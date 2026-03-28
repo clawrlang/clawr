@@ -17,12 +17,11 @@
   "type": "module",
   "dependencies": {
     "commander": "^14.0.0",
-    "decimal.js": "^10.6.0",
+    "decimalish": "^0.1.2",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
     "@types/bun": "^1.3.9",
-    "@types/decimal.js": "^0.0.32",
     "bun": "^1.3.10",
     "eslint": "^10.0.0",
     "prettier": "^3.0.0",

@@ -1,27 +1,24 @@
 import fs from 'fs'
 import path from 'path'
 import child_process from 'node:child_process'
-import { describe, expect, test } from 'bun:test'
-import { glob } from 'fast-glob'
+import { describe, expect, it, test } from 'bun:test'
 
 const CASES_DIR = path.join(__dirname, 'cases')
 const OUTPUT_DIR = path.join(__dirname, 'out')
-const RUNTIME_DIR = path.join(__dirname, '../../src/runtime')
 
-describe('Runtime Tests', () => {
+describe('End-to-end Tests', () => {
     const cases = fs
         .readdirSync(CASES_DIR, { withFileTypes: true })
         .map((f) => f.name)
-        .filter((n) => n.endsWith('.c'))
-
+        .filter((n) => n.endsWith('.clawr'))
     for (const fileName of cases) {
         test(fileName, async () => {
             const filePath = `${CASES_DIR}/${fileName}`
-            const outFilePath = `${CASES_DIR}/${fileName.replace(/.c$/, '.out')}`
-            const errFilePath = `${CASES_DIR}/${fileName.replace(/.c$/, '.err')}`
-            const exePath = `${OUTPUT_DIR}/${fileName.replace(/.c$/, '')}`
+            const outFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.out')}`
+            const errFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.err')}`
+            const exePath = `${OUTPUT_DIR}/${fileName.replace(/.clawr$/, '')}`
 
-            const compilerResult = await runClang(filePath, exePath)
+            const compilerResult = await runCli(filePath)
             expect(compilerResult.stdout).toBe('')
             if (fs.existsSync(errFilePath)) {
                 const data = fs.readFileSync(errFilePath, 'utf-8')
@@ -49,17 +46,8 @@ describe('Runtime Tests', () => {
     }
 })
 
-async function runClang(filePath: string, exeFile: string) {
-    if (!fs.existsSync(path.dirname(exeFile)))
-        fs.mkdirSync(path.dirname(exeFile), { recursive: true })
-    return await exec('clang', [
-        '-I',
-        path.join(RUNTIME_DIR, 'include'),
-        filePath,
-        ...(await glob(path.join(RUNTIME_DIR, '*.c'))),
-        '-o',
-        exeFile,
-    ])
+async function runCli(filePath: string) {
+    return await exec('./dist/rwrc', ['build', filePath, '-o', OUTPUT_DIR])
 }
 
 async function exec(command: string, args: string[]) {

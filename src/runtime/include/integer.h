@@ -3,6 +3,7 @@
 
 #include "refc.h"
 #include "array.h"
+#include "clawr_string.h"
 #include <stdlib.h>
 
 #define DIGIT_MAX INT64_MAX
@@ -52,6 +53,12 @@ void Integer·decrement(Integer* const self, Integer* const subtrahend);
 
 /// @brief Convert Integer to its decimal representation
 /// @param self the integer to convert
+/// @return an owned String object
+String* Integer·toStringRC(Integer* self);
+
+/// @brief Compatibility wrapper returning a caller-owned C string.
+/// Prefer Integer·toStringRC for new code.
+/// @param self the integer to convert
 /// @return the decimal representation
 const char* Integer·toString(Integer* self);
 
@@ -61,5 +68,25 @@ void Integer·toggleSign(Integer* const self);
 void printDigits(Integer* integer);
 
 digit_t Integer·divide(Integer *dividend, digit_t divisor);
+
+/// @brief Add two integers, returning a new owned result
+Integer* Integer¸add(Integer* left, Integer* right);
+
+/// @brief Subtract right from left, returning a new owned result
+Integer* Integer¸subtract(Integer* left, Integer* right);
+
+/// @brief Multiply two integers using grade-school algorithm
+Integer* Integer¸multiply(Integer* left, Integer* right);
+
+/// @brief Divide dividend by divisor (truncated toward zero), returning quotient.
+/// Panics on division by zero.
+Integer* Integer¸divide(Integer* dividend, Integer* divisor);
+
+/// @brief Raise base to a non-negative integer exponent using binary exponentiation.
+/// Panics if exponent is negative.
+Integer* Integer¸power(Integer* base, Integer* exponent);
+
+/// @brief Compare two integers. Returns -1 if left < right, 0 if equal, 1 if left > right.
+int Integer¸compare(Integer* left, Integer* right);
 
 #endif // BIG_INTEGER_H

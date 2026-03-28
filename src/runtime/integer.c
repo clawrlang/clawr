@@ -2,6 +2,9 @@
 #include "array.h"
 #include "panic.h"
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define INVALID_DIGIT (DIGIT_MIN - 1)
 
@@ -145,7 +148,7 @@ typedef struct TrillList {
     struct TrillList* next;
 } TrillList;
 
-const char* Integer·toString(Integer* self) {
+static char* integerToCString(Integer* self) {
     Integer* rem = retainRC(self);
     mutateRC(rem);
 
@@ -195,6 +198,17 @@ const char* Integer·toString(Integer* self) {
     }
 
     return result;
+}
+
+String* Integer·toStringRC(Integer* self) {
+    char* cstr = integerToCString(self);
+    String* s = String¸fromCString(cstr);
+    free(cstr);
+    return s;
+}
+
+const char* Integer·toString(Integer* self) {
+    return integerToCString(self);
 }
 
 void Integer·toggleSign(Integer* const self) {
@@ -320,3 +334,361 @@ digit_t Integer·divide(Integer* self, digit_t divisor) {
     }
     return (digit_t)remainder;
 };
+
+// ---------------------------------------------------------------------------
+// Static helpers for new arithmetic operations
+// ---------------------------------------------------------------------------
+
+static size_t effectiveLength(Integer* self) {
+    size_t n = self->digits->count;
+    while (n > 0 && ARRAY_ELEMENT_AT(n - 1, self->digits, digit_t) == 0)
+        n--;
+    return n;
+}
+
+static int8_t integerSign(Integer* self) {
+    for (size_t i = self->digits->count; i-- > 0; ) {
+        digit_t d = ARRAY_ELEMENT_AT(i, self->digits, digit_t);
+        if (d > 0) return 1;
+        if (d < 0) return -1;
+    }
+    return 0;
+}
+
+static Integer* copyInteger(Integer* src) {
+    Integer* copy = allocRC(Integer, __rc_ISOLATED);
+    size_t n = src->digits->count;
+    copy->digits = Array¸new(n, sizeof(digit_t));   // zero-initialised by Array¸new
+    for (size_t i = 0; i < n; i++)
+        ARRAY_ELEMENT_AT(i, copy->digits, digit_t) = ARRAY_ELEMENT_AT(i, src->digits, digit_t);
+    return copy;
+}
+
+static Integer* zeroOfSize(size_t count) {
+    Integer* result = allocRC(Integer, __rc_ISOLATED);
+    result->digits = Array¸new(count, sizeof(digit_t));  // zero-initialised
+    return result;
+}
+
+static void trimLeadingZeros(Integer* self) {
+    size_t n = self->digits->count;
+    while (n > 0 && ARRAY_ELEMENT_AT(n - 1, self->digits, digit_t) == 0)
+        n--;
+    if (n == self->digits->count) return;
+    if (n == 0) {
+        releaseRC(self->digits);
+        self->digits = retainRC(&Array¸empty);
+        return;
+    }
+    Array* trimmed = Array¸new(n, sizeof(digit_t));
+    for (size_t i = 0; i < n; i++)
+        ARRAY_ELEMENT_AT(i, trimmed, digit_t) = ARRAY_ELEMENT_AT(i, self->digits, digit_t);
+    releaseRC(self->digits);
+    self->digits = trimmed;
+}
+
+static Integer* integerFromSingleDigit(digit_t value) {
+    if (value == 0) return retainRC(&Integer¸zero);
+
+    Integer* integer = allocRC(Integer, __rc_ISOLATED);
+    integer->digits = Array¸new(1, sizeof(digit_t));
+    ARRAY_ELEMENT_AT(0, integer->digits, digit_t) = value;
+    return integer;
+}
+
+static const char* skipDecimalLeadingZeros(const char* value) {
+    while (*value == '0' && value[1] != '\0') value++;
+    return value;
+}
+
+static void normalizeDecimalString(char* value) {
+    const char* normalized = skipDecimalLeadingZeros(value);
+    if (normalized != value) {
+        memmove(value, normalized, strlen(normalized) + 1);
+    }
+}
+
+static int compareDecimalAbs(const char* left, const char* right) {
+    const char* a = skipDecimalLeadingZeros(left);
+    const char* b = skipDecimalLeadingZeros(right);
+
+    size_t leftLen = strlen(a);
+    size_t rightLen = strlen(b);
+    if (leftLen < rightLen) return -1;
+    if (leftLen > rightLen) return 1;
+
+    int cmp = strcmp(a, b);
+    if (cmp < 0) return -1;
+    if (cmp > 0) return 1;
+    return 0;
+}
+
+static char* decimalAbsSubtract(const char* left, const char* right) {
+    size_t leftLen = strlen(left);
+    size_t rightLen = strlen(right);
+
+    char* result = malloc(leftLen + 1);
+    int borrow = 0;
+
+    for (size_t i = 0; i < leftLen; i++) {
+        size_t li = leftLen - 1 - i;
+        int leftDigit = (left[li] - '0') - borrow;
+        int rightDigit = 0;
+        if (i < rightLen) {
+            size_t ri = rightLen - 1 - i;
+            rightDigit = right[ri] - '0';
+        }
+
+        if (leftDigit < rightDigit) {
+            leftDigit += 10;
+            borrow = 1;
+        } else {
+            borrow = 0;
+        }
+
+        result[li] = (char)('0' + (leftDigit - rightDigit));
+    }
+
+    result[leftLen] = '\0';
+    normalizeDecimalString(result);
+    return result;
+}
+
+static char* decimalAppendDigit(char* prefix, char digit) {
+    size_t prefixLen = strlen(prefix);
+
+    if (prefixLen == 1 && prefix[0] == '0') {
+        prefix[0] = digit;
+        return prefix;
+    }
+
+    char* appended = malloc(prefixLen + 2);
+    memcpy(appended, prefix, prefixLen);
+    appended[prefixLen] = digit;
+    appended[prefixLen + 1] = '\0';
+    free(prefix);
+    return appended;
+}
+
+static char* divideDecimalAbs(const char* dividend, const char* divisor) {
+    const char* normalizedDividend = skipDecimalLeadingZeros(dividend);
+    const char* normalizedDivisor = skipDecimalLeadingZeros(divisor);
+
+    if (compareDecimalAbs(normalizedDividend, normalizedDivisor) < 0) {
+        char* zero = malloc(2);
+        zero[0] = '0';
+        zero[1] = '\0';
+        return zero;
+    }
+
+    size_t dividendLen = strlen(normalizedDividend);
+    char* quotient = malloc(dividendLen + 1);
+    size_t quotientCount = 0;
+
+    char* remainder = malloc(2);
+    remainder[0] = '0';
+    remainder[1] = '\0';
+
+    for (size_t i = 0; i < dividendLen; i++) {
+        remainder = decimalAppendDigit(remainder, normalizedDividend[i]);
+        normalizeDecimalString(remainder);
+
+        int quotientDigit = 0;
+        while (compareDecimalAbs(remainder, normalizedDivisor) >= 0) {
+            char* nextRemainder = decimalAbsSubtract(remainder, normalizedDivisor);
+            free(remainder);
+            remainder = nextRemainder;
+            quotientDigit++;
+        }
+
+        quotient[quotientCount++] = (char)('0' + quotientDigit);
+    }
+
+    quotient[quotientCount] = '\0';
+    normalizeDecimalString(quotient);
+
+    free(remainder);
+    return quotient;
+}
+
+static Integer* integerFromDecimalCString(const char* decimal) {
+    int negative = 0;
+    const char* cursor = decimal;
+    if (*cursor == '-') {
+        negative = 1;
+        cursor++;
+    }
+    cursor = skipDecimalLeadingZeros(cursor);
+
+    Integer* result = retainRC(&Integer¸zero);
+    Integer* ten = integerFromSingleDigit(10);
+
+    for (size_t i = 0; cursor[i] != '\0'; i++) {
+        Integer* scaled = Integer¸multiply(result, ten);
+        releaseRC(result);
+
+        Integer* digit = integerFromSingleDigit((digit_t)(cursor[i] - '0'));
+        result = Integer¸add(scaled, digit);
+        releaseRC(scaled);
+        releaseRC(digit);
+    }
+
+    if (negative && effectiveLength(result) > 0) {
+        Integer·toggleSign(result);
+    }
+
+    releaseRC(ten);
+    return result;
+}
+
+/// In-place balanced decompose of a 128-bit value into a digit and carry.
+/// After the call: value == *carry_out * BASE + *digit_out,
+/// with |*digit_out| <= DIGIT_MAX.
+static void balancedDecompose(__int128_t value, digit_t* digit_out, __int128_t* carry_out) {
+    static const __int128_t BASE_128 = ((__int128_t)1 << 64) - 1;
+    __int128_t q = value / BASE_128;
+    __int128_t r = value - q * BASE_128;
+    if (r > (digit_t)DIGIT_MAX) { r -= BASE_128; q++; }
+    else if (r < -(digit_t)DIGIT_MAX) { r += BASE_128; q--; }
+    *digit_out = (digit_t)r;
+    *carry_out = q;
+}
+
+// ---------------------------------------------------------------------------
+// Non-mutating binary operations
+// ---------------------------------------------------------------------------
+
+Integer* Integer¸add(Integer* left, Integer* right) {
+    Integer* result = copyInteger(left);
+    Integer·increment(result, right);
+    trimLeadingZeros(result);
+    return result;
+}
+
+Integer* Integer¸subtract(Integer* left, Integer* right) {
+    Integer* result = copyInteger(left);
+    Integer·decrement(result, right);
+    trimLeadingZeros(result);
+    return result;
+}
+
+Integer* Integer¸multiply(Integer* left, Integer* right) {
+    size_t n = effectiveLength(left);
+    size_t m = effectiveLength(right);
+    if (n == 0 || m == 0) return retainRC(&Integer¸zero);
+
+    Integer* result = zeroOfSize(n + m);
+
+    for (size_t i = 0; i < n; i++) {
+        digit_t a = ARRAY_ELEMENT_AT(i, left->digits, digit_t);
+        if (a == 0) continue;
+
+        __int128_t carry = 0;
+        for (size_t j = 0; j < m; j++) {
+            digit_t b   = ARRAY_ELEMENT_AT(j, right->digits, digit_t);
+            digit_t cur = ARRAY_ELEMENT_AT(i + j, result->digits, digit_t);
+            __int128_t prod = (__int128_t)a * b + cur + carry;
+            digit_t digit;
+            balancedDecompose(prod, &digit, &carry);
+            ARRAY_ELEMENT_AT(i + j, result->digits, digit_t) = digit;
+        }
+
+        // Propagate any remaining carry into the higher positions.
+        for (size_t k = i + m; carry != 0 && k < n + m; k++) {
+            __int128_t sum = (__int128_t)ARRAY_ELEMENT_AT(k, result->digits, digit_t) + carry;
+            digit_t digit;
+            balancedDecompose(sum, &digit, &carry);
+            ARRAY_ELEMENT_AT(k, result->digits, digit_t) = digit;
+        }
+    }
+
+    trimLeadingZeros(result);
+    return result;
+}
+
+Integer* Integer¸divide(Integer* dividend, Integer* divisor) {
+    size_t m = effectiveLength(divisor);
+    if (m == 0) panic("Division by zero!");
+    if (effectiveLength(dividend) == 0) return retainRC(&Integer¸zero);
+
+    if (m == 1) {
+        digit_t d = ARRAY_ELEMENT_AT(0, divisor->digits, digit_t);
+        Integer* result = copyInteger(dividend);
+        Integer·divide(result, d);
+        trimLeadingZeros(result);
+        return result;
+    }
+
+    // Slow but general fallback: convert to decimal, perform long division,
+    // then parse back. This unblocks multi-limb division semantics needed by Real.
+    const char* dividendCStr = Integer·toString(dividend);
+    const char* divisorCStr = Integer·toString(divisor);
+
+    int dividendNegative = dividendCStr[0] == '-';
+    int divisorNegative = divisorCStr[0] == '-';
+    const char* absDividend = dividendNegative ? dividendCStr + 1 : dividendCStr;
+    const char* absDivisor = divisorNegative ? divisorCStr + 1 : divisorCStr;
+
+    char* quotientAbs = divideDecimalAbs(absDividend, absDivisor);
+    Integer* quotient = integerFromDecimalCString(quotientAbs);
+
+    if ((dividendNegative ^ divisorNegative) && effectiveLength(quotient) > 0) {
+        Integer·toggleSign(quotient);
+    }
+
+    free((void*)dividendCStr);
+    free((void*)divisorCStr);
+    free(quotientAbs);
+    trimLeadingZeros(quotient);
+    return quotient;
+}
+
+Integer* Integer¸power(Integer* base, Integer* exponent) {
+    if (integerSign(exponent) < 0)
+        panic("Integer exponentiation requires a non-negative exponent");
+
+    // result = 1
+    Integer* result = zeroOfSize(1);
+    ARRAY_ELEMENT_AT(0, result->digits, digit_t) = 1;
+
+    if (effectiveLength(exponent) == 0)
+        return result;   // base^0 = 1
+
+    Integer* b       = copyInteger(base);
+    Integer* exp_rem = copyInteger(exponent);
+
+    while (effectiveLength(exp_rem) > 0) {
+        digit_t bit = Integer·divide(exp_rem, 2);
+        trimLeadingZeros(exp_rem);
+
+        if (bit != 0) {
+            Integer* new_result = Integer¸multiply(result, b);
+            releaseRC(result);
+            result = new_result;
+        }
+
+        if (effectiveLength(exp_rem) > 0) {
+            Integer* new_b = Integer¸multiply(b, b);
+            releaseRC(b);
+            b = new_b;
+        }
+    }
+
+    releaseRC(b);
+    releaseRC(exp_rem);
+    return result;
+}
+
+int Integer¸compare(Integer* left, Integer* right) {
+    Integer* diff = Integer¸subtract(left, right);
+    const char* decimal = Integer·toString(diff);
+
+    int result = 0;
+    if (strcmp(decimal, "0") != 0) {
+        result = decimal[0] == '-' ? -1 : 1;
+    }
+
+    free((void*) decimal);
+    releaseRC(diff);
+    return result;
+}

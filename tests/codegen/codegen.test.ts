@@ -12,22 +12,32 @@ const RUNTIME_DIR = path.join(__dirname, '../../src/runtime')
 describe('Codegen Tests', () => {
     it('emits correct C code for truthvalue variable declaration', async () => {
         const module: CModule = {
-            body: [
+            structs: [],
+            variables: [],
+            functions: [
                 {
-                    kind: 'var-decl',
-                    type: 'truthvalue_t',
-                    name: 'x',
-                    value: { kind: 'var-ref', name: 'c_ambiguous' },
-                },
-                {
-                    kind: 'function-call',
-                    name: 'printf',
-                    arguments: [
-                        { kind: 'string', value: '%s\\n' },
+                    kind: 'function',
+                    name: 'main',
+                    returnType: 'int',
+                    parameters: [],
+                    body: [
+                        {
+                            kind: 'var-decl',
+                            type: 'truthvalue_t',
+                            name: 'x',
+                            value: { kind: 'var-ref', name: 'c_ambiguous' },
+                        },
                         {
                             kind: 'function-call',
-                            name: 'truthvalue·toCString',
-                            arguments: [{ kind: 'var-ref', name: 'x' }],
+                            name: 'printf',
+                            arguments: [
+                                { kind: 'string', value: '%s\\n' },
+                                {
+                                    kind: 'function-call',
+                                    name: 'truthvalue·toCString',
+                                    arguments: [{ kind: 'var-ref', name: 'x' }],
+                                },
+                            ],
                         },
                     ],
                 },

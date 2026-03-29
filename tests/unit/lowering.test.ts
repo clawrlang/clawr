@@ -16,14 +16,12 @@ describe('Lowering Tests', () => {
             ],
         }
         const module = new IRGenerator().generate(program)
-        expect(module.body).toMatchObject([
-            {
-                kind: 'var-decl',
-                type: 'truthvalue_t',
-                name: 'x',
-                value: { kind: 'var-ref', name: 'c_ambiguous' },
-            },
-        ] satisfies CStatement[])
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'truthvalue_t',
+            name: 'x',
+            value: { kind: 'var-ref', name: 'c_ambiguous' },
+        } satisfies CStatement)
     })
 
     it('lowers print of truthvalue literal correctly', () => {
@@ -36,20 +34,18 @@ describe('Lowering Tests', () => {
             ],
         }
         const module = new IRGenerator().generate(program)
-        expect(module.body).toMatchObject([
-            {
-                kind: 'function-call',
-                name: 'printf',
-                arguments: [
-                    { kind: 'string', value: '%s\\n' },
-                    {
-                        kind: 'function-call',
-                        name: 'truthvalue·toCString',
-                        arguments: [{ kind: 'var-ref', name: 'c_true' }],
-                    },
-                ],
-            },
-        ] satisfies CStatement[])
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'function-call',
+            name: 'printf',
+            arguments: [
+                { kind: 'string', value: '%s\\n' },
+                {
+                    kind: 'function-call',
+                    name: 'truthvalue·toCString',
+                    arguments: [{ kind: 'var-ref', name: 'c_true' }],
+                },
+            ],
+        } satisfies CStatement)
     })
 
     it('lowers print of truthvalue variable correctly', () => {
@@ -68,7 +64,7 @@ describe('Lowering Tests', () => {
             ],
         }
         const module = new IRGenerator().generate(program)
-        expect(module.body[1]).toMatchObject({
+        expect(module.functions[0].body[1]).toMatchObject({
             kind: 'function-call',
             name: 'printf',
             arguments: [

@@ -24,8 +24,8 @@ cli.name('rwrc')
             const source = await fs.promises.readFile(sourceFile, 'utf-8')
             const tokenStream = new TokenStream(source, sourceFile)
             const ast = new Parser(tokenStream).parse()
-            const ir = new IRGenerator().generate(ast)
-            const cCode = codegenC(ir)
+            const program = new IRGenerator().generate(ast)
+            const cCode = codegenC(program)
             await fs.promises.writeFile(outFilePath + '.c', cCode)
 
             // Compile the generated C code using clang

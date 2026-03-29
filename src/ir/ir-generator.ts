@@ -5,12 +5,30 @@ import type {
     ASTStatement,
     ASTExpression,
 } from '../ast'
-import type { CModule, CStatement, CExpression } from '.'
+import type { CModule, CStatement, CExpression, CFunctionDeclaration } from '.'
 
 export class IRGenerator {
     generate(ast: ASTModule): CModule {
+        // For now, only a single main function and no type definitions
+        const mainFunc: CFunctionDeclaration = {
+            kind: 'function',
+            name: 'main',
+            returnType: 'int',
+            parameters: [],
+            body: [
+                ...ast.body.map(this.lowerStatement.bind(this)),
+                // Always return 0 at end of main
+                {
+                    kind: 'function-call',
+                    name: 'return',
+                    arguments: [{ kind: 'var-ref', name: '0' }],
+                },
+            ],
+        }
         return {
-            body: ast.body.map(this.lowerStatement.bind(this)),
+            structs: [], // Add type definitions here in the future
+            variables: [], // Add global variables here in the future
+            functions: [mainFunc],
         }
     }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { ASTModule } from '../../src/ast'
-import { lowerASTtoIR } from '../../src/ir/lowering'
+import { IRGenerator } from '../../src/ir/ir-generator'
 import { CStatement } from '../../src/ir'
 
 describe('Lowering Tests', () => {
@@ -15,7 +15,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = lowerASTtoIR(program)
+        const module = new IRGenerator().generate(program)
         expect(module.body).toMatchObject([
             {
                 kind: 'var-decl',
@@ -35,7 +35,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = lowerASTtoIR(program)
+        const module = new IRGenerator().generate(program)
         expect(module.body).toMatchObject([
             {
                 kind: 'function-call',
@@ -67,7 +67,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = lowerASTtoIR(program)
+        const module = new IRGenerator().generate(program)
         expect(module.body[1]).toMatchObject({
             kind: 'function-call',
             name: 'printf',

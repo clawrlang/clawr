@@ -4,7 +4,7 @@ import fs from 'fs'
 import { Command } from 'commander'
 import { TokenStream } from '../lexer'
 import { Parser } from '../parser/Parser'
-import { lowerASTtoIR } from '../ir/lowering'
+import { IRGenerator } from '../ir/ir-generator'
 import { codegenC } from '../codegen'
 import child_process from 'node:child_process'
 import path from 'node:path'
@@ -24,7 +24,7 @@ cli.name('rwrc')
             const source = await fs.promises.readFile(sourceFile, 'utf-8')
             const tokenStream = new TokenStream(source, sourceFile)
             const ast = new Parser(tokenStream).parse()
-            const ir = lowerASTtoIR(ast)
+            const ir = new IRGenerator().generate(ast)
             const cCode = codegenC(ir)
             await fs.promises.writeFile(outFilePath + '.c', cCode)
 

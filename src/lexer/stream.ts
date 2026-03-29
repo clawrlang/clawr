@@ -106,13 +106,13 @@ export class TokenStream {
         return token
     }
 
-    peek(options?: { skippingNewline: true }): Token | undefined {
+    peek(options?: { skippingNewline: false }): Token | undefined {
         const clone = this.clone()
         return clone.next(options)
     }
 
-    next(options?: { skippingNewline: true } | undefined): Token | undefined {
-        this.skipIgnoredCharacters(options?.skippingNewline ?? false)
+    next(options?: { skippingNewline: false } | undefined): Token | undefined {
+        this.skipIgnoredCharacters(options?.skippingNewline ?? true)
         if (!this.source.hasMoreCharacters()) return
 
         const current = this.source.peek(1)

@@ -373,7 +373,7 @@ describe('forbidden unicode identifier code points', () => {
 function* tokenize(source: string): Generator<Token> {
     const stream = new TokenStream(source, 'test')
     while (true) {
-        const t = stream.next()
+        const t = stream.next({ skippingNewline: false })
         if (!t) return
         yield t
     }

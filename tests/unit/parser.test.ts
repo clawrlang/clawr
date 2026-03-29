@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { TokenStream } from '../../src/lexer'
-import { Parser } from '../../src/parser/Parser'
+import { Parser } from '../../src/parser'
 
 describe('Parser Tests', () => {
     it('parses truthvalue variable declaration correctly', () => {

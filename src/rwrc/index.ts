@@ -3,7 +3,7 @@
 import fs from 'fs'
 import { Command } from 'commander'
 import { TokenStream } from '../lexer'
-import { Parser } from '../parser/Parser'
+import { Parser } from '../parser'
 import { IRGenerator } from '../ir/ir-generator'
 import { codegenC } from '../codegen'
 import child_process from 'node:child_process'

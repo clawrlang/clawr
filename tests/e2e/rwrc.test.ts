@@ -13,6 +13,8 @@ describe('End-to-end Tests', () => {
         .filter((n) => n.endsWith('.clawr'))
     for (const fileName of cases) {
         test(fileName, async () => {
+            if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR)
+
             const filePath = `${CASES_DIR}/${fileName}`
             const outFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.out')}`
             const errFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.err')}`

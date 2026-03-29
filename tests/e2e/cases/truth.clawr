@@ -1,0 +1,5 @@
+const x: truthvalue = true
+
+print x
+print ambiguous
+print false

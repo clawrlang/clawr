@@ -140,7 +140,7 @@ export class IRGenerator {
                             kind: 'function-call',
                             name: 'memcpy',
                             arguments: [
-                                { kind: 'var-ref', name: stmt.name },
+                                { kind: 'raw-expression', expression: `(__rc_header*)${stmt.name} + 1` },
                                 {
                                     kind: 'raw-expression',
                                     expression: `&(${stmt.valueSet.type}ˇfields){ ${this.lowerStructLiteralFields(stmt.value.fields)} }`,

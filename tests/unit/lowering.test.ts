@@ -301,7 +301,7 @@ describe('Lowering Tests', () => {
             kind: 'function-call',
             name: 'memcpy',
             arguments: [
-                { kind: 'var-ref', name: 'p' },
+                { kind: 'raw-expression', expression: `(__rc_header*)p + 1` },
                 {
                     kind: 'raw-expression',
                     expression: '&(Pointˇfields){ .x = c_true, .y = c_false }',

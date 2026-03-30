@@ -1,0 +1,13 @@
+  data DataStructure {
+      x: truthvalue
+      y: truthvalue
+  }
+
+  const a: DataStructure = {
+      x: true
+      y: ambiguous
+  }
+
+  a.y = false
+  const b: truthvalue = a.x
+  print b

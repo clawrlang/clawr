@@ -30,7 +30,6 @@ export interface ASTDataDeclaration {
 
 export interface ASTDataLiteral {
     kind: 'data-literal'
-    type: string // or reference to ASTDataDeclaration
     fields: { [field: string]: ASTExpression }
 }
 

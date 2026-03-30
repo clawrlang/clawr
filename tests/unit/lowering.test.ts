@@ -267,7 +267,6 @@ describe('Lowering Tests', () => {
                     valueSet: { type: 'Point' },
                     value: {
                         kind: 'data-literal',
-                        type: 'Point',
                         fields: {
                             x: { kind: 'truthvalue', value: 'true' },
                             y: { kind: 'truthvalue', value: 'false' },

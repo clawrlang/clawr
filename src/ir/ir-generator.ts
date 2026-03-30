@@ -122,7 +122,7 @@ export class IRGenerator {
                                 kind: 'function-call',
                                 name: 'allocRC',
                                 arguments: [
-                                    { kind: 'var-ref', name: stmt.value.type },
+                                    { kind: 'var-ref', name: stmt.valueSet.type },
                                     {
                                         kind: 'var-ref',
                                         name:
@@ -140,11 +140,11 @@ export class IRGenerator {
                                 { kind: 'var-ref', name: stmt.name },
                                 {
                                     kind: 'raw-expression',
-                                    expression: `&(${stmt.value.type}ˇfields){ ${this.lowerStructLiteralFields(stmt.value.fields)} }`,
+                                    expression: `&(${stmt.valueSet.type}ˇfields){ ${this.lowerStructLiteralFields(stmt.value.fields)} }`,
                                 },
                                 {
                                     kind: 'raw-expression',
-                                    expression: `sizeof(${stmt.value.type}) - sizeof(__rc_header)`,
+                                    expression: `sizeof(${stmt.valueSet.type}) - sizeof(__rc_header)`,
                                 },
                             ],
                         },
@@ -167,11 +167,11 @@ export class IRGenerator {
                         kind: 'assign',
                         target: {
                             kind: 'field-reference',
-                            object: this.lowerValue(stmt.target.object),
+                            object: this.lowerValue(stmt.target.object as any),
                             field: stmt.target.field,
                             deref: true,
                         },
-                        value: this.lowerValue(stmt.value),
+                        value: this.lowerValue(stmt.value as any),
                     },
                 ]
             default:
@@ -196,7 +196,9 @@ export class IRGenerator {
             .join(', ')
     }
 
-    private lowerValue(val: ASTExpression): CExpression {
+    private lowerValue(
+        val: Exclude<ASTExpression, ASTDataLiteral>,
+    ): CExpression {
         switch (val.kind) {
             case 'integer':
                 return {
@@ -220,19 +222,10 @@ export class IRGenerator {
                 return { kind: 'var-ref', name: `c_${val.value}` }
             case 'identifier':
                 return { kind: 'var-ref', name: val.name }
-            case 'data-literal':
-                return {
-                    kind: 'function-call',
-                    name: 'allocRC',
-                    arguments: [
-                        { kind: 'var-ref', name: val.type },
-                        { kind: 'var-ref', name: '__rc_ISOLATED' },
-                    ],
-                }
             case 'field-access':
                 return {
                     kind: 'field-reference',
-                    object: this.lowerValue(val.object),
+                    object: this.lowerValue(val.object as any), // TODO: need to fix types here
                     field: val.field,
                     deref: true,
                 }

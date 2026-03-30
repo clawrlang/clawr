@@ -74,6 +74,28 @@ describe('Parser Tests', () => {
             ],
         })
     })
+
+    it('parses data literal correctly', () => {
+        const program = 'const p: Point = { x: true, y: false }'
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'p',
+                    valueSet: { type: 'Point' },
+                    value: {
+                        kind: 'data-literal',
+                        fields: {
+                            x: { kind: 'truthvalue', value: 'true' },
+                            y: { kind: 'truthvalue', value: 'false' },
+                        },
+                    },
+                },
+            ],
+        })
+    })
 })
 
 function parse(code: string) {

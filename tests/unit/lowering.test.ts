@@ -350,4 +350,64 @@ describe('Lowering Tests', () => {
             value: { kind: 'var-ref', name: 'c_true' },
         })
     })
+
+    it('emits retainRC for reference type variable declaration', () => {
+        const program: ASTModule = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'refVar',
+                    valueSet: { type: 'SomeRefType' },
+                    value: { kind: 'identifier', name: 'otherRef' },
+                },
+            ],
+        }
+        const module = new IRGenerator().generate(program)
+        // Should emit a var-decl and a retainRC call
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            name: 'refVar',
+            type: 'SomeRefType*',
+            value: { kind: 'var-ref', name: 'otherRef' },
+        } satisfies CStatement)
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'function-call',
+            name: 'retainRC',
+            arguments: [{ kind: 'var-ref', name: 'refVar' }],
+        } satisfies CStatement)
+    })
+
+    it('emits mutateRC for nested field assignment', () => {
+        const program: ASTModule = {
+            body: [
+                {
+                    kind: 'assign',
+                    target: {
+                        kind: 'field-access',
+                        object: { kind: 'identifier', name: 'outer' },
+                        field: 'inner',
+                    },
+                    value: { kind: 'identifier', name: 'newValue' },
+                },
+            ],
+        }
+        const module = new IRGenerator().generate(program)
+        // Should emit mutateRC for 'outer' before assignment
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'function-call',
+            name: 'mutateRC',
+            arguments: [{ kind: 'var-ref', name: 'outer' }],
+        } satisfies CStatement)
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'assign',
+            target: {
+                kind: 'field-reference',
+                object: { kind: 'var-ref', name: 'outer' },
+                field: 'inner',
+                deref: true,
+            },
+            value: { kind: 'var-ref', name: 'newValue' },
+        })
+    })
 })

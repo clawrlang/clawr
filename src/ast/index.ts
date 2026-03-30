@@ -1,5 +1,6 @@
 // AST for Clawr data structures and related constructs
 
+// ----- Expressions -----
 export type ASTExpression =
     | ASTIntegerLiteral
     | ASTTruthValueLiteral
@@ -22,12 +23,6 @@ export interface ASTIdentifier {
     name: string
 }
 
-export interface ASTDataDeclaration {
-    kind: 'data-decl'
-    name: string
-    fields: { name: string; type: string }[]
-}
-
 export interface ASTDataLiteral {
     kind: 'data-literal'
     fields: { [field: string]: ASTExpression }
@@ -39,9 +34,27 @@ export interface ASTFieldAccess {
     field: string
 }
 
-export interface ASTFieldAssignment {
-    kind: 'field-assign'
-    target: ASTFieldAccess
+// ----- Statements -----
+export type ASTStatement =
+    | ASTVariableDeclaration
+    | ASTPrintStatement
+    | ASTAssignment
+    | ASTDataDeclaration
+
+export interface ASTAssignment {
+    kind: 'assign'
+    target: ASTExpression
+    value: ASTExpression
+}
+
+export interface ASTDataDeclaration {
+    kind: 'data-decl'
+    name: string
+    fields: { name: string; type: string }[]
+}
+
+export interface ASTPrintStatement {
+    kind: 'print'
     value: ASTExpression
 }
 
@@ -64,17 +77,7 @@ type ASTValueSet = {
     type: string
 }
 
-export interface ASTPrintStatement {
-    kind: 'print'
-    value: ASTExpression
-}
-
-export type ASTStatement =
-    | ASTVariableDeclaration
-    | ASTPrintStatement
-    | ASTFieldAssignment
-    | ASTDataDeclaration
-
+// ----- Top-level module structure -----
 export interface ASTModule {
     body: (ASTDataDeclaration | ASTStatement)[]
 }

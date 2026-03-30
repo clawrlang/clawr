@@ -122,7 +122,10 @@ export class IRGenerator {
                                 kind: 'function-call',
                                 name: 'allocRC',
                                 arguments: [
-                                    { kind: 'var-ref', name: stmt.valueSet.type },
+                                    {
+                                        kind: 'var-ref',
+                                        name: stmt.valueSet.type,
+                                    },
                                     {
                                         kind: 'var-ref',
                                         name:
@@ -161,7 +164,12 @@ export class IRGenerator {
                 }
             case 'print':
                 return this.lowerPrint(stmt)
-            case 'field-assign':
+            case 'assign':
+                if (stmt.target.kind !== 'field-access') {
+                    throw new Error(
+                        'Only field assignments are supported for now',
+                    )
+                }
                 return [
                     {
                         kind: 'assign',

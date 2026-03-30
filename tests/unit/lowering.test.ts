@@ -318,7 +318,7 @@ describe('Lowering Tests', () => {
         const program: ASTModule = {
             body: [
                 {
-                    kind: 'field-assign',
+                    kind: 'assign',
                     target: {
                         kind: 'field-access',
                         object: { kind: 'identifier', name: 'p' },

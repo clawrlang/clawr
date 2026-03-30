@@ -10,11 +10,18 @@ import type {
 
 export function codegenC(program: CModule): string {
     let out = '#include <stdio.h>\n#include "runtime.h"\n\n'
-    // Emit type definitions
+
     for (const typeDef of program.structs) {
         out += emitTypeDef(typeDef) + '\n'
     }
-    // Emit all functions
+
+    for (const globalVar of program.variables) {
+        if (globalVar.modifiers)
+            out += `${globalVar.modifiers.join(' ')} ${globalVar.type} ${globalVar.name} = ${emitExpression(globalVar.value)};\n`
+        else
+            out += `${globalVar.type} ${globalVar.name} = ${emitExpression(globalVar.value)};\n`
+    }
+
     for (const func of program.functions) {
         out += emitFunction(func) + '\n'
     }
@@ -42,11 +49,10 @@ function emitFunction(func: CFunctionDeclaration): string {
 function emitStatement(stmt: CStatement): string {
     switch (stmt.kind) {
         case 'var-decl':
-            return emitConstDecl(stmt)
+            return emitVarDecl(stmt)
+        case 'return':
+            return `    return ${emitExpression(stmt.value)};`
         case 'function-call':
-            if (stmt.name === 'return' && stmt.arguments.length === 1) {
-                return `    return ${emitExpression(stmt.arguments[0])};`
-            }
             return (
                 `    ${stmt.name}(` +
                 stmt.arguments.map(emitExpression).join(', ') +
@@ -59,18 +65,16 @@ function emitStatement(stmt: CStatement): string {
     }
 }
 
-function emitConstDecl(decl: CVariableDeclaration): string {
-    if (decl.value.kind === 'var-ref') {
-        return `    const ${decl.type} ${decl.name} = ${decl.value.name};`
-    }
-    throw new Error('Unknown const value kind')
+function emitVarDecl(decl: CVariableDeclaration): string {
+    const mods = decl.modifiers ? decl.modifiers.join(' ') + ' ' : ''
+    return `    ${mods}${decl.type} ${decl.name} = ${emitExpression(decl.value)};`
 }
 
 function emitExpression(
     value: CExpression,
     index?: number,
     array?: CExpression[],
-): unknown {
+): string {
     switch (value.kind) {
         case 'string':
             return `"${value.value}"`
@@ -82,6 +86,21 @@ function emitExpression(
                 value.arguments.map(emitExpression).join(', ') +
                 ')'
             )
+        case 'raw-expression':
+            return value.expression
+        case 'struct-init': {
+            // e.g., { .field1 = value1, .field2 = value2 }
+            const fields = Object.entries(value.fields)
+                .map(([k, v]) => `. ${k} = ${emitExpression(v)}`)
+                .join(', ')
+            return `{ ${fields} }`
+        }
+        case 'field-reference': {
+            const obj = emitExpression(value.object)
+            return value.deref
+                ? `${obj}->${value.field}`
+                : `${obj}.${value.field}`
+        }
         default:
             throw new Error(`Unknown expression kind: ${(value as any).kind}`)
     }

@@ -37,7 +37,11 @@ export interface CFieldReference {
 }
 
 // ---- Statements ----
-export type CStatement = CVariableDeclaration | CFunctionCall | CAssignment
+export type CStatement =
+    | CVariableDeclaration
+    | CFunctionCall
+    | CAssignment
+    | CReturnStatement
 
 export interface CVariableDeclaration {
     kind: 'var-decl'
@@ -59,7 +63,6 @@ export interface CAssignment {
     value: CExpression
 }
 
-// ---- Function Declarations ----
 export interface CFunctionDeclaration {
     kind: 'function'
     name: string
@@ -68,7 +71,11 @@ export interface CFunctionDeclaration {
     body: CStatement[]
 }
 
-// ---- Struct Types ----
+export interface CReturnStatement {
+    kind: 'return'
+    value: CExpression
+}
+
 export interface CStruct {
     kind: 'struct'
     name: string

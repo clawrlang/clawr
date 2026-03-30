@@ -1,11 +1,5 @@
 # TODO
 
-- Write codegen tests for the new IR structures showcased in [ir-codegen-data.md](./docs/ir-codegen-data.md)
-  - `CRawExpression` - no translation
-  - `CStructInitializer`
-  - `CFieldReference`
-  - `CVariableDeclaration.modifiers`
-  - ... and maybe for the other types as well if tests are lacking
 - Define the AST for declaring and initializing data
 - Implement and test lowering from AST to IR
 - Implement the parser to generate the AST

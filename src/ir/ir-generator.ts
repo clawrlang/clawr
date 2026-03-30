@@ -4,6 +4,7 @@ import type {
     ASTPrintStatement,
     ASTStatement,
     ASTExpression,
+    ASTDataDeclaration,
 } from '../ast'
 import type { CModule, CStatement, CExpression, CFunctionDeclaration } from '.'
 
@@ -32,7 +33,9 @@ export class IRGenerator {
         }
     }
 
-    private lowerStatement(stmt: ASTStatement): CStatement[] {
+    private lowerStatement(
+        stmt: ASTDataDeclaration | ASTStatement,
+    ): CStatement[] {
         if (stmt.kind === 'var-decl') {
             return [
                 {

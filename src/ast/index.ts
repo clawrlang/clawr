@@ -1,9 +1,11 @@
-// Minimal AST for const variable declaration and print
+// AST for Clawr data structures and related constructs
 
 export type ASTExpression =
     | ASTIntegerLiteral
     | ASTTruthValueLiteral
     | ASTIdentifier
+    | ASTDataLiteral
+    | ASTFieldAccess
 
 export interface ASTIntegerLiteral {
     kind: 'integer'
@@ -18,6 +20,30 @@ export interface ASTTruthValueLiteral {
 export interface ASTIdentifier {
     kind: 'identifier'
     name: string
+}
+
+export interface ASTDataDeclaration {
+    kind: 'data-decl'
+    name: string
+    fields: { name: string; type: string }[]
+}
+
+export interface ASTDataLiteral {
+    kind: 'data-literal'
+    type: string // or reference to ASTDataDeclaration
+    fields: { [field: string]: ASTExpression }
+}
+
+export interface ASTFieldAccess {
+    kind: 'field-access'
+    object: ASTExpression
+    field: string
+}
+
+export interface ASTFieldAssignment {
+    kind: 'field-assign'
+    target: ASTFieldAccess
+    value: ASTExpression
 }
 
 export interface ASTVariableDeclaration {
@@ -44,8 +70,11 @@ export interface ASTPrintStatement {
     value: ASTExpression
 }
 
-export type ASTStatement = ASTVariableDeclaration | ASTPrintStatement
+export type ASTStatement =
+    | ASTVariableDeclaration
+    | ASTPrintStatement
+    | ASTFieldAssignment
 
 export interface ASTModule {
-    body: ASTStatement[]
+    body: (ASTDataDeclaration | ASTStatement)[]
 }

@@ -1,6 +1,5 @@
 # TODO
 
-- Define the AST for declaring and initializing data
 - Implement and test lowering from AST to IR
 - Implement the parser to generate the AST
 

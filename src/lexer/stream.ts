@@ -106,13 +106,15 @@ export class TokenStream {
         return token
     }
 
-    peek(options?: { skippingNewline: false }): Token | undefined {
+    peek(options?: { stopAtNewline: true }): Token | undefined {
         const clone = this.clone()
         return clone.next(options)
     }
 
-    next(options?: { skippingNewline: false } | undefined): Token | undefined {
-        this.skipIgnoredCharacters(options?.skippingNewline ?? true)
+    next(options?: { stopAtNewline: true } | undefined): Token | undefined {
+        this.skipIgnoredCharacters({
+            includingNewline: !options?.stopAtNewline,
+        })
         if (!this.source.hasMoreCharacters()) return
 
         const current = this.source.peek(1)
@@ -253,17 +255,21 @@ export class TokenStream {
         }
     }
 
-    private skipIgnoredCharacters(includingNewline: boolean) {
+    private skipIgnoredCharacters({
+        includingNewline,
+    }: {
+        includingNewline: boolean
+    }) {
         this.source.skipMatching(includingNewline ? /[^\S]/ : /[^\S\n]/)
 
         if (this.source.peek(2) == '//') {
             this.source.skipThrough('\n')
-            this.skipIgnoredCharacters(includingNewline)
+            this.skipIgnoredCharacters({ includingNewline })
         }
         if (this.source.peek(2) == '/*') {
             this.source.skip(2)
             this.source.skipThrough('*/')
-            this.skipIgnoredCharacters(includingNewline)
+            this.skipIgnoredCharacters({ includingNewline })
         }
     }
 

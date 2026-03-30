@@ -3,19 +3,22 @@ import { TokenStream } from '../../src/lexer'
 import { Parser } from '../../src/parser'
 
 describe('Parser Tests', () => {
-    it('parses truthvalue variable declaration correctly', () => {
-        const program = `const x: truthvalue = ambiguous`
-        const ast = parse(program)
-        expect(ast).toMatchObject({
-            body: [
-                {
-                    kind: 'var-decl',
-                    semantics: 'const',
-                    name: 'x',
-                    value: { kind: 'truthvalue', value: 'ambiguous' },
-                },
-            ],
-        })
+    describe('variable declaration', () => {
+        for (const keyword of ['const', 'mut', 'ref'] as const)
+            it(`parses ${keyword} truthvalue variable declaration correctly`, () => {
+                const program = `${keyword} x: truthvalue = ambiguous`
+                const ast = parse(program)
+                expect(ast).toMatchObject({
+                    body: [
+                        {
+                            kind: 'var-decl',
+                            semantics: keyword,
+                            name: 'x',
+                            value: { kind: 'truthvalue', value: 'ambiguous' },
+                        },
+                    ],
+                })
+            })
     })
 
     it('parses print of truthvalue literal correctly', () => {

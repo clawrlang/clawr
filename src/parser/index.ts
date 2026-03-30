@@ -6,6 +6,7 @@ import {
     ASTFieldAccess,
 } from '../ast'
 import { TokenStream } from '../lexer'
+import { KeywordToken } from '../lexer/token'
 
 export class Parser {
     constructor(private stream: TokenStream) {}
@@ -23,7 +24,10 @@ export class Parser {
         const token = this.stream.peek()
         if (token?.kind === 'KEYWORD' && token.keyword === 'data') {
             return this.parseDataDeclaration()
-        } else if (token?.kind === 'KEYWORD' && token.keyword === 'const') {
+        } else if (
+            token?.kind === 'KEYWORD' &&
+            isValidVariableSemantics(token.keyword)
+        ) {
             return this.parseVariableDeclaration()
         } else if (token?.kind === 'IDENTIFIER') {
             const backup = this.stream
@@ -84,7 +88,17 @@ export class Parser {
     }
 
     private parseVariableDeclaration(): ASTVariableDeclaration {
-        this.stream.expect('KEYWORD', 'const')
+        const semanticsToken = this.stream.peek()
+        if (
+            semanticsToken?.kind !== 'KEYWORD' ||
+            !isValidVariableSemantics(semanticsToken.keyword)
+        ) {
+            throw new Error(
+                'Expected variable declaration keyword (const, mut, ref)',
+            )
+        }
+        const semantics = semanticsToken.keyword as 'const' | 'mut' | 'ref'
+        this.stream.next() // consume the keyword
         const name = this.stream.expect('IDENTIFIER').identifier
         this.stream.expect('PUNCTUATION', ':')
         const type = this.stream.expect('IDENTIFIER').identifier
@@ -92,7 +106,7 @@ export class Parser {
         const value = this.parseExpression()
         return {
             kind: 'var-decl',
-            semantics: 'const',
+            semantics,
             name,
             valueSet: { type },
             value,
@@ -173,4 +187,8 @@ export class Parser {
                 )
         }
     }
+}
+
+function isValidVariableSemantics(keyword: string): boolean {
+    return ['const', 'mut', 'ref'].includes(keyword)
 }

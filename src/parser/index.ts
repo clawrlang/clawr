@@ -25,8 +25,37 @@ export class Parser {
             return this.parseDataDeclaration()
         } else if (token?.kind === 'KEYWORD' && token.keyword === 'const') {
             return this.parseVariableDeclaration()
+        } else if (token?.kind === 'IDENTIFIER') {
+            const backup = this.stream
+            const ass = this.stream.attempt((clone) => {
+                this.stream = clone
+                try {
+                    return this.parseAssignment()
+                } catch {
+                    return null
+                }
+            })
+            if (ass) return ass
+            this.stream = backup
+
+            return this.parsePrintStatement()
         } else {
             return this.parsePrintStatement()
+        }
+    }
+    private parseAssignment(): ASTStatement {
+        // Parse the left-hand side (identifier or field-access)
+        let target = this.parseExpression()
+        // After parseExpression, expect '='
+        if (!this.stream.isNext('PUNCTUATION', '=')) {
+            throw new Error('Expected = in assignment')
+        }
+        this.stream.next() // consume '='
+        const value = this.parseExpression()
+        return {
+            kind: 'assign',
+            target,
+            value,
         }
     }
 

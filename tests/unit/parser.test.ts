@@ -117,7 +117,10 @@ describe('Parser Tests', () => {
                                     kind: 'field-access',
                                     object: {
                                         kind: 'field-access',
-                                        object: { kind: 'identifier', name: 'a' },
+                                        object: {
+                                            kind: 'identifier',
+                                            name: 'a',
+                                        },
                                         field: 'b',
                                     },
                                     field: 'c',
@@ -128,6 +131,38 @@ describe('Parser Tests', () => {
                         },
                         field: 'f',
                     },
+                },
+            ],
+        })
+    })
+
+    it('parses assignment correctly', () => {
+        const program = 'a = true'
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'assign',
+                    target: { kind: 'identifier', name: 'a' },
+                    value: { kind: 'truthvalue', value: 'true' },
+                },
+            ],
+        })
+    })
+
+    it('parses field assignment correctly', () => {
+        const program = 'p.x = true'
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'assign',
+                    target: {
+                        kind: 'field-access',
+                        object: { kind: 'identifier', name: 'p' },
+                        field: 'x',
+                    },
+                    value: { kind: 'truthvalue', value: 'true' },
                 },
             ],
         })

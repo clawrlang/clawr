@@ -74,6 +74,7 @@ export type ASTStatement =
     | ASTVariableDeclaration
     | ASTPrintStatement
     | ASTFieldAssignment
+    | ASTDataDeclaration
 
 export interface ASTModule {
     body: (ASTDataDeclaration | ASTStatement)[]

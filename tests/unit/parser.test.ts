@@ -52,7 +52,30 @@ describe('Parser Tests', () => {
             ],
         })
     })
+
+    it('parses data declaration correctly', () => {
+        const program = `
+            data Point {
+                x: truthvalue
+                y: truthvalue
+            }
+        `
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Point',
+                    fields: [
+                        { name: 'x', type: 'truthvalue' },
+                        { name: 'y', type: 'truthvalue' },
+                    ],
+                },
+            ],
+        })
+    })
 })
+
 function parse(code: string) {
     const stream = new TokenStream(code, 'test.clawr')
     const parser = new Parser(stream)

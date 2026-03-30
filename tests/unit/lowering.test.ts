@@ -11,6 +11,7 @@ describe('Lowering Tests', () => {
                     kind: 'var-decl',
                     semantics: 'const',
                     name: 'x',
+                    valueSet: { type: 'truthvalue' },
                     value: { kind: 'truthvalue', value: 'ambiguous' },
                 },
             ],
@@ -21,6 +22,40 @@ describe('Lowering Tests', () => {
             type: 'truthvalue_t',
             name: 'x',
             value: { kind: 'var-ref', name: 'c_ambiguous' },
+        } satisfies CStatement)
+    })
+
+    it('lowers integer variable declaration as Integer*', () => {
+        const program: ASTModule = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    valueSet: { type: 'integer' },
+                    value: { kind: 'integer', value: 42n },
+                },
+            ],
+        }
+        const module = new IRGenerator().generate(program)
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'Integer*',
+            name: 'x',
+            value: {
+                kind: 'function-call',
+                name: 'Integer¸withDigits',
+                arguments: [
+                    {
+                        kind: 'function-call',
+                        name: 'Array¸new',
+                        arguments: [
+                            { kind: 'raw-expression', expression: '1' },
+                            { kind: 'raw-expression', expression: '42' },
+                        ],
+                    },
+                ],
+            },
         } satisfies CStatement)
     })
 
@@ -48,12 +83,77 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
+    it('lowers print of integer literal correctly', () => {
+        const program: ASTModule = {
+            body: [
+                {
+                    kind: 'print',
+                    value: { kind: 'integer', value: 42n },
+                },
+            ],
+        }
+        const module = new IRGenerator().generate(program)
+        // Integer* temp0 = Integer¸withDigits(Array¸new(1, 42));
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            name: 'temp0',
+            type: 'Integer*',
+            value: {
+                kind: 'function-call',
+                name: 'Integer¸withDigits',
+                arguments: [
+                    {
+                        kind: 'function-call',
+                        name: 'Array¸new',
+                        arguments: [
+                            { kind: 'raw-expression', expression: '1' },
+                            { kind: 'raw-expression', expression: '42' },
+                        ],
+                    },
+                ],
+            },
+        } satisfies CStatement)
+        // String* temp1 = Integer·toStringRC(temp0);
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'var-decl',
+            name: 'temp1',
+            type: 'String*',
+            value: {
+                kind: 'function-call',
+                name: 'Integer·toStringRC',
+                arguments: [{ kind: 'var-ref', name: 'temp0' }],
+            },
+        } satisfies CStatement)
+        // printf("%s\n", temp1);
+        expect(module.functions[0].body[2]).toMatchObject({
+            kind: 'function-call',
+            name: 'printf',
+            arguments: [
+                { kind: 'string', value: '%s\\n' },
+                { kind: 'var-ref', name: 'temp1' },
+            ],
+        } satisfies CStatement)
+        // releaseRC(temp0);
+        expect(module.functions[0].body[3]).toMatchObject({
+            kind: 'function-call',
+            name: 'releaseRC',
+            arguments: [{ kind: 'var-ref', name: 'temp0' }],
+        } satisfies CStatement)
+        // releaseRC(temp1);
+        expect(module.functions[0].body[4]).toMatchObject({
+            kind: 'function-call',
+            name: 'releaseRC',
+            arguments: [{ kind: 'var-ref', name: 'temp1' }],
+        } satisfies CStatement)
+    })
+
     it('lowers print of truthvalue variable correctly', () => {
         const program: ASTModule = {
             body: [
                 {
                     kind: 'var-decl',
                     semantics: 'const',
+                    valueSet: { type: 'truthvalue' },
                     name: 'x',
                     value: { kind: 'truthvalue', value: 'ambiguous' },
                 },

@@ -16,7 +16,7 @@ export class IRGenerator {
             returnType: 'int',
             parameters: [],
             body: [
-                ...ast.body.map(this.lowerStatement.bind(this)),
+                ...ast.body.flatMap(this.lowerStatement.bind(this)),
                 // Always return 0 at end of main
                 {
                     kind: 'function-call',
@@ -32,14 +32,19 @@ export class IRGenerator {
         }
     }
 
-    private lowerStatement(stmt: ASTStatement): CStatement {
+    private lowerStatement(stmt: ASTStatement): CStatement[] {
         if (stmt.kind === 'var-decl') {
-            return {
-                kind: 'var-decl',
-                type: 'truthvalue_t', // For now, we only have truthvalue variables
-                name: stmt.name,
-                value: this.lowerValue(stmt.value),
-            }
+            return [
+                {
+                    kind: 'var-decl',
+                    type:
+                        stmt.valueSet.type === 'truthvalue'
+                            ? 'truthvalue_t'
+                            : 'Integer*', // For now, we only have truthvalue and integer variables
+                    name: stmt.name,
+                    value: this.lowerValue(stmt.value),
+                },
+            ]
         } else if (stmt.kind === 'print') {
             return this.lowerPrint(stmt)
         }
@@ -47,61 +52,113 @@ export class IRGenerator {
     }
 
     private lowerValue(val: ASTExpression): CExpression {
-        if (val.kind === 'truthvalue') {
-            return { kind: 'var-ref', name: `c_${val.value}` }
-        } else if (val.kind === 'identifier') {
-            return { kind: 'var-ref', name: val.name }
-        }
-        throw new Error('Unknown AST value kind')
-    }
-
-    private lowerPrint(print: ASTPrintStatement): CStatement {
-        switch (print.value.kind) {
+        switch (val.kind) {
             case 'integer':
                 return {
                     kind: 'function-call',
-                    name: 'printf',
+                    name: 'Integer¸withDigits',
                     arguments: [
-                        { kind: 'string', value: '%lld\\n' },
-                        { kind: 'var-ref', name: print.value.value.toString() },
-                    ],
-                }
-            case 'truthvalue': {
-                const map = { false: -1, ambiguous: 0, true: 1 }
-                return {
-                    kind: 'function-call',
-                    name: 'printf',
-                    arguments: [
-                        { kind: 'string', value: '%s\\n' },
                         {
                             kind: 'function-call',
-                            name: 'truthvalue·toCString',
+                            name: 'Array¸new',
                             arguments: [
+                                { kind: 'raw-expression', expression: '1' },
                                 {
-                                    kind: 'var-ref',
-                                    name: `c_${print.value.value}`,
+                                    kind: 'raw-expression',
+                                    expression: val.value.toString(),
                                 },
                             ],
                         },
                     ],
                 }
+            case 'truthvalue':
+                return { kind: 'var-ref', name: `c_${val.value}` }
+            case 'identifier':
+                return { kind: 'var-ref', name: val.name }
+            default:
+                throw new Error('Unknown AST value kind')
+        }
+    }
+
+    private lowerPrint(print: ASTPrintStatement): CStatement[] {
+        switch (print.value.kind) {
+            case 'integer':
+                return [
+                    {
+                        kind: 'var-decl',
+                        name: 'temp0',
+                        type: 'Integer*',
+                        value: this.lowerValue(print.value),
+                    },
+                    {
+                        kind: 'var-decl',
+                        name: 'temp1',
+                        type: 'String*',
+                        value: {
+                            kind: 'function-call',
+                            name: 'Integer·toStringRC',
+                            arguments: [{ kind: 'var-ref', name: 'temp0' }],
+                        },
+                    },
+                    {
+                        kind: 'function-call',
+                        name: 'printf',
+                        arguments: [
+                            { kind: 'string', value: '%s\\n' },
+                            { kind: 'var-ref', name: 'temp1' },
+                        ],
+                    },
+                    {
+                        kind: 'function-call',
+                        name: 'releaseRC',
+                        arguments: [{ kind: 'var-ref', name: 'temp0' }],
+                    },
+                    {
+                        kind: 'function-call',
+                        name: 'releaseRC',
+                        arguments: [{ kind: 'var-ref', name: 'temp1' }],
+                    },
+                ]
+            case 'truthvalue': {
+                const map = { false: -1, ambiguous: 0, true: 1 }
+                return [
+                    {
+                        kind: 'function-call',
+                        name: 'printf',
+                        arguments: [
+                            { kind: 'string', value: '%s\\n' },
+                            {
+                                kind: 'function-call',
+                                name: 'truthvalue·toCString',
+                                arguments: [
+                                    {
+                                        kind: 'var-ref',
+                                        name: `c_${print.value.value}`,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ]
             }
             case 'identifier':
                 // Assume variable is truthvalue
-                return {
-                    kind: 'function-call',
-                    name: 'printf',
-                    arguments: [
-                        { kind: 'string', value: '%s\\n' },
-                        {
-                            kind: 'function-call',
-                            name: 'truthvalue·toCString',
-                            arguments: [
-                                { kind: 'var-ref', name: print.value.name },
-                            ],
-                        },
-                    ],
-                }
+                return [
+                    {
+                        kind: 'function-call',
+                        name: 'printf',
+                        arguments: [
+                            { kind: 'string', value: '%s\\n' },
+                            {
+                                kind: 'function-call',
+                                name: 'truthvalue·toCString',
+                                arguments: [
+                                    { kind: 'var-ref', name: print.value.name },
+                                ],
+                            },
+                        ],
+                    },
+                ]
             default:
                 throw new Error('Unknown print value kind')
         }

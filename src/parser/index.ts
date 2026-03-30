@@ -36,8 +36,9 @@ export class Parser {
         const value = this.parseExpression()
         return {
             kind: 'var-decl',
-            name,
             semantics: 'const',
+            name,
+            valueSet: { type },
             value,
         }
     }

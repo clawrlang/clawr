@@ -9,7 +9,7 @@ import { CModule } from '../../src/ir'
 const OUTPUT_DIR = path.join(__dirname, 'out')
 const RUNTIME_DIR = path.join(__dirname, '../../src/runtime')
 
-describe('Codegen Tests', () => {
+describe('Codegen', () => {
     it('emits correct C code for truthvalue variable declaration', async () => {
         const module: CModule = {
             structs: [],
@@ -47,6 +47,140 @@ describe('Codegen Tests', () => {
         const cCode = codegenC(module)
         const exeResult = await execute(cCode, 'test')
         expectOutput('ambiguous\n', exeResult)
+    })
+
+    it('emits correct C code for heap-allocated struct initialization with memcpy', async () => {
+        const module: CModule = {
+            structs: [
+                // typedef struct DataStructure {
+                //     __rc_header header;
+                //     u_int8_t x;
+                //     u_int8_t y;
+                // } DataStructure;
+                {
+                    kind: 'struct',
+                    name: 'DataStructure',
+                    fields: [
+                        { name: 'header', type: '__rc_header' },
+                        { name: 'x', type: 'u_int8_t' },
+                        { name: 'y', type: 'u_int8_t' },
+                    ],
+                },
+                // typedef struct DataStructureˇfields {
+                //     u_int8_t x;
+                //     u_int8_t y;
+                // } DataStructureˇfields;
+                {
+                    kind: 'struct',
+                    name: 'DataStructureˇfields',
+                    fields: [
+                        { name: 'x', type: 'u_int8_t' },
+                        { name: 'y', type: 'u_int8_t' },
+                    ],
+                },
+            ],
+            variables: [
+                // static const __type_info DataStructureˇtype = {
+                //     .data_type = { .size = sizeof(DataStructure) }
+                // };
+                {
+                    kind: 'var-decl',
+                    type: '__type_info',
+                    name: 'DataStructureˇtype',
+                    value: {
+                        kind: 'raw-expression',
+                        expression:
+                            '{ .data_type = { .size = sizeof(DataStructure) } }',
+                    },
+                },
+            ],
+            functions: [
+                {
+                    kind: 'function',
+                    name: 'main',
+                    returnType: 'int',
+                    parameters: [],
+                    body: [
+                        {
+                            kind: 'var-decl',
+                            type: 'DataStructure*',
+                            name: 'original',
+                            value: {
+                                kind: 'function-call',
+                                name: 'allocRC',
+                                arguments: [
+                                    {
+                                        kind: 'raw-expression',
+                                        expression: 'DataStructure',
+                                    },
+                                    {
+                                        kind: 'raw-expression',
+                                        expression: '__rc_ISOLATED',
+                                    },
+                                ],
+                            },
+                        },
+                        {
+                            kind: 'function-call',
+                            name: 'memcpy',
+                            arguments: [
+                                {
+                                    kind: 'raw-expression',
+                                    expression: '((__rc_header*)original) + 1',
+                                },
+                                {
+                                    kind: 'raw-expression',
+                                    expression:
+                                        '&(DataStructureˇfields) { .x = 47, .y = 42 }',
+                                },
+                                {
+                                    kind: 'raw-expression',
+                                    expression:
+                                        'sizeof(DataStructure) - sizeof(__rc_header)',
+                                },
+                            ],
+                        },
+                        {
+                            kind: 'function-call',
+                            name: 'printf',
+                            arguments: [
+                                {
+                                    kind: 'string',
+                                    value: '%d %d\\n',
+                                },
+                                {
+                                    kind: 'field-reference',
+                                    object: {
+                                        kind: 'var-ref',
+                                        name: 'original',
+                                    },
+                                    field: 'x',
+                                    deref: true,
+                                },
+                                {
+                                    kind: 'field-reference',
+                                    object: {
+                                        kind: 'var-ref',
+                                        name: 'original',
+                                    },
+                                    field: 'y',
+                                    deref: true,
+                                },
+                            ],
+                        },
+                        {
+                            kind: 'function-call',
+                            name: 'releaseRC',
+                            arguments: [{ kind: 'var-ref', name: 'original' }],
+                        },
+                    ],
+                },
+            ],
+        }
+
+        const cCode = codegenC(module)
+        const exeResult = await execute(cCode, 'struct-memcpy')
+        expectOutput('47 42\n', exeResult)
     })
 })
 

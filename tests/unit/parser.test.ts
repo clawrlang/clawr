@@ -96,6 +96,42 @@ describe('Parser Tests', () => {
             ],
         })
     })
+
+    it('parses field access correctly', () => {
+        const program = 'const x: truthvalue = a.b.c.d.e.f'
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                    value: {
+                        kind: 'field-access',
+                        object: {
+                            kind: 'field-access',
+                            object: {
+                                kind: 'field-access',
+                                object: {
+                                    kind: 'field-access',
+                                    object: {
+                                        kind: 'field-access',
+                                        object: { kind: 'identifier', name: 'a' },
+                                        field: 'b',
+                                    },
+                                    field: 'c',
+                                },
+                                field: 'd',
+                            },
+                            field: 'e',
+                        },
+                        field: 'f',
+                    },
+                },
+            ],
+        })
+    })
 })
 
 function parse(code: string) {

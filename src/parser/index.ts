@@ -3,6 +3,7 @@ import {
     ASTStatement,
     ASTExpression,
     ASTVariableDeclaration,
+    ASTFieldAccess,
 } from '../ast'
 import { TokenStream } from '../lexer'
 
@@ -78,6 +79,24 @@ export class Parser {
     }
 
     private parseExpression(): ASTExpression {
+        const expr = this.parsePrimaryExpression()
+        if (!this.stream.isNext('OPERATOR', ['.'])) return expr
+
+        let object: ASTExpression = expr
+        while (this.stream.isNext('OPERATOR', ['.'])) {
+            this.stream.next()
+            const field = this.stream.expect('IDENTIFIER').identifier
+            const fieldAccess: ASTFieldAccess = {
+                kind: 'field-access',
+                object,
+                field,
+            }
+            object = fieldAccess
+        }
+        return object
+    }
+
+    private parsePrimaryExpression(): ASTExpression {
         const token = this.stream.peek()
         switch (token?.kind) {
             case 'TRUTH_LITERAL':

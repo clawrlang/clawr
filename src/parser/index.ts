@@ -6,7 +6,6 @@ import {
     ASTFieldAccess,
 } from '../ast'
 import { TokenStream } from '../lexer'
-import { KeywordToken } from '../lexer/token'
 
 export class Parser {
     constructor(private stream: TokenStream) {}

@@ -1,26 +1,19 @@
 # TODO
 
-- Implement and test lowering from AST to IR
-- Implement the parser to generate the AST
-
-  ```clawr
-  data DataStructure {
-      x: truthvalue
-      y: truthvalue
-  }
-
-  const a: DataStructure = {
-      x: true
-      y: ambiguous
-  }
-
-  a.y = false
-  print a.x
-  ```
-
-## Rework Needed
+## Technical Debt
 
 - **`IRGenerator`**: Data literals only support literal `truthvalue` field values
 - **`IRGenerator`**: Improve lowering of `integer` literals to `Integer*`
 - **`IRGenerator`**: Allow printing `integer` variable (no temp for the literal)
 - **`IRGenerator`**: `lowerStatement`: special case for `var-decl` with `DataLiteral` value
+- **`IRGenerator`**: `retainRC()` not called on reassign
+- **`IRGenerator`**: `mutateRC()` not called when assigning to nested field
+- **`IRGenerator`**: `releaseRC()` is not called at all
+- **`IRGenerator`**: No unit tests for `mutateRC()` and `retainRC()`
+- **`IRGenerator`**: Consider splitting into smaller modules
+- **`Parser`**: Consider splitting into smaller modules
+- **`Parser`**: Allow variable declaration without texplicit ype (add inference step)
+- **AST**: Create two:
+  - CST: parsed tree allowing ambiguities and missing information
+  - AST: analysed tree with inferred types and validated operations
+- **`SemanticAnalyzer`**: Add a step between parsing an lowering

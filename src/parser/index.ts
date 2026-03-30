@@ -4,7 +4,7 @@ import {
     ASTExpression,
     ASTVariableDeclaration,
 } from '../ast'
-import { Token, TokenStream } from '../lexer'
+import { TokenStream } from '../lexer'
 
 export class Parser {
     constructor(private stream: TokenStream) {}
@@ -34,16 +34,14 @@ export class Parser {
         const name = this.stream.expect('IDENTIFIER').identifier
         this.stream.expect('PUNCTUATION', '{')
         const fields: { name: string; type: string }[] = []
-        while (!is(this.stream.peek(), 'PUNCTUATION', '}')) {
+        while (!this.stream.isNext('PUNCTUATION', '}')) {
             const fieldName = this.stream.expect('IDENTIFIER').identifier
             this.stream.expect('PUNCTUATION', ':')
             const fieldType = this.stream.expect('IDENTIFIER').identifier
             fields.push({ name: fieldName, type: fieldType })
-            if (is(this.stream.peek(), 'PUNCTUATION', ',')) {
+            if (this.stream.isNext('PUNCTUATION', ',')) {
                 this.stream.next()
-            } else if (
-                !is(this.stream.peek({ stopAtNewline: true }), 'NEWLINE')
-            ) {
+            } else if (!this.stream.isNext('NEWLINE')) {
                 this.stream.next({ stopAtNewline: true })
             }
         }
@@ -98,21 +96,16 @@ export class Parser {
                 if (token.symbol === '{') {
                     this.stream.next()
                     const fields: { [field: string]: ASTExpression } = {}
-                    while (!is(this.stream.peek(), 'PUNCTUATION', '}')) {
+                    while (!this.stream.isNext('PUNCTUATION', '}')) {
                         const fieldName =
                             this.stream.expect('IDENTIFIER').identifier
                         this.stream.expect('PUNCTUATION', ':')
                         const fieldValue = this.parseExpression()
                         fields[fieldName] = fieldValue
-                        if (is(this.stream.peek(), 'PUNCTUATION', ','))
+                        if (this.stream.isNext('PUNCTUATION', ','))
                             this.stream.next()
 
-                        if (
-                            is(
-                                this.stream.peek({ stopAtNewline: true }),
-                                'NEWLINE',
-                            )
-                        ) {
+                        if (this.stream.isNext('NEWLINE')) {
                             this.stream.next({ stopAtNewline: true })
                         }
                     }
@@ -131,29 +124,5 @@ export class Parser {
                     `${token?.line}:${token?.column}:Unexpected token [${token?.kind}] in expression`,
                 )
         }
-    }
-}
-
-function is(token: Token | undefined, kind: 'NEWLINE'): boolean
-function is(
-    token: Token | undefined,
-    kind: 'PUNCTUATION',
-    value?: string,
-): boolean
-function is(
-    token: Token | undefined,
-    kind: Token['kind'],
-    value?: string,
-): boolean {
-    if (!token) return false
-    if (token.kind !== kind) return false
-
-    switch (token.kind) {
-        case 'NEWLINE':
-            return true
-        case 'PUNCTUATION':
-            return token.symbol === value
-        default:
-            return false
     }
 }

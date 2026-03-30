@@ -57,13 +57,40 @@ export class TokenStream {
         this.previousToken = clone.previousToken
     }
 
+    isNext(kind: 'NEWLINE'): boolean
+    isNext(kind: 'OPERATOR', operators?: Operator[]): boolean
+    isNext(kind: 'KEYWORD', keyword: Keyword): boolean
+    isNext(kind: 'IDENTIFIER'): boolean
+    isNext(kind: 'PUNCTUATION', symbol: PunctuationSymbol): boolean
+    isNext(kind: Token['kind'], value?: string | string[]): boolean {
+        const token = this.peek(
+            kind === 'NEWLINE' ? { stopAtNewline: true } : undefined,
+        )
+        if (!token || token.kind !== kind) return false
+        if (!value) return true
+        const values = Array.isArray(value) ? value : [value]
+
+        switch (token.kind) {
+            case 'PUNCTUATION':
+                return values.includes(token.symbol)
+            case 'OPERATOR':
+                return values.includes(token.operator)
+            case 'KEYWORD':
+                return values.includes(token.keyword)
+            default:
+                return false
+        }
+    }
+
     expect(kind: 'NEWLINE'): NewlineToken
     expect(kind: 'OPERATOR', operators?: Operator[]): OperatorToken
     expect(kind: 'KEYWORD', keyword: Keyword): KeywordToken
     expect(kind: 'IDENTIFIER'): IdentifierToken
     expect(kind: 'PUNCTUATION', symbol: PunctuationSymbol): PunctuationToken
     expect(kind: Token['kind'], value?: string | string[]): Token {
-        const token = this.next()
+        const token = this.next(
+            kind === 'NEWLINE' ? { stopAtNewline: true } : undefined,
+        )
 
         if (!token) throw new Error(`Expected ${value ?? kind}, got EOF`)
 

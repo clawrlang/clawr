@@ -1,6 +1,18 @@
 declare module 'bun:test' {
-    export function describe(name: string, fn: () => void): void
-    export function test(name: string, fn: () => void): void
-    export function it(name: string, fn: () => void): void
+    export const describe: DescribeFunction
+    export const test: TestFunction
+    export const it: TestFunction
     export function expect(value: any): any
+}
+
+interface DescribeFunction {
+    (name: string, fn: () => void): void
+    only: (name: string, fn: () => void) => void
+    skip: (name: string, fn: () => void) => void
+}
+
+interface TestFunction {
+    (name: string, fn: () => void): void
+    only: (name: string, fn: () => void) => void
+    skip: (name: string, fn: () => void) => void
 }

@@ -4,8 +4,10 @@
 int main() {
     // Clawr: `ref original = Struct { x: 47, y: 42 }`
     DataStructure* original = allocRC(DataStructure, __rc_SHARED);
-    original->x = 47;
-    original->y = 42;
+    memcpy(((__rc_header*)original) + 1, &(DataStructureˇfields) {
+        .x = 47,
+        .y = 42,
+    }, sizeof(DataStructure) - sizeof(__rc_header));
 
     // Clawr: `ref isolated = original`
     DataStructure* reference = retainRC(original);

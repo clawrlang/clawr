@@ -10,7 +10,7 @@
     "test:runtime": "bun test tests/runtime",
     "test:codegen": "bun test tests/codegen",
     "test:e2e": "bun run build && bun test tests/unit && bun test tests/e2e",
-    "test:all": "bun test tests/unit && bun run build && bun test tests/codegen && bun test tests/e2e",
+    "test:all": "bun test tests/unit && bun run build && bun test tests/codegen tests/e2e tests/runtime",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "author": "",

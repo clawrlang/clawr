@@ -11,6 +11,9 @@
 //     height: integer
 // }
 // ```
+typedef struct Prismˇfields {
+    int height;
+} Prismˇfields;
 typedef struct Prism {
     __rc_header header;
     int height;
@@ -28,7 +31,9 @@ typedef struct Prismˇvtable {
 // Clawr: `inheritance: func new(height: integer @range(0..20))`
 void Prism˛new_height(Prism* self, int height) {
     // Clawr: `self = { height }`
-    self->height = height;
+    memcpy(((__rc_header*)self) + 1, &(Prismˇfields) {
+        .height = height,
+    }, sizeof(Prism) - sizeof(__rc_header));
 }
 
 // Clawr: `func volume() -> integer`
@@ -45,6 +50,10 @@ int Prism·volume(Prism* self) {
 // }
 // ```
 int RectBlock·area(void* self);
+typedef struct RectBlockˇfields {
+    int width;
+    int depth;
+} RectBlockˇfields;
 typedef struct RectBlock {
     Prism super;
     int width;
@@ -71,8 +80,11 @@ int RectBlock·area(void* self) {
 RectBlock* RectBlock¸new_width_depth_height(int width, int depth, int height) {
     // Clawr: `const self = RectBlock { Prism.new(height: height), width, depth }`
     RectBlock* self = allocRC(RectBlock, __rc_ISOLATED);
-    self->width = width;
-    self->depth = depth;
+    memcpy(((Prism*)self) + 1, &(RectBlockˇfields) {
+        .width = width,
+        .depth = depth,
+    }, sizeof(RectBlock) - sizeof(Prism));
+
     Prism˛new_height((Prism*)self, height);
     return self;
 }

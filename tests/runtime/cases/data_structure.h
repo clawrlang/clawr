@@ -13,3 +13,8 @@ typedef struct DataStructure {
 static const __type_info DataStructureˇtype = {
     .data_type = { .size = sizeof(DataStructure) }
 };
+
+typedef struct DataStructureˇfields {
+    int8_t x;
+    int8_t y;
+} DataStructureˇfields;

@@ -4,8 +4,10 @@
 int main() {
     // Clawr: `mut original = DataStructure { x: 47, y: 42 }`
     DataStructure* original = allocRC(DataStructure, __rc_ISOLATED);
-    original->x = 47;
-    original->y = 42;
+    memcpy(((__rc_header*)original) + 1, &(DataStructureˇfields) {
+        .x = 47,
+        .y = 42,
+    }, sizeof(DataStructure) - sizeof(__rc_header));
 
     // Clawr: `const isolated = original`
     DataStructure* isolated = retainRC(original);

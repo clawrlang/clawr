@@ -5,19 +5,55 @@ import type {
     ASTStatement,
     ASTExpression,
     ASTDataDeclaration,
+    ASTVariableDeclaration,
+    ASTDataLiteral,
 } from '../ast'
-import type { CModule, CStatement, CExpression, CFunctionDeclaration } from '.'
+import type {
+    CModule,
+    CStatement,
+    CExpression,
+    CFunctionDeclaration,
+    CStruct,
+    CVariableDeclaration,
+} from '.'
 
 export class IRGenerator {
     generate(ast: ASTModule): CModule {
         // For now, only a single main function and no type definitions
-        const mainFunc: CFunctionDeclaration = {
+        return {
+            structs: [
+                ...ast.body
+                    .filter(
+                        (stmt): stmt is ASTDataDeclaration =>
+                            stmt.kind === 'data-decl',
+                    )
+                    .flatMap(this.lowerStruct.bind(this)),
+            ],
+            variables: [
+                ...ast.body
+                    .filter(
+                        (stmt): stmt is ASTDataDeclaration =>
+                            stmt.kind === 'data-decl',
+                    )
+                    .map(this.lowerStructTypeInfo.bind(this)),
+            ],
+            functions: [this.lowerMainFunction(ast.body)],
+        }
+    }
+
+    private lowerMainFunction(body: ASTModule['body']): CFunctionDeclaration {
+        return {
             kind: 'function',
             name: 'main',
             returnType: 'int',
             parameters: [],
             body: [
-                ...ast.body.flatMap(this.lowerStatement.bind(this)),
+                ...body
+                    .filter(
+                        (stmt): stmt is ASTStatement =>
+                            stmt.kind !== 'data-decl',
+                    )
+                    .flatMap(this.lowerStatement.bind(this)),
                 // Always return 0 at end of main
                 {
                     kind: 'function-call',
@@ -26,32 +62,138 @@ export class IRGenerator {
                 },
             ],
         }
+    }
+
+    private lowerStruct(stmt: ASTDataDeclaration): CStruct[] {
+        const fields = stmt.fields.map((f) => ({
+            name: f.name,
+            type: f.type === 'truthvalue' ? 'truthvalue_t' : 'Integer*',
+        }))
+        return [
+            {
+                kind: 'struct',
+                name: stmt.name,
+                fields: [{ name: 'header', type: '__rc_header' }, ...fields],
+            },
+            {
+                kind: 'struct',
+                name: `${stmt.name}ˇfields`,
+                fields,
+            },
+        ]
+    }
+
+    private lowerStructTypeInfo(
+        stmt: ASTDataDeclaration,
+    ): CVariableDeclaration {
         return {
-            structs: [], // Add type definitions here in the future
-            variables: [], // Add global variables here in the future
-            functions: [mainFunc],
+            kind: 'var-decl',
+            type: '__type_info',
+            name: `${stmt.name}ˇtype`,
+            value: {
+                kind: 'struct-init',
+                fields: {
+                    data_type: {
+                        kind: 'struct-init',
+                        fields: {
+                            size: {
+                                kind: 'raw-expression',
+                                expression: `sizeof(${stmt.name})`,
+                            },
+                        },
+                    },
+                },
+            },
+            modifiers: ['static', 'const'],
         }
     }
 
-    private lowerStatement(
-        stmt: ASTDataDeclaration | ASTStatement,
-    ): CStatement[] {
-        if (stmt.kind === 'var-decl') {
-            return [
-                {
-                    kind: 'var-decl',
-                    type:
-                        stmt.valueSet.type === 'truthvalue'
-                            ? 'truthvalue_t'
-                            : 'Integer*', // For now, we only have truthvalue and integer variables
-                    name: stmt.name,
-                    value: this.lowerValue(stmt.value),
-                },
-            ]
-        } else if (stmt.kind === 'print') {
-            return this.lowerPrint(stmt)
+    private lowerStatement(stmt: ASTStatement): CStatement[] {
+        switch (stmt.kind) {
+            case 'var-decl':
+                if (stmt.value.kind === 'data-literal') {
+                    // For data literals, we need to allocate the struct and then assign the fields
+                    return [
+                        {
+                            kind: 'var-decl',
+                            type: this.lowerType(stmt),
+                            name: stmt.name,
+                            value: {
+                                kind: 'function-call',
+                                name: 'allocRC',
+                                arguments: [
+                                    { kind: 'var-ref', name: stmt.value.type },
+                                    {
+                                        kind: 'var-ref',
+                                        name:
+                                            stmt.semantics === 'ref'
+                                                ? '__rc_SHARED'
+                                                : '__rc_ISOLATED',
+                                    },
+                                ],
+                            },
+                        },
+                        {
+                            kind: 'function-call',
+                            name: 'memcpy',
+                            arguments: [
+                                { kind: 'var-ref', name: stmt.name },
+                                {
+                                    kind: 'raw-expression',
+                                    expression: `&(${stmt.value.type}ˇfields){ ${this.lowerStructLiteralFields(stmt.value.fields)} }`,
+                                },
+                                {
+                                    kind: 'raw-expression',
+                                    expression: `sizeof(${stmt.value.type}) - sizeof(__rc_header)`,
+                                },
+                            ],
+                        },
+                    ]
+                } else {
+                    return [
+                        {
+                            kind: 'var-decl',
+                            type: this.lowerType(stmt),
+                            name: stmt.name,
+                            value: this.lowerValue(stmt.value),
+                        },
+                    ]
+                }
+            case 'print':
+                return this.lowerPrint(stmt)
+            case 'field-assign':
+                return [
+                    {
+                        kind: 'assign',
+                        target: {
+                            kind: 'field-reference',
+                            object: this.lowerValue(stmt.target.object),
+                            field: stmt.target.field,
+                            deref: true,
+                        },
+                        value: this.lowerValue(stmt.value),
+                    },
+                ]
+            default:
+                throw new Error(
+                    `Unknown AST statement kind ${(stmt as any).kind}`,
+                )
         }
-        throw new Error('Unknown AST statement kind')
+    }
+
+    private lowerStructLiteralFields(fields: ASTDataLiteral['fields']): string {
+        return Object.entries(fields)
+            .map(([k, v]) => {
+                switch (v.kind) {
+                    case 'truthvalue':
+                        return `.${k} = c_${v.value}`
+                    default:
+                        throw new Error(
+                            'Only truthvalue literals are supported in struct literals for now',
+                        )
+                }
+            })
+            .join(', ')
     }
 
     private lowerValue(val: ASTExpression): CExpression {
@@ -78,8 +220,24 @@ export class IRGenerator {
                 return { kind: 'var-ref', name: `c_${val.value}` }
             case 'identifier':
                 return { kind: 'var-ref', name: val.name }
+            case 'data-literal':
+                return {
+                    kind: 'function-call',
+                    name: 'allocRC',
+                    arguments: [
+                        { kind: 'var-ref', name: val.type },
+                        { kind: 'var-ref', name: '__rc_ISOLATED' },
+                    ],
+                }
+            case 'field-access':
+                return {
+                    kind: 'field-reference',
+                    object: this.lowerValue(val.object),
+                    field: val.field,
+                    deref: true,
+                }
             default:
-                throw new Error('Unknown AST value kind')
+                throw new Error(`Unknown AST value kind ${(val as any).kind}`)
         }
     }
 
@@ -164,6 +322,17 @@ export class IRGenerator {
                 ]
             default:
                 throw new Error('Unknown print value kind')
+        }
+    }
+
+    private lowerType(stmt: ASTVariableDeclaration): string {
+        switch (stmt.valueSet.type) {
+            case 'truthvalue':
+                return 'truthvalue_t'
+            case 'integer':
+                return 'Integer*'
+            default:
+                return `${stmt.valueSet.type}*`
         }
     }
 }

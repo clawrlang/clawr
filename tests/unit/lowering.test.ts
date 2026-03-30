@@ -177,4 +177,168 @@ describe('Lowering Tests', () => {
             ],
         } satisfies CStatement)
     })
+
+    it('lowers data declaration', () => {
+        const program: ASTModule = {
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Point',
+                    fields: [
+                        { name: 'x', type: 'truthvalue' },
+                        { name: 'y', type: 'truthvalue' },
+                    ],
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(program)
+        /*
+        typedef struct DataStructure {
+            __rc_header header;
+            u_int8_t x;
+            u_int8_t y;
+        } DataStructure;
+        */
+        expect(module.structs[0]).toMatchObject({
+            kind: 'struct',
+            name: 'Point',
+            fields: [
+                { name: 'header', type: '__rc_header' },
+                { name: 'x', type: 'truthvalue_t' },
+                { name: 'y', type: 'truthvalue_t' },
+            ],
+        })
+        /*
+        typedef struct DataStructureˇfields {
+            u_int8_t x;
+            u_int8_t y;
+        } DataStructureˇfields;
+        */
+        expect(module.structs[1]).toMatchObject({
+            kind: 'struct',
+            name: 'Pointˇfields',
+            fields: [
+                { name: 'x', type: 'truthvalue_t' },
+                { name: 'y', type: 'truthvalue_t' },
+            ],
+        })
+        /*
+        static const __type_info DataStructureˇtype = {
+            .data_type = { .size = sizeof(DataStructure) }
+        };
+        */
+        expect(module.variables[0]).toMatchObject({
+            kind: 'var-decl',
+            name: 'Pointˇtype',
+            type: '__type_info',
+            value: {
+                kind: 'struct-init',
+                fields: {
+                    data_type: {
+                        kind: 'struct-init',
+                        fields: {
+                            size: {
+                                kind: 'raw-expression',
+                                expression: 'sizeof(Point)',
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    })
+
+    it('lowers data literal', () => {
+        const program: ASTModule = {
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Point',
+                    fields: [
+                        { name: 'x', type: 'truthvalue' },
+                        { name: 'y', type: 'truthvalue' },
+                    ],
+                },
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'p',
+                    valueSet: { type: 'Point' },
+                    value: {
+                        kind: 'data-literal',
+                        type: 'Point',
+                        fields: {
+                            x: { kind: 'truthvalue', value: 'true' },
+                            y: { kind: 'truthvalue', value: 'false' },
+                        },
+                    },
+                },
+            ],
+        }
+        const module = new IRGenerator().generate(program)
+        // Point* p = allocRC(Point, __rc_ISOLATED);
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'Point*',
+            name: 'p',
+            value: {
+                kind: 'function-call',
+                name: 'allocRC',
+                arguments: [
+                    {
+                        kind: 'var-ref',
+                        name: 'Point',
+                    },
+                    {
+                        kind: 'var-ref',
+                        name: '__rc_ISOLATED',
+                    },
+                ],
+            },
+        } satisfies CStatement)
+        // memcpy(p, &(Pointˇfields){ .x = c_true, .y = c_false }, sizeof(Point));
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'function-call',
+            name: 'memcpy',
+            arguments: [
+                { kind: 'var-ref', name: 'p' },
+                {
+                    kind: 'raw-expression',
+                    expression: '&(Pointˇfields){ .x = c_true, .y = c_false }',
+                },
+                {
+                    kind: 'raw-expression',
+                    expression: 'sizeof(Point) - sizeof(__rc_header)',
+                },
+            ],
+        } satisfies CStatement)
+    })
+
+    it('lowers field access and assignment', () => {
+        const program: ASTModule = {
+            body: [
+                {
+                    kind: 'field-assign',
+                    target: {
+                        kind: 'field-access',
+                        object: { kind: 'identifier', name: 'p' },
+                        field: 'x',
+                    },
+                    value: { kind: 'truthvalue', value: 'true' },
+                },
+            ],
+        }
+        const module = new IRGenerator().generate(program)
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'assign',
+            target: {
+                kind: 'field-reference',
+                object: { kind: 'var-ref', name: 'p' },
+                field: 'x',
+                deref: true,
+            },
+            value: { kind: 'var-ref', name: 'c_true' },
+        })
+    })
 })

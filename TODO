@@ -18,5 +18,9 @@
   print a.x
   ```
 
-- Improve lowering of `integer` literals to `Integer*`
-- Allow printing `integer` variable (no temp for the literal)
+## Rework Needed
+
+- **`IRGenerator`**: Data literals only support literal `truthvalue` field values
+- **`IRGenerator`**: Improve lowering of `integer` literals to `Integer*`
+- **`IRGenerator`**: Allow printing `integer` variable (no temp for the literal)
+- **`IRGenerator`**: `lowerStatement`: special case for `var-decl` with `DataLiteral` value

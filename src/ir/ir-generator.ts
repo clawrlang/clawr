@@ -140,7 +140,10 @@ export class IRGenerator {
                             kind: 'function-call',
                             name: 'memcpy',
                             arguments: [
-                                { kind: 'raw-expression', expression: `(__rc_header*)${stmt.name} + 1` },
+                                {
+                                    kind: 'raw-expression',
+                                    expression: `(__rc_header*)${stmt.name} + 1`,
+                                },
                                 {
                                     kind: 'raw-expression',
                                     expression: `&(${stmt.valueSet.type}ˇfields){ ${this.lowerStructLiteralFields(stmt.value.fields)} }`,
@@ -152,7 +155,10 @@ export class IRGenerator {
                             ],
                         },
                     ]
-                } else {
+                } else if (
+                    stmt.valueSet.type === 'truthvalue' ||
+                    stmt.valueSet.type === 'integer'
+                ) {
                     return [
                         {
                             kind: 'var-decl',
@@ -161,16 +167,40 @@ export class IRGenerator {
                             value: this.lowerValue(stmt.value),
                         },
                     ]
+                } else {
+                    return [
+                        {
+                            kind: 'var-decl',
+                            type: this.lowerType(stmt),
+                            name: stmt.name,
+                            value: this.lowerValue(stmt.value),
+                        },
+                        {
+                            kind: 'function-call',
+                            name: 'retainRC',
+                            arguments: [{ kind: 'var-ref', name: stmt.name }],
+                        },
+                    ]
                 }
             case 'print':
                 return this.lowerPrint(stmt)
             case 'assign':
-                if (stmt.target.kind !== 'field-access') {
+                if (
+                    stmt.target.kind !== 'field-access' ||
+                    stmt.target.object.kind !== 'identifier'
+                ) {
                     throw new Error(
                         'Only field assignments are supported for now',
                     )
                 }
                 return [
+                    {
+                        kind: 'function-call',
+                        name: 'mutateRC',
+                        arguments: [
+                            { kind: 'var-ref', name: stmt.target.object.name },
+                        ],
+                    },
                     {
                         kind: 'assign',
                         target: {

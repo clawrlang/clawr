@@ -1,0 +1,15 @@
+  data DataStructure {
+      field: truthvalue
+  }
+
+  const a: DataStructure = {
+      field: true
+  }
+
+  mut b: DataStructure = a
+  b.field = false
+
+  const x: truthvalue = a.field
+  const y: truthvalue = b.field
+  print x
+  print y

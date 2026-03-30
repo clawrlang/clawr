@@ -330,6 +330,16 @@ describe('Lowering Tests', () => {
         }
         const module = new IRGenerator().generate(program)
         expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'function-call',
+            name: 'mutateRC',
+            arguments: [
+                {
+                    kind: 'var-ref',
+                    name: 'p',
+                },
+            ],
+        } satisfies CStatement)
+        expect(module.functions[0].body[1]).toMatchObject({
             kind: 'assign',
             target: {
                 kind: 'field-reference',

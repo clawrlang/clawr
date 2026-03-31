@@ -78,6 +78,6 @@ type ASTValueSet = {
 }
 
 // ----- Top-level module structure -----
-export interface ASTModule {
+export interface ASTProgram {
     body: (ASTDataDeclaration | ASTStatement)[]
 }

@@ -1,4 +1,4 @@
-import { ASTModule, ASTStatement } from '../ast'
+import { ASTProgram, ASTStatement } from '../ast'
 import { TokenStream } from '../lexer'
 import { PrintStatementParser } from './statement-parsers/print-statement-parser'
 import { DataDeclarationParser } from './statement-parsers/data-declaration-parser'
@@ -22,7 +22,7 @@ export class Parser {
         ]
     }
 
-    parse(): ASTModule {
+    parse(): ASTProgram {
         const body: ASTStatement[] = []
         while (this.stream.peek()) {
             const stmt = this.parseStatement()

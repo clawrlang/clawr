@@ -1,6 +1,6 @@
 // Lowering from AST to IR for const decl and print
 import type {
-    ASTModule,
+    ASTProgram,
     ASTPrintStatement,
     ASTStatement,
     ASTExpression,
@@ -18,8 +18,7 @@ import type {
 } from '.'
 
 export class IRGenerator {
-    generate(ast: ASTModule): CModule {
-        // For now, only a single main function and no type definitions
+    generate(ast: ASTProgram): CModule {
         return {
             structs: [
                 ...ast.body
@@ -41,7 +40,7 @@ export class IRGenerator {
         }
     }
 
-    private lowerMainFunction(body: ASTModule['body']): CFunctionDeclaration {
+    private lowerMainFunction(body: ASTProgram['body']): CFunctionDeclaration {
         return {
             kind: 'function',
             name: 'main',
@@ -54,7 +53,6 @@ export class IRGenerator {
                             stmt.kind !== 'data-decl',
                     )
                     .flatMap(this.lowerStatement.bind(this)),
-                // Always return 0 at end of main
                 {
                     kind: 'function-call',
                     name: 'return',

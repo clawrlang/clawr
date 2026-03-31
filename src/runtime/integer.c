@@ -150,6 +150,12 @@ typedef struct TrillList {
 } TrillList;
 
 static char* integerToCString(Integer* self) {
+    if (self->digits->count == 0) {
+        char* result = malloc(2);
+        result[0] = '0';
+        result[1] = '\0';
+        return result;
+    }
     Integer* rem = retainRC(self);
     mutateRC(rem);
 
@@ -175,7 +181,7 @@ static char* integerToCString(Integer* self) {
 
     int8_t sign = trillStack->digit < 0 ? -1 : 1;
     size_t length = 18 * limbs + (sign == 1 ? 1 : 2);
-    char* result = malloc(sizeof(char*) * length);
+    char* result = malloc(sizeof(char) * length);
     result[length - 1] = 0;
 
     char* offset = result;
@@ -392,8 +398,14 @@ static Integer* integerFromSingleDigit(digit_t value) {
     if (value == 0) return retainRC(&Integer¸zero);
 
     Integer* integer = allocRC(Integer, __rc_ISOLATED);
-    integer->digits = Array¸new(1, sizeof(digit_t));
-    ARRAY_ELEMENT_AT(0, integer->digits, digit_t) = value;
+    if (value == INVALID_DIGIT) {
+        integer->digits = Array¸new(2, sizeof(digit_t));
+        ARRAY_ELEMENT_AT(0, integer->digits, digit_t) = DIGIT_MAX;
+        ARRAY_ELEMENT_AT(1, integer->digits, digit_t) = -1;
+    } else {
+        integer->digits = Array¸new(1, sizeof(digit_t));
+        ARRAY_ELEMENT_AT(0, integer->digits, digit_t) = value;
+    }
     return integer;
 }
 

@@ -3,14 +3,11 @@
   "version": "0.1.0",
   "description": "Prototype compiler for the Clawr language",
   "scripts": {
-    "build": "tsc && bun build src/rwrc/index.ts --compile --outfile dist/rwrc",
+    "build": "bun build src/rwrc/index.ts --compile --outfile dist/rwrc",
     "dev": "ts-node src/rwrc/index.ts",
     "lint": "eslint . --ext .ts",
-    "test": "tsc && bun test tests/unit",
-    "test:runtime": "bun test tests/runtime",
-    "test:codegen": "bun test tests/codegen",
-    "test:e2e": "bun run build && bun test tests/unit && bun test tests/e2e",
-    "test:all": "bun test tests/unit && bun run build && bun test tests/codegen tests/e2e tests/runtime",
+    "test": "tsc && bun test tests/unit && bun run build && bun test tests/codegen tests/e2e",
+    "test:all": "bun run test && bun test tests/runtime",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "author": "",

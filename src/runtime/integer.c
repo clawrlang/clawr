@@ -1,6 +1,7 @@
 #include "integer.h"
 #include "array.h"
 #include "panic.h"
+#include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -690,5 +691,38 @@ int Integer¸compare(Integer* left, Integer* right) {
 
     free((void*) decimal);
     releaseRC(diff);
+    return result;
+}
+
+// Helper: parse decimal string to Integer*
+Integer* Integer¸fromStringRC(String* str) {
+    if (!str || !str->data) return NULL;
+    const char* s = str->data;
+    // Skip leading whitespace
+    while (isspace(*s)) ++s;
+    int negative = 0;
+    if (*s == '-') { negative = 1; ++s; }
+    else if (*s == '+') { ++s; }
+    // Skip leading zeros
+    while (*s == '0') ++s;
+    if (!*s) return integerFromSingleDigit(0);
+
+    Integer* result = integerFromSingleDigit(0);
+    Integer* ten = integerFromSingleDigit(10);
+    while (*s) {
+        if (!isdigit(*s)) break;
+        int digit = *s - '0';
+        Integer* digitInt = integerFromSingleDigit(digit);
+        Integer* tmp = Integer¸multiply(result, ten);
+        releaseRC(result);
+        result = Integer¸add(tmp, digitInt);
+        releaseRC(tmp);
+        releaseRC(digitInt);
+        ++s;
+    }
+    releaseRC(ten);
+    if (negative) {
+        Integer·toggleSign(result);
+    }
     return result;
 }

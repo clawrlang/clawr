@@ -56,6 +56,11 @@ void Integer·decrement(Integer* const self, Integer* const subtrahend);
 /// @return an owned String object
 String* Integer·toStringRC(Integer* self);
 
+/// @brief Parse a decimal string into an Integer (owned result)
+/// @param str the String* containing the decimal representation
+/// @return an owned Integer object
+Integer* Integer¸fromStringRC(String* str);
+
 /// @brief Compatibility wrapper returning a caller-owned C string.
 /// Prefer Integer·toStringRC for new code.
 /// @param self the integer to convert

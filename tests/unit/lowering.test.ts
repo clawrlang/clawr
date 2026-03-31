@@ -44,15 +44,12 @@ describe('Lowering Tests', () => {
             name: 'x',
             value: {
                 kind: 'function-call',
-                name: 'Integer¸withDigits',
+                name: 'Integer¸fromStringRC',
                 arguments: [
                     {
                         kind: 'function-call',
-                        name: 'Array¸new',
-                        arguments: [
-                            { kind: 'raw-expression', expression: '1' },
-                            { kind: 'raw-expression', expression: '42' },
-                        ],
+                        name: 'String¸fromCString',
+                        arguments: [{ kind: 'string', value: '42' }],
                     },
                 ],
             },
@@ -93,22 +90,19 @@ describe('Lowering Tests', () => {
             ],
         }
         const module = new IRGenerator().generate(program)
-        // Integer* temp0 = Integer¸withDigits(Array¸new(1, 42));
+        // Integer* temp0 = Integer¸fromStringRC(String¸fromCString("42"));
         expect(module.functions[0].body[0]).toMatchObject({
             kind: 'var-decl',
             name: 'temp0',
             type: 'Integer*',
             value: {
                 kind: 'function-call',
-                name: 'Integer¸withDigits',
+                name: 'Integer¸fromStringRC',
                 arguments: [
                     {
                         kind: 'function-call',
-                        name: 'Array¸new',
-                        arguments: [
-                            { kind: 'raw-expression', expression: '1' },
-                            { kind: 'raw-expression', expression: '42' },
-                        ],
+                        name: 'String¸fromCString',
+                        arguments: [{ kind: 'string', value: '42' }],
                     },
                 ],
             },

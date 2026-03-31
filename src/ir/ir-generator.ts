@@ -241,17 +241,13 @@ export class IRGenerator {
             case 'integer':
                 return {
                     kind: 'function-call',
-                    name: 'Integer¸withDigits',
+                    name: 'Integer¸fromStringRC',
                     arguments: [
                         {
                             kind: 'function-call',
-                            name: 'Array¸new',
+                            name: 'String¸fromCString',
                             arguments: [
-                                { kind: 'raw-expression', expression: '1' },
-                                {
-                                    kind: 'raw-expression',
-                                    expression: val.value.toString(),
-                                },
+                                { kind: 'string', value: val.value.toString() },
                             ],
                         },
                     ],

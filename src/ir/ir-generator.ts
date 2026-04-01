@@ -2,6 +2,7 @@
 import type {
     SemanticDataDeclaration,
     SemanticExpression,
+    SemanticFieldAccess,
     SemanticFunction,
     SemanticModule,
     SemanticPrintStatement,
@@ -18,23 +19,43 @@ import type {
     CVariableDeclaration,
 } from '.'
 
+interface LoweringContext {
+    referenceTypes: Set<string>
+    variableTypes: Map<string, string>
+    releaseAtExit: Set<string>
+}
+
 export class IRGenerator {
     generate(ast: SemanticModule): CModule {
         return {
             structs: ast.types.flatMap(this.lowerStruct.bind(this)),
             variables: ast.types.map(this.lowerStructTypeInfo.bind(this)),
-            functions: ast.functions.map(this.lowerFunction.bind(this)),
+            functions: ast.functions.map((fn) =>
+                this.lowerFunction(fn, new Set(ast.types.map((t) => t.name))),
+            ),
         }
     }
 
-    private lowerFunction(fn: SemanticFunction): CFunctionDeclaration {
+    private lowerFunction(
+        fn: SemanticFunction,
+        referenceTypes: Set<string>,
+    ): CFunctionDeclaration {
+        const context: LoweringContext = {
+            referenceTypes,
+            variableTypes: new Map(),
+            releaseAtExit: new Set(),
+        }
+
         return {
             kind: 'function',
             name: fn.name,
             returnType: 'int',
             parameters: [],
             body: [
-                ...fn.body.flatMap(this.lowerStatement.bind(this)),
+                ...fn.body.flatMap((stmt) =>
+                    this.lowerStatement(stmt, context),
+                ),
+                ...this.lowerReleaseAtExit(context),
                 {
                     kind: 'function-call',
                     name: 'return',
@@ -88,10 +109,17 @@ export class IRGenerator {
         }
     }
 
-    private lowerStatement(stmt: SemanticStatement): CStatement[] {
+    private lowerStatement(
+        stmt: SemanticStatement,
+        context: LoweringContext,
+    ): CStatement[] {
         switch (stmt.kind) {
             case 'var-decl':
+                context.variableTypes.set(stmt.name, stmt.valueSet.type)
                 if (stmt.value.kind === 'data-literal') {
+                    if (this.isReferenceType(stmt.valueSet.type, context)) {
+                        context.releaseAtExit.add(stmt.name)
+                    }
                     // For data literals, we need to allocate the struct and then assign the fields
                     return [
                         {
@@ -135,10 +163,7 @@ export class IRGenerator {
                             ],
                         },
                     ]
-                } else if (
-                    stmt.valueSet.type === 'truthvalue' ||
-                    stmt.valueSet.type === 'integer'
-                ) {
+                } else if (!this.isReferenceType(stmt.valueSet.type, context)) {
                     return [
                         {
                             kind: 'var-decl',
@@ -148,6 +173,7 @@ export class IRGenerator {
                         },
                     ]
                 } else {
+                    context.releaseAtExit.add(stmt.name)
                     return [
                         {
                             kind: 'var-decl',
@@ -165,31 +191,76 @@ export class IRGenerator {
             case 'print':
                 return this.lowerPrint(stmt)
             case 'assign':
-                if (
-                    stmt.target.kind !== 'field-access' ||
-                    stmt.target.object.kind !== 'identifier'
-                ) {
-                    throw new Error(
-                        'Only field assignments are supported for now',
+                if (stmt.target.kind === 'identifier') {
+                    if (stmt.value.kind === 'data-literal')
+                        throw new Error(
+                            'Data-literal assignment is unsupported for now',
+                        )
+
+                    const targetType = context.variableTypes.get(
+                        stmt.target.name,
                     )
+                    if (!targetType)
+                        throw new Error(
+                            `Unknown assignment target '${stmt.target.name}'`,
+                        )
+
+                    const loweredValue = this.lowerValue(stmt.value)
+                    if (this.isReferenceType(targetType, context)) {
+                        return [
+                            {
+                                kind: 'function-call',
+                                name: 'retainRC',
+                                arguments: [loweredValue],
+                            },
+                            {
+                                kind: 'function-call',
+                                name: 'releaseRC',
+                                arguments: [
+                                    { kind: 'var-ref', name: stmt.target.name },
+                                ],
+                            },
+                            {
+                                kind: 'assign',
+                                target: {
+                                    kind: 'var-ref',
+                                    name: stmt.target.name,
+                                },
+                                value: loweredValue,
+                            },
+                        ]
+                    } else {
+                        return [
+                            {
+                                kind: 'assign',
+                                target: {
+                                    kind: 'var-ref',
+                                    name: stmt.target.name,
+                                },
+                                value: loweredValue,
+                            },
+                        ]
+                    }
                 }
+
+                if (stmt.target.kind !== 'field-access')
+                    throw new Error('Unsupported assignment target kind')
+
+                if (stmt.value.kind === 'data-literal')
+                    throw new Error(
+                        'Data-literal assignment is unsupported for now',
+                    )
+
                 return [
-                    {
-                        kind: 'function-call',
+                    ...this.collectMutateTargets(stmt.target).map((target) => ({
+                        kind: 'function-call' as const,
                         name: 'mutateRC',
-                        arguments: [
-                            { kind: 'var-ref', name: stmt.target.object.name },
-                        ],
-                    },
+                        arguments: [target],
+                    })),
                     {
                         kind: 'assign',
-                        target: {
-                            kind: 'field-reference',
-                            object: this.lowerValue(stmt.target.object as any),
-                            field: stmt.target.field,
-                            deref: true,
-                        },
-                        value: this.lowerValue(stmt.value as any),
+                        target: this.lowerValue(stmt.target),
+                        value: this.lowerValue(stmt.value),
                     },
                 ]
             default:
@@ -197,6 +268,37 @@ export class IRGenerator {
                     `Unknown AST statement kind ${(stmt as any).kind}`,
                 )
         }
+    }
+
+    private lowerReleaseAtExit(context: LoweringContext): CStatement[] {
+        return [...context.releaseAtExit].sort().map((name) => ({
+            kind: 'function-call' as const,
+            name: 'releaseRC',
+            arguments: [{ kind: 'var-ref' as const, name }],
+        }))
+    }
+
+    private isReferenceType(type: string, context: LoweringContext): boolean {
+        return context.referenceTypes.has(type)
+    }
+
+    private collectMutateTargets(target: SemanticFieldAccess): CExpression[] {
+        const targets: CExpression[] = []
+
+        const collect = (expr: SemanticExpression) => {
+            if (expr.kind === 'field-access') {
+                collect(expr.object)
+                targets.push(this.lowerValue(expr))
+                return
+            }
+            if (expr.kind === 'data-literal')
+                throw new Error('Unsupported mutate target kind data-literal')
+
+            targets.push(this.lowerValue(expr))
+        }
+
+        collect(target.object)
+        return targets
     }
 
     private lowerStructLiteralFields(fields: ASTDataLiteral['fields']): string {

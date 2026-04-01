@@ -430,6 +430,12 @@ describe('Lowering Tests', () => {
         const program: SemanticProgramFixture = {
             body: [
                 {
+                    kind: 'data-decl',
+                    name: 'SomeRefType',
+                    fields: [{ name: 'x', type: 'truthvalue' }],
+                    position: somePosition,
+                },
+                {
                     kind: 'var-decl',
                     semantics: 'const',
                     name: 'refVar',
@@ -454,6 +460,66 @@ describe('Lowering Tests', () => {
             kind: 'function-call',
             name: 'retainRC',
             arguments: [{ kind: 'var-ref', name: 'refVar' }],
+        } satisfies CStatement)
+        expect(module.functions[0].body[2]).toMatchObject({
+            kind: 'function-call',
+            name: 'releaseRC',
+            arguments: [{ kind: 'var-ref', name: 'refVar' }],
+        } satisfies CStatement)
+    })
+
+    it('emits retainRC and releaseRC on reference identifier reassign', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'SomeRefType',
+                    fields: [{ name: 'x', type: 'truthvalue' }],
+                    position: somePosition,
+                },
+                {
+                    kind: 'var-decl',
+                    semantics: 'mut',
+                    name: 'refVar',
+                    valueSet: { type: 'SomeRefType' },
+                    value: {
+                        kind: 'identifier',
+                        name: 'lhs',
+                        position: somePosition,
+                    },
+                },
+                {
+                    kind: 'assign',
+                    target: {
+                        kind: 'identifier',
+                        name: 'refVar',
+                        position: somePosition,
+                    },
+                    value: {
+                        kind: 'identifier',
+                        name: 'rhs',
+                        position: somePosition,
+                    },
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[2]).toMatchObject({
+            kind: 'function-call',
+            name: 'retainRC',
+            arguments: [{ kind: 'var-ref', name: 'rhs' }],
+        } satisfies CStatement)
+        expect(module.functions[0].body[3]).toMatchObject({
+            kind: 'function-call',
+            name: 'releaseRC',
+            arguments: [{ kind: 'var-ref', name: 'refVar' }],
+        } satisfies CStatement)
+        expect(module.functions[0].body[4]).toMatchObject({
+            kind: 'assign',
+            target: { kind: 'var-ref', name: 'refVar' },
+            value: { kind: 'var-ref', name: 'rhs' },
         } satisfies CStatement)
     })
 
@@ -497,6 +563,56 @@ describe('Lowering Tests', () => {
                 deref: true,
             },
             value: { kind: 'var-ref', name: 'newValue' },
+        } satisfies CStatement)
+    })
+
+    it('emits mutateRC for each container in nested field assignment', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'assign',
+                    target: {
+                        kind: 'field-access',
+                        object: {
+                            kind: 'field-access',
+                            object: {
+                                kind: 'identifier',
+                                name: 'outer',
+                                position: somePosition,
+                            },
+                            field: 'middle',
+                            position: somePosition,
+                        },
+                        field: 'inner',
+                        position: somePosition,
+                    },
+                    value: {
+                        kind: 'identifier',
+                        name: 'newValue',
+                        position: somePosition,
+                    },
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'function-call',
+            name: 'mutateRC',
+            arguments: [{ kind: 'var-ref', name: 'outer' }],
+        } satisfies CStatement)
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'function-call',
+            name: 'mutateRC',
+            arguments: [
+                {
+                    kind: 'field-reference',
+                    object: { kind: 'var-ref', name: 'outer' },
+                    field: 'middle',
+                    deref: true,
+                },
+            ],
         } satisfies CStatement)
     })
 })

@@ -7,7 +7,10 @@
 - **`IRGenerator`**: `lowerStatement`: special case for `var-decl` with `DataLiteral` value
 - **`IRGenerator`**: `retainRC()` not called on reassign
 - **`IRGenerator`**: `mutateRC()` not called when assigning to nested field
-- **`IRGenerator`**: `releaseRC()` is not called at all
+- **`IRGenerator`**: Track variables that need `releaseRC()` at scope exit
 - **`IRGenerator`**: No unit tests for `mutateRC()` and `retainRC()`
 - **`IRGenerator`**: Consider splitting into smaller modules
+- **`IRGenerator`**: Generate temp variable names to ensure uniqueness.
+  - Include the `ˇ` character to indicate that they are Clawr artefacts.
 - **`SemanticAnalyzer`**: Output `ASTModule` (or `SemanticModule`?). Convert `ASTProgram` to a module with a main function. Lowering should not infer the main functions.
+- **`SemanticAnalyzer`**: Function and block scopes

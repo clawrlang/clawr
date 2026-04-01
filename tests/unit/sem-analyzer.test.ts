@@ -91,6 +91,37 @@ describe('SemanticAnalyzer', () => {
         })
     })
 
+    it('annotates print dispatch for identifier values', () => {
+        const program = analyze('const x = ambiguous\nprint x')
+
+        expect(program).toMatchObject({
+            body: [
+                {
+                    kind: 'var-decl',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                },
+                {
+                    kind: 'print',
+                    dispatchType: 'truthvalue',
+                },
+            ],
+        })
+    })
+
+    it('annotates print dispatch for truthvalue literal values', () => {
+        const program = analyze('print true')
+
+        expect(program).toMatchObject({
+            body: [
+                {
+                    kind: 'print',
+                    dispatchType: 'truthvalue',
+                },
+            ],
+        })
+    })
+
     it('fails when assignment target and value types differ', () => {
         expect(() => analyze('mut x = ambiguous\nx = y')).toThrow(
             "2:5:Unknown identifier 'y'",

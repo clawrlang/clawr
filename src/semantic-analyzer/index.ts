@@ -9,6 +9,7 @@ import type {
 } from '../ast'
 import type {
     SemanticDataDeclaration,
+    SemanticPrintStatement,
     SemanticProgram,
     SemanticStatement,
     SemanticVariableDeclaration,
@@ -16,6 +17,7 @@ import type {
 
 export type {
     SemanticDataDeclaration,
+    SemanticPrintStatement,
     SemanticProgram,
     SemanticStatement,
     SemanticExpression,
@@ -44,10 +46,28 @@ export class SemanticAnalyzer {
                 return stmt
             case 'var-decl':
                 return this.analyzeVariableDeclaration(stmt)
+            case 'print':
+                return this.analyzePrintStatement(stmt)
             case 'assign':
                 return this.analyzeAssignment(stmt)
             default:
                 return stmt
+        }
+    }
+
+    private analyzePrintStatement(
+        stmt: Extract<ASTStatement, { kind: 'print' }>,
+    ): SemanticPrintStatement {
+        const dispatchType = this.inferExpressionType(stmt.value)
+        if (!dispatchType) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Cannot infer print dispatch type from '${stmt.value.kind}'`,
+            )
+        }
+
+        return {
+            ...stmt,
+            dispatchType,
         }
     }
 

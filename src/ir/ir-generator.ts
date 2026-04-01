@@ -2,11 +2,12 @@
 import type {
     SemanticDataDeclaration,
     SemanticExpression,
+    SemanticPrintStatement,
     SemanticProgram,
     SemanticStatement,
     SemanticVariableDeclaration,
 } from '../semantic-analyzer'
-import type { ASTDataLiteral, ASTPrintStatement } from '../ast'
+import type { ASTDataLiteral } from '../ast'
 import type {
     CModule,
     CStatement,
@@ -267,8 +268,12 @@ export class IRGenerator {
         }
     }
 
-    private lowerPrint(print: ASTPrintStatement): CStatement[] {
-        switch (print.value.kind) {
+    private lowerPrint(print: SemanticPrintStatement): CStatement[] {
+        if (print.value.kind === 'data-literal') {
+            throw new Error('Unsupported print value kind data-literal')
+        }
+
+        switch (print.dispatchType) {
             case 'integer':
                 return [
                     {
@@ -307,7 +312,6 @@ export class IRGenerator {
                     },
                 ]
             case 'truthvalue': {
-                const map = { false: -1, ambiguous: 0, true: 1 }
                 return [
                     {
                         kind: 'function-call',
@@ -317,37 +321,16 @@ export class IRGenerator {
                             {
                                 kind: 'function-call',
                                 name: 'truthvalue·toCString',
-                                arguments: [
-                                    {
-                                        kind: 'var-ref',
-                                        name: `c_${print.value.value}`,
-                                    },
-                                ],
+                                arguments: [this.lowerValue(print.value)],
                             },
                         ],
                     },
                 ]
             }
-            case 'identifier':
-                // Assume variable is truthvalue
-                return [
-                    {
-                        kind: 'function-call',
-                        name: 'printf',
-                        arguments: [
-                            { kind: 'string', value: '%s\\n' },
-                            {
-                                kind: 'function-call',
-                                name: 'truthvalue·toCString',
-                                arguments: [
-                                    { kind: 'var-ref', name: print.value.name },
-                                ],
-                            },
-                        ],
-                    },
-                ]
             default:
-                throw new Error('Unknown print value kind')
+                throw new Error(
+                    `Unsupported print dispatch type '${print.dispatchType}'`,
+                )
         }
     }
 

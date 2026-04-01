@@ -70,6 +70,7 @@ describe('Lowering Tests', () => {
             body: [
                 {
                     kind: 'print',
+                    dispatchType: 'truthvalue',
                     value: {
                         kind: 'truthvalue',
                         value: 'true',
@@ -99,6 +100,7 @@ describe('Lowering Tests', () => {
             body: [
                 {
                     kind: 'print',
+                    dispatchType: 'integer',
                     value: {
                         kind: 'integer',
                         value: 42n,
@@ -176,6 +178,7 @@ describe('Lowering Tests', () => {
                 },
                 {
                     kind: 'print',
+                    dispatchType: 'truthvalue',
                     value: {
                         kind: 'identifier',
                         name: 'x',

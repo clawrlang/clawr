@@ -171,6 +171,42 @@ describe('SemanticAnalyzer', () => {
                 },
             })
         })
+
+        it('converts dot operator in assignment target into field assignment', () => {
+            const program = analyze(
+                'data Point {\n  x: truthvalue\n}\nmut p: Point = { x: true }\np.x = true',
+            )
+            expect(program).toMatchObject({
+                body: [
+                    {
+                        kind: 'data-decl',
+                        name: 'Point',
+                        fields: [{ name: 'x', type: 'truthvalue' }],
+                    },
+                    {
+                        kind: 'var-decl',
+                        semantics: 'mut',
+                        name: 'p',
+                        valueSet: { type: 'Point' },
+                        value: {
+                            kind: 'data-literal',
+                            fields: {
+                                x: { kind: 'truthvalue', value: 'true' },
+                            },
+                        },
+                    },
+                    {
+                        kind: 'assign',
+                        target: {
+                            kind: 'field-access',
+                            object: { kind: 'identifier', name: 'p' },
+                            field: 'x',
+                        },
+                        value: { kind: 'truthvalue', value: 'true' },
+                    },
+                ],
+            })
+        })
     })
 })
 

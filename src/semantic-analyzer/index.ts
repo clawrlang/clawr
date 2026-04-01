@@ -1,4 +1,5 @@
 import type {
+    ASTAssignment,
     ASTDataDeclaration,
     ASTDataLiteral,
     ASTExpression,
@@ -43,9 +44,46 @@ export class SemanticAnalyzer {
                 return stmt
             case 'var-decl':
                 return this.analyzeVariableDeclaration(stmt)
+            case 'assign':
+                return this.analyzeAssignment(stmt)
             default:
                 return stmt
         }
+    }
+
+    private analyzeAssignment(stmt: ASTAssignment): ASTAssignment {
+        if (!this.isAssignableTarget(stmt.target)) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Invalid assignment target kind '${stmt.target.kind}'`,
+            )
+        }
+
+        const targetType = this.inferExpressionType(stmt.target)
+        const valueType = this.inferExpressionType(stmt.value)
+
+        if (!targetType) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Cannot infer type for assignment target '${stmt.target.kind}'`,
+            )
+        }
+
+        if (!valueType) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Cannot infer type for assignment value '${stmt.value.kind}'`,
+            )
+        }
+
+        if (targetType !== valueType) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Assignment type mismatch: target is '${targetType}' but value is '${valueType}'`,
+            )
+        }
+
+        return stmt
+    }
+
+    private isAssignableTarget(target: ASTExpression): boolean {
+        return target.kind === 'identifier' || target.kind === 'field-access'
     }
 
     private registerDataDeclaration(stmt: ASTDataDeclaration) {
@@ -72,7 +110,7 @@ export class SemanticAnalyzer {
         const inferredType = this.inferExpressionType(stmt.value)
         if (!inferredType) {
             throw new Error(
-                `Cannot infer type for variable '${stmt.name}' from '${stmt.value.kind}' initializer`,
+                `${stmt.position.line}:${stmt.position.column}:Cannot infer type for variable '${stmt.name}' from '${stmt.value.kind}' initializer`,
             )
         }
 
@@ -95,7 +133,7 @@ export class SemanticAnalyzer {
         const inferred = this.inferExpressionType(value)
         if (inferred && inferred !== expected) {
             throw new Error(
-                `Type mismatch: expected '${expected}' but got '${inferred}'`,
+                `${value.position.line}:${value.position.column}:Type mismatch: expected '${expected}' but got '${inferred}'`,
             )
         }
     }
@@ -107,7 +145,7 @@ export class SemanticAnalyzer {
         for (const fieldName of expectedFields.keys()) {
             if (!(fieldName in value.fields)) {
                 throw new Error(
-                    `Missing field '${fieldName}' for data type '${expectedType}'`,
+                    `${value.position.line}:${value.position.column}:Missing field '${fieldName}' for data type '${expectedType}'`,
                 )
             }
         }
@@ -116,14 +154,14 @@ export class SemanticAnalyzer {
             const expectedFieldType = expectedFields.get(fieldName)
             if (!expectedFieldType) {
                 throw new Error(
-                    `Unknown field '${fieldName}' for data type '${expectedType}'`,
+                    `${value.position.line}:${value.position.column}:Unknown field '${fieldName}' for data type '${expectedType}'`,
                 )
             }
 
             const inferredFieldType = this.inferExpressionType(fieldValue)
             if (!inferredFieldType || inferredFieldType !== expectedFieldType) {
                 throw new Error(
-                    `Type mismatch for field '${fieldName}': expected '${expectedFieldType}' but got '${inferredFieldType ?? fieldValue.kind}'`,
+                    `${fieldValue.position.line}:${fieldValue.position.column}:Type mismatch for field '${fieldName}': expected '${expectedFieldType}' but got '${inferredFieldType ?? fieldValue.kind}'`,
                 )
             }
         }
@@ -138,7 +176,7 @@ export class SemanticAnalyzer {
             case 'identifier': {
                 const type = this.bindings.get(value.name)
                 if (!type) {
-                    throw new Error(`Unknown identifier '${value.name}'`)
+                    throw new Error(`${value.position.line}:${value.position.column}:Unknown identifier '${value.name}'`)
                 }
                 return type
             }
@@ -146,19 +184,19 @@ export class SemanticAnalyzer {
                 const objectType = this.inferExpressionType(value.object)
                 if (!objectType) {
                     throw new Error(
-                        `Cannot infer type for field access object '${value.field}'`,
+                        `${value.position.line}:${value.position.column}:Cannot infer type for field access object '${value.field}'`,
                     )
                 }
                 const fields = this.dataTypes.get(objectType)
                 if (!fields) {
                     throw new Error(
-                        `Cannot resolve field '${value.field}' on non-data type '${objectType}'`,
+                        `${value.position.line}:${value.position.column}:Cannot resolve field '${value.field}' on non-data type '${objectType}'`,
                     )
                 }
                 const fieldType = fields.get(value.field)
                 if (!fieldType) {
                     throw new Error(
-                        `Unknown field '${value.field}' on data type '${objectType}'`,
+                        `${value.position.line}:${value.position.column}:Unknown field '${value.field}' on data type '${objectType}'`,
                     )
                 }
                 return fieldType

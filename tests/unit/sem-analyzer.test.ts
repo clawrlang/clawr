@@ -37,13 +37,13 @@ describe('SemanticAnalyzer', () => {
 
     it('fails on explicit declaration type mismatch', () => {
         expect(() => analyze('const x: integer = ambiguous')).toThrow(
-            "Type mismatch: expected 'integer' but got 'truthvalue'",
+            "1:20:Type mismatch: expected 'integer' but got 'truthvalue'",
         )
     })
 
     it('fails when declaration has data literal initializer without annotation', () => {
         expect(() => analyze('const p = { x: true }')).toThrow(
-            "Cannot infer type for variable 'p' from 'data-literal' initializer",
+            "1:1:Cannot infer type for variable 'p' from 'data-literal' initializer",
         )
     })
 
@@ -67,7 +67,60 @@ describe('SemanticAnalyzer', () => {
     })
 
     it('fails when inferred declaration references unknown identifier', () => {
-        expect(() => analyze('const y = x')).toThrow("Unknown identifier 'x'")
+        expect(() => analyze('const y = x')).toThrow(
+            "1:11:Unknown identifier 'x'",
+        )
+    })
+
+    it('accepts assignment when target and value types match', () => {
+        const program = analyze('mut x = ambiguous\nx = true')
+
+        expect(program).toMatchObject({
+            body: [
+                {
+                    kind: 'var-decl',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                },
+                {
+                    kind: 'assign',
+                    target: { kind: 'identifier', name: 'x' },
+                    value: { kind: 'truthvalue', value: 'true' },
+                },
+            ],
+        })
+    })
+
+    it('fails when assignment target and value types differ', () => {
+        expect(() => analyze('mut x = ambiguous\nx = y')).toThrow(
+            "2:5:Unknown identifier 'y'",
+        )
+    })
+
+    it('fails when assignment target type does not match value type', () => {
+        expect(() =>
+            analyze(
+                'data Point {\n  x: truthvalue\n}\nmut p: Point = { x: true }\nmut t = ambiguous\nt = p',
+            ),
+        ).toThrow(
+            "6:1:Assignment type mismatch: target is 'truthvalue' but value is 'Point'",
+        )
+    })
+
+    it('fails when assignment target is unknown identifier', () => {
+        expect(() => analyze('unknown = ambiguous')).toThrow(
+            "1:1:Unknown identifier 'unknown'",
+        )
+    })
+
+    it('fails when field assignment has mismatched known types', () => {
+        expect(() =>
+            analyze(
+                'data Point {\n  x: truthvalue\n}\nmut p: Point = { x: true }\np.x = p',
+            ),
+        ).toThrow(
+            "5:1:Assignment type mismatch: target is 'truthvalue' but value is 'Point'",
+        )
     })
 })
 

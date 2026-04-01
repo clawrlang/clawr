@@ -202,6 +202,43 @@ describe('SemanticAnalyzer', () => {
             )
         })
     })
+
+    describe('ownership effects', () => {
+        it('annotates reference declaration with retain and release-at-exit effects', () => {
+            const module = analyze(
+                'data Box {\n  value: truthvalue\n}\nconst other: Box = { value: true }\nconst b: Box = other',
+            )
+
+            expect(module.functions[0].body[1]).toMatchObject({
+                kind: 'var-decl',
+                name: 'b',
+                ownership: {
+                    releaseAtScopeExit: true,
+                    retains: [{ kind: 'identifier', name: 'b' }],
+                },
+            })
+        })
+
+        it('annotates nested field assignment with mutate effects', () => {
+            const module = analyze(
+                'data Inner {\n  value: truthvalue\n}\ndata Outer {\n  inner: Inner\n}\nconst i: Inner = { value: true }\nmut o: Outer = { inner: i }\no.inner.value = true',
+            )
+
+            expect(module.functions[0].body[2]).toMatchObject({
+                kind: 'assign',
+                ownership: {
+                    mutates: [
+                        { kind: 'identifier', name: 'o' },
+                        {
+                            kind: 'field-access',
+                            object: { kind: 'identifier', name: 'o' },
+                            field: 'inner',
+                        },
+                    ],
+                },
+            })
+        })
+    })
 })
 
 function analyze(code: string) {

@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'bun:test'
 import {
     SemanticDataDeclaration,
+    SemanticExpression,
     SemanticModule,
+    SemanticOwnershipEffects,
     SemanticStatement,
 } from '../../src/semantic-analyzer'
 import { IRGenerator } from '../../src/ir/ir-generator'
@@ -9,26 +11,90 @@ import { CStatement } from '../../src/ir'
 
 const somePosition = { line: 1, column: 1 }
 
-type SemanticProgramFixture = {
-    body: (SemanticDataDeclaration | SemanticStatement)[]
+type SemanticProgramFixture = { body: any[] }
+
+function collectMutates(expr: any): SemanticExpression[] {
+    const mutates: SemanticExpression[] = []
+    let current = expr
+    while (current?.kind === 'field-access') {
+        mutates.unshift(current.object)
+        current = current.object
+    }
+    if (mutates.length === 0 && expr?.kind === 'field-access') {
+        mutates.push(expr.object)
+    }
+    return mutates
+}
+
+function normalizeOwnership(
+    body: any[],
+    typeNames: Set<string>,
+): SemanticStatement[] {
+    const variableTypes = new Map<string, string>()
+
+    return body.map((stmt) => {
+        if (stmt.kind === 'var-decl') {
+            variableTypes.set(stmt.name, stmt.valueSet.type)
+            const ownership: SemanticOwnershipEffects =
+                stmt.ownership ??
+                (typeNames.has(stmt.valueSet.type)
+                    ? {
+                          releaseAtScopeExit: true,
+                          retains:
+                              stmt.value.kind === 'data-literal'
+                                  ? []
+                                  : [
+                                        {
+                                            kind: 'identifier',
+                                            name: stmt.name,
+                                            position:
+                                                stmt.position ?? somePosition,
+                                        },
+                                    ],
+                      }
+                    : {})
+
+            return { ...stmt, ownership } as SemanticStatement
+        }
+
+        if (stmt.kind === 'assign') {
+            const ownership: SemanticOwnershipEffects =
+                stmt.ownership ??
+                (stmt.target.kind === 'field-access'
+                    ? { mutates: collectMutates(stmt.target) }
+                    : stmt.target.kind === 'identifier' &&
+                        typeNames.has(variableTypes.get(stmt.target.name) ?? '')
+                      ? {
+                            retains: [stmt.value],
+                            releases: [stmt.target],
+                        }
+                      : {})
+
+            return { ...stmt, ownership } as SemanticStatement
+        }
+
+        return stmt as SemanticStatement
+    })
 }
 
 function toModule(program: SemanticProgramFixture): SemanticModule {
+    const types = program.body.filter(
+        (stmt): stmt is SemanticDataDeclaration => stmt.kind === 'data-decl',
+    )
+    const typeNames = new Set(types.map((t) => t.name))
+
     return {
         functions: [
             {
                 kind: 'function',
                 name: 'main',
-                body: program.body.filter(
-                    (stmt): stmt is SemanticStatement =>
-                        stmt.kind !== 'data-decl',
+                body: normalizeOwnership(
+                    program.body.filter((stmt) => stmt.kind !== 'data-decl'),
+                    typeNames,
                 ),
             },
         ],
-        types: program.body.filter(
-            (stmt): stmt is SemanticDataDeclaration =>
-                stmt.kind === 'data-decl',
-        ),
+        types,
         globals: [],
     }
 }

@@ -5,6 +5,7 @@ import type {
     SemanticFieldAccess,
     SemanticFunction,
     SemanticModule,
+    SemanticOwnershipEffects,
     SemanticPrintStatement,
     SemanticStatement,
     SemanticVariableDeclaration,
@@ -20,8 +21,6 @@ import type {
 } from '.'
 
 interface LoweringContext {
-    referenceTypes: Set<string>
-    variableTypes: Map<string, string>
     releaseAtExit: Set<string>
 }
 
@@ -30,19 +29,12 @@ export class IRGenerator {
         return {
             structs: ast.types.flatMap(this.lowerStruct.bind(this)),
             variables: ast.types.map(this.lowerStructTypeInfo.bind(this)),
-            functions: ast.functions.map((fn) =>
-                this.lowerFunction(fn, new Set(ast.types.map((t) => t.name))),
-            ),
+            functions: ast.functions.map((fn) => this.lowerFunction(fn)),
         }
     }
 
-    private lowerFunction(
-        fn: SemanticFunction,
-        referenceTypes: Set<string>,
-    ): CFunctionDeclaration {
+    private lowerFunction(fn: SemanticFunction): CFunctionDeclaration {
         const context: LoweringContext = {
-            referenceTypes,
-            variableTypes: new Map(),
             releaseAtExit: new Set(),
         }
 
@@ -115,11 +107,10 @@ export class IRGenerator {
     ): CStatement[] {
         switch (stmt.kind) {
             case 'var-decl':
-                context.variableTypes.set(stmt.name, stmt.valueSet.type)
+                if (stmt.ownership.releaseAtScopeExit)
+                    context.releaseAtExit.add(stmt.name)
+
                 if (stmt.value.kind === 'data-literal') {
-                    if (this.isReferenceType(stmt.valueSet.type, context)) {
-                        context.releaseAtExit.add(stmt.name)
-                    }
                     // For data literals, we need to allocate the struct and then assign the fields
                     return [
                         {
@@ -162,18 +153,9 @@ export class IRGenerator {
                                 },
                             ],
                         },
-                    ]
-                } else if (!this.isReferenceType(stmt.valueSet.type, context)) {
-                    return [
-                        {
-                            kind: 'var-decl',
-                            type: this.lowerType(stmt),
-                            name: stmt.name,
-                            value: this.lowerValue(stmt.value),
-                        },
+                        ...this.lowerOwnershipPrefix(stmt.ownership),
                     ]
                 } else {
-                    context.releaseAtExit.add(stmt.name)
                     return [
                         {
                             kind: 'var-decl',
@@ -181,82 +163,36 @@ export class IRGenerator {
                             name: stmt.name,
                             value: this.lowerValue(stmt.value),
                         },
-                        {
-                            kind: 'function-call',
-                            name: 'retainRC',
-                            arguments: [{ kind: 'var-ref', name: stmt.name }],
-                        },
+                        ...this.lowerOwnershipPrefix(stmt.ownership),
                     ]
                 }
             case 'print':
                 return this.lowerPrint(stmt)
             case 'assign':
-                if (stmt.target.kind === 'identifier') {
-                    if (stmt.value.kind === 'data-literal')
-                        throw new Error(
-                            'Data-literal assignment is unsupported for now',
-                        )
-
-                    const targetType = context.variableTypes.get(
-                        stmt.target.name,
-                    )
-                    if (!targetType)
-                        throw new Error(
-                            `Unknown assignment target '${stmt.target.name}'`,
-                        )
-
-                    const loweredValue = this.lowerValue(stmt.value)
-                    if (this.isReferenceType(targetType, context)) {
-                        return [
-                            {
-                                kind: 'function-call',
-                                name: 'retainRC',
-                                arguments: [loweredValue],
-                            },
-                            {
-                                kind: 'function-call',
-                                name: 'releaseRC',
-                                arguments: [
-                                    { kind: 'var-ref', name: stmt.target.name },
-                                ],
-                            },
-                            {
-                                kind: 'assign',
-                                target: {
-                                    kind: 'var-ref',
-                                    name: stmt.target.name,
-                                },
-                                value: loweredValue,
-                            },
-                        ]
-                    } else {
-                        return [
-                            {
-                                kind: 'assign',
-                                target: {
-                                    kind: 'var-ref',
-                                    name: stmt.target.name,
-                                },
-                                value: loweredValue,
-                            },
-                        ]
-                    }
-                }
-
-                if (stmt.target.kind !== 'field-access')
-                    throw new Error('Unsupported assignment target kind')
-
                 if (stmt.value.kind === 'data-literal')
                     throw new Error(
                         'Data-literal assignment is unsupported for now',
                     )
 
+                if (stmt.target.kind === 'identifier') {
+                    return [
+                        ...this.lowerOwnershipPrefix(stmt.ownership),
+                        {
+                            kind: 'assign',
+                            target: {
+                                kind: 'var-ref',
+                                name: stmt.target.name,
+                            },
+                            value: this.lowerValue(stmt.value),
+                        },
+                    ]
+                }
+
+                if (stmt.target.kind !== 'field-access')
+                    throw new Error('Unsupported assignment target kind')
+
                 return [
-                    ...this.collectMutateTargets(stmt.target).map((target) => ({
-                        kind: 'function-call' as const,
-                        name: 'mutateRC',
-                        arguments: [target],
-                    })),
+                    ...this.lowerOwnershipPrefix(stmt.ownership),
                     {
                         kind: 'assign',
                         target: this.lowerValue(stmt.target),
@@ -270,35 +206,57 @@ export class IRGenerator {
         }
     }
 
+    private lowerOwnershipPrefix(
+        ownership: SemanticOwnershipEffects,
+    ): CStatement[] {
+        const mutates = (ownership.mutates ?? []).map(
+            (expr: SemanticExpression) => {
+                if (expr.kind === 'data-literal') {
+                    throw new Error('Unsupported mutate ownership expression')
+                }
+                return {
+                    kind: 'function-call' as const,
+                    name: 'mutateRC',
+                    arguments: [this.lowerValue(expr)],
+                }
+            },
+        )
+
+        const retains = (ownership.retains ?? []).map(
+            (expr: SemanticExpression) => {
+                if (expr.kind === 'data-literal') {
+                    throw new Error('Unsupported retain ownership expression')
+                }
+                return {
+                    kind: 'function-call' as const,
+                    name: 'retainRC',
+                    arguments: [this.lowerValue(expr)],
+                }
+            },
+        )
+
+        const releases = (ownership.releases ?? []).map(
+            (expr: SemanticExpression) => {
+                if (expr.kind === 'data-literal') {
+                    throw new Error('Unsupported release ownership expression')
+                }
+                return {
+                    kind: 'function-call' as const,
+                    name: 'releaseRC',
+                    arguments: [this.lowerValue(expr)],
+                }
+            },
+        )
+
+        return [...mutates, ...retains, ...releases]
+    }
+
     private lowerReleaseAtExit(context: LoweringContext): CStatement[] {
         return [...context.releaseAtExit].sort().map((name) => ({
             kind: 'function-call' as const,
             name: 'releaseRC',
             arguments: [{ kind: 'var-ref' as const, name }],
         }))
-    }
-
-    private isReferenceType(type: string, context: LoweringContext): boolean {
-        return context.referenceTypes.has(type)
-    }
-
-    private collectMutateTargets(target: SemanticFieldAccess): CExpression[] {
-        const targets: CExpression[] = []
-
-        const collect = (expr: SemanticExpression) => {
-            if (expr.kind === 'field-access') {
-                collect(expr.object)
-                targets.push(this.lowerValue(expr))
-                return
-            }
-            if (expr.kind === 'data-literal')
-                throw new Error('Unsupported mutate target kind data-literal')
-
-            targets.push(this.lowerValue(expr))
-        }
-
-        collect(target.object)
-        return targets
     }
 
     private lowerStructLiteralFields(fields: ASTDataLiteral['fields']): string {

@@ -14,6 +14,7 @@ import type {
     SemanticFieldAccess,
     SemanticFunction,
     SemanticModule,
+    SemanticOwnershipEffects,
     SemanticPrintStatement,
     SemanticStatement,
     SemanticVariableDeclaration,
@@ -25,6 +26,7 @@ export type {
     SemanticFieldAccess,
     SemanticFunction,
     SemanticModule,
+    SemanticOwnershipEffects,
     SemanticPrintStatement,
     SemanticStatement,
     SemanticExpression,
@@ -125,12 +127,41 @@ export class SemanticAnalyzer {
             )
         }
 
+        const rewrittenTarget = this.rewriteExpression(stmt.target)
+        const rewrittenValue = this.rewriteExpression(stmt.value)
+
         return {
             kind: 'assign',
-            target: this.rewriteExpression(stmt.target),
-            value: this.rewriteExpression(stmt.value),
+            target: rewrittenTarget,
+            value: rewrittenValue,
+            ownership: this.buildAssignmentOwnership(
+                rewrittenTarget,
+                rewrittenValue,
+                targetType,
+            ),
             position: stmt.position,
         }
+    }
+
+    private buildAssignmentOwnership(
+        target: SemanticAssignment['target'],
+        value: SemanticAssignment['value'],
+        targetType: string,
+    ): SemanticOwnershipEffects {
+        if (target.kind === 'field-access') {
+            return {
+                mutates: this.collectMutateTargets(target),
+            }
+        }
+
+        if (target.kind === 'identifier' && this.isReferenceType(targetType)) {
+            return {
+                retains: [value],
+                releases: [target],
+            }
+        }
+
+        return {}
     }
 
     private isAssignableTarget(target: ASTExpression): boolean {
@@ -178,10 +209,16 @@ export class SemanticAnalyzer {
         if (explicitType) {
             this.validateInitializerAgainstType(stmt.value, explicitType)
             this.bindings.set(stmt.name, explicitType)
+            const rewrittenValue = this.rewriteExpression(stmt.value)
             return {
                 ...stmt,
                 valueSet: { type: explicitType },
-                value: this.rewriteExpression(stmt.value),
+                value: rewrittenValue,
+                ownership: this.buildVariableOwnership(
+                    stmt.name,
+                    explicitType,
+                    rewrittenValue,
+                ),
             }
         }
 
@@ -193,11 +230,57 @@ export class SemanticAnalyzer {
         }
 
         this.bindings.set(stmt.name, inferredType)
+        const rewrittenValue = this.rewriteExpression(stmt.value)
         return {
             ...stmt,
             valueSet: { type: inferredType },
-            value: this.rewriteExpression(stmt.value),
+            value: rewrittenValue,
+            ownership: this.buildVariableOwnership(
+                stmt.name,
+                inferredType,
+                rewrittenValue,
+            ),
         }
+    }
+
+    private buildVariableOwnership(
+        name: string,
+        type: string,
+        value: SemanticVariableDeclaration['value'],
+    ): SemanticOwnershipEffects {
+        if (!this.isReferenceType(type)) return {}
+
+        return {
+            retains:
+                value.kind === 'data-literal'
+                    ? []
+                    : [
+                          {
+                              kind: 'identifier',
+                              name,
+                              position: value.position,
+                          },
+                      ],
+            releaseAtScopeExit: true,
+        }
+    }
+
+    private isReferenceType(type: string): boolean {
+        return this.dataTypes.has(type)
+    }
+
+    private collectMutateTargets(
+        target: SemanticFieldAccess,
+    ): SemanticFieldAccess['object'][] {
+        const mutates: SemanticFieldAccess['object'][] = []
+
+        const collect = (expr: SemanticFieldAccess['object']) => {
+            mutates.push(expr)
+            if (expr.kind === 'field-access') collect(expr.object)
+        }
+
+        collect(target.object)
+        return mutates.reverse()
     }
 
     private validateInitializerAgainstType(

@@ -25,12 +25,20 @@ export interface SemanticValueSet {
     type: string
 }
 
+export interface SemanticOwnershipEffects {
+    retains?: SemanticExpression[]
+    releases?: SemanticExpression[]
+    mutates?: SemanticExpression[]
+    releaseAtScopeExit?: boolean
+}
+
 export interface SemanticVariableDeclaration {
     kind: 'var-decl'
     semantics: 'const' | 'mut' | 'ref'
     name: string
     valueSet: SemanticValueSet
     value: SemanticExpression
+    ownership: SemanticOwnershipEffects
     position?: ASTPosition
 }
 
@@ -45,6 +53,7 @@ export interface SemanticAssignment {
     kind: 'assign'
     target: SemanticExpression
     value: SemanticExpression
+    ownership: SemanticOwnershipEffects
     position: ASTPosition
 }
 

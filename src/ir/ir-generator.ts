@@ -1,13 +1,12 @@
-// Lowering from AST to IR for const decl and print
+// Lowering from analyzed semantic AST to IR.
 import type {
-    ASTProgram,
-    ASTPrintStatement,
-    ASTStatement,
-    ASTExpression,
-    ASTDataDeclaration,
-    ASTVariableDeclaration,
-    ASTDataLiteral,
-} from '../ast'
+    SemanticDataDeclaration,
+    SemanticExpression,
+    SemanticProgram,
+    SemanticStatement,
+    SemanticVariableDeclaration,
+} from '../semantic-analyzer'
+import type { ASTDataLiteral, ASTPrintStatement } from '../ast'
 import type {
     CModule,
     CStatement,
@@ -18,12 +17,12 @@ import type {
 } from '.'
 
 export class IRGenerator {
-    generate(ast: ASTProgram): CModule {
+    generate(ast: SemanticProgram): CModule {
         return {
             structs: [
                 ...ast.body
                     .filter(
-                        (stmt): stmt is ASTDataDeclaration =>
+                        (stmt): stmt is SemanticDataDeclaration =>
                             stmt.kind === 'data-decl',
                     )
                     .flatMap(this.lowerStruct.bind(this)),
@@ -31,7 +30,7 @@ export class IRGenerator {
             variables: [
                 ...ast.body
                     .filter(
-                        (stmt): stmt is ASTDataDeclaration =>
+                        (stmt): stmt is SemanticDataDeclaration =>
                             stmt.kind === 'data-decl',
                     )
                     .map(this.lowerStructTypeInfo.bind(this)),
@@ -40,7 +39,9 @@ export class IRGenerator {
         }
     }
 
-    private lowerMainFunction(body: ASTProgram['body']): CFunctionDeclaration {
+    private lowerMainFunction(
+        body: SemanticProgram['body'],
+    ): CFunctionDeclaration {
         return {
             kind: 'function',
             name: 'main',
@@ -49,7 +50,7 @@ export class IRGenerator {
             body: [
                 ...body
                     .filter(
-                        (stmt): stmt is ASTStatement =>
+                        (stmt): stmt is SemanticStatement =>
                             stmt.kind !== 'data-decl',
                     )
                     .flatMap(this.lowerStatement.bind(this)),
@@ -62,7 +63,7 @@ export class IRGenerator {
         }
     }
 
-    private lowerStruct(stmt: ASTDataDeclaration): CStruct[] {
+    private lowerStruct(stmt: SemanticDataDeclaration): CStruct[] {
         const fields = stmt.fields.map((f) => ({
             name: f.name,
             type: f.type === 'truthvalue' ? 'truthvalue_t' : 'Integer*',
@@ -82,7 +83,7 @@ export class IRGenerator {
     }
 
     private lowerStructTypeInfo(
-        stmt: ASTDataDeclaration,
+        stmt: SemanticDataDeclaration,
     ): CVariableDeclaration {
         return {
             kind: 'var-decl',
@@ -106,7 +107,7 @@ export class IRGenerator {
         }
     }
 
-    private lowerStatement(stmt: ASTStatement): CStatement[] {
+    private lowerStatement(stmt: SemanticStatement): CStatement[] {
         switch (stmt.kind) {
             case 'var-decl':
                 if (stmt.value.kind === 'data-literal') {
@@ -233,7 +234,7 @@ export class IRGenerator {
     }
 
     private lowerValue(
-        val: Exclude<ASTExpression, ASTDataLiteral>,
+        val: Exclude<SemanticExpression, ASTDataLiteral>,
     ): CExpression {
         switch (val.kind) {
             case 'integer':
@@ -350,7 +351,7 @@ export class IRGenerator {
         }
     }
 
-    private lowerType(stmt: ASTVariableDeclaration): string {
+    private lowerType(stmt: SemanticVariableDeclaration): string {
         switch (stmt.valueSet.type) {
             case 'truthvalue':
                 return 'truthvalue_t'

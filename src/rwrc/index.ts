@@ -4,6 +4,7 @@ import fs from 'fs'
 import { Command } from 'commander'
 import { TokenStream } from '../lexer'
 import { Parser } from '../parser'
+import { SemanticAnalyzer } from '../semantic-analyzer'
 import { IRGenerator } from '../ir/ir-generator'
 import { codegenC } from '../codegen'
 import child_process from 'node:child_process'
@@ -24,7 +25,8 @@ cli.name('rwrc')
             const source = await fs.promises.readFile(sourceFile, 'utf-8')
             const tokenStream = new TokenStream(source, sourceFile)
             const ast = new Parser(tokenStream).parse()
-            const program = new IRGenerator().generate(ast)
+            const semanticProgram = new SemanticAnalyzer(ast).analyze()
+            const program = new IRGenerator().generate(semanticProgram)
             const cCode = codegenC(program)
             await fs.promises.writeFile(outFilePath + '.c', cCode)
 

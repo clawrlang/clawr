@@ -19,6 +19,21 @@ describe('Parser Tests', () => {
                     ],
                 })
             })
+
+        it('parses declaration without explicit value set', () => {
+            const ast = parse('const x = ambiguous')
+            expect(ast).toMatchObject({
+                body: [
+                    {
+                        kind: 'var-decl',
+                        semantics: 'const',
+                        name: 'x',
+                        valueSet: undefined,
+                        value: { kind: 'truthvalue', value: 'ambiguous' },
+                    },
+                ],
+            })
+        })
     })
 
     it('parses print of truthvalue literal correctly', () => {

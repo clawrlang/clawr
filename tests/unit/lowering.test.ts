@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'bun:test'
-import { ASTProgram } from '../../src/ast'
+import { SemanticProgram } from '../../src/semantic-analyzer'
 import { IRGenerator } from '../../src/ir/ir-generator'
 import { CStatement } from '../../src/ir'
 
 describe('Lowering Tests', () => {
     it('lowers truthvalue variable declaration as truthvalue_t', () => {
-        const program: ASTProgram = {
+        const program: SemanticProgram = {
             body: [
                 {
                     kind: 'var-decl',
@@ -26,7 +26,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers integer variable declaration as Integer*', () => {
-        const program: ASTProgram = {
+        const program: SemanticProgram = {
             body: [
                 {
                     kind: 'var-decl',
@@ -57,7 +57,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers print of truthvalue literal correctly', () => {
-        const program: ASTProgram = {
+        const program: SemanticProgram = {
             body: [
                 {
                     kind: 'print',
@@ -81,7 +81,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers print of integer literal correctly', () => {
-        const program: ASTProgram = {
+        const program: SemanticProgram = {
             body: [
                 {
                     kind: 'print',
@@ -142,7 +142,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers print of truthvalue variable correctly', () => {
-        const program: ASTProgram = {
+        const program: SemanticProgram = {
             body: [
                 {
                     kind: 'var-decl',
@@ -173,7 +173,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers data declaration', () => {
-        const program: ASTProgram = {
+        const program: SemanticProgram = {
             body: [
                 {
                     kind: 'data-decl',
@@ -244,7 +244,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers data literal', () => {
-        const program: ASTProgram = {
+        const program: SemanticProgram = {
             body: [
                 {
                     kind: 'data-decl',
@@ -309,7 +309,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers field access and assignment', () => {
-        const program: ASTProgram = {
+        const program: SemanticProgram = {
             body: [
                 {
                     kind: 'assign',
@@ -346,7 +346,7 @@ describe('Lowering Tests', () => {
     })
 
     it('emits retainRC for reference type variable declaration', () => {
-        const program: ASTProgram = {
+        const program: SemanticProgram = {
             body: [
                 {
                     kind: 'var-decl',
@@ -373,7 +373,7 @@ describe('Lowering Tests', () => {
     })
 
     it('emits mutateRC for field assignment', () => {
-        const program: ASTProgram = {
+        const program: SemanticProgram = {
             body: [
                 {
                     kind: 'assign',

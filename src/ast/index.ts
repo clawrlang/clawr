@@ -62,7 +62,7 @@ export interface ASTVariableDeclaration {
     kind: 'var-decl'
     semantics: 'const' | 'mut' | 'ref'
     name: string
-    valueSet: ASTValueSet
+    valueSet?: ASTValueSet
     value: ASTExpression
 }
 
@@ -73,7 +73,7 @@ export interface ASTVariableDeclaration {
 // values, e.g., for integers we might want to represent a range, and for truth
 // values we might want to represent subsets of {false, ambiguous, true}. For
 // now, we just use a simple type field to represent the top of the lattice.
-type ASTValueSet = {
+export type ASTValueSet = {
     type: string
 }
 

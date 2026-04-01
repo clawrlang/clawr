@@ -1,5 +1,5 @@
 import { ExpressionParser } from '../expression-parser'
-import { ASTVariableDeclaration } from '../../ast'
+import { ASTValueSet, ASTVariableDeclaration } from '../../ast'
 import { TokenStream } from '../../lexer'
 
 export class VariableDeclarationParser {
@@ -25,8 +25,12 @@ export class VariableDeclarationParser {
         const semantics = semanticsToken.keyword as 'const' | 'mut' | 'ref'
         this.stream.next() // consume the keyword
         const name = this.stream.expect('IDENTIFIER').identifier
-        this.stream.expect('PUNCTUATION', ':')
-        const type = this.stream.expect('IDENTIFIER').identifier
+        let valueSet: ASTValueSet | undefined
+        if (this.stream.isNext('PUNCTUATION', ':')) {
+            this.stream.next()
+            const type = this.stream.expect('IDENTIFIER').identifier
+            valueSet = { type }
+        }
         this.stream.expect('PUNCTUATION', '=')
         // parseExpression will be injected by the main parser
         // @ts-ignore
@@ -35,7 +39,7 @@ export class VariableDeclarationParser {
             kind: 'var-decl',
             semantics,
             name,
-            valueSet: { type },
+            valueSet,
             value,
         }
     }

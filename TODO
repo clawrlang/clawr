@@ -10,8 +10,5 @@
 - **`IRGenerator`**: `releaseRC()` is not called at all
 - **`IRGenerator`**: No unit tests for `mutateRC()` and `retainRC()`
 - **`IRGenerator`**: Consider splitting into smaller modules
-- **`Parser`**: Allow variable declaration without explicit type (add inference step)
-- **AST**: Create two:
-  - CST: parsed tree allowing ambiguities and missing information
-  - AST: analysed tree with inferred types and validated operations
-- **`SemanticAnalyzer`**: Add a step between parsing an lowering
+- **`SemanticAnalyzer`**: Output `ASTModule` (or `SemanticModule`?). Convert `ASTProgram` to a module with a main function. Lowering should not infer the main functions.
+- **`Parser`**: Parse dot notation as binary operator and convert to field-access in `SemanticAnalyzer`.

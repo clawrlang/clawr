@@ -11,6 +11,7 @@ export class AssignmentParser {
     }
 
     parse(): ASTStatement {
+        const firstToken = this.stream.peek()!!
         // Parse the left-hand side (identifier or field-access)
         let target = new ExpressionParser(this.stream).parse()
         // After parseExpression, expect '='
@@ -23,6 +24,7 @@ export class AssignmentParser {
             kind: 'assign',
             target,
             value,
+            position: { line: firstToken.line, column: firstToken.column },
         }
     }
 }

@@ -11,11 +11,12 @@ export class ExpressionParser {
         let object: ASTExpression = expr
         while (this.stream.isNext('OPERATOR', ['.'])) {
             this.stream.next()
-            const field = this.stream.expect('IDENTIFIER').identifier
+            const fieldToken = this.stream.expect('IDENTIFIER')
             const fieldAccess: ASTFieldAccess = {
                 kind: 'field-access',
                 object,
-                field,
+                field: fieldToken.identifier,
+                position: { line: fieldToken.line, column: fieldToken.column },
             }
             object = fieldAccess
         }
@@ -30,12 +31,14 @@ export class ExpressionParser {
                 return {
                     kind: 'truthvalue',
                     value: token.value,
+                    position: { line: token.line, column: token.column },
                 }
             case 'IDENTIFIER':
                 this.stream.next()
                 return {
                     kind: 'identifier',
                     name: token.identifier,
+                    position: { line: token.line, column: token.column },
                 }
             case 'PUNCTUATION':
                 if (token.symbol === '{') {
@@ -58,6 +61,7 @@ export class ExpressionParser {
                     return {
                         kind: 'data-literal',
                         fields,
+                        position: { line: token.line, column: token.column },
                     }
                 } else {
                     throw new Error(

@@ -2,6 +2,7 @@ import type {
     ASTAssignment,
     ASTDataDeclaration,
     ASTExpression,
+    ASTPosition,
     ASTPrintStatement,
 } from '../ast'
 
@@ -17,6 +18,7 @@ export interface SemanticVariableDeclaration {
     name: string
     valueSet: SemanticValueSet
     value: SemanticExpression
+    position?: ASTPosition
 }
 
 export type SemanticStatement =

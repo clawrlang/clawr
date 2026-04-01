@@ -3,6 +3,7 @@ import { SemanticProgram } from '../../src/semantic-analyzer'
 import { IRGenerator } from '../../src/ir/ir-generator'
 import { CStatement } from '../../src/ir'
 
+const somePosition = { line: 1, column: 1 }
 describe('Lowering Tests', () => {
     it('lowers truthvalue variable declaration as truthvalue_t', () => {
         const program: SemanticProgram = {
@@ -12,7 +13,11 @@ describe('Lowering Tests', () => {
                     semantics: 'const',
                     name: 'x',
                     valueSet: { type: 'truthvalue' },
-                    value: { kind: 'truthvalue', value: 'ambiguous' },
+                    value: {
+                        kind: 'truthvalue',
+                        value: 'ambiguous',
+                        position: somePosition,
+                    },
                 },
             ],
         }
@@ -33,7 +38,11 @@ describe('Lowering Tests', () => {
                     semantics: 'const',
                     name: 'x',
                     valueSet: { type: 'integer' },
-                    value: { kind: 'integer', value: 42n },
+                    value: {
+                        kind: 'integer',
+                        value: 42n,
+                        position: somePosition,
+                    },
                 },
             ],
         }
@@ -61,7 +70,12 @@ describe('Lowering Tests', () => {
             body: [
                 {
                     kind: 'print',
-                    value: { kind: 'truthvalue', value: 'true' },
+                    value: {
+                        kind: 'truthvalue',
+                        value: 'true',
+                        position: somePosition,
+                    },
+                    position: somePosition,
                 },
             ],
         }
@@ -85,7 +99,12 @@ describe('Lowering Tests', () => {
             body: [
                 {
                     kind: 'print',
-                    value: { kind: 'integer', value: 42n },
+                    value: {
+                        kind: 'integer',
+                        value: 42n,
+                        position: somePosition,
+                    },
+                    position: somePosition,
                 },
             ],
         }
@@ -149,11 +168,20 @@ describe('Lowering Tests', () => {
                     semantics: 'const',
                     valueSet: { type: 'truthvalue' },
                     name: 'x',
-                    value: { kind: 'truthvalue', value: 'ambiguous' },
+                    value: {
+                        kind: 'truthvalue',
+                        value: 'ambiguous',
+                        position: somePosition,
+                    },
                 },
                 {
                     kind: 'print',
-                    value: { kind: 'identifier', name: 'x' },
+                    value: {
+                        kind: 'identifier',
+                        name: 'x',
+                        position: somePosition,
+                    },
+                    position: somePosition,
                 },
             ],
         }
@@ -182,6 +210,7 @@ describe('Lowering Tests', () => {
                         { name: 'x', type: 'truthvalue' },
                         { name: 'y', type: 'truthvalue' },
                     ],
+                    position: somePosition,
                 },
             ],
         }
@@ -253,6 +282,7 @@ describe('Lowering Tests', () => {
                         { name: 'x', type: 'truthvalue' },
                         { name: 'y', type: 'truthvalue' },
                     ],
+                    position: somePosition,
                 },
                 {
                     kind: 'var-decl',
@@ -262,9 +292,18 @@ describe('Lowering Tests', () => {
                     value: {
                         kind: 'data-literal',
                         fields: {
-                            x: { kind: 'truthvalue', value: 'true' },
-                            y: { kind: 'truthvalue', value: 'false' },
+                            x: {
+                                kind: 'truthvalue',
+                                value: 'true',
+                                position: somePosition,
+                            },
+                            y: {
+                                kind: 'truthvalue',
+                                value: 'false',
+                                position: somePosition,
+                            },
                         },
+                        position: somePosition,
                     },
                 },
             ],
@@ -315,10 +354,20 @@ describe('Lowering Tests', () => {
                     kind: 'assign',
                     target: {
                         kind: 'field-access',
-                        object: { kind: 'identifier', name: 'p' },
+                        object: {
+                            kind: 'identifier',
+                            name: 'p',
+                            position: somePosition,
+                        },
                         field: 'x',
+                        position: somePosition,
                     },
-                    value: { kind: 'truthvalue', value: 'true' },
+                    value: {
+                        kind: 'truthvalue',
+                        value: 'true',
+                        position: somePosition,
+                    },
+                    position: somePosition,
                 },
             ],
         }
@@ -342,7 +391,7 @@ describe('Lowering Tests', () => {
                 deref: true,
             },
             value: { kind: 'var-ref', name: 'c_true' },
-        })
+        } satisfies CStatement)
     })
 
     it('emits retainRC for reference type variable declaration', () => {
@@ -353,7 +402,11 @@ describe('Lowering Tests', () => {
                     semantics: 'const',
                     name: 'refVar',
                     valueSet: { type: 'SomeRefType' },
-                    value: { kind: 'identifier', name: 'otherRef' },
+                    value: {
+                        kind: 'identifier',
+                        name: 'otherRef',
+                        position: somePosition,
+                    },
                 },
             ],
         }
@@ -379,10 +432,20 @@ describe('Lowering Tests', () => {
                     kind: 'assign',
                     target: {
                         kind: 'field-access',
-                        object: { kind: 'identifier', name: 'outer' },
+                        object: {
+                            kind: 'identifier',
+                            name: 'outer',
+                            position: somePosition,
+                        },
                         field: 'inner',
+                        position: somePosition,
                     },
-                    value: { kind: 'identifier', name: 'newValue' },
+                    value: {
+                        kind: 'identifier',
+                        name: 'newValue',
+                        position: somePosition,
+                    },
+                    position: somePosition,
                 },
             ],
         }
@@ -402,6 +465,6 @@ describe('Lowering Tests', () => {
                 deref: true,
             },
             value: { kind: 'var-ref', name: 'newValue' },
-        })
+        } satisfies CStatement)
     })
 })

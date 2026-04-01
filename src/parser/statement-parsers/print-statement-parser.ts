@@ -11,10 +11,11 @@ export class PrintStatementParser {
     }
 
     parse(): ASTStatement {
-        this.stream.expect('IDENTIFIER')
+        const token = this.stream.expect('IDENTIFIER')
         return {
             kind: 'print',
             value: new ExpressionParser(this.stream).parse(),
+            position: { line: token.line, column: token.column },
         }
     }
 }

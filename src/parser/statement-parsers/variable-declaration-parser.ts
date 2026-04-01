@@ -41,6 +41,10 @@ export class VariableDeclarationParser {
             name,
             valueSet,
             value,
+            position: {
+                line: semanticsToken.line,
+                column: semanticsToken.column,
+            },
         }
     }
 }

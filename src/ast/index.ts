@@ -1,5 +1,10 @@
 // AST for Clawr data structures and related constructs
 
+export interface ASTPosition {
+    line: number
+    column: number
+}
+
 // ----- Expressions -----
 export type ASTExpression =
     | ASTIntegerLiteral
@@ -11,27 +16,32 @@ export type ASTExpression =
 export interface ASTIntegerLiteral {
     kind: 'integer'
     value: bigint
+    position: ASTPosition
 }
 
 export interface ASTTruthValueLiteral {
     kind: 'truthvalue'
     value: 'false' | 'ambiguous' | 'true'
+    position: ASTPosition
 }
 
 export interface ASTIdentifier {
     kind: 'identifier'
     name: string
+    position: ASTPosition
 }
 
 export interface ASTDataLiteral {
     kind: 'data-literal'
     fields: { [field: string]: ASTExpression }
+    position: ASTPosition
 }
 
 export interface ASTFieldAccess {
     kind: 'field-access'
     object: ASTExpression
     field: string
+    position: ASTPosition
 }
 
 // ----- Statements -----
@@ -45,17 +55,20 @@ export interface ASTAssignment {
     kind: 'assign'
     target: ASTExpression
     value: ASTExpression
+    position: ASTPosition
 }
 
 export interface ASTDataDeclaration {
     kind: 'data-decl'
     name: string
     fields: { name: string; type: string }[]
+    position: ASTPosition
 }
 
 export interface ASTPrintStatement {
     kind: 'print'
     value: ASTExpression
+    position: ASTPosition
 }
 
 export interface ASTVariableDeclaration {
@@ -64,6 +77,7 @@ export interface ASTVariableDeclaration {
     name: string
     valueSet?: ASTValueSet
     value: ASTExpression
+    position: ASTPosition
 }
 
 // Placeholder for lattice information. This will be used for various analyses

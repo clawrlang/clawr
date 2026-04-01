@@ -10,7 +10,7 @@ export class DataDeclarationParser {
     }
 
     parse(): ASTStatement {
-        this.stream.expect('KEYWORD', 'data')
+        const token = this.stream.expect('KEYWORD', 'data')
         const name = this.stream.expect('IDENTIFIER').identifier
         this.stream.expect('PUNCTUATION', '{')
         const fields: { name: string; type: string }[] = []
@@ -30,6 +30,7 @@ export class DataDeclarationParser {
             kind: 'data-decl',
             name,
             fields,
+            position: { line: token.line, column: token.column },
         }
     }
 }

@@ -21,7 +21,7 @@ export class DataDeclarationParser {
             fields.push({ name: fieldName, type: fieldType })
             if (this.stream.isNext('PUNCTUATION', ',')) {
                 this.stream.next()
-            } else if (!this.stream.isNext('NEWLINE')) {
+            } else if (this.stream.isNext('NEWLINE')) {
                 this.stream.next({ stopAtNewline: true })
             }
         }

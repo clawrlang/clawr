@@ -194,6 +194,33 @@ describe('Parser Tests', () => {
             ],
         })
     })
+
+    it('parses data declaration and variable initialization correctly', () => {
+        const program =
+            'data Point { x: truthvalue }\nmut p: Point = { x: true }'
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Point',
+                    fields: [{ name: 'x', type: 'truthvalue' }],
+                },
+                {
+                    kind: 'var-decl',
+                    semantics: 'mut',
+                    name: 'p',
+                    valueSet: { type: 'Point' },
+                    value: {
+                        kind: 'data-literal',
+                        fields: {
+                            x: { kind: 'truthvalue', value: 'true' },
+                        },
+                    },
+                },
+            ],
+        })
+    })
 })
 
 function parse(code: string) {

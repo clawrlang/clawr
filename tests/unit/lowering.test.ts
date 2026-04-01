@@ -1,12 +1,41 @@
 import { describe, expect, it } from 'bun:test'
-import { SemanticProgram } from '../../src/semantic-analyzer'
+import {
+    SemanticDataDeclaration,
+    SemanticModule,
+    SemanticStatement,
+} from '../../src/semantic-analyzer'
 import { IRGenerator } from '../../src/ir/ir-generator'
 import { CStatement } from '../../src/ir'
 
 const somePosition = { line: 1, column: 1 }
+
+type SemanticProgramFixture = {
+    body: (SemanticDataDeclaration | SemanticStatement)[]
+}
+
+function toModule(program: SemanticProgramFixture): SemanticModule {
+    return {
+        functions: [
+            {
+                kind: 'function',
+                name: 'main',
+                body: program.body.filter(
+                    (stmt): stmt is SemanticStatement =>
+                        stmt.kind !== 'data-decl',
+                ),
+            },
+        ],
+        types: program.body.filter(
+            (stmt): stmt is SemanticDataDeclaration =>
+                stmt.kind === 'data-decl',
+        ),
+        globals: [],
+    }
+}
+
 describe('Lowering Tests', () => {
     it('lowers truthvalue variable declaration as truthvalue_t', () => {
-        const program: SemanticProgram = {
+        const program: SemanticProgramFixture = {
             body: [
                 {
                     kind: 'var-decl',
@@ -21,7 +50,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = new IRGenerator().generate(program)
+        const module = new IRGenerator().generate(toModule(program))
         expect(module.functions[0].body[0]).toMatchObject({
             kind: 'var-decl',
             type: 'truthvalue_t',
@@ -31,7 +60,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers integer variable declaration as Integer*', () => {
-        const program: SemanticProgram = {
+        const program: SemanticProgramFixture = {
             body: [
                 {
                     kind: 'var-decl',
@@ -46,7 +75,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = new IRGenerator().generate(program)
+        const module = new IRGenerator().generate(toModule(program))
         expect(module.functions[0].body[0]).toMatchObject({
             kind: 'var-decl',
             type: 'Integer*',
@@ -66,7 +95,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers print of truthvalue literal correctly', () => {
-        const program: SemanticProgram = {
+        const program: SemanticProgramFixture = {
             body: [
                 {
                     kind: 'print',
@@ -80,7 +109,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = new IRGenerator().generate(program)
+        const module = new IRGenerator().generate(toModule(program))
         expect(module.functions[0].body[0]).toMatchObject({
             kind: 'function-call',
             name: 'printf',
@@ -96,7 +125,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers print of integer literal correctly', () => {
-        const program: SemanticProgram = {
+        const program: SemanticProgramFixture = {
             body: [
                 {
                     kind: 'print',
@@ -110,7 +139,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = new IRGenerator().generate(program)
+        const module = new IRGenerator().generate(toModule(program))
         // Integer* temp0 = Integer¸fromStringRC(String¸fromCString("42"));
         expect(module.functions[0].body[0]).toMatchObject({
             kind: 'var-decl',
@@ -163,7 +192,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers print of truthvalue variable correctly', () => {
-        const program: SemanticProgram = {
+        const program: SemanticProgramFixture = {
             body: [
                 {
                     kind: 'var-decl',
@@ -188,7 +217,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = new IRGenerator().generate(program)
+        const module = new IRGenerator().generate(toModule(program))
         expect(module.functions[0].body[1]).toMatchObject({
             kind: 'function-call',
             name: 'printf',
@@ -204,7 +233,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers data declaration', () => {
-        const program: SemanticProgram = {
+        const program: SemanticProgramFixture = {
             body: [
                 {
                     kind: 'data-decl',
@@ -218,7 +247,7 @@ describe('Lowering Tests', () => {
             ],
         }
 
-        const module = new IRGenerator().generate(program)
+        const module = new IRGenerator().generate(toModule(program))
         /*
         typedef struct DataStructure {
             __rc_header header;
@@ -276,7 +305,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers data literal', () => {
-        const program: SemanticProgram = {
+        const program: SemanticProgramFixture = {
             body: [
                 {
                     kind: 'data-decl',
@@ -311,7 +340,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = new IRGenerator().generate(program)
+        const module = new IRGenerator().generate(toModule(program))
         // Point* p = allocRC(Point, __rc_ISOLATED);
         expect(module.functions[0].body[0]).toMatchObject({
             kind: 'var-decl',
@@ -351,7 +380,7 @@ describe('Lowering Tests', () => {
     })
 
     it('lowers field access and assignment', () => {
-        const program: SemanticProgram = {
+        const program: SemanticProgramFixture = {
             body: [
                 {
                     kind: 'assign',
@@ -374,7 +403,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = new IRGenerator().generate(program)
+        const module = new IRGenerator().generate(toModule(program))
         expect(module.functions[0].body[0]).toMatchObject({
             kind: 'function-call',
             name: 'mutateRC',
@@ -398,7 +427,7 @@ describe('Lowering Tests', () => {
     })
 
     it('emits retainRC for reference type variable declaration', () => {
-        const program: SemanticProgram = {
+        const program: SemanticProgramFixture = {
             body: [
                 {
                     kind: 'var-decl',
@@ -413,7 +442,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = new IRGenerator().generate(program)
+        const module = new IRGenerator().generate(toModule(program))
         // Should emit a var-decl and a retainRC call
         expect(module.functions[0].body[0]).toMatchObject({
             kind: 'var-decl',
@@ -429,7 +458,7 @@ describe('Lowering Tests', () => {
     })
 
     it('emits mutateRC for field assignment', () => {
-        const program: SemanticProgram = {
+        const program: SemanticProgramFixture = {
             body: [
                 {
                     kind: 'assign',
@@ -452,7 +481,7 @@ describe('Lowering Tests', () => {
                 },
             ],
         }
-        const module = new IRGenerator().generate(program)
+        const module = new IRGenerator().generate(toModule(program))
         // Should emit mutateRC for 'outer' before assignment
         expect(module.functions[0].body[0]).toMatchObject({
             kind: 'function-call',

@@ -2,8 +2,9 @@
 import type {
     SemanticDataDeclaration,
     SemanticExpression,
+    SemanticFunction,
+    SemanticModule,
     SemanticPrintStatement,
-    SemanticProgram,
     SemanticStatement,
     SemanticVariableDeclaration,
 } from '../semantic-analyzer'
@@ -18,43 +19,22 @@ import type {
 } from '.'
 
 export class IRGenerator {
-    generate(ast: SemanticProgram): CModule {
+    generate(ast: SemanticModule): CModule {
         return {
-            structs: [
-                ...ast.body
-                    .filter(
-                        (stmt): stmt is SemanticDataDeclaration =>
-                            stmt.kind === 'data-decl',
-                    )
-                    .flatMap(this.lowerStruct.bind(this)),
-            ],
-            variables: [
-                ...ast.body
-                    .filter(
-                        (stmt): stmt is SemanticDataDeclaration =>
-                            stmt.kind === 'data-decl',
-                    )
-                    .map(this.lowerStructTypeInfo.bind(this)),
-            ],
-            functions: [this.lowerMainFunction(ast.body)],
+            structs: ast.types.flatMap(this.lowerStruct.bind(this)),
+            variables: ast.types.map(this.lowerStructTypeInfo.bind(this)),
+            functions: ast.functions.map(this.lowerFunction.bind(this)),
         }
     }
 
-    private lowerMainFunction(
-        body: SemanticProgram['body'],
-    ): CFunctionDeclaration {
+    private lowerFunction(fn: SemanticFunction): CFunctionDeclaration {
         return {
             kind: 'function',
-            name: 'main',
+            name: fn.name,
             returnType: 'int',
             parameters: [],
             body: [
-                ...body
-                    .filter(
-                        (stmt): stmt is SemanticStatement =>
-                            stmt.kind !== 'data-decl',
-                    )
-                    .flatMap(this.lowerStatement.bind(this)),
+                ...fn.body.flatMap(this.lowerStatement.bind(this)),
                 {
                     kind: 'function-call',
                     name: 'return',

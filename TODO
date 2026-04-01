@@ -12,5 +12,4 @@
 - **`IRGenerator`**: Consider splitting into smaller modules
 - **`IRGenerator`**: Generate temp variable names to ensure uniqueness.
   - Include the `ˇ` character to indicate that they are Clawr artefacts.
-- **`SemanticAnalyzer`**: Output `ASTModule` (or `SemanticModule`?). Convert `ASTProgram` to a module with a main function. Lowering should not infer the main functions.
 - **`SemanticAnalyzer`**: Function and block scopes

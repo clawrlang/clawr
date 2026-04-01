@@ -55,6 +55,14 @@ export type SemanticStatement =
 
 export type SemanticDataDeclaration = ASTDataDeclaration
 
-export interface SemanticProgram {
-    body: (SemanticDataDeclaration | SemanticStatement)[]
+export interface SemanticFunction {
+    kind: 'function'
+    name: string
+    body: SemanticStatement[]
+}
+
+export interface SemanticModule {
+    functions: SemanticFunction[]
+    types: SemanticDataDeclaration[]
+    globals: SemanticVariableDeclaration[]
 }

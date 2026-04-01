@@ -12,8 +12,9 @@ import type {
     SemanticAssignment,
     SemanticDataDeclaration,
     SemanticFieldAccess,
+    SemanticFunction,
+    SemanticModule,
     SemanticPrintStatement,
-    SemanticProgram,
     SemanticStatement,
     SemanticVariableDeclaration,
 } from './ast'
@@ -22,8 +23,9 @@ export type {
     SemanticAssignment,
     SemanticDataDeclaration,
     SemanticFieldAccess,
+    SemanticFunction,
+    SemanticModule,
     SemanticPrintStatement,
-    SemanticProgram,
     SemanticStatement,
     SemanticExpression,
     SemanticValueSet,
@@ -36,19 +38,37 @@ export class SemanticAnalyzer {
 
     constructor(private ast: ASTProgram) {}
 
-    analyze(): SemanticProgram {
+    analyze(): SemanticModule {
+        const types: SemanticDataDeclaration[] = []
+        const mainBody: SemanticStatement[] = []
+
+        for (const stmt of this.ast.body) {
+            if (stmt.kind === 'data-decl') {
+                this.registerDataDeclaration(stmt)
+                types.push(stmt)
+                continue
+            }
+
+            mainBody.push(this.analyzeStatement(stmt))
+        }
+
+        const mainFunction: SemanticFunction = {
+            kind: 'function',
+            name: 'main',
+            body: mainBody,
+        }
+
         return {
-            body: this.ast.body.map((stmt) => this.analyzeNode(stmt)),
+            functions: [mainFunction],
+            types,
+            globals: [],
         }
     }
 
-    private analyzeNode(
-        stmt: ASTStatement | ASTDataDeclaration,
-    ): SemanticStatement | SemanticDataDeclaration {
+    private analyzeStatement(stmt: ASTStatement): SemanticStatement {
         switch (stmt.kind) {
             case 'data-decl':
-                this.registerDataDeclaration(stmt)
-                return stmt
+                throw new Error('Unexpected data declaration in statement body')
             case 'var-decl':
                 return this.analyzeVariableDeclaration(stmt)
             case 'print':

@@ -220,5 +220,13 @@ function analyze(code: string) {
     const stream = new TokenStream(code, 'test.clawr')
     const parser = new Parser(stream)
     const analyzer = new SemanticAnalyzer(parser.parse())
-    return analyzer.analyze()
+    const module = analyzer.analyze()
+
+    return {
+        ...module,
+        body: [
+            ...module.types,
+            ...(module.functions.find((fn) => fn.name === 'main')?.body ?? []),
+        ],
+    }
 }

@@ -11,4 +11,3 @@
 - **`IRGenerator`**: No unit tests for `mutateRC()` and `retainRC()`
 - **`IRGenerator`**: Consider splitting into smaller modules
 - **`SemanticAnalyzer`**: Output `ASTModule` (or `SemanticModule`?). Convert `ASTProgram` to a module with a main function. Lowering should not infer the main functions.
-- **`Parser`**: Parse dot notation as binary operator and convert to field-access in `SemanticAnalyzer`.

@@ -1,26 +1,24 @@
-import { ASTExpression, ASTFieldAccess } from '../ast'
+import { ASTBinaryExpression, ASTExpression } from '../ast'
 import { TokenStream } from '../lexer'
 
 export class ExpressionParser {
     constructor(private stream: TokenStream) {}
 
     parse(): ASTExpression {
-        const expr = this.parsePrimaryExpression()
-        if (!this.stream.isNext('OPERATOR', ['.'])) return expr
-
-        let object: ASTExpression = expr
+        let expr = this.parsePrimaryExpression()
         while (this.stream.isNext('OPERATOR', ['.'])) {
-            this.stream.next()
-            const fieldToken = this.stream.expect('IDENTIFIER')
-            const fieldAccess: ASTFieldAccess = {
-                kind: 'field-access',
-                object,
-                field: fieldToken.identifier,
-                position: { line: fieldToken.line, column: fieldToken.column },
+            const dotToken = this.stream.expect('OPERATOR')
+            const right = this.parsePrimaryExpression()
+            const binary: ASTBinaryExpression = {
+                kind: 'binary',
+                operator: '.',
+                left: expr,
+                right,
+                position: { line: dotToken.line, column: dotToken.column },
             }
-            object = fieldAccess
+            expr = binary
         }
-        return object
+        return expr
     }
 
     private parsePrimaryExpression(): ASTExpression {

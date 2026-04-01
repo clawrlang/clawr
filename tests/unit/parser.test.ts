@@ -126,28 +126,36 @@ describe('Parser Tests', () => {
                     name: 'x',
                     valueSet: { type: 'truthvalue' },
                     value: {
-                        kind: 'field-access',
-                        object: {
-                            kind: 'field-access',
-                            object: {
-                                kind: 'field-access',
-                                object: {
-                                    kind: 'field-access',
-                                    object: {
-                                        kind: 'field-access',
-                                        object: {
+                        kind: 'binary',
+                        operator: '.',
+                        left: {
+                            kind: 'binary',
+                            operator: '.',
+                            left: {
+                                kind: 'binary',
+                                operator: '.',
+                                left: {
+                                    kind: 'binary',
+                                    operator: '.',
+                                    left: {
+                                        kind: 'binary',
+                                        operator: '.',
+                                        left: {
                                             kind: 'identifier',
                                             name: 'a',
                                         },
-                                        field: 'b',
+                                        right: {
+                                            kind: 'identifier',
+                                            name: 'b',
+                                        },
                                     },
-                                    field: 'c',
+                                    right: { kind: 'identifier', name: 'c' },
                                 },
-                                field: 'd',
+                                right: { kind: 'identifier', name: 'd' },
                             },
-                            field: 'e',
+                            right: { kind: 'identifier', name: 'e' },
                         },
-                        field: 'f',
+                        right: { kind: 'identifier', name: 'f' },
                     },
                 },
             ],
@@ -176,9 +184,10 @@ describe('Parser Tests', () => {
                 {
                     kind: 'assign',
                     target: {
-                        kind: 'field-access',
-                        object: { kind: 'identifier', name: 'p' },
-                        field: 'x',
+                        kind: 'binary',
+                        operator: '.',
+                        left: { kind: 'identifier', name: 'p' },
+                        right: { kind: 'identifier', name: 'x' },
                     },
                     value: { kind: 'truthvalue', value: 'true' },
                 },

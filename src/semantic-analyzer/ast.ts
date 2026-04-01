@@ -1,11 +1,25 @@
 import type {
-    ASTAssignment,
     ASTDataDeclaration,
-    ASTExpression,
+    ASTDataLiteral,
+    ASTIdentifier,
+    ASTIntegerLiteral,
     ASTPosition,
+    ASTTruthValueLiteral,
 } from '../ast'
 
-export type SemanticExpression = ASTExpression
+export interface SemanticFieldAccess {
+    kind: 'field-access'
+    object: SemanticExpression
+    field: string
+    position: ASTPosition
+}
+
+export type SemanticExpression =
+    | ASTIntegerLiteral
+    | ASTTruthValueLiteral
+    | ASTIdentifier
+    | ASTDataLiteral
+    | SemanticFieldAccess
 
 export interface SemanticValueSet {
     type: string
@@ -27,10 +41,17 @@ export interface SemanticPrintStatement {
     position: ASTPosition
 }
 
+export interface SemanticAssignment {
+    kind: 'assign'
+    target: SemanticExpression
+    value: SemanticExpression
+    position: ASTPosition
+}
+
 export type SemanticStatement =
     | SemanticVariableDeclaration
     | SemanticPrintStatement
-    | ASTAssignment
+    | SemanticAssignment
 
 export type SemanticDataDeclaration = ASTDataDeclaration
 

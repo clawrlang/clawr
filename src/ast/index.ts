@@ -11,7 +11,7 @@ export type ASTExpression =
     | ASTTruthValueLiteral
     | ASTIdentifier
     | ASTDataLiteral
-    | ASTFieldAccess
+    | ASTBinaryExpression
 
 export interface ASTIntegerLiteral {
     kind: 'integer'
@@ -37,10 +37,11 @@ export interface ASTDataLiteral {
     position: ASTPosition
 }
 
-export interface ASTFieldAccess {
-    kind: 'field-access'
-    object: ASTExpression
-    field: string
+export interface ASTBinaryExpression {
+    kind: 'binary'
+    operator: string
+    left: ASTExpression
+    right: ASTExpression
     position: ASTPosition
 }
 

@@ -153,6 +153,25 @@ describe('SemanticAnalyzer', () => {
             "5:1:Assignment type mismatch: target is 'truthvalue' but value is 'Point'",
         )
     })
+
+    describe('field access', () => {
+        it('converts binary expressions with dot operator into field access expressions', () => {
+            const program = analyze(
+                'data Point {\n  x: truthvalue\n}\nconst p: Point = { x: true }\nconst x = p.x',
+            )
+
+            expect(program.body[2]).toMatchObject({
+                kind: 'var-decl',
+                name: 'x',
+                valueSet: { type: 'truthvalue' },
+                value: {
+                    kind: 'field-access',
+                    object: { kind: 'identifier', name: 'p' },
+                    field: 'x',
+                },
+            })
+        })
+    })
 })
 
 function analyze(code: string) {

@@ -1,5 +1,6 @@
 import type {
     ASTAssignment,
+    ASTBinaryExpression,
     ASTDataDeclaration,
     ASTDataLiteral,
     ASTExpression,
@@ -8,7 +9,9 @@ import type {
     ASTVariableDeclaration,
 } from '../ast'
 import type {
+    SemanticAssignment,
     SemanticDataDeclaration,
+    SemanticFieldAccess,
     SemanticPrintStatement,
     SemanticProgram,
     SemanticStatement,
@@ -16,7 +19,9 @@ import type {
 } from './ast'
 
 export type {
+    SemanticAssignment,
     SemanticDataDeclaration,
+    SemanticFieldAccess,
     SemanticPrintStatement,
     SemanticProgram,
     SemanticStatement,
@@ -67,11 +72,12 @@ export class SemanticAnalyzer {
 
         return {
             ...stmt,
+            value: this.rewriteExpression(stmt.value),
             dispatchType,
         }
     }
 
-    private analyzeAssignment(stmt: ASTAssignment): ASTAssignment {
+    private analyzeAssignment(stmt: ASTAssignment): SemanticAssignment {
         if (!this.isAssignableTarget(stmt.target)) {
             throw new Error(
                 `${stmt.position.line}:${stmt.position.column}:Invalid assignment target kind '${stmt.target.kind}'`,
@@ -99,11 +105,42 @@ export class SemanticAnalyzer {
             )
         }
 
-        return stmt
+        return {
+            kind: 'assign',
+            target: this.rewriteExpression(stmt.target),
+            value: this.rewriteExpression(stmt.value),
+            position: stmt.position,
+        }
     }
 
     private isAssignableTarget(target: ASTExpression): boolean {
-        return target.kind === 'identifier' || target.kind === 'field-access'
+        return (
+            target.kind === 'identifier' ||
+            (target.kind === 'binary' && target.operator === '.')
+        )
+    }
+
+    private rewriteExpression(
+        expr: ASTExpression,
+    ): SemanticFieldAccess | Exclude<ASTExpression, ASTBinaryExpression> {
+        if (expr.kind !== 'binary') return expr
+
+        if (expr.operator !== '.') {
+            throw new Error(
+                `${expr.position.line}:${expr.position.column}:Unsupported binary operator '${expr.operator}'`,
+            )
+        }
+        if (expr.right.kind !== 'identifier') {
+            throw new Error(
+                `${expr.right.position.line}:${expr.right.position.column}:Field name must be an identifier`,
+            )
+        }
+        return {
+            kind: 'field-access',
+            object: this.rewriteExpression(expr.left),
+            field: expr.right.name,
+            position: expr.position,
+        }
     }
 
     private registerDataDeclaration(stmt: ASTDataDeclaration) {
@@ -124,6 +161,7 @@ export class SemanticAnalyzer {
             return {
                 ...stmt,
                 valueSet: { type: explicitType },
+                value: this.rewriteExpression(stmt.value),
             }
         }
 
@@ -138,6 +176,7 @@ export class SemanticAnalyzer {
         return {
             ...stmt,
             valueSet: { type: inferredType },
+            value: this.rewriteExpression(stmt.value),
         }
     }
 
@@ -196,27 +235,31 @@ export class SemanticAnalyzer {
             case 'identifier': {
                 const type = this.bindings.get(value.name)
                 if (!type) {
-                    throw new Error(`${value.position.line}:${value.position.column}:Unknown identifier '${value.name}'`)
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Unknown identifier '${value.name}'`,
+                    )
                 }
                 return type
             }
-            case 'field-access': {
-                const objectType = this.inferExpressionType(value.object)
+            case 'binary': {
+                if (value.operator !== '.') return null
+                if (value.right.kind !== 'identifier') return null
+                const objectType = this.inferExpressionType(value.left)
                 if (!objectType) {
                     throw new Error(
-                        `${value.position.line}:${value.position.column}:Cannot infer type for field access object '${value.field}'`,
+                        `${value.position.line}:${value.position.column}:Cannot infer type for dot access object`,
                     )
                 }
                 const fields = this.dataTypes.get(objectType)
                 if (!fields) {
                     throw new Error(
-                        `${value.position.line}:${value.position.column}:Cannot resolve field '${value.field}' on non-data type '${objectType}'`,
+                        `${value.position.line}:${value.position.column}:Cannot resolve field '${value.right.name}' on non-data type '${objectType}'`,
                     )
                 }
-                const fieldType = fields.get(value.field)
+                const fieldType = fields.get(value.right.name)
                 if (!fieldType) {
                     throw new Error(
-                        `${value.position.line}:${value.position.column}:Unknown field '${value.field}' on data type '${objectType}'`,
+                        `${value.position.line}:${value.position.column}:Unknown field '${value.right.name}' on data type '${objectType}'`,
                     )
                 }
                 return fieldType

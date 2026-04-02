@@ -422,7 +422,7 @@ Targets:
 Checklist:
 
 - [x] Ensure multi-module semantic input lowers in deterministic order.
-- [ ] Prevent emission of helper-only symbols into public linkage surfaces as needed.
+- [x] Prevent emission of helper-only symbols into public linkage surfaces as needed.
 - [ ] Keep generated runtime calls and ownership semantics unchanged.
 
 ### Phase A2.6: Tests and Fixtures

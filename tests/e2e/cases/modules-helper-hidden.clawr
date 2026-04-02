@@ -1,0 +1,7 @@
+import Scratch from "./module-fixtures/shapes"
+
+const s: Scratch = {
+    tmp: true
+}
+
+print s.tmp

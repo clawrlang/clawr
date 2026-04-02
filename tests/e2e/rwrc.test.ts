@@ -28,6 +28,7 @@ describe('End-to-end Tests', () => {
                     code: 1,
                     stderr: data,
                 })
+                return
             } else {
                 expect(compilerResult).toMatchObject({
                     code: 0,

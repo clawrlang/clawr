@@ -110,7 +110,9 @@ function composeEntryProgram(graph: ModuleGraph): ASTProgram {
         }
 
         const dataDeclarations = program.body.filter(
-            (stmt): stmt is ASTDataDeclaration => stmt.kind === 'data-decl',
+            (stmt): stmt is ASTDataDeclaration =>
+                stmt.kind === 'data-decl' &&
+                (modulePath === graph.entry || stmt.visibility === 'public'),
         )
         mergedDeclarations.push(...dataDeclarations)
 

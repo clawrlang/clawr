@@ -1,0 +1,7 @@
+data Circle {
+    filled: truthvalue
+}
+
+helper data Scratch {
+    tmp: truthvalue
+}

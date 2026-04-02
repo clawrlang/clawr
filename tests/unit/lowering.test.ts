@@ -241,7 +241,7 @@ describe('Lowering Tests', () => {
         const module = new IRGenerator().generate(toModule(program))
         expect(module.functions[0].body[1]).toMatchObject({
             kind: 'var-decl',
-            name: 'temp1',
+            name: 'tempˇ0',
             type: 'String*',
             value: {
                 kind: 'function-call',
@@ -249,20 +249,20 @@ describe('Lowering Tests', () => {
                 arguments: [{ kind: 'var-ref', name: 'x' }],
             },
         } satisfies CStatement)
-        // printf("%s\n", temp1);
+        // printf("%s\n", tempˇ0);
         expect(module.functions[0].body[2]).toMatchObject({
             kind: 'function-call',
             name: 'printf',
             arguments: [
                 { kind: 'string', value: '%s\\n' },
-                { kind: 'var-ref', name: 'temp1' },
+                { kind: 'var-ref', name: 'tempˇ0' },
             ],
         } satisfies CStatement)
-        // releaseRC(temp0);
+        // releaseRC(tempˇ0);
         expect(module.functions[0].body[3]).toMatchObject({
             kind: 'function-call',
             name: 'releaseRC',
-            arguments: [{ kind: 'var-ref', name: 'temp1' }],
+            arguments: [{ kind: 'var-ref', name: 'tempˇ0' }],
         } satisfies CStatement)
     })
 

@@ -22,6 +22,7 @@ import type {
 
 interface LoweringContext {
     releaseAtExit: Set<string>
+    tempCounter: number
 }
 
 export class IRGenerator {
@@ -36,6 +37,7 @@ export class IRGenerator {
     private lowerFunction(fn: SemanticFunction): CFunctionDeclaration {
         const context: LoweringContext = {
             releaseAtExit: new Set(),
+            tempCounter: 0,
         }
 
         return {
@@ -167,7 +169,7 @@ export class IRGenerator {
                     ]
                 }
             case 'print':
-                return this.lowerPrint(stmt)
+                return this.lowerPrint(stmt, context)
             case 'assign':
                 if (stmt.value.kind === 'data-literal')
                     throw new Error(
@@ -259,6 +261,12 @@ export class IRGenerator {
         }))
     }
 
+    private nextTempName(context: LoweringContext): string {
+        const name = `tempˇ${context.tempCounter}`
+        context.tempCounter += 1
+        return name
+    }
+
     private lowerStructLiteralFields(fields: ASTDataLiteral['fields']): string {
         return Object.entries(fields)
             .map(([k, v]) => {
@@ -302,7 +310,10 @@ export class IRGenerator {
         }
     }
 
-    private lowerPrint(print: SemanticPrintStatement): CStatement[] {
+    private lowerPrint(
+        print: SemanticPrintStatement,
+        context: LoweringContext,
+    ): CStatement[] {
         if (print.value.kind === 'data-literal') {
             throw new Error('Unsupported print value kind data-literal')
         }
@@ -325,10 +336,11 @@ export class IRGenerator {
                     ]
                 }
 
+                const tempString = this.nextTempName(context)
                 return [
                     {
                         kind: 'var-decl',
-                        name: 'temp1',
+                        name: tempString,
                         type: 'String*',
                         value: {
                             kind: 'function-call',
@@ -341,13 +353,13 @@ export class IRGenerator {
                         name: 'printf',
                         arguments: [
                             { kind: 'string', value: '%s\\n' },
-                            { kind: 'var-ref', name: 'temp1' },
+                            { kind: 'var-ref', name: tempString },
                         ],
                     },
                     {
                         kind: 'function-call',
                         name: 'releaseRC',
-                        arguments: [{ kind: 'var-ref', name: 'temp1' }],
+                        arguments: [{ kind: 'var-ref', name: tempString }],
                     },
                 ]
             case 'truthvalue': {

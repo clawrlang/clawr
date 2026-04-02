@@ -5,6 +5,4 @@
 - **`IRGenerator`**: Data literals only support literal `truthvalue` field values
 - **`IRGenerator`**: `lowerStatement`: special case for `var-decl` with `DataLiteral` value
 - **`IRGenerator`**: Consider splitting into smaller modules
-- **`IRGenerator`**: Generate temp variable names to ensure uniqueness.
-  - Include the `ˇ` character to indicate that they are Clawr artefacts.
 - **`SemanticAnalyzer`**: Function and block scopes

@@ -154,6 +154,24 @@ describe('Parser Tests', () => {
         })
     })
 
+    it('parses explicit copy expression', () => {
+        const ast = parse('mut x: Box = copy(shared)')
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'mut',
+                    name: 'x',
+                    valueSet: { type: 'Box' },
+                    value: {
+                        kind: 'copy',
+                        value: { kind: 'identifier', name: 'shared' },
+                    },
+                },
+            ],
+        })
+    })
+
     it('parses field access correctly', () => {
         const program = 'const x: truthvalue = a.b.c.d.e.f'
         const ast = parse(program)

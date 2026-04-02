@@ -11,6 +11,7 @@ export type ASTExpression =
     | ASTTruthValueLiteral
     | ASTIdentifier
     | ASTDataLiteral
+    | ASTCopyExpression
     | ASTBinaryExpression
 
 export interface ASTIntegerLiteral {
@@ -34,6 +35,12 @@ export interface ASTIdentifier {
 export interface ASTDataLiteral {
     kind: 'data-literal'
     fields: { [field: string]: ASTExpression }
+    position: ASTPosition
+}
+
+export interface ASTCopyExpression {
+    kind: 'copy'
+    value: ASTExpression
     position: ASTPosition
 }
 

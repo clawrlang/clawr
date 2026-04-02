@@ -14,11 +14,18 @@ export interface SemanticFieldAccess {
     position: ASTPosition
 }
 
+export interface SemanticCopyExpression {
+    kind: 'copy'
+    value: SemanticExpression
+    position: ASTPosition
+}
+
 export type SemanticExpression =
     | ASTIntegerLiteral
     | ASTTruthValueLiteral
     | ASTIdentifier
     | ASTDataLiteral
+    | SemanticCopyExpression
     | SemanticFieldAccess
 
 export interface SemanticValueSet {
@@ -30,6 +37,7 @@ export interface SemanticOwnershipEffects {
     releases?: SemanticExpression[]
     mutates?: SemanticExpression[]
     releaseAtScopeExit?: boolean
+    copyValueSemantics?: '__rc_ISOLATED' | '__rc_SHARED'
 }
 
 export interface SemanticVariableDeclaration {

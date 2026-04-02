@@ -803,6 +803,49 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
+    it('emits copyRC for reference declaration crossing semantics', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'SomeRefType',
+                    fields: [{ name: 'x', type: 'truthvalue' }],
+                    position: somePosition,
+                },
+                {
+                    kind: 'var-decl',
+                    semantics: 'mut',
+                    name: 'isolated',
+                    valueSet: { type: 'SomeRefType' },
+                    value: {
+                        kind: 'identifier',
+                        name: 'sharedSource',
+                        position: somePosition,
+                    },
+                    ownership: {
+                        copyValueSemantics: '__rc_ISOLATED',
+                        releaseAtScopeExit: true,
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            name: 'isolated',
+            type: 'SomeRefType*',
+            value: {
+                kind: 'function-call',
+                name: 'copyRC',
+                arguments: [
+                    { kind: 'var-ref', name: 'sharedSource' },
+                    { kind: 'var-ref', name: '__rc_ISOLATED' },
+                ],
+            },
+        } satisfies CStatement)
+    })
+
     it('emits retainRC and releaseRC on reference identifier reassign', () => {
         const program: SemanticProgramFixture = {
             body: [
@@ -948,6 +991,62 @@ describe('Lowering Tests', () => {
                     deref: true,
                 },
             ],
+        } satisfies CStatement)
+    })
+
+    it('emits copyRC for reference assignment crossing semantics', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'SomeRefType',
+                    fields: [{ name: 'x', type: 'truthvalue' }],
+                    position: somePosition,
+                },
+                {
+                    kind: 'assign',
+                    target: {
+                        kind: 'identifier',
+                        name: 'isolated',
+                        position: somePosition,
+                    },
+                    value: {
+                        kind: 'identifier',
+                        name: 'sharedSource',
+                        position: somePosition,
+                    },
+                    ownership: {
+                        releases: [
+                            {
+                                kind: 'identifier',
+                                name: 'isolated',
+                                position: somePosition,
+                            },
+                        ],
+                        copyValueSemantics: '__rc_ISOLATED',
+                    },
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'function-call',
+            name: 'releaseRC',
+            arguments: [{ kind: 'var-ref', name: 'isolated' }],
+        } satisfies CStatement)
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'assign',
+            target: { kind: 'var-ref', name: 'isolated' },
+            value: {
+                kind: 'function-call',
+                name: 'copyRC',
+                arguments: [
+                    { kind: 'var-ref', name: 'sharedSource' },
+                    { kind: 'var-ref', name: '__rc_ISOLATED' },
+                ],
+            },
         } satisfies CStatement)
     })
 })

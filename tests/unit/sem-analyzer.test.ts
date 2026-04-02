@@ -276,6 +276,62 @@ describe('SemanticAnalyzer', () => {
             })
         })
 
+        it('rejects declaration crossing semantics without explicit copy', () => {
+            expect(() =>
+                analyze(
+                    'data Box {\n  value: truthvalue\n}\nref shared: Box = { value: true }\nmut isolated: Box = shared',
+                ),
+            ).toThrow('5:1:Cross-semantics assignment requires explicit copy(...)')
+            expect(() =>
+                analyze(
+                    'data Box {\n  value: truthvalue\n}\nref shared: Box = { value: true }\nmut isolated: Box = shared',
+                ),
+            ).toThrow('Use copy(shared) to state intent.')
+        })
+
+        it('rejects assignment crossing semantics without explicit copy', () => {
+            expect(() =>
+                analyze(
+                    'data Box {\n  value: truthvalue\n}\nref shared: Box = { value: true }\nmut isolated: Box = { value: true }\nisolated = shared',
+                ),
+            ).toThrow('6:1:Cross-semantics assignment requires explicit copy(...)')
+        })
+
+        it('allows declaration crossing semantics with explicit copy', () => {
+            const module = analyze(
+                'data Box {\n  value: truthvalue\n}\nref shared: Box = { value: true }\nmut isolated: Box = copy(shared)',
+            )
+
+            expect(module.functions[0].body[1]).toMatchObject({
+                kind: 'var-decl',
+                name: 'isolated',
+                value: {
+                    kind: 'copy',
+                    value: { kind: 'identifier', name: 'shared' },
+                },
+            })
+        })
+
+        it('allows assignment crossing semantics with explicit copy', () => {
+            const module = analyze(
+                'data Box {\n  value: truthvalue\n}\nref shared: Box = { value: true }\nmut isolated: Box = { value: true }\nisolated = copy(shared)',
+            )
+
+            expect(module.functions[0].body[2]).toMatchObject({
+                kind: 'assign',
+                value: {
+                    kind: 'copy',
+                    value: { kind: 'identifier', name: 'shared' },
+                },
+            })
+        })
+
+        it('rejects copy(...) for non-reference values', () => {
+            expect(() => analyze('mut x = copy(true)')).toThrow(
+                "1:9:copy(...) expects a reference-counted value, got 'truthvalue'",
+            )
+        })
+
         it('annotates nested field assignment with mutate effects', () => {
             const module = analyze(
                 'data Inner {\n  value: truthvalue\n}\ndata Outer {\n  inner: Inner\n}\nconst i: Inner = { value: true }\nmut o: Outer = { inner: i }\no.inner.value = true',

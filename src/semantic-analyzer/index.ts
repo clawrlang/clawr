@@ -11,7 +11,9 @@ import type {
 } from '../ast'
 import type {
     SemanticAssignment,
+    SemanticCopyExpression,
     SemanticDataDeclaration,
+    SemanticExpression,
     SemanticFieldAccess,
     SemanticFunction,
     SemanticModule,
@@ -49,6 +51,7 @@ export class SemanticAnalyzer {
             string,
             {
                 type: string
+                semantics: 'const' | 'mut' | 'ref'
                 declarationPosition?: { line: number; column: number }
             }
         >
@@ -130,6 +133,8 @@ export class SemanticAnalyzer {
 
         const targetType = this.inferExpressionType(stmt.target)
         const valueType = this.inferExpressionType(stmt.value)
+        const targetSemantics = this.inferExpressionSemantics(stmt.target)
+        const valueSemantics = this.inferExpressionSemantics(stmt.value)
 
         if (!targetType) {
             throw new Error(
@@ -152,6 +157,14 @@ export class SemanticAnalyzer {
         const rewrittenTarget = this.rewriteExpression(stmt.target)
         const rewrittenValue = this.rewriteExpression(stmt.value)
 
+        this.validateSemanticBoundary(
+            targetType,
+            targetSemantics,
+            valueSemantics,
+            rewrittenValue,
+            stmt.position,
+        )
+
         return {
             kind: 'assign',
             target: rewrittenTarget,
@@ -160,6 +173,8 @@ export class SemanticAnalyzer {
                 rewrittenTarget,
                 rewrittenValue,
                 targetType,
+                targetSemantics,
+                valueSemantics,
             ),
             position: stmt.position,
         }
@@ -169,14 +184,34 @@ export class SemanticAnalyzer {
         target: SemanticAssignment['target'],
         value: SemanticAssignment['value'],
         targetType: string,
+        targetSemantics: ASTVariableDeclaration['semantics'] | null,
+        valueSemantics: ASTVariableDeclaration['semantics'] | null,
     ): SemanticOwnershipEffects {
         if (target.kind === 'field-access') {
-            return {
+            const ownership: SemanticOwnershipEffects = {
                 mutates: this.collectMutateTargets(target),
             }
+
+            if (
+                this.isReferenceType(targetType) &&
+                this.isCopyExpression(value)
+            ) {
+                ownership.copyValueSemantics =
+                    this.toRuntimeSemanticsFlag(targetSemantics)
+            }
+
+            return ownership
         }
 
         if (target.kind === 'identifier' && this.isReferenceType(targetType)) {
+            if (this.isCopyExpression(value)) {
+                return {
+                    releases: [target],
+                    copyValueSemantics:
+                        this.toRuntimeSemanticsFlag(targetSemantics),
+                }
+            }
+
             return {
                 retains: [value],
                 releases: [target],
@@ -193,9 +228,14 @@ export class SemanticAnalyzer {
         )
     }
 
-    private rewriteExpression(
-        expr: ASTExpression,
-    ): SemanticFieldAccess | Exclude<ASTExpression, ASTBinaryExpression> {
+    private rewriteExpression(expr: ASTExpression): SemanticExpression {
+        if (expr.kind === 'copy') {
+            return {
+                ...expr,
+                value: this.rewriteExpression(expr.value),
+            }
+        }
+
         if (expr.kind !== 'binary') return expr
 
         if (expr.operator !== '.') {
@@ -224,6 +264,7 @@ export class SemanticAnalyzer {
                     field.name,
                     {
                         type: field.type,
+                        semantics: field.semantics ?? 'mut',
                         declarationPosition: field.position,
                     },
                 ]),
@@ -257,6 +298,7 @@ export class SemanticAnalyzer {
         stmt: ASTVariableDeclaration,
     ): SemanticVariableDeclaration {
         const explicitType = stmt.valueSet?.type
+        const valueSemantics = this.inferExpressionSemantics(stmt.value)
 
         if (explicitType) {
             this.validateInitializerAgainstType(stmt.value, explicitType)
@@ -265,6 +307,15 @@ export class SemanticAnalyzer {
                 semantics: stmt.semantics,
             })
             const rewrittenValue = this.rewriteExpression(stmt.value)
+
+            this.validateSemanticBoundary(
+                explicitType,
+                stmt.semantics,
+                valueSemantics,
+                rewrittenValue,
+                stmt.position,
+            )
+
             return {
                 ...stmt,
                 valueSet: { type: explicitType },
@@ -273,6 +324,8 @@ export class SemanticAnalyzer {
                     stmt.name,
                     explicitType,
                     rewrittenValue,
+                    stmt.semantics,
+                    valueSemantics,
                 ),
             }
         }
@@ -289,6 +342,15 @@ export class SemanticAnalyzer {
             semantics: stmt.semantics,
         })
         const rewrittenValue = this.rewriteExpression(stmt.value)
+
+        this.validateSemanticBoundary(
+            inferredType,
+            stmt.semantics,
+            valueSemantics,
+            rewrittenValue,
+            stmt.position,
+        )
+
         return {
             ...stmt,
             valueSet: { type: inferredType },
@@ -297,6 +359,8 @@ export class SemanticAnalyzer {
                 stmt.name,
                 inferredType,
                 rewrittenValue,
+                stmt.semantics,
+                valueSemantics,
             ),
         }
     }
@@ -305,22 +369,33 @@ export class SemanticAnalyzer {
         name: string,
         type: string,
         value: SemanticVariableDeclaration['value'],
+        targetSemantics: ASTVariableDeclaration['semantics'],
+        valueSemantics: ASTVariableDeclaration['semantics'] | null,
     ): SemanticOwnershipEffects {
         if (!this.isReferenceType(type)) return {}
 
-        return {
-            retains:
-                value.kind === 'data-literal'
-                    ? []
-                    : [
-                          {
-                              kind: 'identifier',
-                              name,
-                              position: value.position,
-                          },
-                      ],
+        const ownership: SemanticOwnershipEffects = {
             releaseAtScopeExit: true,
         }
+
+        if (this.isCopyExpression(value)) {
+            ownership.copyValueSemantics =
+                this.toRuntimeSemanticsFlag(targetSemantics)
+            return ownership
+        }
+
+        ownership.retains =
+            value.kind === 'data-literal'
+                ? []
+                : [
+                      {
+                          kind: 'identifier',
+                          name,
+                          position: value.position,
+                      },
+                  ]
+
+        return ownership
     }
 
     private isReferenceType(type: string): boolean {
@@ -429,6 +504,20 @@ export class SemanticAnalyzer {
                 }
                 return fieldInfo.type
             }
+            case 'copy': {
+                const copiedType = this.inferExpressionType(value.value)
+                if (!copiedType) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Cannot infer type for copy value`,
+                    )
+                }
+                if (!this.isReferenceType(copiedType)) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:copy(...) expects a reference-counted value, got '${copiedType}'`,
+                    )
+                }
+                return copiedType
+            }
             case 'data-literal':
                 return null
             default:
@@ -463,6 +552,97 @@ export class SemanticAnalyzer {
                 )
             }
         }
+    }
+
+    private inferExpressionSemantics(
+        value: ASTExpression,
+    ): ASTVariableDeclaration['semantics'] | null {
+        switch (value.kind) {
+            case 'identifier': {
+                const binding = this.bindings.get(value.name)
+                if (!binding) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Unknown identifier '${value.name}'`,
+                    )
+                }
+                return binding.semantics
+            }
+            case 'binary': {
+                if (value.operator !== '.') return null
+                if (value.right.kind !== 'identifier') return null
+                const objectType = this.inferExpressionType(value.left)
+                if (!objectType) return null
+                const fields = this.dataTypes.get(objectType)
+                if (!fields) return null
+                const fieldInfo = fields.get(value.right.name)
+                if (!fieldInfo) return null
+                return fieldInfo.semantics
+            }
+            case 'copy':
+                return null
+            default:
+                return null
+        }
+    }
+
+    private toRuntimeSemanticsFlag(
+        semantics: ASTVariableDeclaration['semantics'] | null,
+    ): '__rc_ISOLATED' | '__rc_SHARED' {
+        return semantics === 'ref' ? '__rc_SHARED' : '__rc_ISOLATED'
+    }
+
+    private requiresSemanticCopy(
+        targetSemantics: ASTVariableDeclaration['semantics'] | null,
+        valueSemantics: ASTVariableDeclaration['semantics'] | null,
+    ): boolean {
+        if (!targetSemantics || !valueSemantics) return false
+        return (
+            this.toRuntimeSemanticsFlag(targetSemantics) !==
+            this.toRuntimeSemanticsFlag(valueSemantics)
+        )
+    }
+
+    private validateSemanticBoundary(
+        targetType: string,
+        targetSemantics: ASTVariableDeclaration['semantics'] | null,
+        valueSemantics: ASTVariableDeclaration['semantics'] | null,
+        rewrittenValue:
+            | SemanticAssignment['value']
+            | SemanticVariableDeclaration['value'],
+        position: { line: number; column: number },
+    ): void {
+        if (!this.isReferenceType(targetType)) return
+        if (!this.requiresSemanticCopy(targetSemantics, valueSemantics)) return
+        if (this.isCopyExpression(rewrittenValue)) return
+
+        const suggestionExpr = this.formatCopySuggestionValue(rewrittenValue)
+
+        throw new Error(
+            `${position.line}:${position.column}:Cross-semantics assignment requires explicit copy(...). Use copy(${suggestionExpr}) to state intent.`,
+        )
+    }
+
+    private formatCopySuggestionValue(
+        value:
+            | SemanticAssignment['value']
+            | SemanticVariableDeclaration['value'],
+    ): string {
+        switch (value.kind) {
+            case 'identifier':
+                return value.name
+            case 'field-access':
+                return `${this.formatCopySuggestionValue(value.object)}.${value.field}`
+            default:
+                return 'value'
+        }
+    }
+
+    private isCopyExpression(
+        value:
+            | SemanticAssignment['value']
+            | SemanticVariableDeclaration['value'],
+    ): value is SemanticCopyExpression {
+        return value.kind === 'copy'
     }
 
     private assertIdentifierIsMutable(

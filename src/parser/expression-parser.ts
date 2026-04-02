@@ -33,6 +33,16 @@ export class ExpressionParser {
                 }
             case 'IDENTIFIER':
                 this.stream.next()
+                if (token.identifier === 'copy') {
+                    this.stream.expect('PUNCTUATION', '(')
+                    const value = this.parse()
+                    this.stream.expect('PUNCTUATION', ')')
+                    return {
+                        kind: 'copy',
+                        value,
+                        position: { line: token.line, column: token.column },
+                    }
+                }
                 return {
                     kind: 'identifier',
                     name: token.identifier,

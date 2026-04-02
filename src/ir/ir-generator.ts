@@ -244,7 +244,10 @@ export class IRGenerator {
                             kind: 'var-decl',
                             type: this.lowerType(stmt),
                             name: stmt.name,
-                            value: this.lowerValue(stmt.value),
+                            value: this.lowerOwnedValue(
+                                stmt.value,
+                                stmt.ownership,
+                            ),
                         },
                         ...this.lowerOwnershipPrefix(stmt.ownership),
                     ]
@@ -266,7 +269,10 @@ export class IRGenerator {
                                 kind: 'var-ref',
                                 name: stmt.target.name,
                             },
-                            value: this.lowerValue(stmt.value),
+                            value: this.lowerOwnedValue(
+                                stmt.value,
+                                stmt.ownership,
+                            ),
                         },
                     ]
                 }
@@ -279,7 +285,7 @@ export class IRGenerator {
                     {
                         kind: 'assign',
                         target: this.lowerValue(stmt.target),
-                        value: this.lowerValue(stmt.value),
+                        value: this.lowerOwnedValue(stmt.value, stmt.ownership),
                     },
                 ]
             default:
@@ -427,8 +433,30 @@ export class IRGenerator {
                     field: val.field,
                     deref: true,
                 }
+            case 'copy':
+                if (val.value.kind === 'data-literal') {
+                    throw new Error('copy(...) of data literal is unsupported')
+                }
+                return this.lowerValue(val.value)
             default:
                 throw new Error(`Unknown AST value kind ${(val as any).kind}`)
+        }
+    }
+
+    private lowerOwnedValue(
+        val: Exclude<SemanticExpression, ASTDataLiteral>,
+        ownership: SemanticOwnershipEffects,
+    ): CExpression {
+        const lowered = this.lowerValue(val)
+        if (!ownership.copyValueSemantics) return lowered
+
+        return {
+            kind: 'function-call',
+            name: 'copyRC',
+            arguments: [
+                lowered,
+                { kind: 'var-ref', name: ownership.copyValueSemantics },
+            ],
         }
     }
 

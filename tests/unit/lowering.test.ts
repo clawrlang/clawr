@@ -585,6 +585,55 @@ describe('Lowering Tests', () => {
         })
     })
 
+    it('lowers field access as if condition with strict-true comparison', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Point',
+                    fields: [{ name: 'x', type: 'truthvalue' }],
+                    position: somePosition,
+                },
+                {
+                    kind: 'if',
+                    condition: {
+                        kind: 'field-access',
+                        object: {
+                            kind: 'identifier',
+                            name: 'p',
+                            position: somePosition,
+                        },
+                        field: 'x',
+                        position: somePosition,
+                    },
+                    thenBranch: [
+                        {
+                            kind: 'print',
+                            dispatchType: 'truthvalue',
+                            value: {
+                                kind: 'truthvalue',
+                                value: 'true',
+                                position: somePosition,
+                            },
+                            position: somePosition,
+                        },
+                    ],
+                    elseBranch: undefined,
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'if',
+            condition: {
+                kind: 'raw-expression',
+                expression: '(p->x == c_true)',
+            },
+        })
+    })
+
     it('lowers while conditions as strict true checks', () => {
         const program: SemanticProgramFixture = {
             body: [

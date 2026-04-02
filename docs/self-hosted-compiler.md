@@ -63,13 +63,13 @@ Prioritise features that unlock writing the compiler in Clawr with the smallest 
 3. Milestone B: Operator and precedence stabilization across modules
 4. Milestone C: Encapsulated `object`/`service` types
 
-Current focus: Milestone A2 (Modules/imports/helper visibility)
+Current focus: Milestone C (Encapsulated `object`/`service` types)
 
 Roadmap status:
 
 - [x] Milestone A1 complete
-- [ ] Milestone A2 complete
-- [ ] Milestone B complete
+- [x] Milestone A2 complete
+- [x] Milestone B complete
 - [ ] Milestone C complete
 
 ### Integrated Plan: Where Modules Fit
@@ -455,9 +455,9 @@ Targets:
 
 Checklist:
 
-- [ ] Add cross-module regression fixtures that combine operators with imports.
-- [ ] Verify precedence remains deterministic after module graph integration.
-- [ ] Keep integer and truthvalue operator behavior stable in e2e runs.
+- [x] Add cross-module regression fixtures that combine operators with imports.
+- [x] Verify precedence remains deterministic after module graph integration.
+- [x] Keep integer and truthvalue operator behavior stable in e2e runs.
 
 ### Milestone Risk Register
 
@@ -471,7 +471,7 @@ Checklist:
 - [x] PR2: Phase A1.2 (control-flow semantics/lowering + unit/e2e tests).
 - [x] PR3: Phase A2.1 + Phase A2.2 (module/import/helper syntax + parser tests, data-only slice).
 - [x] PR4: Phase A2.3 + A2.4 + A2.5 + A2.6 (semantic resolution + module graph + lowering/codegen wiring + tests).
-- [ ] PR5: Phase B stabilization suite across multi-module fixtures.
+- [x] PR5: Phase B stabilization suite across multi-module fixtures.
 - [ ] PR6: Follow-up for deferred `object`/`service` method visibility and helper-boundary semantics.
 
 ## Probably not Needed

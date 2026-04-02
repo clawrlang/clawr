@@ -219,6 +219,32 @@ describe('Parser Tests', () => {
         })
     })
 
+    it('parses field access chain in body following import block', () => {
+        const ast = parse(
+            'import Point from "models"\nconst x: truthvalue = p.a.b',
+        )
+        expect(ast).toMatchObject({
+            imports: [{ kind: 'import', items: [{ name: 'Point' }] }],
+            body: [
+                {
+                    kind: 'var-decl',
+                    name: 'x',
+                    value: {
+                        kind: 'binary',
+                        operator: '.',
+                        left: {
+                            kind: 'binary',
+                            operator: '.',
+                            left: { kind: 'identifier', name: 'p' },
+                            right: { kind: 'identifier', name: 'a' },
+                        },
+                        right: { kind: 'identifier', name: 'b' },
+                    },
+                },
+            ],
+        })
+    })
+
     it('parses assignment correctly', () => {
         const program = 'a = true'
         const ast = parse(program)

@@ -132,8 +132,15 @@ An `object` is a _meaningful_ entity that hides a `data` structure in its bowels
 
 object Money {
 
-    func dollars() => self.cents / 100
-    func cents() => self.cents % 100
+    // Non-mutating method: self is const (immutable), returns isolated owned value
+    func dollars(self: const Money) -> integer {
+        return self.cents / 100
+    }
+
+    // Non-mutating method: self is const, returns shared COW value
+    func toCurrency(self: const Money) -> const string {
+        return self.cents.toStringRC()
+    }
 
 data:
     const cents: integer
@@ -145,17 +152,78 @@ data:
 companion Money {
     const zero: Money = { cents: 0 }
 
-    func cents(_ c: integer) => { cents: c }
-    func dollars(_ d: integer, cents: integer = 0) => {
-        cents: d * 100 + cents
+    // Factory methods return isolated owned values
+    func cents(c: integer) -> Money {
+        return { cents: c }
     }
-    func amount(_ a: real) => {
-        cents: integer(Math.round(a * 100))
+
+    func dollars(d: integer, cents: integer = 0) -> Money {
+        return { cents: d * 100 + cents }
+    }
+
+    func amount(a: real) -> Money {
+        return { cents: integer(Math.round(a * 100)) }
     }
 }
 ```
 
-## The `service` Type
+## Method Semantics
+
+Method signatures in `object` and `service` types define how `self` is bound, how parameters are passed, and what ownership semantics apply to return values.
+
+For inheritance-specific setup and super-initializer behavior, see [docs/inheritance.md](inheritance.md).
+
+### Self Binding
+
+- **Non-mutating methods**: `self: const Type` — implicit, read-only access to the object's data. No `mutateRC` call needed.
+- **Mutating methods**: `self: ref Type` — requires a `mutateRC` call before the method body executes, ensuring refs == 1 (or is shared with no COW). All mutations to `self` assume exclusive access.
+
+### Parameter Semantics
+
+- **No prefix** — `in` semantics: the parameter can be accessed but not changed. Can be called with any value (isolated or shared).
+- **`const` prefix** — cannot be passed a shared (`__rc_SHARED`) value; must be isolated or const.
+- **`mut` prefix** — cannot be passed a shared value; can be mutated, and assumes exclusive access.
+- **`ref` prefix** — borrows a reference; the parameter is bound to the caller's variable lifetime.
+
+### Return Value Semantics
+
+- **`-> Type`** — returns an isolated, uniquely-referenced value. The callee marks it `__rc_ISOLATED`, but the receiver may change it to `__rc_SHARED` (e.g., assigning to a `ref` variable).
+- **`-> const Type`** — returns a COW (copy-on-write) value. It may have `refs > 1`. This is used for accessor methods that return shared data.
+
+### Example: Non-Mutating and Mutating Methods
+
+```clawr
+object Account {
+    // Non-mutating accessor: const self, returns isolated integer
+    func balance(self: const Account) -> integer {
+        return self.balanceCents
+    }
+
+    // Non-mutating accessor: const self, returns COW string
+    func accountNumber(self: const Account) -> const string {
+        return self.number  // shared if previously returned
+    }
+
+    // Mutating method: ref self, modifies internal state
+    func deposit(self: ref Account, amount: integer) {
+        // mutateRC is called implicitly before this method body
+        self.balanceCents = self.balanceCents + amount
+    }
+
+    // Mutating method with parameter passing
+    func transfer(self: ref Account, to: ref Account, amount: integer) {
+        // mutateRC is called for self before entry; to must be handled separately
+        self.balanceCents = self.balanceCents - amount
+        to.balanceCents = to.balanceCents + amount
+    }
+
+data:
+    mut balanceCents: integer
+    const number: string
+}
+```
+
+---
 
 An `object` is just an encapsulated `data` structure. In some cases, however, we might want to access and modify system-wide data such as on-device sensors, a database or the Internet. This is where the `service` type comes in.
 
@@ -163,19 +231,24 @@ A `service` is similar to an `object`. It is defined by its interface and its be
 
 ```clawr
 service UserRepository {
-    func getUser(id: integer) -> User {
+    // Non-mutating service method: returns isolated owned value
+    func getUser(self: const UserRepository, id: integer) -> User {
         // Fetch user from database or external subsystem
+        // ...
     }
 
 mutating:
-    func updateUser(_ user: User) {
+    // Mutating service method: ref self, mutateRC is called before entry
+    func updateUser(self: ref UserRepository, user: User) {
         // Update user in database or external subsystem
+        // All mutations to self assume refs == 1 or shared (no COW)
+        // ...
     }
 }
 ```
 
-A `service` type can only use `SHARED` semantics. Variables must always be declared as `ref`.
-As it’s data is defined externally, making isolated copies of it’s memory will only cause weird behaviour.
+A `service` type can only use `SHARED` semantics (reference semantics). Variables must always be declared as `ref`.
+As its data is defined externally, making isolated copies of its memory will only cause unpredictable behaviour.
 
 ## Visibility and Headers
 
@@ -186,7 +259,7 @@ Headers are, however, rather complex to use. That might be the main problem with
 My current idea is to use a `helper` keyword:
 
 - All `object` and `service` fields are hidden and all `data` fields are public. That cannot change.
-- All methods of an object are public unless marked `helper`. A `helper` method can only be used by other methods of the same `object` (or by factories defined in the same module).
+- All methods of an object are public unless marked `helper`. A `helper` method can only be used by other methods of the same `object` (or by companion factories and module-scoped functions).
 - Free functions are publicly available. If marked `helper` they cannot be accessed outside their package/target.
 - Types are publicly available. If marked `helper` they cannot be accessed outside their package/target.
 

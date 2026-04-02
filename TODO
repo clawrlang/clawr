@@ -9,3 +9,7 @@
   - `trait HasStringRepresentation { func toString() -> string }`
   - Or use something like C# implicit/explicit operator instead of `toString()`?
 - Object-oriented lowering helpers?
+- `visibility: 'helper'` -> `isHelper: true`?
+- `import`: too TypeScript?
+- e2e test with helper in the same module?
+- Should helper be visible to all modules in the package/library?

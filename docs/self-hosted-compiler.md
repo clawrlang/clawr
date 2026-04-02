@@ -459,6 +459,55 @@ Checklist:
 - [x] Verify precedence remains deterministic after module graph integration.
 - [x] Keep integer and truthvalue operator behavior stable in e2e runs.
 
+### Phase C1.1: Free Function Declarations
+
+Scope decisions:
+
+- Free functions (top-level `func`) are used as constructors, so companions are deferred.
+- Function parsing is the prerequisite for method parsing, which is the prerequisite for `object`/`service` bodies.
+- Polymorphism keywords (`abstract`, `virtual`, `override`) are deferred to C2.
+
+Targets:
+
+- `src/ast/index.ts`
+- `src/parser/index.ts` (or a new `src/parser/statement-parsers/function-declaration-parser.ts`)
+- `tests/unit/parser.test.ts`
+
+Checklist:
+
+- [ ] Add `ASTFunctionDeclaration` AST node: name, parameters (name + type + optional label), return type annotation, body (list of statements), visibility, position.
+- [ ] Parse top-level `func name(params) -> Type { body }` declarations.
+- [ ] Parse `func name(params) { body }` (no return type annotation).
+- [ ] Parse `func name(params) => expression` (shorthand body).
+- [ ] Parse labeled/unlabeled parameters: `func f(label name: Type)` and `func f(name: Type)`.
+- [ ] `helper` prefix applies to top-level `func` declarations.
+- [ ] Add parser unit tests covering all forms.
+- [ ] Semantic analyzer registers function names into module scope (no body analysis yet).
+
+### Phase C1.2: `object`/`service` Declaration Syntax
+
+Prerequisites: C1.1 complete (method bodies reuse function body parsing).
+
+Targets:
+
+- `src/ast/index.ts`
+- `src/parser/index.ts`
+- `src/parser/statement-parsers/object-declaration-parser.ts` (new)
+- `tests/unit/parser.test.ts`
+
+Checklist:
+
+- [ ] Add `ASTObjectDeclaration` AST node: name, optional supertype, sections (`data`, `mutating`, default), visibility.
+- [ ] Add `ASTServiceDeclaration` AST node: same shape as object declaration.
+- [ ] Parse `object Name { ... }` with `data:`, `mutating:`, and default (non-mutating) method sections.
+- [ ] Parse `service Name { ... }` with the same section structure.
+- [ ] Methods inside sections reuse `ASTFunctionDeclaration` parsing from C1.1.
+- [ ] `data:` section fields use the same syntax as `data` declaration fields.
+- [ ] `helper` prefix applies to individual method declarations.
+- [ ] No `abstract`, `virtual`, `override`, `inheritance:` in this slice.
+- [ ] Semantic analyzer registers type names (no method resolution yet).
+- [ ] Add parser unit tests for valid declarations, malformed sections, and `helper` methods.
+
 ### Milestone Risk Register
 
 - [ ] Loop scope correctness: variable lifetime and state transitions across `break`/`continue`.
@@ -472,7 +521,9 @@ Checklist:
 - [x] PR3: Phase A2.1 + Phase A2.2 (module/import/helper syntax + parser tests, data-only slice).
 - [x] PR4: Phase A2.3 + A2.4 + A2.5 + A2.6 (semantic resolution + module graph + lowering/codegen wiring + tests).
 - [x] PR5: Phase B stabilization suite across multi-module fixtures.
-- [ ] PR6: Follow-up for deferred `object`/`service` method visibility and helper-boundary semantics.
+- [ ] PR6: Phase C1.1 (free function declaration parsing + AST + parser tests).
+- [ ] PR7: Phase C1.2 (`object`/`service` declaration parsing + AST + parser tests).
+- [ ] PR8: Follow-up for deferred `object`/`service` method visibility and helper-boundary semantics.
 
 ## Probably not Needed
 

@@ -24,10 +24,6 @@ export function lowerValueSetType(type: string): string {
     }
 }
 
-export function isReferenceCountedValueSetType(type: string): boolean {
-    return type !== 'truthvalue'
-}
-
 export function lowerStruct(stmt: SemanticDataDeclaration): CStruct[] {
     const fields = stmt.fields.map((field) => ({
         name: field.name,
@@ -96,9 +92,7 @@ export function structHookNames(typeName: string): {
 export function lowerStructHooks(
     stmt: SemanticDataDeclaration,
 ): CFunctionDeclaration[] {
-    const rcFields = stmt.fields.filter((field) =>
-        isReferenceCountedValueSetType(field.type),
-    )
+    const rcFields = stmt.fields.filter((field) => field.isReferenceCounted)
     const hooks = structHookNames(stmt.name)
     const selfExpr: CExpression = {
         kind: 'raw-expression',

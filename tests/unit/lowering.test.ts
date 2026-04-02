@@ -78,9 +78,19 @@ function normalizeOwnership(
 }
 
 function toModule(program: SemanticProgramFixture): SemanticModule {
-    const types = program.body.filter(
-        (stmt): stmt is SemanticDataDeclaration => stmt.kind === 'data-decl',
-    )
+    const types = program.body
+        .filter(
+            (stmt): stmt is SemanticDataDeclaration =>
+                stmt.kind === 'data-decl',
+        )
+        .map((stmt) => ({
+            ...stmt,
+            fields: stmt.fields.map((field) => ({
+                ...field,
+                isReferenceCounted:
+                    field.isReferenceCounted ?? field.type !== 'truthvalue',
+            })),
+        }))
     const typeNames = new Set(types.map((t) => t.name))
 
     return {

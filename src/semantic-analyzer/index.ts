@@ -55,7 +55,7 @@ export class SemanticAnalyzer {
         for (const stmt of this.ast.body) {
             if (stmt.kind === 'data-decl') {
                 this.registerDataDeclaration(stmt)
-                types.push(stmt)
+                types.push(this.annotateDataDeclaration(stmt))
             }
         }
 
@@ -264,6 +264,18 @@ export class SemanticAnalyzer {
                 ]),
             ),
         )
+    }
+
+    private annotateDataDeclaration(
+        stmt: ASTDataDeclaration,
+    ): SemanticDataDeclaration {
+        return {
+            ...stmt,
+            fields: stmt.fields.map((field) => ({
+                ...field,
+                isReferenceCounted: this.dataTypes.has(field.type),
+            })),
+        }
     }
 
     private lookupDataType(name: string): BindingMap | undefined {

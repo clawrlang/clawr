@@ -70,7 +70,16 @@ export type SemanticStatement =
     | SemanticPrintStatement
     | SemanticAssignment
 
-export type SemanticDataDeclaration = ASTDataDeclaration
+export interface SemanticDataDeclaration extends Omit<
+    ASTDataDeclaration,
+    'fields'
+> {
+    fields: Array<
+        ASTDataDeclaration['fields'][number] & {
+            isReferenceCounted: boolean
+        }
+    >
+}
 
 export interface SemanticFunction {
     kind: 'function'

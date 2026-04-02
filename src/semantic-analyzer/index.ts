@@ -53,6 +53,8 @@ export class SemanticAnalyzer {
 
     analyze(): SemanticModule {
         const types: SemanticDataDeclaration[] = []
+        const objects: ASTObjectDeclaration[] = []
+        const services: ASTServiceDeclaration[] = []
         const mainBody: SemanticStatement[] = []
 
         for (const stmt of this.ast.body) {
@@ -63,8 +65,13 @@ export class SemanticAnalyzer {
             if (stmt.kind === 'func-decl') {
                 this.registerFunctionDeclaration(stmt)
             }
-            if (stmt.kind === 'object-decl' || stmt.kind === 'service-decl') {
+            if (stmt.kind === 'object-decl') {
                 this.registerTypeDeclaration(stmt)
+                objects.push(stmt)
+            }
+            if (stmt.kind === 'service-decl') {
+                this.registerTypeDeclaration(stmt)
+                services.push(stmt)
             }
         }
 
@@ -92,6 +99,8 @@ export class SemanticAnalyzer {
             })),
             functions: [mainFunction],
             types,
+            objects,
+            services,
             globals: [],
         }
     }

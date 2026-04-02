@@ -501,6 +501,68 @@ describe('SemanticAnalyzer', () => {
             )
         })
     })
+
+    describe('object and service declarations', () => {
+        it('surfaces public object declaration in module.objects', () => {
+            const module = analyze(
+                'object Money { data: const cents: integer }',
+            )
+            expect(module.objects).toMatchObject([
+                { kind: 'object-decl', name: 'Money', visibility: 'public' },
+            ])
+            expect(module.services).toEqual([])
+        })
+
+        it('surfaces helper object declaration with correct visibility', () => {
+            const module = analyze('helper object Internal { }')
+            expect(module.objects).toMatchObject([
+                { kind: 'object-decl', name: 'Internal', visibility: 'helper' },
+            ])
+        })
+
+        it('surfaces public service declaration in module.services', () => {
+            const module = analyze('service UserRepo { }')
+            expect(module.services).toMatchObject([
+                {
+                    kind: 'service-decl',
+                    name: 'UserRepo',
+                    visibility: 'public',
+                },
+            ])
+            expect(module.objects).toEqual([])
+        })
+
+        it('surfaces helper service declaration with correct visibility', () => {
+            const module = analyze('helper service InternalRepo { }')
+            expect(module.services).toMatchObject([
+                {
+                    kind: 'service-decl',
+                    name: 'InternalRepo',
+                    visibility: 'helper',
+                },
+            ])
+        })
+
+        it('registers object name as a reference type for variable declarations', () => {
+            // Object types registered via registerTypeDeclaration enter dataTypes,
+            // so the name is tracked and the object appears in module.objects.
+            const module = analyze(
+                'object Account { data: mut balance: truthvalue }\nobject Ledger { }',
+            )
+            expect(module.objects).toMatchObject([
+                { name: 'Account' },
+                { name: 'Ledger' },
+            ])
+        })
+
+        it('does not expose object or service in module.types', () => {
+            const module = analyze(
+                'data Point { x: truthvalue }\nobject Shape { }\nservice Renderer { }',
+            )
+            expect(module.types).toMatchObject([{ name: 'Point' }])
+            expect(module.types).toHaveLength(1)
+        })
+    })
 })
 
 function analyze(code: string) {

@@ -512,7 +512,7 @@ Checklist:
 
 - [ ] Loop scope correctness: variable lifetime and state transitions across `break`/`continue`.
 - [ ] Deterministic module ordering: import DAG stability and cycle diagnostics.
-- [ ] Helper boundary enforcement: visibility checks across package/library boundaries.
+- [x] Helper boundary enforcement: visibility checks across package/library boundaries.
 
 ### Suggested PR Slices
 
@@ -521,9 +521,9 @@ Checklist:
 - [x] PR3: Phase A2.1 + Phase A2.2 (module/import/helper syntax + parser tests, data-only slice).
 - [x] PR4: Phase A2.3 + A2.4 + A2.5 + A2.6 (semantic resolution + module graph + lowering/codegen wiring + tests).
 - [x] PR5: Phase B stabilization suite across multi-module fixtures.
-- [ ] PR6: Phase C1.1 (free function declaration parsing + AST + parser tests).
-- [ ] PR7: Phase C1.2 (`object`/`service` declaration parsing + AST + parser tests).
-- [ ] PR8: Follow-up for deferred `object`/`service` method visibility and helper-boundary semantics.
+- [x] PR6: Phase C1.1 (free function declaration parsing + AST + parser tests).
+- [x] PR7: Phase C1.2 (`object`/`service` declaration parsing + AST + parser tests).
+- [x] PR8: `object`/`service` helper-boundary semantics — `SemanticModule` extended with `objects`/`services` arrays; module graph import enforcement for helper-visibility; sem-analyzer and module graph unit tests.
 
 ## Probably not Needed
 

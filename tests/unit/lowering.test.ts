@@ -106,6 +106,8 @@ function toModule(program: SemanticProgramFixture): SemanticModule {
             },
         ],
         types,
+        objects: [],
+        services: [],
         globals: [],
     }
 }

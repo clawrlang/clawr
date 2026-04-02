@@ -4,7 +4,9 @@ import type {
     ASTIdentifier,
     ASTImportDeclaration,
     ASTIntegerLiteral,
+    ASTObjectDeclaration,
     ASTPosition,
+    ASTServiceDeclaration,
     ASTTruthValueLiteral,
 } from '../ast'
 
@@ -123,5 +125,7 @@ export interface SemanticModule {
     imports: SemanticImportDeclaration[]
     functions: SemanticFunction[]
     types: SemanticDataDeclaration[]
+    objects: ASTObjectDeclaration[]
+    services: ASTServiceDeclaration[]
     globals: SemanticVariableDeclaration[]
 }

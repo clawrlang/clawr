@@ -99,6 +99,61 @@ describe('Module graph', () => {
 
         await expect(buildModuleGraph(main)).rejects.toThrow('is helper-only')
     })
+
+    it('allows importing a public object declaration from another module', async () => {
+        const root = mkTemp()
+        const main = path.join(root, 'main.clawr')
+        const mod = path.join(root, 'mod.clawr')
+
+        fs.writeFileSync(main, 'import Money from "./mod"\nconst x = ambiguous')
+        fs.writeFileSync(mod, 'object Money { data: const cents: integer }')
+
+        const graph = await buildModuleGraph(main)
+        expect([...graph.modules.keys()]).toHaveLength(2)
+    })
+
+    it('fails when importing a helper object from another module', async () => {
+        const root = mkTemp()
+        const main = path.join(root, 'main.clawr')
+        const mod = path.join(root, 'mod.clawr')
+
+        fs.writeFileSync(
+            main,
+            'import Internal from "./mod"\nconst x = ambiguous',
+        )
+        fs.writeFileSync(mod, 'helper object Internal { }')
+
+        await expect(buildModuleGraph(main)).rejects.toThrow('is helper-only')
+    })
+
+    it('allows importing a public service declaration from another module', async () => {
+        const root = mkTemp()
+        const main = path.join(root, 'main.clawr')
+        const mod = path.join(root, 'mod.clawr')
+
+        fs.writeFileSync(
+            main,
+            'import UserRepo from "./mod"\nconst x = ambiguous',
+        )
+        fs.writeFileSync(mod, 'service UserRepo { }')
+
+        const graph = await buildModuleGraph(main)
+        expect([...graph.modules.keys()]).toHaveLength(2)
+    })
+
+    it('fails when importing a helper service from another module', async () => {
+        const root = mkTemp()
+        const main = path.join(root, 'main.clawr')
+        const mod = path.join(root, 'mod.clawr')
+
+        fs.writeFileSync(
+            main,
+            'import InternalCache from "./mod"\nconst x = ambiguous',
+        )
+        fs.writeFileSync(mod, 'helper service InternalCache { }')
+
+        await expect(buildModuleGraph(main)).rejects.toThrow('is helper-only')
+    })
 })
 
 function mkTemp(): string {

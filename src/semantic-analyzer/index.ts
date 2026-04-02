@@ -3,6 +3,7 @@ import type {
     ASTDataDeclaration,
     ASTDataLiteral,
     ASTExpression,
+    ASTFunctionDeclaration,
     ASTIdentifier,
     ASTProgram,
     ASTStatement,
@@ -58,6 +59,9 @@ export class SemanticAnalyzer {
                 this.registerDataDeclaration(stmt)
                 types.push(this.annotateDataDeclaration(stmt))
             }
+            if (stmt.kind === 'func-decl') {
+                this.registerFunctionDeclaration(stmt)
+            }
         }
 
         this.validateDataFieldSemantics(types)
@@ -65,6 +69,7 @@ export class SemanticAnalyzer {
         const scopedAnalyzer = this.createChildScope()
         for (const stmt of this.ast.body) {
             if (stmt.kind === 'data-decl') continue
+            if (stmt.kind === 'func-decl') continue
             mainBody.push(scopedAnalyzer.analyzeStatement(stmt))
         }
 
@@ -107,6 +112,10 @@ export class SemanticAnalyzer {
         switch (stmt.kind) {
             case 'data-decl':
                 throw new Error('Unexpected data declaration in statement body')
+            case 'func-decl':
+                throw new Error(
+                    'Unexpected function declaration in statement body',
+                )
             case 'var-decl':
                 return this.analyzeVariableDeclaration(stmt)
             case 'print':
@@ -358,6 +367,16 @@ export class SemanticAnalyzer {
             field: expr.right.name,
             position: expr.position,
         }
+    }
+
+    private registerFunctionDeclaration(stmt: ASTFunctionDeclaration) {
+        // Register the function name as a binding so identifiers can refer to it.
+        // Full body analysis is deferred to a later slice.
+        this.bindings.set(stmt.name, {
+            type: 'func',
+            semantics: 'const',
+            declarationPosition: stmt.position,
+        })
     }
 
     private registerDataDeclaration(stmt: ASTDataDeclaration) {

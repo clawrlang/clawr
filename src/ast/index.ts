@@ -67,6 +67,31 @@ export interface ASTBinaryExpression {
     position: ASTPosition
 }
 
+// ----- Function declarations -----
+export interface ASTFunctionParameter {
+    label?: string // external label; absent means positional/unlabeled
+    name: string // internal binding name
+    type: string
+    semantics?: 'const' | 'mut' | 'ref'
+    position: ASTPosition
+}
+
+export interface ASTFunctionDeclaration {
+    kind: 'func-decl'
+    name: string
+    visibility: ASTVisibility
+    parameters: ASTFunctionParameter[]
+    returnType?: string // absent means void / no annotation
+    returnSemantics?: 'const' | 'ref' // absent = unique/unbound return
+    body: ASTFunctionBody
+    position: ASTPosition
+}
+
+// Block body `{ stmts }` or shorthand body `=> expr`
+export type ASTFunctionBody =
+    | { kind: 'block'; statements: ASTStatement[] }
+    | { kind: 'expression'; value: ASTExpression }
+
 // ----- Statements -----
 export type ASTStatement =
     | ASTVariableDeclaration
@@ -77,6 +102,7 @@ export type ASTStatement =
     | ASTBreakStatement
     | ASTContinueStatement
     | ASTDataDeclaration
+    | ASTFunctionDeclaration
 
 export interface ASTAssignment {
     kind: 'assign'

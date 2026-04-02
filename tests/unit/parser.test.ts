@@ -433,7 +433,7 @@ describe('Parser Tests', () => {
 
     it('rejects helper before unsupported top-level declarations', () => {
         expect(() => parse('helper const x = ambiguous')).toThrow(
-            '1:1:helper is only supported for top-level data declarations in this slice',
+            '1:1:helper is only supported before data or func declarations',
         )
     })
 
@@ -454,6 +454,126 @@ describe('Parser Tests', () => {
 
         expect(() => parse('import Token from ambiguous')).toThrow(
             "1:14:Expected module path string literal after 'from', got truth literal 'ambiguous'",
+        )
+    })
+})
+
+describe('Function declaration tests', () => {
+    it('parses a simple function with no parameters and no return type', () => {
+        const ast = parse('func greet() { print true }')
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'func-decl',
+                    name: 'greet',
+                    visibility: 'public',
+                    parameters: [],
+                    returnType: undefined,
+                    body: {
+                        kind: 'block',
+                        statements: [{ kind: 'print' }],
+                    },
+                },
+            ],
+        })
+    })
+
+    it('parses a function with a return type annotation', () => {
+        const ast = parse(
+            'func makePoint() -> Point { const p: Point = { x: true } }',
+        )
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'func-decl',
+                    name: 'makePoint',
+                    returnType: 'Point',
+                    returnSemantics: undefined,
+                    body: { kind: 'block' },
+                },
+            ],
+        })
+    })
+
+    it('parses a function with const and ref return semantics', () => {
+        const cow = parse(
+            'func sharedPoint() -> const Point { const p: Point = { x: true } }',
+        )
+        expect(cow.body[0]).toMatchObject({
+            kind: 'func-decl',
+            returnType: 'Point',
+            returnSemantics: 'const',
+        })
+
+        const ref = parse(
+            'func refPoint() -> ref Point { const p: Point = { x: true } }',
+        )
+        expect(ref.body[0]).toMatchObject({
+            kind: 'func-decl',
+            returnType: 'Point',
+            returnSemantics: 'ref',
+        })
+    })
+
+    it('parses a function with unlabeled parameters', () => {
+        const ast = parse('func add(a: integer, b: integer) -> integer { }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'func-decl',
+            name: 'add',
+            parameters: [
+                { label: undefined, name: 'a', type: 'integer' },
+                { label: undefined, name: 'b', type: 'integer' },
+            ],
+        })
+    })
+
+    it('parses a function with labeled parameters', () => {
+        const ast = parse('func deposit(amount cents: integer) -> Account { }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'func-decl',
+            name: 'deposit',
+            parameters: [{ label: 'amount', name: 'cents', type: 'integer' }],
+        })
+    })
+
+    it('parses a function with parameter semantics prefixes', () => {
+        const ast = parse(
+            'func update(ref target: Point, value: truthvalue) { }',
+        )
+        expect(ast.body[0]).toMatchObject({
+            kind: 'func-decl',
+            parameters: [
+                { semantics: 'ref', name: 'target', type: 'Point' },
+                { semantics: undefined, name: 'value', type: 'truthvalue' },
+            ],
+        })
+    })
+
+    it('parses shorthand expression body', () => {
+        const ast = parse('func isActive() -> truthvalue => true')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'func-decl',
+            name: 'isActive',
+            returnType: 'truthvalue',
+            body: {
+                kind: 'expression',
+                value: { kind: 'truthvalue', value: 'true' },
+            },
+        })
+    })
+
+    it('parses helper function declaration', () => {
+        const ast = parse('helper func scanToken() -> Token { }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'func-decl',
+            name: 'scanToken',
+            visibility: 'helper',
+        })
+    })
+
+    it('rejects helper before unsupported declaration kinds', () => {
+        expect(() => parse('helper const x: truthvalue = true')).toThrow(
+            'helper is only supported before data or func declarations',
         )
     })
 })

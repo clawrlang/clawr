@@ -475,14 +475,14 @@ Targets:
 
 Checklist:
 
-- [ ] Add `ASTFunctionDeclaration` AST node: name, parameters (name + type + optional label), return type annotation, body (list of statements), visibility, position.
-- [ ] Parse top-level `func name(params) -> Type { body }` declarations.
-- [ ] Parse `func name(params) { body }` (no return type annotation).
-- [ ] Parse `func name(params) => expression` (shorthand body).
-- [ ] Parse labeled/unlabeled parameters: `func f(label name: Type)` and `func f(name: Type)`.
-- [ ] `helper` prefix applies to top-level `func` declarations.
-- [ ] Add parser unit tests covering all forms.
-- [ ] Semantic analyzer registers function names into module scope (no body analysis yet).
+- [x] Add `ASTFunctionDeclaration` AST node: name, parameters (name + type + optional label), return type annotation, body (list of statements), visibility, position.
+- [x] Parse top-level `func name(params) -> Type { body }` declarations.
+- [x] Parse `func name(params) { body }` (no return type annotation).
+- [x] Parse `func name(params) => expression` (shorthand body).
+- [x] Parse labeled/unlabeled parameters: `func f(label name: Type)` and `func f(name: Type)`.
+- [x] `helper` prefix applies to top-level `func` declarations.
+- [x] Add parser unit tests covering all forms.
+- [x] Semantic analyzer registers function names into module scope (no body analysis yet).
 
 ### Phase C1.2: `object`/`service` Declaration Syntax
 

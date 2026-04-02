@@ -14,6 +14,7 @@ import { PrintStatementParser } from './statement-parsers/print-statement-parser
 import { DataDeclarationParser } from './statement-parsers/data-declaration-parser'
 import { VariableDeclarationParser } from './statement-parsers/variable-declaration-parser'
 import { AssignmentParser } from './statement-parsers/assignment-parser'
+import { FunctionDeclarationParser } from './statement-parsers/function-declaration-parser'
 
 interface StatementParser {
     isNext(): boolean
@@ -27,6 +28,7 @@ export class Parser {
         this.statementParsers = [
             new VariableDeclarationParser(stream),
             new DataDeclarationParser(stream),
+            new FunctionDeclarationParser(stream),
             new PrintStatementParser(stream),
             new AssignmentParser(stream),
         ]
@@ -59,7 +61,7 @@ export class Parser {
         return this.parseStatement()
     }
 
-    private parseStatement(): ASTStatement | undefined {
+    parseStatement(): ASTStatement | undefined {
         if (this.stream.isNext('KEYWORD', 'if')) {
             return this.parseIfStatement()
         }
@@ -239,26 +241,27 @@ export class Parser {
     private parseHelperTopLevelDeclaration(): ASTStatement {
         const helperToken = this.stream.expect('KEYWORD', 'helper')
 
-        if (!this.stream.isNext('KEYWORD', 'data')) {
-            throw new Error(
-                `${helperToken.line}:${helperToken.column}:helper is only supported for top-level data declarations in this slice`,
-            )
+        if (this.stream.isNext('KEYWORD', 'data')) {
+            const dataDeclaration = this.statementParsers
+                .find((parser) => parser instanceof DataDeclarationParser)
+                ?.parse() as ASTDataDeclaration | undefined
+
+            if (!dataDeclaration || dataDeclaration.kind !== 'data-decl') {
+                throw new Error(
+                    `${helperToken.line}:${helperToken.column}:Expected data declaration after helper`,
+                )
+            }
+
+            return { ...dataDeclaration, visibility: 'helper' }
         }
 
-        const dataDeclaration = this.statementParsers
-            .find((parser) => parser instanceof DataDeclarationParser)
-            ?.parse() as ASTDataDeclaration | undefined
-
-        if (!dataDeclaration || dataDeclaration.kind !== 'data-decl') {
-            throw new Error(
-                `${helperToken.line}:${helperToken.column}:Expected data declaration after helper`,
-            )
+        if (this.stream.isNext('KEYWORD', 'func')) {
+            return new FunctionDeclarationParser(this.stream).parse('helper')
         }
 
-        return {
-            ...dataDeclaration,
-            visibility: 'helper',
-        }
+        throw new Error(
+            `${helperToken.line}:${helperToken.column}:helper is only supported before data or func declarations`,
+        )
     }
 }
 

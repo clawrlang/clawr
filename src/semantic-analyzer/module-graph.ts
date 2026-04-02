@@ -2,7 +2,11 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { TokenStream } from '../lexer'
 import { Parser } from '../parser'
-import type { ASTDataDeclaration, ASTProgram } from '../ast'
+import type {
+    ASTDataDeclaration,
+    ASTFunctionDeclaration,
+    ASTProgram,
+} from '../ast'
 
 export interface ModuleGraph {
     entry: string
@@ -109,25 +113,35 @@ export async function buildModuleGraph(
 }
 
 function exportedDataByName(program: ASTProgram): Set<string> {
-    return new Set(
-        program.body
-            .filter(
-                (stmt): stmt is ASTDataDeclaration => stmt.kind === 'data-decl',
-            )
-            .filter((decl) => decl.visibility !== 'helper')
-            .map((decl) => decl.name),
-    )
+    const dataNames = program.body
+        .filter((stmt): stmt is ASTDataDeclaration => stmt.kind === 'data-decl')
+        .filter((decl) => decl.visibility !== 'helper')
+        .map((decl) => decl.name)
+
+    const funcNames = program.body
+        .filter(
+            (stmt): stmt is ASTFunctionDeclaration => stmt.kind === 'func-decl',
+        )
+        .filter((decl) => decl.visibility !== 'helper')
+        .map((decl) => decl.name)
+
+    return new Set([...dataNames, ...funcNames])
 }
 
 function helperDataByName(program: ASTProgram): Set<string> {
-    return new Set(
-        program.body
-            .filter(
-                (stmt): stmt is ASTDataDeclaration => stmt.kind === 'data-decl',
-            )
-            .filter((decl) => decl.visibility === 'helper')
-            .map((decl) => decl.name),
-    )
+    const dataNames = program.body
+        .filter((stmt): stmt is ASTDataDeclaration => stmt.kind === 'data-decl')
+        .filter((decl) => decl.visibility === 'helper')
+        .map((decl) => decl.name)
+
+    const funcNames = program.body
+        .filter(
+            (stmt): stmt is ASTFunctionDeclaration => stmt.kind === 'func-decl',
+        )
+        .filter((decl) => decl.visibility === 'helper')
+        .map((decl) => decl.name)
+
+    return new Set([...dataNames, ...funcNames])
 }
 
 export function resolveImportPath(

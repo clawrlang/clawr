@@ -281,15 +281,9 @@ export class IRGenerator {
             case 'integer':
                 return {
                     kind: 'function-call',
-                    name: 'Integer¸fromStringRC',
+                    name: 'Integer¸fromCString',
                     arguments: [
-                        {
-                            kind: 'function-call',
-                            name: 'String¸fromCString',
-                            arguments: [
-                                { kind: 'string', value: val.value.toString() },
-                            ],
-                        },
+                        { kind: 'string', value: val.value.toString() },
                     ],
                 }
             case 'truthvalue':

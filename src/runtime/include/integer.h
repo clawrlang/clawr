@@ -61,6 +61,11 @@ String* Integer·toStringRC(Integer* self);
 /// @return an owned Integer object
 Integer* Integer¸fromStringRC(String* str);
 
+/// @brief Parse a decimal C string into an Integer (owned result)
+/// @param str decimal representation as C string
+/// @return an owned Integer object
+Integer* Integer¸fromCString(const char* str);
+
 /// @brief Compatibility wrapper returning a caller-owned C string.
 /// Prefer Integer·toStringRC for new code.
 /// @param self the integer to convert

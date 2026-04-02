@@ -738,3 +738,10 @@ Integer* Integer¸fromStringRC(String* str) {
     }
     return result;
 }
+
+Integer* Integer¸fromCString(const char* str) {
+    String* value = String¸fromCString(str);
+    Integer* result = Integer¸fromStringRC(value);
+    releaseRC(value);
+    return result;
+}

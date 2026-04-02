@@ -148,14 +148,8 @@ describe('Lowering Tests', () => {
             name: 'x',
             value: {
                 kind: 'function-call',
-                name: 'Integer¸fromStringRC',
-                arguments: [
-                    {
-                        kind: 'function-call',
-                        name: 'String¸fromCString',
-                        arguments: [{ kind: 'string', value: '42' }],
-                    },
-                ],
+                name: 'Integer¸fromCString',
+                arguments: [{ kind: 'string', value: '42' }],
             },
         } satisfies CStatement)
     })

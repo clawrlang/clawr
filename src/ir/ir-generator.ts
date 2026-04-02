@@ -54,6 +54,10 @@ type FieldAccessAssignment = LowerableAssignment & {
     target: SemanticFieldAccess
 }
 
+type LowerablePrintStatement = SemanticPrintStatement & {
+    value: Exclude<SemanticPrintStatement['value'], { kind: 'data-literal' }>
+}
+
 export class IRGenerator {
     private module!: SemanticModule
 
@@ -353,69 +357,101 @@ export class IRGenerator {
             throw new Error('Unsupported print value kind data-literal')
         }
 
+        if (this.isLowerablePrintStatement(print)) {
+            return this.lowerNonDataLiteralPrint(print, context)
+        }
+
+        throw new Error('Unsupported print value kind')
+    }
+
+    private lowerNonDataLiteralPrint(
+        print: LowerablePrintStatement,
+        context: LoweringContext,
+    ): CStatement[] {
         switch (print.dispatchType) {
             case 'integer':
-                if (print.value.kind === 'integer') {
-                    return [
-                        {
-                            kind: 'function-call',
-                            name: 'printf',
-                            arguments: [
-                                { kind: 'string', value: '%s\\n' },
-                                {
-                                    kind: 'string',
-                                    value: print.value.value.toString(),
-                                },
-                            ],
-                        },
-                    ]
-                }
-
-                const tempString = this.nextTempName(context)
-                return [
-                    {
-                        kind: 'var-decl',
-                        name: tempString,
-                        type: 'String*',
-                        value: {
-                            kind: 'function-call',
-                            name: 'Integer·toStringRC',
-                            arguments: [lowerValue(print.value)],
-                        },
-                    },
-                    {
-                        kind: 'function-call',
-                        name: 'printf',
-                        arguments: [
-                            { kind: 'string', value: '%s\\n' },
-                            { kind: 'var-ref', name: tempString },
-                        ],
-                    },
-                    {
-                        kind: 'function-call',
-                        name: 'releaseRC',
-                        arguments: [{ kind: 'var-ref', name: tempString }],
-                    },
-                ]
+                return this.lowerIntegerPrint(print, context)
             case 'truthvalue':
-                return [
-                    {
-                        kind: 'function-call',
-                        name: 'printf',
-                        arguments: [
-                            { kind: 'string', value: '%s\\n' },
-                            {
-                                kind: 'function-call',
-                                name: 'truthvalue·toCString',
-                                arguments: [lowerValue(print.value)],
-                            },
-                        ],
-                    },
-                ]
+                return this.lowerTruthvaluePrint(print)
             default:
                 throw new Error(
                     `Unsupported print dispatch type '${print.dispatchType}'`,
                 )
         }
+    }
+
+    private lowerIntegerPrint(
+        print: LowerablePrintStatement,
+        context: LoweringContext,
+    ): CStatement[] {
+        if (print.value.kind === 'integer') {
+            return this.lowerIntegerLiteralPrint(print.value.value)
+        }
+
+        const tempString = this.nextTempName(context)
+        return [
+            {
+                kind: 'var-decl',
+                name: tempString,
+                type: 'String*',
+                value: {
+                    kind: 'function-call',
+                    name: 'Integer·toStringRC',
+                    arguments: [lowerValue(print.value)],
+                },
+            },
+            {
+                kind: 'function-call',
+                name: 'printf',
+                arguments: [
+                    { kind: 'string', value: '%s\\n' },
+                    { kind: 'var-ref', name: tempString },
+                ],
+            },
+            {
+                kind: 'function-call',
+                name: 'releaseRC',
+                arguments: [{ kind: 'var-ref', name: tempString }],
+            },
+        ]
+    }
+
+    private lowerIntegerLiteralPrint(value: bigint): CStatement[] {
+        return [
+            {
+                kind: 'function-call',
+                name: 'printf',
+                arguments: [
+                    { kind: 'string', value: '%s\\n' },
+                    {
+                        kind: 'string',
+                        value: value.toString(),
+                    },
+                ],
+            },
+        ]
+    }
+
+    private lowerTruthvaluePrint(print: LowerablePrintStatement): CStatement[] {
+        return [
+            {
+                kind: 'function-call',
+                name: 'printf',
+                arguments: [
+                    { kind: 'string', value: '%s\\n' },
+                    {
+                        kind: 'function-call',
+                        name: 'truthvalue·toCString',
+                        arguments: [lowerValue(print.value)],
+                    },
+                ],
+            },
+        ]
+    }
+
+    private isLowerablePrintStatement(
+        print: SemanticPrintStatement,
+    ): print is LowerablePrintStatement {
+        return print.value.kind !== 'data-literal'
     }
 }

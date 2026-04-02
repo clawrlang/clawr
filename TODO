@@ -2,7 +2,6 @@
 
 ## Technical Debt
 
-- **`IRGenerator`**: `lowerStatement`: special case for `var-decl` with `DataLiteral` value
 - **`IRGenerator`**: contains a reference to `ASTExpression`
 - Change `PrintStatement` to a function call.
   - Can probably not be done until `trait` support is added

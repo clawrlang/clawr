@@ -421,7 +421,7 @@ Targets:
 
 Checklist:
 
-- [ ] Ensure multi-module semantic input lowers in deterministic order.
+- [x] Ensure multi-module semantic input lowers in deterministic order.
 - [ ] Prevent emission of helper-only symbols into public linkage surfaces as needed.
 - [ ] Keep generated runtime calls and ownership semantics unchanged.
 

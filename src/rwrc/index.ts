@@ -2,10 +2,12 @@
 
 import fs from 'fs'
 import { Command } from 'commander'
-import { TokenStream } from '../lexer'
-import { Parser } from '../parser'
+import type { ASTDataDeclaration, ASTProgram, ASTStatement } from '../ast'
 import { SemanticAnalyzer } from '../semantic-analyzer'
-import { buildModuleGraph } from '../semantic-analyzer/module-graph'
+import {
+    buildModuleGraph,
+    type ModuleGraph,
+} from '../semantic-analyzer/module-graph'
 import { IRGenerator } from '../ir/ir-generator'
 import { codegenC } from '../codegen'
 import child_process from 'node:child_process'
@@ -28,7 +30,10 @@ cli.name('rwrc')
             if (!ast) {
                 throw new Error('Entry module missing from module graph')
             }
-            const semanticModule = new SemanticAnalyzer(ast).analyze()
+            const compositeProgram = composeEntryProgram(graph)
+            const semanticModule = new SemanticAnalyzer(
+                compositeProgram,
+            ).analyze()
             const program = new IRGenerator().generate(semanticModule)
             const cCode = codegenC(program)
             await fs.promises.writeFile(outFilePath + '.c', cCode)
@@ -88,4 +93,50 @@ type ExecResult = {
     code: number
     stdout: string
     stderr: string
+}
+
+function composeEntryProgram(graph: ModuleGraph): ASTProgram {
+    const entry = graph.modules.get(graph.entry)
+    if (!entry) {
+        throw new Error('Entry module missing from module graph')
+    }
+
+    const mergedDeclarations: ASTDataDeclaration[] = []
+
+    for (const modulePath of graph.order) {
+        const program = graph.modules.get(modulePath)
+        if (!program) {
+            throw new Error(`Module missing from graph: ${modulePath}`)
+        }
+
+        const dataDeclarations = program.body.filter(
+            (stmt): stmt is ASTDataDeclaration => stmt.kind === 'data-decl',
+        )
+        mergedDeclarations.push(...dataDeclarations)
+
+        // Keep execution semantics explicit for this slice: only entry module may
+        // define executable top-level statements.
+        if (modulePath !== graph.entry) {
+            const executableStatements = program.body.filter(
+                (stmt): stmt is ASTStatement => stmt.kind !== 'data-decl',
+            )
+            if (executableStatements.length > 0) {
+                throw new Error(
+                    `${path.relative(process.cwd(), modulePath)} has top-level executable statements; only data declarations are allowed in imported modules for now`,
+                )
+            }
+        }
+    }
+
+    const entryExecutableStatements = entry.body.filter(
+        (stmt): stmt is ASTStatement => stmt.kind !== 'data-decl',
+    )
+
+    return {
+        imports: entry.imports.map((imp) => ({
+            ...imp,
+            items: imp.items.map((item) => ({ ...item })),
+        })),
+        body: [...mergedDeclarations, ...entryExecutableStatements],
+    }
 }

@@ -3,6 +3,7 @@ declare module 'bun:test' {
     export const test: TestFunction
     export const it: TestFunction
     export function expect(value: any): any
+    export function afterEach(fn: () => void): void
 }
 
 interface DescribeFunction {

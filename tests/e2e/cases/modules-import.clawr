@@ -1,0 +1,9 @@
+import Point from "./module-fixtures/point"
+
+const p: Point = {
+    x: true
+    y: ambiguous
+}
+
+print p.x
+print p.y

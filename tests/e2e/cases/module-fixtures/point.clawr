@@ -1,0 +1,4 @@
+data Point {
+    x: truthvalue
+    y: truthvalue
+}

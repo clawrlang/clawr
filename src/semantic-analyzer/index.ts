@@ -43,7 +43,16 @@ export class SemanticAnalyzer {
             semantics: ASTVariableDeclaration['semantics']
         }
     >()
-    private dataTypes = new Map<string, Map<string, string>>()
+    private dataTypes = new Map<
+        string,
+        Map<
+            string,
+            {
+                type: string
+                declarationPosition?: { line: number; column: number }
+            }
+        >
+    >()
 
     constructor(private ast: ASTProgram) {}
 
@@ -55,9 +64,13 @@ export class SemanticAnalyzer {
             if (stmt.kind === 'data-decl') {
                 this.registerDataDeclaration(stmt)
                 types.push(stmt)
-                continue
             }
+        }
 
+        this.validateDataFieldSemantics(types)
+
+        for (const stmt of this.ast.body) {
+            if (stmt.kind === 'data-decl') continue
             mainBody.push(this.analyzeStatement(stmt))
         }
 
@@ -206,8 +219,38 @@ export class SemanticAnalyzer {
     private registerDataDeclaration(stmt: ASTDataDeclaration) {
         this.dataTypes.set(
             stmt.name,
-            new Map(stmt.fields.map((field) => [field.name, field.type])),
+            new Map(
+                stmt.fields.map((field) => [
+                    field.name,
+                    {
+                        type: field.type,
+                        declarationPosition: field.position,
+                    },
+                ]),
+            ),
         )
+    }
+
+    private validateDataFieldSemantics(
+        declarations: SemanticDataDeclaration[],
+    ): void {
+        for (const decl of declarations) {
+            for (const field of decl.fields) {
+                const semantics = field.semantics ?? 'mut'
+
+                if (semantics === 'const') {
+                    throw new Error(
+                        `${decl.position.line}:${decl.position.column}:Field '${field.name}' in data type '${decl.name}' cannot use 'const' semantics`,
+                    )
+                }
+
+                if (semantics === 'ref' && !this.isReferenceType(field.type)) {
+                    throw new Error(
+                        `${decl.position.line}:${decl.position.column}:Field '${field.name}' in data type '${decl.name}' cannot use 'ref' semantics with non-reference type '${field.type}'`,
+                    )
+                }
+            }
+        }
     }
 
     private analyzeVariableDeclaration(
@@ -319,26 +362,30 @@ export class SemanticAnalyzer {
         const expectedFields = this.dataTypes.get(expectedType)
         if (!expectedFields) return
 
-        for (const fieldName of expectedFields.keys()) {
+        for (const [fieldName, fieldInfo] of expectedFields.entries()) {
             if (!(fieldName in value.fields)) {
+                const position = fieldInfo.declarationPosition ?? value.position
                 throw new Error(
-                    `${value.position.line}:${value.position.column}:Missing field '${fieldName}' for data type '${expectedType}'`,
+                    `${position.line}:${position.column}:Missing field '${fieldName}' for data type '${expectedType}'`,
                 )
             }
         }
 
         for (const [fieldName, fieldValue] of Object.entries(value.fields)) {
-            const expectedFieldType = expectedFields.get(fieldName)
-            if (!expectedFieldType) {
+            const expectedFieldInfo = expectedFields.get(fieldName)
+            if (!expectedFieldInfo) {
                 throw new Error(
-                    `${value.position.line}:${value.position.column}:Unknown field '${fieldName}' for data type '${expectedType}'`,
+                    `${fieldValue.position.line}:${fieldValue.position.column}:Unknown field '${fieldName}' for data type '${expectedType}'`,
                 )
             }
 
             const inferredFieldType = this.inferExpressionType(fieldValue)
-            if (!inferredFieldType || inferredFieldType !== expectedFieldType) {
+            if (
+                !inferredFieldType ||
+                inferredFieldType !== expectedFieldInfo.type
+            ) {
                 throw new Error(
-                    `${fieldValue.position.line}:${fieldValue.position.column}:Type mismatch for field '${fieldName}': expected '${expectedFieldType}' but got '${inferredFieldType ?? fieldValue.kind}'`,
+                    `${fieldValue.position.line}:${fieldValue.position.column}:Type mismatch for field '${fieldName}': expected '${expectedFieldInfo.type}' but got '${inferredFieldType ?? fieldValue.kind}'`,
                 )
             }
         }
@@ -374,13 +421,13 @@ export class SemanticAnalyzer {
                         `${value.position.line}:${value.position.column}:Cannot resolve field '${value.right.name}' on non-data type '${objectType}'`,
                     )
                 }
-                const fieldType = fields.get(value.right.name)
-                if (!fieldType) {
+                const fieldInfo = fields.get(value.right.name)
+                if (!fieldInfo) {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Unknown field '${value.right.name}' on data type '${objectType}'`,
                     )
                 }
-                return fieldType
+                return fieldInfo.type
             }
             case 'data-literal':
                 return null

@@ -4,6 +4,49 @@ import { Parser } from '../../src/parser'
 import { SemanticAnalyzer } from '../../src/semantic-analyzer'
 
 describe('SemanticAnalyzer', () => {
+    describe('data field semantics', () => {
+        it('accepts ref field with reference-counted type', () => {
+            const module = analyze(
+                'data Node {\n  ref next: Node\n  value: truthvalue\n}',
+            )
+
+            expect(module.types).toMatchObject([
+                {
+                    kind: 'data-decl',
+                    name: 'Node',
+                    fields: [
+                        { semantics: 'ref', name: 'next', type: 'Node' },
+                        { semantics: 'mut', name: 'value', type: 'truthvalue' },
+                    ],
+                },
+            ])
+        })
+
+        it('fails when const field semantics is used', () => {
+            expect(() =>
+                analyze('data Point {\n  const x: truthvalue\n}'),
+            ).toThrow(
+                "1:1:Field 'x' in data type 'Point' cannot use 'const' semantics",
+            )
+        })
+
+        it('fails when ref field semantics is used with non-reference type', () => {
+            expect(() =>
+                analyze('data Point {\n  ref x: truthvalue\n}'),
+            ).toThrow(
+                "1:1:Field 'x' in data type 'Point' cannot use 'ref' semantics with non-reference type 'truthvalue'",
+            )
+        })
+
+        it('reports missing field using declaration field position', () => {
+            expect(() =>
+                analyze(
+                    'data Point {\nx: truthvalue\ny: truthvalue\n}\nconst p: Point = { x: true }',
+                ),
+            ).toThrow("3:1:Missing field 'y' for data type 'Point'")
+        })
+    })
+
     describe('variable declaration type inference', () => {
         it('infers declaration type from truthvalue literal', () => {
             const module = analyze('const x = ambiguous')

@@ -62,7 +62,12 @@ export interface ASTAssignment {
 export interface ASTDataDeclaration {
     kind: 'data-decl'
     name: string
-    fields: { name: string; type: string }[]
+    fields: {
+        semantics?: 'const' | 'mut' | 'ref'
+        name: string
+        type: string
+        position?: ASTPosition
+    }[]
     position: ASTPosition
 }
 

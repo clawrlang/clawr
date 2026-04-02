@@ -13,12 +13,37 @@ export class DataDeclarationParser {
         const token = this.stream.expect('KEYWORD', 'data')
         const name = this.stream.expect('IDENTIFIER').identifier
         this.stream.expect('PUNCTUATION', '{')
-        const fields: { name: string; type: string }[] = []
+        const fields: {
+            semantics: 'const' | 'mut' | 'ref'
+            name: string
+            type: string
+            position: { line: number; column: number }
+        }[] = []
         while (!this.stream.isNext('PUNCTUATION', '}')) {
-            const fieldName = this.stream.expect('IDENTIFIER').identifier
+            let fieldSemantics: 'const' | 'mut' | 'ref' = 'mut'
+            const maybeSemantics = this.stream.peek()
+            if (
+                maybeSemantics?.kind === 'KEYWORD' &&
+                (maybeSemantics.keyword === 'const' ||
+                    maybeSemantics.keyword === 'mut' ||
+                    maybeSemantics.keyword === 'ref')
+            ) {
+                fieldSemantics = maybeSemantics.keyword
+                this.stream.next()
+            }
+            const fieldNameToken = this.stream.expect('IDENTIFIER')
+            const fieldName = fieldNameToken.identifier
             this.stream.expect('PUNCTUATION', ':')
             const fieldType = this.stream.expect('IDENTIFIER').identifier
-            fields.push({ name: fieldName, type: fieldType })
+            fields.push({
+                semantics: fieldSemantics,
+                name: fieldName,
+                type: fieldType,
+                position: {
+                    line: fieldNameToken.line,
+                    column: fieldNameToken.column,
+                },
+            })
             if (this.stream.isNext('PUNCTUATION', ',')) {
                 this.stream.next()
             } else if (this.stream.isNext('NEWLINE')) {

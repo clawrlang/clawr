@@ -85,8 +85,47 @@ describe('Parser Tests', () => {
                     kind: 'data-decl',
                     name: 'Point',
                     fields: [
-                        { name: 'x', type: 'truthvalue' },
-                        { name: 'y', type: 'truthvalue' },
+                        { semantics: 'mut', name: 'x', type: 'truthvalue' },
+                        { semantics: 'mut', name: 'y', type: 'truthvalue' },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('parses field-level semantics in data declaration', () => {
+        const program = `
+            data Link {
+                ref next: Link
+                value: truthvalue
+            }
+        `
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Link',
+                    fields: [
+                        { semantics: 'ref', name: 'next', type: 'Link' },
+                        { semantics: 'mut', name: 'value', type: 'truthvalue' },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('preserves declaration field positions', () => {
+        const ast = parse('data Point {\nx: truthvalue\ny: truthvalue\n}')
+
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Point',
+                    fields: [
+                        { name: 'x', position: { line: 2, column: 1 } },
+                        { name: 'y', position: { line: 3, column: 1 } },
                     ],
                 },
             ],

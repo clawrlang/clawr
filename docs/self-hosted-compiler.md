@@ -360,9 +360,9 @@ Checklist:
 - [x] Add/confirm tokens for `import`, `from`, `as`, and `helper`.
 - [x] Add AST nodes for import declarations (`module path`, imported names, aliases).
 - [x] Add visibility annotation on top-level declarations (`public` default, `helper` explicit).
-- [ ] Add AST representation for method visibility in `object`/`service` declarations.
+- [ ] Add AST representation for method visibility in `object`/`service` declarations (deferred until `object`/`service` declarations land in a later slice).
 
-Current slice: top-level visibility is currently carried for `data` declarations only.
+Current slice: top-level visibility is currently carried for `data` declarations only; method visibility work is intentionally deferred until `object`/`service` syntax exists.
 
 ### Phase A2.2: Parser Integration
 
@@ -376,11 +376,11 @@ Checklist:
 
 - [x] Parse leading import blocks at module/file scope.
 - [x] Parse import item aliases (`Name as Alias`).
-- [ ] Parse `helper` before top-level `data`/`object`/`service`/`fn`.
-- [ ] Parse `helper` before `object`/`service` methods.
+- [ ] Parse `helper` before top-level `data`/`object`/`service`/`fn` (deferred for `object`/`service`/`fn` until those declarations exist; `helper data` is implemented in the current slice).
+- [ ] Parse `helper` before `object`/`service` methods (deferred until method syntax exists).
 - [x] Emit precise diagnostics for malformed import lists and missing `from` strings.
 
-Current slice: `helper` parsing is wired for top-level `data` declarations only.
+Current slice: `helper` parsing is wired for top-level `data` declarations only; broader declaration coverage is intentionally deferred with the missing declaration forms.
 
 ### Phase A2.3: Semantic Analysis (Single-Module)
 
@@ -393,8 +393,10 @@ Checklist:
 
 - [x] Carry import declarations into semantic module representation.
 - [x] Carry declaration visibility (`public`/`helper`) into semantic declarations.
-- [ ] Enforce method-level helper visibility within declaring type boundaries.
+- [ ] Enforce method-level helper visibility within declaring type boundaries (deferred until method-bearing `object`/`service` semantics exist).
 - [x] Keep existing behavior unchanged for projects that do not use imports/helper.
+
+Current slice: semantic helper visibility is enforced for top-level module exports/imports; method-level visibility remains intentionally deferred with `object`/`service` semantics.
 
 ### Phase A2.4: Module Graph and Resolution Pass
 

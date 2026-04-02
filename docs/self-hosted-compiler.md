@@ -63,11 +63,12 @@ Prioritise features that unlock writing the compiler in Clawr with the smallest 
 3. Milestone B: Operator and precedence stabilization across modules
 4. Milestone C: Encapsulated `object`/`service` types
 
-Current focus: Milestone A (Control-flow)
+Current focus: Milestone A2 (Modules/imports/helper visibility)
 
 Roadmap status:
 
-- [x] Milestone A complete
+- [x] Milestone A1 complete
+- [ ] Milestone A2 complete
 - [ ] Milestone B complete
 - [ ] Milestone C complete
 
@@ -93,7 +94,7 @@ Why this integration is important:
 - Visibility (`helper`) only becomes meaningful with cross-module boundaries.
 - Many operator/control-flow tests can stay local, while module tests validate composition and build reproducibility.
 
-### Milestone A: Bootstrap Control-Flow
+### Milestone A1: Bootstrap Control-Flow
 
 Scope:
 
@@ -108,6 +109,24 @@ Done criteria:
 - [x] Semantic analysis validates branch/loop scoping rules.
 - [x] Lowering generates correct C control-flow.
 - [x] At least one compiler subsystem-style example can be expressed without workarounds (for example token scanning loops and branching error paths).
+
+### Milestone A2: Modules, Imports, and Helper Visibility
+
+Scope:
+
+- [ ] `import ... from "..."`
+- [ ] `as` aliases in import items
+- [ ] `helper` visibility on top-level declarations
+- [ ] `helper` visibility on `object`/`service` methods
+- [ ] Module graph resolution and cycle diagnostics
+
+Done criteria:
+
+- [ ] Lexer and AST represent `import`, `from`, `as`, and `helper`.
+- [ ] Parser accepts import blocks, aliases, and helper-qualified declarations with precise diagnostics.
+- [ ] Semantic analysis carries visibility/import information without regressing single-file programs.
+- [ ] Module graph resolution is deterministic and rejects cycles.
+- [ ] At least one multi-module e2e fixture proves helper-hidden symbols are enforced.
 
 ### Milestone B: Bootstrap Operators
 
@@ -323,10 +342,10 @@ Targets:
 
 Checklist:
 
-- [ ] Validate branch and loop scoping rules in semantic analysis.
-- [ ] Validate `break`/`continue` placement and loop boundaries.
-- [ ] Lower control-flow statements to correct C control structures.
-- [ ] Add unit and e2e fixtures for control-flow-heavy compiler-style scenarios.
+- [x] Validate branch and loop scoping rules in semantic analysis.
+- [x] Validate `break`/`continue` placement and loop boundaries.
+- [x] Lower control-flow statements to correct C control structures.
+- [x] Add unit and e2e fixtures for control-flow-heavy compiler-style scenarios.
 
 ### Phase A2.1: Lexer and AST Foundations
 

@@ -469,9 +469,10 @@ Checklist:
 
 - [x] PR1: Phase A1.1 only (control-flow syntax + AST + parser tests).
 - [x] PR2: Phase A1.2 (control-flow semantics/lowering + unit/e2e tests).
-- [ ] PR3: Phase A2.1 + Phase A2.2 (module/import/helper syntax + parser tests).
-- [ ] PR4: Phase A2.3 + A2.4 + A2.6 (semantic resolution + module graph + tests).
+- [x] PR3: Phase A2.1 + Phase A2.2 (module/import/helper syntax + parser tests, data-only slice).
+- [x] PR4: Phase A2.3 + A2.4 + A2.5 + A2.6 (semantic resolution + module graph + lowering/codegen wiring + tests).
 - [ ] PR5: Phase B stabilization suite across multi-module fixtures.
+- [ ] PR6: Follow-up for deferred `object`/`service` method visibility and helper-boundary semantics.
 
 ## Probably not Needed
 

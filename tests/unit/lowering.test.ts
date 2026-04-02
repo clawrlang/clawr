@@ -587,6 +587,133 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
+    it('lowers data literal with integer field', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Container',
+                    fields: [
+                        { name: 'value', type: 'integer' },
+                        { name: 'flag', type: 'truthvalue' },
+                    ],
+                    position: somePosition,
+                },
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'c',
+                    valueSet: { type: 'Container' },
+                    value: {
+                        kind: 'data-literal',
+                        fields: {
+                            value: {
+                                kind: 'integer',
+                                value: 42n,
+                                position: somePosition,
+                            },
+                            flag: {
+                                kind: 'truthvalue',
+                                value: 'true',
+                                position: somePosition,
+                            },
+                        },
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+        const module = new IRGenerator().generate(toModule(program))
+        // memcpy(c, &(Containerˇfields){ .value = Integer¸fromCString("42"), .flag = c_true }, sizeof(Container));
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'function-call',
+            name: 'memcpy',
+            arguments: [
+                { kind: 'raw-expression', expression: `(__rc_header*)c + 1` },
+                {
+                    kind: 'raw-expression',
+                    expression:
+                        '&(Containerˇfields){ .value = Integer¸fromCString("42"), .flag = c_true }',
+                },
+                {
+                    kind: 'raw-expression',
+                    expression: 'sizeof(Container) - sizeof(__rc_header)',
+                },
+            ],
+        } satisfies CStatement)
+    })
+
+    it('lowers data literal with nested data field', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Point',
+                    fields: [
+                        { name: 'x', type: 'truthvalue' },
+                        { name: 'y', type: 'truthvalue' },
+                    ],
+                    position: somePosition,
+                },
+                {
+                    kind: 'data-decl',
+                    name: 'Pair',
+                    fields: [{ name: 'p', type: 'Point' }],
+                    position: somePosition,
+                },
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'pair',
+                    valueSet: { type: 'Pair' },
+                    value: {
+                        kind: 'data-literal',
+                        fields: {
+                            p: {
+                                kind: 'data-literal',
+                                fields: {
+                                    x: {
+                                        kind: 'truthvalue',
+                                        value: 'true',
+                                        position: somePosition,
+                                    },
+                                    y: {
+                                        kind: 'truthvalue',
+                                        value: 'false',
+                                        position: somePosition,
+                                    },
+                                },
+                                position: somePosition,
+                            },
+                        },
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+        const module = new IRGenerator().generate(toModule(program))
+        // memcpy(pair, &(Pairˇfields){ .p = &(Pointˇfields){ .x = c_true, .y = c_false } }, sizeof(Pair));
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'function-call',
+            name: 'memcpy',
+            arguments: [
+                {
+                    kind: 'raw-expression',
+                    expression: `(__rc_header*)pair + 1`,
+                },
+                {
+                    kind: 'raw-expression',
+                    expression:
+                        '&(Pairˇfields){ .p = &(Pointˇfields){ .x = c_true, .y = c_false } }',
+                },
+                {
+                    kind: 'raw-expression',
+                    expression: 'sizeof(Pair) - sizeof(__rc_header)',
+                },
+            ],
+        } satisfies CStatement)
+    })
+
     it('lowers field access and assignment', () => {
         const program: SemanticProgramFixture = {
             body: [

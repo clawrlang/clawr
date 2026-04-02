@@ -2,7 +2,6 @@
 import type {
     SemanticDataDeclaration,
     SemanticExpression,
-    SemanticFieldAccess,
     SemanticFunction,
     SemanticModule,
     SemanticOwnershipEffects,
@@ -10,7 +9,7 @@ import type {
     SemanticStatement,
     SemanticVariableDeclaration,
 } from '../semantic-analyzer'
-import type { ASTDataLiteral } from '../ast'
+import type { ASTDataLiteral, ASTExpression } from '../ast'
 import type {
     CModule,
     CStatement,
@@ -26,7 +25,10 @@ interface LoweringContext {
 }
 
 export class IRGenerator {
+    private module!: SemanticModule
+
     generate(ast: SemanticModule): CModule {
+        this.module = ast
         const dataHookFunctions = ast.types.flatMap((stmt) =>
             this.lowerStructHooks(stmt),
         )
@@ -226,7 +228,7 @@ export class IRGenerator {
                                 },
                                 {
                                     kind: 'raw-expression',
-                                    expression: `&(${stmt.valueSet.type}ˇfields){ ${this.lowerStructLiteralFields(stmt.value.fields)} }`,
+                                    expression: `&(${stmt.valueSet.type}ˇfields){ ${this.lowerStructLiteralFields(stmt.valueSet.type, stmt.value.fields)} }`,
                                 },
                                 {
                                     kind: 'raw-expression',
@@ -346,19 +348,60 @@ export class IRGenerator {
         return name
     }
 
-    private lowerStructLiteralFields(fields: ASTDataLiteral['fields']): string {
+    private lowerStructLiteralFields(
+        typeName: string,
+        fields: ASTDataLiteral['fields'],
+    ): string {
+        // Look up the field type declarations for this data type
+        const typeDecl = this.module.types.find((t) => t.name === typeName)
+        if (!typeDecl) {
+            throw new Error(
+                `Cannot find type declaration for ${typeName} in struct literal lowering`,
+            )
+        }
+
+        // Build a map of field names to their declared types
+        const fieldTypes = new Map(typeDecl.fields.map((f) => [f.name, f.type]))
+
         return Object.entries(fields)
-            .map(([k, v]) => {
-                switch (v.kind) {
-                    case 'truthvalue':
-                        return `.${k} = c_${v.value}`
-                    default:
-                        throw new Error(
-                            'Only truthvalue literals are supported in struct literals for now',
-                        )
+            .map(([fieldName, expr]) => {
+                const fieldType = fieldTypes.get(fieldName)
+                if (!fieldType) {
+                    throw new Error(
+                        `Field ${fieldName} not found in type ${typeName}`,
+                    )
                 }
+
+                // Lower the expression based on its kind and the declared field type
+                const lowered = this.lowerStructFieldExpression(expr, fieldType)
+                return `.${fieldName} = ${lowered}`
             })
             .join(', ')
+    }
+
+    private lowerStructFieldExpression(
+        expr: ASTExpression,
+        declaredFieldType: string,
+    ): string {
+        switch (expr.kind) {
+            case 'truthvalue':
+                return `c_${expr.value}`
+            case 'integer':
+                return `Integer¸fromCString("${expr.value.toString()}")`
+            case 'identifier':
+                return expr.name
+            case 'data-literal':
+                // Recursively lower nested data literals
+                return `&(${declaredFieldType}ˇfields){ ${this.lowerStructLiteralFields(declaredFieldType, expr.fields)} }`
+            case 'binary':
+                throw new Error(
+                    'Binary expressions are not supported in struct field literals',
+                )
+            default:
+                throw new Error(
+                    `Unsupported struct field expression kind: ${(expr as any).kind}`,
+                )
+        }
     }
 
     private lowerValue(

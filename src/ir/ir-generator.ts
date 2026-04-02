@@ -1,23 +1,24 @@
 // Lowering from analyzed semantic AST to IR.
 import type {
-    SemanticDataDeclaration,
     SemanticExpression,
     SemanticFunction,
     SemanticModule,
     SemanticOwnershipEffects,
     SemanticPrintStatement,
     SemanticStatement,
-    SemanticVariableDeclaration,
 } from '../semantic-analyzer'
-import type { ASTDataLiteral, ASTExpression } from '../ast'
-import type {
-    CModule,
-    CStatement,
-    CExpression,
-    CFunctionDeclaration,
-    CStruct,
-    CVariableDeclaration,
-} from '.'
+import type { CModule, CStatement, CFunctionDeclaration } from '.'
+import {
+    lowerStruct,
+    lowerStructHooks,
+    lowerStructTypeInfo,
+    lowerType,
+} from './lowering-types'
+import {
+    lowerOwnedValue,
+    lowerStructLiteralFields,
+    lowerValue,
+} from './lowering-values'
 
 interface LoweringContext {
     releaseAtExit: Set<string>
@@ -30,12 +31,12 @@ export class IRGenerator {
     generate(ast: SemanticModule): CModule {
         this.module = ast
         const dataHookFunctions = ast.types.flatMap((stmt) =>
-            this.lowerStructHooks(stmt),
+            lowerStructHooks(stmt),
         )
 
         return {
-            structs: ast.types.flatMap(this.lowerStruct.bind(this)),
-            variables: ast.types.map(this.lowerStructTypeInfo.bind(this)),
+            structs: ast.types.flatMap((stmt) => lowerStruct(stmt)),
+            variables: ast.types.map((stmt) => lowerStructTypeInfo(stmt)),
             functions: [
                 ...ast.functions.map((fn) => this.lowerFunction(fn)),
                 ...dataHookFunctions,
@@ -68,122 +69,6 @@ export class IRGenerator {
         }
     }
 
-    private lowerStruct(stmt: SemanticDataDeclaration): CStruct[] {
-        const fields = stmt.fields.map((f) => ({
-            name: f.name,
-            type: this.lowerValueSetType(f.type),
-        }))
-        return [
-            {
-                kind: 'struct',
-                name: stmt.name,
-                fields: [{ name: 'header', type: '__rc_header' }, ...fields],
-            },
-            {
-                kind: 'struct',
-                name: `${stmt.name}ˇfields`,
-                fields,
-            },
-        ]
-    }
-
-    private lowerStructTypeInfo(
-        stmt: SemanticDataDeclaration,
-    ): CVariableDeclaration {
-        const hookNames = this.structHookNames(stmt.name)
-
-        return {
-            kind: 'var-decl',
-            type: '__type_info',
-            name: `${stmt.name}ˇtype`,
-            value: {
-                kind: 'struct-init',
-                fields: {
-                    data_type: {
-                        kind: 'struct-init',
-                        fields: {
-                            size: {
-                                kind: 'raw-expression',
-                                expression: `sizeof(${stmt.name})`,
-                            },
-                            retain_nested_fields: {
-                                kind: 'raw-expression',
-                                expression: hookNames.retain,
-                            },
-                            release_nested_fields: {
-                                kind: 'raw-expression',
-                                expression: hookNames.release,
-                            },
-                        },
-                    },
-                },
-            },
-            modifiers: ['static', 'const'],
-        }
-    }
-
-    private structHookNames(typeName: string): {
-        retain: string
-        release: string
-    } {
-        return {
-            retain: `${typeName}ˇretainNestedFields`,
-            release: `${typeName}ˇreleaseNestedFields`,
-        }
-    }
-
-    private lowerStructHooks(
-        stmt: SemanticDataDeclaration,
-    ): CFunctionDeclaration[] {
-        const rcFields = stmt.fields.filter((f) =>
-            this.isReferenceCountedValueSetType(f.type),
-        )
-        const hooks = this.structHookNames(stmt.name)
-        const selfExpr: CExpression = {
-            kind: 'raw-expression',
-            expression: `(${stmt.name}*)self`,
-        }
-
-        return [
-            {
-                kind: 'function',
-                name: hooks.retain,
-                returnType: 'void',
-                parameters: [{ name: 'self', type: 'void*' }],
-                body: rcFields.map((field) => ({
-                    kind: 'function-call',
-                    name: 'retainRC',
-                    arguments: [
-                        {
-                            kind: 'field-reference',
-                            object: selfExpr,
-                            field: field.name,
-                            deref: true,
-                        },
-                    ],
-                })),
-            },
-            {
-                kind: 'function',
-                name: hooks.release,
-                returnType: 'void',
-                parameters: [{ name: 'self', type: 'void*' }],
-                body: rcFields.map((field) => ({
-                    kind: 'function-call',
-                    name: 'releaseRC',
-                    arguments: [
-                        {
-                            kind: 'field-reference',
-                            object: selfExpr,
-                            field: field.name,
-                            deref: true,
-                        },
-                    ],
-                })),
-            },
-        ]
-    }
-
     private lowerStatement(
         stmt: SemanticStatement,
         context: LoweringContext,
@@ -198,7 +83,7 @@ export class IRGenerator {
                     return [
                         {
                             kind: 'var-decl',
-                            type: this.lowerType(stmt),
+                            type: lowerType(stmt),
                             name: stmt.name,
                             value: {
                                 kind: 'function-call',
@@ -228,7 +113,7 @@ export class IRGenerator {
                                 },
                                 {
                                     kind: 'raw-expression',
-                                    expression: `&(${stmt.valueSet.type}ˇfields){ ${this.lowerStructLiteralFields(stmt.valueSet.type, stmt.value.fields)} }`,
+                                    expression: `&(${stmt.valueSet.type}ˇfields){ ${lowerStructLiteralFields(this.module, stmt.valueSet.type, stmt.value.fields)} }`,
                                 },
                                 {
                                     kind: 'raw-expression',
@@ -242,12 +127,9 @@ export class IRGenerator {
                     return [
                         {
                             kind: 'var-decl',
-                            type: this.lowerType(stmt),
+                            type: lowerType(stmt),
                             name: stmt.name,
-                            value: this.lowerOwnedValue(
-                                stmt.value,
-                                stmt.ownership,
-                            ),
+                            value: lowerOwnedValue(stmt.value, stmt.ownership),
                         },
                         ...this.lowerOwnershipPrefix(stmt.ownership),
                     ]
@@ -269,10 +151,7 @@ export class IRGenerator {
                                 kind: 'var-ref',
                                 name: stmt.target.name,
                             },
-                            value: this.lowerOwnedValue(
-                                stmt.value,
-                                stmt.ownership,
-                            ),
+                            value: lowerOwnedValue(stmt.value, stmt.ownership),
                         },
                     ]
                 }
@@ -284,8 +163,8 @@ export class IRGenerator {
                     ...this.lowerOwnershipPrefix(stmt.ownership),
                     {
                         kind: 'assign',
-                        target: this.lowerValue(stmt.target),
-                        value: this.lowerOwnedValue(stmt.value, stmt.ownership),
+                        target: lowerValue(stmt.target),
+                        value: lowerOwnedValue(stmt.value, stmt.ownership),
                     },
                 ]
             default:
@@ -306,7 +185,7 @@ export class IRGenerator {
                 return {
                     kind: 'function-call' as const,
                     name: 'mutateRC',
-                    arguments: [this.lowerValue(expr)],
+                    arguments: [lowerValue(expr)],
                 }
             },
         )
@@ -319,7 +198,7 @@ export class IRGenerator {
                 return {
                     kind: 'function-call' as const,
                     name: 'retainRC',
-                    arguments: [this.lowerValue(expr)],
+                    arguments: [lowerValue(expr)],
                 }
             },
         )
@@ -332,7 +211,7 @@ export class IRGenerator {
                 return {
                     kind: 'function-call' as const,
                     name: 'releaseRC',
-                    arguments: [this.lowerValue(expr)],
+                    arguments: [lowerValue(expr)],
                 }
             },
         )
@@ -352,112 +231,6 @@ export class IRGenerator {
         const name = `tempˇ${context.tempCounter}`
         context.tempCounter += 1
         return name
-    }
-
-    private lowerStructLiteralFields(
-        typeName: string,
-        fields: ASTDataLiteral['fields'],
-    ): string {
-        // Look up the field type declarations for this data type
-        const typeDecl = this.module.types.find((t) => t.name === typeName)
-        if (!typeDecl) {
-            throw new Error(
-                `Cannot find type declaration for ${typeName} in struct literal lowering`,
-            )
-        }
-
-        // Build a map of field names to their declared types
-        const fieldTypes = new Map(typeDecl.fields.map((f) => [f.name, f.type]))
-
-        return Object.entries(fields)
-            .map(([fieldName, expr]) => {
-                const fieldType = fieldTypes.get(fieldName)
-                if (!fieldType) {
-                    throw new Error(
-                        `Field ${fieldName} not found in type ${typeName}`,
-                    )
-                }
-
-                // Lower the expression based on its kind and the declared field type
-                const lowered = this.lowerStructFieldExpression(expr, fieldType)
-                return `.${fieldName} = ${lowered}`
-            })
-            .join(', ')
-    }
-
-    private lowerStructFieldExpression(
-        expr: ASTExpression,
-        declaredFieldType: string,
-    ): string {
-        switch (expr.kind) {
-            case 'truthvalue':
-                return `c_${expr.value}`
-            case 'integer':
-                return `Integer¸fromCString("${expr.value.toString()}")`
-            case 'identifier':
-                return expr.name
-            case 'data-literal':
-                // Recursively lower nested data literals
-                return `&(${declaredFieldType}ˇfields){ ${this.lowerStructLiteralFields(declaredFieldType, expr.fields)} }`
-            case 'binary':
-                throw new Error(
-                    'Binary expressions are not supported in struct field literals',
-                )
-            default:
-                throw new Error(
-                    `Unsupported struct field expression kind: ${(expr as any).kind}`,
-                )
-        }
-    }
-
-    private lowerValue(
-        val: Exclude<SemanticExpression, ASTDataLiteral>,
-    ): CExpression {
-        switch (val.kind) {
-            case 'integer':
-                return {
-                    kind: 'function-call',
-                    name: 'Integer¸fromCString',
-                    arguments: [
-                        { kind: 'string', value: val.value.toString() },
-                    ],
-                }
-            case 'truthvalue':
-                return { kind: 'var-ref', name: `c_${val.value}` }
-            case 'identifier':
-                return { kind: 'var-ref', name: val.name }
-            case 'field-access':
-                return {
-                    kind: 'field-reference',
-                    object: this.lowerValue(val.object as any), // TODO: need to fix types here
-                    field: val.field,
-                    deref: true,
-                }
-            case 'copy':
-                if (val.value.kind === 'data-literal') {
-                    throw new Error('copy(...) of data literal is unsupported')
-                }
-                return this.lowerValue(val.value)
-            default:
-                throw new Error(`Unknown AST value kind ${(val as any).kind}`)
-        }
-    }
-
-    private lowerOwnedValue(
-        val: Exclude<SemanticExpression, ASTDataLiteral>,
-        ownership: SemanticOwnershipEffects,
-    ): CExpression {
-        const lowered = this.lowerValue(val)
-        if (!ownership.copyValueSemantics) return lowered
-
-        return {
-            kind: 'function-call',
-            name: 'copyRC',
-            arguments: [
-                lowered,
-                { kind: 'var-ref', name: ownership.copyValueSemantics },
-            ],
-        }
     }
 
     private lowerPrint(
@@ -495,7 +268,7 @@ export class IRGenerator {
                         value: {
                             kind: 'function-call',
                             name: 'Integer·toStringRC',
-                            arguments: [this.lowerValue(print.value)],
+                            arguments: [lowerValue(print.value)],
                         },
                     },
                     {
@@ -512,7 +285,7 @@ export class IRGenerator {
                         arguments: [{ kind: 'var-ref', name: tempString }],
                     },
                 ]
-            case 'truthvalue': {
+            case 'truthvalue':
                 return [
                     {
                         kind: 'function-call',
@@ -522,35 +295,15 @@ export class IRGenerator {
                             {
                                 kind: 'function-call',
                                 name: 'truthvalue·toCString',
-                                arguments: [this.lowerValue(print.value)],
+                                arguments: [lowerValue(print.value)],
                             },
                         ],
                     },
                 ]
-            }
             default:
                 throw new Error(
                     `Unsupported print dispatch type '${print.dispatchType}'`,
                 )
         }
-    }
-
-    private lowerType(stmt: SemanticVariableDeclaration): string {
-        return this.lowerValueSetType(stmt.valueSet.type)
-    }
-
-    private lowerValueSetType(type: string): string {
-        switch (type) {
-            case 'truthvalue':
-                return 'truthvalue_t'
-            case 'integer':
-                return 'Integer*'
-            default:
-                return `${type}*`
-        }
-    }
-
-    private isReferenceCountedValueSetType(type: string): boolean {
-        return type !== 'truthvalue'
     }
 }

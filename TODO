@@ -3,7 +3,6 @@
 ## Technical Debt
 
 - **`IRGenerator`**: `lowerStatement`: special case for `var-decl` with `DataLiteral` value
-- **`IRGenerator`**: Consider splitting into smaller modules
 
 ## V1 Data Gap Closure Order
 

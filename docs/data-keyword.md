@@ -9,19 +9,22 @@ This section is implementation-facing. If exploratory notes elsewhere disagree, 
 ### Core Model
 
 - `data` defines a nominal, heap-allocated, reference-counted structure.
-- `data` has fields only; instance methods are not part of `data` in V1.
+- `data` has fields only. For methods, use `object` which is fully encapsulated.
 - Each `data` declaration is a distinct type, even if field sets are identical.
 - Generics are deferred.
-- Recursive `data` fields are deferred.
 
 ### Field Model
 
 - Fields are mutable (`mut`) by default.
-- `ref` fields are allowed.
-- `const` fields are deferred (not required in V1).
+- `ref` fields are allowed if their type is reference-counted.
+- `const` fields are deferred (not required in V1, and probably useless forever).
 - A `const` variable of a `data` type with no `ref` fields is structurally immutable.
-- A `ref` variable referencing `data` with mutable fields uses shared semantics.
+  - The compiler should disallow any mutation through `const` variable names
+  - If a nested field is referenced by multiple variables (including `mut`s), copy-on-write ensures isolation.
+- A `ref` variable referencing `data` with mutable fields uses shared semantics
+  - ...for the root allocation, but nested allocations can be copy-on-write.
 - A `mut` variable referencing `data` uses isolated semantics with copy-on-write on mutation.
+  - But if there are `ref` fields, those sections of the structure are shared
 
 ### Declaration and Literal Syntax
 

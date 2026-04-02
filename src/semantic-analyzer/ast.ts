@@ -65,10 +65,39 @@ export interface SemanticAssignment {
     position: ASTPosition
 }
 
+export interface SemanticIfStatement {
+    kind: 'if'
+    condition: SemanticExpression
+    thenBranch: SemanticStatement[]
+    elseBranch?: SemanticStatement[]
+    position: ASTPosition
+}
+
+export interface SemanticWhileStatement {
+    kind: 'while'
+    condition: SemanticExpression
+    body: SemanticStatement[]
+    position: ASTPosition
+}
+
+export interface SemanticBreakStatement {
+    kind: 'break'
+    position: ASTPosition
+}
+
+export interface SemanticContinueStatement {
+    kind: 'continue'
+    position: ASTPosition
+}
+
 export type SemanticStatement =
     | SemanticVariableDeclaration
     | SemanticPrintStatement
     | SemanticAssignment
+    | SemanticIfStatement
+    | SemanticWhileStatement
+    | SemanticBreakStatement
+    | SemanticContinueStatement
 
 export interface SemanticDataDeclaration extends Omit<
     ASTDataDeclaration,

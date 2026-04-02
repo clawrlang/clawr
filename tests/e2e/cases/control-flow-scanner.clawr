@@ -1,0 +1,33 @@
+// Scanner-style control-flow simulation: classify and stop at end/error.
+mut hasInput: truthvalue = true
+mut hitError: truthvalue = ambiguous
+mut reachedEnd: truthvalue = ambiguous
+mut shouldStop: truthvalue = false
+
+while hasInput {
+    if hitError {
+        print false
+        shouldStop = true
+    } else {
+        if reachedEnd {
+            print ambiguous
+            shouldStop = true
+        } else {
+            print true
+            reachedEnd = true
+            continue
+        }
+    }
+
+    if shouldStop {
+        hasInput = false
+    }
+}
+
+// Verify ambiguous does not pass strict-true branch.
+mut gate: truthvalue = ambiguous
+if gate {
+    print true
+} else {
+    print false
+}

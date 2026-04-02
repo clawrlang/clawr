@@ -332,4 +332,86 @@ describe('Codegen', () => {
         expect(cCode).toContain('int y;')
         expect(cCode).toContain('} Point;')
     })
+
+    it('emits if/else with strict truth condition expression', () => {
+        const module: CModule = {
+            structs: [],
+            variables: [],
+            functions: [
+                {
+                    kind: 'function',
+                    name: 'main',
+                    returnType: 'int',
+                    parameters: [],
+                    body: [
+                        {
+                            kind: 'if',
+                            condition: {
+                                kind: 'raw-expression',
+                                expression: '(x == c_true)',
+                            },
+                            thenBranch: [
+                                {
+                                    kind: 'function-call',
+                                    name: 'printf',
+                                    arguments: [
+                                        {
+                                            kind: 'string',
+                                            value: 'then\\n',
+                                        },
+                                    ],
+                                },
+                            ],
+                            elseBranch: [
+                                {
+                                    kind: 'function-call',
+                                    name: 'printf',
+                                    arguments: [
+                                        {
+                                            kind: 'string',
+                                            value: 'else\\n',
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+
+        const cCode = codegenC(module)
+        expect(cCode).toContain('if ((x == c_true)) {')
+        expect(cCode).toContain('} else {')
+    })
+
+    it('emits while loop with continue and break', () => {
+        const module: CModule = {
+            structs: [],
+            variables: [],
+            functions: [
+                {
+                    kind: 'function',
+                    name: 'main',
+                    returnType: 'int',
+                    parameters: [],
+                    body: [
+                        {
+                            kind: 'while',
+                            condition: {
+                                kind: 'raw-expression',
+                                expression: '(x == c_true)',
+                            },
+                            body: [{ kind: 'continue' }, { kind: 'break' }],
+                        },
+                    ],
+                },
+            ],
+        }
+
+        const cCode = codegenC(module)
+        expect(cCode).toContain('while ((x == c_true)) {')
+        expect(cCode).toContain('continue;')
+        expect(cCode).toContain('break;')
+    })
 })

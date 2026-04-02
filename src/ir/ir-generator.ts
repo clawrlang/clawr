@@ -115,9 +115,96 @@ export class IRGenerator {
                 return this.lowerPrint(stmt, context)
             case 'assign':
                 return this.lowerAssignment(stmt)
+            case 'if':
+                return [this.lowerIfStatement(stmt, context)]
+            case 'while':
+                return [this.lowerWhileStatement(stmt, context)]
+            case 'break':
+                return [{ kind: 'break' }]
+            case 'continue':
+                return [{ kind: 'continue' }]
             default:
                 throw new Error(
                     `Unknown AST statement kind ${(stmt as any).kind}`,
+                )
+        }
+    }
+
+    private lowerIfStatement(
+        stmt: Extract<SemanticStatement, { kind: 'if' }>,
+        context: LoweringContext,
+    ): Extract<CStatement, { kind: 'if' }> {
+        return {
+            kind: 'if',
+            condition: this.lowerTruthyCondition(stmt.condition),
+            thenBranch: stmt.thenBranch.flatMap((child) =>
+                this.lowerStatement(child, context),
+            ),
+            elseBranch: stmt.elseBranch?.flatMap((child) =>
+                this.lowerStatement(child, context),
+            ),
+        }
+    }
+
+    private lowerWhileStatement(
+        stmt: Extract<SemanticStatement, { kind: 'while' }>,
+        context: LoweringContext,
+    ): Extract<CStatement, { kind: 'while' }> {
+        return {
+            kind: 'while',
+            condition: this.lowerTruthyCondition(stmt.condition),
+            body: stmt.body.flatMap((child) =>
+                this.lowerStatement(child, context),
+            ),
+        }
+    }
+
+    private lowerTruthyCondition(condition: SemanticExpression) {
+        if (condition.kind === 'data-literal') {
+            throw new Error(
+                'Unsupported control-flow condition kind data-literal',
+            )
+        }
+
+        const lowered = lowerValue(condition)
+        return {
+            kind: 'raw-expression' as const,
+            expression: `(${this.renderExpressionInline(lowered)} == c_true)`,
+        }
+    }
+
+    private renderExpressionInline(
+        expression: ReturnType<typeof lowerValue>,
+    ): string {
+        switch (expression.kind) {
+            case 'var-ref':
+                return expression.name
+            case 'string':
+                return `"${expression.value}"`
+            case 'raw-expression':
+                return expression.expression
+            case 'function-call':
+                return `${expression.name}(${expression.arguments.map((arg) => this.renderExpressionInline(arg as ReturnType<typeof lowerValue>)).join(', ')})`
+            case 'field-reference': {
+                const object = this.renderExpressionInline(
+                    expression.object as ReturnType<typeof lowerValue>,
+                )
+                return expression.deref
+                    ? `${object}->${expression.field}`
+                    : `${object}.${expression.field}`
+            }
+            case 'struct-init': {
+                const fields = Object.entries(expression.fields)
+                    .map(
+                        ([name, value]) =>
+                            `. ${name} = ${this.renderExpressionInline(value as ReturnType<typeof lowerValue>)}`,
+                    )
+                    .join(', ')
+                return `{ ${fields} }`
+            }
+            default:
+                throw new Error(
+                    `Unknown expression kind ${(expression as never as { kind: string }).kind}`,
                 )
         }
     }

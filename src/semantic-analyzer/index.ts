@@ -44,6 +44,7 @@ export class SemanticAnalyzer {
         private ast: ASTProgram,
         private parent?: SemanticAnalyzer,
         dataTypes?: Map<string, BindingMap>,
+        private loopDepth = 0,
     ) {
         this.dataTypes = dataTypes ?? parent?.dataTypes ?? new Map()
     }
@@ -81,7 +82,21 @@ export class SemanticAnalyzer {
     }
 
     private createChildScope(): SemanticAnalyzer {
-        return new SemanticAnalyzer(this.ast, this, this.dataTypes)
+        return new SemanticAnalyzer(
+            this.ast,
+            this,
+            this.dataTypes,
+            this.loopDepth,
+        )
+    }
+
+    private createLoopChildScope(): SemanticAnalyzer {
+        return new SemanticAnalyzer(
+            this.ast,
+            this,
+            this.dataTypes,
+            this.loopDepth + 1,
+        )
     }
 
     private analyzeStatement(stmt: ASTStatement): SemanticStatement {
@@ -95,14 +110,96 @@ export class SemanticAnalyzer {
             case 'assign':
                 return this.analyzeAssignment(stmt)
             case 'if':
+                return this.analyzeIfStatement(stmt)
             case 'while':
+                return this.analyzeWhileStatement(stmt)
             case 'break':
+                return this.analyzeBreakStatement(stmt)
             case 'continue':
-                throw new Error(
-                    `${stmt.position.line}:${stmt.position.column}:Control-flow statement '${stmt.kind}' is not yet supported in semantic analysis`,
-                )
+                return this.analyzeContinueStatement(stmt)
             default:
                 return stmt
+        }
+    }
+
+    private analyzeIfStatement(
+        stmt: Extract<ASTStatement, { kind: 'if' }>,
+    ): SemanticStatement {
+        this.assertTruthvalueCondition(stmt.condition, stmt.position, 'if')
+
+        const thenAnalyzer = this.createChildScope()
+        const thenBranch = stmt.thenBranch.map((child) =>
+            thenAnalyzer.analyzeStatement(child),
+        )
+
+        const elseBranch = stmt.elseBranch
+            ? (() => {
+                  const elseAnalyzer = this.createChildScope()
+                  return stmt.elseBranch.map((child) =>
+                      elseAnalyzer.analyzeStatement(child),
+                  )
+              })()
+            : undefined
+
+        return {
+            kind: 'if',
+            condition: this.rewriteExpression(stmt.condition),
+            thenBranch,
+            elseBranch,
+            position: stmt.position,
+        }
+    }
+
+    private analyzeWhileStatement(
+        stmt: Extract<ASTStatement, { kind: 'while' }>,
+    ): SemanticStatement {
+        this.assertTruthvalueCondition(stmt.condition, stmt.position, 'while')
+
+        const loopAnalyzer = this.createLoopChildScope()
+        const body = stmt.body.map((child) => loopAnalyzer.analyzeStatement(child))
+
+        return {
+            kind: 'while',
+            condition: this.rewriteExpression(stmt.condition),
+            body,
+            position: stmt.position,
+        }
+    }
+
+    private analyzeBreakStatement(
+        stmt: Extract<ASTStatement, { kind: 'break' }>,
+    ): SemanticStatement {
+        if (this.loopDepth <= 0) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:break is only allowed inside a while loop`,
+            )
+        }
+
+        return stmt
+    }
+
+    private analyzeContinueStatement(
+        stmt: Extract<ASTStatement, { kind: 'continue' }>,
+    ): SemanticStatement {
+        if (this.loopDepth <= 0) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:continue is only allowed inside a while loop`,
+            )
+        }
+
+        return stmt
+    }
+
+    private assertTruthvalueCondition(
+        condition: ASTExpression,
+        position: { line: number; column: number },
+        keyword: 'if' | 'while',
+    ): void {
+        const conditionType = this.inferExpressionType(condition)
+        if (conditionType !== 'truthvalue') {
+            throw new Error(
+                `${position.line}:${position.column}:${keyword} condition must be truthvalue, got '${conditionType ?? condition.kind}'`,
+            )
         }
     }
 

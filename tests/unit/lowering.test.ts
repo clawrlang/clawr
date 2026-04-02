@@ -522,6 +522,106 @@ describe('Lowering Tests', () => {
         })
     })
 
+    it('lowers if conditions as strict true checks', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'mut',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                    value: {
+                        kind: 'truthvalue',
+                        value: 'ambiguous',
+                        position: somePosition,
+                    },
+                },
+                {
+                    kind: 'if',
+                    condition: {
+                        kind: 'identifier',
+                        name: 'x',
+                        position: somePosition,
+                    },
+                    thenBranch: [
+                        {
+                            kind: 'print',
+                            dispatchType: 'truthvalue',
+                            value: {
+                                kind: 'truthvalue',
+                                value: 'true',
+                                position: somePosition,
+                            },
+                            position: somePosition,
+                        },
+                    ],
+                    elseBranch: [
+                        {
+                            kind: 'print',
+                            dispatchType: 'truthvalue',
+                            value: {
+                                kind: 'truthvalue',
+                                value: 'false',
+                                position: somePosition,
+                            },
+                            position: somePosition,
+                        },
+                    ],
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'if',
+            condition: {
+                kind: 'raw-expression',
+                expression: '(x == c_true)',
+            },
+            thenBranch: [{ kind: 'function-call', name: 'printf' }],
+            elseBranch: [{ kind: 'function-call', name: 'printf' }],
+        })
+    })
+
+    it('lowers while conditions as strict true checks', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'mut',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                    value: {
+                        kind: 'truthvalue',
+                        value: 'ambiguous',
+                        position: somePosition,
+                    },
+                },
+                {
+                    kind: 'while',
+                    condition: {
+                        kind: 'identifier',
+                        name: 'x',
+                        position: somePosition,
+                    },
+                    body: [{ kind: 'break', position: somePosition }],
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'while',
+            condition: {
+                kind: 'raw-expression',
+                expression: '(x == c_true)',
+            },
+            body: [{ kind: 'break' }],
+        })
+    })
+
     it('lowers data literal', () => {
         const program: SemanticProgramFixture = {
             body: [

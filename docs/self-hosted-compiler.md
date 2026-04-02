@@ -67,7 +67,7 @@ Current focus: Milestone A (Control-flow)
 
 Roadmap status:
 
-- [ ] Milestone A complete
+- [x] Milestone A complete
 - [ ] Milestone B complete
 - [ ] Milestone C complete
 
@@ -97,16 +97,17 @@ Why this integration is important:
 
 Scope:
 
-- [ ] `if`/`else`
-- [ ] `while`
-- [ ] `break`/`continue`
+- [x] `if`/`else`
+- [x] `while`
+- [x] `break`/`continue`
+- [x] Truthvalue condition semantics: `if (x)`/`while (x)` are strict-true checks (`x == true`), so `ambiguous` follows `else` or exits loops.
 
 Done criteria:
 
-- [ ] Parser supports these constructs in statement position.
-- [ ] Semantic analysis validates branch/loop scoping rules.
-- [ ] Lowering generates correct C control-flow.
-- [ ] At least one compiler subsystem-style example can be expressed without workarounds (for example token scanning loops and branching error paths).
+- [x] Parser supports these constructs in statement position.
+- [x] Semantic analysis validates branch/loop scoping rules.
+- [x] Lowering generates correct C control-flow.
+- [x] At least one compiler subsystem-style example can be expressed without workarounds (for example token scanning loops and branching error paths).
 
 ### Milestone B: Bootstrap Operators
 
@@ -442,7 +443,7 @@ Checklist:
 ### Suggested PR Slices
 
 - [x] PR1: Phase A1.1 only (control-flow syntax + AST + parser tests).
-- [ ] PR2: Phase A1.2 (control-flow semantics/lowering + unit/e2e tests).
+- [x] PR2: Phase A1.2 (control-flow semantics/lowering + unit/e2e tests).
 - [ ] PR3: Phase A2.1 + Phase A2.2 (module/import/helper syntax + parser tests).
 - [ ] PR4: Phase A2.3 + A2.4 + A2.6 (semantic resolution + module graph + tests).
 - [ ] PR5: Phase B stabilization suite across multi-module fixtures.

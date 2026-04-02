@@ -41,6 +41,10 @@ export type CStatement =
     | CVariableDeclaration
     | CFunctionCall
     | CAssignment
+    | CIfStatement
+    | CWhileStatement
+    | CBreakStatement
+    | CContinueStatement
     | CReturnStatement
 
 export interface CVariableDeclaration {
@@ -61,6 +65,27 @@ export interface CAssignment {
     kind: 'assign'
     target: CExpression // e.g., field access or variable
     value: CExpression
+}
+
+export interface CIfStatement {
+    kind: 'if'
+    condition: CExpression
+    thenBranch: CStatement[]
+    elseBranch?: CStatement[]
+}
+
+export interface CWhileStatement {
+    kind: 'while'
+    condition: CExpression
+    body: CStatement[]
+}
+
+export interface CBreakStatement {
+    kind: 'break'
+}
+
+export interface CContinueStatement {
+    kind: 'continue'
 }
 
 export interface CFunctionDeclaration {

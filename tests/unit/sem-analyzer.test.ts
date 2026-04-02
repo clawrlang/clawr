@@ -287,7 +287,9 @@ describe('SemanticAnalyzer', () => {
                 analyze(
                     'data Box {\n  value: truthvalue\n}\nref shared: Box = { value: true }\nmut isolated: Box = shared',
                 ),
-            ).toThrow('5:1:Cross-semantics assignment requires explicit copy(...)')
+            ).toThrow(
+                '5:1:Cross-semantics assignment requires explicit copy(...)',
+            )
             expect(() =>
                 analyze(
                     'data Box {\n  value: truthvalue\n}\nref shared: Box = { value: true }\nmut isolated: Box = shared',
@@ -300,7 +302,9 @@ describe('SemanticAnalyzer', () => {
                 analyze(
                     'data Box {\n  value: truthvalue\n}\nref shared: Box = { value: true }\nmut isolated: Box = { value: true }\nisolated = shared',
                 ),
-            ).toThrow('6:1:Cross-semantics assignment requires explicit copy(...)')
+            ).toThrow(
+                '6:1:Cross-semantics assignment requires explicit copy(...)',
+            )
         })
 
         it('allows declaration crossing semantics with explicit copy', () => {
@@ -356,6 +360,61 @@ describe('SemanticAnalyzer', () => {
                     ],
                 },
             })
+        })
+    })
+
+    describe('control-flow semantics', () => {
+        it('accepts truthvalue if/while conditions', () => {
+            const module = analyze(
+                'mut x = true\nif x { print true } else { print false }\nwhile x { break }',
+            )
+
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                },
+                {
+                    kind: 'if',
+                    condition: { kind: 'identifier', name: 'x' },
+                    thenBranch: [{ kind: 'print' }],
+                    elseBranch: [{ kind: 'print' }],
+                },
+                {
+                    kind: 'while',
+                    condition: { kind: 'identifier', name: 'x' },
+                    body: [{ kind: 'break' }],
+                },
+            ])
+        })
+
+        it('rejects non-truthvalue if condition', () => {
+            expect(() =>
+                analyze(
+                    'data Box { value: truthvalue }\nconst b: Box = { value: true }\nif b { print true }',
+                ),
+            ).toThrow("3:1:if condition must be truthvalue, got 'Box'")
+        })
+
+        it('rejects non-truthvalue while condition', () => {
+            expect(() =>
+                analyze(
+                    'data Box { value: truthvalue }\nconst b: Box = { value: true }\nwhile b { break }',
+                ),
+            ).toThrow("3:1:while condition must be truthvalue, got 'Box'")
+        })
+
+        it('rejects break outside while', () => {
+            expect(() => analyze('break')).toThrow(
+                '1:1:break is only allowed inside a while loop',
+            )
+        })
+
+        it('rejects continue outside while', () => {
+            expect(() => analyze('continue')).toThrow(
+                '1:1:continue is only allowed inside a while loop',
+            )
         })
     })
 })

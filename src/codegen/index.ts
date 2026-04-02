@@ -62,6 +62,35 @@ function emitStatement(stmt: CStatement): string {
             return emitVarDecl(stmt)
         case 'return':
             return `    return ${emitExpression(stmt.value)};`
+        case 'if': {
+            let out = `    if (${emitExpression(stmt.condition)}) {\n`
+            for (const child of stmt.thenBranch) {
+                out += emitStatement(child) + '\n'
+            }
+            out += '    }'
+
+            if (stmt.elseBranch) {
+                out += ' else {\n'
+                for (const child of stmt.elseBranch) {
+                    out += emitStatement(child) + '\n'
+                }
+                out += '    }'
+            }
+
+            return out
+        }
+        case 'while': {
+            let out = `    while (${emitExpression(stmt.condition)}) {\n`
+            for (const child of stmt.body) {
+                out += emitStatement(child) + '\n'
+            }
+            out += '    }'
+            return out
+        }
+        case 'break':
+            return '    break;'
+        case 'continue':
+            return '    continue;'
         case 'function-call':
             return (
                 `    ${stmt.name}(` +

@@ -378,7 +378,7 @@ Checklist:
 - [x] Parse import item aliases (`Name as Alias`).
 - [ ] Parse `helper` before top-level `data`/`object`/`service`/`fn`.
 - [ ] Parse `helper` before `object`/`service` methods.
-- [ ] Emit precise diagnostics for malformed import lists and missing `from` strings.
+- [x] Emit precise diagnostics for malformed import lists and missing `from` strings.
 
 Current slice: `helper` parsing is wired for top-level `data` declarations only.
 

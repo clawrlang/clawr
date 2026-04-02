@@ -151,6 +151,19 @@ export class Parser {
         const items: ASTImportItem[] = []
 
         while (true) {
+            const nextToken = this.stream.peek()
+            if (!nextToken) {
+                throw new Error(
+                    `${importToken.line}:${importToken.column}:Expected identifier in import list, got EOF`,
+                )
+            }
+
+            if (nextToken.kind !== 'IDENTIFIER') {
+                throw new Error(
+                    `${nextToken.line}:${nextToken.column}:Expected identifier in import list, got ${describeToken(nextToken)}`,
+                )
+            }
+
             const nameToken = this.stream.expect('IDENTIFIER')
             let alias: string | undefined
 
@@ -165,18 +178,51 @@ export class Parser {
                 position: { line: nameToken.line, column: nameToken.column },
             })
 
-            if (!this.stream.isNext('PUNCTUATION', ',')) {
+            if (this.stream.isNext('KEYWORD', 'from')) {
                 break
             }
 
+            if (!this.stream.isNext('PUNCTUATION', ',')) {
+                const separatorToken = this.stream.peek()
+                if (!separatorToken) {
+                    throw new Error(
+                        `${importToken.line}:${importToken.column}:Expected ',' or 'from' after import item, got EOF`,
+                    )
+                }
+
+                throw new Error(
+                    `${separatorToken.line}:${separatorToken.column}:Expected ',' or 'from' after import item, got ${describeToken(separatorToken)}`,
+                )
+            }
+
             this.stream.expect('PUNCTUATION', ',')
+
+            if (this.stream.isNext('KEYWORD', 'from')) {
+                const fromToken = this.stream.peek()
+                throw new Error(
+                    `${fromToken?.line ?? importToken.line}:${fromToken?.column ?? importToken.column}:Expected identifier after ',' in import list, got 'from'`,
+                )
+            }
+        }
+
+        const fromToken = this.stream.peek()
+        if (!fromToken) {
+            throw new Error(
+                `${importToken.line}:${importToken.column}:Expected 'from' after import list, got EOF`,
+            )
+        }
+
+        if (fromToken.kind !== 'KEYWORD' || fromToken.keyword !== 'from') {
+            throw new Error(
+                `${fromToken.line}:${fromToken.column}:Expected 'from' after import list, got ${describeToken(fromToken)}`,
+            )
         }
 
         this.stream.expect('KEYWORD', 'from')
         const modulePathToken = this.stream.next()
         if (!modulePathToken || modulePathToken.kind !== 'STRING_LITERAL') {
             throw new Error(
-                `Expected module path string literal, got ${modulePathToken?.kind ?? 'EOF'}`,
+                `${fromToken.line}:${fromToken.column}:Expected module path string literal after 'from', got ${modulePathToken ? describeToken(modulePathToken) : 'EOF'}`,
             )
         }
         const modulePath = modulePathToken.value
@@ -212,5 +258,24 @@ export class Parser {
             ...dataDeclaration,
             visibility: 'helper',
         }
+    }
+}
+
+function describeToken(
+    token: { kind: string } & Record<string, unknown>,
+): string {
+    switch (token.kind) {
+        case 'KEYWORD':
+            return `'${String(token.keyword)}'`
+        case 'PUNCTUATION':
+            return `'${String(token.symbol)}'`
+        case 'IDENTIFIER':
+            return `identifier '${String(token.identifier)}'`
+        case 'STRING_LITERAL':
+            return 'string literal'
+        case 'TRUTH_LITERAL':
+            return `truth literal '${String(token.value)}'`
+        default:
+            return token.kind
     }
 }

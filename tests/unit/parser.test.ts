@@ -387,6 +387,26 @@ describe('Parser Tests', () => {
             ],
         })
     })
+
+    it('reports malformed import lists precisely', () => {
+        expect(() => parse('import Token, from "lexer/tokens"')).toThrow(
+            "1:15:Expected identifier after ',' in import list, got 'from'",
+        )
+
+        expect(() => parse('import Token Span from "lexer/tokens"')).toThrow(
+            "1:14:Expected ',' or 'from' after import item, got identifier 'Span'",
+        )
+    })
+
+    it('reports missing import module path strings precisely', () => {
+        expect(() => parse('import Token from')).toThrow(
+            "1:14:Expected module path string literal after 'from', got EOF",
+        )
+
+        expect(() => parse('import Token from ambiguous')).toThrow(
+            "1:14:Expected module path string literal after 'from', got truth literal 'ambiguous'",
+        )
+    })
 })
 
 function parse(code: string) {

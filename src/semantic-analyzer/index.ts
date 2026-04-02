@@ -1,6 +1,5 @@
 import type {
     ASTAssignment,
-    ASTBinaryExpression,
     ASTDataDeclaration,
     ASTDataLiteral,
     ASTExpression,
@@ -38,28 +37,16 @@ export type {
 } from './ast'
 
 export class SemanticAnalyzer {
-    private bindingScopes: Array<
-        Map<
-            string,
-            {
-                type: string
-                semantics: ASTVariableDeclaration['semantics']
-            }
-        >
-    > = []
-    private dataTypes = new Map<
-        string,
-        Map<
-            string,
-            {
-                type: string
-                semantics: 'const' | 'mut' | 'ref'
-                declarationPosition?: { line: number; column: number }
-            }
-        >
-    >()
+    private bindings: BindingMap = new Map()
+    private dataTypes: Map<string, BindingMap>
 
-    constructor(private ast: ASTProgram) {}
+    constructor(
+        private ast: ASTProgram,
+        private parent?: SemanticAnalyzer,
+        dataTypes?: Map<string, BindingMap>,
+    ) {
+        this.dataTypes = dataTypes ?? parent?.dataTypes ?? new Map()
+    }
 
     analyze(): SemanticModule {
         const types: SemanticDataDeclaration[] = []
@@ -74,14 +61,10 @@ export class SemanticAnalyzer {
 
         this.validateDataFieldSemantics(types)
 
-        this.enterScope()
-        try {
-            for (const stmt of this.ast.body) {
-                if (stmt.kind === 'data-decl') continue
-                mainBody.push(this.analyzeStatement(stmt))
-            }
-        } finally {
-            this.exitScope()
+        const scopedAnalyzer = this.createChildScope()
+        for (const stmt of this.ast.body) {
+            if (stmt.kind === 'data-decl') continue
+            mainBody.push(scopedAnalyzer.analyzeStatement(stmt))
         }
 
         const mainFunction: SemanticFunction = {
@@ -95,6 +78,10 @@ export class SemanticAnalyzer {
             types,
             globals: [],
         }
+    }
+
+    private createChildScope(): SemanticAnalyzer {
+        return new SemanticAnalyzer(this.ast, this, this.dataTypes)
     }
 
     private analyzeStatement(stmt: ASTStatement): SemanticStatement {
@@ -279,6 +266,12 @@ export class SemanticAnalyzer {
         )
     }
 
+    private lookupDataType(name: string): BindingMap | undefined {
+        const dataType = this.dataTypes.get(name)
+        if (dataType || !this.parent) return dataType
+        return this.parent.lookupDataType(name)
+    }
+
     private validateDataFieldSemantics(
         declarations: SemanticDataDeclaration[],
     ): void {
@@ -414,7 +407,7 @@ export class SemanticAnalyzer {
     }
 
     private isReferenceType(type: string): boolean {
-        return this.dataTypes.has(type)
+        return Boolean(this.lookupDataType(type))
     }
 
     private collectMutateTargets(
@@ -449,7 +442,7 @@ export class SemanticAnalyzer {
     }
 
     private validateDataLiteral(value: ASTDataLiteral, expectedType: string) {
-        const expectedFields = this.dataTypes.get(expectedType)
+        const expectedFields = this.lookupDataType(expectedType)
         if (!expectedFields) return
 
         for (const [fieldName, fieldInfo] of expectedFields.entries()) {
@@ -505,7 +498,7 @@ export class SemanticAnalyzer {
                         `${value.position.line}:${value.position.column}:Cannot infer type for dot access object`,
                     )
                 }
-                const fields = this.dataTypes.get(objectType)
+                const fields = this.lookupDataType(objectType)
                 if (!fields) {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Cannot resolve field '${value.right.name}' on non-data type '${objectType}'`,
@@ -587,7 +580,7 @@ export class SemanticAnalyzer {
                 if (value.right.kind !== 'identifier') return null
                 const objectType = this.inferExpressionType(value.left)
                 if (!objectType) return null
-                const fields = this.dataTypes.get(objectType)
+                const fields = this.lookupDataType(objectType)
                 if (!fields) return null
                 const fieldInfo = fields.get(value.right.name)
                 if (!fieldInfo) return null
@@ -686,14 +679,6 @@ export class SemanticAnalyzer {
         return null
     }
 
-    private enterScope(): void {
-        this.bindingScopes.push(new Map())
-    }
-
-    private exitScope(): void {
-        this.bindingScopes.pop()
-    }
-
     private declareBinding(
         name: string,
         binding: {
@@ -702,35 +687,26 @@ export class SemanticAnalyzer {
         },
         position: { line: number; column: number },
     ): void {
-        const currentScope = this.bindingScopes[this.bindingScopes.length - 1]
-        if (!currentScope) {
-            throw new Error('Internal error: no active binding scope')
-        }
-
-        if (currentScope.has(name)) {
+        if (this.bindings.has(name)) {
             throw new Error(
                 `${position.line}:${position.column}:Variable '${name}' is already declared in this scope`,
             )
         }
 
-        currentScope.set(name, binding)
+        this.bindings.set(name, binding)
     }
 
-    private lookupBinding(name: string):
-        | {
-              type: string
-              semantics: ASTVariableDeclaration['semantics']
-          }
-        | undefined {
-        for (
-            let index = this.bindingScopes.length - 1;
-            index >= 0;
-            index -= 1
-        ) {
-            const binding = this.bindingScopes[index].get(name)
-            if (binding) return binding
-        }
-
-        return undefined
+    private lookupBinding(name: string): VariableBinding | undefined {
+        const binding = this.bindings.get(name)
+        if (binding || !this.parent) return binding
+        return this.parent.lookupBinding(name)
     }
 }
+
+type VariableBinding = {
+    type: string
+    semantics: ASTVariableDeclaration['semantics']
+    declarationPosition?: { line: number; column: number }
+}
+
+type BindingMap = Map<string, VariableBinding>

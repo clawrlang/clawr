@@ -8,5 +8,4 @@
   - Can probably not be done until `trait` support is added
   - `trait HasStringRepresentation { func toString() -> string }`
   - Or use something like C# implicit/explicit operator instead of `toString()`?
-- Encapsulate scope
 - Object-oriented lowering helpers?

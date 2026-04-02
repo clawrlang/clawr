@@ -109,6 +109,12 @@ describe('SemanticAnalyzer', () => {
                 "1:11:Unknown identifier 'x'",
             )
         })
+
+        it('fails when redeclaring a variable in the same scope', () => {
+            expect(() => analyze('const x = ambiguous\nmut x = true')).toThrow(
+                "2:1:Variable 'x' is already declared in this scope",
+            )
+        })
     })
 
     describe('variable assignment', () => {

@@ -4,7 +4,6 @@
 
 - **`IRGenerator`**: `lowerStatement`: special case for `var-decl` with `DataLiteral` value
 - **`IRGenerator`**: Consider splitting into smaller modules
-- **`SemanticAnalyzer`**: Function and block scopes
 
 ## V1 Data Gap Closure Order
 

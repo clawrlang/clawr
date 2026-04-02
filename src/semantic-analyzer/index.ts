@@ -38,13 +38,15 @@ export type {
 } from './ast'
 
 export class SemanticAnalyzer {
-    private bindings = new Map<
-        string,
-        {
-            type: string
-            semantics: ASTVariableDeclaration['semantics']
-        }
-    >()
+    private bindingScopes: Array<
+        Map<
+            string,
+            {
+                type: string
+                semantics: ASTVariableDeclaration['semantics']
+            }
+        >
+    > = []
     private dataTypes = new Map<
         string,
         Map<
@@ -72,9 +74,14 @@ export class SemanticAnalyzer {
 
         this.validateDataFieldSemantics(types)
 
-        for (const stmt of this.ast.body) {
-            if (stmt.kind === 'data-decl') continue
-            mainBody.push(this.analyzeStatement(stmt))
+        this.enterScope()
+        try {
+            for (const stmt of this.ast.body) {
+                if (stmt.kind === 'data-decl') continue
+                mainBody.push(this.analyzeStatement(stmt))
+            }
+        } finally {
+            this.exitScope()
         }
 
         const mainFunction: SemanticFunction = {
@@ -302,10 +309,14 @@ export class SemanticAnalyzer {
 
         if (explicitType) {
             this.validateInitializerAgainstType(stmt.value, explicitType)
-            this.bindings.set(stmt.name, {
-                type: explicitType,
-                semantics: stmt.semantics,
-            })
+            this.declareBinding(
+                stmt.name,
+                {
+                    type: explicitType,
+                    semantics: stmt.semantics,
+                },
+                stmt.position,
+            )
             const rewrittenValue = this.rewriteExpression(stmt.value)
 
             this.validateSemanticBoundary(
@@ -337,10 +348,14 @@ export class SemanticAnalyzer {
             )
         }
 
-        this.bindings.set(stmt.name, {
-            type: inferredType,
-            semantics: stmt.semantics,
-        })
+        this.declareBinding(
+            stmt.name,
+            {
+                type: inferredType,
+                semantics: stmt.semantics,
+            },
+            stmt.position,
+        )
         const rewrittenValue = this.rewriteExpression(stmt.value)
 
         this.validateSemanticBoundary(
@@ -473,7 +488,7 @@ export class SemanticAnalyzer {
             case 'integer':
                 return 'integer'
             case 'identifier': {
-                const binding = this.bindings.get(value.name)
+                const binding = this.lookupBinding(value.name)
                 if (!binding) {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Unknown identifier '${value.name}'`,
@@ -539,7 +554,7 @@ export class SemanticAnalyzer {
                 )
             }
 
-            const binding = this.bindings.get(rootIdentifier.name)
+            const binding = this.lookupBinding(rootIdentifier.name)
             if (!binding) {
                 throw new Error(
                     `${rootIdentifier.position.line}:${rootIdentifier.position.column}:Unknown identifier '${rootIdentifier.name}'`,
@@ -559,7 +574,7 @@ export class SemanticAnalyzer {
     ): ASTVariableDeclaration['semantics'] | null {
         switch (value.kind) {
             case 'identifier': {
-                const binding = this.bindings.get(value.name)
+                const binding = this.lookupBinding(value.name)
                 if (!binding) {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Unknown identifier '${value.name}'`,
@@ -649,7 +664,7 @@ export class SemanticAnalyzer {
         identifier: ASTIdentifier,
         position: { line: number; column: number },
     ): void {
-        const binding = this.bindings.get(identifier.name)
+        const binding = this.lookupBinding(identifier.name)
         if (!binding) {
             throw new Error(
                 `${position.line}:${position.column}:Unknown identifier '${identifier.name}'`,
@@ -669,5 +684,53 @@ export class SemanticAnalyzer {
             return this.extractRootIdentifier(expr.left)
         }
         return null
+    }
+
+    private enterScope(): void {
+        this.bindingScopes.push(new Map())
+    }
+
+    private exitScope(): void {
+        this.bindingScopes.pop()
+    }
+
+    private declareBinding(
+        name: string,
+        binding: {
+            type: string
+            semantics: ASTVariableDeclaration['semantics']
+        },
+        position: { line: number; column: number },
+    ): void {
+        const currentScope = this.bindingScopes[this.bindingScopes.length - 1]
+        if (!currentScope) {
+            throw new Error('Internal error: no active binding scope')
+        }
+
+        if (currentScope.has(name)) {
+            throw new Error(
+                `${position.line}:${position.column}:Variable '${name}' is already declared in this scope`,
+            )
+        }
+
+        currentScope.set(name, binding)
+    }
+
+    private lookupBinding(name: string):
+        | {
+              type: string
+              semantics: ASTVariableDeclaration['semantics']
+          }
+        | undefined {
+        for (
+            let index = this.bindingScopes.length - 1;
+            index >= 0;
+            index -= 1
+        ) {
+            const binding = this.bindingScopes[index].get(name)
+            if (binding) return binding
+        }
+
+        return undefined
     }
 }

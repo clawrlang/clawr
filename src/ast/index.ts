@@ -57,6 +57,10 @@ export type ASTStatement =
     | ASTVariableDeclaration
     | ASTPrintStatement
     | ASTAssignment
+    | ASTIfStatement
+    | ASTWhileStatement
+    | ASTBreakStatement
+    | ASTContinueStatement
     | ASTDataDeclaration
 
 export interface ASTAssignment {
@@ -75,6 +79,31 @@ export interface ASTDataDeclaration {
         type: string
         position?: ASTPosition
     }[]
+    position: ASTPosition
+}
+
+export interface ASTIfStatement {
+    kind: 'if'
+    condition: ASTExpression
+    thenBranch: ASTStatement[]
+    elseBranch?: ASTStatement[]
+    position: ASTPosition
+}
+
+export interface ASTWhileStatement {
+    kind: 'while'
+    condition: ASTExpression
+    body: ASTStatement[]
+    position: ASTPosition
+}
+
+export interface ASTBreakStatement {
+    kind: 'break'
+    position: ASTPosition
+}
+
+export interface ASTContinueStatement {
+    kind: 'continue'
     position: ASTPosition
 }
 

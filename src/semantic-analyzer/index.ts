@@ -94,6 +94,13 @@ export class SemanticAnalyzer {
                 return this.analyzePrintStatement(stmt)
             case 'assign':
                 return this.analyzeAssignment(stmt)
+            case 'if':
+            case 'while':
+            case 'break':
+            case 'continue':
+                throw new Error(
+                    `${stmt.position.line}:${stmt.position.column}:Control-flow statement '${stmt.kind}' is not yet supported in semantic analysis`,
+                )
             default:
                 return stmt
         }

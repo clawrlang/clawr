@@ -278,6 +278,72 @@ describe('Parser Tests', () => {
             ],
         })
     })
+
+    it('parses if/else block statements', () => {
+        const program = 'if true { print true } else { print false }'
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'if',
+                    condition: { kind: 'truthvalue', value: 'true' },
+                    thenBranch: [
+                        {
+                            kind: 'print',
+                            value: { kind: 'truthvalue', value: 'true' },
+                        },
+                    ],
+                    elseBranch: [
+                        {
+                            kind: 'print',
+                            value: { kind: 'truthvalue', value: 'false' },
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('parses else-if chains', () => {
+        const program = 'if true { print true } else if false { print false }'
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'if',
+                    elseBranch: [
+                        {
+                            kind: 'if',
+                            condition: { kind: 'truthvalue', value: 'false' },
+                            thenBranch: [
+                                {
+                                    kind: 'print',
+                                    value: {
+                                        kind: 'truthvalue',
+                                        value: 'false',
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('parses while loops with break and continue', () => {
+        const program = 'while ambiguous { continue break }'
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'while',
+                    condition: { kind: 'truthvalue', value: 'ambiguous' },
+                    body: [{ kind: 'continue' }, { kind: 'break' }],
+                },
+            ],
+        })
+    })
 })
 
 function parse(code: string) {

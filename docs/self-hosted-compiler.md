@@ -58,9 +58,10 @@ The major milestone for Clawr is to be able to build itself
 
 Prioritise features that unlock writing the compiler in Clawr with the smallest semantic surface area first.
 
-1. Control-flow (minimal core)
-2. Operators and precedence (minimal core)
-3. Encapsulated `object`/`service` types
+1. Milestone A1: Control-flow core
+2. Milestone A2: Modules/imports/helper visibility foundations
+3. Milestone B: Operator and precedence stabilization across modules
+4. Milestone C: Encapsulated `object`/`service` types
 
 Current focus: Milestone A (Control-flow)
 
@@ -78,13 +79,13 @@ Recommended sequencing:
 
 1. Milestone A1: Control-flow core in a single-module world.
 2. Milestone A2: Module/import foundations (lexer, AST, parser, semantic model).
-3. Milestone B: Operators and precedence on top of multi-module analysis.
+3. Milestone B: Operators and precedence hardening on top of multi-module analysis.
 4. Milestone C: Encapsulation/subtyping after modules and operators are stable.
 
 Milestone gates:
 
-- Gate to start B: module graph resolution works, import cycles are diagnosed, and helper visibility is enforced at top-level.
-- Gate to start C: at least one non-trivial compiler subsystem compiles/runs across multiple modules with stable control-flow and operator semantics.
+- Gate to mark B complete: operator precedence/associativity tests and mixed-expression lowering pass in both single-module and multi-module fixtures.
+- Gate to start C: A1 and A2 are complete end-to-end, and B stabilization checks are green.
 
 Why this integration is important:
 
@@ -109,14 +110,16 @@ Done criteria:
 
 ### Milestone B: Bootstrap Operators
 
+Status:
+
+- [x] Core parsing support for operator precedence exists.
+- [ ] Cross-module stabilization and regression hardening remains.
+
 Scope:
 
-- [ ] Primary and parenthesised expressions
-- [ ] Unary prefix (`-`, `!`)
-- [ ] Multiplicative (`*`, `/`)
-- [ ] Additive (`+`, `-`)
-- [ ] Comparison (`==`, `<`, `<=`, `>`, `>=`)
-- [ ] Logical AND/OR (`&&`, `||`)
+- [ ] Preserve deterministic precedence and associativity in parser and lowering.
+- [ ] Verify mixed expression trees in multi-module analysis paths.
+- [ ] Maintain operator behavior regressions for integer and truthvalue paths.
 
 Done criteria:
 
@@ -141,7 +144,7 @@ Done criteria:
 
 ### Practical Rule for Self-Hosting
 
-Do not start Milestone C until A and B are stable enough that new compiler features are mostly blocked by abstraction/encapsulation concerns rather than language expressiveness.
+Do not start Milestone C until A1 and A2 are complete and Milestone B stabilization is green, so remaining blockers are abstraction/encapsulation concerns rather than core language gaps.
 
 ## Definition of Done: Self-Hosting v1
 
@@ -287,11 +290,44 @@ Within a function/method body:
 - Re-export chains and barrel modules.
 - Package registry resolution beyond relative or declared library roots.
 
-## Implementation Checklist: V1 Modules/Imports/Helper
+## Implementation Checklist: A1/A2/B Flow
 
-This checklist maps the V1 design to the current codebase layout for incremental implementation.
+This checklist maps the roadmap to the current codebase layout in execution order.
 
-### Phase 1: Lexer and AST Foundations
+### Phase A1.1: Control-Flow Parser and AST Foundations
+
+Targets:
+
+- `src/ast/index.ts`
+- `src/parser/index.ts`
+- `tests/unit/parser.test.ts`
+
+Checklist:
+
+- [x] Add AST nodes for `if`/`else`, `while`, `break`, and `continue` statements.
+- [x] Parse control-flow statements with nested block support.
+- [x] Add parser coverage for `if`/`else`, `else if`, and loop flow statements.
+
+### Phase A1.2: Control-Flow Semantics and Lowering
+
+Targets:
+
+- `src/semantic-analyzer/ast.ts`
+- `src/semantic-analyzer/index.ts`
+- `src/ir/ir-generator.ts`
+- `src/codegen/index.ts`
+- `tests/unit/sem-analyzer.test.ts`
+- `tests/unit/lowering.test.ts`
+- `tests/e2e/*`
+
+Checklist:
+
+- [ ] Validate branch and loop scoping rules in semantic analysis.
+- [ ] Validate `break`/`continue` placement and loop boundaries.
+- [ ] Lower control-flow statements to correct C control structures.
+- [ ] Add unit and e2e fixtures for control-flow-heavy compiler-style scenarios.
+
+### Phase A2.1: Lexer and AST Foundations
 
 Targets:
 
@@ -306,7 +342,7 @@ Checklist:
 - [ ] Add visibility annotation on top-level declarations (`public` default, `helper` explicit).
 - [ ] Add AST representation for method visibility in `object`/`service` declarations.
 
-### Phase 2: Parser Integration
+### Phase A2.2: Parser Integration
 
 Targets:
 
@@ -322,7 +358,7 @@ Checklist:
 - [ ] Parse `helper` before `object`/`service` methods.
 - [ ] Emit precise diagnostics for malformed import lists and missing `from` strings.
 
-### Phase 3: Semantic Analysis (Single-Module)
+### Phase A2.3: Semantic Analysis (Single-Module)
 
 Targets:
 
@@ -336,7 +372,7 @@ Checklist:
 - [ ] Enforce method-level helper visibility within declaring type boundaries.
 - [ ] Keep existing behavior unchanged for projects that do not use imports/helper.
 
-### Phase 4: Module Graph and Resolution Pass
+### Phase A2.4: Module Graph and Resolution Pass
 
 Targets:
 
@@ -351,7 +387,7 @@ Checklist:
 - [ ] Resolve imported symbol names/aliases against target module exports.
 - [ ] Enforce top-level helper boundary at library/package scope.
 
-### Phase 5: Lowering and Codegen Wiring
+### Phase A2.5: Lowering and Codegen Wiring
 
 Targets:
 
@@ -365,7 +401,7 @@ Checklist:
 - [ ] Prevent emission of helper-only symbols into public linkage surfaces as needed.
 - [ ] Keep generated runtime calls and ownership semantics unchanged.
 
-### Phase 6: Tests and Fixtures
+### Phase A2.6: Tests and Fixtures
 
 Targets:
 
@@ -383,11 +419,33 @@ Checklist:
 - [ ] Add module-graph tests for cycle detection and deterministic order.
 - [ ] Add e2e fixture with at least two modules and one helper-hidden symbol.
 
-### Suggested First PR Slice
+### Phase B: Operator Stabilization and Regression
 
-- [ ] Phase 1 + Phase 2 only (syntax accepted, no cross-module semantic resolution yet).
-- [ ] Parser and AST tests updated.
-- [ ] Feature-gate semantic enforcement until module graph pass lands.
+Targets:
+
+- `tests/unit/parser.test.ts`
+- `tests/unit/lowering.test.ts`
+- `tests/e2e/*`
+
+Checklist:
+
+- [ ] Add cross-module regression fixtures that combine operators with imports.
+- [ ] Verify precedence remains deterministic after module graph integration.
+- [ ] Keep integer and truthvalue operator behavior stable in e2e runs.
+
+### Milestone Risk Register
+
+- [ ] Loop scope correctness: variable lifetime and state transitions across `break`/`continue`.
+- [ ] Deterministic module ordering: import DAG stability and cycle diagnostics.
+- [ ] Helper boundary enforcement: visibility checks across package/library boundaries.
+
+### Suggested PR Slices
+
+- [x] PR1: Phase A1.1 only (control-flow syntax + AST + parser tests).
+- [ ] PR2: Phase A1.2 (control-flow semantics/lowering + unit/e2e tests).
+- [ ] PR3: Phase A2.1 + Phase A2.2 (module/import/helper syntax + parser tests).
+- [ ] PR4: Phase A2.3 + A2.4 + A2.6 (semantic resolution + module graph + tests).
+- [ ] PR5: Phase B stabilization suite across multi-module fixtures.
 
 ## Probably not Needed
 

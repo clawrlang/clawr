@@ -2,10 +2,13 @@ import type {
     ASTDataDeclaration,
     ASTDataLiteral,
     ASTIdentifier,
+    ASTImportDeclaration,
     ASTIntegerLiteral,
     ASTPosition,
     ASTTruthValueLiteral,
 } from '../ast'
+
+export type SemanticImportDeclaration = ASTImportDeclaration
 
 export interface SemanticFieldAccess {
     kind: 'field-access'
@@ -117,6 +120,7 @@ export interface SemanticFunction {
 }
 
 export interface SemanticModule {
+    imports: SemanticImportDeclaration[]
     functions: SemanticFunction[]
     types: SemanticDataDeclaration[]
     globals: SemanticVariableDeclaration[]

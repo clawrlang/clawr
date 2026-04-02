@@ -391,8 +391,8 @@ Targets:
 
 Checklist:
 
-- [ ] Carry import declarations into semantic module representation.
-- [ ] Carry declaration visibility (`public`/`helper`) into semantic declarations.
+- [x] Carry import declarations into semantic module representation.
+- [x] Carry declaration visibility (`public`/`helper`) into semantic declarations.
 - [ ] Enforce method-level helper visibility within declaring type boundaries.
 - [ ] Keep existing behavior unchanged for projects that do not use imports/helper.
 
@@ -405,11 +405,11 @@ Targets:
 
 Checklist:
 
-- [ ] Resolve import paths to module files.
-- [ ] Build dependency DAG and detect cycles.
-- [ ] Produce a deterministic module processing order.
-- [ ] Resolve imported symbol names/aliases against target module exports.
-- [ ] Enforce top-level helper boundary at library/package scope.
+- [x] Resolve import paths to module files.
+- [x] Build dependency DAG and detect cycles.
+- [x] Produce a deterministic module processing order.
+- [x] Resolve imported symbol names/aliases against target module exports.
+- [x] Enforce top-level helper boundary at library/package scope.
 
 ### Phase A2.5: Lowering and Codegen Wiring
 

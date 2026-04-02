@@ -75,6 +75,10 @@ export class SemanticAnalyzer {
         }
 
         return {
+            imports: this.ast.imports.map((imp) => ({
+                ...imp,
+                items: imp.items.map((item) => ({ ...item })),
+            })),
             functions: [mainFunction],
             types,
             globals: [],
@@ -156,7 +160,9 @@ export class SemanticAnalyzer {
         this.assertTruthvalueCondition(stmt.condition, stmt.position, 'while')
 
         const loopAnalyzer = this.createLoopChildScope()
-        const body = stmt.body.map((child) => loopAnalyzer.analyzeStatement(child))
+        const body = stmt.body.map((child) =>
+            loopAnalyzer.analyzeStatement(child),
+        )
 
         return {
             kind: 'while',

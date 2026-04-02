@@ -5,6 +5,7 @@ import { Command } from 'commander'
 import { TokenStream } from '../lexer'
 import { Parser } from '../parser'
 import { SemanticAnalyzer } from '../semantic-analyzer'
+import { buildModuleGraph } from '../semantic-analyzer/module-graph'
 import { IRGenerator } from '../ir/ir-generator'
 import { codegenC } from '../codegen'
 import child_process from 'node:child_process'
@@ -22,9 +23,11 @@ cli.name('rwrc')
         try {
             const basename = path.basename(sourceFile, '.clawr')
             const outFilePath = path.resolve(options.outdir, basename)
-            const source = await fs.promises.readFile(sourceFile, 'utf-8')
-            const tokenStream = new TokenStream(source, sourceFile)
-            const ast = new Parser(tokenStream).parse()
+            const graph = await buildModuleGraph(sourceFile)
+            const ast = graph.modules.get(graph.entry)
+            if (!ast) {
+                throw new Error('Entry module missing from module graph')
+            }
             const semanticModule = new SemanticAnalyzer(ast).analyze()
             const program = new IRGenerator().generate(semanticModule)
             const cCode = codegenC(program)

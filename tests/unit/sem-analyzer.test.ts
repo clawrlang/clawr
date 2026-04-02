@@ -92,6 +92,12 @@ describe('SemanticAnalyzer', () => {
             )
         })
 
+        it('fails when assigning to const variable', () => {
+            expect(() => analyze('const x = ambiguous\nx = true')).toThrow(
+                "2:1:Cannot assign to const variable 'x'",
+            )
+        })
+
         it('fails when assignment target type does not match value type', () => {
             expect(() =>
                 analyze(
@@ -200,6 +206,14 @@ describe('SemanticAnalyzer', () => {
             ).toThrow(
                 "5:1:Assignment type mismatch: target is 'truthvalue' but value is 'Point'",
             )
+        })
+
+        it('fails when mutating field through const variable', () => {
+            expect(() =>
+                analyze(
+                    'data Point {\n  x: truthvalue\n}\nconst p: Point = { x: true }\np.x = false',
+                ),
+            ).toThrow("5:1:Cannot mutate field through const variable 'p'")
         })
     })
 

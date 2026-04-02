@@ -4,6 +4,7 @@ import type {
     ASTDataDeclaration,
     ASTDataLiteral,
     ASTExpression,
+    ASTIdentifier,
     ASTProgram,
     ASTStatement,
     ASTVariableDeclaration,
@@ -35,7 +36,13 @@ export type {
 } from './ast'
 
 export class SemanticAnalyzer {
-    private bindings = new Map<string, string>()
+    private bindings = new Map<
+        string,
+        {
+            type: string
+            semantics: ASTVariableDeclaration['semantics']
+        }
+    >()
     private dataTypes = new Map<string, Map<string, string>>()
 
     constructor(private ast: ASTProgram) {}
@@ -105,6 +112,8 @@ export class SemanticAnalyzer {
                 `${stmt.position.line}:${stmt.position.column}:Invalid assignment target kind '${stmt.target.kind}'`,
             )
         }
+
+        this.validateAssignmentMutationSemantics(stmt.target)
 
         const targetType = this.inferExpressionType(stmt.target)
         const valueType = this.inferExpressionType(stmt.value)
@@ -208,7 +217,10 @@ export class SemanticAnalyzer {
 
         if (explicitType) {
             this.validateInitializerAgainstType(stmt.value, explicitType)
-            this.bindings.set(stmt.name, explicitType)
+            this.bindings.set(stmt.name, {
+                type: explicitType,
+                semantics: stmt.semantics,
+            })
             const rewrittenValue = this.rewriteExpression(stmt.value)
             return {
                 ...stmt,
@@ -229,7 +241,10 @@ export class SemanticAnalyzer {
             )
         }
 
-        this.bindings.set(stmt.name, inferredType)
+        this.bindings.set(stmt.name, {
+            type: inferredType,
+            semantics: stmt.semantics,
+        })
         const rewrittenValue = this.rewriteExpression(stmt.value)
         return {
             ...stmt,
@@ -336,13 +351,13 @@ export class SemanticAnalyzer {
             case 'integer':
                 return 'integer'
             case 'identifier': {
-                const type = this.bindings.get(value.name)
-                if (!type) {
+                const binding = this.bindings.get(value.name)
+                if (!binding) {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Unknown identifier '${value.name}'`,
                     )
                 }
-                return type
+                return binding.type
             }
             case 'binary': {
                 if (value.operator !== '.') return null
@@ -372,5 +387,60 @@ export class SemanticAnalyzer {
             default:
                 return null
         }
+    }
+
+    private validateAssignmentMutationSemantics(target: ASTExpression): void {
+        if (target.kind === 'identifier') {
+            this.assertIdentifierIsMutable(target, target.position)
+            return
+        }
+
+        if (target.kind === 'binary' && target.operator === '.') {
+            const rootIdentifier = this.extractRootIdentifier(target)
+            if (!rootIdentifier) {
+                throw new Error(
+                    `${target.position.line}:${target.position.column}:Invalid field assignment target`,
+                )
+            }
+
+            const binding = this.bindings.get(rootIdentifier.name)
+            if (!binding) {
+                throw new Error(
+                    `${rootIdentifier.position.line}:${rootIdentifier.position.column}:Unknown identifier '${rootIdentifier.name}'`,
+                )
+            }
+
+            if (binding.semantics === 'const') {
+                throw new Error(
+                    `${rootIdentifier.position.line}:${rootIdentifier.position.column}:Cannot mutate field through const variable '${rootIdentifier.name}'`,
+                )
+            }
+        }
+    }
+
+    private assertIdentifierIsMutable(
+        identifier: ASTIdentifier,
+        position: { line: number; column: number },
+    ): void {
+        const binding = this.bindings.get(identifier.name)
+        if (!binding) {
+            throw new Error(
+                `${position.line}:${position.column}:Unknown identifier '${identifier.name}'`,
+            )
+        }
+
+        if (binding.semantics === 'const') {
+            throw new Error(
+                `${position.line}:${position.column}:Cannot assign to const variable '${identifier.name}'`,
+            )
+        }
+    }
+
+    private extractRootIdentifier(expr: ASTExpression): ASTIdentifier | null {
+        if (expr.kind === 'identifier') return expr
+        if (expr.kind === 'binary' && expr.operator === '.') {
+            return this.extractRootIdentifier(expr.left)
+        }
+        return null
     }
 }

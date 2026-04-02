@@ -379,6 +379,40 @@ describe('Lowering Tests', () => {
         })
     })
 
+    it('lowers non-primitive data fields to pointers of their declared type', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Inner',
+                    fields: [{ name: 'x', type: 'truthvalue' }],
+                    position: somePosition,
+                },
+                {
+                    kind: 'data-decl',
+                    name: 'Outer',
+                    fields: [{ name: 'inner', type: 'Inner' }],
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.structs[2]).toMatchObject({
+            kind: 'struct',
+            name: 'Outer',
+            fields: [
+                { name: 'header', type: '__rc_header' },
+                { name: 'inner', type: 'Inner*' },
+            ],
+        })
+        expect(module.structs[3]).toMatchObject({
+            kind: 'struct',
+            name: 'Outerˇfields',
+            fields: [{ name: 'inner', type: 'Inner*' }],
+        })
+    })
+
     it('lowers data literal', () => {
         const program: SemanticProgramFixture = {
             body: [

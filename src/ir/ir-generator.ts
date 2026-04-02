@@ -62,7 +62,7 @@ export class IRGenerator {
     private lowerStruct(stmt: SemanticDataDeclaration): CStruct[] {
         const fields = stmt.fields.map((f) => ({
             name: f.name,
-            type: f.type === 'truthvalue' ? 'truthvalue_t' : 'Integer*',
+            type: this.lowerValueSetType(f.type),
         }))
         return [
             {
@@ -386,13 +386,17 @@ export class IRGenerator {
     }
 
     private lowerType(stmt: SemanticVariableDeclaration): string {
-        switch (stmt.valueSet.type) {
+        return this.lowerValueSetType(stmt.valueSet.type)
+    }
+
+    private lowerValueSetType(type: string): string {
+        switch (type) {
             case 'truthvalue':
                 return 'truthvalue_t'
             case 'integer':
                 return 'Integer*'
             default:
-                return `${stmt.valueSet.type}*`
+                return `${type}*`
         }
     }
 }

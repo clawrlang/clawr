@@ -4,8 +4,11 @@ import type {
     SemanticFunction,
     SemanticModule,
     SemanticOwnershipEffects,
+    SemanticAssignment,
+    SemanticFieldAccess,
     SemanticPrintStatement,
     SemanticStatement,
+    SemanticVariableDeclaration,
 } from '../semantic-analyzer'
 import type { CModule, CStatement, CFunctionDeclaration } from '.'
 import {
@@ -23,6 +26,32 @@ import {
 interface LoweringContext {
     releaseAtExit: Set<string>
     tempCounter: number
+}
+
+type DataLiteralVariableDeclaration = SemanticVariableDeclaration & {
+    value: Extract<
+        SemanticVariableDeclaration['value'],
+        { kind: 'data-literal' }
+    >
+}
+
+type NonDataLiteralVariableDeclaration = SemanticVariableDeclaration & {
+    value: Exclude<
+        SemanticVariableDeclaration['value'],
+        { kind: 'data-literal' }
+    >
+}
+
+type LowerableAssignment = SemanticAssignment & {
+    value: Exclude<SemanticAssignment['value'], { kind: 'data-literal' }>
+}
+
+type IdentifierAssignment = LowerableAssignment & {
+    target: Extract<SemanticAssignment['target'], { kind: 'identifier' }>
+}
+
+type FieldAccessAssignment = LowerableAssignment & {
+    target: SemanticFieldAccess
 }
 
 export class IRGenerator {
@@ -77,101 +106,184 @@ export class IRGenerator {
             case 'var-decl':
                 if (stmt.ownership.releaseAtScopeExit)
                     context.releaseAtExit.add(stmt.name)
-
-                if (stmt.value.kind === 'data-literal') {
-                    // For data literals, we need to allocate the struct and then assign the fields
-                    return [
-                        {
-                            kind: 'var-decl',
-                            type: lowerType(stmt),
-                            name: stmt.name,
-                            value: {
-                                kind: 'function-call',
-                                name: 'allocRC',
-                                arguments: [
-                                    {
-                                        kind: 'var-ref',
-                                        name: stmt.valueSet.type,
-                                    },
-                                    {
-                                        kind: 'var-ref',
-                                        name:
-                                            stmt.semantics === 'ref'
-                                                ? '__rc_SHARED'
-                                                : '__rc_ISOLATED',
-                                    },
-                                ],
-                            },
-                        },
-                        {
-                            kind: 'function-call',
-                            name: 'memcpy',
-                            arguments: [
-                                {
-                                    kind: 'raw-expression',
-                                    expression: `(__rc_header*)${stmt.name} + 1`,
-                                },
-                                {
-                                    kind: 'raw-expression',
-                                    expression: `&(${stmt.valueSet.type}ˇfields){ ${lowerStructLiteralFields(this.module, stmt.valueSet.type, stmt.value.fields)} }`,
-                                },
-                                {
-                                    kind: 'raw-expression',
-                                    expression: `sizeof(${stmt.valueSet.type}) - sizeof(__rc_header)`,
-                                },
-                            ],
-                        },
-                        ...this.lowerOwnershipPrefix(stmt.ownership),
-                    ]
-                } else {
-                    return [
-                        {
-                            kind: 'var-decl',
-                            type: lowerType(stmt),
-                            name: stmt.name,
-                            value: lowerOwnedValue(stmt.value, stmt.ownership),
-                        },
-                        ...this.lowerOwnershipPrefix(stmt.ownership),
-                    ]
-                }
+                return this.lowerVariableDeclaration(stmt)
             case 'print':
                 return this.lowerPrint(stmt, context)
             case 'assign':
-                if (stmt.value.kind === 'data-literal')
-                    throw new Error(
-                        'Data-literal assignment is unsupported for now',
-                    )
-
-                if (stmt.target.kind === 'identifier') {
-                    return [
-                        ...this.lowerOwnershipPrefix(stmt.ownership),
-                        {
-                            kind: 'assign',
-                            target: {
-                                kind: 'var-ref',
-                                name: stmt.target.name,
-                            },
-                            value: lowerOwnedValue(stmt.value, stmt.ownership),
-                        },
-                    ]
-                }
-
-                if (stmt.target.kind !== 'field-access')
-                    throw new Error('Unsupported assignment target kind')
-
-                return [
-                    ...this.lowerOwnershipPrefix(stmt.ownership),
-                    {
-                        kind: 'assign',
-                        target: lowerValue(stmt.target),
-                        value: lowerOwnedValue(stmt.value, stmt.ownership),
-                    },
-                ]
+                return this.lowerAssignment(stmt)
             default:
                 throw new Error(
                     `Unknown AST statement kind ${(stmt as any).kind}`,
                 )
         }
+    }
+
+    private lowerVariableDeclaration(
+        stmt: SemanticVariableDeclaration,
+    ): CStatement[] {
+        if (this.isDataLiteralVariableDeclaration(stmt)) {
+            return this.lowerDataLiteralVariableDeclaration(stmt)
+        }
+
+        if (this.isNonDataLiteralVariableDeclaration(stmt)) {
+            return this.lowerNonDataLiteralVariableDeclaration(stmt)
+        }
+
+        throw new Error('Unsupported variable declaration value kind')
+    }
+
+    private lowerNonDataLiteralVariableDeclaration(
+        stmt: NonDataLiteralVariableDeclaration,
+    ): CStatement[] {
+        return [
+            {
+                kind: 'var-decl',
+                type: lowerType(stmt),
+                name: stmt.name,
+                value: lowerOwnedValue(stmt.value, stmt.ownership),
+            },
+            ...this.lowerOwnershipPrefix(stmt.ownership),
+        ]
+    }
+
+    private isDataLiteralVariableDeclaration(
+        stmt: SemanticVariableDeclaration,
+    ): stmt is DataLiteralVariableDeclaration {
+        return stmt.value.kind === 'data-literal'
+    }
+
+    private isNonDataLiteralVariableDeclaration(
+        stmt: SemanticVariableDeclaration,
+    ): stmt is NonDataLiteralVariableDeclaration {
+        return stmt.value.kind !== 'data-literal'
+    }
+
+    private lowerDataLiteralVariableDeclaration(
+        stmt: DataLiteralVariableDeclaration,
+    ): CStatement[] {
+        const structTypeName = stmt.valueSet.type
+        const structFields = lowerStructLiteralFields(
+            this.module,
+            structTypeName,
+            stmt.value.fields,
+        )
+
+        return [
+            {
+                kind: 'var-decl',
+                type: lowerType(stmt),
+                name: stmt.name,
+                value: {
+                    kind: 'function-call',
+                    name: 'allocRC',
+                    arguments: [
+                        {
+                            kind: 'var-ref',
+                            name: structTypeName,
+                        },
+                        {
+                            kind: 'var-ref',
+                            name:
+                                stmt.semantics === 'ref'
+                                    ? '__rc_SHARED'
+                                    : '__rc_ISOLATED',
+                        },
+                    ],
+                },
+            },
+            {
+                kind: 'function-call',
+                name: 'memcpy',
+                arguments: [
+                    {
+                        kind: 'raw-expression',
+                        expression: `(__rc_header*)${stmt.name} + 1`,
+                    },
+                    {
+                        kind: 'raw-expression',
+                        expression: `&(${structTypeName}ˇfields){ ${structFields} }`,
+                    },
+                    {
+                        kind: 'raw-expression',
+                        expression: `sizeof(${structTypeName}) - sizeof(__rc_header)`,
+                    },
+                ],
+            },
+            ...this.lowerOwnershipPrefix(stmt.ownership),
+        ]
+    }
+
+    private lowerAssignment(stmt: SemanticAssignment): CStatement[] {
+        if (stmt.value.kind === 'data-literal') {
+            throw new Error('Data-literal assignment is unsupported for now')
+        }
+
+        if (this.isLowerableAssignment(stmt)) {
+            return this.lowerNonDataLiteralAssignment(stmt)
+        }
+
+        throw new Error('Unsupported assignment value kind')
+    }
+
+    private lowerNonDataLiteralAssignment(
+        stmt: LowerableAssignment,
+    ): CStatement[] {
+        if (this.isIdentifierAssignment(stmt)) {
+            return this.lowerIdentifierAssignment(stmt)
+        }
+
+        if (this.isFieldAccessAssignment(stmt)) {
+            return this.lowerFieldAccessAssignment(stmt)
+        }
+
+        throw new Error('Unsupported assignment target kind')
+    }
+
+    private lowerIdentifierAssignment(
+        stmt: IdentifierAssignment,
+    ): CStatement[] {
+        return [
+            ...this.lowerOwnershipPrefix(stmt.ownership),
+            {
+                kind: 'assign',
+                target: {
+                    kind: 'var-ref',
+                    name: stmt.target.name,
+                },
+                value: lowerOwnedValue(stmt.value, stmt.ownership),
+            },
+        ]
+    }
+
+    private lowerFieldAccessAssignment(
+        stmt: FieldAccessAssignment,
+    ): CStatement[] {
+        return [
+            ...this.lowerOwnershipPrefix(stmt.ownership),
+            {
+                kind: 'assign',
+                target: lowerValue(stmt.target),
+                value: lowerOwnedValue(stmt.value, stmt.ownership),
+            },
+        ]
+    }
+
+    private isIdentifierAssignment(
+        stmt: LowerableAssignment,
+    ): stmt is IdentifierAssignment {
+        return stmt.target.kind === 'identifier'
+    }
+
+    private isFieldAccessAssignment(
+        stmt: LowerableAssignment,
+    ): stmt is FieldAccessAssignment {
+        return stmt.target.kind === 'field-access'
+    }
+
+    private isLowerableAssignment(
+        stmt: SemanticAssignment,
+    ): stmt is LowerableAssignment {
+        return stmt.value.kind !== 'data-literal'
     }
 
     private lowerOwnershipPrefix(

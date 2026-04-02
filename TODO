@@ -3,41 +3,10 @@
 ## Technical Debt
 
 - **`IRGenerator`**: `lowerStatement`: special case for `var-decl` with `DataLiteral` value
-
-## V1 Data Gap Closure Order
-
-1. Field typing in lowered structs (high impact, low risk)
-   - Lower each data field to its actual C type, not just `truthvalue_t | Integer*`.
-   - Unblocks nested data field support and removes incorrect field layouts.
-
-2. Runtime retain/release hooks for generated data types (high impact)
-   - Generate `retain_nested_fields` and `release_nested_fields` for each data type.
-   - Needed for correct RC behavior with nested reference fields.
-
-3. Data-literal codegen for non-truthvalue fields (high impact)
-   - Extend literal lowering beyond truthvalue-only field values.
-   - Reuse semantic type info to lower field expressions correctly.
-
-4. Variable semantics enforcement in semantic analysis (high impact)
-   - Enforce `const/mut/ref` mutation legality on assignment and field writes.
-   - Track binding semantics (not just binding type) in semantic state.
-
-5. Field declaration semantics in parser + AST (medium/high impact)
-   - Extend data field model to carry field semantics metadata.
-   - Validate allowed combinations in semantic analysis.
-
-6. Field-level position data in AST (medium impact)
-   - Add positions on declaration fields for precise diagnostics.
-   - Upgrade missing/unknown/incompatible field errors to use exact field spans.
-
-7. copyRC integration at semantics boundaries (medium impact)
-   - Introduce explicit copy points where isolated/shared transitions require cloning.
-   - Keep ownership policy in semantic effects, runtime calls in lowering.
-
-8. Scope model completion (medium impact)
-   - Add function/block scopes in semantic analyzer.
-   - Required before broadening mutation and ownership diagnostics.
-
-9. Cleanup and modularization (low risk)
-   - Split `IRGenerator` into focused units after behavior is stable.
-   - Keep refactors after semantic and RC correctness work.
+- **`IRGenerator`**: contains a reference to `ASTExpression`
+- Change `PrintStatement` to a function call.
+  - Can probably not be done until `trait` support is added
+  - `trait HasStringRepresentation { func toString() -> string }`
+  - Or use something like C# implicit/explicit operator instead of `toString()`?
+- Encapsulate scope
+- Object-oriented lowering helpers?

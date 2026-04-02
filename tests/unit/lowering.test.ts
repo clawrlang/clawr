@@ -206,24 +206,45 @@ describe('Lowering Tests', () => {
             ],
         }
         const module = new IRGenerator().generate(toModule(program))
-        // Integer* temp0 = Integer¸fromStringRC(String¸fromCString("42"));
+        // printf("%s\n", "42");
         expect(module.functions[0].body[0]).toMatchObject({
-            kind: 'var-decl',
-            name: 'temp0',
-            type: 'Integer*',
-            value: {
-                kind: 'function-call',
-                name: 'Integer¸fromStringRC',
-                arguments: [
-                    {
-                        kind: 'function-call',
-                        name: 'String¸fromCString',
-                        arguments: [{ kind: 'string', value: '42' }],
-                    },
-                ],
-            },
+            kind: 'function-call',
+            name: 'printf',
+            arguments: [
+                { kind: 'string', value: '%s\\n' },
+                { kind: 'string', value: '42' },
+            ],
         } satisfies CStatement)
-        // String* temp1 = Integer·toStringRC(temp0);
+    })
+
+    it('lowers print of integer variable with a single String temp', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    valueSet: { type: 'integer' },
+                    name: 'x',
+                    value: {
+                        kind: 'integer',
+                        value: 42n,
+                        position: somePosition,
+                    },
+                },
+                {
+                    kind: 'print',
+                    dispatchType: 'integer',
+                    value: {
+                        kind: 'identifier',
+                        name: 'x',
+                        position: somePosition,
+                    },
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
         expect(module.functions[0].body[1]).toMatchObject({
             kind: 'var-decl',
             name: 'temp1',
@@ -231,7 +252,7 @@ describe('Lowering Tests', () => {
             value: {
                 kind: 'function-call',
                 name: 'Integer·toStringRC',
-                arguments: [{ kind: 'var-ref', name: 'temp0' }],
+                arguments: [{ kind: 'var-ref', name: 'x' }],
             },
         } satisfies CStatement)
         // printf("%s\n", temp1);
@@ -245,12 +266,6 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
         // releaseRC(temp0);
         expect(module.functions[0].body[3]).toMatchObject({
-            kind: 'function-call',
-            name: 'releaseRC',
-            arguments: [{ kind: 'var-ref', name: 'temp0' }],
-        } satisfies CStatement)
-        // releaseRC(temp1);
-        expect(module.functions[0].body[4]).toMatchObject({
             kind: 'function-call',
             name: 'releaseRC',
             arguments: [{ kind: 'var-ref', name: 'temp1' }],

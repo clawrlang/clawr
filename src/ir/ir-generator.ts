@@ -315,13 +315,23 @@ export class IRGenerator {
 
         switch (print.dispatchType) {
             case 'integer':
+                if (print.value.kind === 'integer') {
+                    return [
+                        {
+                            kind: 'function-call',
+                            name: 'printf',
+                            arguments: [
+                                { kind: 'string', value: '%s\\n' },
+                                {
+                                    kind: 'string',
+                                    value: print.value.value.toString(),
+                                },
+                            ],
+                        },
+                    ]
+                }
+
                 return [
-                    {
-                        kind: 'var-decl',
-                        name: 'temp0',
-                        type: 'Integer*',
-                        value: this.lowerValue(print.value),
-                    },
                     {
                         kind: 'var-decl',
                         name: 'temp1',
@@ -329,7 +339,7 @@ export class IRGenerator {
                         value: {
                             kind: 'function-call',
                             name: 'Integer·toStringRC',
-                            arguments: [{ kind: 'var-ref', name: 'temp0' }],
+                            arguments: [this.lowerValue(print.value)],
                         },
                     },
                     {
@@ -339,11 +349,6 @@ export class IRGenerator {
                             { kind: 'string', value: '%s\\n' },
                             { kind: 'var-ref', name: 'temp1' },
                         ],
-                    },
-                    {
-                        kind: 'function-call',
-                        name: 'releaseRC',
-                        arguments: [{ kind: 'var-ref', name: 'temp0' }],
                     },
                     {
                         kind: 'function-call',

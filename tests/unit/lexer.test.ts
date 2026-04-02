@@ -137,7 +137,7 @@ describe('it tokenizes', () => {
     })
 
     describe('keywords', () => {
-        const tests = ['const', 'mut', 'ref']
+        const tests = ['const', 'mut', 'ref', 'helper', 'import', 'from', 'as']
         for (const keyword of tests) {
             test(keyword, () => {
                 const tokens = [...tokenize(keyword)]

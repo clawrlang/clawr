@@ -5,6 +5,21 @@ export interface ASTPosition {
     column: number
 }
 
+export type ASTVisibility = 'public' | 'helper'
+
+export interface ASTImportItem {
+    name: string
+    alias?: string
+    position: ASTPosition
+}
+
+export interface ASTImportDeclaration {
+    kind: 'import'
+    items: ASTImportItem[]
+    modulePath: string
+    position: ASTPosition
+}
+
 // ----- Expressions -----
 export type ASTExpression =
     | ASTIntegerLiteral
@@ -73,6 +88,7 @@ export interface ASTAssignment {
 export interface ASTDataDeclaration {
     kind: 'data-decl'
     name: string
+    visibility: ASTVisibility
     fields: {
         semantics?: 'const' | 'mut' | 'ref'
         name: string
@@ -135,5 +151,6 @@ export type ASTValueSet = {
 
 // ----- Top-level module structure -----
 export interface ASTProgram {
-    body: (ASTDataDeclaration | ASTStatement)[]
+    imports: ASTImportDeclaration[]
+    body: ASTStatement[]
 }

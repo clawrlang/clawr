@@ -344,6 +344,49 @@ describe('Parser Tests', () => {
             ],
         })
     })
+
+    it('parses import declarations with aliases before top-level body', () => {
+        const program =
+            'import Token as Tok, Span from "lexer/tokens"\nconst x = ambiguous'
+        const ast = parse(program)
+
+        expect(ast).toMatchObject({
+            imports: [
+                {
+                    kind: 'import',
+                    items: [{ name: 'Token', alias: 'Tok' }, { name: 'Span' }],
+                    modulePath: 'lexer/tokens',
+                },
+            ],
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    value: { kind: 'truthvalue', value: 'ambiguous' },
+                },
+            ],
+        })
+    })
+
+    it('parses helper data declarations at top level', () => {
+        const program = 'helper data ParserState { value: truthvalue }'
+        const ast = parse(program)
+
+        expect(ast).toMatchObject({
+            imports: [],
+            body: [
+                {
+                    kind: 'data-decl',
+                    visibility: 'helper',
+                    name: 'ParserState',
+                    fields: [
+                        { semantics: 'mut', name: 'value', type: 'truthvalue' },
+                    ],
+                },
+            ],
+        })
+    })
 })
 
 function parse(code: string) {

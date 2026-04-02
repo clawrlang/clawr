@@ -1,5 +1,8 @@
 import {
+    ASTDataDeclaration,
     ASTIfStatement,
+    ASTImportDeclaration,
+    ASTImportItem,
     ASTProgram,
     ASTStatement,
     ASTWhileStatement,
@@ -29,18 +32,30 @@ export class Parser {
     }
 
     parse(): ASTProgram {
+        const imports: ASTImportDeclaration[] = []
         const body: ASTStatement[] = []
         while (this.stream.peek()) {
-            const stmt = this.parseStatement()
+            const stmt = this.parseTopLevel(imports)
             if (stmt) {
                 body.push(stmt)
-            } else {
-                throw new Error(
-                    `Unexpected token: ${JSON.stringify(this.stream.peek())}`,
-                )
             }
         }
-        return { body }
+        return { imports, body }
+    }
+
+    private parseTopLevel(
+        imports: ASTImportDeclaration[],
+    ): ASTStatement | undefined {
+        if (this.stream.isNext('KEYWORD', 'import')) {
+            imports.push(this.parseImportDeclaration())
+            return undefined
+        }
+
+        if (this.stream.isNext('KEYWORD', 'helper')) {
+            return this.parseHelperTopLevelDeclaration()
+        }
+
+        return this.parseStatement()
     }
 
     private parseStatement(): ASTStatement | undefined {
@@ -129,5 +144,73 @@ export class Parser {
 
         this.stream.expect('PUNCTUATION', '}')
         return statements
+    }
+
+    private parseImportDeclaration(): ASTImportDeclaration {
+        const importToken = this.stream.expect('KEYWORD', 'import')
+        const items: ASTImportItem[] = []
+
+        while (true) {
+            const nameToken = this.stream.expect('IDENTIFIER')
+            let alias: string | undefined
+
+            if (this.stream.isNext('KEYWORD', 'as')) {
+                this.stream.expect('KEYWORD', 'as')
+                alias = this.stream.expect('IDENTIFIER').identifier
+            }
+
+            items.push({
+                name: nameToken.identifier,
+                alias,
+                position: { line: nameToken.line, column: nameToken.column },
+            })
+
+            if (!this.stream.isNext('PUNCTUATION', ',')) {
+                break
+            }
+
+            this.stream.expect('PUNCTUATION', ',')
+        }
+
+        this.stream.expect('KEYWORD', 'from')
+        const modulePathToken = this.stream.next()
+        if (!modulePathToken || modulePathToken.kind !== 'STRING_LITERAL') {
+            throw new Error(
+                `Expected module path string literal, got ${modulePathToken?.kind ?? 'EOF'}`,
+            )
+        }
+        const modulePath = modulePathToken.value
+
+        return {
+            kind: 'import',
+            items,
+            modulePath,
+            position: { line: importToken.line, column: importToken.column },
+        }
+    }
+
+    private parseHelperTopLevelDeclaration(): ASTStatement {
+        const helperToken = this.stream.expect('KEYWORD', 'helper')
+
+        if (!this.stream.isNext('KEYWORD', 'data')) {
+            throw new Error(
+                `${helperToken.line}:${helperToken.column}:helper is only supported for top-level data declarations in this slice`,
+            )
+        }
+
+        const dataDeclaration = this.statementParsers
+            .find((parser) => parser instanceof DataDeclarationParser)
+            ?.parse() as ASTDataDeclaration | undefined
+
+        if (!dataDeclaration || dataDeclaration.kind !== 'data-decl') {
+            throw new Error(
+                `${helperToken.line}:${helperToken.column}:Expected data declaration after helper`,
+            )
+        }
+
+        return {
+            ...dataDeclaration,
+            visibility: 'helper',
+        }
     }
 }

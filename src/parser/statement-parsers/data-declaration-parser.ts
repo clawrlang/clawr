@@ -1,4 +1,4 @@
-import { ASTStatement } from '../../ast'
+import { ASTDataDeclaration } from '../../ast'
 import { TokenStream } from '../../lexer'
 
 export class DataDeclarationParser {
@@ -9,7 +9,7 @@ export class DataDeclarationParser {
         return token?.kind === 'KEYWORD' && token.keyword === 'data'
     }
 
-    parse(): ASTStatement {
+    parse(): ASTDataDeclaration {
         const token = this.stream.expect('KEYWORD', 'data')
         const name = this.stream.expect('IDENTIFIER').identifier
         this.stream.expect('PUNCTUATION', '{')
@@ -54,6 +54,7 @@ export class DataDeclarationParser {
         return {
             kind: 'data-decl',
             name,
+            visibility: 'public',
             fields,
             position: { line: token.line, column: token.column },
         }

@@ -357,10 +357,12 @@ Targets:
 
 Checklist:
 
-- [ ] Add/confirm tokens for `import`, `from`, `as`, and `helper`.
-- [ ] Add AST nodes for import declarations (`module path`, imported names, aliases).
-- [ ] Add visibility annotation on top-level declarations (`public` default, `helper` explicit).
+- [x] Add/confirm tokens for `import`, `from`, `as`, and `helper`.
+- [x] Add AST nodes for import declarations (`module path`, imported names, aliases).
+- [x] Add visibility annotation on top-level declarations (`public` default, `helper` explicit).
 - [ ] Add AST representation for method visibility in `object`/`service` declarations.
+
+Current slice: top-level visibility is currently carried for `data` declarations only.
 
 ### Phase A2.2: Parser Integration
 
@@ -372,11 +374,13 @@ Targets:
 
 Checklist:
 
-- [ ] Parse leading import blocks at module/file scope.
-- [ ] Parse import item aliases (`Name as Alias`).
+- [x] Parse leading import blocks at module/file scope.
+- [x] Parse import item aliases (`Name as Alias`).
 - [ ] Parse `helper` before top-level `data`/`object`/`service`/`fn`.
 - [ ] Parse `helper` before `object`/`service` methods.
 - [ ] Emit precise diagnostics for malformed import lists and missing `from` strings.
+
+Current slice: `helper` parsing is wired for top-level `data` declarations only.
 
 ### Phase A2.3: Semantic Analysis (Single-Module)
 

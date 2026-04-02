@@ -8,6 +8,7 @@ import {
     ASTWhileStatement,
 } from '../ast'
 import { TokenStream } from '../lexer'
+import type { Token } from '../lexer'
 import { ExpressionParser } from './expression-parser'
 import { PrintStatementParser } from './statement-parsers/print-statement-parser'
 import { DataDeclarationParser } from './statement-parsers/data-declaration-parser'
@@ -261,20 +262,18 @@ export class Parser {
     }
 }
 
-function describeToken(
-    token: { kind: string } & Record<string, unknown>,
-): string {
+function describeToken(token: Token): string {
     switch (token.kind) {
         case 'KEYWORD':
-            return `'${String(token.keyword)}'`
+            return `'${token.keyword}'`
         case 'PUNCTUATION':
-            return `'${String(token.symbol)}'`
+            return `'${token.symbol}'`
         case 'IDENTIFIER':
-            return `identifier '${String(token.identifier)}'`
+            return `identifier '${token.identifier}'`
         case 'STRING_LITERAL':
             return 'string literal'
         case 'TRUTH_LITERAL':
-            return `truth literal '${String(token.value)}'`
+            return `truth literal '${token.value}'`
         default:
             return token.kind
     }

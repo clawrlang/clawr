@@ -394,7 +394,7 @@ Checklist:
 - [x] Carry import declarations into semantic module representation.
 - [x] Carry declaration visibility (`public`/`helper`) into semantic declarations.
 - [ ] Enforce method-level helper visibility within declaring type boundaries.
-- [ ] Keep existing behavior unchanged for projects that do not use imports/helper.
+- [x] Keep existing behavior unchanged for projects that do not use imports/helper.
 
 ### Phase A2.4: Module Graph and Resolution Pass
 

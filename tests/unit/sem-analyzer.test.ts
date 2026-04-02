@@ -26,6 +26,41 @@ describe('SemanticAnalyzer', () => {
                 },
             ])
         })
+
+        it('keeps single-module behavior unchanged when no imports/helper are used', () => {
+            const module = analyze(
+                'data Point { x: truthvalue }\nconst p: Point = { x: true }\nprint p.x',
+            )
+
+            expect(module.imports).toEqual([])
+            expect(module.types).toMatchObject([
+                {
+                    kind: 'data-decl',
+                    name: 'Point',
+                    visibility: 'public',
+                    fields: [
+                        { semantics: 'mut', name: 'x', type: 'truthvalue' },
+                    ],
+                },
+            ])
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 'p',
+                    valueSet: { type: 'Point' },
+                    value: { kind: 'data-literal' },
+                },
+                {
+                    kind: 'print',
+                    dispatchType: 'truthvalue',
+                    value: {
+                        kind: 'field-access',
+                        object: { kind: 'identifier', name: 'p' },
+                        field: 'x',
+                    },
+                },
+            ])
+        })
     })
 
     describe('data field semantics', () => {

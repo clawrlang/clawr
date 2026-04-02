@@ -423,7 +423,7 @@ Checklist:
 
 - [x] Ensure multi-module semantic input lowers in deterministic order.
 - [x] Prevent emission of helper-only symbols into public linkage surfaces as needed.
-- [ ] Keep generated runtime calls and ownership semantics unchanged.
+- [x] Keep generated runtime calls and ownership semantics unchanged.
 
 ### Phase A2.6: Tests and Fixtures
 
@@ -437,11 +437,11 @@ Targets:
 
 Checklist:
 
-- [ ] Add lexer coverage for all new keywords and token combinations.
-- [ ] Add parser coverage for all import forms and helper placements.
-- [ ] Add semantic tests for visibility violations and valid helper usage.
-- [ ] Add module-graph tests for cycle detection and deterministic order.
-- [ ] Add e2e fixture with at least two modules and one helper-hidden symbol.
+- [x] Add lexer coverage for all new keywords and token combinations.
+- [x] Add parser coverage for all import forms and helper placements.
+- [x] Add semantic tests for visibility violations and valid helper usage.
+- [x] Add module-graph tests for cycle detection and deterministic order.
+- [x] Add e2e fixture with at least two modules and one helper-hidden symbol.
 
 ### Phase B: Operator Stabilization and Regression
 

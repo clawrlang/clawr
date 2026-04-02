@@ -369,6 +369,23 @@ describe('Parser Tests', () => {
         })
     })
 
+    it('parses single-item import declarations without aliases', () => {
+        const ast = parse('import Point from "models/point"\nprint true')
+
+        expect(ast).toMatchObject({
+            imports: [
+                {
+                    kind: 'import',
+                    items: [{ name: 'Point' }],
+                    modulePath: 'models/point',
+                },
+            ],
+            body: [
+                { kind: 'print', value: { kind: 'truthvalue', value: 'true' } },
+            ],
+        })
+    })
+
     it('parses helper data declarations at top level', () => {
         const program = 'helper data ParserState { value: truthvalue }'
         const ast = parse(program)
@@ -386,6 +403,12 @@ describe('Parser Tests', () => {
                 },
             ],
         })
+    })
+
+    it('rejects helper before unsupported top-level declarations', () => {
+        expect(() => parse('helper const x = ambiguous')).toThrow(
+            '1:1:helper is only supported for top-level data declarations in this slice',
+        )
     })
 
     it('reports malformed import lists precisely', () => {

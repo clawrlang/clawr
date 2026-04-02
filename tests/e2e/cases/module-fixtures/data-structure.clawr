@@ -1,0 +1,3 @@
+data DataStructure {
+    field: truthvalue
+}

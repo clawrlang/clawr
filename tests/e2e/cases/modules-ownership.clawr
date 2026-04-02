@@ -1,0 +1,21 @@
+import DataStructure from "./module-fixtures/data-structure"
+
+const isolatedSource: DataStructure = {
+    field: true
+}
+
+mut isolatedCopy: DataStructure = isolatedSource
+isolatedCopy.field = false
+
+print isolatedSource.field
+print isolatedCopy.field
+
+ref sharedA: DataStructure = {
+    field: true
+}
+
+ref sharedB: DataStructure = sharedA
+sharedB.field = ambiguous
+
+print sharedA.field
+print sharedB.field

@@ -61,6 +61,31 @@ describe('SemanticAnalyzer', () => {
                 },
             ])
         })
+
+        it('allows helper data usage inside the declaring module', () => {
+            const module = analyze(
+                'helper data Scratch { tmp: truthvalue }\nconst s: Scratch = { tmp: true }\nprint s.tmp',
+            )
+
+            expect(module.types).toMatchObject([
+                {
+                    kind: 'data-decl',
+                    name: 'Scratch',
+                    visibility: 'helper',
+                },
+            ])
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 's',
+                    valueSet: { type: 'Scratch' },
+                },
+                {
+                    kind: 'print',
+                    dispatchType: 'truthvalue',
+                },
+            ])
+        })
     })
 
     describe('data field semantics', () => {

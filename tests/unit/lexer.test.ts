@@ -148,6 +148,20 @@ describe('it tokenizes', () => {
                 })
             })
         }
+
+        it('tokenizes import syntax keyword combinations in sequence', () => {
+            const tokens = [
+                ...tokenize('import Token as Tok from "lexer/tokens"'),
+            ]
+            expect(tokens).toMatchObject([
+                { kind: 'KEYWORD', keyword: 'import' },
+                { kind: 'IDENTIFIER', identifier: 'Token' },
+                { kind: 'KEYWORD', keyword: 'as' },
+                { kind: 'IDENTIFIER', identifier: 'Tok' },
+                { kind: 'KEYWORD', keyword: 'from' },
+                { kind: 'STRING_LITERAL', value: 'lexer/tokens' },
+            ])
+        })
     })
 
     describe('punctuation', () => {

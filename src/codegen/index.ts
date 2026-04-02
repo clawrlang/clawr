@@ -15,6 +15,11 @@ export function codegenC(program: CModule): string {
         out += emitTypeDef(typeDef) + '\n'
     }
 
+    for (const func of program.functions) {
+        out += emitFunctionPrototype(func) + '\n'
+    }
+    out += '\n'
+
     for (const globalVar of program.variables) {
         if (globalVar.modifiers)
             out += `${globalVar.modifiers.join(' ')} ${globalVar.type} ${globalVar.name} = ${emitExpression(globalVar.value)};\n`
@@ -34,6 +39,11 @@ function emitTypeDef(typeDef: CStruct): string {
         .map((f) => `    ${f.type} ${f.name};`)
         .join('\n')
     return `typedef struct ${typeDef.name} {\n${fields}\n} ${typeDef.name};`
+}
+
+function emitFunctionPrototype(func: CFunctionDeclaration): string {
+    const params = func.parameters.map((p) => `${p.type} ${p.name}`).join(', ')
+    return `${func.returnType} ${func.name}(${params});`
 }
 
 function emitFunction(func: CFunctionDeclaration): string {

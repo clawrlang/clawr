@@ -27,10 +27,17 @@ interface LoweringContext {
 
 export class IRGenerator {
     generate(ast: SemanticModule): CModule {
+        const dataHookFunctions = ast.types.flatMap((stmt) =>
+            this.lowerStructHooks(stmt),
+        )
+
         return {
             structs: ast.types.flatMap(this.lowerStruct.bind(this)),
             variables: ast.types.map(this.lowerStructTypeInfo.bind(this)),
-            functions: ast.functions.map((fn) => this.lowerFunction(fn)),
+            functions: [
+                ...ast.functions.map((fn) => this.lowerFunction(fn)),
+                ...dataHookFunctions,
+            ],
         }
     }
 
@@ -81,6 +88,8 @@ export class IRGenerator {
     private lowerStructTypeInfo(
         stmt: SemanticDataDeclaration,
     ): CVariableDeclaration {
+        const hookNames = this.structHookNames(stmt.name)
+
         return {
             kind: 'var-decl',
             type: '__type_info',
@@ -95,12 +104,82 @@ export class IRGenerator {
                                 kind: 'raw-expression',
                                 expression: `sizeof(${stmt.name})`,
                             },
+                            retain_nested_fields: {
+                                kind: 'raw-expression',
+                                expression: hookNames.retain,
+                            },
+                            release_nested_fields: {
+                                kind: 'raw-expression',
+                                expression: hookNames.release,
+                            },
                         },
                     },
                 },
             },
             modifiers: ['static', 'const'],
         }
+    }
+
+    private structHookNames(typeName: string): {
+        retain: string
+        release: string
+    } {
+        return {
+            retain: `${typeName}ˇretainNestedFields`,
+            release: `${typeName}ˇreleaseNestedFields`,
+        }
+    }
+
+    private lowerStructHooks(
+        stmt: SemanticDataDeclaration,
+    ): CFunctionDeclaration[] {
+        const rcFields = stmt.fields.filter((f) =>
+            this.isReferenceCountedValueSetType(f.type),
+        )
+        const hooks = this.structHookNames(stmt.name)
+        const selfExpr: CExpression = {
+            kind: 'raw-expression',
+            expression: `(${stmt.name}*)self`,
+        }
+
+        return [
+            {
+                kind: 'function',
+                name: hooks.retain,
+                returnType: 'void',
+                parameters: [{ name: 'self', type: 'void*' }],
+                body: rcFields.map((field) => ({
+                    kind: 'function-call',
+                    name: 'retainRC',
+                    arguments: [
+                        {
+                            kind: 'field-reference',
+                            object: selfExpr,
+                            field: field.name,
+                            deref: true,
+                        },
+                    ],
+                })),
+            },
+            {
+                kind: 'function',
+                name: hooks.release,
+                returnType: 'void',
+                parameters: [{ name: 'self', type: 'void*' }],
+                body: rcFields.map((field) => ({
+                    kind: 'function-call',
+                    name: 'releaseRC',
+                    arguments: [
+                        {
+                            kind: 'field-reference',
+                            object: selfExpr,
+                            field: field.name,
+                            deref: true,
+                        },
+                    ],
+                })),
+            },
+        ]
     }
 
     private lowerStatement(
@@ -398,5 +477,9 @@ export class IRGenerator {
             default:
                 return `${type}*`
         }
+    }
+
+    private isReferenceCountedValueSetType(type: string): boolean {
+        return type !== 'truthvalue'
     }
 }

@@ -323,6 +323,28 @@ describe('Lowering Tests', () => {
         }
 
         const module = new IRGenerator().generate(toModule(program))
+        expect(
+            module.functions.find(
+                (fn) => fn.name === 'PointˇretainNestedFields',
+            ),
+        ).toMatchObject({
+            kind: 'function',
+            name: 'PointˇretainNestedFields',
+            returnType: 'void',
+            parameters: [{ name: 'self', type: 'void*' }],
+            body: [],
+        })
+        expect(
+            module.functions.find(
+                (fn) => fn.name === 'PointˇreleaseNestedFields',
+            ),
+        ).toMatchObject({
+            kind: 'function',
+            name: 'PointˇreleaseNestedFields',
+            returnType: 'void',
+            parameters: [{ name: 'self', type: 'void*' }],
+            body: [],
+        })
         /*
         typedef struct DataStructure {
             __rc_header header;
@@ -372,6 +394,14 @@ describe('Lowering Tests', () => {
                                 kind: 'raw-expression',
                                 expression: 'sizeof(Point)',
                             },
+                            retain_nested_fields: {
+                                kind: 'raw-expression',
+                                expression: 'PointˇretainNestedFields',
+                            },
+                            release_nested_fields: {
+                                kind: 'raw-expression',
+                                expression: 'PointˇreleaseNestedFields',
+                            },
                         },
                     },
                 },
@@ -410,6 +440,75 @@ describe('Lowering Tests', () => {
             kind: 'struct',
             name: 'Outerˇfields',
             fields: [{ name: 'inner', type: 'Inner*' }],
+        })
+
+        expect(
+            module.functions.find(
+                (fn) => fn.name === 'InnerˇretainNestedFields',
+            ),
+        ).toMatchObject({
+            kind: 'function',
+            name: 'InnerˇretainNestedFields',
+            body: [],
+        })
+        expect(
+            module.functions.find(
+                (fn) => fn.name === 'InnerˇreleaseNestedFields',
+            ),
+        ).toMatchObject({
+            kind: 'function',
+            name: 'InnerˇreleaseNestedFields',
+            body: [],
+        })
+        expect(
+            module.functions.find(
+                (fn) => fn.name === 'OuterˇretainNestedFields',
+            ),
+        ).toMatchObject({
+            kind: 'function',
+            name: 'OuterˇretainNestedFields',
+            body: [
+                {
+                    kind: 'function-call',
+                    name: 'retainRC',
+                    arguments: [
+                        {
+                            kind: 'field-reference',
+                            object: {
+                                kind: 'raw-expression',
+                                expression: '(Outer*)self',
+                            },
+                            field: 'inner',
+                            deref: true,
+                        },
+                    ],
+                },
+            ],
+        })
+        expect(
+            module.functions.find(
+                (fn) => fn.name === 'OuterˇreleaseNestedFields',
+            ),
+        ).toMatchObject({
+            kind: 'function',
+            name: 'OuterˇreleaseNestedFields',
+            body: [
+                {
+                    kind: 'function-call',
+                    name: 'releaseRC',
+                    arguments: [
+                        {
+                            kind: 'field-reference',
+                            object: {
+                                kind: 'raw-expression',
+                                expression: '(Outer*)self',
+                            },
+                            field: 'inner',
+                            deref: true,
+                        },
+                    ],
+                },
+            ],
         })
     })
 

@@ -2,6 +2,7 @@
 
 ## Technical Debt
 
+- Errors without position tagging
 - **`IRGenerator`**: contains a reference to `ASTExpression`
 - Change `PrintStatement` to a function call.
   - Can probably not be done until `trait` support is added

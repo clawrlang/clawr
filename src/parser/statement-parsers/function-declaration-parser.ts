@@ -90,7 +90,24 @@ export class FunctionDeclarationParser {
                 this.stream.expect('PUNCTUATION', ',')
             }
 
-            // Optional parameter semantics prefix
+            // Either `label name: [semantics] Type` or `name: [semantics] Type`
+            const firstToken = this.parseParameterNameToken()
+            let label: string | undefined
+            let paramName: string
+
+            if (
+                this.stream.isNext('IDENTIFIER') ||
+                this.stream.isNext('KEYWORD', 'self')
+            ) {
+                label = firstToken.identifier
+                paramName = this.parseParameterNameToken().identifier
+            } else {
+                paramName = firstToken.identifier
+            }
+
+            this.stream.expect('PUNCTUATION', ':')
+
+            // Optional semantics after ':': `name: const Type` / `name: ref Type`
             let semantics: 'const' | 'mut' | 'ref' | undefined
             const maybeSem = this.stream.peek()
             if (
@@ -103,22 +120,6 @@ export class FunctionDeclarationParser {
                 this.stream.next()
             }
 
-            // Either `label name: Type` or just `name: Type`
-            // We use attempt() to decide: peek two identifiers before ':'
-            const firstToken = this.stream.expect('IDENTIFIER')
-            let label: string | undefined
-            let paramName: string
-
-            if (this.stream.isNext('IDENTIFIER')) {
-                // Two identifiers in a row → first is label, second is name
-                label = firstToken.identifier
-                paramName = this.stream.expect('IDENTIFIER').identifier
-            } else {
-                // Single identifier → no label, just name
-                paramName = firstToken.identifier
-            }
-
-            this.stream.expect('PUNCTUATION', ':')
             const paramType = this.stream.expect('IDENTIFIER').identifier
 
             params.push({
@@ -135,5 +136,34 @@ export class FunctionDeclarationParser {
 
         this.stream.expect('PUNCTUATION', ')')
         return params
+    }
+
+    private parseParameterNameToken(): {
+        identifier: string
+        line: number
+        column: number
+    } {
+        if (this.stream.isNext('IDENTIFIER')) {
+            const token = this.stream.expect('IDENTIFIER')
+            return {
+                identifier: token.identifier,
+                line: token.line,
+                column: token.column,
+            }
+        }
+
+        if (this.stream.isNext('KEYWORD', 'self')) {
+            const token = this.stream.expect('KEYWORD', 'self')
+            return {
+                identifier: token.keyword,
+                line: token.line,
+                column: token.column,
+            }
+        }
+
+        const token = this.stream.peek()
+        throw new Error(
+            `Expected parameter name, got ${JSON.stringify(token ?? 'EOF')}`,
+        )
     }
 }

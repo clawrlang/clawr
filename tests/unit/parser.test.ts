@@ -433,7 +433,7 @@ describe('Parser Tests', () => {
 
     it('rejects helper before unsupported top-level declarations', () => {
         expect(() => parse('helper const x = ambiguous')).toThrow(
-            '1:1:helper is only supported before data or func declarations',
+            '1:1:helper is only supported before data, func, object, or service declarations',
         )
     })
 
@@ -538,7 +538,7 @@ describe('Function declaration tests', () => {
 
     it('parses a function with parameter semantics prefixes', () => {
         const ast = parse(
-            'func update(ref target: Point, value: truthvalue) { }',
+            'func update(target: ref Point, value: truthvalue) { }',
         )
         expect(ast.body[0]).toMatchObject({
             kind: 'func-decl',
@@ -573,7 +573,7 @@ describe('Function declaration tests', () => {
 
     it('rejects helper before unsupported declaration kinds', () => {
         expect(() => parse('helper const x: truthvalue = true')).toThrow(
-            'helper is only supported before data or func declarations',
+            'helper is only supported before data, func, object, or service declarations',
         )
     })
 })
@@ -583,3 +583,146 @@ function parse(code: string) {
     const parser = new Parser(stream)
     return parser.parse()
 }
+
+describe('Object and service declaration tests', () => {
+    it('parses a minimal object with no sections', () => {
+        const ast = parse('object Empty { }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'object-decl',
+            name: 'Empty',
+            visibility: 'public',
+            supertype: undefined,
+            sections: [],
+        })
+    })
+
+    it('parses an object with only a data section', () => {
+        const ast = parse('object Money { data: const cents: integer }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'object-decl',
+            name: 'Money',
+            sections: [
+                {
+                    kind: 'data',
+                    fields: [
+                        { semantics: 'const', name: 'cents', type: 'integer' },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('parses an object with methods then a data section', () => {
+        const ast = parse(
+            'object Money { func dollars(self: const Money) -> integer { } data: const cents: integer }',
+        )
+        const decl = ast.body[0]
+        expect(decl).toMatchObject({ kind: 'object-decl', name: 'Money' })
+        if (decl.kind !== 'object-decl') throw new Error('unreachable')
+        expect(decl.sections[0]).toMatchObject({
+            kind: 'methods',
+            items: [{ kind: 'func-decl', name: 'dollars' }],
+        })
+        expect(decl.sections[1]).toMatchObject({
+            kind: 'data',
+            fields: [{ name: 'cents', type: 'integer' }],
+        })
+    })
+
+    it('parses an object with a mutating section', () => {
+        const ast = parse(
+            'object Account { mutating: func deposit(self: ref Account, amount: integer) { } }',
+        )
+        const decl = ast.body[0]
+        expect(decl).toMatchObject({ kind: 'object-decl', name: 'Account' })
+        if (decl.kind !== 'object-decl') throw new Error('unreachable')
+        expect(decl.sections[0]).toMatchObject({
+            kind: 'mutating',
+            items: [{ kind: 'func-decl', name: 'deposit' }],
+        })
+    })
+
+    it('parses an object with a supertype', () => {
+        const ast = parse('object Student: Entity { }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'object-decl',
+            name: 'Student',
+            supertype: 'Entity',
+        })
+    })
+
+    it('parses a helper method inside an object', () => {
+        const ast = parse(
+            'object Foo { helper func internalHelper() -> truthvalue { } }',
+        )
+        const decl = ast.body[0]
+        if (decl.kind !== 'object-decl') throw new Error('unreachable')
+        expect(decl.sections[0]).toMatchObject({
+            kind: 'methods',
+            items: [
+                {
+                    kind: 'func-decl',
+                    name: 'internalHelper',
+                    visibility: 'helper',
+                },
+            ],
+        })
+    })
+
+    it('parses a helper object declaration', () => {
+        const ast = parse('helper object Internal { }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'object-decl',
+            name: 'Internal',
+            visibility: 'helper',
+        })
+    })
+
+    it('parses a minimal service with no sections', () => {
+        const ast = parse('service Empty { }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'service-decl',
+            name: 'Empty',
+            visibility: 'public',
+            sections: [],
+        })
+    })
+
+    it('parses a service with default and mutating sections', () => {
+        const ast = parse(
+            'service Repo { func getUser(self: const Repo, id: integer) -> User { } mutating: func updateUser(self: ref Repo, user: User) { } }',
+        )
+        const decl = ast.body[0]
+        expect(decl).toMatchObject({ kind: 'service-decl', name: 'Repo' })
+        if (decl.kind !== 'service-decl') throw new Error('unreachable')
+        expect(decl.sections[0]).toMatchObject({
+            kind: 'methods',
+            items: [{ kind: 'func-decl', name: 'getUser' }],
+        })
+        expect(decl.sections[1]).toMatchObject({
+            kind: 'mutating',
+            items: [{ kind: 'func-decl', name: 'updateUser' }],
+        })
+    })
+
+    it('parses a helper service declaration', () => {
+        const ast = parse('helper service InternalRepo { }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'service-decl',
+            name: 'InternalRepo',
+            visibility: 'helper',
+        })
+    })
+
+    it('rejects method declarations inside data section', () => {
+        expect(() => parse('object Bad { data: func nope() { } }')).toThrow(
+            'Expected IDENTIFIER, got KEYWORD',
+        )
+    })
+
+    it('rejects field declarations inside mutating section', () => {
+        expect(() =>
+            parse('service Bad { mutating: const x: integer }'),
+        ).toThrow('Expected method declaration (func or helper func)')
+    })
+})

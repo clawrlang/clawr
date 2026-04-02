@@ -497,16 +497,16 @@ Targets:
 
 Checklist:
 
-- [ ] Add `ASTObjectDeclaration` AST node: name, optional supertype, sections (`data`, `mutating`, default), visibility.
-- [ ] Add `ASTServiceDeclaration` AST node: same shape as object declaration.
-- [ ] Parse `object Name { ... }` with `data:`, `mutating:`, and default (non-mutating) method sections.
-- [ ] Parse `service Name { ... }` with the same section structure.
-- [ ] Methods inside sections reuse `ASTFunctionDeclaration` parsing from C1.1.
-- [ ] `data:` section fields use the same syntax as `data` declaration fields.
-- [ ] `helper` prefix applies to individual method declarations.
-- [ ] No `abstract`, `virtual`, `override`, `inheritance:` in this slice.
-- [ ] Semantic analyzer registers type names (no method resolution yet).
-- [ ] Add parser unit tests for valid declarations, malformed sections, and `helper` methods.
+- [x] Add `ASTObjectDeclaration` AST node: name, optional supertype, sections (`data`, `mutating`, default), visibility.
+- [x] Add `ASTServiceDeclaration` AST node: same shape as object declaration.
+- [x] Parse `object Name { ... }` with `data:`, `mutating:`, and default (non-mutating) method sections.
+- [x] Parse `service Name { ... }` with the same section structure.
+- [x] Methods inside sections reuse `ASTFunctionDeclaration` parsing from C1.1.
+- [x] `data:` section fields use the same syntax as `data` declaration fields.
+- [x] `helper` prefix applies to individual method declarations.
+- [x] No `abstract`, `virtual`, `override`, `inheritance:` in this slice.
+- [x] Semantic analyzer registers type names (no method resolution yet).
+- [x] Add parser unit tests for valid declarations, malformed sections, and `helper` methods.
 
 ### Milestone Risk Register
 

@@ -15,6 +15,7 @@ import { DataDeclarationParser } from './statement-parsers/data-declaration-pars
 import { VariableDeclarationParser } from './statement-parsers/variable-declaration-parser'
 import { AssignmentParser } from './statement-parsers/assignment-parser'
 import { FunctionDeclarationParser } from './statement-parsers/function-declaration-parser'
+import { ObjectDeclarationParser } from './statement-parsers/object-declaration-parser'
 
 interface StatementParser {
     isNext(): boolean
@@ -29,6 +30,7 @@ export class Parser {
             new VariableDeclarationParser(stream),
             new DataDeclarationParser(stream),
             new FunctionDeclarationParser(stream),
+            new ObjectDeclarationParser(stream),
             new PrintStatementParser(stream),
             new AssignmentParser(stream),
         ]
@@ -259,8 +261,15 @@ export class Parser {
             return new FunctionDeclarationParser(this.stream).parse('helper')
         }
 
+        if (
+            this.stream.isNext('KEYWORD', 'object') ||
+            this.stream.isNext('KEYWORD', 'service')
+        ) {
+            return new ObjectDeclarationParser(this.stream).parse('helper')
+        }
+
         throw new Error(
-            `${helperToken.line}:${helperToken.column}:helper is only supported before data or func declarations`,
+            `${helperToken.line}:${helperToken.column}:helper is only supported before data, func, object, or service declarations`,
         )
     }
 }

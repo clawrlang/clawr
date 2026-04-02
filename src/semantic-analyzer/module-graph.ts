@@ -7,6 +7,7 @@ import type {
     ASTFunctionDeclaration,
     ASTProgram,
 } from '../ast'
+import type { ASTObjectDeclaration, ASTServiceDeclaration } from '../ast'
 
 export interface ModuleGraph {
     entry: string
@@ -125,7 +126,15 @@ function exportedDataByName(program: ASTProgram): Set<string> {
         .filter((decl) => decl.visibility !== 'helper')
         .map((decl) => decl.name)
 
-    return new Set([...dataNames, ...funcNames])
+    const typeNames = program.body
+        .filter(
+            (stmt): stmt is ASTObjectDeclaration | ASTServiceDeclaration =>
+                stmt.kind === 'object-decl' || stmt.kind === 'service-decl',
+        )
+        .filter((decl) => decl.visibility !== 'helper')
+        .map((decl) => decl.name)
+
+    return new Set([...dataNames, ...funcNames, ...typeNames])
 }
 
 function helperDataByName(program: ASTProgram): Set<string> {
@@ -141,7 +150,15 @@ function helperDataByName(program: ASTProgram): Set<string> {
         .filter((decl) => decl.visibility === 'helper')
         .map((decl) => decl.name)
 
-    return new Set([...dataNames, ...funcNames])
+    const typeNames = program.body
+        .filter(
+            (stmt): stmt is ASTObjectDeclaration | ASTServiceDeclaration =>
+                stmt.kind === 'object-decl' || stmt.kind === 'service-decl',
+        )
+        .filter((decl) => decl.visibility === 'helper')
+        .map((decl) => decl.name)
+
+    return new Set([...dataNames, ...funcNames, ...typeNames])
 }
 
 export function resolveImportPath(

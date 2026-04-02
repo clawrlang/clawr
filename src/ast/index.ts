@@ -93,6 +93,37 @@ export type ASTFunctionBody =
     | { kind: 'expression'; value: ASTExpression }
 
 // ----- Statements -----
+// ----- Object / Service declarations -----
+export type ASTObjectField = {
+    semantics?: 'const' | 'mut' | 'ref'
+    name: string
+    type: string
+    position?: ASTPosition
+}
+
+export type ASTObjectSection =
+    | { kind: 'methods'; items: ASTFunctionDeclaration[] }
+    | { kind: 'data'; fields: ASTObjectField[] }
+    | { kind: 'mutating'; items: ASTFunctionDeclaration[] }
+
+export interface ASTObjectDeclaration {
+    kind: 'object-decl'
+    name: string
+    supertype?: string
+    visibility: ASTVisibility
+    sections: ASTObjectSection[]
+    position: ASTPosition
+}
+
+export interface ASTServiceDeclaration {
+    kind: 'service-decl'
+    name: string
+    visibility: ASTVisibility
+    sections: ASTObjectSection[]
+    position: ASTPosition
+}
+
+// ----- Statements -----
 export type ASTStatement =
     | ASTVariableDeclaration
     | ASTPrintStatement
@@ -103,6 +134,8 @@ export type ASTStatement =
     | ASTContinueStatement
     | ASTDataDeclaration
     | ASTFunctionDeclaration
+    | ASTObjectDeclaration
+    | ASTServiceDeclaration
 
 export interface ASTAssignment {
     kind: 'assign'

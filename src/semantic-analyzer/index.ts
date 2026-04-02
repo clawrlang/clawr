@@ -9,6 +9,7 @@ import type {
     ASTStatement,
     ASTVariableDeclaration,
 } from '../ast'
+import type { ASTObjectDeclaration, ASTServiceDeclaration } from '../ast'
 import type {
     SemanticAssignment,
     SemanticCopyExpression,
@@ -62,6 +63,9 @@ export class SemanticAnalyzer {
             if (stmt.kind === 'func-decl') {
                 this.registerFunctionDeclaration(stmt)
             }
+            if (stmt.kind === 'object-decl' || stmt.kind === 'service-decl') {
+                this.registerTypeDeclaration(stmt)
+            }
         }
 
         this.validateDataFieldSemantics(types)
@@ -70,6 +74,8 @@ export class SemanticAnalyzer {
         for (const stmt of this.ast.body) {
             if (stmt.kind === 'data-decl') continue
             if (stmt.kind === 'func-decl') continue
+            if (stmt.kind === 'object-decl') continue
+            if (stmt.kind === 'service-decl') continue
             mainBody.push(scopedAnalyzer.analyzeStatement(stmt))
         }
 
@@ -115,6 +121,14 @@ export class SemanticAnalyzer {
             case 'func-decl':
                 throw new Error(
                     'Unexpected function declaration in statement body',
+                )
+            case 'object-decl':
+                throw new Error(
+                    'Unexpected object declaration in statement body',
+                )
+            case 'service-decl':
+                throw new Error(
+                    'Unexpected service declaration in statement body',
                 )
             case 'var-decl':
                 return this.analyzeVariableDeclaration(stmt)
@@ -377,6 +391,14 @@ export class SemanticAnalyzer {
             semantics: 'const',
             declarationPosition: stmt.position,
         })
+    }
+
+    private registerTypeDeclaration(
+        stmt: ASTObjectDeclaration | ASTServiceDeclaration,
+    ) {
+        // Register the type name in dataTypes with an empty binding map.
+        // Full method resolution is deferred to a later slice.
+        this.dataTypes.set(stmt.name, new Map())
     }
 
     private registerDataDeclaration(stmt: ASTDataDeclaration) {

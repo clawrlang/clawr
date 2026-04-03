@@ -631,6 +631,95 @@ describe('SemanticAnalyzer', () => {
             ).toThrow("Call to 'Clock.now()' is side-effecting (external)")
         })
     })
+
+    describe('inheritance semantics', () => {
+        it('rejects object declarations with unknown supertypes', () => {
+            expect(() => analyze('object Student: Entity { }')).toThrow(
+                "1:1:Unknown supertype 'Entity' for object 'Student'",
+            )
+        })
+
+        it('rejects object declarations inheriting from non-object types', () => {
+            expect(() =>
+                analyze(
+                    'data Entity { id: truthvalue }\nobject Student: Entity { }',
+                ),
+            ).toThrow(
+                "2:1:Object 'Student' cannot inherit from non-object type 'Entity'",
+            )
+        })
+
+        it('rejects cyclic object inheritance', () => {
+            expect(() => analyze('object A: B { }\nobject B: A { }')).toThrow(
+                "1:1:Cyclic inheritance involving 'A'",
+            )
+        })
+
+        it('allows calling inherited methods on subtype values', () => {
+            const module = analyze(
+                'object Entity { func id(self: const Entity) -> truthvalue { return true } }\nobject Student: Entity { }\nconst student: Student = { }\nconst id: truthvalue = student.id()',
+            )
+
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 'student',
+                    valueSet: { type: 'Student' },
+                },
+                {
+                    kind: 'var-decl',
+                    name: 'id',
+                    valueSet: { type: 'truthvalue' },
+                    value: {
+                        kind: 'call',
+                        callee: {
+                            kind: 'identifier',
+                            name: 'Entity·id',
+                        },
+                    },
+                },
+            ])
+        })
+
+        it('allows assigning subtype values to supertype variables', () => {
+            const module = analyze(
+                'object Entity { }\nobject Student: Entity { }\nconst student: Student = { }\nconst entity: Entity = student',
+            )
+
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 'student',
+                    valueSet: { type: 'Student' },
+                },
+                {
+                    kind: 'var-decl',
+                    name: 'entity',
+                    valueSet: { type: 'Entity' },
+                },
+            ])
+        })
+
+        it('rejects overrides with incompatible return types', () => {
+            expect(() =>
+                analyze(
+                    'object Entity { func id(self: const Entity) -> truthvalue { return true } }\nobject Student: Entity { func id(self: const Student) -> integer { return 1 } }',
+                ),
+            ).toThrow(
+                "2:26:Override 'Student.id()' must match return type 'truthvalue', got 'integer'",
+            )
+        })
+
+        it('rejects overrides with incompatible effect levels', () => {
+            expect(() =>
+                analyze(
+                    'object Entity { func id(self: const Entity) -> truthvalue { return true } }\nobject Student: Entity { mutating: func id(self: ref Student) -> truthvalue { return true } }',
+                ),
+            ).toThrow(
+                "2:36:Override 'Student.id()' must match effect level 'pure', got 'self-mutation'",
+            )
+        })
+    })
 })
 
 describe('Function body analysis', () => {

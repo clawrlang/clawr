@@ -45,12 +45,16 @@ export class SemanticAnalyzer {
     private bindings: BindingMap = new Map()
     private dataTypes: Map<string, BindingMap>
     private functionSignatures: Map<string, FunctionSignature>
+    private typeKinds: Map<string, TypeKind>
+    private objectSupertypes: Map<string, string>
 
     constructor(
         private ast: ASTProgram,
         private parent?: SemanticAnalyzer,
         dataTypes?: Map<string, BindingMap>,
         functionSignatures?: Map<string, FunctionSignature>,
+        typeKinds?: Map<string, TypeKind>,
+        objectSupertypes?: Map<string, string>,
         private loopDepth = 0,
         private currentFunctionReturnType?: string,
         private currentOwnerType?: string,
@@ -61,6 +65,9 @@ export class SemanticAnalyzer {
         this.dataTypes = dataTypes ?? parent?.dataTypes ?? new Map()
         this.functionSignatures =
             functionSignatures ?? parent?.functionSignatures ?? new Map()
+        this.typeKinds = typeKinds ?? parent?.typeKinds ?? new Map()
+        this.objectSupertypes =
+            objectSupertypes ?? parent?.objectSupertypes ?? new Map()
     }
 
     analyze(): SemanticModule {
@@ -101,7 +108,7 @@ export class SemanticAnalyzer {
                 )
             }
             if (stmt.kind === 'object-decl') {
-                this.registerTypeDeclaration(stmt)
+                this.registerTypeDeclaration('object', stmt)
                 this.registerMethodSignatures(
                     'object',
                     stmt.name,
@@ -110,7 +117,7 @@ export class SemanticAnalyzer {
                 objects.push(stmt)
             }
             if (stmt.kind === 'service-decl') {
-                this.registerTypeDeclaration(stmt)
+                this.registerTypeDeclaration('service', stmt)
                 this.registerMethodSignatures(
                     'service',
                     stmt.name,
@@ -121,6 +128,7 @@ export class SemanticAnalyzer {
         }
 
         this.validateDataFieldSemantics(types)
+        this.validateObjectHierarchies(objects)
 
         // Second pass: analyze function bodies and module-level statements.
         const mainScopedAnalyzer = this.createChildScope()
@@ -167,6 +175,8 @@ export class SemanticAnalyzer {
             this,
             this.dataTypes,
             this.functionSignatures,
+            this.typeKinds,
+            this.objectSupertypes,
             this.loopDepth,
             this.currentFunctionReturnType,
             this.currentOwnerType,
@@ -182,6 +192,8 @@ export class SemanticAnalyzer {
             this,
             this.dataTypes,
             this.functionSignatures,
+            this.typeKinds,
+            this.objectSupertypes,
             this.loopDepth + 1,
             this.currentFunctionReturnType,
             this.currentOwnerType,
@@ -204,6 +216,8 @@ export class SemanticAnalyzer {
             this,
             this.dataTypes,
             this.functionSignatures,
+            this.typeKinds,
+            this.objectSupertypes,
             0, // reset loop depth — break/continue inside a nested function is not the outer loop's
             returnType,
             ownerType,
@@ -273,7 +287,10 @@ export class SemanticAnalyzer {
             )
         }
 
-        if (returnType && returnType !== this.currentFunctionReturnType) {
+        if (
+            returnType &&
+            !this.isTypeAssignable(returnType, this.currentFunctionReturnType)
+        ) {
             throw new Error(
                 `${stmt.position.line}:${stmt.position.column}:Return type mismatch: expected '${this.currentFunctionReturnType}' but got '${returnType}'`,
             )
@@ -425,7 +442,7 @@ export class SemanticAnalyzer {
             )
         }
 
-        if (targetType !== valueType) {
+        if (!this.isTypeAssignable(valueType, targetType)) {
             throw new Error(
                 `${stmt.position.line}:${stmt.position.column}:Assignment type mismatch: target is '${targetType}' but value is '${valueType}'`,
             )
@@ -526,11 +543,26 @@ export class SemanticAnalyzer {
                     )
                 }
 
+                const signature = this.resolveMethodSignature(
+                    receiverType,
+                    expr.callee.right.name,
+                    expr.arguments.map((arg) => arg.label ?? '_'),
+                )
+                if (!signature) {
+                    throw new Error(
+                        `${expr.position.line}:${expr.position.column}:Function/method not found '${renderFunctionSignature(
+                            expr.callee.right.name,
+                            expr.arguments.map((arg) => arg.label ?? '_'),
+                            receiverType,
+                        )}'`,
+                    )
+                }
+
                 return {
                     kind: 'call',
                     callee: {
                         kind: 'identifier',
-                        name: `${receiverType}·${expr.callee.right.name}`,
+                        name: `${signature.ownerType ?? receiverType}·${expr.callee.right.name}`,
                         position: expr.callee.right.position,
                     },
                     arguments: [
@@ -659,11 +691,129 @@ export class SemanticAnalyzer {
     }
 
     private registerTypeDeclaration(
+        typeKind: 'object' | 'service',
         stmt: ASTObjectDeclaration | ASTServiceDeclaration,
     ) {
         // Register the type name in dataTypes with an empty binding map.
         // Full method resolution is deferred to a later slice.
         this.dataTypes.set(stmt.name, new Map())
+        this.typeKinds.set(stmt.name, typeKind)
+
+        if (
+            typeKind === 'object' &&
+            stmt.kind === 'object-decl' &&
+            stmt.supertype
+        ) {
+            this.objectSupertypes.set(stmt.name, stmt.supertype)
+        }
+    }
+
+    private validateObjectHierarchies(objects: ASTObjectDeclaration[]): void {
+        for (const objectDecl of objects) {
+            this.validateDeclaredSupertype(objectDecl)
+        }
+
+        for (const objectDecl of objects) {
+            this.validateInheritanceCycle(objectDecl)
+            this.validateMethodOverrides(objectDecl)
+        }
+    }
+
+    private validateDeclaredSupertype(objectDecl: ASTObjectDeclaration): void {
+        if (!objectDecl.supertype) return
+
+        const supertypeKind = this.lookupTypeKind(objectDecl.supertype)
+        if (!supertypeKind) {
+            throw new Error(
+                `${objectDecl.position.line}:${objectDecl.position.column}:Unknown supertype '${objectDecl.supertype}' for object '${objectDecl.name}'`,
+            )
+        }
+
+        if (supertypeKind !== 'object') {
+            throw new Error(
+                `${objectDecl.position.line}:${objectDecl.position.column}:Object '${objectDecl.name}' cannot inherit from non-object type '${objectDecl.supertype}'`,
+            )
+        }
+    }
+
+    private validateInheritanceCycle(objectDecl: ASTObjectDeclaration): void {
+        const seen = new Set<string>()
+        let current: string | undefined = objectDecl.name
+
+        while (current) {
+            if (seen.has(current)) {
+                throw new Error(
+                    `${objectDecl.position.line}:${objectDecl.position.column}:Cyclic inheritance involving '${objectDecl.name}'`,
+                )
+            }
+
+            seen.add(current)
+            current = this.lookupObjectSupertype(current)
+        }
+    }
+
+    private validateMethodOverrides(objectDecl: ASTObjectDeclaration): void {
+        for (const section of objectDecl.sections) {
+            if (section.kind !== 'methods' && section.kind !== 'mutating') {
+                continue
+            }
+
+            for (const method of section.items) {
+                const callableParams =
+                    method.parameters[0]?.name === 'self'
+                        ? method.parameters.slice(1)
+                        : method.parameters
+                const labels = callableParams.map((param) => param.label ?? '_')
+                const baseSignature = this.lookupInheritedMethodSignature(
+                    objectDecl.supertype,
+                    method.name,
+                    labels,
+                )
+
+                if (!baseSignature) continue
+
+                const overrideName = renderFunctionSignature(
+                    method.name,
+                    labels,
+                    objectDecl.name,
+                )
+                const overrideEffectLevel = this.methodEffectLevel(
+                    'object',
+                    section.kind,
+                )
+
+                if (method.returnType !== baseSignature.returnType) {
+                    throw new Error(
+                        `${method.position.line}:${method.position.column}:Override '${overrideName}' must match return type '${baseSignature.returnType ?? 'void'}', got '${method.returnType ?? 'void'}'`,
+                    )
+                }
+
+                if (
+                    callableParams.length !==
+                        baseSignature.parameterTypes.length ||
+                    callableParams.some(
+                        (param, index) =>
+                            param.type !== baseSignature.parameterTypes[index],
+                    )
+                ) {
+                    throw new Error(
+                        `${method.position.line}:${method.position.column}:Override '${overrideName}' must match parameter types of inherited method`,
+                    )
+                }
+
+                if (method.visibility !== baseSignature.visibility) {
+                    throw new Error(
+                        `${method.position.line}:${method.position.column}:Override '${overrideName}' must keep visibility '${baseSignature.visibility}'`,
+                    )
+                }
+
+                if (overrideEffectLevel !== baseSignature.effectLevel) {
+                    throw new Error(
+                        `${method.position.line}:${method.position.column}:Override '${overrideName}' must match effect level '${baseSignature.effectLevel}', got '${overrideEffectLevel}'`,
+                    )
+                }
+            }
+        }
     }
 
     private registerMethodSignatures(
@@ -788,6 +938,7 @@ export class SemanticAnalyzer {
     }
 
     private registerDataDeclaration(stmt: ASTDataDeclaration) {
+        this.typeKinds.set(stmt.name, 'data')
         this.dataTypes.set(
             stmt.name,
             new Map(
@@ -819,6 +970,18 @@ export class SemanticAnalyzer {
         const dataType = this.dataTypes.get(name)
         if (dataType || !this.parent) return dataType
         return this.parent.lookupDataType(name)
+    }
+
+    private lookupTypeKind(name: string): TypeKind | undefined {
+        const typeKind = this.typeKinds.get(name)
+        if (typeKind || !this.parent) return typeKind
+        return this.parent.lookupTypeKind(name)
+    }
+
+    private lookupObjectSupertype(name: string): string | undefined {
+        const supertype = this.objectSupertypes.get(name)
+        if (supertype || !this.parent) return supertype
+        return this.parent.lookupObjectSupertype(name)
     }
 
     private validateDataFieldSemantics(
@@ -983,7 +1146,7 @@ export class SemanticAnalyzer {
         }
 
         const inferred = this.inferExpressionType(value)
-        if (inferred && inferred !== expected) {
+        if (inferred && !this.isTypeAssignable(inferred, expected)) {
             throw new Error(
                 `${value.position.line}:${value.position.column}:Type mismatch: expected '${expected}' but got '${inferred}'`,
             )
@@ -1014,7 +1177,10 @@ export class SemanticAnalyzer {
             const inferredFieldType = this.inferExpressionType(fieldValue)
             if (
                 !inferredFieldType ||
-                inferredFieldType !== expectedFieldInfo.type
+                !this.isTypeAssignable(
+                    inferredFieldType,
+                    expectedFieldInfo.type,
+                )
             ) {
                 throw new Error(
                     `${fieldValue.position.line}:${fieldValue.position.column}:Type mismatch for field '${fieldName}': expected '${expectedFieldInfo.type}' but got '${inferredFieldType ?? fieldValue.kind}'`,
@@ -1082,12 +1248,10 @@ export class SemanticAnalyzer {
                     }
 
                     calleeName = value.callee.right.name
-                    signature = this.lookupFunctionSignature(
-                        buildFunctionSignatureKey(
-                            calleeName,
-                            argumentLabels,
-                            receiverType,
-                        ),
+                    signature = this.resolveMethodSignature(
+                        receiverType,
+                        calleeName,
+                        argumentLabels,
                     )
 
                     if (!signature) {
@@ -1153,7 +1317,7 @@ export class SemanticAnalyzer {
                     if (
                         actualType &&
                         expectedType !== undefined &&
-                        actualType !== expectedType
+                        !this.isTypeAssignable(actualType, expectedType)
                     ) {
                         throw new Error(
                             `${value.arguments[i].value.position.line}:${value.arguments[i].value.position.column}:Argument ${i + 1} type mismatch for function '${calleeName}': expected '${expectedType}' but got '${actualType}'`,
@@ -1405,16 +1569,97 @@ export class SemanticAnalyzer {
         name: string,
         ownerType?: string,
     ): FunctionSignature[] {
+        const ownerTypes =
+            ownerType === undefined
+                ? undefined
+                : [ownerType, ...this.collectObjectSupertypeChain(ownerType)]
         const signatures = Array.from(this.functionSignatures.values()).filter(
-            (signature) =>
-                signature.name === name &&
-                (ownerType === undefined
-                    ? signature.ownerType === undefined
-                    : signature.ownerType === ownerType),
+            (signature) => {
+                if (signature.name !== name) return false
+                if (ownerType === undefined) {
+                    return signature.ownerType === undefined
+                }
+
+                return (
+                    signature.ownerType !== undefined &&
+                    ownerTypes?.includes(signature.ownerType)
+                )
+            },
         )
 
         if (signatures.length > 0 || !this.parent) return signatures
         return this.parent.lookupFunctionSignaturesByName(name, ownerType)
+    }
+
+    private resolveMethodSignature(
+        receiverType: string,
+        methodName: string,
+        labels: string[],
+    ): FunctionSignature | undefined {
+        const ownerTypes = [
+            receiverType,
+            ...this.collectObjectSupertypeChain(receiverType),
+        ]
+
+        for (const ownerType of ownerTypes) {
+            const signature = this.lookupFunctionSignature(
+                buildFunctionSignatureKey(methodName, labels, ownerType),
+            )
+            if (signature) {
+                return signature
+            }
+        }
+
+        return undefined
+    }
+
+    private lookupInheritedMethodSignature(
+        ownerType: string | undefined,
+        methodName: string,
+        labels: string[],
+    ): FunctionSignature | undefined {
+        if (!ownerType) return undefined
+
+        const signature = this.lookupFunctionSignature(
+            buildFunctionSignatureKey(methodName, labels, ownerType),
+        )
+        if (signature?.visibility === 'public') {
+            return signature
+        }
+
+        return this.lookupInheritedMethodSignature(
+            this.lookupObjectSupertype(ownerType),
+            methodName,
+            labels,
+        )
+    }
+
+    private collectObjectSupertypeChain(name: string): string[] {
+        const chain: string[] = []
+        const seen = new Set<string>()
+        let current = this.lookupObjectSupertype(name)
+
+        while (current && !seen.has(current)) {
+            chain.push(current)
+            seen.add(current)
+            current = this.lookupObjectSupertype(current)
+        }
+
+        return chain
+    }
+
+    private isTypeAssignable(actual: string, expected: string): boolean {
+        if (actual === expected) return true
+
+        let current = this.lookupObjectSupertype(actual)
+        while (current) {
+            if (current === expected) {
+                return true
+            }
+            current = this.lookupObjectSupertype(current)
+        }
+
+        return false
     }
 }
 
@@ -1425,6 +1670,8 @@ type VariableBinding = {
 }
 
 type BindingMap = Map<string, VariableBinding>
+
+type TypeKind = 'data' | 'object' | 'service'
 
 type EffectLevel = 'pure' | 'self-mutation' | 'external'
 

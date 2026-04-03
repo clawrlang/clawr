@@ -787,6 +787,55 @@ describe('Call expression analysis', () => {
             "Function 'log' has no return type and cannot be used as a value",
         )
     })
+
+    it('resolves method calls by owner type and label signature', () => {
+        const module = analyze(
+            'object Counter { mutating: func adjust(self: ref Counter, down amount: integer) -> integer { return amount } }\nconst counter: Counter = { }\nconst z = counter.adjust(down: 2)',
+        )
+
+        expect(module.functions[0].body).toMatchObject([
+            {
+                kind: 'var-decl',
+                name: 'counter',
+                valueSet: { type: 'Counter' },
+            },
+            {
+                kind: 'var-decl',
+                name: 'z',
+                valueSet: { type: 'integer' },
+                value: {
+                    kind: 'call',
+                    callee: { kind: 'identifier', name: 'Counter·adjust' },
+                    arguments: [
+                        {
+                            value: {
+                                kind: 'identifier',
+                                name: 'counter',
+                            },
+                        },
+                        {
+                            label: 'down',
+                            value: { kind: 'integer', value: 2n },
+                        },
+                    ],
+                },
+            },
+        ])
+    })
+
+    it('reports method not found for wrong method labels and suggests nearby overload', () => {
+        expect(() =>
+            analyze(
+                'object Counter { mutating: func adjust(self: ref Counter, down amount: integer) -> integer { return amount } }\nconst counter: Counter = { }\nconst z = counter.adjust(up: 2)',
+            ),
+        ).toThrow("Function/method not found 'Counter.adjust(up:)'")
+
+        expect(() =>
+            analyze(
+                'object Counter { mutating: func adjust(self: ref Counter, down amount: integer) -> integer { return amount } }\nconst counter: Counter = { }\nconst z = counter.adjust(up: 2)',
+            ),
+        ).toThrow("Did you mean 'Counter.adjust(down:)'?")
+    })
 })
 
 function analyze(code: string) {

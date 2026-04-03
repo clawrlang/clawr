@@ -835,4 +835,23 @@ describe('Call expression tests', () => {
             },
         })
     })
+
+    it('parses method-style call expressions as binary callee + call args', () => {
+        const ast = parse('const z: integer = counter.adjust(down: 2)')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            value: {
+                kind: 'call',
+                callee: {
+                    kind: 'binary',
+                    operator: '.',
+                    left: { kind: 'identifier', name: 'counter' },
+                    right: { kind: 'identifier', name: 'adjust' },
+                },
+                arguments: [
+                    { label: 'down', value: { kind: 'integer', value: 2n } },
+                ],
+            },
+        })
+    })
 })

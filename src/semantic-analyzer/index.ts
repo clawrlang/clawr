@@ -96,10 +96,12 @@ export class SemanticAnalyzer {
             }
             if (stmt.kind === 'object-decl') {
                 this.registerTypeDeclaration(stmt)
+                this.registerMethodSignatures(stmt.name, stmt.sections)
                 objects.push(stmt)
             }
             if (stmt.kind === 'service-decl') {
                 this.registerTypeDeclaration(stmt)
+                this.registerMethodSignatures(stmt.name, stmt.sections)
                 services.push(stmt)
             }
         }
@@ -463,6 +465,38 @@ export class SemanticAnalyzer {
         }
 
         if (expr.kind === 'call') {
+            if (
+                expr.callee.kind === 'binary' &&
+                expr.callee.operator === '.' &&
+                expr.callee.right.kind === 'identifier'
+            ) {
+                const receiverType = this.inferExpressionType(expr.callee.left)
+                if (!receiverType) {
+                    throw new Error(
+                        `${expr.callee.position.line}:${expr.callee.position.column}:Cannot infer type for method call receiver`,
+                    )
+                }
+
+                return {
+                    kind: 'call',
+                    callee: {
+                        kind: 'identifier',
+                        name: `${receiverType}·${expr.callee.right.name}`,
+                        position: expr.callee.right.position,
+                    },
+                    arguments: [
+                        {
+                            value: this.rewriteExpression(expr.callee.left),
+                        },
+                        ...expr.arguments.map((arg) => ({
+                            label: arg.label,
+                            value: this.rewriteExpression(arg.value),
+                        })),
+                    ],
+                    position: expr.position,
+                }
+            }
+
             return {
                 kind: 'call',
                 callee: this.rewriteExpression(expr.callee),
@@ -551,6 +585,39 @@ export class SemanticAnalyzer {
         // Register the type name in dataTypes with an empty binding map.
         // Full method resolution is deferred to a later slice.
         this.dataTypes.set(stmt.name, new Map())
+    }
+
+    private registerMethodSignatures(
+        ownerType: string,
+        sections: ASTObjectDeclaration['sections'],
+    ) {
+        for (const section of sections) {
+            if (section.kind !== 'methods' && section.kind !== 'mutating') {
+                continue
+            }
+
+            for (const method of section.items) {
+                const callableParams =
+                    method.parameters[0]?.name === 'self'
+                        ? method.parameters.slice(1)
+                        : method.parameters
+                const labels = callableParams.map((param) => param.label ?? '_')
+
+                this.functionSignatures.set(
+                    buildFunctionSignatureKey(method.name, labels, ownerType),
+                    {
+                        name: method.name,
+                        ownerType,
+                        labels,
+                        returnType: method.returnType,
+                        arity: callableParams.length,
+                        parameterTypes: callableParams.map(
+                            (param) => param.type,
+                        ),
+                    },
+                )
+            }
+        }
     }
 
     private registerDataDeclaration(stmt: ASTDataDeclaration) {
@@ -796,63 +863,89 @@ export class SemanticAnalyzer {
             case 'integer':
                 return 'integer'
             case 'call': {
-                if (value.callee.kind !== 'identifier') {
+                const argumentLabels = value.arguments.map(
+                    (arg) => arg.label ?? '_',
+                )
+
+                let signature: FunctionSignature | undefined
+                let calleeName: string
+
+                if (value.callee.kind === 'identifier') {
+                    calleeName = value.callee.name
+                    const calleeBinding = this.lookupBinding(value.callee.name)
+                    if (!calleeBinding) {
+                        throw new Error(
+                            `${value.callee.position.line}:${value.callee.position.column}:Unknown identifier '${value.callee.name}'`,
+                        )
+                    }
+
+                    if (calleeBinding.type !== 'func') {
+                        throw new Error(
+                            `${value.callee.position.line}:${value.callee.position.column}:Cannot call non-function identifier '${value.callee.name}'`,
+                        )
+                    }
+
+                    signature = this.lookupFunctionSignature(
+                        buildFunctionSignatureKey(calleeName, argumentLabels),
+                    )
+
+                    if (!signature) {
+                        const overloads =
+                            this.lookupFunctionSignaturesByName(calleeName)
+                        const suggestion = buildDidYouMeanSignatureHint(
+                            calleeName,
+                            overloads,
+                        )
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Function/method not found '${renderFunctionSignature(calleeName, argumentLabels)}'.${suggestion}`,
+                        )
+                    }
+                } else if (
+                    value.callee.kind === 'binary' &&
+                    value.callee.operator === '.' &&
+                    value.callee.right.kind === 'identifier'
+                ) {
+                    const receiverType = this.inferExpressionType(
+                        value.callee.left,
+                    )
+                    if (!receiverType) {
+                        throw new Error(
+                            `${value.callee.position.line}:${value.callee.position.column}:Cannot infer type for method call receiver`,
+                        )
+                    }
+
+                    calleeName = value.callee.right.name
+                    signature = this.lookupFunctionSignature(
+                        buildFunctionSignatureKey(
+                            calleeName,
+                            argumentLabels,
+                            receiverType,
+                        ),
+                    )
+
+                    if (!signature) {
+                        const overloads = this.lookupFunctionSignaturesByName(
+                            calleeName,
+                            receiverType,
+                        )
+                        const suggestion = buildDidYouMeanSignatureHint(
+                            calleeName,
+                            overloads,
+                            receiverType,
+                        )
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Function/method not found '${renderFunctionSignature(calleeName, argumentLabels, receiverType)}'.${suggestion}`,
+                        )
+                    }
+                } else {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Unsupported call target '${value.callee.kind}'`,
                     )
                 }
 
-                const argumentLabels = value.arguments.map(
-                    (arg) => arg.label ?? '_',
-                )
-                const signatureKey = buildFunctionSignatureKey(
-                    value.callee.name,
-                    argumentLabels,
-                )
-
-                const signature = this.lookupFunctionSignature(signatureKey)
-                if (!signature) {
-                    const baseOverloads = this.lookupFunctionSignaturesByName(
-                        value.callee.name,
-                    )
-
-                    if (baseOverloads.length > 0) {
-                        const suggestion = buildDidYouMeanSignatureHint(
-                            value.callee.name,
-                            baseOverloads,
-                        )
-                        throw new Error(
-                            `${value.position.line}:${value.position.column}:Function/method not found '${renderFunctionSignature(value.callee.name, argumentLabels)}'.${suggestion}`,
-                        )
-                    }
-                }
-
-                const calleeBinding = this.lookupBinding(value.callee.name)
-                if (!calleeBinding) {
-                    throw new Error(
-                        `${value.callee.position.line}:${value.callee.position.column}:Unknown identifier '${value.callee.name}'`,
-                    )
-                }
-
-                if (calleeBinding.type !== 'func') {
-                    throw new Error(
-                        `${value.callee.position.line}:${value.callee.position.column}:Cannot call non-function identifier '${value.callee.name}'`,
-                    )
-                }
-
-                if (!signature) {
-                    const signature = renderFunctionSignature(
-                        value.callee.name,
-                        argumentLabels,
-                    )
-                    throw new Error(
-                        `${value.position.line}:${value.position.column}:Function/method not found '${signature}'.`,
-                    )
-                }
-
                 if (value.arguments.length !== signature.arity) {
                     throw new Error(
-                        `${value.position.line}:${value.position.column}:Function '${value.callee.name}' expects ${signature.arity} argument(s), got ${value.arguments.length}`,
+                        `${value.position.line}:${value.position.column}:Function '${calleeName}' expects ${signature.arity} argument(s), got ${value.arguments.length}`,
                     )
                 }
 
@@ -872,14 +965,14 @@ export class SemanticAnalyzer {
                         actualType !== expectedType
                     ) {
                         throw new Error(
-                            `${value.arguments[i].value.position.line}:${value.arguments[i].value.position.column}:Argument ${i + 1} type mismatch for function '${value.callee.name}': expected '${expectedType}' but got '${actualType}'`,
+                            `${value.arguments[i].value.position.line}:${value.arguments[i].value.position.column}:Argument ${i + 1} type mismatch for function '${calleeName}': expected '${expectedType}' but got '${actualType}'`,
                         )
                     }
                 }
 
                 if (signature.returnType === undefined) {
                     throw new Error(
-                        `${value.position.line}:${value.position.column}:Function '${value.callee.name}' has no return type and cannot be used as a value`,
+                        `${value.position.line}:${value.position.column}:Function '${calleeName}' has no return type and cannot be used as a value`,
                     )
                 }
 
@@ -1117,13 +1210,20 @@ export class SemanticAnalyzer {
         return this.parent.lookupFunctionSignature(signatureKey)
     }
 
-    private lookupFunctionSignaturesByName(name: string): FunctionSignature[] {
+    private lookupFunctionSignaturesByName(
+        name: string,
+        ownerType?: string,
+    ): FunctionSignature[] {
         const signatures = Array.from(this.functionSignatures.values()).filter(
-            (signature) => signature.name === name,
+            (signature) =>
+                signature.name === name &&
+                (ownerType === undefined
+                    ? signature.ownerType === undefined
+                    : signature.ownerType === ownerType),
         )
 
         if (signatures.length > 0 || !this.parent) return signatures
-        return this.parent.lookupFunctionSignaturesByName(name)
+        return this.parent.lookupFunctionSignaturesByName(name, ownerType)
     }
 }
 
@@ -1137,25 +1237,37 @@ type BindingMap = Map<string, VariableBinding>
 
 type FunctionSignature = {
     name: string
+    ownerType?: string
     labels: string[]
     returnType?: string
     arity: number
     parameterTypes: string[]
 }
 
-function buildFunctionSignatureKey(name: string, labels: string[]): string {
-    return `${name}(${labels.join(':')})`
+function buildFunctionSignatureKey(
+    name: string,
+    labels: string[],
+    ownerType?: string,
+): string {
+    const qualifier = ownerType ? `${ownerType}.` : ''
+    return `${qualifier}${name}(${labels.join(':')})`
 }
 
-function renderFunctionSignature(name: string, labels: string[]): string {
-    return `${name}(${labels.join(':')}:)`
+function renderFunctionSignature(
+    name: string,
+    labels: string[],
+    ownerType?: string,
+): string {
+    const qualifier = ownerType ? `${ownerType}.` : ''
+    return `${qualifier}${name}(${labels.join(':')}:)`
 }
 
 function buildDidYouMeanSignatureHint(
     name: string,
     signatures: FunctionSignature[],
+    ownerType?: string,
 ): string {
     if (signatures.length === 0) return ''
     const first = signatures[0]
-    return ` Did you mean '${renderFunctionSignature(name, first.labels)}'?`
+    return ` Did you mean '${renderFunctionSignature(name, first.labels, ownerType ?? first.ownerType)}'?`
 }

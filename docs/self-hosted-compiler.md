@@ -114,38 +114,38 @@ Done criteria:
 
 Scope:
 
-- [ ] `import ... from "..."`
-- [ ] `as` aliases in import items
-- [ ] `helper` visibility on top-level declarations
-- [ ] `helper` visibility on `object`/`service` methods
-- [ ] Module graph resolution and cycle diagnostics
+- [x] `import ... from "..."`
+- [x] `as` aliases in import items
+- [x] `helper` visibility on top-level declarations
+- [x] `helper` visibility on `object`/`service` methods
+- [x] Module graph resolution and cycle diagnostics
 
 Done criteria:
 
-- [ ] Lexer and AST represent `import`, `from`, `as`, and `helper`.
-- [ ] Parser accepts import blocks, aliases, and helper-qualified declarations with precise diagnostics.
-- [ ] Semantic analysis carries visibility/import information without regressing single-file programs.
-- [ ] Module graph resolution is deterministic and rejects cycles.
-- [ ] At least one multi-module e2e fixture proves helper-hidden symbols are enforced.
+- [x] Lexer and AST represent `import`, `from`, `as`, and `helper`.
+- [x] Parser accepts import blocks, aliases, and helper-qualified declarations with precise diagnostics.
+- [x] Semantic analysis carries visibility/import information without regressing single-file programs.
+- [x] Module graph resolution is deterministic and rejects cycles.
+- [x] At least one multi-module e2e fixture proves helper-hidden symbols are enforced.
 
 ### Milestone B: Bootstrap Operators
 
 Status:
 
 - [x] Core parsing support for operator precedence exists.
-- [ ] Cross-module stabilization and regression hardening remains.
+- [x] Cross-module stabilization and regression hardening remains.
 
 Scope:
 
-- [ ] Preserve deterministic precedence and associativity in parser and lowering.
-- [ ] Verify mixed expression trees in multi-module analysis paths.
-- [ ] Maintain operator behavior regressions for integer and truthvalue paths.
+- [x] Preserve deterministic precedence and associativity in parser and lowering.
+- [x] Verify mixed expression trees in multi-module analysis paths.
+- [x] Maintain operator behavior regressions for integer and truthvalue paths.
 
 Done criteria:
 
-- [ ] Precedence and associativity are deterministic and tested.
-- [ ] Mixed expression trees lower correctly in codegen and e2e tests.
-- [ ] Integer and truthvalue behavior is fully covered in unit tests.
+- [x] Precedence and associativity are deterministic and tested.
+- [x] Mixed expression trees lower correctly in codegen and e2e tests.
+- [x] Integer and truthvalue behavior is fully covered in unit tests.
 
 ### Milestone C: Encapsulation and Subtyping
 
@@ -360,7 +360,7 @@ Checklist:
 - [x] Add/confirm tokens for `import`, `from`, `as`, and `helper`.
 - [x] Add AST nodes for import declarations (`module path`, imported names, aliases).
 - [x] Add visibility annotation on top-level declarations (`public` default, `helper` explicit).
-- [ ] Add AST representation for method visibility in `object`/`service` declarations (deferred until `object`/`service` declarations land in a later slice).
+- [x] Add AST representation for method visibility in `object`/`service` declarations (deferred until `object`/`service` declarations land in a later slice).
 
 Current slice: top-level visibility is currently carried for `data` declarations only; method visibility work is intentionally deferred until `object`/`service` syntax exists.
 
@@ -376,8 +376,8 @@ Checklist:
 
 - [x] Parse leading import blocks at module/file scope.
 - [x] Parse import item aliases (`Name as Alias`).
-- [ ] Parse `helper` before top-level `data`/`object`/`service`/`fn` (deferred for `object`/`service`/`fn` until those declarations exist; `helper data` is implemented in the current slice).
-- [ ] Parse `helper` before `object`/`service` methods (deferred until method syntax exists).
+- [x] Parse `helper` before top-level `data`/`object`/`service`/`fn` (deferred for `object`/`service`/`fn` until those declarations exist; `helper data` is implemented in the current slice).
+- [x] Parse `helper` before `object`/`service` methods (deferred until method syntax exists).
 - [x] Emit precise diagnostics for malformed import lists and missing `from` strings.
 
 Current slice: `helper` parsing is wired for top-level `data` declarations only; broader declaration coverage is intentionally deferred with the missing declaration forms.
@@ -511,7 +511,7 @@ Checklist:
 ### Milestone Risk Register
 
 - [ ] Loop scope correctness: variable lifetime and state transitions across `break`/`continue`.
-- [ ] Deterministic module ordering: import DAG stability and cycle diagnostics.
+- [x] Deterministic module ordering: import DAG stability and cycle diagnostics.
 - [x] Helper boundary enforcement: visibility checks across package/library boundaries.
 
 ### Suggested PR Slices

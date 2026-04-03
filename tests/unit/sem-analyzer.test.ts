@@ -676,6 +676,12 @@ describe('SemanticAnalyzer', () => {
                             kind: 'identifier',
                             name: 'Entity·id',
                         },
+                        dispatch: {
+                            kind: 'virtual',
+                            methodName: 'id',
+                            ownerType: 'Entity',
+                            receiverType: 'Student',
+                        },
                     },
                 },
             ])
@@ -1076,6 +1082,12 @@ describe('Call expression analysis', () => {
                 value: {
                     kind: 'call',
                     callee: { kind: 'identifier', name: 'Counter·adjust' },
+                    dispatch: {
+                        kind: 'virtual',
+                        methodName: 'adjust',
+                        ownerType: 'Counter',
+                        receiverType: 'Counter',
+                    },
                     arguments: [
                         {
                             value: {
@@ -1091,6 +1103,27 @@ describe('Call expression analysis', () => {
                 },
             },
         ])
+    })
+
+    it('resolves service method calls as direct dispatch', () => {
+        const module = analyze(
+            'service Clock { func now(self: const Clock) -> truthvalue { return true } }\nref clock: Clock = { }\nconst now = clock.now()',
+        )
+
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'var-decl',
+            name: 'now',
+            value: {
+                kind: 'call',
+                callee: { kind: 'identifier', name: 'Clock·now' },
+                dispatch: {
+                    kind: 'direct',
+                    methodName: 'now',
+                    ownerType: 'Clock',
+                    receiverType: 'Clock',
+                },
+            },
+        })
     })
 
     it('reports method not found for wrong method labels and suggests nearby overload', () => {

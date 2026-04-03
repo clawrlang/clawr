@@ -86,6 +86,7 @@ export function lowerValue(
             return {
                 kind: 'function-call',
                 name: mangleCallName(val.callee, val.arguments),
+                dispatch: val.dispatch,
                 arguments: val.arguments.map((arg) => {
                     if (arg.value.kind === 'data-literal') {
                         throw new Error(

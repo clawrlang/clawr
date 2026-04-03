@@ -27,10 +27,18 @@ export interface SemanticCopyExpression {
     position: ASTPosition
 }
 
+export interface SemanticCallDispatch {
+    kind: 'direct' | 'virtual'
+    methodName?: string
+    ownerType?: string
+    receiverType?: string
+}
+
 export interface SemanticCallExpression {
     kind: 'call'
     callee: SemanticExpression
     arguments: SemanticCallArgument[]
+    dispatch?: SemanticCallDispatch
     position: ASTPosition
 }
 

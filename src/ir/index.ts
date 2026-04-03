@@ -19,6 +19,13 @@ export interface CVariableReference {
     name: string
 }
 
+export interface CCallDispatch {
+    kind: 'direct' | 'virtual'
+    methodName?: string
+    ownerType?: string
+    receiverType?: string
+}
+
 export interface CRawExpression {
     kind: 'raw-expression'
     expression: string
@@ -59,6 +66,7 @@ export interface CFunctionCall {
     kind: 'function-call'
     name: string
     arguments: CExpression[]
+    dispatch?: CCallDispatch
 }
 
 export interface CAssignment {

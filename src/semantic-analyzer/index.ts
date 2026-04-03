@@ -579,6 +579,11 @@ export class SemanticAnalyzer {
                             value: this.rewriteExpression(arg.value),
                         })),
                     ],
+                    dispatch: this.buildCallDispatch(
+                        signature,
+                        expr.callee.right.name,
+                        receiverType,
+                    ),
                     position: expr.position,
                 }
             }
@@ -590,6 +595,7 @@ export class SemanticAnalyzer {
                     label: arg.label,
                     value: this.rewriteExpression(arg.value),
                 })),
+                dispatch: { kind: 'direct' },
                 position: expr.position,
             }
         }
@@ -863,6 +869,7 @@ export class SemanticAnalyzer {
                     {
                         name: method.name,
                         ownerType,
+                        ownerKind,
                         visibility: method.visibility,
                         labels,
                         returnType: method.returnType,
@@ -964,6 +971,36 @@ export class SemanticAnalyzer {
     ): EffectLevel {
         if (ownerKind === 'service') return 'external'
         return sectionKind === 'mutating' ? 'self-mutation' : 'pure'
+    }
+
+    private buildCallDispatch(
+        signature: FunctionSignature,
+        methodName: string,
+        receiverType: string,
+    ): {
+        kind: 'direct' | 'virtual'
+        methodName?: string
+        ownerType?: string
+        receiverType?: string
+    } {
+        if (
+            signature.ownerKind === 'object' &&
+            signature.visibility === 'public'
+        ) {
+            return {
+                kind: 'virtual',
+                methodName,
+                ownerType: signature.ownerType,
+                receiverType,
+            }
+        }
+
+        return {
+            kind: 'direct',
+            methodName,
+            ownerType: signature.ownerType,
+            receiverType,
+        }
     }
 
     private registerDataDeclaration(stmt: ASTDataDeclaration) {
@@ -1809,6 +1846,7 @@ type EffectLevel = 'pure' | 'self-mutation' | 'external'
 type FunctionSignature = {
     name: string
     ownerType?: string
+    ownerKind?: 'object' | 'service'
     visibility: 'public' | 'helper'
     labels: string[]
     returnType?: string

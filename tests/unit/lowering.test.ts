@@ -280,6 +280,12 @@ describe('Lowering Tests', () => {
                             name: 'Counter·adjust',
                             position: somePosition,
                         },
+                        dispatch: {
+                            kind: 'virtual',
+                            methodName: 'adjust',
+                            ownerType: 'Counter',
+                            receiverType: 'Counter',
+                        },
                         arguments: [
                             {
                                 value: {
@@ -311,6 +317,12 @@ describe('Lowering Tests', () => {
             value: {
                 kind: 'function-call',
                 name: 'Counter·adjust__down',
+                dispatch: {
+                    kind: 'virtual',
+                    methodName: 'adjust',
+                    ownerType: 'Counter',
+                    receiverType: 'Counter',
+                },
                 arguments: [
                     { kind: 'var-ref', name: 'counter' },
                     {
@@ -319,6 +331,61 @@ describe('Lowering Tests', () => {
                         arguments: [{ kind: 'string', value: '2' }],
                     },
                 ],
+            },
+        } satisfies CStatement)
+    })
+
+    it('preserves direct dispatch metadata for service calls', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                    value: {
+                        kind: 'call',
+                        callee: {
+                            kind: 'identifier',
+                            name: 'Clock·now',
+                            position: somePosition,
+                        },
+                        dispatch: {
+                            kind: 'direct',
+                            methodName: 'now',
+                            ownerType: 'Clock',
+                            receiverType: 'Clock',
+                        },
+                        arguments: [
+                            {
+                                value: {
+                                    kind: 'identifier',
+                                    name: 'clock',
+                                    position: somePosition,
+                                },
+                            },
+                        ],
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'truthvalue_t',
+            name: 'x',
+            value: {
+                kind: 'function-call',
+                name: 'Clock·now',
+                arguments: [{ kind: 'var-ref', name: 'clock' }],
+                dispatch: {
+                    kind: 'direct',
+                    methodName: 'now',
+                    ownerType: 'Clock',
+                    receiverType: 'Clock',
+                },
             },
         } satisfies CStatement)
     })

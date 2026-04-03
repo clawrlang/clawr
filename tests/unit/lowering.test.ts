@@ -203,6 +203,68 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
+    it('mangles labeled call names with label suffixes', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    valueSet: { type: 'integer' },
+                    value: {
+                        kind: 'call',
+                        callee: {
+                            kind: 'identifier',
+                            name: 'adjust',
+                            position: somePosition,
+                        },
+                        arguments: [
+                            {
+                                value: {
+                                    kind: 'integer',
+                                    value: 1n,
+                                    position: somePosition,
+                                },
+                            },
+                            {
+                                label: 'down',
+                                value: {
+                                    kind: 'integer',
+                                    value: 2n,
+                                    position: somePosition,
+                                },
+                            },
+                        ],
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'Integer*',
+            name: 'x',
+            value: {
+                kind: 'function-call',
+                name: 'adjust__down',
+                arguments: [
+                    {
+                        kind: 'function-call',
+                        name: 'Integer¸fromCString',
+                        arguments: [{ kind: 'string', value: '1' }],
+                    },
+                    {
+                        kind: 'function-call',
+                        name: 'Integer¸fromCString',
+                        arguments: [{ kind: 'string', value: '2' }],
+                    },
+                ],
+            },
+        } satisfies CStatement)
+    })
+
     it('lowers print of truthvalue literal correctly', () => {
         const program: SemanticProgramFixture = {
             body: [

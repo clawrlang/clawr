@@ -695,7 +695,91 @@ describe('Call expression analysis', () => {
             analyze(
                 'func choose(x: truthvalue, y: truthvalue) -> truthvalue { return x }\nconst z = choose(true)',
             ),
-        ).toThrow("Function 'choose' expects 2 argument(s), got 1")
+        ).toThrow("Function/method not found 'choose(_:)'")
+
+        expect(() =>
+            analyze(
+                'func choose(x: truthvalue, y: truthvalue) -> truthvalue { return x }\nconst z = choose(true)',
+            ),
+        ).toThrow("Did you mean 'choose(_:_:)'?")
+    })
+
+    it('rejects function calls with wrong argument types', () => {
+        expect(() =>
+            analyze(
+                'func choose(x: truthvalue, y: truthvalue) -> truthvalue { return x }\nconst z = choose(1, true)',
+            ),
+        ).toThrow(
+            "Argument 1 type mismatch for function 'choose': expected 'truthvalue' but got 'integer'",
+        )
+    })
+
+    it('accepts function calls when argument types match the signature', () => {
+        const module = analyze(
+            'func choose(x: truthvalue, y: truthvalue) -> truthvalue { return y }\nconst z = choose(true, ambiguous)',
+        )
+
+        expect(module.functions[0].body).toMatchObject([
+            {
+                kind: 'var-decl',
+                name: 'z',
+                valueSet: { type: 'truthvalue' },
+                value: {
+                    kind: 'call',
+                    arguments: [
+                        { value: { kind: 'truthvalue', value: 'true' } },
+                        {
+                            value: {
+                                kind: 'truthvalue',
+                                value: 'ambiguous',
+                            },
+                        },
+                    ],
+                },
+            },
+        ])
+    })
+
+    it('resolves overloaded functions by label signature', () => {
+        const module = analyze(
+            'func adjust(_ value: integer, up amount: integer) -> integer { return value }\nfunc adjust(_ value: integer, down amount: integer) -> integer { return amount }\nconst z = adjust(1, down: 2)',
+        )
+
+        expect(module.functions[0].body).toMatchObject([
+            {
+                kind: 'var-decl',
+                name: 'z',
+                valueSet: { type: 'integer' },
+                value: {
+                    kind: 'call',
+                    callee: { kind: 'identifier', name: 'adjust' },
+                    arguments: [
+                        {
+                            label: undefined,
+                            value: { kind: 'integer', value: 1n },
+                        },
+                        {
+                            label: 'down',
+                            value: { kind: 'integer', value: 2n },
+                        },
+                    ],
+                },
+            },
+        ])
+    })
+
+    it('reports function/method not found for wrong labels and suggests a nearby overload', () => {
+        expect(() =>
+            analyze(
+                'func adjust(_ value: integer, up amount: integer) -> integer { return value }\nconst z = adjust(1, down: 2)',
+            ),
+        ).toThrow("Function/method not found 'adjust(_:down:)'")
+
+        expect(() =>
+            analyze(
+                'func adjust(_ value: integer, up amount: integer) -> integer { return value }\nconst z = adjust(1, down: 2)',
+            ),
+        ).toThrow("Did you mean 'adjust(_:up:)'?")
     })
 
     it('rejects using void functions as value expressions', () => {

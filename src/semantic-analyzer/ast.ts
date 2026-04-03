@@ -1,4 +1,5 @@
 import type {
+    ASTCallArgument,
     ASTDataDeclaration,
     ASTDataLiteral,
     ASTFunctionParameter,
@@ -29,8 +30,12 @@ export interface SemanticCopyExpression {
 export interface SemanticCallExpression {
     kind: 'call'
     callee: SemanticExpression
-    arguments: SemanticExpression[]
+    arguments: SemanticCallArgument[]
     position: ASTPosition
+}
+
+export interface SemanticCallArgument extends Omit<ASTCallArgument, 'value'> {
+    value: SemanticExpression
 }
 
 export type SemanticExpression =

@@ -85,14 +85,14 @@ export function lowerValue(
         case 'call':
             return {
                 kind: 'function-call',
-                name: extractCallName(val.callee),
+                name: mangleCallName(val.callee, val.arguments),
                 arguments: val.arguments.map((arg) => {
-                    if (arg.kind === 'data-literal') {
+                    if (arg.value.kind === 'data-literal') {
                         throw new Error(
                             'Data-literal call arguments are unsupported for now',
                         )
                     }
-                    return lowerValue(arg)
+                    return lowerValue(arg.value)
                 }),
             }
         case 'field-access':
@@ -138,4 +138,18 @@ export function lowerOwnedValue(
 function extractCallName(callee: SemanticExpression): string {
     if (callee.kind === 'identifier') return callee.name
     throw new Error(`Unsupported call callee kind '${callee.kind}'`)
+}
+
+function mangleCallName(
+    callee: SemanticExpression,
+    arguments_: Extract<SemanticExpression, { kind: 'call' }>['arguments'],
+): string {
+    const base = extractCallName(callee)
+    const suffix = arguments_
+        .map((arg) => arg.label)
+        .filter((label): label is string => Boolean(label && label !== '_'))
+        .map((label) => `__${label}`)
+        .join('')
+
+    return `${base}${suffix}`
 }

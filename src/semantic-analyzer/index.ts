@@ -78,10 +78,21 @@ export class SemanticAnalyzer {
                     semantics: 'const',
                     declarationPosition: stmt.position,
                 })
-                this.functionSignatures.set(stmt.name, {
-                    returnType: stmt.returnType,
-                    arity: stmt.parameters.length,
-                })
+                const labels = stmt.parameters.map(
+                    (param) => param.label ?? '_',
+                )
+                this.functionSignatures.set(
+                    buildFunctionSignatureKey(stmt.name, labels),
+                    {
+                        name: stmt.name,
+                        labels,
+                        returnType: stmt.returnType,
+                        arity: stmt.parameters.length,
+                        parameterTypes: stmt.parameters.map(
+                            (param) => param.type,
+                        ),
+                    },
+                )
             }
             if (stmt.kind === 'object-decl') {
                 this.registerTypeDeclaration(stmt)
@@ -455,9 +466,10 @@ export class SemanticAnalyzer {
             return {
                 kind: 'call',
                 callee: this.rewriteExpression(expr.callee),
-                arguments: expr.arguments.map((arg) =>
-                    this.rewriteExpression(arg),
-                ),
+                arguments: expr.arguments.map((arg) => ({
+                    label: arg.label,
+                    value: this.rewriteExpression(arg.value),
+                })),
                 position: expr.position,
             }
         }
@@ -790,6 +802,31 @@ export class SemanticAnalyzer {
                     )
                 }
 
+                const argumentLabels = value.arguments.map(
+                    (arg) => arg.label ?? '_',
+                )
+                const signatureKey = buildFunctionSignatureKey(
+                    value.callee.name,
+                    argumentLabels,
+                )
+
+                const signature = this.lookupFunctionSignature(signatureKey)
+                if (!signature) {
+                    const baseOverloads = this.lookupFunctionSignaturesByName(
+                        value.callee.name,
+                    )
+
+                    if (baseOverloads.length > 0) {
+                        const suggestion = buildDidYouMeanSignatureHint(
+                            value.callee.name,
+                            baseOverloads,
+                        )
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Function/method not found '${renderFunctionSignature(value.callee.name, argumentLabels)}'.${suggestion}`,
+                        )
+                    }
+                }
+
                 const calleeBinding = this.lookupBinding(value.callee.name)
                 if (!calleeBinding) {
                     throw new Error(
@@ -803,12 +840,13 @@ export class SemanticAnalyzer {
                     )
                 }
 
-                const signature = this.lookupFunctionSignature(
-                    value.callee.name,
-                )
                 if (!signature) {
+                    const signature = renderFunctionSignature(
+                        value.callee.name,
+                        argumentLabels,
+                    )
                     throw new Error(
-                        `${value.callee.position.line}:${value.callee.position.column}:Cannot resolve signature for function '${value.callee.name}'`,
+                        `${value.position.line}:${value.position.column}:Function/method not found '${signature}'.`,
                     )
                 }
 
@@ -819,7 +857,24 @@ export class SemanticAnalyzer {
                 }
 
                 for (const arg of value.arguments) {
-                    this.inferExpressionType(arg)
+                    this.inferExpressionType(arg.value)
+                }
+
+                for (let i = 0; i < value.arguments.length; i++) {
+                    const actualType = this.inferExpressionType(
+                        value.arguments[i].value,
+                    )
+                    const expectedType = signature.parameterTypes[i]
+
+                    if (
+                        actualType &&
+                        expectedType !== undefined &&
+                        actualType !== expectedType
+                    ) {
+                        throw new Error(
+                            `${value.arguments[i].value.position.line}:${value.arguments[i].value.position.column}:Argument ${i + 1} type mismatch for function '${value.callee.name}': expected '${expectedType}' but got '${actualType}'`,
+                        )
+                    }
                 }
 
                 if (signature.returnType === undefined) {
@@ -1055,11 +1110,20 @@ export class SemanticAnalyzer {
     }
 
     private lookupFunctionSignature(
-        name: string,
+        signatureKey: string,
     ): FunctionSignature | undefined {
-        const signature = this.functionSignatures.get(name)
+        const signature = this.functionSignatures.get(signatureKey)
         if (signature || !this.parent) return signature
-        return this.parent.lookupFunctionSignature(name)
+        return this.parent.lookupFunctionSignature(signatureKey)
+    }
+
+    private lookupFunctionSignaturesByName(name: string): FunctionSignature[] {
+        const signatures = Array.from(this.functionSignatures.values()).filter(
+            (signature) => signature.name === name,
+        )
+
+        if (signatures.length > 0 || !this.parent) return signatures
+        return this.parent.lookupFunctionSignaturesByName(name)
     }
 }
 
@@ -1072,6 +1136,26 @@ type VariableBinding = {
 type BindingMap = Map<string, VariableBinding>
 
 type FunctionSignature = {
+    name: string
+    labels: string[]
     returnType?: string
     arity: number
+    parameterTypes: string[]
+}
+
+function buildFunctionSignatureKey(name: string, labels: string[]): string {
+    return `${name}(${labels.join(':')})`
+}
+
+function renderFunctionSignature(name: string, labels: string[]): string {
+    return `${name}(${labels.join(':')}:)`
+}
+
+function buildDidYouMeanSignatureHint(
+    name: string,
+    signatures: FunctionSignature[],
+): string {
+    if (signatures.length === 0) return ''
+    const first = signatures[0]
+    return ` Did you mean '${renderFunctionSignature(name, first.labels)}'?`
 }

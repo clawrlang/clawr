@@ -63,8 +63,13 @@ export interface ASTCopyExpression {
 export interface ASTCallExpression {
     kind: 'call'
     callee: ASTExpression
-    arguments: ASTExpression[]
+    arguments: ASTCallArgument[]
     position: ASTPosition
+}
+
+export interface ASTCallArgument {
+    label?: string
+    value: ASTExpression
 }
 
 export interface ASTBinaryExpression {

@@ -814,8 +814,23 @@ describe('Call expression tests', () => {
                 kind: 'call',
                 callee: { kind: 'identifier', name: 'choose' },
                 arguments: [
-                    { kind: 'truthvalue', value: 'true' },
-                    { kind: 'truthvalue', value: 'ambiguous' },
+                    { value: { kind: 'truthvalue', value: 'true' } },
+                    { value: { kind: 'truthvalue', value: 'ambiguous' } },
+                ],
+            },
+        })
+    })
+
+    it('parses a call expression with mixed unlabeled and labeled arguments', () => {
+        const ast = parse('const x: integer = adjust(1, down: 2)')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            value: {
+                kind: 'call',
+                callee: { kind: 'identifier', name: 'adjust' },
+                arguments: [
+                    { value: { kind: 'integer', value: 1n } },
+                    { label: 'down', value: { kind: 'integer', value: 2n } },
                 ],
             },
         })

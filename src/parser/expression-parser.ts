@@ -1,4 +1,4 @@
-import { ASTBinaryExpression, ASTExpression } from '../ast'
+import { ASTBinaryExpression, ASTCallArgument, ASTExpression } from '../ast'
 import { TokenStream } from '../lexer'
 
 export class ExpressionParser {
@@ -9,10 +9,10 @@ export class ExpressionParser {
         while (true) {
             if (this.stream.isNext('PUNCTUATION', '(')) {
                 const lparen = this.stream.expect('PUNCTUATION', '(')
-                const args: ASTExpression[] = []
+                const args: ASTCallArgument[] = []
 
                 while (!this.stream.isNext('PUNCTUATION', ')')) {
-                    args.push(this.parse())
+                    args.push(this.parseCallArgument())
                     if (this.stream.isNext('PUNCTUATION', ',')) {
                         this.stream.next()
                     } else {
@@ -47,6 +47,20 @@ export class ExpressionParser {
             break
         }
         return expr
+    }
+
+    private parseCallArgument(): ASTCallArgument {
+        const labeled = this.stream.attempt((clone) => {
+            if (!clone.isNext('IDENTIFIER')) return null
+            const labelToken = clone.expect('IDENTIFIER')
+            if (!clone.isNext('PUNCTUATION', ':')) return null
+            clone.expect('PUNCTUATION', ':')
+            const value = new ExpressionParser(clone).parse()
+            return { label: labelToken.identifier, value }
+        })
+
+        if (labeled) return labeled
+        return { value: this.parse() }
     }
 
     private parsePrimaryExpression(): ASTExpression {

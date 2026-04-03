@@ -626,7 +626,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects mutating object methods calling service methods (external effects)', () => {
             expect(() =>
                 analyze(
-                    'service Clock { func now(self: const Clock) -> truthvalue { return true } }\nobject Counter { mutating: func tick(self: ref Counter, c: const Clock) -> truthvalue { return c.now() } }',
+                    'service Clock { func now(self: const Clock) -> truthvalue { return true } }\nobject Counter { mutating: func tick(self: ref Counter, c: ref Clock) -> truthvalue { return c.now() } }',
                 ),
             ).toThrow("Call to 'Clock.now()' is side-effecting (external)")
         })
@@ -718,6 +718,88 @@ describe('SemanticAnalyzer', () => {
             ).toThrow(
                 "2:36:Override 'Student.id()' must match effect level 'pure', got 'self-mutation'",
             )
+        })
+    })
+
+    describe('service reference restrictions', () => {
+        it('rejects non-ref service variables', () => {
+            expect(() =>
+                analyze('service Clock { }\nconst clock: Clock = { }'),
+            ).toThrow(
+                "2:1:Service variable 'clock' must be declared as 'ref', got 'const'",
+            )
+        })
+
+        it('allows ref service variables', () => {
+            const module = analyze('service Clock { }\nref clock: Clock = { }')
+
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 'clock',
+                    semantics: 'ref',
+                    valueSet: { type: 'Clock' },
+                },
+            ])
+        })
+
+        it('rejects non-ref service parameters', () => {
+            expect(() =>
+                analyze('service Clock { }\nfunc use(clock: Clock) { }'),
+            ).toThrow("2:10:Service parameter 'clock' must use 'ref' semantics")
+        })
+
+        it('rejects service returns without ref return semantics', () => {
+            expect(() =>
+                analyze(
+                    'service Clock { }\nfunc current() -> Clock { return { } }',
+                ),
+            ).toThrow(
+                "2:1:Function 'current' returning service type 'Clock' must declare '-> ref Clock'",
+            )
+        })
+
+        it('allows service returns with ref return semantics', () => {
+            const module = analyze(
+                'service Clock { }\nfunc current() -> ref Clock { return { } }',
+            )
+
+            expect(
+                module.functions.find((f) => f.name === 'current'),
+            ).toBeDefined()
+        })
+
+        it('rejects service fields inside data and object types', () => {
+            expect(() =>
+                analyze('service Logger { }\ndata Audit { logger: Logger }'),
+            ).toThrow(
+                "2:1:Data type 'Audit' cannot contain service field 'logger' of type 'Logger'",
+            )
+
+            expect(() =>
+                analyze(
+                    'service Logger { }\nobject Audit { data: ref logger: Logger }',
+                ),
+            ).toThrow(
+                "2:1:Object 'Audit' cannot contain service field 'logger' of type 'Logger'",
+            )
+        })
+
+        it('requires ref semantics for service fields inside services', () => {
+            expect(() =>
+                analyze(
+                    'service Logger { }\nservice Repo { data: logger: Logger }',
+                ),
+            ).toThrow(
+                "2:1:Service 'Repo' field 'logger' with service type 'Logger' must use 'ref' semantics",
+            )
+
+            const module = analyze(
+                'service Logger { }\nservice Repo { data: ref logger: Logger }',
+            )
+            expect(
+                module.services.find((service) => service.name === 'Repo'),
+            ).toBeDefined()
         })
     })
 })

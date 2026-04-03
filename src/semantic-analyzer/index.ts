@@ -128,6 +128,7 @@ export class SemanticAnalyzer {
         }
 
         this.validateDataFieldSemantics(types)
+        this.validateTypeFieldSemantics(objects, services)
         this.validateObjectHierarchies(objects)
 
         // Second pass: analyze function bodies and module-level statements.
@@ -613,6 +614,7 @@ export class SemanticAnalyzer {
         stmt: ASTFunctionDeclaration,
     ): SemanticFunction {
         this.validateMethodDeclarationRules(stmt)
+        this.validateServiceFunctionRestrictions(stmt)
 
         const bodyAnalyzer = this.createFunctionChildScope(
             stmt.returnType,
@@ -1002,6 +1004,46 @@ export class SemanticAnalyzer {
                         `${decl.position.line}:${decl.position.column}:Field '${field.name}' in data type '${decl.name}' cannot use 'ref' semantics with non-reference type '${field.type}'`,
                     )
                 }
+
+                if (this.isServiceType(field.type)) {
+                    throw new Error(
+                        `${decl.position.line}:${decl.position.column}:Data type '${decl.name}' cannot contain service field '${field.name}' of type '${field.type}'`,
+                    )
+                }
+            }
+        }
+    }
+
+    private validateTypeFieldSemantics(
+        objects: ASTObjectDeclaration[],
+        services: ASTServiceDeclaration[],
+    ): void {
+        for (const objectDecl of objects) {
+            for (const section of objectDecl.sections) {
+                if (section.kind !== 'data') continue
+
+                for (const field of section.fields) {
+                    if (!this.isServiceType(field.type)) continue
+
+                    throw new Error(
+                        `${objectDecl.position.line}:${objectDecl.position.column}:Object '${objectDecl.name}' cannot contain service field '${field.name}' of type '${field.type}'`,
+                    )
+                }
+            }
+        }
+
+        for (const serviceDecl of services) {
+            for (const section of serviceDecl.sections) {
+                if (section.kind !== 'data') continue
+
+                for (const field of section.fields) {
+                    if (!this.isServiceType(field.type)) continue
+                    if (field.semantics === 'ref') continue
+
+                    throw new Error(
+                        `${serviceDecl.position.line}:${serviceDecl.position.column}:Service '${serviceDecl.name}' field '${field.name}' with service type '${field.type}' must use 'ref' semantics`,
+                    )
+                }
             }
         }
     }
@@ -1014,6 +1056,12 @@ export class SemanticAnalyzer {
 
         if (explicitType) {
             this.validateInitializerAgainstType(stmt.value, explicitType)
+            this.validateServiceVariableSemantics(
+                stmt.name,
+                explicitType,
+                stmt.semantics,
+                stmt.position,
+            )
             this.declareBinding(
                 stmt.name,
                 {
@@ -1053,6 +1101,12 @@ export class SemanticAnalyzer {
             )
         }
 
+        this.validateServiceVariableSemantics(
+            stmt.name,
+            inferredType,
+            stmt.semantics,
+            stmt.position,
+        )
         this.declareBinding(
             stmt.name,
             {
@@ -1120,6 +1174,56 @@ export class SemanticAnalyzer {
 
     private isReferenceType(type: string): boolean {
         return Boolean(this.lookupDataType(type))
+    }
+
+    private isServiceType(type: string): boolean {
+        return this.lookupTypeKind(type) === 'service'
+    }
+
+    private validateServiceVariableSemantics(
+        name: string,
+        type: string,
+        semantics: ASTVariableDeclaration['semantics'],
+        position: { line: number; column: number },
+    ): void {
+        if (!this.isServiceType(type)) return
+        if (semantics === 'ref') return
+
+        throw new Error(
+            `${position.line}:${position.column}:Service variable '${name}' must be declared as 'ref', got '${semantics}'`,
+        )
+    }
+
+    private validateServiceFunctionRestrictions(
+        stmt: ASTFunctionDeclaration,
+    ): void {
+        for (const param of stmt.parameters) {
+            if (!this.isServiceType(param.type)) continue
+
+            const isServiceSelfParameter =
+                param.name === 'self' &&
+                this.currentOwnerKind === 'service' &&
+                this.currentOwnerType === param.type
+            if (isServiceSelfParameter) continue
+
+            if (param.semantics !== 'ref') {
+                throw new Error(
+                    `${param.position.line}:${param.position.column}:Service parameter '${param.name}' must use 'ref' semantics`,
+                )
+            }
+        }
+
+        if (!stmt.returnType || !this.isServiceType(stmt.returnType)) return
+        if (stmt.returnSemantics === 'ref') return
+
+        throw new Error(
+            `${stmt.position.line}:${stmt.position.column}:Function '${this.renderDiagnosticFunctionName(stmt)}' returning service type '${stmt.returnType}' must declare '-> ref ${stmt.returnType}'`,
+        )
+    }
+
+    private renderDiagnosticFunctionName(stmt: ASTFunctionDeclaration): string {
+        if (!this.currentOwnerType) return stmt.name
+        return `${this.currentOwnerType}.${stmt.name}`
     }
 
     private collectMutateTargets(

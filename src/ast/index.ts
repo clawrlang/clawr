@@ -27,6 +27,7 @@ export type ASTExpression =
     | ASTIdentifier
     | ASTDataLiteral
     | ASTCopyExpression
+    | ASTCallExpression
     | ASTBinaryExpression
 
 export interface ASTIntegerLiteral {
@@ -56,6 +57,13 @@ export interface ASTDataLiteral {
 export interface ASTCopyExpression {
     kind: 'copy'
     value: ASTExpression
+    position: ASTPosition
+}
+
+export interface ASTCallExpression {
+    kind: 'call'
+    callee: ASTExpression
+    arguments: ASTExpression[]
     position: ASTPosition
 }
 

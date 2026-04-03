@@ -658,6 +658,53 @@ describe('Function body analysis', () => {
     })
 })
 
+describe('Call expression analysis', () => {
+    it('infers call expression type from function return type', () => {
+        const module = analyze(
+            'func yes() -> truthvalue { return true }\nconst x = yes()',
+        )
+
+        expect(module.functions[0].body).toMatchObject([
+            {
+                kind: 'var-decl',
+                name: 'x',
+                valueSet: { type: 'truthvalue' },
+                value: {
+                    kind: 'call',
+                    callee: { kind: 'identifier', name: 'yes' },
+                    arguments: [],
+                },
+            },
+        ])
+    })
+
+    it('rejects calling unknown identifiers', () => {
+        expect(() => analyze('const x = nope()')).toThrow(
+            "Unknown identifier 'nope'",
+        )
+    })
+
+    it('rejects calling non-function identifiers', () => {
+        expect(() => analyze('const value = true\nconst x = value()')).toThrow(
+            "Cannot call non-function identifier 'value'",
+        )
+    })
+
+    it('rejects function calls with wrong arity', () => {
+        expect(() =>
+            analyze(
+                'func choose(x: truthvalue, y: truthvalue) -> truthvalue { return x }\nconst z = choose(true)',
+            ),
+        ).toThrow("Function 'choose' expects 2 argument(s), got 1")
+    })
+
+    it('rejects using void functions as value expressions', () => {
+        expect(() => analyze('func log() { return }\nconst x = log()')).toThrow(
+            "Function 'log' has no return type and cannot be used as a value",
+        )
+    })
+})
+
 function analyze(code: string) {
     const stream = new TokenStream(code, 'test.clawr')
     const parser = new Parser(stream)

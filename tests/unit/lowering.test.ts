@@ -168,6 +168,41 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
+    it('lowers call-expression variable initialization to C function call', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                    value: {
+                        kind: 'call',
+                        callee: {
+                            kind: 'identifier',
+                            name: 'yes',
+                            position: somePosition,
+                        },
+                        arguments: [],
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'truthvalue_t',
+            name: 'x',
+            value: {
+                kind: 'function-call',
+                name: 'yes',
+                arguments: [],
+            },
+        } satisfies CStatement)
+    })
+
     it('lowers print of truthvalue literal correctly', () => {
         const program: SemanticProgramFixture = {
             body: [

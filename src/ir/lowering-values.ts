@@ -47,6 +47,10 @@ export function lowerStructFieldExpression(
             return `c_${expr.value}`
         case 'integer':
             return `Integer¸fromCString("${expr.value.toString()}")`
+        case 'call':
+            throw new Error(
+                'Call expressions are not supported in struct field literals',
+            )
         case 'identifier':
             return expr.name
         case 'data-literal':
@@ -78,6 +82,19 @@ export function lowerValue(
             return { kind: 'var-ref', name: `c_${val.value}` }
         case 'identifier':
             return { kind: 'var-ref', name: val.name }
+        case 'call':
+            return {
+                kind: 'function-call',
+                name: extractCallName(val.callee),
+                arguments: val.arguments.map((arg) => {
+                    if (arg.kind === 'data-literal') {
+                        throw new Error(
+                            'Data-literal call arguments are unsupported for now',
+                        )
+                    }
+                    return lowerValue(arg)
+                }),
+            }
         case 'field-access':
             return {
                 kind: 'field-reference',
@@ -116,4 +133,9 @@ export function lowerOwnedValue(
             { kind: 'var-ref', name: ownership.copyValueSemantics },
         ],
     }
+}
+
+function extractCallName(callee: SemanticExpression): string {
+    if (callee.kind === 'identifier') return callee.name
+    throw new Error(`Unsupported call callee kind '${callee.kind}'`)
 }

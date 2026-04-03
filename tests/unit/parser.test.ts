@@ -791,3 +791,33 @@ describe('Return statement tests', () => {
         })
     })
 })
+
+describe('Call expression tests', () => {
+    it('parses a simple call expression in variable initialization', () => {
+        const ast = parse('const x: truthvalue = yes()')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            name: 'x',
+            value: {
+                kind: 'call',
+                callee: { kind: 'identifier', name: 'yes' },
+                arguments: [],
+            },
+        })
+    })
+
+    it('parses a call expression with positional arguments', () => {
+        const ast = parse('const x: truthvalue = choose(true, ambiguous)')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            value: {
+                kind: 'call',
+                callee: { kind: 'identifier', name: 'choose' },
+                arguments: [
+                    { kind: 'truthvalue', value: 'true' },
+                    { kind: 'truthvalue', value: 'ambiguous' },
+                ],
+            },
+        })
+    })
+})

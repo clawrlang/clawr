@@ -6,17 +6,45 @@ export class ExpressionParser {
 
     parse(): ASTExpression {
         let expr = this.parsePrimaryExpression()
-        while (this.stream.isNext('OPERATOR', ['.'])) {
-            const dotToken = this.stream.expect('OPERATOR')
-            const right = this.parsePrimaryExpression()
-            const binary: ASTBinaryExpression = {
-                kind: 'binary',
-                operator: '.',
-                left: expr,
-                right,
-                position: { line: dotToken.line, column: dotToken.column },
+        while (true) {
+            if (this.stream.isNext('PUNCTUATION', '(')) {
+                const lparen = this.stream.expect('PUNCTUATION', '(')
+                const args: ASTExpression[] = []
+
+                while (!this.stream.isNext('PUNCTUATION', ')')) {
+                    args.push(this.parse())
+                    if (this.stream.isNext('PUNCTUATION', ',')) {
+                        this.stream.next()
+                    } else {
+                        break
+                    }
+                }
+
+                this.stream.expect('PUNCTUATION', ')')
+                expr = {
+                    kind: 'call',
+                    callee: expr,
+                    arguments: args,
+                    position: { line: lparen.line, column: lparen.column },
+                }
+                continue
             }
-            expr = binary
+
+            if (this.stream.isNext('OPERATOR', ['.'])) {
+                const dotToken = this.stream.expect('OPERATOR')
+                const right = this.parsePrimaryExpression()
+                const binary: ASTBinaryExpression = {
+                    kind: 'binary',
+                    operator: '.',
+                    left: expr,
+                    right,
+                    position: { line: dotToken.line, column: dotToken.column },
+                }
+                expr = binary
+                continue
+            }
+
+            break
         }
         return expr
     }

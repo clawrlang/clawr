@@ -26,12 +26,20 @@ export interface SemanticCopyExpression {
     position: ASTPosition
 }
 
+export interface SemanticCallExpression {
+    kind: 'call'
+    callee: SemanticExpression
+    arguments: SemanticExpression[]
+    position: ASTPosition
+}
+
 export type SemanticExpression =
     | ASTIntegerLiteral
     | ASTTruthValueLiteral
     | ASTIdentifier
     | ASTDataLiteral
     | SemanticCopyExpression
+    | SemanticCallExpression
     | SemanticFieldAccess
 
 export interface SemanticValueSet {

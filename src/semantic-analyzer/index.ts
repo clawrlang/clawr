@@ -44,15 +44,19 @@ export type {
 export class SemanticAnalyzer {
     private bindings: BindingMap = new Map()
     private dataTypes: Map<string, BindingMap>
+    private functionSignatures: Map<string, FunctionSignature>
 
     constructor(
         private ast: ASTProgram,
         private parent?: SemanticAnalyzer,
         dataTypes?: Map<string, BindingMap>,
+        functionSignatures?: Map<string, FunctionSignature>,
         private loopDepth = 0,
         private currentFunctionReturnType?: string,
     ) {
         this.dataTypes = dataTypes ?? parent?.dataTypes ?? new Map()
+        this.functionSignatures =
+            functionSignatures ?? parent?.functionSignatures ?? new Map()
     }
 
     analyze(): SemanticModule {
@@ -73,6 +77,10 @@ export class SemanticAnalyzer {
                     type: 'func',
                     semantics: 'const',
                     declarationPosition: stmt.position,
+                })
+                this.functionSignatures.set(stmt.name, {
+                    returnType: stmt.returnType,
+                    arity: stmt.parameters.length,
                 })
             }
             if (stmt.kind === 'object-decl') {
@@ -128,6 +136,7 @@ export class SemanticAnalyzer {
             this.ast,
             this,
             this.dataTypes,
+            this.functionSignatures,
             this.loopDepth,
             this.currentFunctionReturnType,
         )
@@ -138,6 +147,7 @@ export class SemanticAnalyzer {
             this.ast,
             this,
             this.dataTypes,
+            this.functionSignatures,
             this.loopDepth + 1,
             this.currentFunctionReturnType,
         )
@@ -148,6 +158,7 @@ export class SemanticAnalyzer {
             this.ast,
             this,
             this.dataTypes,
+            this.functionSignatures,
             0, // reset loop depth — break/continue inside a nested function is not the outer loop's
             returnType,
         )
@@ -437,6 +448,17 @@ export class SemanticAnalyzer {
             return {
                 ...expr,
                 value: this.rewriteExpression(expr.value),
+            }
+        }
+
+        if (expr.kind === 'call') {
+            return {
+                kind: 'call',
+                callee: this.rewriteExpression(expr.callee),
+                arguments: expr.arguments.map((arg) =>
+                    this.rewriteExpression(arg),
+                ),
+                position: expr.position,
             }
         }
 
@@ -761,6 +783,53 @@ export class SemanticAnalyzer {
                 return 'truthvalue'
             case 'integer':
                 return 'integer'
+            case 'call': {
+                if (value.callee.kind !== 'identifier') {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Unsupported call target '${value.callee.kind}'`,
+                    )
+                }
+
+                const calleeBinding = this.lookupBinding(value.callee.name)
+                if (!calleeBinding) {
+                    throw new Error(
+                        `${value.callee.position.line}:${value.callee.position.column}:Unknown identifier '${value.callee.name}'`,
+                    )
+                }
+
+                if (calleeBinding.type !== 'func') {
+                    throw new Error(
+                        `${value.callee.position.line}:${value.callee.position.column}:Cannot call non-function identifier '${value.callee.name}'`,
+                    )
+                }
+
+                const signature = this.lookupFunctionSignature(
+                    value.callee.name,
+                )
+                if (!signature) {
+                    throw new Error(
+                        `${value.callee.position.line}:${value.callee.position.column}:Cannot resolve signature for function '${value.callee.name}'`,
+                    )
+                }
+
+                if (value.arguments.length !== signature.arity) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Function '${value.callee.name}' expects ${signature.arity} argument(s), got ${value.arguments.length}`,
+                    )
+                }
+
+                for (const arg of value.arguments) {
+                    this.inferExpressionType(arg)
+                }
+
+                if (signature.returnType === undefined) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Function '${value.callee.name}' has no return type and cannot be used as a value`,
+                    )
+                }
+
+                return signature.returnType
+            }
             case 'identifier': {
                 const binding = this.lookupBinding(value.name)
                 if (!binding) {
@@ -847,6 +916,8 @@ export class SemanticAnalyzer {
         value: ASTExpression,
     ): ASTVariableDeclaration['semantics'] | null {
         switch (value.kind) {
+            case 'call':
+                return null
             case 'identifier': {
                 const binding = this.lookupBinding(value.name)
                 if (!binding) {
@@ -982,6 +1053,14 @@ export class SemanticAnalyzer {
         if (binding || !this.parent) return binding
         return this.parent.lookupBinding(name)
     }
+
+    private lookupFunctionSignature(
+        name: string,
+    ): FunctionSignature | undefined {
+        const signature = this.functionSignatures.get(name)
+        if (signature || !this.parent) return signature
+        return this.parent.lookupFunctionSignature(name)
+    }
 }
 
 type VariableBinding = {
@@ -991,3 +1070,8 @@ type VariableBinding = {
 }
 
 type BindingMap = Map<string, VariableBinding>
+
+type FunctionSignature = {
+    returnType?: string
+    arity: number
+}

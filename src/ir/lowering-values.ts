@@ -12,15 +12,34 @@ export function lowerStructLiteralFields(
     fields: ASTDataLiteral['fields'],
 ): string {
     const typeDecl = module.types.find((typeDecl) => typeDecl.name === typeName)
-    if (!typeDecl) {
-        throw new Error(
-            `Cannot find type declaration for ${typeName} in struct literal lowering`,
-        )
-    }
+    const fieldTypes: Map<string, string> = typeDecl
+        ? new Map(
+              typeDecl.fields.map((field): [string, string] => [
+                  field.name,
+                  field.type,
+              ]),
+          )
+        : (() => {
+              const objectDecl = module.objects.find(
+                  (objectDecl) => objectDecl.name === typeName,
+              )
+              if (!objectDecl) {
+                  throw new Error(
+                      `Cannot find type declaration for ${typeName} in struct literal lowering`,
+                  )
+              }
 
-    const fieldTypes = new Map(
-        typeDecl.fields.map((field) => [field.name, field.type]),
-    )
+              const dataSection = objectDecl.sections.find(
+                  (section) => section.kind === 'data',
+              )
+
+              return new Map(
+                  (dataSection?.fields ?? []).map((field): [string, string] => [
+                      field.name,
+                      field.type,
+                  ]),
+              )
+          })()
 
     return Object.entries(fields)
         .map(([fieldName, expr]) => {

@@ -11,6 +11,12 @@ import type {
 export function codegenC(program: CModule): string {
     let out = '#include <stdio.h>\n#include "runtime.h"\n\n'
 
+    // Forward declarations let function-pointer fields reference types declared later.
+    for (const typeDef of program.structs) {
+        out += `typedef struct ${typeDef.name} ${typeDef.name};\n`
+    }
+    out += '\n'
+
     for (const typeDef of program.structs) {
         out += emitTypeDef(typeDef) + '\n'
     }
@@ -36,7 +42,14 @@ export function codegenC(program: CModule): string {
 function emitTypeDef(typeDef: CStruct): string {
     // For now, just a placeholder for struct definition
     const fields = typeDef.fields
-        .map((f) => `    ${f.type} ${f.name};`)
+        .map((f) => {
+            const functionPointerMatch = f.type.match(/^(.*)\(\*\)\((.*)\)$/)
+            if (functionPointerMatch) {
+                const [, returnType, parameterTypes] = functionPointerMatch
+                return `    ${returnType}(*${f.name})(${parameterTypes});`
+            }
+            return `    ${f.type} ${f.name};`
+        })
         .join('\n')
     return `typedef struct ${typeDef.name} {\n${fields}\n} ${typeDef.name};`
 }

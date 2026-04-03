@@ -487,13 +487,17 @@ describe('Lowering Tests', () => {
                 arguments: [{ kind: 'var-ref', name: 'x' }],
             },
         } satisfies CStatement)
-        // printf("%s\n", tempˇ0);
+        // printf("%s\n", String·toCString(tempˇ0));
         expect(module.functions[0].body[2]).toMatchObject({
             kind: 'function-call',
             name: 'printf',
             arguments: [
                 { kind: 'string', value: '%s\\n' },
-                { kind: 'var-ref', name: 'tempˇ0' },
+                {
+                    kind: 'function-call',
+                    name: 'String·toCString',
+                    arguments: [{ kind: 'var-ref', name: 'tempˇ0' }],
+                },
             ],
         } satisfies CStatement)
         // releaseRC(tempˇ0);

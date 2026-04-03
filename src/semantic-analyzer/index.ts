@@ -78,6 +78,7 @@ export class SemanticAnalyzer {
         const services: ASTServiceDeclaration[] = []
         const mainBody: SemanticStatement[] = []
         const userFunctions: SemanticFunction[] = []
+        const typeMethods: SemanticFunction[] = []
 
         // First pass: register all type and function names so forward references work.
         for (const stmt of this.ast.body) {
@@ -145,11 +146,23 @@ export class SemanticAnalyzer {
                 continue
             }
             if (stmt.kind === 'object-decl') {
-                this.analyzeTypeMethods(stmt.name, 'object', stmt.sections)
+                typeMethods.push(
+                    ...this.analyzeTypeMethods(
+                        stmt.name,
+                        'object',
+                        stmt.sections,
+                    ),
+                )
                 continue
             }
             if (stmt.kind === 'service-decl') {
-                this.analyzeTypeMethods(stmt.name, 'service', stmt.sections)
+                typeMethods.push(
+                    ...this.analyzeTypeMethods(
+                        stmt.name,
+                        'service',
+                        stmt.sections,
+                    ),
+                )
                 continue
             }
             if (stmt.kind === 'data-decl') continue
@@ -168,7 +181,7 @@ export class SemanticAnalyzer {
                 ...imp,
                 items: imp.items.map((item) => ({ ...item })),
             })),
-            functions: [mainFunction, ...userFunctions],
+            functions: [mainFunction, ...userFunctions, ...typeMethods],
             types,
             objects,
             services,
@@ -899,7 +912,8 @@ export class SemanticAnalyzer {
         ownerType: string,
         ownerKind: 'object' | 'service',
         sections: ASTObjectDeclaration['sections'],
-    ): void {
+    ): SemanticFunction[] {
+        const methods: SemanticFunction[] = []
         for (const section of sections) {
             if (section.kind !== 'methods' && section.kind !== 'mutating') {
                 continue
@@ -912,9 +926,15 @@ export class SemanticAnalyzer {
                     ownerKind,
                     section.kind === 'mutating',
                 )
-                methodAnalyzer.analyzeFunctionDeclaration(method)
+                const analyzed =
+                    methodAnalyzer.analyzeFunctionDeclaration(method)
+                methods.push({
+                    ...analyzed,
+                    name: `${ownerType}·${method.name}`,
+                })
             }
         }
+        return methods
     }
 
     private validateMethodAssignmentRules(

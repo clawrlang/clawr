@@ -1,0 +1,19 @@
+object Shape {
+    func sides(self: const Shape) -> integer {
+        return 0
+    }
+}
+
+object Square: Shape {
+    func sides(self: const Square) -> integer {
+        return 4
+    }
+}
+
+ref square: Square = { }
+const directResult: integer = square.sides()
+print directResult
+
+ref polymorphShape: Shape = square
+const polymorphResult: integer = polymorphShape.sides()
+print polymorphResult

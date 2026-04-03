@@ -148,12 +148,19 @@ export interface ObjectMethodInfo {
     labels: string[]
     ownerType: string
     visibility: 'public' | 'helper'
+    returnType?: string
 }
 
 export function lowerObjectStruct(
     objectDecl: ASTObjectDeclaration,
     functionSignatures: Map<string, SemanticFunctionSignature>,
-): CStruct {
+): CStruct[] {
+    const dataFields = getObjectDataFields(objectDecl)
+    const loweredDataFields = dataFields.map((field) => ({
+        name: field.name,
+        type: lowerValueSetType(field.type),
+    }))
+
     // Collect all public methods for this object (including inherited)
     const publicMethods = getObjectPublicMethods(
         objectDecl.name,
@@ -165,15 +172,26 @@ export function lowerObjectStruct(
     if (publicMethods.length > 0) {
         fields.push({
             name: '__vtable',
-            type: `${objectDecl.name}ˇVtable*`,
+            type: `const ${objectDecl.name}ˇVtable*`,
         })
     }
 
-    return {
-        kind: 'struct',
-        name: objectDecl.name,
-        fields,
-    }
+    return [
+        {
+            kind: 'struct',
+            name: objectDecl.name,
+            fields: [
+                { name: 'header', type: '__rc_header' },
+                ...fields,
+                ...loweredDataFields,
+            ],
+        },
+        {
+            kind: 'struct',
+            name: `${objectDecl.name}ˇfields`,
+            fields: loweredDataFields,
+        },
+    ]
 }
 
 export function lowerObjectVtable(
@@ -191,7 +209,7 @@ export function lowerObjectVtable(
     const fields: { name: string; type: string }[] = publicMethods.map(
         (method) => ({
             name: method.name,
-            type: `int (*)(${objectDecl.name}*)`, // Simplified; actual signature would be more complex
+            type: `${method.returnType ? lowerValueSetType(method.returnType) : 'void'} (*)(${objectDecl.name}*)`,
         }),
     )
 
@@ -220,7 +238,7 @@ export function lowerObjectVtableInstance(
         // In real codegen, this would point to the actual method function pointer
         methodFields[method.name] = {
             kind: 'raw-expression',
-            expression: `${objectDecl.name}ˇ${method.name}`,
+            expression: `${objectDecl.name}·${method.name}`,
         }
     }
 
@@ -252,9 +270,117 @@ function getObjectPublicMethods(
                 labels: signature.labels,
                 ownerType: signature.ownerType,
                 visibility: signature.visibility,
+                returnType: signature.returnType,
             })
         }
     }
 
     return methods
+}
+
+export function lowerObjectTypeInfo(
+    objectDecl: ASTObjectDeclaration,
+): CVariableDeclaration {
+    const hookNames = structHookNames(objectDecl.name)
+
+    return {
+        kind: 'var-decl',
+        type: '__type_info',
+        name: `${objectDecl.name}ˇtype`,
+        value: {
+            kind: 'struct-init',
+            fields: {
+                data_type: {
+                    kind: 'struct-init',
+                    fields: {
+                        size: {
+                            kind: 'raw-expression',
+                            expression: `sizeof(${objectDecl.name})`,
+                        },
+                        retain_nested_fields: {
+                            kind: 'raw-expression',
+                            expression: hookNames.retain,
+                        },
+                        release_nested_fields: {
+                            kind: 'raw-expression',
+                            expression: hookNames.release,
+                        },
+                    },
+                },
+            },
+        },
+        modifiers: ['static', 'const'],
+    }
+}
+
+export function lowerObjectHooks(
+    objectDecl: ASTObjectDeclaration,
+): CFunctionDeclaration[] {
+    const rcFields = getObjectDataFields(objectDecl).filter((field) =>
+        isReferenceCountedType(field.type),
+    )
+    const hooks = structHookNames(objectDecl.name)
+    const selfExpr: CExpression = {
+        kind: 'raw-expression',
+        expression: `(${objectDecl.name}*)self`,
+    }
+
+    return [
+        {
+            kind: 'function',
+            name: hooks.retain,
+            returnType: 'void',
+            parameters: [{ name: 'self', type: 'void*' }],
+            body: rcFields.map((field) => ({
+                kind: 'function-call',
+                name: 'retainRC',
+                arguments: [
+                    {
+                        kind: 'field-reference',
+                        object: selfExpr,
+                        field: field.name,
+                        deref: true,
+                    },
+                ],
+            })),
+        },
+        {
+            kind: 'function',
+            name: hooks.release,
+            returnType: 'void',
+            parameters: [{ name: 'self', type: 'void*' }],
+            body: rcFields.map((field) => ({
+                kind: 'function-call',
+                name: 'releaseRC',
+                arguments: [
+                    {
+                        kind: 'field-reference',
+                        object: selfExpr,
+                        field: field.name,
+                        deref: true,
+                    },
+                ],
+            })),
+        },
+    ]
+}
+
+function getObjectDataFields(
+    objectDecl: ASTObjectDeclaration,
+): ASTObjectDeclaration['sections'][number] extends infer S
+    ? S extends { kind: 'data'; fields: infer F }
+        ? F extends Array<infer Field>
+            ? Field[]
+            : never
+        : never
+    : never {
+    const dataSection = objectDecl.sections.find(
+        (section): section is Extract<typeof section, { kind: 'data' }> =>
+            section.kind === 'data',
+    )
+    return (dataSection?.fields ?? []) as any
+}
+
+function isReferenceCountedType(type: string): boolean {
+    return type !== 'truthvalue'
 }

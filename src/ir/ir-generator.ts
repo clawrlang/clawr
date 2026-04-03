@@ -16,7 +16,10 @@ import {
     lowerStructHooks,
     lowerStructTypeInfo,
     lowerType,
+    lowerValueSetType,
     lowerObjectStruct,
+    lowerObjectTypeInfo,
+    lowerObjectHooks,
     lowerObjectVtable,
     lowerObjectVtableInstance,
 } from './lowering-types'
@@ -69,9 +72,12 @@ export class IRGenerator {
         const dataHookFunctions = ast.types.flatMap((stmt) =>
             lowerStructHooks(stmt),
         )
+        const objectHookFunctions = ast.objects.flatMap((obj) =>
+            lowerObjectHooks(obj),
+        )
 
         // Lower object structs and vtables
-        const objectStructs = ast.objects.map((obj) =>
+        const objectStructs = ast.objects.flatMap((obj) =>
             lowerObjectStruct(obj, ast.functionSignatures),
         )
         const objectVtables = ast.objects
@@ -86,16 +92,18 @@ export class IRGenerator {
         return {
             structs: [
                 ...ast.types.flatMap((stmt) => lowerStruct(stmt)),
-                ...objectStructs,
                 ...objectVtables,
+                ...objectStructs,
             ],
             variables: [
                 ...ast.types.map((stmt) => lowerStructTypeInfo(stmt)),
+                ...ast.objects.map((obj) => lowerObjectTypeInfo(obj)),
                 ...objectVtableInstances,
             ],
             functions: [
                 ...ast.functions.map((fn) => this.lowerFunction(fn)),
                 ...dataHookFunctions,
+                ...objectHookFunctions,
             ],
         }
     }
@@ -106,21 +114,35 @@ export class IRGenerator {
             tempCounter: 0,
         }
 
+        const isMain = fn.name === 'main'
+        const returnType = isMain
+            ? 'int'
+            : fn.returnType
+              ? lowerValueSetType(fn.returnType)
+              : 'void'
+        const parameters = fn.parameters.map((param) => ({
+            name: param.name,
+            type: lowerValueSetType(param.type),
+        }))
+
         return {
             kind: 'function',
             name: fn.name,
-            returnType: 'int',
-            parameters: [],
+            returnType,
+            parameters,
             body: [
                 ...fn.body.flatMap((stmt) =>
                     this.lowerStatement(stmt, context),
                 ),
                 ...this.lowerReleaseAtExit(context),
-                {
-                    kind: 'function-call',
-                    name: 'return',
-                    arguments: [{ kind: 'var-ref', name: '0' }],
-                },
+                ...(returnType === 'void'
+                    ? []
+                    : [
+                          {
+                              kind: 'return' as const,
+                              value: { kind: 'var-ref' as const, name: '0' },
+                          },
+                      ]),
             ],
         }
     }
@@ -146,6 +168,8 @@ export class IRGenerator {
                 return [{ kind: 'break' }]
             case 'continue':
                 return [{ kind: 'continue' }]
+            case 'return':
+                return this.lowerReturnStatement(stmt)
             default:
                 throw new Error(
                     `Unknown AST statement kind ${(stmt as any).kind}`,
@@ -282,7 +306,7 @@ export class IRGenerator {
             stmt.value.fields,
         )
 
-        return [
+        const statements: CStatement[] = [
             {
                 kind: 'var-decl',
                 type: lowerType(stmt),
@@ -324,6 +348,48 @@ export class IRGenerator {
                 ],
             },
             ...this.lowerOwnershipPrefix(stmt.ownership),
+        ]
+
+        if (this.module.typeKinds.get(structTypeName) === 'object') {
+            statements.push({
+                kind: 'assign',
+                target: {
+                    kind: 'field-reference',
+                    object: { kind: 'var-ref', name: stmt.name },
+                    field: '__vtable',
+                    deref: true,
+                },
+                value: {
+                    kind: 'raw-expression',
+                    expression: `&${structTypeName}ˇvtableInstance`,
+                },
+            })
+        }
+
+        return statements
+    }
+
+    private lowerReturnStatement(
+        stmt: Extract<SemanticStatement, { kind: 'return' }>,
+    ): CStatement[] {
+        if (stmt.value === undefined) {
+            return [
+                {
+                    kind: 'return',
+                    value: { kind: 'var-ref', name: '0' },
+                },
+            ]
+        }
+
+        if (stmt.value.kind === 'data-literal') {
+            throw new Error('Data-literal return is unsupported for now')
+        }
+
+        return [
+            {
+                kind: 'return',
+                value: lowerValue(stmt.value),
+            },
         ]
     }
 
@@ -515,7 +581,11 @@ export class IRGenerator {
                 name: 'printf',
                 arguments: [
                     { kind: 'string', value: '%s\\n' },
-                    { kind: 'var-ref', name: tempString },
+                    {
+                        kind: 'function-call',
+                        name: 'String·toCString',
+                        arguments: [{ kind: 'var-ref', name: tempString }],
+                    },
                 ],
             },
             {

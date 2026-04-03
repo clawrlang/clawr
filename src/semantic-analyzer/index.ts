@@ -53,6 +53,7 @@ export class SemanticAnalyzer {
         functionSignatures?: Map<string, FunctionSignature>,
         private loopDepth = 0,
         private currentFunctionReturnType?: string,
+        private currentOwnerType?: string,
     ) {
         this.dataTypes = dataTypes ?? parent?.dataTypes ?? new Map()
         this.functionSignatures =
@@ -85,6 +86,7 @@ export class SemanticAnalyzer {
                     buildFunctionSignatureKey(stmt.name, labels),
                     {
                         name: stmt.name,
+                        visibility: stmt.visibility,
                         labels,
                         returnType: stmt.returnType,
                         arity: stmt.parameters.length,
@@ -152,6 +154,7 @@ export class SemanticAnalyzer {
             this.functionSignatures,
             this.loopDepth,
             this.currentFunctionReturnType,
+            this.currentOwnerType,
         )
     }
 
@@ -163,10 +166,14 @@ export class SemanticAnalyzer {
             this.functionSignatures,
             this.loopDepth + 1,
             this.currentFunctionReturnType,
+            this.currentOwnerType,
         )
     }
 
-    private createFunctionChildScope(returnType?: string): SemanticAnalyzer {
+    private createFunctionChildScope(
+        returnType?: string,
+        ownerType?: string,
+    ): SemanticAnalyzer {
         return new SemanticAnalyzer(
             this.ast,
             this,
@@ -174,6 +181,7 @@ export class SemanticAnalyzer {
             this.functionSignatures,
             0, // reset loop depth — break/continue inside a nested function is not the outer loop's
             returnType,
+            ownerType,
         )
     }
 
@@ -608,6 +616,7 @@ export class SemanticAnalyzer {
                     {
                         name: method.name,
                         ownerType,
+                        visibility: method.visibility,
                         labels,
                         returnType: method.returnType,
                         arity: callableParams.length,
@@ -943,6 +952,16 @@ export class SemanticAnalyzer {
                     )
                 }
 
+                if (
+                    signature.ownerType &&
+                    signature.visibility === 'helper' &&
+                    this.currentOwnerType !== signature.ownerType
+                ) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Method '${renderFunctionSignature(calleeName, argumentLabels, signature.ownerType)}' is helper and only callable inside '${signature.ownerType}'`,
+                    )
+                }
+
                 if (value.arguments.length !== signature.arity) {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Function '${calleeName}' expects ${signature.arity} argument(s), got ${value.arguments.length}`,
@@ -1238,6 +1257,7 @@ type BindingMap = Map<string, VariableBinding>
 type FunctionSignature = {
     name: string
     ownerType?: string
+    visibility: 'public' | 'helper'
     labels: string[]
     returnType?: string
     arity: number
@@ -1259,6 +1279,9 @@ function renderFunctionSignature(
     ownerType?: string,
 ): string {
     const qualifier = ownerType ? `${ownerType}.` : ''
+    if (labels.length === 0) {
+        return `${qualifier}${name}()`
+    }
     return `${qualifier}${name}(${labels.join(':')}:)`
 }
 

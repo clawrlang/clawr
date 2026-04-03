@@ -836,6 +836,16 @@ describe('Call expression analysis', () => {
             ),
         ).toThrow("Did you mean 'Counter.adjust(down:)'?")
     })
+
+    it('rejects helper method calls from outside declaring type', () => {
+        expect(() =>
+            analyze(
+                'object Counter { helper func secret(self: const Counter) -> integer { return 1 } }\nconst counter: Counter = { }\nconst z = counter.secret()',
+            ),
+        ).toThrow(
+            "Method 'Counter.secret()' is helper and only callable inside 'Counter'",
+        )
+    })
 })
 
 function analyze(code: string) {

@@ -104,6 +104,9 @@ export class SemanticAnalyzer {
                         parameterTypes: stmt.parameters.map(
                             (param) => param.type,
                         ),
+                        parameterSemantics: stmt.parameters.map(
+                            (param) => param.semantics ?? 'const',
+                        ),
                         effectLevel: 'external',
                     },
                 )
@@ -811,6 +814,18 @@ export class SemanticAnalyzer {
                     )
                 }
 
+                if (
+                    callableParams.some(
+                        (param, index) =>
+                            (param.semantics ?? 'const') !==
+                            baseSignature.parameterSemantics[index],
+                    )
+                ) {
+                    throw new Error(
+                        `${method.position.line}:${method.position.column}:Override '${overrideName}' must match parameter semantics of inherited method`,
+                    )
+                }
+
                 if (method.visibility !== baseSignature.visibility) {
                     throw new Error(
                         `${method.position.line}:${method.position.column}:Override '${overrideName}' must keep visibility '${baseSignature.visibility}'`,
@@ -855,6 +870,9 @@ export class SemanticAnalyzer {
                         arity: callableParams.length,
                         parameterTypes: callableParams.map(
                             (param) => param.type,
+                        ),
+                        parameterSemantics: callableParams.map(
+                            (param) => param.semantics ?? 'const',
                         ),
                         effectLevel: this.methodEffectLevel(
                             ownerKind,
@@ -1797,6 +1815,7 @@ type FunctionSignature = {
     returnSemantics?: 'const' | 'ref'
     arity: number
     parameterTypes: string[]
+    parameterSemantics: Array<'const' | 'mut' | 'ref'>
     effectLevel: EffectLevel
 }
 

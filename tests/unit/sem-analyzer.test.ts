@@ -720,6 +720,16 @@ describe('SemanticAnalyzer', () => {
             )
         })
 
+        it('rejects overrides with incompatible parameter semantics', () => {
+            expect(() =>
+                analyze(
+                    'object Entity { func link(self: const Entity, other: ref Entity) -> truthvalue { return true } }\nobject Student: Entity { func link(self: const Student, other: const Entity) -> truthvalue { return true } }',
+                ),
+            ).toThrow(
+                "2:26:Override 'Student.link(_:)' must match parameter semantics of inherited method",
+            )
+        })
+
         it('rejects overrides with incompatible return semantics', () => {
             expect(() =>
                 analyze(

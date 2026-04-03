@@ -563,6 +563,42 @@ describe('SemanticAnalyzer', () => {
             expect(module.types).toHaveLength(1)
         })
     })
+
+    describe('method constraints', () => {
+        it('rejects immutable methods without a return type', () => {
+            expect(() =>
+                analyze('object Counter { func id(self: const Counter) { } }'),
+            ).toThrow(
+                "Immutable method 'Counter.id' must declare a return type",
+            )
+        })
+
+        it('rejects immutable methods assigning to self fields', () => {
+            expect(() =>
+                analyze(
+                    'data Box { value: truthvalue }\nobject Counter { func set(self: ref Counter, b: ref Box) -> truthvalue { b.value = true\nreturn true } }',
+                ),
+            ).toThrow("Immutable method 'Counter' may not assign to a field")
+        })
+
+        it('rejects object methods mutating external state', () => {
+            expect(() =>
+                analyze(
+                    'data Box { value: truthvalue }\nobject Counter { mutating: func leak(self: ref Counter, b: ref Box) { b.value = true } }\nconst box: Box = { value: false }\nconst counter: Counter = { }',
+                ),
+            ).toThrow("Object methods may not mutate external state via 'b'")
+        })
+
+        it('rejects print statements in object methods as external side-effects', () => {
+            expect(() =>
+                analyze(
+                    'object Counter { mutating: func log(self: ref Counter) { print true } }',
+                ),
+            ).toThrow(
+                'Object methods may not perform external side-effects (print)',
+            )
+        })
+    })
 })
 
 describe('Function body analysis', () => {

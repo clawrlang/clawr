@@ -54,6 +54,8 @@ export class SemanticAnalyzer {
         private loopDepth = 0,
         private currentFunctionReturnType?: string,
         private currentOwnerType?: string,
+        private currentOwnerKind?: 'object' | 'service',
+        private currentMethodMutating = false,
     ) {
         this.dataTypes = dataTypes ?? parent?.dataTypes ?? new Map()
         this.functionSignatures =
@@ -117,12 +119,15 @@ export class SemanticAnalyzer {
                 userFunctions.push(this.analyzeFunctionDeclaration(stmt))
                 continue
             }
-            if (
-                stmt.kind === 'data-decl' ||
-                stmt.kind === 'object-decl' ||
-                stmt.kind === 'service-decl'
-            )
+            if (stmt.kind === 'object-decl') {
+                this.analyzeTypeMethods(stmt.name, 'object', stmt.sections)
                 continue
+            }
+            if (stmt.kind === 'service-decl') {
+                this.analyzeTypeMethods(stmt.name, 'service', stmt.sections)
+                continue
+            }
+            if (stmt.kind === 'data-decl') continue
             mainBody.push(mainScopedAnalyzer.analyzeStatement(stmt))
         }
 
@@ -155,6 +160,8 @@ export class SemanticAnalyzer {
             this.loopDepth,
             this.currentFunctionReturnType,
             this.currentOwnerType,
+            this.currentOwnerKind,
+            this.currentMethodMutating,
         )
     }
 
@@ -167,12 +174,16 @@ export class SemanticAnalyzer {
             this.loopDepth + 1,
             this.currentFunctionReturnType,
             this.currentOwnerType,
+            this.currentOwnerKind,
+            this.currentMethodMutating,
         )
     }
 
     private createFunctionChildScope(
         returnType?: string,
         ownerType?: string,
+        ownerKind?: 'object' | 'service',
+        methodMutating = false,
     ): SemanticAnalyzer {
         return new SemanticAnalyzer(
             this.ast,
@@ -182,6 +193,8 @@ export class SemanticAnalyzer {
             0, // reset loop depth — break/continue inside a nested function is not the outer loop's
             returnType,
             ownerType,
+            ownerKind,
+            methodMutating,
         )
     }
 
@@ -344,6 +357,12 @@ export class SemanticAnalyzer {
     private analyzePrintStatement(
         stmt: Extract<ASTStatement, { kind: 'print' }>,
     ): SemanticPrintStatement {
+        if (this.currentOwnerKind === 'object') {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Object methods may not perform external side-effects (print)`,
+            )
+        }
+
         const dispatchType = this.inferExpressionType(stmt.value)
         if (!dispatchType) {
             throw new Error(
@@ -364,6 +383,8 @@ export class SemanticAnalyzer {
                 `${stmt.position.line}:${stmt.position.column}:Invalid assignment target kind '${stmt.target.kind}'`,
             )
         }
+
+        this.validateMethodAssignmentRules(stmt.target, stmt.position)
 
         this.validateAssignmentMutationSemantics(stmt.target)
 
@@ -539,7 +560,14 @@ export class SemanticAnalyzer {
     private analyzeFunctionDeclaration(
         stmt: ASTFunctionDeclaration,
     ): SemanticFunction {
-        const bodyAnalyzer = this.createFunctionChildScope(stmt.returnType)
+        this.validateMethodDeclarationRules(stmt)
+
+        const bodyAnalyzer = this.createFunctionChildScope(
+            stmt.returnType,
+            this.currentOwnerType,
+            this.currentOwnerKind,
+            this.currentMethodMutating,
+        )
 
         // Inject parameters as bindings in the function scope.
         for (const param of stmt.parameters) {
@@ -559,6 +587,16 @@ export class SemanticAnalyzer {
             returnType: stmt.returnType,
             body,
         }
+    }
+
+    private validateMethodDeclarationRules(stmt: ASTFunctionDeclaration): void {
+        if (!this.currentOwnerType) return
+        if (this.currentMethodMutating) return
+        if (stmt.returnType !== undefined) return
+
+        throw new Error(
+            `${stmt.position.line}:${stmt.position.column}:Immutable method '${this.currentOwnerType}.${stmt.name}' must declare a return type`,
+        )
     }
 
     private analyzeFunctionBody(
@@ -626,6 +664,59 @@ export class SemanticAnalyzer {
                     },
                 )
             }
+        }
+    }
+
+    private analyzeTypeMethods(
+        ownerType: string,
+        ownerKind: 'object' | 'service',
+        sections: ASTObjectDeclaration['sections'],
+    ): void {
+        for (const section of sections) {
+            if (section.kind !== 'methods' && section.kind !== 'mutating') {
+                continue
+            }
+
+            for (const method of section.items) {
+                const methodAnalyzer = this.createFunctionChildScope(
+                    method.returnType,
+                    ownerType,
+                    ownerKind,
+                    section.kind === 'mutating',
+                )
+                methodAnalyzer.analyzeFunctionDeclaration(method)
+            }
+        }
+    }
+
+    private validateMethodAssignmentRules(
+        target: ASTExpression,
+        position: { line: number; column: number },
+    ): void {
+        if (!this.currentOwnerType) return
+
+        if (
+            !this.currentMethodMutating &&
+            target.kind === 'binary' &&
+            target.operator === '.'
+        ) {
+            throw new Error(
+                `${position.line}:${position.column}:Immutable method '${this.currentOwnerType}' may not assign to a field`,
+            )
+        }
+
+        if (this.currentOwnerKind !== 'object') return
+
+        const root = this.extractRootIdentifier(target)
+        if (
+            target.kind === 'binary' &&
+            target.operator === '.' &&
+            root &&
+            root.name !== 'self'
+        ) {
+            throw new Error(
+                `${position.line}:${position.column}:Object methods may not mutate external state via '${root.name}'`,
+            )
         }
     }
 

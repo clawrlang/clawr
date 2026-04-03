@@ -14,8 +14,6 @@
 - Convert `print` statement to a function call
 - e2e test with helper in the same module?
 - Should helper types/functions be visible to all modules in the package/library?
-- **`SemanticAnalyzer`**: Immutable methods must have return value
-- **`SemanticAnalyzer`**: Immutable methods may not assign to a field
 - **`SemanticAnalyzer`**: Object method may not have external side-effects
 - **`IRGenerator`**: does it lower names correctly?
   - Use `·` in function names to indicate instance method

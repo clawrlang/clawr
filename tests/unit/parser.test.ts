@@ -726,3 +726,68 @@ describe('Object and service declaration tests', () => {
         ).toThrow('Expected method declaration (func or helper func)')
     })
 })
+
+describe('Return statement tests', () => {
+    it('parses a bare return inside a function body', () => {
+        const ast = parse('func quit() { return }')
+        const fn = ast.body[0]
+        if (fn.kind !== 'func-decl') throw new Error('unreachable')
+        expect(fn.body).toMatchObject({
+            kind: 'block',
+            statements: [{ kind: 'return' }],
+        })
+        if (fn.body.kind !== 'block') throw new Error('unreachable')
+        expect(fn.body.statements[0]).not.toHaveProperty('value')
+    })
+
+    it('parses a return with an expression value', () => {
+        const ast = parse('func answer() -> integer { return 42 }')
+        const fn = ast.body[0]
+        if (fn.kind !== 'func-decl') throw new Error('unreachable')
+        expect(fn.body).toMatchObject({
+            kind: 'block',
+            statements: [
+                { kind: 'return', value: { kind: 'integer', value: 42n } },
+            ],
+        })
+    })
+
+    it('parses a return with an identifier expression', () => {
+        const ast = parse(
+            'func identity(x: truthvalue) -> truthvalue { return x }',
+        )
+        const fn = ast.body[0]
+        if (fn.kind !== 'func-decl') throw new Error('unreachable')
+        expect(fn.body).toMatchObject({
+            kind: 'block',
+            statements: [
+                { kind: 'return', value: { kind: 'identifier', name: 'x' } },
+            ],
+        })
+    })
+
+    it('parses a return inside a nested if inside a function', () => {
+        const ast = parse('func check(x: truthvalue) { if x { return } }')
+        const fn = ast.body[0]
+        if (fn.kind !== 'func-decl') throw new Error('unreachable')
+        expect(fn.body).toMatchObject({
+            kind: 'block',
+            statements: [
+                {
+                    kind: 'if',
+                    thenBranch: [{ kind: 'return' }],
+                },
+            ],
+        })
+    })
+
+    it('parses a shorthand function body with => expression', () => {
+        const ast = parse('func double(n: integer) -> integer => n')
+        const fn = ast.body[0]
+        if (fn.kind !== 'func-decl') throw new Error('unreachable')
+        expect(fn.body).toMatchObject({
+            kind: 'expression',
+            value: { kind: 'identifier', name: 'n' },
+        })
+    })
+})

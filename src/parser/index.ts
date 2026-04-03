@@ -4,6 +4,7 @@ import {
     ASTImportDeclaration,
     ASTImportItem,
     ASTProgram,
+    ASTReturnStatement,
     ASTStatement,
     ASTWhileStatement,
 } from '../ast'
@@ -88,6 +89,10 @@ export class Parser {
             }
         }
 
+        if (this.stream.isNext('KEYWORD', 'return')) {
+            return this.parseReturnStatement()
+        }
+
         const statementParser = this.statementParsers.find((parser) =>
             parser.isNext(),
         )
@@ -149,6 +154,27 @@ export class Parser {
 
         this.stream.expect('PUNCTUATION', '}')
         return statements
+    }
+
+    private parseReturnStatement(): ASTReturnStatement {
+        const returnToken = this.stream.expect('KEYWORD', 'return')
+        const position = { line: returnToken.line, column: returnToken.column }
+
+        // A return value is present if the next token could start an expression.
+        // It is absent if the block ends (`}`) or the stream is exhausted.
+        const next = this.stream.peek()
+        const isVoid =
+            !next || (next.kind === 'PUNCTUATION' && next.symbol === '}')
+
+        if (isVoid) {
+            return { kind: 'return', position }
+        }
+
+        return {
+            kind: 'return',
+            value: new ExpressionParser(this.stream).parse(),
+            position,
+        }
     }
 
     private parseImportDeclaration(): ASTImportDeclaration {

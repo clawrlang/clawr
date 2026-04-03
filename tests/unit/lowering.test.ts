@@ -99,6 +99,7 @@ function toModule(program: SemanticProgramFixture): SemanticModule {
             {
                 kind: 'function',
                 name: 'main',
+                parameters: [],
                 body: normalizeOwnership(
                     program.body.filter((stmt) => stmt.kind !== 'data-decl'),
                     typeNames,

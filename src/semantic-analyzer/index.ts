@@ -6,6 +6,7 @@ import type {
     ASTFunctionDeclaration,
     ASTIdentifier,
     ASTProgram,
+    ASTReturnStatement,
     ASTStatement,
     ASTVariableDeclaration,
 } from '../ast'
@@ -20,6 +21,7 @@ import type {
     SemanticModule,
     SemanticOwnershipEffects,
     SemanticPrintStatement,
+    SemanticReturnStatement,
     SemanticStatement,
     SemanticVariableDeclaration,
 } from './ast'
@@ -32,6 +34,7 @@ export type {
     SemanticModule,
     SemanticOwnershipEffects,
     SemanticPrintStatement,
+    SemanticReturnStatement,
     SemanticStatement,
     SemanticExpression,
     SemanticValueSet,
@@ -47,6 +50,7 @@ export class SemanticAnalyzer {
         private parent?: SemanticAnalyzer,
         dataTypes?: Map<string, BindingMap>,
         private loopDepth = 0,
+        private currentFunctionReturnType?: string,
     ) {
         this.dataTypes = dataTypes ?? parent?.dataTypes ?? new Map()
     }
@@ -56,14 +60,20 @@ export class SemanticAnalyzer {
         const objects: ASTObjectDeclaration[] = []
         const services: ASTServiceDeclaration[] = []
         const mainBody: SemanticStatement[] = []
+        const userFunctions: SemanticFunction[] = []
 
+        // First pass: register all type and function names so forward references work.
         for (const stmt of this.ast.body) {
             if (stmt.kind === 'data-decl') {
                 this.registerDataDeclaration(stmt)
                 types.push(this.annotateDataDeclaration(stmt))
             }
             if (stmt.kind === 'func-decl') {
-                this.registerFunctionDeclaration(stmt)
+                this.bindings.set(stmt.name, {
+                    type: 'func',
+                    semantics: 'const',
+                    declarationPosition: stmt.position,
+                })
             }
             if (stmt.kind === 'object-decl') {
                 this.registerTypeDeclaration(stmt)
@@ -77,18 +87,26 @@ export class SemanticAnalyzer {
 
         this.validateDataFieldSemantics(types)
 
-        const scopedAnalyzer = this.createChildScope()
+        // Second pass: analyze function bodies and module-level statements.
+        const mainScopedAnalyzer = this.createChildScope()
         for (const stmt of this.ast.body) {
-            if (stmt.kind === 'data-decl') continue
-            if (stmt.kind === 'func-decl') continue
-            if (stmt.kind === 'object-decl') continue
-            if (stmt.kind === 'service-decl') continue
-            mainBody.push(scopedAnalyzer.analyzeStatement(stmt))
+            if (stmt.kind === 'func-decl') {
+                userFunctions.push(this.analyzeFunctionDeclaration(stmt))
+                continue
+            }
+            if (
+                stmt.kind === 'data-decl' ||
+                stmt.kind === 'object-decl' ||
+                stmt.kind === 'service-decl'
+            )
+                continue
+            mainBody.push(mainScopedAnalyzer.analyzeStatement(stmt))
         }
 
         const mainFunction: SemanticFunction = {
             kind: 'function',
             name: 'main',
+            parameters: [],
             body: mainBody,
         }
 
@@ -97,7 +115,7 @@ export class SemanticAnalyzer {
                 ...imp,
                 items: imp.items.map((item) => ({ ...item })),
             })),
-            functions: [mainFunction],
+            functions: [mainFunction, ...userFunctions],
             types,
             objects,
             services,
@@ -111,6 +129,7 @@ export class SemanticAnalyzer {
             this,
             this.dataTypes,
             this.loopDepth,
+            this.currentFunctionReturnType,
         )
     }
 
@@ -120,6 +139,17 @@ export class SemanticAnalyzer {
             this,
             this.dataTypes,
             this.loopDepth + 1,
+            this.currentFunctionReturnType,
+        )
+    }
+
+    private createFunctionChildScope(returnType?: string): SemanticAnalyzer {
+        return new SemanticAnalyzer(
+            this.ast,
+            this,
+            this.dataTypes,
+            0, // reset loop depth — break/continue inside a nested function is not the outer loop's
+            returnType,
         )
     }
 
@@ -153,8 +183,46 @@ export class SemanticAnalyzer {
                 return this.analyzeBreakStatement(stmt)
             case 'continue':
                 return this.analyzeContinueStatement(stmt)
+            case 'return':
+                return this.analyzeReturnStatement(stmt)
             default:
                 return stmt
+        }
+    }
+
+    private analyzeReturnStatement(
+        stmt: ASTReturnStatement,
+    ): SemanticReturnStatement {
+        if (stmt.value === undefined) {
+            if (this.currentFunctionReturnType !== undefined) {
+                throw new Error(
+                    `${stmt.position.line}:${stmt.position.column}:Return statement requires a value of type '${this.currentFunctionReturnType}'`,
+                )
+            }
+
+            return { kind: 'return', position: stmt.position }
+        }
+
+        // Validate the return expression first so specific diagnostics like
+        // unknown identifiers surface before the enclosing function contract.
+        const returnType = this.inferExpressionType(stmt.value)
+
+        if (this.currentFunctionReturnType === undefined) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Cannot return a value from a function without a return type annotation`,
+            )
+        }
+
+        if (returnType && returnType !== this.currentFunctionReturnType) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Return type mismatch: expected '${this.currentFunctionReturnType}' but got '${returnType}'`,
+            )
+        }
+
+        return {
+            kind: 'return',
+            value: this.rewriteExpression(stmt.value),
+            position: stmt.position,
         }
     }
 
@@ -392,14 +460,55 @@ export class SemanticAnalyzer {
         }
     }
 
-    private registerFunctionDeclaration(stmt: ASTFunctionDeclaration) {
-        // Register the function name as a binding so identifiers can refer to it.
-        // Full body analysis is deferred to a later slice.
-        this.bindings.set(stmt.name, {
-            type: 'func',
-            semantics: 'const',
-            declarationPosition: stmt.position,
-        })
+    private analyzeFunctionDeclaration(
+        stmt: ASTFunctionDeclaration,
+    ): SemanticFunction {
+        const bodyAnalyzer = this.createFunctionChildScope(stmt.returnType)
+
+        // Inject parameters as bindings in the function scope.
+        for (const param of stmt.parameters) {
+            bodyAnalyzer.bindings.set(param.name, {
+                type: param.type,
+                semantics: param.semantics ?? 'const',
+                declarationPosition: param.position,
+            })
+        }
+
+        const body = this.analyzeFunctionBody(stmt, bodyAnalyzer)
+
+        return {
+            kind: 'function',
+            name: stmt.name,
+            parameters: stmt.parameters,
+            returnType: stmt.returnType,
+            body,
+        }
+    }
+
+    private analyzeFunctionBody(
+        stmt: ASTFunctionDeclaration,
+        bodyAnalyzer: SemanticAnalyzer,
+    ): SemanticStatement[] {
+        if (stmt.body.kind === 'block') {
+            return stmt.body.statements.map((s) =>
+                bodyAnalyzer.analyzeStatement(s),
+            )
+        }
+
+        // Shorthand `=> expr` body: treat as a single implicit return.
+        if (stmt.returnType === undefined) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Shorthand body '=> expr' requires a return type annotation on function '${stmt.name}'`,
+            )
+        }
+
+        return [
+            bodyAnalyzer.analyzeReturnStatement({
+                kind: 'return',
+                value: stmt.body.value,
+                position: stmt.body.value.position,
+            }),
+        ]
     }
 
     private registerTypeDeclaration(

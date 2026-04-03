@@ -132,6 +132,7 @@ export type ASTStatement =
     | ASTWhileStatement
     | ASTBreakStatement
     | ASTContinueStatement
+    | ASTReturnStatement
     | ASTDataDeclaration
     | ASTFunctionDeclaration
     | ASTObjectDeclaration
@@ -169,6 +170,12 @@ export interface ASTWhileStatement {
     kind: 'while'
     condition: ASTExpression
     body: ASTStatement[]
+    position: ASTPosition
+}
+
+export interface ASTReturnStatement {
+    kind: 'return'
+    value?: ASTExpression
     position: ASTPosition
 }
 

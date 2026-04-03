@@ -565,6 +565,99 @@ describe('SemanticAnalyzer', () => {
     })
 })
 
+describe('Function body analysis', () => {
+    it('produces a SemanticFunction with name and parameters for a simple func', () => {
+        const module = analyze(
+            'func identity(x: truthvalue) -> truthvalue { return x }',
+        )
+        const fn = module.functions.find((f) => f.name === 'identity')
+        expect(fn).toMatchObject({
+            kind: 'function',
+            name: 'identity',
+            returnType: 'truthvalue',
+            parameters: [{ name: 'x', type: 'truthvalue' }],
+        })
+    })
+
+    it('parameter is in scope inside the function body', () => {
+        const module = analyze(
+            'func echo(x: truthvalue) -> truthvalue { return x }',
+        )
+        const fn = module.functions.find((f) => f.name === 'echo')
+        expect(fn?.body).toMatchObject([
+            { kind: 'return', value: { kind: 'identifier', name: 'x' } },
+        ])
+    })
+
+    it('body statements are fully analyzed (var-decl and return)', () => {
+        const module = analyze(
+            'func compute(a: truthvalue) -> truthvalue { const b = a\nreturn b }',
+        )
+        const fn = module.functions.find((f) => f.name === 'compute')
+        expect(fn?.body).toMatchObject([
+            { kind: 'var-decl', name: 'b' },
+            { kind: 'return', value: { kind: 'identifier', name: 'b' } },
+        ])
+    })
+
+    it('rejects unknown identifier inside function body', () => {
+        expect(() => analyze('func bad() { return nope }')).toThrow(
+            "Unknown identifier 'nope'",
+        )
+    })
+
+    it('function names are visible in module scope (forward reference registered)', () => {
+        const module = analyze('func go() { }\nconst x = ambiguous')
+        const fn = module.functions.find((f) => f.name === 'go')
+        expect(fn).toBeDefined()
+    })
+
+    it('shorthand body is lowered to an implicit return statement', () => {
+        const module = analyze('func yes() -> truthvalue => true')
+        const fn = module.functions.find((f) => f.name === 'yes')
+        expect(fn?.body).toMatchObject([
+            { kind: 'return', value: { kind: 'truthvalue', value: 'true' } },
+        ])
+    })
+
+    it('shorthand body without return type annotation is rejected', () => {
+        expect(() => analyze('func bad() => true')).toThrow(
+            "Shorthand body '=> expr' requires a return type annotation",
+        )
+    })
+
+    it('rejects returning a value from a function without a return type annotation', () => {
+        expect(() => analyze('func bad() { return true }')).toThrow(
+            'Cannot return a value from a function without a return type annotation',
+        )
+    })
+
+    it('rejects bare return in a typed function', () => {
+        expect(() => analyze('func bad() -> truthvalue { return }')).toThrow(
+            "Return statement requires a value of type 'truthvalue'",
+        )
+    })
+
+    it('rejects return value whose type does not match the function return type', () => {
+        expect(() => analyze('func bad() -> truthvalue { return 1 }')).toThrow(
+            "Return type mismatch: expected 'truthvalue' but got 'integer'",
+        )
+    })
+
+    it('rejects shorthand return value whose type does not match the function return type', () => {
+        expect(() => analyze('func bad() -> truthvalue => 1')).toThrow(
+            "Return type mismatch: expected 'truthvalue' but got 'integer'",
+        )
+    })
+
+    it('break inside a function body does not see outer loop depth', () => {
+        // break outside a while inside a function body — loop depth is reset to 0.
+        expect(() =>
+            analyze('func f() { while true { break }\nbreak }'),
+        ).toThrow('break is only allowed inside a while loop')
+    })
+})
+
 function analyze(code: string) {
     const stream = new TokenStream(code, 'test.clawr')
     const parser = new Parser(stream)

@@ -24,6 +24,13 @@ export class ExpressionParser {
     private parsePrimaryExpression(): ASTExpression {
         const token = this.stream.peek()
         switch (token?.kind) {
+            case 'INTEGER_LITERAL':
+                this.stream.next()
+                return {
+                    kind: 'integer',
+                    value: token.value,
+                    position: { line: token.line, column: token.column },
+                }
             case 'TRUTH_LITERAL':
                 this.stream.next()
                 return {

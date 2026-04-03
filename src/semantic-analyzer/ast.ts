@@ -1,6 +1,7 @@
 import type {
     ASTDataDeclaration,
     ASTDataLiteral,
+    ASTFunctionParameter,
     ASTIdentifier,
     ASTImportDeclaration,
     ASTIntegerLiteral,
@@ -95,6 +96,12 @@ export interface SemanticContinueStatement {
     position: ASTPosition
 }
 
+export interface SemanticReturnStatement {
+    kind: 'return'
+    value?: SemanticExpression
+    position: ASTPosition
+}
+
 export type SemanticStatement =
     | SemanticVariableDeclaration
     | SemanticPrintStatement
@@ -103,6 +110,7 @@ export type SemanticStatement =
     | SemanticWhileStatement
     | SemanticBreakStatement
     | SemanticContinueStatement
+    | SemanticReturnStatement
 
 export interface SemanticDataDeclaration extends Omit<
     ASTDataDeclaration,
@@ -115,9 +123,13 @@ export interface SemanticDataDeclaration extends Omit<
     >
 }
 
+export type SemanticFunctionParameter = ASTFunctionParameter
+
 export interface SemanticFunction {
     kind: 'function'
     name: string
+    parameters: SemanticFunctionParameter[]
+    returnType?: string
     body: SemanticStatement[]
 }
 

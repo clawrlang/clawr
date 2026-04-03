@@ -56,6 +56,7 @@ export class SemanticAnalyzer {
         private currentOwnerType?: string,
         private currentOwnerKind?: 'object' | 'service',
         private currentMethodMutating = false,
+        private currentFunctionEffectLevel: EffectLevel | null = null,
     ) {
         this.dataTypes = dataTypes ?? parent?.dataTypes ?? new Map()
         this.functionSignatures =
@@ -95,17 +96,26 @@ export class SemanticAnalyzer {
                         parameterTypes: stmt.parameters.map(
                             (param) => param.type,
                         ),
+                        effectLevel: 'external',
                     },
                 )
             }
             if (stmt.kind === 'object-decl') {
                 this.registerTypeDeclaration(stmt)
-                this.registerMethodSignatures(stmt.name, stmt.sections)
+                this.registerMethodSignatures(
+                    'object',
+                    stmt.name,
+                    stmt.sections,
+                )
                 objects.push(stmt)
             }
             if (stmt.kind === 'service-decl') {
                 this.registerTypeDeclaration(stmt)
-                this.registerMethodSignatures(stmt.name, stmt.sections)
+                this.registerMethodSignatures(
+                    'service',
+                    stmt.name,
+                    stmt.sections,
+                )
                 services.push(stmt)
             }
         }
@@ -162,6 +172,7 @@ export class SemanticAnalyzer {
             this.currentOwnerType,
             this.currentOwnerKind,
             this.currentMethodMutating,
+            this.currentFunctionEffectLevel,
         )
     }
 
@@ -176,6 +187,7 @@ export class SemanticAnalyzer {
             this.currentOwnerType,
             this.currentOwnerKind,
             this.currentMethodMutating,
+            this.currentFunctionEffectLevel,
         )
     }
 
@@ -185,6 +197,8 @@ export class SemanticAnalyzer {
         ownerKind?: 'object' | 'service',
         methodMutating = false,
     ): SemanticAnalyzer {
+        // For free functions, infer effect level; for methods, we already know it
+        const inferEffect = ownerType ? null : ('pure' as EffectLevel)
         return new SemanticAnalyzer(
             this.ast,
             this,
@@ -195,6 +209,7 @@ export class SemanticAnalyzer {
             ownerType,
             ownerKind,
             methodMutating,
+            inferEffect,
         )
     }
 
@@ -361,6 +376,11 @@ export class SemanticAnalyzer {
             throw new Error(
                 `${stmt.position.line}:${stmt.position.column}:Object methods may not perform external side-effects (print)`,
             )
+        }
+
+        // Mark free functions as external if they contain print
+        if (this.currentFunctionEffectLevel !== null) {
+            this.currentFunctionEffectLevel = 'external'
         }
 
         const dispatchType = this.inferExpressionType(stmt.value)
@@ -580,6 +600,19 @@ export class SemanticAnalyzer {
 
         const body = this.analyzeFunctionBody(stmt, bodyAnalyzer)
 
+        // Update function signature with inferred effect level for free functions
+        if (
+            !this.currentOwnerType &&
+            bodyAnalyzer.currentFunctionEffectLevel !== null
+        ) {
+            const labels = stmt.parameters.map((param) => param.label ?? '_')
+            const key = buildFunctionSignatureKey(stmt.name, labels)
+            const signature = this.functionSignatures.get(key)
+            if (signature) {
+                signature.effectLevel = bodyAnalyzer.currentFunctionEffectLevel
+            }
+        }
+
         return {
             kind: 'function',
             name: stmt.name,
@@ -634,6 +667,7 @@ export class SemanticAnalyzer {
     }
 
     private registerMethodSignatures(
+        ownerKind: 'object' | 'service',
         ownerType: string,
         sections: ASTObjectDeclaration['sections'],
     ) {
@@ -660,6 +694,10 @@ export class SemanticAnalyzer {
                         arity: callableParams.length,
                         parameterTypes: callableParams.map(
                             (param) => param.type,
+                        ),
+                        effectLevel: this.methodEffectLevel(
+                            ownerKind,
+                            section.kind,
                         ),
                     },
                 )
@@ -718,6 +756,35 @@ export class SemanticAnalyzer {
                 `${position.line}:${position.column}:Object methods may not mutate external state via '${root.name}'`,
             )
         }
+    }
+
+    private validateCallEffects(
+        signature: FunctionSignature,
+        position: { line: number; column: number },
+        callable: { name: string; labels: string[]; ownerType?: string },
+    ): void {
+        const allowed = this.allowedEffectLevel()
+        if (!isEffectLevelAllowed(signature.effectLevel, allowed)) {
+            throw new Error(
+                `${position.line}:${position.column}:Call to '${renderFunctionSignature(callable.name, callable.labels, callable.ownerType)}' is side-effecting (${signature.effectLevel}) and is not allowed in this method context (${allowed})`,
+            )
+        }
+    }
+
+    private allowedEffectLevel(): EffectLevel {
+        if (this.currentOwnerKind === 'service') return 'external'
+        if (this.currentOwnerKind === 'object') {
+            return this.currentMethodMutating ? 'self-mutation' : 'pure'
+        }
+        return 'external'
+    }
+
+    private methodEffectLevel(
+        ownerKind: 'object' | 'service',
+        sectionKind: 'methods' | 'mutating',
+    ): EffectLevel {
+        if (ownerKind === 'service') return 'external'
+        return sectionKind === 'mutating' ? 'self-mutation' : 'pure'
     }
 
     private registerDataDeclaration(stmt: ASTDataDeclaration) {
@@ -1053,6 +1120,20 @@ export class SemanticAnalyzer {
                     )
                 }
 
+                this.validateCallEffects(signature, value.position, {
+                    name: calleeName,
+                    labels: argumentLabels,
+                    ownerType: signature.ownerType,
+                })
+
+                // Update current free function's effect level if calling external functions
+                if (
+                    this.currentFunctionEffectLevel !== null &&
+                    signature.effectLevel === 'external'
+                ) {
+                    this.currentFunctionEffectLevel = 'external'
+                }
+
                 if (value.arguments.length !== signature.arity) {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Function '${calleeName}' expects ${signature.arity} argument(s), got ${value.arguments.length}`,
@@ -1345,6 +1426,8 @@ type VariableBinding = {
 
 type BindingMap = Map<string, VariableBinding>
 
+type EffectLevel = 'pure' | 'self-mutation' | 'external'
+
 type FunctionSignature = {
     name: string
     ownerType?: string
@@ -1353,6 +1436,25 @@ type FunctionSignature = {
     returnType?: string
     arity: number
     parameterTypes: string[]
+    effectLevel: EffectLevel
+}
+
+function effectRank(level: EffectLevel): number {
+    switch (level) {
+        case 'pure':
+            return 0
+        case 'self-mutation':
+            return 1
+        case 'external':
+            return 2
+    }
+}
+
+function isEffectLevelAllowed(
+    actual: EffectLevel,
+    allowed: EffectLevel,
+): boolean {
+    return effectRank(actual) <= effectRank(allowed)
 }
 
 function buildFunctionSignatureKey(

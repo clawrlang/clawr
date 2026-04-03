@@ -11,7 +11,7 @@
 - Object-oriented lowering helpers?
 - `visibility: 'helper'` -> `isHelper: true`?
 - `import`: too TypeScript?
-- Convert `print` statement to a function call
+- Convert `print` statement to a function call (tagged as `external`)
 - e2e test with helper in the same module?
 - Should helper types/functions be visible to all modules in the package/library?
 - **`SemanticAnalyzer`**: Object method may not have external side-effects
@@ -24,3 +24,5 @@
     - No labelled parameters at all require no underscores (`basename(x, y)`)
     - see `mangleCallName`s
 - Parser: Is a method call parsed as target-expr `.` function-call?
+- `object` should be allowed side-effects in `DEBUG` mode
+  - Mark specific debug APIs (that are removed in production) as pure

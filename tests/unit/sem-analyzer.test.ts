@@ -598,6 +598,38 @@ describe('SemanticAnalyzer', () => {
                 'Object methods may not perform external side-effects (print)',
             )
         })
+
+        it('allows calling pure free functions from immutable object methods', () => {
+            const module = analyze(
+                'func ping() -> truthvalue { return true }\nobject Counter { func ok(self: const Counter) -> truthvalue { return ping() } }',
+            )
+
+            expect(module.objects).toMatchObject([{ name: 'Counter' }])
+        })
+
+        it('rejects calling free functions with side effects from immutable object methods', () => {
+            expect(() =>
+                analyze(
+                    'func poke() -> truthvalue { print true\nreturn true }\nobject Counter { func ok(self: const Counter) -> truthvalue { return poke() } }',
+                ),
+            ).toThrow("Call to 'poke()' is side-effecting (external)")
+        })
+
+        it('allows calling pure object methods from mutating object methods', () => {
+            const module = analyze(
+                'object Counter { func id(self: const Counter) -> truthvalue { return true } mutating: func tick(self: ref Counter, c: const Counter) -> truthvalue { return c.id() } }',
+            )
+
+            expect(module.objects).toMatchObject([{ name: 'Counter' }])
+        })
+
+        it('rejects mutating object methods calling service methods (external effects)', () => {
+            expect(() =>
+                analyze(
+                    'service Clock { func now(self: const Clock) -> truthvalue { return true } }\nobject Counter { mutating: func tick(self: ref Counter, c: const Clock) -> truthvalue { return c.now() } }',
+                ),
+            ).toThrow("Call to 'Clock.now()' is side-effecting (external)")
+        })
     })
 })
 

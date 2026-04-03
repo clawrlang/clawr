@@ -145,10 +145,12 @@ export function lowerStructHooks(
 
 export interface ObjectMethodInfo {
     name: string
+    slotName: string
     labels: string[]
     ownerType: string
     visibility: 'public' | 'helper'
     returnType?: string
+    parameterTypes: string[]
 }
 
 export function lowerObjectStruct(
@@ -161,13 +163,6 @@ export function lowerObjectStruct(
         name: field.name,
         type: lowerValueSetType(field.type),
     }))
-
-    // Collect all public methods for this object (including inherited)
-    const publicMethods = getObjectPublicMethods(
-        objectDecl.name,
-        functionSignatures,
-        objects,
-    )
 
     return [
         {
@@ -202,8 +197,11 @@ export function lowerObjectVtable(
     // Create function pointer fields for each public method
     const fields: { name: string; type: string }[] = publicMethods.map(
         (method) => ({
-            name: method.name,
-            type: `${method.returnType ? lowerValueSetType(method.returnType) : 'void'} (*)(${method.ownerType}*)`,
+            name: method.slotName,
+            type: `${method.returnType ? lowerValueSetType(method.returnType) : 'void'} (*)(${[
+                `${method.ownerType}*`,
+                ...method.parameterTypes.map((type) => lowerValueSetType(type)),
+            ].join(', ')})`,
         }),
     )
 
@@ -232,9 +230,9 @@ export function lowerObjectVtableInstance(
     for (const method of publicMethods) {
         // Create a placeholder reference to the actual method implementation
         // In real codegen, this would point to the actual method function pointer
-        methodFields[method.name] = {
+        methodFields[method.slotName] = {
             kind: 'raw-expression',
-            expression: `${method.ownerType}·${method.name}`,
+            expression: `${method.ownerType}·${method.slotName}`,
         }
     }
 
@@ -275,10 +273,12 @@ function getObjectPublicMethods(
             const slotKey = `${signature.name}::${signature.labels.join('|')}`
             methodsBySlot.set(slotKey, {
                 name: signature.name,
+                slotName: mangleCallableName(signature.name, signature.labels),
                 labels: signature.labels,
                 ownerType: signature.ownerType,
                 visibility: signature.visibility,
                 returnType: signature.returnType,
+                parameterTypes: signature.parameterTypes,
             })
         }
     }
@@ -406,4 +406,12 @@ function getObjectDataFields(
 
 function isReferenceCountedType(type: string): boolean {
     return type !== 'truthvalue'
+}
+
+function mangleCallableName(name: string, labels: string[]): string {
+    const suffix = labels
+        .filter((label) => label !== '_')
+        .map((label) => `__${label}`)
+        .join('')
+    return `${name}${suffix}`
 }

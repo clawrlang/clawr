@@ -26,3 +26,6 @@
 - Parser: Is a method call parsed as target-expr `.` function-call?
 - `object` should be allowed side-effects in `DEBUG` mode
   - Mark specific debug APIs (that are removed in production) as pure
+- Methods should not need to declare `self` parameter
+  - `func adjust(self: const Square, down amount: integer)`
+  - `func adjust(down amount: integer)`

@@ -136,7 +136,10 @@ function emitExpression(
             // Handle virtual dispatch via runtime type info lookup.
             if (value.dispatch?.kind === 'virtual' && value.receiver) {
                 const receiverExpr = emitExpression(value.receiver)
-                const methodName = value.dispatch.methodName || 'unknown'
+                const methodName =
+                    value.dispatch.slotName ||
+                    value.dispatch.methodName ||
+                    'unknown'
                 const baseType =
                     value.dispatch.ownerType || value.dispatch.receiverType
                 const args = value.arguments.map(emitExpression).join(', ')

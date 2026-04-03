@@ -1,0 +1,17 @@
+object Shape {
+    func adjust(self: const Shape, down amount: integer) -> integer {
+        return 1
+    }
+}
+
+object Square: Shape {
+    func adjust(self: const Square, down amount: integer) -> integer {
+        return 2
+    }
+}
+
+const square: Square = { }
+print square.adjust(down: 9)
+
+const polymorphShape: Shape = square
+print polymorphShape.adjust(down: 9)

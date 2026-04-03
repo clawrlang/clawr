@@ -30,6 +30,7 @@ export interface SemanticCopyExpression {
 export interface SemanticCallDispatch {
     kind: 'direct' | 'virtual'
     methodName?: string
+    slotName?: string
     ownerType?: string
     receiverType?: string
 }

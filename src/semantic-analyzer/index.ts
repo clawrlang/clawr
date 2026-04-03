@@ -142,7 +142,14 @@ export class SemanticAnalyzer {
         const mainScopedAnalyzer = this.createChildScope()
         for (const stmt of this.ast.body) {
             if (stmt.kind === 'func-decl') {
-                userFunctions.push(this.analyzeFunctionDeclaration(stmt))
+                const analyzed = this.analyzeFunctionDeclaration(stmt)
+                const labels = stmt.parameters.map(
+                    (param) => param.label ?? '_',
+                )
+                userFunctions.push({
+                    ...analyzed,
+                    name: mangleCallableName(stmt.name, labels),
+                })
                 continue
             }
             if (stmt.kind === 'object-decl') {
@@ -599,6 +606,7 @@ export class SemanticAnalyzer {
                     dispatch: this.buildCallDispatch(
                         signature,
                         expr.callee.right.name,
+                        expr.arguments.map((arg) => arg.label ?? '_'),
                         receiverType,
                     ),
                     position: expr.position,
@@ -928,9 +936,14 @@ export class SemanticAnalyzer {
                 )
                 const analyzed =
                     methodAnalyzer.analyzeFunctionDeclaration(method)
+                const callableParams =
+                    method.parameters[0]?.name === 'self'
+                        ? method.parameters.slice(1)
+                        : method.parameters
+                const labels = callableParams.map((param) => param.label ?? '_')
                 methods.push({
                     ...analyzed,
-                    name: `${ownerType}·${method.name}`,
+                    name: `${ownerType}·${mangleCallableName(method.name, labels)}`,
                 })
             }
         }
@@ -1000,13 +1013,16 @@ export class SemanticAnalyzer {
     private buildCallDispatch(
         signature: FunctionSignature,
         methodName: string,
+        labels: string[],
         receiverType: string,
     ): {
         kind: 'direct' | 'virtual'
         methodName?: string
+        slotName?: string
         ownerType?: string
         receiverType?: string
     } {
+        const slotName = mangleCallableName(methodName, labels)
         if (
             signature.ownerKind === 'object' &&
             signature.visibility === 'public'
@@ -1014,6 +1030,7 @@ export class SemanticAnalyzer {
             return {
                 kind: 'virtual',
                 methodName,
+                slotName,
                 ownerType: signature.ownerType,
                 receiverType,
             }
@@ -1022,6 +1039,7 @@ export class SemanticAnalyzer {
         return {
             kind: 'direct',
             methodName,
+            slotName,
             ownerType: signature.ownerType,
             receiverType,
         }
@@ -1928,4 +1946,12 @@ function buildDidYouMeanSignatureHint(
     if (signatures.length === 0) return ''
     const first = signatures[0]
     return ` Did you mean '${renderFunctionSignature(name, first.labels, ownerType ?? first.ownerType)}'?`
+}
+
+function mangleCallableName(name: string, labels: string[]): string {
+    const suffix = labels
+        .filter((label) => label !== '_')
+        .map((label) => `__${label}`)
+        .join('')
+    return `${name}${suffix}`
 }

@@ -22,6 +22,7 @@ export interface CVariableReference {
 export interface CCallDispatch {
     kind: 'direct' | 'virtual'
     methodName?: string
+    slotName?: string
     ownerType?: string
     receiverType?: string
 }

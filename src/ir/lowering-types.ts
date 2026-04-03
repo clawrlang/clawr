@@ -154,6 +154,7 @@ export interface ObjectMethodInfo {
 export function lowerObjectStruct(
     objectDecl: ASTObjectDeclaration,
     functionSignatures: Map<string, SemanticFunctionSignature>,
+    objects: ASTObjectDeclaration[],
 ): CStruct[] {
     const dataFields = getObjectDataFields(objectDecl)
     const loweredDataFields = dataFields.map((field) => ({
@@ -165,6 +166,7 @@ export function lowerObjectStruct(
     const publicMethods = getObjectPublicMethods(
         objectDecl.name,
         functionSignatures,
+        objects,
     )
 
     return [
@@ -187,10 +189,12 @@ export function lowerObjectStruct(
 export function lowerObjectVtable(
     objectDecl: ASTObjectDeclaration,
     functionSignatures: Map<string, SemanticFunctionSignature>,
+    objects: ASTObjectDeclaration[],
 ): CStruct | null {
     const publicMethods = getObjectPublicMethods(
         objectDecl.name,
         functionSignatures,
+        objects,
     )
 
     if (publicMethods.length === 0) return null
@@ -199,7 +203,7 @@ export function lowerObjectVtable(
     const fields: { name: string; type: string }[] = publicMethods.map(
         (method) => ({
             name: method.name,
-            type: `${method.returnType ? lowerValueSetType(method.returnType) : 'void'} (*)(${objectDecl.name}*)`,
+            type: `${method.returnType ? lowerValueSetType(method.returnType) : 'void'} (*)(${method.ownerType}*)`,
         }),
     )
 
@@ -213,10 +217,12 @@ export function lowerObjectVtable(
 export function lowerObjectVtableInstance(
     objectDecl: ASTObjectDeclaration,
     functionSignatures: Map<string, SemanticFunctionSignature>,
+    objects: ASTObjectDeclaration[],
 ): CVariableDeclaration | null {
     const publicMethods = getObjectPublicMethods(
         objectDecl.name,
         functionSignatures,
+        objects,
     )
 
     if (publicMethods.length === 0) return null
@@ -228,7 +234,7 @@ export function lowerObjectVtableInstance(
         // In real codegen, this would point to the actual method function pointer
         methodFields[method.name] = {
             kind: 'raw-expression',
-            expression: `${objectDecl.name}·${method.name}`,
+            expression: `${method.ownerType}·${method.name}`,
         }
     }
 
@@ -247,15 +253,27 @@ export function lowerObjectVtableInstance(
 function getObjectPublicMethods(
     objectName: string,
     functionSignatures: Map<string, SemanticFunctionSignature>,
+    objects: ASTObjectDeclaration[],
 ): ObjectMethodInfo[] {
-    const methods: ObjectMethodInfo[] = []
+    const methodsBySlot = new Map<string, ObjectMethodInfo>()
+    const objectByName = new Map(objects.map((obj) => [obj.name, obj]))
+    const lineage: string[] = []
 
-    for (const signature of functionSignatures.values()) {
-        if (
-            signature.ownerType === objectName &&
-            signature.visibility === 'public'
-        ) {
-            methods.push({
+    let currentName: string | undefined = objectName
+    while (currentName) {
+        lineage.push(currentName)
+        currentName = objectByName.get(currentName)?.supertype
+    }
+
+    lineage.reverse()
+
+    for (const ownerType of lineage) {
+        for (const signature of functionSignatures.values()) {
+            if (signature.ownerType !== ownerType) continue
+            if (signature.visibility !== 'public') continue
+
+            const slotKey = `${signature.name}::${signature.labels.join('|')}`
+            methodsBySlot.set(slotKey, {
                 name: signature.name,
                 labels: signature.labels,
                 ownerType: signature.ownerType,
@@ -265,7 +283,7 @@ function getObjectPublicMethods(
         }
     }
 
-    return methods
+    return [...methodsBySlot.values()]
 }
 
 export function lowerObjectTypeInfo(

@@ -1,0 +1,16 @@
+object Shape {
+    func sides(self: const Shape) -> integer {
+        return 3
+    }
+}
+
+object Triangle: Shape {
+}
+
+ref tri: Triangle = { }
+const directResult: integer = tri.sides()
+print directResult
+
+ref polymorphShape: Shape = tri
+const polymorphResult: integer = polymorphShape.sides()
+print polymorphResult

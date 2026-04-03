@@ -78,14 +78,20 @@ export class IRGenerator {
 
         // Lower object structs and vtables
         const objectStructs = ast.objects.flatMap((obj) =>
-            lowerObjectStruct(obj, ast.functionSignatures),
+            lowerObjectStruct(obj, ast.functionSignatures, ast.objects),
         )
         const objectVtables = ast.objects
-            .map((obj) => lowerObjectVtable(obj, ast.functionSignatures))
+            .map((obj) =>
+                lowerObjectVtable(obj, ast.functionSignatures, ast.objects),
+            )
             .filter((v) => v !== null)
         const objectVtableInstances = ast.objects
             .map((obj) =>
-                lowerObjectVtableInstance(obj, ast.functionSignatures),
+                lowerObjectVtableInstance(
+                    obj,
+                    ast.functionSignatures,
+                    ast.objects,
+                ),
             )
             .filter((v) => v !== null)
 

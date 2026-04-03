@@ -718,7 +718,7 @@ describe('Lowering Tests', () => {
                             kind: 'field-reference',
                             object: {
                                 kind: 'raw-expression',
-                                expression: '(Outer*)self',
+                                expression: '((Outer*)self)',
                             },
                             field: 'inner',
                             deref: true,
@@ -743,7 +743,7 @@ describe('Lowering Tests', () => {
                             kind: 'field-reference',
                             object: {
                                 kind: 'raw-expression',
-                                expression: '(Outer*)self',
+                                expression: '((Outer*)self)',
                             },
                             field: 'inner',
                             deref: true,

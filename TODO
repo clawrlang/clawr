@@ -29,3 +29,4 @@
 - Methods should not need to declare `self` parameter
   - `func adjust(self: const Square, down amount: integer)`
   - `func adjust(down amount: integer)`
+- `print poly.edges` should be an error. Expose `edges` through a getter instead.

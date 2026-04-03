@@ -1,0 +1,10 @@
+object Shape {
+    data: const edges: integer
+}
+
+object Square: Shape {
+}
+
+const square: Square = { edges: 4 }
+const poly: Shape = square
+print poly.edges

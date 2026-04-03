@@ -29,16 +29,31 @@ export function lowerStructLiteralFields(
                   )
               }
 
-              const dataSection = objectDecl.sections.find(
-                  (section) => section.kind === 'data',
+              const objectByName = new Map(
+                  module.objects.map((obj) => [obj.name, obj]),
               )
+              const lineage: typeof module.objects = []
+              let current: (typeof module.objects)[number] | undefined =
+                  objectDecl
+              while (current) {
+                  lineage.push(current)
+                  current = current.supertype
+                      ? objectByName.get(current.supertype)
+                      : undefined
+              }
+              lineage.reverse()
 
-              return new Map(
-                  (dataSection?.fields ?? []).map((field): [string, string] => [
-                      field.name,
-                      field.type,
-                  ]),
-              )
+              const inheritedFieldTypes = new Map<string, string>()
+              for (const declaration of lineage) {
+                  const section = declaration.sections.find(
+                      (candidate) => candidate.kind === 'data',
+                  )
+                  for (const field of section?.fields ?? []) {
+                      inheritedFieldTypes.set(field.name, field.type)
+                  }
+              }
+
+              return inheritedFieldTypes
           })()
 
     return Object.entries(fields)

@@ -98,7 +98,7 @@ export function lowerStructHooks(
     const hooks = structHookNames(stmt.name)
     const selfExpr: CExpression = {
         kind: 'raw-expression',
-        expression: `(${stmt.name}*)self`,
+        expression: `((${stmt.name}*)self)`,
     }
 
     return [
@@ -158,7 +158,7 @@ export function lowerObjectStruct(
     functionSignatures: Map<string, SemanticFunctionSignature>,
     objects: ASTObjectDeclaration[],
 ): CStruct[] {
-    const dataFields = getObjectDataFields(objectDecl)
+    const dataFields = getObjectAllDataFields(objectDecl, objects)
     const loweredDataFields = dataFields.map((field) => ({
         name: field.name,
         type: lowerValueSetType(field.type),
@@ -288,8 +288,13 @@ function getObjectPublicMethods(
 
 export function lowerObjectTypeInfo(
     objectDecl: ASTObjectDeclaration,
+    functionSignatures: Map<string, SemanticFunctionSignature>,
+    objects: ASTObjectDeclaration[],
 ): CVariableDeclaration {
     const hookNames = structHookNames(objectDecl.name)
+    const hasPublicMethods =
+        getObjectPublicMethods(objectDecl.name, functionSignatures, objects)
+            .length > 0
 
     return {
         kind: 'var-decl',
@@ -326,7 +331,9 @@ export function lowerObjectTypeInfo(
                         },
                         vtable: {
                             kind: 'raw-expression',
-                            expression: `&${objectDecl.name}ˇvtableInstance`,
+                            expression: hasPublicMethods
+                                ? `&${objectDecl.name}ˇvtableInstance`
+                                : 'NULL',
                         },
                     },
                 },
@@ -338,14 +345,15 @@ export function lowerObjectTypeInfo(
 
 export function lowerObjectHooks(
     objectDecl: ASTObjectDeclaration,
+    objects: ASTObjectDeclaration[],
 ): CFunctionDeclaration[] {
-    const rcFields = getObjectDataFields(objectDecl).filter((field) =>
-        isReferenceCountedType(field.type),
+    const rcFields = getObjectAllDataFields(objectDecl, objects).filter(
+        (field) => isReferenceCountedType(field.type),
     )
     const hooks = structHookNames(objectDecl.name)
     const selfExpr: CExpression = {
         kind: 'raw-expression',
-        expression: `(${objectDecl.name}*)self`,
+        expression: `((${objectDecl.name}*)self)`,
     }
 
     return [
@@ -388,7 +396,7 @@ export function lowerObjectHooks(
     ]
 }
 
-function getObjectDataFields(
+function getObjectOwnDataFields(
     objectDecl: ASTObjectDeclaration,
 ): ASTObjectDeclaration['sections'][number] extends infer S
     ? S extends { kind: 'data'; fields: infer F }
@@ -402,6 +410,36 @@ function getObjectDataFields(
             section.kind === 'data',
     )
     return (dataSection?.fields ?? []) as any
+}
+
+function getObjectAllDataFields(
+    objectDecl: ASTObjectDeclaration,
+    objects: ASTObjectDeclaration[],
+): Array<{ name: string; type: string }> {
+    const objectByName = new Map(objects.map((obj) => [obj.name, obj]))
+    const lineage: ASTObjectDeclaration[] = []
+
+    let current: ASTObjectDeclaration | undefined = objectDecl
+    while (current) {
+        lineage.push(current)
+        current = current.supertype
+            ? objectByName.get(current.supertype)
+            : undefined
+    }
+
+    lineage.reverse()
+
+    const fieldsByName = new Map<string, { name: string; type: string }>()
+    for (const declaration of lineage) {
+        for (const field of getObjectOwnDataFields(declaration)) {
+            fieldsByName.set(field.name, {
+                name: field.name,
+                type: field.type,
+            })
+        }
+    }
+
+    return [...fieldsByName.values()]
 }
 
 function isReferenceCountedType(type: string): boolean {

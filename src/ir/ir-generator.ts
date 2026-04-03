@@ -73,7 +73,7 @@ export class IRGenerator {
             lowerStructHooks(stmt),
         )
         const objectHookFunctions = ast.objects.flatMap((obj) =>
-            lowerObjectHooks(obj),
+            lowerObjectHooks(obj, ast.objects),
         )
 
         // Lower object structs and vtables
@@ -104,7 +104,13 @@ export class IRGenerator {
             variables: [
                 ...ast.types.map((stmt) => lowerStructTypeInfo(stmt)),
                 ...objectVtableInstances,
-                ...ast.objects.map((obj) => lowerObjectTypeInfo(obj)),
+                ...ast.objects.map((obj) =>
+                    lowerObjectTypeInfo(
+                        obj,
+                        ast.functionSignatures,
+                        ast.objects,
+                    ),
+                ),
             ],
             functions: [
                 ...ast.functions.map((fn) => this.lowerFunction(fn)),

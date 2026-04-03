@@ -732,9 +732,24 @@ export class SemanticAnalyzer {
         typeKind: 'object' | 'service',
         stmt: ASTObjectDeclaration | ASTServiceDeclaration,
     ) {
-        // Register the type name in dataTypes with an empty binding map.
-        // Full method resolution is deferred to a later slice.
-        this.dataTypes.set(stmt.name, new Map())
+        const dataSection = stmt.sections.find(
+            (section): section is Extract<typeof section, { kind: 'data' }> =>
+                section.kind === 'data',
+        )
+        const fields = new Map(
+            (dataSection?.fields ?? []).map((field) => [
+                field.name,
+                {
+                    type: field.type,
+                    semantics: field.semantics ?? 'mut',
+                    declarationPosition: field.position,
+                },
+            ]),
+        )
+
+        // Register the type name so it can be used in variable declarations,
+        // literals, and field accesses.
+        this.dataTypes.set(stmt.name, fields)
         this.typeKinds.set(stmt.name, typeKind)
 
         if (
@@ -1364,7 +1379,7 @@ export class SemanticAnalyzer {
     }
 
     private validateDataLiteral(value: ASTDataLiteral, expectedType: string) {
-        const expectedFields = this.lookupDataType(expectedType)
+        const expectedFields = this.lookupAllTypeFields(expectedType)
         if (!expectedFields) return
 
         for (const [fieldName, fieldInfo] of expectedFields.entries()) {
@@ -1561,13 +1576,15 @@ export class SemanticAnalyzer {
                         `${value.position.line}:${value.position.column}:Cannot infer type for dot access object`,
                     )
                 }
-                const fields = this.lookupDataType(objectType)
-                if (!fields) {
+                if (!this.lookupDataType(objectType)) {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Cannot resolve field '${value.right.name}' on non-data type '${objectType}'`,
                     )
                 }
-                const fieldInfo = fields.get(value.right.name)
+                const fieldInfo = this.lookupFieldInfo(
+                    objectType,
+                    value.right.name,
+                )
                 if (!fieldInfo) {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Unknown field '${value.right.name}' on data type '${objectType}'`,
@@ -1645,9 +1662,10 @@ export class SemanticAnalyzer {
                 if (value.right.kind !== 'identifier') return null
                 const objectType = this.inferExpressionType(value.left)
                 if (!objectType) return null
-                const fields = this.lookupDataType(objectType)
-                if (!fields) return null
-                const fieldInfo = fields.get(value.right.name)
+                const fieldInfo = this.lookupFieldInfo(
+                    objectType,
+                    value.right.name,
+                )
                 if (!fieldInfo) return null
                 return fieldInfo.semantics
             }
@@ -1870,6 +1888,40 @@ export class SemanticAnalyzer {
         }
 
         return false
+    }
+
+    private lookupAllTypeFields(typeName: string): BindingMap | undefined {
+        const directFields = this.lookupDataType(typeName)
+        const kind = this.lookupTypeKind(typeName)
+
+        if (kind !== 'object') return directFields
+
+        const merged = new Map<string, VariableBinding>()
+        const lineage: string[] = []
+        let current: string | undefined = typeName
+        while (current) {
+            lineage.push(current)
+            current = this.lookupObjectSupertype(current)
+        }
+
+        lineage.reverse()
+        for (const name of lineage) {
+            const fields = this.lookupDataType(name)
+            if (!fields) continue
+            for (const [fieldName, fieldInfo] of fields.entries()) {
+                merged.set(fieldName, fieldInfo)
+            }
+        }
+
+        return merged
+    }
+
+    private lookupFieldInfo(
+        typeName: string,
+        fieldName: string,
+    ): VariableBinding | undefined {
+        const allFields = this.lookupAllTypeFields(typeName)
+        return allFields?.get(fieldName)
     }
 }
 

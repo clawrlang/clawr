@@ -67,6 +67,7 @@ export interface CFunctionCall {
     name: string
     arguments: CExpression[]
     dispatch?: CCallDispatch
+    receiver?: CExpression // For virtual dispatch calls, the receiver object
 }
 
 export interface CAssignment {

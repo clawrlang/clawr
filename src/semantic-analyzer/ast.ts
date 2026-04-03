@@ -155,6 +155,22 @@ export interface SemanticFunction {
     body: SemanticStatement[]
 }
 
+export type SemanticTypeKind = 'data' | 'object' | 'service'
+
+export interface SemanticFunctionSignature {
+    name: string
+    ownerType?: string
+    ownerKind?: 'object' | 'service'
+    visibility: 'public' | 'helper'
+    labels: string[]
+    returnType?: string
+    returnSemantics?: 'const' | 'ref'
+    arity: number
+    parameterTypes: string[]
+    parameterSemantics: Array<'const' | 'mut' | 'ref'>
+    effectLevel: 'pure' | 'self-mutation' | 'external'
+}
+
 export interface SemanticModule {
     imports: SemanticImportDeclaration[]
     functions: SemanticFunction[]
@@ -162,4 +178,6 @@ export interface SemanticModule {
     objects: ASTObjectDeclaration[]
     services: ASTServiceDeclaration[]
     globals: SemanticVariableDeclaration[]
+    typeKinds: Map<string, SemanticTypeKind>
+    functionSignatures: Map<string, SemanticFunctionSignature>
 }

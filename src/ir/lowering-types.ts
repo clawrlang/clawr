@@ -1,7 +1,9 @@
 import type {
     SemanticDataDeclaration,
     SemanticVariableDeclaration,
+    SemanticFunctionSignature,
 } from '../semantic-analyzer'
+import type { ASTObjectDeclaration } from '../ast'
 import type {
     CExpression,
     CFunctionDeclaration,
@@ -137,4 +139,122 @@ export function lowerStructHooks(
             })),
         },
     ]
+}
+
+// ---- Object lowering ----
+
+export interface ObjectMethodInfo {
+    name: string
+    labels: string[]
+    ownerType: string
+    visibility: 'public' | 'helper'
+}
+
+export function lowerObjectStruct(
+    objectDecl: ASTObjectDeclaration,
+    functionSignatures: Map<string, SemanticFunctionSignature>,
+): CStruct {
+    // Collect all public methods for this object (including inherited)
+    const publicMethods = getObjectPublicMethods(
+        objectDecl.name,
+        functionSignatures,
+    )
+
+    // If there are public methods, add a vtable pointer field
+    const fields: { name: string; type: string }[] = []
+    if (publicMethods.length > 0) {
+        fields.push({
+            name: '__vtable',
+            type: `${objectDecl.name}ˇVtable*`,
+        })
+    }
+
+    return {
+        kind: 'struct',
+        name: objectDecl.name,
+        fields,
+    }
+}
+
+export function lowerObjectVtable(
+    objectDecl: ASTObjectDeclaration,
+    functionSignatures: Map<string, SemanticFunctionSignature>,
+): CStruct | null {
+    const publicMethods = getObjectPublicMethods(
+        objectDecl.name,
+        functionSignatures,
+    )
+
+    if (publicMethods.length === 0) return null
+
+    // Create function pointer fields for each public method
+    const fields: { name: string; type: string }[] = publicMethods.map(
+        (method) => ({
+            name: method.name,
+            type: `int (*)(${objectDecl.name}*)`, // Simplified; actual signature would be more complex
+        }),
+    )
+
+    return {
+        kind: 'struct',
+        name: `${objectDecl.name}ˇVtable`,
+        fields,
+    }
+}
+
+export function lowerObjectVtableInstance(
+    objectDecl: ASTObjectDeclaration,
+    functionSignatures: Map<string, SemanticFunctionSignature>,
+): CVariableDeclaration | null {
+    const publicMethods = getObjectPublicMethods(
+        objectDecl.name,
+        functionSignatures,
+    )
+
+    if (publicMethods.length === 0) return null
+
+    // Create global vtable instance with method pointers
+    const methodFields: { [key: string]: CExpression } = {}
+    for (const method of publicMethods) {
+        // Create a placeholder reference to the actual method implementation
+        // In real codegen, this would point to the actual method function pointer
+        methodFields[method.name] = {
+            kind: 'raw-expression',
+            expression: `${objectDecl.name}ˇ${method.name}`,
+        }
+    }
+
+    return {
+        kind: 'var-decl',
+        type: `${objectDecl.name}ˇVtable`,
+        name: `${objectDecl.name}ˇvtableInstance`,
+        value: {
+            kind: 'struct-init',
+            fields: methodFields,
+        },
+        modifiers: ['static', 'const'],
+    }
+}
+
+function getObjectPublicMethods(
+    objectName: string,
+    functionSignatures: Map<string, SemanticFunctionSignature>,
+): ObjectMethodInfo[] {
+    const methods: ObjectMethodInfo[] = []
+
+    for (const signature of functionSignatures.values()) {
+        if (
+            signature.ownerType === objectName &&
+            signature.visibility === 'public'
+        ) {
+            methods.push({
+                name: signature.name,
+                labels: signature.labels,
+                ownerType: signature.ownerType,
+                visibility: signature.visibility,
+            })
+        }
+    }
+
+    return methods
 }

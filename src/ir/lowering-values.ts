@@ -95,6 +95,16 @@ export function lowerValue(
                     }
                     return lowerValue(arg.value)
                 }),
+                // For virtual dispatch, preserve the receiver expression (first argument)
+                receiver:
+                    val.dispatch?.kind === 'virtual' && val.arguments.length > 0
+                        ? lowerValue(
+                              val.arguments[0].value as Exclude<
+                                  SemanticExpression,
+                                  ASTDataLiteral
+                              >,
+                          )
+                        : undefined,
             }
         case 'field-access':
             return {

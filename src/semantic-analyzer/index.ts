@@ -39,6 +39,8 @@ export type {
     SemanticExpression,
     SemanticValueSet,
     SemanticVariableDeclaration,
+    SemanticTypeKind,
+    SemanticFunctionSignature,
 } from './ast'
 
 export class SemanticAnalyzer {
@@ -171,6 +173,8 @@ export class SemanticAnalyzer {
             objects,
             services,
             globals: [],
+            typeKinds: this.typeKinds,
+            functionSignatures: this.functionSignatures,
         }
     }
 

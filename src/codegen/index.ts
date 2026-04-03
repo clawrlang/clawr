@@ -120,6 +120,15 @@ function emitExpression(
         case 'var-ref':
             return value.name
         case 'function-call':
+            // Handle virtual dispatch: emit receiver->__vtable->methodName(receiver, ...args)
+            if (value.dispatch?.kind === 'virtual' && value.receiver) {
+                const receiverExpr = emitExpression(value.receiver)
+                const methodName = value.dispatch.methodName || 'unknown'
+                const args = value.arguments.map(emitExpression).join(', ')
+                return `${receiverExpr}->__vtable->${methodName}(${args})`
+            }
+
+            // Direct dispatch: emit functionName(args)
             return (
                 `${value.name}(` +
                 value.arguments.map(emitExpression).join(', ') +

@@ -110,6 +110,8 @@ function toModule(program: SemanticProgramFixture): SemanticModule {
         objects: [],
         services: [],
         globals: [],
+        typeKinds: new Map(),
+        functionSignatures: new Map(),
     }
 }
 

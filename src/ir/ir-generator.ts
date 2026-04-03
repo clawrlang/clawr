@@ -16,6 +16,9 @@ import {
     lowerStructHooks,
     lowerStructTypeInfo,
     lowerType,
+    lowerObjectStruct,
+    lowerObjectVtable,
+    lowerObjectVtableInstance,
 } from './lowering-types'
 import {
     lowerOwnedValue,
@@ -67,9 +70,29 @@ export class IRGenerator {
             lowerStructHooks(stmt),
         )
 
+        // Lower object structs and vtables
+        const objectStructs = ast.objects.map((obj) =>
+            lowerObjectStruct(obj, ast.functionSignatures),
+        )
+        const objectVtables = ast.objects
+            .map((obj) => lowerObjectVtable(obj, ast.functionSignatures))
+            .filter((v) => v !== null)
+        const objectVtableInstances = ast.objects
+            .map((obj) =>
+                lowerObjectVtableInstance(obj, ast.functionSignatures),
+            )
+            .filter((v) => v !== null)
+
         return {
-            structs: ast.types.flatMap((stmt) => lowerStruct(stmt)),
-            variables: ast.types.map((stmt) => lowerStructTypeInfo(stmt)),
+            structs: [
+                ...ast.types.flatMap((stmt) => lowerStruct(stmt)),
+                ...objectStructs,
+                ...objectVtables,
+            ],
+            variables: [
+                ...ast.types.map((stmt) => lowerStructTypeInfo(stmt)),
+                ...objectVtableInstances,
+            ],
             functions: [
                 ...ast.functions.map((fn) => this.lowerFunction(fn)),
                 ...dataHookFunctions,

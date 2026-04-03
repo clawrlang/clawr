@@ -11,5 +11,18 @@
 - Object-oriented lowering helpers?
 - `visibility: 'helper'` -> `isHelper: true`?
 - `import`: too TypeScript?
+- Convert `print` statement to a function call
 - e2e test with helper in the same module?
-- Should helper be visible to all modules in the package/library?
+- Should helper types/functions be visible to all modules in the package/library?
+- **`SemanticAnalyzer`**: Immutable methods must have return value
+- **`SemanticAnalyzer`**: Immutable methods may not assign to a field
+- **`SemanticAnalyzer`**: Object method may not have external side-effects
+- **`IRGenerator`**: does it lower names correctly?
+  - Use `·` in function names to indicate instance method
+  - Use `¸` in static member names (companion methods)
+  - Use `ˇ` in runtime artefacts (`ˇtype`, `tempˇ0` etc)
+  - Include labels in function names (`basename_label1_label2(x, y)`)
+    - Unlabelled parameters are empty between underscores (`basename__label(x, y)`)
+    - No labelled parameters at all require no underscores (`basename(x, y)`)
+    - see `mangleCallName`s
+- Parser: Is a method call parsed as target-expr `.` function-call?

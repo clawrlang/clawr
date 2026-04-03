@@ -719,6 +719,16 @@ describe('SemanticAnalyzer', () => {
                 "2:36:Override 'Student.id()' must match effect level 'pure', got 'self-mutation'",
             )
         })
+
+        it('rejects overrides with incompatible return semantics', () => {
+            expect(() =>
+                analyze(
+                    'object Entity { func id(self: const Entity) -> ref Entity { return { } } }\nobject Student: Entity { func id(self: const Student) -> Entity { return { } } }',
+                ),
+            ).toThrow(
+                "2:26:Override 'Student.id()' must match return semantics 'ref', got 'unique'",
+            )
+        })
     })
 
     describe('service reference restrictions', () => {
@@ -766,7 +776,7 @@ describe('SemanticAnalyzer', () => {
 
             expect(
                 module.functions.find((f) => f.name === 'current'),
-            ).toBeDefined()
+            ).toMatchObject({ returnType: 'Clock', returnSemantics: 'ref' })
         })
 
         it('rejects service fields inside data and object types', () => {
@@ -815,6 +825,17 @@ describe('Function body analysis', () => {
             name: 'identity',
             returnType: 'truthvalue',
             parameters: [{ name: 'x', type: 'truthvalue' }],
+        })
+    })
+
+    it('preserves return semantics on semantic functions', () => {
+        const module = analyze(
+            'service Clock { }\nfunc current() -> ref Clock { return { } }',
+        )
+        const fn = module.functions.find((f) => f.name === 'current')
+        expect(fn).toMatchObject({
+            returnType: 'Clock',
+            returnSemantics: 'ref',
         })
     })
 

@@ -99,6 +99,7 @@ export class SemanticAnalyzer {
                         visibility: stmt.visibility,
                         labels,
                         returnType: stmt.returnType,
+                        returnSemantics: stmt.returnSemantics,
                         arity: stmt.parameters.length,
                         parameterTypes: stmt.parameters.map(
                             (param) => param.type,
@@ -652,6 +653,7 @@ export class SemanticAnalyzer {
             name: stmt.name,
             parameters: stmt.parameters,
             returnType: stmt.returnType,
+            returnSemantics: stmt.returnSemantics,
             body,
         }
     }
@@ -790,6 +792,12 @@ export class SemanticAnalyzer {
                     )
                 }
 
+                if (method.returnSemantics !== baseSignature.returnSemantics) {
+                    throw new Error(
+                        `${method.position.line}:${method.position.column}:Override '${overrideName}' must match return semantics '${baseSignature.returnSemantics ?? 'unique'}', got '${method.returnSemantics ?? 'unique'}'`,
+                    )
+                }
+
                 if (
                     callableParams.length !==
                         baseSignature.parameterTypes.length ||
@@ -843,6 +851,7 @@ export class SemanticAnalyzer {
                         visibility: method.visibility,
                         labels,
                         returnType: method.returnType,
+                        returnSemantics: method.returnSemantics,
                         arity: callableParams.length,
                         parameterTypes: callableParams.map(
                             (param) => param.type,
@@ -1785,6 +1794,7 @@ type FunctionSignature = {
     visibility: 'public' | 'helper'
     labels: string[]
     returnType?: string
+    returnSemantics?: 'const' | 'ref'
     arity: number
     parameterTypes: string[]
     effectLevel: EffectLevel

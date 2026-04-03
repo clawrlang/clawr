@@ -143,6 +143,7 @@ export interface SemanticFunction {
     name: string
     parameters: SemanticFunctionParameter[]
     returnType?: string
+    returnSemantics?: 'const' | 'ref'
     body: SemanticStatement[]
 }
 

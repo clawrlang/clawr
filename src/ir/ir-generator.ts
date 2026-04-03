@@ -97,8 +97,8 @@ export class IRGenerator {
             ],
             variables: [
                 ...ast.types.map((stmt) => lowerStructTypeInfo(stmt)),
-                ...ast.objects.map((obj) => lowerObjectTypeInfo(obj)),
                 ...objectVtableInstances,
+                ...ast.objects.map((obj) => lowerObjectTypeInfo(obj)),
             ],
             functions: [
                 ...ast.functions.map((fn) => this.lowerFunction(fn)),
@@ -349,22 +349,6 @@ export class IRGenerator {
             },
             ...this.lowerOwnershipPrefix(stmt.ownership),
         ]
-
-        if (this.module.typeKinds.get(structTypeName) === 'object') {
-            statements.push({
-                kind: 'assign',
-                target: {
-                    kind: 'field-reference',
-                    object: { kind: 'var-ref', name: stmt.name },
-                    field: '__vtable',
-                    deref: true,
-                },
-                value: {
-                    kind: 'raw-expression',
-                    expression: `&${structTypeName}ˇvtableInstance`,
-                },
-            })
-        }
 
         return statements
     }

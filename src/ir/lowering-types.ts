@@ -167,22 +167,12 @@ export function lowerObjectStruct(
         functionSignatures,
     )
 
-    // If there are public methods, add a vtable pointer field
-    const fields: { name: string; type: string }[] = []
-    if (publicMethods.length > 0) {
-        fields.push({
-            name: '__vtable',
-            type: `const ${objectDecl.name}ˇVtable*`,
-        })
-    }
-
     return [
         {
             kind: 'struct',
             name: objectDecl.name,
             fields: [
                 { name: 'header', type: '__rc_header' },
-                ...fields,
                 ...loweredDataFields,
             ],
         },
@@ -215,7 +205,7 @@ export function lowerObjectVtable(
 
     return {
         kind: 'struct',
-        name: `${objectDecl.name}ˇVtable`,
+        name: `${objectDecl.name}ˇvtable`,
         fields,
     }
 }
@@ -244,7 +234,7 @@ export function lowerObjectVtableInstance(
 
     return {
         kind: 'var-decl',
-        type: `${objectDecl.name}ˇVtable`,
+        type: `${objectDecl.name}ˇvtable`,
         name: `${objectDecl.name}ˇvtableInstance`,
         value: {
             kind: 'struct-init',
@@ -290,20 +280,35 @@ export function lowerObjectTypeInfo(
         value: {
             kind: 'struct-init',
             fields: {
-                data_type: {
+                polymorphic_type: {
                     kind: 'struct-init',
                     fields: {
-                        size: {
-                            kind: 'raw-expression',
-                            expression: `sizeof(${objectDecl.name})`,
+                        data: {
+                            kind: 'struct-init',
+                            fields: {
+                                size: {
+                                    kind: 'raw-expression',
+                                    expression: `sizeof(${objectDecl.name})`,
+                                },
+                                retain_nested_fields: {
+                                    kind: 'raw-expression',
+                                    expression: hookNames.retain,
+                                },
+                                release_nested_fields: {
+                                    kind: 'raw-expression',
+                                    expression: hookNames.release,
+                                },
+                            },
                         },
-                        retain_nested_fields: {
+                        super: {
                             kind: 'raw-expression',
-                            expression: hookNames.retain,
+                            expression: objectDecl.supertype
+                                ? `&${objectDecl.supertype}ˇtype.polymorphic_type`
+                                : 'NULL',
                         },
-                        release_nested_fields: {
+                        vtable: {
                             kind: 'raw-expression',
-                            expression: hookNames.release,
+                            expression: `&${objectDecl.name}ˇvtableInstance`,
                         },
                     },
                 },

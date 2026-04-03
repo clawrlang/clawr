@@ -133,12 +133,19 @@ function emitExpression(
         case 'var-ref':
             return value.name
         case 'function-call':
-            // Handle virtual dispatch: emit receiver->__vtable->methodName(receiver, ...args)
+            // Handle virtual dispatch via runtime type info lookup.
             if (value.dispatch?.kind === 'virtual' && value.receiver) {
                 const receiverExpr = emitExpression(value.receiver)
                 const methodName = value.dispatch.methodName || 'unknown'
+                const baseType =
+                    value.dispatch.ownerType || value.dispatch.receiverType
                 const args = value.arguments.map(emitExpression).join(', ')
-                return `${receiverExpr}->__vtable->${methodName}(${args})`
+                if (!baseType) {
+                    throw new Error(
+                        'Virtual dispatch requires ownerType or receiverType metadata',
+                    )
+                }
+                return `VTABLE(${receiverExpr}, ${baseType})->${methodName}(${args})`
             }
 
             // Direct dispatch: emit functionName(args)

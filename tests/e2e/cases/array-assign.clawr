@@ -1,0 +1,5 @@
+mut xs: [integer] = [10, 20, 30]
+xs[1] = 99
+
+const x: integer = xs[1]
+print x

@@ -27,6 +27,7 @@ import type {
 } from './ast'
 
 export type {
+    SemanticArrayIndexExpression,
     SemanticAssignment,
     SemanticDataDeclaration,
     SemanticFieldAccess,

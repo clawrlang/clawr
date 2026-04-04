@@ -5,6 +5,7 @@ import type {
     SemanticModule,
     SemanticOwnershipEffects,
     SemanticAssignment,
+    SemanticArrayIndexExpression,
     SemanticFieldAccess,
     SemanticPrintStatement,
     SemanticStatement,
@@ -66,6 +67,10 @@ type IdentifierAssignment = LowerableAssignment & {
 
 type FieldAccessAssignment = LowerableAssignment & {
     target: SemanticFieldAccess
+}
+
+type ArrayIndexAssignment = LowerableAssignment & {
+    target: SemanticArrayIndexExpression
 }
 
 type LowerablePrintStatement = SemanticPrintStatement & {
@@ -489,6 +494,10 @@ export class IRGenerator {
             return this.lowerFieldAccessAssignment(stmt)
         }
 
+        if (this.isArrayIndexAssignment(stmt)) {
+            return this.lowerArrayIndexAssignment(stmt)
+        }
+
         throw new Error('Unsupported assignment target kind')
     }
 
@@ -531,6 +540,25 @@ export class IRGenerator {
         stmt: LowerableAssignment,
     ): stmt is FieldAccessAssignment {
         return stmt.target.kind === 'field-access'
+    }
+
+    private isArrayIndexAssignment(
+        stmt: LowerableAssignment,
+    ): stmt is ArrayIndexAssignment {
+        return stmt.target.kind === 'array-index'
+    }
+
+    private lowerArrayIndexAssignment(
+        stmt: ArrayIndexAssignment,
+    ): CStatement[] {
+        return [
+            ...this.lowerOwnershipPrefix(stmt.ownership),
+            {
+                kind: 'assign',
+                target: lowerValue(stmt.target),
+                value: lowerOwnedValue(stmt.value, stmt.ownership),
+            },
+        ]
     }
 
     private isLowerableAssignment(

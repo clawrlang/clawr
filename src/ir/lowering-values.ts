@@ -5,6 +5,7 @@ import type {
     SemanticOwnershipEffects,
 } from '../semantic-analyzer'
 import type { CExpression } from '.'
+import { lowerValueSetType } from './lowering-types'
 
 export function lowerStructLiteralFields(
     module: SemanticModule,
@@ -195,6 +196,20 @@ export function lowerValue(
             throw new Error(
                 `Unsupported binary operator '${val.operator}' during lowering`,
             )
+        case 'array-index':
+            if (val.array.kind === 'data-literal') {
+                throw new Error('Array index base cannot be data-literal')
+            }
+            if (val.index.kind !== 'integer') {
+                throw new Error(
+                    'Array indexing currently requires an integer literal index in lowering',
+                )
+            }
+
+            return {
+                kind: 'raw-expression',
+                expression: `ARRAY_ELEMENT_AT(${val.index.value.toString()}, ${renderInlineExpression(lowerValue(val.array as Exclude<SemanticExpression, ASTDataLiteral>))}, ${lowerValueSetType(val.elementType)})`,
+            }
         case 'array-literal':
             throw new Error('Array literals are not supported during lowering')
         case 'copy':
@@ -207,6 +222,40 @@ export function lowerValue(
         default:
             throw new Error(
                 `Unknown AST value kind ${(val as never as { kind: string }).kind}`,
+            )
+    }
+}
+
+function renderInlineExpression(expression: CExpression): string {
+    switch (expression.kind) {
+        case 'var-ref':
+            return expression.name
+        case 'string':
+            return `"${expression.value}"`
+        case 'raw-expression':
+            return expression.expression
+        case 'function-call':
+            return `${expression.name}(${expression.arguments
+                .map(renderInlineExpression)
+                .join(', ')})`
+        case 'field-reference': {
+            const object = renderInlineExpression(expression.object)
+            return expression.deref
+                ? `${object}->${expression.field}`
+                : `${object}.${expression.field}`
+        }
+        case 'struct-init': {
+            const fields = Object.entries(expression.fields)
+                .map(
+                    ([name, value]) =>
+                        `. ${name} = ${renderInlineExpression(value)}`,
+                )
+                .join(', ')
+            return `{ ${fields} }`
+        }
+        default:
+            throw new Error(
+                `Unsupported inline expression kind '${(expression as never as { kind: string }).kind}'`,
             )
     }
 }

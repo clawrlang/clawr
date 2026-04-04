@@ -74,6 +74,20 @@ export class ExpressionParser {
                 continue
             }
 
+            if (this.stream.isNext('PUNCTUATION', '[')) {
+                const lbracket = this.stream.expect('PUNCTUATION', '[')
+                const indexExpr = this.parse()
+                this.stream.expect('PUNCTUATION', ']')
+                expr = {
+                    kind: 'binary',
+                    operator: '[]',
+                    left: expr,
+                    right: indexExpr,
+                    position: { line: lbracket.line, column: lbracket.column },
+                }
+                continue
+            }
+
             break
         }
         return expr

@@ -967,4 +967,17 @@ describe('Expression precedence tests', () => {
             },
         })
     })
+
+    it('parses array indexing as postfix expression', () => {
+        const ast = parse('const x = xs[1]')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            value: {
+                kind: 'binary',
+                operator: '[]',
+                left: { kind: 'identifier', name: 'xs' },
+                right: { kind: 'integer', value: 1n },
+            },
+        })
+    })
 })

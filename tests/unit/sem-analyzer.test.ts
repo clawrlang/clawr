@@ -360,6 +360,34 @@ describe('SemanticAnalyzer', () => {
                 '1:12:Cannot infer type for empty array literal; add an explicit annotation',
             )
         })
+
+        it('infers indexed array element type', () => {
+            const module = analyze(
+                'const xs: [integer] = [1, 2]\nconst x = xs[1]',
+            )
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 'xs',
+                    valueSet: { type: '[integer]' },
+                },
+                {
+                    kind: 'var-decl',
+                    name: 'x',
+                    valueSet: { type: 'integer' },
+                    value: {
+                        kind: 'array-index',
+                        elementType: 'integer',
+                    },
+                },
+            ])
+        })
+
+        it('rejects non-integer array index expressions', () => {
+            expect(() =>
+                analyze('const xs: [integer] = [1, 2]\nconst x = xs[true]'),
+            ).toThrow("2:13:Array index must be integer, got 'truthvalue'")
+        })
     })
 
     describe('field access', () => {

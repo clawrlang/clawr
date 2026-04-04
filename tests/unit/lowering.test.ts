@@ -291,6 +291,45 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
+    it('lowers array index reads to ARRAY_ELEMENT_AT dereference', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    valueSet: { type: 'integer' },
+                    value: {
+                        kind: 'array-index',
+                        array: {
+                            kind: 'identifier',
+                            name: 'xs',
+                            position: somePosition,
+                        },
+                        index: {
+                            kind: 'integer',
+                            value: 1n,
+                            position: somePosition,
+                        },
+                        elementType: 'integer',
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'Integer*',
+            name: 'x',
+            value: {
+                kind: 'raw-expression',
+                expression: 'ARRAY_ELEMENT_AT(1, xs, Integer*)',
+            },
+        })
+    })
+
     it('lowers call-expression variable initialization to C function call', () => {
         const program: SemanticProgramFixture = {
             body: [

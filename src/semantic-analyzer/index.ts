@@ -547,7 +547,8 @@ export class SemanticAnalyzer {
     private isAssignableTarget(target: ASTExpression): boolean {
         return (
             target.kind === 'identifier' ||
-            (target.kind === 'binary' && target.operator === '.')
+            (target.kind === 'binary' &&
+                (target.operator === '.' || target.operator === '[]'))
         )
     }
 
@@ -636,6 +637,37 @@ export class SemanticAnalyzer {
         }
 
         if (expr.kind !== 'binary') return expr
+
+        if (expr.operator === '[]') {
+            const arrayType = this.inferExpressionType(expr.left)
+            if (!arrayType || !this.isArrayType(arrayType)) {
+                throw new Error(
+                    `${expr.position.line}:${expr.position.column}:Indexing expects an array value, got '${arrayType ?? expr.left.kind}'`,
+                )
+            }
+
+            const indexType = this.inferExpressionType(expr.right)
+            if (indexType !== 'integer') {
+                throw new Error(
+                    `${expr.position.line}:${expr.position.column}:Array index must be integer, got '${indexType ?? expr.right.kind}'`,
+                )
+            }
+
+            const elementType = this.arrayElementType(arrayType)
+            if (!elementType) {
+                throw new Error(
+                    `${expr.position.line}:${expr.position.column}:Invalid array type '${arrayType}'`,
+                )
+            }
+
+            return {
+                kind: 'array-index',
+                array: this.rewriteExpression(expr.left),
+                index: this.rewriteExpression(expr.right),
+                elementType,
+                position: expr.position,
+            }
+        }
 
         if (expr.operator === '+') {
             return {
@@ -1653,6 +1685,31 @@ export class SemanticAnalyzer {
                 return binding.type
             }
             case 'binary': {
+                if (value.operator === '[]') {
+                    const arrayType = this.inferExpressionType(value.left)
+                    if (!arrayType || !this.isArrayType(arrayType)) {
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Indexing expects an array value, got '${arrayType ?? value.left.kind}'`,
+                        )
+                    }
+
+                    const indexType = this.inferExpressionType(value.right)
+                    if (indexType !== 'integer') {
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Array index must be integer, got '${indexType ?? value.right.kind}'`,
+                        )
+                    }
+
+                    const elementType = this.arrayElementType(arrayType)
+                    if (!elementType) {
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Invalid array type '${arrayType}'`,
+                        )
+                    }
+
+                    return elementType
+                }
+
                 if (value.operator === '+') {
                     const leftType = this.inferExpressionType(value.left)
                     const rightType = this.inferExpressionType(value.right)
@@ -1764,6 +1821,7 @@ export class SemanticAnalyzer {
                 return binding.semantics
             }
             case 'binary': {
+                if (value.operator === '[]') return null
                 if (value.operator === '+') return null
                 if (value.operator !== '.') return null
                 if (value.right.kind !== 'identifier') return null

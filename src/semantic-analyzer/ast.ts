@@ -43,6 +43,14 @@ export interface SemanticArrayLiteral {
     position: ASTPosition
 }
 
+export interface SemanticArrayIndexExpression {
+    kind: 'array-index'
+    array: SemanticExpression
+    index: SemanticExpression
+    elementType: string
+    position: ASTPosition
+}
+
 export interface SemanticCallDispatch {
     kind: 'direct' | 'virtual'
     methodName?: string
@@ -70,6 +78,7 @@ export type SemanticExpression =
     | ASTIdentifier
     | ASTDataLiteral
     | SemanticArrayLiteral
+    | SemanticArrayIndexExpression
     | SemanticBinaryExpression
     | SemanticCopyExpression
     | SemanticCallExpression

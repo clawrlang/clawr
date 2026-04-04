@@ -22,3 +22,16 @@ Array* Array¸new(size_t count, size_t elem_size) {
 
     return array;
 }
+
+size_t Array¸checkedIndex(int64_t index, const Array* array) {
+    if (index < 0) {
+        panic("Array index cannot be negative");
+    }
+
+    size_t normalized = (size_t)index;
+    if (normalized >= array->count) {
+        panic("Array index out of bounds");
+    }
+
+    return normalized;
+}

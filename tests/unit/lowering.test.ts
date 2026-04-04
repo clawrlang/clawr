@@ -291,7 +291,7 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
-    it('lowers array index reads to ARRAY_ELEMENT_AT dereference', () => {
+    it('lowers array index reads to checked array access', () => {
         const program: SemanticProgramFixture = {
             body: [
                 {
@@ -325,7 +325,7 @@ describe('Lowering Tests', () => {
             name: 'x',
             value: {
                 kind: 'raw-expression',
-                expression: 'ARRAY_ELEMENT_AT(1, xs, Integer*)',
+                expression: 'ARRAY_ELEMENT_AT_CHECKED(1, xs, Integer*)',
             },
         })
     })
@@ -1309,6 +1309,52 @@ describe('Lowering Tests', () => {
                 deref: true,
             },
             value: { kind: 'var-ref', name: 'c_true' },
+        } satisfies CStatement)
+    })
+
+    it('lowers array index assignment to checked array access', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'assign',
+                    target: {
+                        kind: 'array-index',
+                        array: {
+                            kind: 'identifier',
+                            name: 'xs',
+                            position: somePosition,
+                        },
+                        index: {
+                            kind: 'integer',
+                            value: 1n,
+                            position: somePosition,
+                        },
+                        elementType: 'integer',
+                        position: somePosition,
+                    },
+                    value: {
+                        kind: 'integer',
+                        value: 99n,
+                        position: somePosition,
+                    },
+                    ownership: {},
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'assign',
+            target: {
+                kind: 'raw-expression',
+                expression: 'ARRAY_ELEMENT_AT_CHECKED(1, xs, Integer*)',
+            },
+            value: {
+                kind: 'function-call',
+                name: 'Integer¸fromCString',
+                arguments: [{ kind: 'string', value: '99' }],
+            },
         } satisfies CStatement)
     })
 

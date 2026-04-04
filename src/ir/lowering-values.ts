@@ -208,7 +208,7 @@ export function lowerValue(
 
             return {
                 kind: 'raw-expression',
-                expression: `ARRAY_ELEMENT_AT(${val.index.value.toString()}, ${renderInlineExpression(lowerValue(val.array as Exclude<SemanticExpression, ASTDataLiteral>))}, ${lowerValueSetType(val.elementType)})`,
+                expression: `ARRAY_ELEMENT_AT_CHECKED(${val.index.value.toString()}, ${renderInlineExpression(lowerValue(val.array as Exclude<SemanticExpression, ASTDataLiteral>))}, ${lowerValueSetType(val.elementType)})`,
             }
         case 'array-literal':
             throw new Error('Array literals are not supported during lowering')

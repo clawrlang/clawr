@@ -21,6 +21,8 @@ export function lowerValueSetType(type: string): string {
             return 'truthvalue_t'
         case 'integer':
             return 'Integer*'
+        case 'string':
+            return 'String*'
         default:
             return `${type}*`
     }

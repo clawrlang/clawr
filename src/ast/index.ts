@@ -24,6 +24,7 @@ export interface ASTImportDeclaration {
 export type ASTExpression =
     | ASTIntegerLiteral
     | ASTTruthValueLiteral
+    | ASTStringLiteral
     | ASTIdentifier
     | ASTDataLiteral
     | ASTCopyExpression
@@ -39,6 +40,12 @@ export interface ASTIntegerLiteral {
 export interface ASTTruthValueLiteral {
     kind: 'truthvalue'
     value: 'false' | 'ambiguous' | 'true'
+    position: ASTPosition
+}
+
+export interface ASTStringLiteral {
+    kind: 'string'
+    value: string
     position: ASTPosition
 }
 

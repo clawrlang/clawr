@@ -543,6 +543,8 @@ export class IRGenerator {
         switch (print.dispatchType) {
             case 'integer':
                 return this.lowerIntegerPrint(print, context)
+            case 'string':
+                return this.lowerStringPrint(print)
             case 'truthvalue':
                 return this.lowerTruthvaluePrint(print)
             default:
@@ -618,6 +620,36 @@ export class IRGenerator {
                     {
                         kind: 'function-call',
                         name: 'truthvalue·toCString',
+                        arguments: [lowerValue(print.value)],
+                    },
+                ],
+            },
+        ]
+    }
+
+    private lowerStringPrint(print: LowerablePrintStatement): CStatement[] {
+        if (print.value.kind === 'string') {
+            return [
+                {
+                    kind: 'function-call',
+                    name: 'printf',
+                    arguments: [
+                        { kind: 'string', value: '%s\\n' },
+                        { kind: 'string', value: print.value.value },
+                    ],
+                },
+            ]
+        }
+
+        return [
+            {
+                kind: 'function-call',
+                name: 'printf',
+                arguments: [
+                    { kind: 'string', value: '%s\\n' },
+                    {
+                        kind: 'function-call',
+                        name: 'String·toCString',
                         arguments: [lowerValue(print.value)],
                     },
                 ],

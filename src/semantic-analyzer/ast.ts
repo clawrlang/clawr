@@ -9,6 +9,7 @@ import type {
     ASTObjectDeclaration,
     ASTPosition,
     ASTServiceDeclaration,
+    ASTStringLiteral,
     ASTTruthValueLiteral,
 } from '../ast'
 
@@ -24,6 +25,14 @@ export interface SemanticFieldAccess {
 export interface SemanticCopyExpression {
     kind: 'copy'
     value: SemanticExpression
+    position: ASTPosition
+}
+
+export interface SemanticBinaryExpression {
+    kind: 'binary'
+    operator: string
+    left: SemanticExpression
+    right: SemanticExpression
     position: ASTPosition
 }
 
@@ -50,8 +59,10 @@ export interface SemanticCallArgument extends Omit<ASTCallArgument, 'value'> {
 export type SemanticExpression =
     | ASTIntegerLiteral
     | ASTTruthValueLiteral
+    | ASTStringLiteral
     | ASTIdentifier
     | ASTDataLiteral
+    | SemanticBinaryExpression
     | SemanticCopyExpression
     | SemanticCallExpression
     | SemanticFieldAccess

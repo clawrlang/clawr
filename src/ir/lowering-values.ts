@@ -106,6 +106,12 @@ export function lowerValue(
     val: Exclude<SemanticExpression, ASTDataLiteral>,
 ): CExpression {
     switch (val.kind) {
+        case 'string':
+            return {
+                kind: 'function-call',
+                name: 'String¸fromCString',
+                arguments: [{ kind: 'string', value: val.value }],
+            }
         case 'integer':
             return {
                 kind: 'function-call',
@@ -149,6 +155,42 @@ export function lowerValue(
                 field: val.field,
                 deref: true,
             }
+        case 'binary':
+            if (val.operator === '+') {
+                if (val.left.kind === 'data-literal') {
+                    throw new Error(
+                        'String concatenation does not support data-literal lhs',
+                    )
+                }
+                if (val.right.kind === 'data-literal') {
+                    throw new Error(
+                        'String concatenation does not support data-literal rhs',
+                    )
+                }
+
+                return {
+                    kind: 'function-call',
+                    name: 'String¸concat',
+                    arguments: [
+                        lowerValue(
+                            val.left as Exclude<
+                                SemanticExpression,
+                                ASTDataLiteral
+                            >,
+                        ),
+                        lowerValue(
+                            val.right as Exclude<
+                                SemanticExpression,
+                                ASTDataLiteral
+                            >,
+                        ),
+                    ],
+                }
+            }
+
+            throw new Error(
+                `Unsupported binary operator '${val.operator}' during lowering`,
+            )
         case 'copy':
             if (val.value.kind === 'data-literal') {
                 throw new Error('copy(...) of data literal is unsupported')

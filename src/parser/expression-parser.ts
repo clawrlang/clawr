@@ -110,6 +110,13 @@ export class ExpressionParser {
                     value: token.value,
                     position: { line: token.line, column: token.column },
                 }
+            case 'STRING_LITERAL':
+                this.stream.next()
+                return {
+                    kind: 'string',
+                    value: token.value,
+                    position: { line: token.line, column: token.column },
+                }
             case 'IDENTIFIER':
                 this.stream.next()
                 if (token.identifier === 'copy') {

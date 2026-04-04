@@ -627,6 +627,16 @@ export class SemanticAnalyzer {
 
         if (expr.kind !== 'binary') return expr
 
+        if (expr.operator === '+') {
+            return {
+                kind: 'binary',
+                operator: '+',
+                left: this.rewriteExpression(expr.left),
+                right: this.rewriteExpression(expr.right),
+                position: expr.position,
+            }
+        }
+
         if (expr.operator !== '.') {
             throw new Error(
                 `${expr.position.line}:${expr.position.column}:Unsupported binary operator '${expr.operator}'`,
@@ -1420,6 +1430,8 @@ export class SemanticAnalyzer {
                 return 'truthvalue'
             case 'integer':
                 return 'integer'
+            case 'string':
+                return 'string'
             case 'call': {
                 const argumentLabels = value.arguments.map(
                     (arg) => arg.label ?? '_',
@@ -1568,6 +1580,25 @@ export class SemanticAnalyzer {
                 return binding.type
             }
             case 'binary': {
+                if (value.operator === '+') {
+                    const leftType = this.inferExpressionType(value.left)
+                    const rightType = this.inferExpressionType(value.right)
+
+                    if (!leftType || !rightType) {
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Cannot infer operand type for '+'`,
+                        )
+                    }
+
+                    if (leftType !== 'string' || rightType !== 'string') {
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Operator '+' expects string operands, got '${leftType}' and '${rightType}'`,
+                        )
+                    }
+
+                    return 'string'
+                }
+
                 if (value.operator !== '.') return null
                 if (value.right.kind !== 'identifier') return null
                 const objectType = this.inferExpressionType(value.left)
@@ -1658,6 +1689,7 @@ export class SemanticAnalyzer {
                 return binding.semantics
             }
             case 'binary': {
+                if (value.operator === '+') return null
                 if (value.operator !== '.') return null
                 if (value.right.kind !== 'identifier') return null
                 const objectType = this.inferExpressionType(value.left)

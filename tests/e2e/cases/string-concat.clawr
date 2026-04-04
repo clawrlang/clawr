@@ -1,0 +1,5 @@
+const greeting: string = "Hello"
+const target: string = " Clawr"
+const message: string = greeting + target
+
+print message

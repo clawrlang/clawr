@@ -39,6 +39,23 @@ String* String¸fromCString(const char* value) {
     return s;
 }
 
+String* String¸concat(String* left, String* right) {
+    if (!left || !right) panic("String¸concat does not accept NULL");
+
+    size_t len = left->length + right->length;
+    char* data = malloc(len + 1);
+    if (!data) panic("Out of memory in String¸concat");
+
+    memcpy(data, left->data, left->length);
+    memcpy(data + left->length, right->data, right->length);
+    data[len] = '\0';
+
+    String* s = allocRC(String, __rc_ISOLATED);
+    s->length = len;
+    s->data = data;
+    return s;
+}
+
 const char* String·toCString(String* self) {
     if (!self) panic("String·toCString does not accept NULL");
     return self->data;

@@ -170,6 +170,57 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
+    it('lowers string concatenation to String¸concat call', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 's',
+                    valueSet: { type: 'string' },
+                    value: {
+                        kind: 'binary',
+                        operator: '+',
+                        left: {
+                            kind: 'string',
+                            value: 'hello',
+                            position: somePosition,
+                        },
+                        right: {
+                            kind: 'string',
+                            value: ' world',
+                            position: somePosition,
+                        },
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'String*',
+            name: 's',
+            value: {
+                kind: 'function-call',
+                name: 'String¸concat',
+                arguments: [
+                    {
+                        kind: 'function-call',
+                        name: 'String¸fromCString',
+                        arguments: [{ kind: 'string', value: 'hello' }],
+                    },
+                    {
+                        kind: 'function-call',
+                        name: 'String¸fromCString',
+                        arguments: [{ kind: 'string', value: ' world' }],
+                    },
+                ],
+            },
+        } satisfies CStatement)
+    })
+
     it('lowers call-expression variable initialization to C function call', () => {
         const program: SemanticProgramFixture = {
             body: [

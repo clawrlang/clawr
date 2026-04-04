@@ -857,6 +857,19 @@ describe('Call expression tests', () => {
 })
 
 describe('Expression precedence tests', () => {
+    it('parses string concatenation expressions', () => {
+        const ast = parse('const s: string = "hello" + " world"')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            value: {
+                kind: 'binary',
+                operator: '+',
+                left: { kind: 'string', value: 'hello' },
+                right: { kind: 'string', value: ' world' },
+            },
+        })
+    })
+
     it('parses additive expressions as left-associative', () => {
         const ast = parse('const x: integer = a + b + c')
         expect(ast.body[0]).toMatchObject({

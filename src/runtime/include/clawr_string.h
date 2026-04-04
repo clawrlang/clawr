@@ -12,6 +12,7 @@ typedef struct String {
 extern const __type_info Stringˇtype;
 
 String* String¸fromCString(const char* value);
+String* String¸concat(String* left, String* right);
 const char* String·toCString(String* self);
 
 #endif // CLAWR_STRING_H

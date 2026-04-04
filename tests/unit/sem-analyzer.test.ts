@@ -275,6 +275,46 @@ describe('SemanticAnalyzer', () => {
                 },
             ])
         })
+
+        it('annotates print dispatch for string concatenation values', () => {
+            const module = analyze('print "hello" + " world"')
+
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'print',
+                    dispatchType: 'string',
+                    value: {
+                        kind: 'binary',
+                        operator: '+',
+                        left: { kind: 'string', value: 'hello' },
+                        right: { kind: 'string', value: ' world' },
+                    },
+                },
+            ])
+        })
+    })
+
+    describe('string concatenation typing', () => {
+        it('accepts string + string', () => {
+            const module = analyze('const s: string = "a" + "b"')
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 's',
+                    valueSet: { type: 'string' },
+                    value: {
+                        kind: 'binary',
+                        operator: '+',
+                    },
+                },
+            ])
+        })
+
+        it('rejects non-string operands for +', () => {
+            expect(() => analyze('const s: string = "a" + 1')).toThrow(
+                "1:23:Operator '+' expects string operands, got 'string' and 'integer'",
+            )
+        })
     })
 
     describe('field access', () => {

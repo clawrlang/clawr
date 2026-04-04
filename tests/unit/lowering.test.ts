@@ -365,6 +365,69 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
+    it('lowers when expression to nested conditional', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    valueSet: { type: 'integer' },
+                    value: {
+                        kind: 'when',
+                        subject: {
+                            kind: 'identifier',
+                            name: 'cond',
+                            position: somePosition,
+                        },
+                        branches: [
+                            {
+                                pattern: {
+                                    kind: 'value-pattern',
+                                    value: {
+                                        kind: 'truthvalue',
+                                        value: 'true',
+                                        position: somePosition,
+                                    },
+                                    position: somePosition,
+                                },
+                                value: {
+                                    kind: 'integer',
+                                    value: 1n,
+                                    position: somePosition,
+                                },
+                            },
+                            {
+                                pattern: {
+                                    kind: 'wildcard-pattern',
+                                    position: somePosition,
+                                },
+                                value: {
+                                    kind: 'integer',
+                                    value: 2n,
+                                    position: somePosition,
+                                },
+                            },
+                        ],
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'Integer*',
+            name: 'x',
+            value: {
+                kind: 'raw-expression',
+                expression:
+                    '((cond == c_true) ? Integer¸fromCString("1") : Integer¸fromCString("2"))',
+            },
+        })
+    })
+
     it('mangles labeled call names with label suffixes', () => {
         const program: SemanticProgramFixture = {
             body: [

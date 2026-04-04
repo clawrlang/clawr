@@ -12,6 +12,7 @@ import type {
     ASTServiceDeclaration,
     ASTStringLiteral,
     ASTTruthValueLiteral,
+    ASTWhenPattern,
 } from '../ast'
 
 export type SemanticImportDeclaration = ASTImportDeclaration
@@ -71,6 +72,27 @@ export interface SemanticCallArgument extends Omit<ASTCallArgument, 'value'> {
     value: SemanticExpression
 }
 
+export type SemanticWhenPattern =
+    | {
+          kind: 'wildcard-pattern'
+          position: ASTPosition
+      }
+    | {
+          kind: 'value-pattern'
+          value: SemanticExpression
+          position: ASTPosition
+      }
+
+export interface SemanticWhenExpression {
+    kind: 'when'
+    subject: SemanticExpression
+    branches: Array<{
+        pattern: SemanticWhenPattern
+        value: SemanticExpression
+    }>
+    position: ASTPosition
+}
+
 export type SemanticExpression =
     | ASTIntegerLiteral
     | ASTTruthValueLiteral
@@ -82,6 +104,7 @@ export type SemanticExpression =
     | SemanticBinaryExpression
     | SemanticCopyExpression
     | SemanticCallExpression
+    | SemanticWhenExpression
     | SemanticFieldAccess
 
 export interface SemanticValueSet {

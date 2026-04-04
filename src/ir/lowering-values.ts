@@ -196,6 +196,63 @@ export function lowerValue(
             throw new Error(
                 `Unsupported binary operator '${val.operator}' during lowering`,
             )
+        case 'when': {
+            if (val.subject.kind === 'data-literal') {
+                throw new Error('when subject cannot be data-literal')
+            }
+
+            const subject = renderInlineExpression(lowerValue(val.subject))
+            const firstValuePattern = val.branches.find(
+                (branch) => branch.pattern.kind === 'value-pattern',
+            )
+            const matchMode =
+                firstValuePattern &&
+                firstValuePattern.pattern.kind === 'value-pattern' &&
+                firstValuePattern.pattern.value.kind === 'integer'
+                    ? 'integer'
+                    : 'direct'
+            const nested = [...val.branches]
+                .reverse()
+                .reduce<string | null>((acc, branch) => {
+                    const branchValue =
+                        branch.value.kind === 'data-literal'
+                            ? (() => {
+                                  throw new Error(
+                                      'when branch value cannot be data-literal during lowering',
+                                  )
+                              })()
+                            : renderInlineExpression(lowerValue(branch.value))
+
+                    if (branch.pattern.kind === 'wildcard-pattern') {
+                        return branchValue
+                    }
+
+                    if (branch.pattern.value.kind === 'data-literal') {
+                        throw new Error(
+                            'when pattern value cannot be data-literal during lowering',
+                        )
+                    }
+
+                    const pattern = renderInlineExpression(
+                        lowerValue(branch.pattern.value),
+                    )
+                    const condition =
+                        matchMode === 'integer'
+                            ? `(Integer¸compare(${subject}, ${pattern}) == 0)`
+                            : `(${subject} == ${pattern})`
+
+                    return `(${condition} ? ${branchValue} : ${acc ?? branchValue})`
+                }, null)
+
+            if (!nested) {
+                throw new Error('when requires at least one branch')
+            }
+
+            return {
+                kind: 'raw-expression',
+                expression: nested,
+            }
+        }
         case 'array-index':
             if (val.array.kind === 'data-literal') {
                 throw new Error('Array index base cannot be data-literal')

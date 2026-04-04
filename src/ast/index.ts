@@ -26,6 +26,7 @@ export type ASTExpression =
     | ASTTruthValueLiteral
     | ASTStringLiteral
     | ASTArrayLiteral
+    | ASTWhenExpression
     | ASTIdentifier
     | ASTDataLiteral
     | ASTCopyExpression
@@ -91,6 +92,27 @@ export interface ASTBinaryExpression {
     operator: string
     left: ASTExpression
     right: ASTExpression
+    position: ASTPosition
+}
+
+export type ASTWhenPattern =
+    | {
+          kind: 'wildcard-pattern'
+          position: ASTPosition
+      }
+    | {
+          kind: 'value-pattern'
+          value: ASTExpression
+          position: ASTPosition
+      }
+
+export interface ASTWhenExpression {
+    kind: 'when'
+    subject: ASTExpression
+    branches: Array<{
+        pattern: ASTWhenPattern
+        value: ASTExpression
+    }>
     position: ASTPosition
 }
 

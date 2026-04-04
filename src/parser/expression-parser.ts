@@ -110,6 +110,13 @@ export class ExpressionParser {
     private parsePrimaryExpression(): ASTExpression {
         const token = this.stream.peek()
         switch (token?.kind) {
+            case 'KEYWORD':
+                if (token.keyword === 'when') {
+                    return this.parseWhenExpression()
+                }
+                throw new Error(
+                    `${token.line}:${token.column}:Unexpected keyword [${token.keyword}] in expression`,
+                )
             case 'INTEGER_LITERAL':
                 this.stream.next()
                 return {
@@ -208,6 +215,61 @@ export class ExpressionParser {
                 throw new Error(
                     `${token?.line}:${token?.column}:Unexpected token [${token?.kind}] in expression`,
                 )
+        }
+    }
+
+    private parseWhenExpression(): ASTExpression {
+        const whenToken = this.stream.expect('KEYWORD', 'when')
+        const subject = this.parse()
+        this.stream.expect('PUNCTUATION', '{')
+
+        const branches: Array<{
+            pattern:
+                | {
+                      kind: 'wildcard-pattern'
+                      position: { line: number; column: number }
+                  }
+                | {
+                      kind: 'value-pattern'
+                      value: ASTExpression
+                      position: { line: number; column: number }
+                  }
+            value: ASTExpression
+        }> = []
+
+        while (!this.stream.isNext('PUNCTUATION', '}')) {
+            const patternExpr = this.parse()
+            const pattern =
+                patternExpr.kind === 'identifier' && patternExpr.name === '_'
+                    ? {
+                          kind: 'wildcard-pattern' as const,
+                          position: patternExpr.position,
+                      }
+                    : {
+                          kind: 'value-pattern' as const,
+                          value: patternExpr,
+                          position: patternExpr.position,
+                      }
+
+            this.stream.expect('PUNCTUATION', '=>')
+            const value = this.parse()
+            branches.push({ pattern, value })
+
+            if (this.stream.isNext('PUNCTUATION', ',')) {
+                this.stream.next()
+            }
+
+            if (this.stream.isNext('NEWLINE')) {
+                this.stream.next({ stopAtNewline: true })
+            }
+        }
+
+        this.stream.expect('PUNCTUATION', '}')
+        return {
+            kind: 'when',
+            subject,
+            branches,
+            position: { line: whenToken.line, column: whenToken.column },
         }
     }
 }

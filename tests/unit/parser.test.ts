@@ -391,6 +391,46 @@ describe('Parser Tests', () => {
         })
     })
 
+    it('parses when expressions with wildcard branch', () => {
+        const program =
+            'const x: truthvalue = when true { true => false, _ => true }'
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'var-decl',
+                    name: 'x',
+                    value: {
+                        kind: 'when',
+                        subject: { kind: 'truthvalue', value: 'true' },
+                        branches: [
+                            {
+                                pattern: {
+                                    kind: 'value-pattern',
+                                    value: {
+                                        kind: 'truthvalue',
+                                        value: 'true',
+                                    },
+                                },
+                                value: {
+                                    kind: 'truthvalue',
+                                    value: 'false',
+                                },
+                            },
+                            {
+                                pattern: { kind: 'wildcard-pattern' },
+                                value: {
+                                    kind: 'truthvalue',
+                                    value: 'true',
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+        })
+    })
+
     it('parses import declarations with aliases before top-level body', () => {
         const program =
             'import Token as Tok, Span from "lexer/tokens"\nconst x = ambiguous'

@@ -388,6 +388,38 @@ describe('SemanticAnalyzer', () => {
                 analyze('const xs: [integer] = [1, 2]\nconst x = xs[true]'),
             ).toThrow("2:13:Array index must be integer, got 'truthvalue'")
         })
+
+        it('infers when expression type from branch values', () => {
+            const module = analyze('const x = when true { true => 1, _ => 2 }')
+            expect(module.functions[0].body[0]).toMatchObject({
+                kind: 'var-decl',
+                name: 'x',
+                valueSet: { type: 'integer' },
+                value: { kind: 'when' },
+            })
+        })
+
+        it('rejects when expressions without wildcard branch', () => {
+            expect(() => analyze('const x = when true { true => 1 }')).toThrow(
+                "1:11:when expression requires a wildcard '_' branch for exhaustiveness",
+            )
+        })
+
+        it('rejects wildcard branch before final position', () => {
+            expect(() =>
+                analyze('const x = when true { _ => 1, true => 2 }'),
+            ).toThrow(
+                "1:11:Wildcard pattern '_' must be the last branch in when expression",
+            )
+        })
+
+        it('rejects when pattern type mismatch', () => {
+            expect(() =>
+                analyze('const x = when true { 1 => 1, _ => 2 }'),
+            ).toThrow(
+                "1:23:when pattern type mismatch: expected 'truthvalue' but got 'integer'",
+            )
+        })
     })
 
     describe('field access', () => {

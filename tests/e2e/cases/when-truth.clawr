@@ -1,0 +1,7 @@
+const flag: truthvalue = true
+const value: integer = when flag {
+    true => 41
+    _ => 12
+}
+
+print value

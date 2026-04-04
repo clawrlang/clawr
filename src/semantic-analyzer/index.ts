@@ -604,6 +604,27 @@ export class SemanticAnalyzer {
     }
 
     private rewriteExpression(expr: ASTExpression): SemanticExpression {
+        if (expr.kind === 'when') {
+            return {
+                kind: 'when',
+                subject: this.rewriteExpression(expr.subject),
+                branches: expr.branches.map((branch) => ({
+                    pattern:
+                        branch.pattern.kind === 'wildcard-pattern'
+                            ? branch.pattern
+                            : {
+                                  kind: 'value-pattern' as const,
+                                  value: this.rewriteExpression(
+                                      branch.pattern.value,
+                                  ),
+                                  position: branch.pattern.position,
+                              },
+                    value: this.rewriteExpression(branch.value),
+                })),
+                position: expr.position,
+            }
+        }
+
         if (expr.kind === 'array-literal') {
             return {
                 kind: 'array-literal',
@@ -1560,6 +1581,80 @@ export class SemanticAnalyzer {
                 return 'integer'
             case 'string':
                 return 'string'
+            case 'when': {
+                const subjectType = this.inferExpressionType(value.subject)
+                if (!subjectType) {
+                    throw new Error(
+                        `${value.subject.position.line}:${value.subject.position.column}:Cannot infer type for when subject`,
+                    )
+                }
+
+                if (subjectType === 'string') {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:when does not yet support string subject patterns`,
+                    )
+                }
+
+                if (value.branches.length === 0) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:when requires at least one branch`,
+                    )
+                }
+
+                const wildcardIndex = value.branches.findIndex(
+                    (branch) => branch.pattern.kind === 'wildcard-pattern',
+                )
+                if (wildcardIndex === -1) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:when expression requires a wildcard '_' branch for exhaustiveness`,
+                    )
+                }
+                if (wildcardIndex !== value.branches.length - 1) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Wildcard pattern '_' must be the last branch in when expression`,
+                    )
+                }
+
+                let resultType: string | null = null
+                for (const branch of value.branches) {
+                    if (branch.pattern.kind === 'value-pattern') {
+                        const patternType = this.inferExpressionType(
+                            branch.pattern.value,
+                        )
+                        if (!patternType) {
+                            throw new Error(
+                                `${branch.pattern.position.line}:${branch.pattern.position.column}:Cannot infer type for when pattern`,
+                            )
+                        }
+
+                        if (!this.isTypeAssignable(patternType, subjectType)) {
+                            throw new Error(
+                                `${branch.pattern.position.line}:${branch.pattern.position.column}:when pattern type mismatch: expected '${subjectType}' but got '${patternType}'`,
+                            )
+                        }
+                    }
+
+                    const branchType = this.inferExpressionType(branch.value)
+                    if (!branchType) {
+                        throw new Error(
+                            `${branch.value.position.line}:${branch.value.position.column}:Cannot infer type for when branch value`,
+                        )
+                    }
+
+                    if (!resultType) {
+                        resultType = branchType
+                        continue
+                    }
+
+                    if (!this.isTypeAssignable(branchType, resultType)) {
+                        throw new Error(
+                            `${branch.value.position.line}:${branch.value.position.column}:when branch type mismatch: expected '${resultType}' but got '${branchType}'`,
+                        )
+                    }
+                }
+
+                return resultType
+            }
             case 'array-literal': {
                 if (value.elements.length === 0) {
                     throw new Error(
@@ -1859,6 +1954,8 @@ export class SemanticAnalyzer {
     ): ASTVariableDeclaration['semantics'] | null {
         switch (value.kind) {
             case 'call':
+                return null
+            case 'when':
                 return null
             case 'array-literal':
                 return null

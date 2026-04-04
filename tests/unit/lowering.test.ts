@@ -221,6 +221,76 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
+    it('lowers array literal declaration to Array¸new and element assignments', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'xs',
+                    valueSet: { type: '[integer]' },
+                    value: {
+                        kind: 'array-literal',
+                        elements: [
+                            {
+                                kind: 'integer',
+                                value: 1n,
+                                position: somePosition,
+                            },
+                            {
+                                kind: 'integer',
+                                value: 2n,
+                                position: somePosition,
+                            },
+                        ],
+                        position: somePosition,
+                    },
+                    ownership: {
+                        releaseAtScopeExit: true,
+                        retains: [],
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'Array*',
+            name: 'xs',
+            value: {
+                kind: 'function-call',
+                name: 'Array¸new',
+            },
+        })
+
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'assign',
+            target: {
+                kind: 'raw-expression',
+                expression: 'ARRAY_ELEMENT_AT(0, xs, Integer*)',
+            },
+            value: {
+                kind: 'function-call',
+                name: 'Integer¸fromCString',
+                arguments: [{ kind: 'string', value: '1' }],
+            },
+        } satisfies CStatement)
+
+        expect(module.functions[0].body[2]).toMatchObject({
+            kind: 'assign',
+            target: {
+                kind: 'raw-expression',
+                expression: 'ARRAY_ELEMENT_AT(1, xs, Integer*)',
+            },
+            value: {
+                kind: 'function-call',
+                name: 'Integer¸fromCString',
+                arguments: [{ kind: 'string', value: '2' }],
+            },
+        } satisfies CStatement)
+    })
+
     it('lowers call-expression variable initialization to C function call', () => {
         const program: SemanticProgramFixture = {
             body: [

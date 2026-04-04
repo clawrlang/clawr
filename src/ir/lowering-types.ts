@@ -16,6 +16,10 @@ export function lowerType(stmt: SemanticVariableDeclaration): string {
 }
 
 export function lowerValueSetType(type: string): string {
+    if (isArrayType(type)) {
+        return 'Array*'
+    }
+
     switch (type) {
         case 'truthvalue':
             return 'truthvalue_t'
@@ -26,6 +30,15 @@ export function lowerValueSetType(type: string): string {
         default:
             return `${type}*`
     }
+}
+
+export function parseArrayElementType(type: string): string | null {
+    const match = type.match(/^\[([^\]]+)\]$/)
+    return match ? match[1] : null
+}
+
+function isArrayType(type: string): boolean {
+    return parseArrayElementType(type) !== null
 }
 
 export function lowerStruct(stmt: SemanticDataDeclaration): CStruct[] {

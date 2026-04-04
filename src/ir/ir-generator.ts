@@ -16,6 +16,7 @@ import {
     lowerStructHooks,
     lowerStructTypeInfo,
     lowerType,
+    parseArrayElementType,
     lowerValueSetType,
     lowerObjectStruct,
     lowerObjectTypeInfo,
@@ -44,7 +45,14 @@ type DataLiteralVariableDeclaration = SemanticVariableDeclaration & {
 type NonDataLiteralVariableDeclaration = SemanticVariableDeclaration & {
     value: Exclude<
         SemanticVariableDeclaration['value'],
-        { kind: 'data-literal' }
+        { kind: 'data-literal' } | { kind: 'array-literal' }
+    >
+}
+
+type ArrayLiteralVariableDeclaration = SemanticVariableDeclaration & {
+    value: Extract<
+        SemanticVariableDeclaration['value'],
+        { kind: 'array-literal' }
     >
 }
 
@@ -275,6 +283,10 @@ export class IRGenerator {
             return this.lowerDataLiteralVariableDeclaration(stmt)
         }
 
+        if (this.isArrayLiteralVariableDeclaration(stmt)) {
+            return this.lowerArrayLiteralVariableDeclaration(stmt)
+        }
+
         if (this.isNonDataLiteralVariableDeclaration(stmt)) {
             return this.lowerNonDataLiteralVariableDeclaration(stmt)
         }
@@ -305,7 +317,72 @@ export class IRGenerator {
     private isNonDataLiteralVariableDeclaration(
         stmt: SemanticVariableDeclaration,
     ): stmt is NonDataLiteralVariableDeclaration {
-        return stmt.value.kind !== 'data-literal'
+        return (
+            stmt.value.kind !== 'data-literal' &&
+            stmt.value.kind !== 'array-literal'
+        )
+    }
+
+    private isArrayLiteralVariableDeclaration(
+        stmt: SemanticVariableDeclaration,
+    ): stmt is ArrayLiteralVariableDeclaration {
+        return stmt.value.kind === 'array-literal'
+    }
+
+    private lowerArrayLiteralVariableDeclaration(
+        stmt: ArrayLiteralVariableDeclaration,
+    ): CStatement[] {
+        const elementType = parseArrayElementType(stmt.valueSet.type)
+        if (!elementType) {
+            throw new Error(
+                `Array literal declaration '${stmt.name}' requires array valueSet type, got '${stmt.valueSet.type}'`,
+            )
+        }
+
+        const loweredElementType = lowerValueSetType(elementType)
+
+        const statements: CStatement[] = [
+            {
+                kind: 'var-decl',
+                type: lowerType(stmt),
+                name: stmt.name,
+                value: {
+                    kind: 'function-call',
+                    name: 'Array¸new',
+                    arguments: [
+                        {
+                            kind: 'raw-expression',
+                            expression: `${stmt.value.elements.length}`,
+                        },
+                        {
+                            kind: 'raw-expression',
+                            expression: `sizeof(${loweredElementType})`,
+                        },
+                    ],
+                },
+            },
+        ]
+
+        stmt.value.elements.forEach((element, index) => {
+            if (element.kind === 'data-literal') {
+                throw new Error(
+                    'Array literals with data-literal elements are not supported yet',
+                )
+            }
+
+            statements.push({
+                kind: 'assign',
+                target: {
+                    kind: 'raw-expression',
+                    expression: `ARRAY_ELEMENT_AT(${index}, ${stmt.name}, ${loweredElementType})`,
+                },
+                value: lowerValue(element),
+            })
+        })
+
+        statements.push(...this.lowerOwnershipPrefix(stmt.ownership))
+
+        return statements
     }
 
     private lowerDataLiteralVariableDeclaration(

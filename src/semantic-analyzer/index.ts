@@ -1300,7 +1300,7 @@ export class SemanticAnalyzer {
         }
 
         ownership.retains =
-            value.kind === 'data-literal'
+            value.kind === 'data-literal' || value.kind === 'array-literal'
                 ? []
                 : [
                       {
@@ -1314,7 +1314,7 @@ export class SemanticAnalyzer {
     }
 
     private isReferenceType(type: string): boolean {
-        return Boolean(this.lookupDataType(type))
+        return Boolean(this.lookupDataType(type)) || this.isArrayType(type)
     }
 
     private isServiceType(type: string): boolean {

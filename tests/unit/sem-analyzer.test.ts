@@ -317,6 +317,51 @@ describe('SemanticAnalyzer', () => {
         })
     })
 
+    describe('array literals and annotations', () => {
+        it('infers array type from homogeneous literals', () => {
+            const module = analyze('const xs = [1, 2, 3]')
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 'xs',
+                    valueSet: { type: '[integer]' },
+                    value: {
+                        kind: 'array-literal',
+                    },
+                },
+            ])
+        })
+
+        it('rejects mixed element types in array literals', () => {
+            expect(() => analyze('const xs = [1, true]')).toThrow(
+                "1:16:Array literal element type mismatch: expected 'integer' but got 'truthvalue'",
+            )
+        })
+
+        it('accepts [T] annotation with matching literal elements', () => {
+            const module = analyze('const xs: [integer] = [1, 2]')
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 'xs',
+                    valueSet: { type: '[integer]' },
+                },
+            ])
+        })
+
+        it('rejects array element type mismatch against [T] annotation', () => {
+            expect(() => analyze('const xs: [truthvalue] = [true, 1]')).toThrow(
+                "1:33:Type mismatch for array element: expected 'truthvalue' but got 'integer'",
+            )
+        })
+
+        it('rejects empty array literal without explicit type context', () => {
+            expect(() => analyze('const xs = []')).toThrow(
+                '1:12:Cannot infer type for empty array literal; add an explicit annotation',
+            )
+        })
+    })
+
     describe('field access', () => {
         it('converts binary expressions with dot operator into field access expressions', () => {
             const module = analyze(

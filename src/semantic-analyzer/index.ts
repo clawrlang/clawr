@@ -552,6 +552,16 @@ export class SemanticAnalyzer {
     }
 
     private rewriteExpression(expr: ASTExpression): SemanticExpression {
+        if (expr.kind === 'array-literal') {
+            return {
+                kind: 'array-literal',
+                elements: expr.elements.map((element) =>
+                    this.rewriteExpression(element),
+                ),
+                position: expr.position,
+            }
+        }
+
         if (expr.kind === 'copy') {
             return {
                 ...expr,
@@ -1375,6 +1385,11 @@ export class SemanticAnalyzer {
         value: ASTExpression,
         expected: string,
     ) {
+        if (value.kind === 'array-literal') {
+            this.validateArrayLiteral(value, expected)
+            return
+        }
+
         if (value.kind === 'data-literal') {
             this.validateDataLiteral(value, expected)
             return
@@ -1424,6 +1439,36 @@ export class SemanticAnalyzer {
         }
     }
 
+    private validateArrayLiteral(
+        value: Extract<ASTExpression, { kind: 'array-literal' }>,
+        expectedType: string,
+    ) {
+        if (!this.isArrayType(expectedType)) {
+            throw new Error(
+                `${value.position.line}:${value.position.column}:Type mismatch: expected '${expectedType}' but got 'array-literal'`,
+            )
+        }
+
+        const elementType = this.arrayElementType(expectedType)
+        if (!elementType) {
+            throw new Error(
+                `${value.position.line}:${value.position.column}:Invalid array type '${expectedType}'`,
+            )
+        }
+
+        for (const element of value.elements) {
+            const inferredElementType = this.inferExpressionType(element)
+            if (
+                !inferredElementType ||
+                !this.isTypeAssignable(inferredElementType, elementType)
+            ) {
+                throw new Error(
+                    `${element.position.line}:${element.position.column}:Type mismatch for array element: expected '${elementType}' but got '${inferredElementType ?? element.kind}'`,
+                )
+            }
+        }
+    }
+
     private inferExpressionType(value: ASTExpression): string | null {
         switch (value.kind) {
             case 'truthvalue':
@@ -1432,6 +1477,34 @@ export class SemanticAnalyzer {
                 return 'integer'
             case 'string':
                 return 'string'
+            case 'array-literal': {
+                if (value.elements.length === 0) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Cannot infer type for empty array literal; add an explicit annotation`,
+                    )
+                }
+
+                const firstType = this.inferExpressionType(value.elements[0])
+                if (!firstType) {
+                    throw new Error(
+                        `${value.elements[0].position.line}:${value.elements[0].position.column}:Cannot infer type for array element`,
+                    )
+                }
+
+                for (let i = 1; i < value.elements.length; i++) {
+                    const nextType = this.inferExpressionType(value.elements[i])
+                    if (
+                        !nextType ||
+                        !this.isTypeAssignable(nextType, firstType)
+                    ) {
+                        throw new Error(
+                            `${value.elements[i].position.line}:${value.elements[i].position.column}:Array literal element type mismatch: expected '${firstType}' but got '${nextType ?? value.elements[i].kind}'`,
+                        )
+                    }
+                }
+
+                return `[${firstType}]`
+            }
             case 'call': {
                 const argumentLabels = value.arguments.map(
                     (arg) => arg.label ?? '_',
@@ -1679,6 +1752,8 @@ export class SemanticAnalyzer {
         switch (value.kind) {
             case 'call':
                 return null
+            case 'array-literal':
+                return null
             case 'identifier': {
                 const binding = this.lookupBinding(value.name)
                 if (!binding) {
@@ -1920,6 +1995,15 @@ export class SemanticAnalyzer {
         }
 
         return false
+    }
+
+    private isArrayType(type: string): boolean {
+        return /^\[[^\]]+\]$/.test(type)
+    }
+
+    private arrayElementType(type: string): string | null {
+        const match = type.match(/^\[([^\]]+)\]$/)
+        return match ? match[1] : null
     }
 
     private lookupAllTypeFields(typeName: string): BindingMap | undefined {

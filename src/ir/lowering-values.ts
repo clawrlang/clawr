@@ -93,6 +93,10 @@ export function lowerStructFieldExpression(
             throw new Error(
                 'Binary expressions are not supported in struct field literals',
             )
+        case 'array-literal':
+            throw new Error(
+                'Array literals are not supported in struct field literals',
+            )
         case 'copy':
             throw new Error('copy(...) is unsupported in struct field literals')
         default:
@@ -191,6 +195,8 @@ export function lowerValue(
             throw new Error(
                 `Unsupported binary operator '${val.operator}' during lowering`,
             )
+        case 'array-literal':
+            throw new Error('Array literals are not supported during lowering')
         case 'copy':
             if (val.value.kind === 'data-literal') {
                 throw new Error('copy(...) of data literal is unsupported')

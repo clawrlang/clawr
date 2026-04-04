@@ -28,7 +28,15 @@ export class VariableDeclarationParser {
         let valueSet: ASTValueSet | undefined
         if (this.stream.isNext('PUNCTUATION', ':')) {
             this.stream.next()
-            const type = this.stream.expect('IDENTIFIER').identifier
+            let type: string
+            if (this.stream.isNext('PUNCTUATION', '[')) {
+                this.stream.next()
+                const elementType = this.stream.expect('IDENTIFIER').identifier
+                this.stream.expect('PUNCTUATION', ']')
+                type = `[${elementType}]`
+            } else {
+                type = this.stream.expect('IDENTIFIER').identifier
+            }
             valueSet = { type }
         }
         this.stream.expect('PUNCTUATION', '=')

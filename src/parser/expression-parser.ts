@@ -142,6 +142,27 @@ export class ExpressionParser {
                     return value
                 }
 
+                if (token.symbol === '[') {
+                    this.stream.next()
+                    const elements: ASTExpression[] = []
+
+                    while (!this.stream.isNext('PUNCTUATION', ']')) {
+                        elements.push(this.parse())
+                        if (this.stream.isNext('PUNCTUATION', ',')) {
+                            this.stream.next()
+                        } else {
+                            break
+                        }
+                    }
+
+                    this.stream.expect('PUNCTUATION', ']')
+                    return {
+                        kind: 'array-literal',
+                        elements,
+                        position: { line: token.line, column: token.column },
+                    }
+                }
+
                 if (token.symbol === '{') {
                     this.stream.next()
                     const fields: { [field: string]: ASTExpression } = {}

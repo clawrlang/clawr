@@ -940,4 +940,31 @@ describe('Expression precedence tests', () => {
             },
         })
     })
+
+    it('parses array literal expressions', () => {
+        const ast = parse('const xs = [1, 2, 3]')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            value: {
+                kind: 'array-literal',
+                elements: [
+                    { kind: 'integer', value: 1n },
+                    { kind: 'integer', value: 2n },
+                    { kind: 'integer', value: 3n },
+                ],
+            },
+        })
+    })
+
+    it('parses array type annotations as [T]', () => {
+        const ast = parse('const xs: [integer] = [1, 2, 3]')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            name: 'xs',
+            valueSet: { type: '[integer]' },
+            value: {
+                kind: 'array-literal',
+            },
+        })
+    })
 })

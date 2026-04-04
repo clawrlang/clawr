@@ -1,4 +1,5 @@
 import type {
+    ASTArrayLiteral,
     ASTCallArgument,
     ASTDataDeclaration,
     ASTDataLiteral,
@@ -36,6 +37,12 @@ export interface SemanticBinaryExpression {
     position: ASTPosition
 }
 
+export interface SemanticArrayLiteral {
+    kind: 'array-literal'
+    elements: SemanticExpression[]
+    position: ASTPosition
+}
+
 export interface SemanticCallDispatch {
     kind: 'direct' | 'virtual'
     methodName?: string
@@ -62,6 +69,7 @@ export type SemanticExpression =
     | ASTStringLiteral
     | ASTIdentifier
     | ASTDataLiteral
+    | SemanticArrayLiteral
     | SemanticBinaryExpression
     | SemanticCopyExpression
     | SemanticCallExpression

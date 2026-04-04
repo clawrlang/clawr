@@ -25,6 +25,7 @@ export type ASTExpression =
     | ASTIntegerLiteral
     | ASTTruthValueLiteral
     | ASTStringLiteral
+    | ASTArrayLiteral
     | ASTIdentifier
     | ASTDataLiteral
     | ASTCopyExpression
@@ -46,6 +47,12 @@ export interface ASTTruthValueLiteral {
 export interface ASTStringLiteral {
     kind: 'string'
     value: string
+    position: ASTPosition
+}
+
+export interface ASTArrayLiteral {
+    kind: 'array-literal'
+    elements: ASTExpression[]
     position: ASTPosition
 }
 

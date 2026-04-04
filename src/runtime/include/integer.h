@@ -4,6 +4,7 @@
 #include "refc.h"
 #include "array.h"
 #include "clawr_string.h"
+#include "truthvalue.h"
 #include <stdlib.h>
 
 #define DIGIT_MAX INT64_MAX
@@ -98,5 +99,12 @@ Integer* Integer¸power(Integer* base, Integer* exponent);
 
 /// @brief Compare two integers. Returns -1 if left < right, 0 if equal, 1 if left > right.
 int Integer¸compare(Integer* left, Integer* right);
+
+truthvalue_t Integer¸eq(Integer* left, Integer* right);
+truthvalue_t Integer¸ne(Integer* left, Integer* right);
+truthvalue_t Integer¸lt(Integer* left, Integer* right);
+truthvalue_t Integer¸le(Integer* left, Integer* right);
+truthvalue_t Integer¸gt(Integer* left, Integer* right);
+truthvalue_t Integer¸ge(Integer* left, Integer* right);
 
 #endif // BIG_INTEGER_H

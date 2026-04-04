@@ -193,6 +193,58 @@ export function lowerValue(
                 }
             }
 
+            {
+                // Typed operators produced by semantic rewriter
+                const left = lowerValue(
+                    val.left as Exclude<SemanticExpression, ASTDataLiteral>,
+                )
+                const right = lowerValue(
+                    val.right as Exclude<SemanticExpression, ASTDataLiteral>,
+                )
+                const directFnMap: Record<string, string> = {
+                    'integer-sub': 'Integer¸subtract',
+                    'integer-mul': 'Integer¸multiply',
+                    'integer-div': 'Integer¸divide',
+                    'integer-eq': 'Integer¸eq',
+                    'integer-ne': 'Integer¸ne',
+                    'integer-lt': 'Integer¸lt',
+                    'integer-le': 'Integer¸le',
+                    'integer-gt': 'Integer¸gt',
+                    'integer-ge': 'Integer¸ge',
+                    'string-eq': 'String¸eq',
+                    'truthvalue-and': 'truthvalue¸and',
+                    'truthvalue-or': 'truthvalue¸or',
+                }
+                const fnName = directFnMap[val.operator]
+                if (fnName) {
+                    return {
+                        kind: 'function-call',
+                        name: fnName,
+                        arguments: [left, right],
+                    }
+                }
+                // string != : negate String¸eq (negation in ternary logic is -(v))
+                if (val.operator === 'string-ne') {
+                    return {
+                        kind: 'raw-expression',
+                        expression: `(-(String¸eq(${renderInlineExpression(left)}, ${renderInlineExpression(right)})))`,
+                    }
+                }
+                // truthvalue == and != : plain C integer comparison returning truthvalue_t
+                if (val.operator === 'truthvalue-eq') {
+                    return {
+                        kind: 'raw-expression',
+                        expression: `((${renderInlineExpression(left)}) == (${renderInlineExpression(right)}) ? 1 : -1)`,
+                    }
+                }
+                if (val.operator === 'truthvalue-ne') {
+                    return {
+                        kind: 'raw-expression',
+                        expression: `((${renderInlineExpression(left)}) != (${renderInlineExpression(right)}) ? 1 : -1)`,
+                    }
+                }
+            }
+
             throw new Error(
                 `Unsupported binary operator '${val.operator}' during lowering`,
             )

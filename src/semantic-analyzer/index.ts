@@ -751,6 +751,76 @@ export class SemanticAnalyzer {
             }
         }
 
+        if (
+            expr.operator === '-' ||
+            expr.operator === '*' ||
+            expr.operator === '/'
+        ) {
+            const opMap: Record<string, string> = {
+                '-': 'integer-sub',
+                '*': 'integer-mul',
+                '/': 'integer-div',
+            }
+            return {
+                kind: 'binary',
+                operator: opMap[expr.operator],
+                left: this.rewriteExpression(expr.left),
+                right: this.rewriteExpression(expr.right),
+                position: expr.position,
+            }
+        }
+
+        if (expr.operator === '==' || expr.operator === '!=') {
+            const leftType = this.inferExpressionType(expr.left)
+            const opPrefix =
+                leftType === 'integer'
+                    ? 'integer'
+                    : leftType === 'string'
+                      ? 'string'
+                      : 'truthvalue'
+            const opSuffix = expr.operator === '==' ? 'eq' : 'ne'
+            return {
+                kind: 'binary',
+                operator: `${opPrefix}-${opSuffix}`,
+                left: this.rewriteExpression(expr.left),
+                right: this.rewriteExpression(expr.right),
+                position: expr.position,
+            }
+        }
+
+        if (
+            expr.operator === '<' ||
+            expr.operator === '<=' ||
+            expr.operator === '>' ||
+            expr.operator === '>='
+        ) {
+            const opMap: Record<string, string> = {
+                '<': 'integer-lt',
+                '<=': 'integer-le',
+                '>': 'integer-gt',
+                '>=': 'integer-ge',
+            }
+            return {
+                kind: 'binary',
+                operator: opMap[expr.operator],
+                left: this.rewriteExpression(expr.left),
+                right: this.rewriteExpression(expr.right),
+                position: expr.position,
+            }
+        }
+
+        if (expr.operator === '&&' || expr.operator === '||') {
+            const op =
+                expr.operator === '&&' ? 'truthvalue-and' : 'truthvalue-or'
+            return {
+                kind: 'binary',
+                operator: op,
+                left: this.rewriteExpression(expr.left),
+                right: this.rewriteExpression(expr.right),
+                position: expr.position,
+            }
+        }
+
         if (expr.operator !== '.') {
             throw new Error(
                 `${expr.position.line}:${expr.position.column}:Unsupported binary operator '${expr.operator}'`,
@@ -1873,6 +1943,76 @@ export class SemanticAnalyzer {
                     }
 
                     return 'string'
+                }
+
+                if (
+                    value.operator === '-' ||
+                    value.operator === '*' ||
+                    value.operator === '/'
+                ) {
+                    const leftType = this.inferExpressionType(value.left)
+                    const rightType = this.inferExpressionType(value.right)
+
+                    if (leftType !== 'integer' || rightType !== 'integer') {
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Operator '${value.operator}' expects integer operands, got '${leftType}' and '${rightType}'`,
+                        )
+                    }
+
+                    return 'integer'
+                }
+
+                if (value.operator === '==' || value.operator === '!=') {
+                    const leftType = this.inferExpressionType(value.left)
+                    const rightType = this.inferExpressionType(value.right)
+
+                    if (!leftType || !rightType) {
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Cannot infer operand type for '${value.operator}'`,
+                        )
+                    }
+
+                    if (leftType !== rightType) {
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Operator '${value.operator}' requires matching operand types, got '${leftType}' and '${rightType}'`,
+                        )
+                    }
+
+                    return 'truthvalue'
+                }
+
+                if (
+                    value.operator === '<' ||
+                    value.operator === '<=' ||
+                    value.operator === '>' ||
+                    value.operator === '>='
+                ) {
+                    const leftType = this.inferExpressionType(value.left)
+                    const rightType = this.inferExpressionType(value.right)
+
+                    if (leftType !== 'integer' || rightType !== 'integer') {
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Operator '${value.operator}' expects integer operands, got '${leftType}' and '${rightType}'`,
+                        )
+                    }
+
+                    return 'truthvalue'
+                }
+
+                if (value.operator === '&&' || value.operator === '||') {
+                    const leftType = this.inferExpressionType(value.left)
+                    const rightType = this.inferExpressionType(value.right)
+
+                    if (
+                        leftType !== 'truthvalue' ||
+                        rightType !== 'truthvalue'
+                    ) {
+                        throw new Error(
+                            `${value.position.line}:${value.position.column}:Operator '${value.operator}' expects truthvalue operands, got '${leftType}' and '${rightType}'`,
+                        )
+                    }
+
+                    return 'truthvalue'
                 }
 
                 if (value.operator !== '.') return null

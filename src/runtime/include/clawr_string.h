@@ -2,6 +2,7 @@
 #define CLAWR_STRING_H
 
 #include "refc.h"
+#include "truthvalue.h"
 #include <stddef.h>
 
 typedef struct String {
@@ -13,6 +14,7 @@ extern const __type_info Stringˇtype;
 
 String* String¸fromCString(const char* value);
 String* String¸concat(String* left, String* right);
+truthvalue_t String¸eq(String* left, String* right);
 const char* String·toCString(String* self);
 
 #endif // CLAWR_STRING_H

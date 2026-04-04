@@ -21,6 +21,14 @@ static inline truthvalue_t modulate__by(truthvalue_t value, truthvalue_t by) {
     return value * by;
 }
 
+static inline truthvalue_t truthvalue¸and(truthvalue_t a, truthvalue_t b) {
+    return a < b ? a : b;
+}
+
+static inline truthvalue_t truthvalue¸or(truthvalue_t a, truthvalue_t b) {
+    return a > b ? a : b;
+}
+
 const char* truthvalue·toCString(truthvalue_t value);
 
 #endif // CLAWR_TRUTHVALUE_H

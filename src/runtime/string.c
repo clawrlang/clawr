@@ -56,6 +56,12 @@ String* String¸concat(String* left, String* right) {
     return s;
 }
 
+truthvalue_t String¸eq(String* left, String* right) {
+    if (!left && !right) return c_true;
+    if (!left || !right) return c_false;
+    return strcmp(left->data, right->data) == 0 ? c_true : c_false;
+}
+
 const char* String·toCString(String* self) {
     if (!self) panic("String·toCString does not accept NULL");
     return self->data;

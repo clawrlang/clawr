@@ -693,17 +693,54 @@ Integer* Integer¸power(Integer* base, Integer* exponent) {
 }
 
 int Integer¸compare(Integer* left, Integer* right) {
-    Integer* diff = Integer¸subtract(left, right);
-    const char* decimal = Integer·toString(diff);
+    int8_t leftSign = integerSign(left);
+    int8_t rightSign = integerSign(right);
 
-    int result = 0;
-    if (strcmp(decimal, "0") != 0) {
-        result = decimal[0] == '-' ? -1 : 1;
+    if (leftSign < rightSign) return -1;
+    if (leftSign > rightSign) return 1;
+    if (leftSign == 0) return 0;
+
+    size_t leftLength = effectiveLength(left);
+    size_t rightLength = effectiveLength(right);
+    if (leftLength != rightLength) {
+        if (leftSign > 0) return leftLength > rightLength ? 1 : -1;
+        return leftLength > rightLength ? -1 : 1;
     }
 
-    free((void*) decimal);
-    releaseRC(diff);
-    return result;
+    for (size_t i = leftLength; i-- > 0; ) {
+        digit_t leftDigit = ARRAY_ELEMENT_AT(i, left->digits, digit_t);
+        digit_t rightDigit = ARRAY_ELEMENT_AT(i, right->digits, digit_t);
+        if (leftDigit == rightDigit) continue;
+
+        if (leftSign > 0) return leftDigit > rightDigit ? 1 : -1;
+        return leftDigit > rightDigit ? -1 : 1;
+    }
+
+    return 0;
+}
+
+truthvalue_t Integer¸eq(Integer* left, Integer* right) {
+    return Integer¸compare(left, right) == 0 ? c_true : c_false;
+}
+
+truthvalue_t Integer¸ne(Integer* left, Integer* right) {
+    return Integer¸compare(left, right) != 0 ? c_true : c_false;
+}
+
+truthvalue_t Integer¸lt(Integer* left, Integer* right) {
+    return Integer¸compare(left, right) < 0 ? c_true : c_false;
+}
+
+truthvalue_t Integer¸le(Integer* left, Integer* right) {
+    return Integer¸compare(left, right) <= 0 ? c_true : c_false;
+}
+
+truthvalue_t Integer¸gt(Integer* left, Integer* right) {
+    return Integer¸compare(left, right) > 0 ? c_true : c_false;
+}
+
+truthvalue_t Integer¸ge(Integer* left, Integer* right) {
+    return Integer¸compare(left, right) >= 0 ? c_true : c_false;
 }
 
 // Helper: parse decimal string to Integer*

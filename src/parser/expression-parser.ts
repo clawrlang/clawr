@@ -5,7 +5,37 @@ export class ExpressionParser {
     constructor(private stream: TokenStream) {}
 
     parse(): ASTExpression {
+        return this.parseAdditiveExpression()
+    }
+
+    // Lowest precedence currently supported.
+    // Additional operator layers should be added above this method.
+    private parseAdditiveExpression(): ASTExpression {
+        let expr = this.parsePostfixExpression()
+
+        while (true) {
+            if (!this.stream.isNext('OPERATOR', ['+'])) {
+                break
+            }
+
+            const op = this.stream.expect('OPERATOR', ['+'])
+            const right = this.parsePostfixExpression()
+            expr = {
+                kind: 'binary',
+                operator: '+',
+                left: expr,
+                right,
+                position: { line: op.line, column: op.column },
+            }
+        }
+
+        return expr
+    }
+
+    // Postfix operators have the highest precedence in the current grammar.
+    private parsePostfixExpression(): ASTExpression {
         let expr = this.parsePrimaryExpression()
+
         while (true) {
             if (this.stream.isNext('PUNCTUATION', '(')) {
                 const lparen = this.stream.expect('PUNCTUATION', '(')
@@ -98,6 +128,13 @@ export class ExpressionParser {
                     position: { line: token.line, column: token.column },
                 }
             case 'PUNCTUATION':
+                if (token.symbol === '(') {
+                    this.stream.next()
+                    const value = this.parse()
+                    this.stream.expect('PUNCTUATION', ')')
+                    return value
+                }
+
                 if (token.symbol === '{') {
                     this.stream.next()
                     const fields: { [field: string]: ASTExpression } = {}

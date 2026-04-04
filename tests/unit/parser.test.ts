@@ -855,3 +855,76 @@ describe('Call expression tests', () => {
         })
     })
 })
+
+describe('Expression precedence tests', () => {
+    it('parses additive expressions as left-associative', () => {
+        const ast = parse('const x: integer = a + b + c')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            value: {
+                kind: 'binary',
+                operator: '+',
+                left: {
+                    kind: 'binary',
+                    operator: '+',
+                    left: { kind: 'identifier', name: 'a' },
+                    right: { kind: 'identifier', name: 'b' },
+                },
+                right: { kind: 'identifier', name: 'c' },
+            },
+        })
+    })
+
+    it('keeps member access and call precedence above additive', () => {
+        const ast = parse('const x: integer = counter.adjust(down: 2) + bump()')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            value: {
+                kind: 'binary',
+                operator: '+',
+                left: {
+                    kind: 'call',
+                    callee: {
+                        kind: 'binary',
+                        operator: '.',
+                        left: { kind: 'identifier', name: 'counter' },
+                        right: { kind: 'identifier', name: 'adjust' },
+                    },
+                    arguments: [
+                        {
+                            label: 'down',
+                            value: { kind: 'integer', value: 2n },
+                        },
+                    ],
+                },
+                right: {
+                    kind: 'call',
+                    callee: { kind: 'identifier', name: 'bump' },
+                    arguments: [],
+                },
+            },
+        })
+    })
+
+    it('supports parenthesized sub-expressions', () => {
+        const ast = parse('const x: integer = (a + b).toInt()')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            value: {
+                kind: 'call',
+                callee: {
+                    kind: 'binary',
+                    operator: '.',
+                    left: {
+                        kind: 'binary',
+                        operator: '+',
+                        left: { kind: 'identifier', name: 'a' },
+                        right: { kind: 'identifier', name: 'b' },
+                    },
+                    right: { kind: 'identifier', name: 'toInt' },
+                },
+                arguments: [],
+            },
+        })
+    })
+})

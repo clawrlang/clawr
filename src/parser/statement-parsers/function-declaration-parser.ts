@@ -36,7 +36,7 @@ export class FunctionDeclarationParser {
                 returnSemantics = maybeSemantics.keyword
                 this.stream.next()
             }
-            returnType = this.stream.expect('IDENTIFIER').identifier
+            returnType = this.parseTypeReference()
         }
 
         // Body: `=> expr` or `{ stmts }`
@@ -120,7 +120,7 @@ export class FunctionDeclarationParser {
                 this.stream.next()
             }
 
-            const paramType = this.stream.expect('IDENTIFIER').identifier
+            const paramType = this.parseTypeReference()
 
             params.push({
                 label,
@@ -165,5 +165,16 @@ export class FunctionDeclarationParser {
         throw new Error(
             `Expected parameter name, got ${JSON.stringify(token ?? 'EOF')}`,
         )
+    }
+
+    private parseTypeReference(): string {
+        if (this.stream.isNext('PUNCTUATION', '[')) {
+            this.stream.expect('PUNCTUATION', '[')
+            const elementType = this.stream.expect('IDENTIFIER').identifier
+            this.stream.expect('PUNCTUATION', ']')
+            return `[${elementType}]`
+        }
+
+        return this.stream.expect('IDENTIFIER').identifier
     }
 }

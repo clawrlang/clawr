@@ -593,6 +593,15 @@ describe('Function declaration tests', () => {
         })
     })
 
+    it('parses a function with an array return type annotation', () => {
+        const ast = parse('func tokenize() -> [Token] { }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'func-decl',
+            name: 'tokenize',
+            returnType: '[Token]',
+        })
+    })
+
     it('parses a function with const and ref return semantics', () => {
         const cow = parse(
             'func sharedPoint() -> const Point { const p: Point = { x: true } }',
@@ -644,6 +653,14 @@ describe('Function declaration tests', () => {
                 { semantics: 'ref', name: 'target', type: 'Point' },
                 { semantics: undefined, name: 'value', type: 'truthvalue' },
             ],
+        })
+    })
+
+    it('parses function parameters with array type annotations', () => {
+        const ast = parse('func consume(tokens: [Token]) { }')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'func-decl',
+            parameters: [{ name: 'tokens', type: '[Token]' }],
         })
     })
 

@@ -317,6 +317,79 @@ describe('SemanticAnalyzer', () => {
         })
     })
 
+    describe('binary operator typing', () => {
+        it('rewrites integer arithmetic operators to typed semantic operators', () => {
+            const module = analyze('const x: integer = 9 - 3 * 2 / 1')
+            expect(module.functions[0].body[0]).toMatchObject({
+                kind: 'var-decl',
+                name: 'x',
+                valueSet: { type: 'integer' },
+                value: {
+                    kind: 'binary',
+                    operator: 'integer-sub',
+                },
+            })
+        })
+
+        it('rewrites integer comparisons to typed semantic operators', () => {
+            const module = analyze('const x: truthvalue = 1 <= 2')
+            expect(module.functions[0].body[0]).toMatchObject({
+                kind: 'var-decl',
+                name: 'x',
+                valueSet: { type: 'truthvalue' },
+                value: {
+                    kind: 'binary',
+                    operator: 'integer-le',
+                },
+            })
+        })
+
+        it('rewrites string equality and inequality to typed semantic operators', () => {
+            const eqModule = analyze('const x: truthvalue = "a" == "b"')
+            expect(eqModule.functions[0].body[0]).toMatchObject({
+                kind: 'var-decl',
+                value: { kind: 'binary', operator: 'string-eq' },
+            })
+
+            const neModule = analyze('const x: truthvalue = "a" != "b"')
+            expect(neModule.functions[0].body[0]).toMatchObject({
+                kind: 'var-decl',
+                value: { kind: 'binary', operator: 'string-ne' },
+            })
+        })
+
+        it('rewrites truthvalue logical operators to typed semantic operators', () => {
+            const module = analyze('const x: truthvalue = true && false')
+            expect(module.functions[0].body[0]).toMatchObject({
+                kind: 'var-decl',
+                name: 'x',
+                valueSet: { type: 'truthvalue' },
+                value: {
+                    kind: 'binary',
+                    operator: 'truthvalue-and',
+                },
+            })
+        })
+
+        it('rejects non-integer operands for arithmetic operators', () => {
+            expect(() => analyze('const x: integer = true - 1')).toThrow(
+                "1:25:Operator '-' expects integer operands, got 'truthvalue' and 'integer'",
+            )
+        })
+
+        it('rejects mismatched equality operand types', () => {
+            expect(() => analyze('const x: truthvalue = 1 == true')).toThrow(
+                "1:25:Operator '==' requires matching operand types, got 'integer' and 'truthvalue'",
+            )
+        })
+
+        it('rejects non-truthvalue operands for logical operators', () => {
+            expect(() => analyze('const x: truthvalue = true && 1')).toThrow(
+                "1:28:Operator '&&' expects truthvalue operands, got 'truthvalue' and 'integer'",
+            )
+        })
+    })
+
     describe('array literals and annotations', () => {
         it('infers array type from homogeneous literals', () => {
             const module = analyze('const xs = [1, 2, 3]')

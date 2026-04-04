@@ -221,6 +221,124 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
+    it('lowers typed integer comparison operator to Integer comparison callable', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                    value: {
+                        kind: 'binary',
+                        operator: 'integer-ge',
+                        left: {
+                            kind: 'integer',
+                            value: 2n,
+                            position: somePosition,
+                        },
+                        right: {
+                            kind: 'integer',
+                            value: 1n,
+                            position: somePosition,
+                        },
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'truthvalue_t',
+            name: 'x',
+            value: {
+                kind: 'function-call',
+                name: 'Integer¸ge',
+            },
+        } satisfies CStatement)
+    })
+
+    it('lowers typed truthvalue logical operators to truthvalue callables', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                    value: {
+                        kind: 'binary',
+                        operator: 'truthvalue-or',
+                        left: {
+                            kind: 'truthvalue',
+                            value: 'false',
+                            position: somePosition,
+                        },
+                        right: {
+                            kind: 'truthvalue',
+                            value: 'true',
+                            position: somePosition,
+                        },
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'truthvalue_t',
+            name: 'x',
+            value: {
+                kind: 'function-call',
+                name: 'truthvalue¸or',
+            },
+        } satisfies CStatement)
+    })
+
+    it('lowers typed string inequality to raw negated String equality expression', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'var-decl',
+                    semantics: 'const',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                    value: {
+                        kind: 'binary',
+                        operator: 'string-ne',
+                        left: {
+                            kind: 'string',
+                            value: 'a',
+                            position: somePosition,
+                        },
+                        right: {
+                            kind: 'string',
+                            value: 'b',
+                            position: somePosition,
+                        },
+                        position: somePosition,
+                    },
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'truthvalue_t',
+            name: 'x',
+            value: {
+                kind: 'raw-expression',
+                expression:
+                    '(-(String¸eq(String¸fromCString("a"), String¸fromCString("b"))))',
+            },
+        } satisfies CStatement)
+    })
+
     it('lowers array literal declaration to Array¸new and element assignments', () => {
         const program: SemanticProgramFixture = {
             body: [

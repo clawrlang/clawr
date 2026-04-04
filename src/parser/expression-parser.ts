@@ -5,24 +5,116 @@ export class ExpressionParser {
     constructor(private stream: TokenStream) {}
 
     parse(): ASTExpression {
-        return this.parseAdditiveExpression()
+        return this.parseLogicalOrExpression()
     }
 
-    // Lowest precedence currently supported.
-    // Additional operator layers should be added above this method.
+    private parseLogicalOrExpression(): ASTExpression {
+        let expr = this.parseLogicalAndExpression()
+
+        while (this.stream.isNext('OPERATOR', ['||'])) {
+            const op = this.stream.expect('OPERATOR', ['||'])
+            const right = this.parseLogicalAndExpression()
+            expr = {
+                kind: 'binary',
+                operator: '||',
+                left: expr,
+                right,
+                position: { line: op.line, column: op.column },
+            }
+        }
+
+        return expr
+    }
+
+    private parseLogicalAndExpression(): ASTExpression {
+        let expr = this.parseEqualityExpression()
+
+        while (this.stream.isNext('OPERATOR', ['&&'])) {
+            const op = this.stream.expect('OPERATOR', ['&&'])
+            const right = this.parseEqualityExpression()
+            expr = {
+                kind: 'binary',
+                operator: '&&',
+                left: expr,
+                right,
+                position: { line: op.line, column: op.column },
+            }
+        }
+
+        return expr
+    }
+
+    private parseEqualityExpression(): ASTExpression {
+        let expr = this.parseComparisonExpression()
+
+        while (this.stream.isNext('OPERATOR', ['==', '!='])) {
+            const op = this.stream.expect('OPERATOR', ['==', '!='])
+            const right = this.parseComparisonExpression()
+            expr = {
+                kind: 'binary',
+                operator: op.operator,
+                left: expr,
+                right,
+                position: { line: op.line, column: op.column },
+            }
+        }
+
+        return expr
+    }
+
+    private parseComparisonExpression(): ASTExpression {
+        let expr = this.parseAdditiveExpression()
+
+        while (this.stream.isNext('OPERATOR', ['<', '<=', '>', '>='])) {
+            const op = this.stream.expect('OPERATOR', ['<', '<=', '>', '>='])
+            const right = this.parseAdditiveExpression()
+            expr = {
+                kind: 'binary',
+                operator: op.operator,
+                left: expr,
+                right,
+                position: { line: op.line, column: op.column },
+            }
+        }
+
+        return expr
+    }
+
     private parseAdditiveExpression(): ASTExpression {
-        let expr = this.parsePostfixExpression()
+        let expr = this.parseMultiplicativeExpression()
 
         while (true) {
-            if (!this.stream.isNext('OPERATOR', ['+'])) {
+            if (!this.stream.isNext('OPERATOR', ['+', '-'])) {
                 break
             }
 
-            const op = this.stream.expect('OPERATOR', ['+'])
+            const op = this.stream.expect('OPERATOR', ['+', '-'])
+            const right = this.parseMultiplicativeExpression()
+            expr = {
+                kind: 'binary',
+                operator: op.operator,
+                left: expr,
+                right,
+                position: { line: op.line, column: op.column },
+            }
+        }
+
+        return expr
+    }
+
+    private parseMultiplicativeExpression(): ASTExpression {
+        let expr = this.parsePostfixExpression()
+
+        while (true) {
+            if (!this.stream.isNext('OPERATOR', ['*', '/'])) {
+                break
+            }
+
+            const op = this.stream.expect('OPERATOR', ['*', '/'])
             const right = this.parsePostfixExpression()
             expr = {
                 kind: 'binary',
-                operator: '+',
+                operator: op.operator,
                 left: expr,
                 right,
                 position: { line: op.line, column: op.column },

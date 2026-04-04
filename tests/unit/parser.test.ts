@@ -278,6 +278,44 @@ describe('Parser Tests', () => {
         })
     })
 
+    it('parses arithmetic binary operators', () => {
+        const ast = parse('const x: integer = 9 - 3 * 2 / 1')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            name: 'x',
+            valueSet: { type: 'integer' },
+            value: {
+                kind: 'binary',
+            },
+        })
+    })
+
+    it('parses comparison binary operators', () => {
+        const ast = parse('const x: truthvalue = 1 <= 2')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            name: 'x',
+            valueSet: { type: 'truthvalue' },
+            value: {
+                kind: 'binary',
+                operator: '<=',
+            },
+        })
+    })
+
+    it('parses logical binary operators', () => {
+        const ast = parse('const x: truthvalue = true && false || ambiguous')
+        expect(ast.body[0]).toMatchObject({
+            kind: 'var-decl',
+            name: 'x',
+            valueSet: { type: 'truthvalue' },
+            value: {
+                kind: 'binary',
+                operator: '||',
+            },
+        })
+    })
+
     it('parses data declaration and variable initialization correctly', () => {
         const program =
             'data Point { x: truthvalue }\nmut p: Point = { x: true }'

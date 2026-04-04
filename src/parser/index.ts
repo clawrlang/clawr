@@ -42,9 +42,17 @@ export class Parser {
         const imports: ASTImportDeclaration[] = []
         const body: ASTStatement[] = []
         while (this.stream.peek()) {
+            const before = this.stream.peek()
             const stmt = this.parseTopLevel(imports)
             if (stmt) {
                 body.push(stmt)
+            }
+
+            const after = this.stream.peek()
+            if (before && before === after) {
+                throw new Error(
+                    `${before.line}:${before.column}:Unexpected token ${describeToken(before)} at top level`,
+                )
             }
         }
         return { imports, body }

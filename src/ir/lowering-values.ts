@@ -82,6 +82,8 @@ export function lowerStructFieldExpression(
             return `c_${expr.value}`
         case 'integer':
             return `Integer¸fromCString("${expr.value.toString()}")`
+        case 'string':
+            return `String¸fromCString("${expr.value}")`
         case 'call':
             throw new Error(
                 'Call expressions are not supported in struct field literals',
@@ -90,10 +92,47 @@ export function lowerStructFieldExpression(
             return expr.name
         case 'data-literal':
             return `&(${declaredFieldType}ˇfields){ ${lowerStructLiteralFields(module, declaredFieldType, expr.fields)} }`
-        case 'binary':
-            throw new Error(
-                'Binary expressions are not supported in struct field literals',
+        case 'binary': {
+            if (expr.operator === '.') {
+                if (expr.right.kind !== 'identifier') {
+                    throw new Error(
+                        'Struct field dot access expects identifier rhs',
+                    )
+                }
+
+                return `${lowerStructFieldExpression(module, expr.left, declaredFieldType)}->${expr.right.name}`
+            }
+
+            const left = lowerStructFieldExpression(
+                module,
+                expr.left,
+                declaredFieldType,
             )
+            const right = lowerStructFieldExpression(
+                module,
+                expr.right,
+                declaredFieldType,
+            )
+
+            if (declaredFieldType === 'integer') {
+                const integerMap: Record<string, string> = {
+                    '+': 'Integer¸add',
+                    '-': 'Integer¸subtract',
+                    '*': 'Integer¸multiply',
+                    '/': 'Integer¸divide',
+                }
+                const fn = integerMap[expr.operator]
+                if (fn) return `${fn}(${left}, ${right})`
+            }
+
+            if (declaredFieldType === 'string' && expr.operator === '+') {
+                return `String¸concat(${left}, ${right})`
+            }
+
+            throw new Error(
+                `Binary operator '${expr.operator}' is not supported in struct field literals for type '${declaredFieldType}'`,
+            )
+        }
         case 'array-literal':
             throw new Error(
                 'Array literals are not supported in struct field literals',
@@ -202,6 +241,7 @@ export function lowerValue(
                     val.right as Exclude<SemanticExpression, ASTDataLiteral>,
                 )
                 const directFnMap: Record<string, string> = {
+                    'integer-add': 'Integer¸add',
                     'integer-sub': 'Integer¸subtract',
                     'integer-mul': 'Integer¸multiply',
                     'integer-div': 'Integer¸divide',

@@ -742,9 +742,15 @@ export class SemanticAnalyzer {
         }
 
         if (expr.operator === '+') {
+            const leftType = this.inferExpressionType(expr.left)
+            const rightType = this.inferExpressionType(expr.right)
+            const operator =
+                leftType === 'integer' && rightType === 'integer'
+                    ? 'integer-add'
+                    : '+'
             return {
                 kind: 'binary',
-                operator: '+',
+                operator,
                 left: this.rewriteExpression(expr.left),
                 right: this.rewriteExpression(expr.right),
                 position: expr.position,
@@ -1936,13 +1942,28 @@ export class SemanticAnalyzer {
                         )
                     }
 
-                    if (leftType !== 'string' || rightType !== 'string') {
+                    if (leftType === 'string' && rightType === 'string') {
+                        return 'string'
+                    }
+
+                    if (leftType === 'integer' && rightType === 'integer') {
+                        return 'integer'
+                    }
+
+                    if (
+                        leftType !== 'string' &&
+                        leftType !== 'integer' &&
+                        rightType !== 'string' &&
+                        rightType !== 'integer'
+                    ) {
                         throw new Error(
-                            `${value.position.line}:${value.position.column}:Operator '+' expects string operands, got '${leftType}' and '${rightType}'`,
+                            `${value.position.line}:${value.position.column}:Operator '+' expects string or integer operands, got '${leftType}' and '${rightType}'`,
                         )
                     }
 
-                    return 'string'
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Operator '+' requires matching operand types, got '${leftType}' and '${rightType}'`,
+                    )
                 }
 
                 if (

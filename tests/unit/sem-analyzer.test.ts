@@ -312,7 +312,7 @@ describe('SemanticAnalyzer', () => {
 
         it('rejects non-string operands for +', () => {
             expect(() => analyze('const s: string = "a" + 1')).toThrow(
-                "1:23:Operator '+' expects string operands, got 'string' and 'integer'",
+                "1:23:Operator '+' requires matching operand types, got 'string' and 'integer'",
             )
         })
     })

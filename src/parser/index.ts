@@ -1,5 +1,6 @@
 import {
     ASTDataDeclaration,
+    ASTForInStatement,
     ASTIfStatement,
     ASTImportDeclaration,
     ASTImportItem,
@@ -73,6 +74,10 @@ export class Parser {
             return this.parseWhileStatement()
         }
 
+        if (this.stream.isNext('KEYWORD', 'for')) {
+            return this.parseForInStatement()
+        }
+
         if (this.stream.isNext('KEYWORD', 'break')) {
             const token = this.stream.expect('KEYWORD', 'break')
             return {
@@ -134,6 +139,22 @@ export class Parser {
             condition,
             body,
             position: { line: whileToken.line, column: whileToken.column },
+        }
+    }
+
+    private parseForInStatement(): ASTForInStatement {
+        const forToken = this.stream.expect('KEYWORD', 'for')
+        const loopVar = this.stream.expect('IDENTIFIER').identifier
+        this.stream.expect('KEYWORD', 'in')
+        const iterable = new ExpressionParser(this.stream).parse()
+        const body = this.parseBlock()
+
+        return {
+            kind: 'for-in',
+            loopVar,
+            iterable,
+            body,
+            position: { line: forToken.line, column: forToken.column },
         }
     }
 

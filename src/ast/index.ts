@@ -157,6 +157,7 @@ export type ASTStatement =
     | ASTAssignment
     | ASTIfStatement
     | ASTWhileStatement
+    | ASTForInStatement
     | ASTBreakStatement
     | ASTContinueStatement
     | ASTReturnStatement
@@ -196,6 +197,14 @@ export interface ASTIfStatement {
 export interface ASTWhileStatement {
     kind: 'while'
     condition: ASTExpression
+    body: ASTStatement[]
+    position: ASTPosition
+}
+
+export interface ASTForInStatement {
+    kind: 'for-in'
+    loopVar: string
+    iterable: ASTExpression
     body: ASTStatement[]
     position: ASTPosition
 }

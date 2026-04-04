@@ -1063,6 +1063,92 @@ describe('Lowering Tests', () => {
         })
     })
 
+    it('lowers for-in loops to index-based while loops', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'for-in',
+                    loopVar: 'x',
+                    iterable: {
+                        kind: 'identifier',
+                        name: 'xs',
+                        position: somePosition,
+                    },
+                    elementType: 'integer',
+                    body: [
+                        {
+                            kind: 'print',
+                            dispatchType: 'integer',
+                            value: {
+                                kind: 'identifier',
+                                name: 'x',
+                                position: somePosition,
+                            },
+                            position: somePosition,
+                        },
+                    ],
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        expect(module.functions[0].body[0]).toMatchObject({
+            kind: 'var-decl',
+            type: 'Array*',
+            value: { kind: 'raw-expression', expression: 'xs' },
+        })
+        expect(module.functions[0].body[1]).toMatchObject({
+            kind: 'var-decl',
+            type: 'size_t',
+            value: { kind: 'raw-expression', expression: '0' },
+        })
+        expect(module.functions[0].body[2]).toMatchObject({
+            kind: 'while',
+            condition: {
+                kind: 'raw-expression',
+                expression: '(tempˇ1 < tempˇ0->count)',
+            },
+            body: [
+                {
+                    kind: 'var-decl',
+                    type: 'Integer*',
+                    name: 'x',
+                    value: {
+                        kind: 'raw-expression',
+                        expression:
+                            'ARRAY_ELEMENT_AT_CHECKED(tempˇ1, tempˇ0, Integer*)',
+                    },
+                },
+                {
+                    kind: 'var-decl',
+                    type: 'String*',
+                    name: 'tempˇ2',
+                    value: {
+                        kind: 'function-call',
+                        name: 'Integer·toStringRC',
+                    },
+                },
+                {
+                    kind: 'function-call',
+                    name: 'printf',
+                },
+                {
+                    kind: 'function-call',
+                    name: 'releaseRC',
+                },
+                {
+                    kind: 'assign',
+                    target: { kind: 'var-ref', name: 'tempˇ1' },
+                    value: {
+                        kind: 'raw-expression',
+                        expression: 'tempˇ1 + 1',
+                    },
+                },
+            ],
+        })
+    })
+
     it('lowers data literal', () => {
         const program: SemanticProgramFixture = {
             body: [

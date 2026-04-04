@@ -371,6 +371,26 @@ describe('Parser Tests', () => {
         })
     })
 
+    it('parses for-in loops', () => {
+        const program = 'for x in xs { print x }'
+        const ast = parse(program)
+        expect(ast).toMatchObject({
+            body: [
+                {
+                    kind: 'for-in',
+                    loopVar: 'x',
+                    iterable: { kind: 'identifier', name: 'xs' },
+                    body: [
+                        {
+                            kind: 'print',
+                            value: { kind: 'identifier', name: 'x' },
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
     it('parses import declarations with aliases before top-level body', () => {
         const program =
             'import Token as Tok, Span from "lexer/tokens"\nconst x = ambiguous'

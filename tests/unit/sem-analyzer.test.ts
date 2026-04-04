@@ -586,6 +586,32 @@ describe('SemanticAnalyzer', () => {
             ])
         })
 
+        it('accepts for-in over arrays and binds loop variable type', () => {
+            const module = analyze(
+                'const xs: [integer] = [1, 2]\nfor x in xs { print x }',
+            )
+
+            expect(module.functions[0].body[1]).toMatchObject({
+                kind: 'for-in',
+                loopVar: 'x',
+                elementType: 'integer',
+                iterable: { kind: 'identifier', name: 'xs' },
+                body: [
+                    {
+                        kind: 'print',
+                        dispatchType: 'integer',
+                        value: { kind: 'identifier', name: 'x' },
+                    },
+                ],
+            })
+        })
+
+        it('rejects for-in over non-array iterables', () => {
+            expect(() =>
+                analyze('const x: integer = 1\nfor y in x { print y }'),
+            ).toThrow("2:1:for-in iterable must be array, got 'integer'")
+        })
+
         it('rejects non-truthvalue if condition', () => {
             expect(() =>
                 analyze(

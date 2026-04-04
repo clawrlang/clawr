@@ -189,6 +189,8 @@ export class IRGenerator {
                 return [this.lowerIfStatement(stmt, context)]
             case 'while':
                 return [this.lowerWhileStatement(stmt, context)]
+            case 'for-in':
+                return this.lowerForInStatement(stmt, context)
             case 'break':
                 return [{ kind: 'break' }]
             case 'continue':
@@ -229,6 +231,66 @@ export class IRGenerator {
                 this.lowerStatement(child, context),
             ),
         }
+    }
+
+    private lowerForInStatement(
+        stmt: Extract<SemanticStatement, { kind: 'for-in' }>,
+        context: LoweringContext,
+    ): CStatement[] {
+        if (stmt.iterable.kind === 'data-literal') {
+            throw new Error('Unsupported for-in iterable kind data-literal')
+        }
+
+        const iterableName = this.nextTempName(context)
+        const indexName = this.nextTempName(context)
+        const elementType = lowerValueSetType(stmt.elementType)
+        const iterableExpr = this.renderExpressionInline(
+            lowerValue(stmt.iterable),
+        )
+
+        return [
+            {
+                kind: 'var-decl',
+                type: 'Array*',
+                name: iterableName,
+                value: { kind: 'raw-expression', expression: iterableExpr },
+            },
+            {
+                kind: 'var-decl',
+                type: 'size_t',
+                name: indexName,
+                value: { kind: 'raw-expression', expression: '0' },
+            },
+            {
+                kind: 'while',
+                condition: {
+                    kind: 'raw-expression',
+                    expression: `(${indexName} < ${iterableName}->count)`,
+                },
+                body: [
+                    {
+                        kind: 'var-decl',
+                        type: elementType,
+                        name: stmt.loopVar,
+                        value: {
+                            kind: 'raw-expression',
+                            expression: `ARRAY_ELEMENT_AT_CHECKED(${indexName}, ${iterableName}, ${elementType})`,
+                        },
+                    },
+                    ...stmt.body.flatMap((child) =>
+                        this.lowerStatement(child, context),
+                    ),
+                    {
+                        kind: 'assign',
+                        target: { kind: 'var-ref', name: indexName },
+                        value: {
+                            kind: 'raw-expression',
+                            expression: `${indexName} + 1`,
+                        },
+                    },
+                ],
+            },
+        ]
     }
 
     private lowerTruthyCondition(condition: SemanticExpression) {

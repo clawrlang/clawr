@@ -30,6 +30,7 @@ export type {
     SemanticArrayIndexExpression,
     SemanticAssignment,
     SemanticDataDeclaration,
+    SemanticForInStatement,
     SemanticFieldAccess,
     SemanticFunction,
     SemanticModule,
@@ -283,6 +284,8 @@ export class SemanticAnalyzer {
                 return this.analyzeIfStatement(stmt)
             case 'while':
                 return this.analyzeWhileStatement(stmt)
+            case 'for-in':
+                return this.analyzeForInStatement(stmt)
             case 'break':
                 return this.analyzeBreakStatement(stmt)
             case 'continue':
@@ -374,6 +377,53 @@ export class SemanticAnalyzer {
         return {
             kind: 'while',
             condition: this.rewriteExpression(stmt.condition),
+            body,
+            position: stmt.position,
+        }
+    }
+
+    private analyzeForInStatement(
+        stmt: Extract<ASTStatement, { kind: 'for-in' }>,
+    ): SemanticStatement {
+        const iterableType = this.inferExpressionType(stmt.iterable)
+        if (!iterableType) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Cannot infer type for for-in iterable`,
+            )
+        }
+
+        if (!this.isArrayType(iterableType)) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:for-in iterable must be array, got '${iterableType}'`,
+            )
+        }
+
+        const elementType = this.arrayElementType(iterableType)
+        if (!elementType) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Cannot resolve array element type from '${iterableType}'`,
+            )
+        }
+
+        const loopAnalyzer = this.createLoopChildScope()
+        loopAnalyzer.declareBinding(
+            stmt.loopVar,
+            {
+                type: elementType,
+                semantics: 'const',
+            },
+            stmt.position,
+        )
+
+        const body = stmt.body.map((child) =>
+            loopAnalyzer.analyzeStatement(child),
+        )
+
+        return {
+            kind: 'for-in',
+            loopVar: stmt.loopVar,
+            iterable: this.rewriteExpression(stmt.iterable),
+            elementType,
             body,
             position: stmt.position,
         }

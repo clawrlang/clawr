@@ -136,6 +136,15 @@ export interface SemanticWhileStatement {
     position: ASTPosition
 }
 
+export interface SemanticForInStatement {
+    kind: 'for-in'
+    loopVar: string
+    iterable: SemanticExpression
+    elementType: string
+    body: SemanticStatement[]
+    position: ASTPosition
+}
+
 export interface SemanticBreakStatement {
     kind: 'break'
     position: ASTPosition
@@ -158,6 +167,7 @@ export type SemanticStatement =
     | SemanticAssignment
     | SemanticIfStatement
     | SemanticWhileStatement
+    | SemanticForInStatement
     | SemanticBreakStatement
     | SemanticContinueStatement
     | SemanticReturnStatement

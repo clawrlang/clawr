@@ -1,0 +1,4 @@
+write: true
+read-null: false
+content: hello clawr
+missing-null: true

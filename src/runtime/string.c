@@ -1,6 +1,7 @@
 #include "clawr_string.h"
 #include "panic.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -60,6 +61,66 @@ truthvalue_t String¸eq(String* left, String* right) {
     if (!left && !right) return c_true;
     if (!left || !right) return c_false;
     return strcmp(left->data, right->data) == 0 ? c_true : c_false;
+}
+
+String* String¸readTextFile(String* path) {
+    if (!path) panic("String¸readTextFile does not accept NULL path");
+
+    FILE* file = fopen(String·toCString(path), "rb");
+    if (!file) return NULL;
+
+    if (fseek(file, 0, SEEK_END) != 0) {
+        fclose(file);
+        return NULL;
+    }
+
+    long rawSize = ftell(file);
+    if (rawSize < 0) {
+        fclose(file);
+        return NULL;
+    }
+
+    if (fseek(file, 0, SEEK_SET) != 0) {
+        fclose(file);
+        return NULL;
+    }
+
+    size_t size = (size_t)rawSize;
+    char* data = malloc(size + 1);
+    if (!data) panic("Out of memory in String¸readTextFile");
+
+    size_t readCount = fread(data, 1, size, file);
+    if (ferror(file)) {
+        free(data);
+        fclose(file);
+        return NULL;
+    }
+
+    data[readCount] = '\0';
+    fclose(file);
+
+    String* s = allocRC(String, __rc_ISOLATED);
+    s->length = readCount;
+    s->data = data;
+    return s;
+}
+
+truthvalue_t String¸writeTextFile(String* path, String* content) {
+    if (!path || !content) {
+        panic("String¸writeTextFile does not accept NULL arguments");
+    }
+
+    FILE* file = fopen(String·toCString(path), "wb");
+    if (!file) return c_false;
+
+    size_t written = fwrite(content->data, 1, content->length, file);
+    if (written != content->length) {
+        fclose(file);
+        return c_false;
+    }
+
+    if (fclose(file) != 0) return c_false;
+    return c_true;
 }
 
 const char* String·toCString(String* self) {

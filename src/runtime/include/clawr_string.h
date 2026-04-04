@@ -15,6 +15,8 @@ extern const __type_info Stringˇtype;
 String* String¸fromCString(const char* value);
 String* String¸concat(String* left, String* right);
 truthvalue_t String¸eq(String* left, String* right);
+String* String¸readTextFile(String* path);
+truthvalue_t String¸writeTextFile(String* path, String* content);
 const char* String·toCString(String* self);
 
 #endif // CLAWR_STRING_H

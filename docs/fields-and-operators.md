@@ -75,6 +75,8 @@ This keeps ordinary masking simple and predictable, while still supporting terna
 
 ### 6. Indexing and Slicing
 
+For string indexing/length semantics, see grapheme-first policy in [types.md](types.md#text-semantics-planned).
+
 1. `field[i]` returns one lane (`boolean` for bitfield, `truthvalue` for tritfield).
 2. `field[a..<b]` returns same field family with length `b-a`.
 3. Concatenation is supported: `concat(a, b)`.

@@ -16,6 +16,35 @@ Every language needs primitive types. Here is a proposed set for Clawr:
 
 These are foundational types that can be aggregated into `data` structures and other user-defined types.
 
+## Text Semantics (Planned)
+
+Clawr text semantics should be architecture-agnostic and user-facing. The default unit of text is therefore planned to be the **grapheme cluster** (what users perceive as one character), not bytes or Unicode code points.
+
+### Default language behavior
+
+- `string.length` means grapheme count.
+- `string[i]` indexes graphemes.
+- String iteration yields graphemes.
+- String slicing boundaries are grapheme boundaries.
+
+### Explicit low-level escape hatches
+
+For protocol work, interop, and performance-sensitive code, low-level APIs should be explicit and separate from the default model:
+
+- byte-oriented APIs (UTF-8 storage details)
+- code-point-oriented APIs (Unicode scalar level)
+
+These APIs are intentionally not the default and should have names that clearly communicate their level.
+
+### Staging
+
+- v1 can keep runtime internals UTF-8 based without exposing byte/code-point semantics as the language default.
+- Post-v1 should lock grapheme semantics for `length`, indexing, and iteration.
+
+### Performance note
+
+Grapheme indexing may be $O(n)$ unless a runtime-specific index/cache is maintained. This is acceptable as a semantic baseline and can be optimized per backend/runtime.
+
 ## Ternary Mode
 
 Clawr should support ternary architectures whenever they become mainstream. It is reasonable to expect that balanced ternary could take over the baton from binary in the future. In practical terms this is probably a very distant future as there is so much existing infrastructure that will need to be replaced, but being prepared is never a mistake. And actually being able to utilise ternary—albeit on a small scale—in the near future could spell competitive advantage.

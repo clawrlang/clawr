@@ -256,6 +256,18 @@ describe('Lowering Tests', () => {
             value: {
                 kind: 'function-call',
                 name: 'Integer¸ge',
+                arguments: [
+                    {
+                        kind: 'function-call',
+                        name: 'Integer¸fromCString',
+                        arguments: [{ kind: 'string', value: '2' }],
+                    },
+                    {
+                        kind: 'function-call',
+                        name: 'Integer¸fromCString',
+                        arguments: [{ kind: 'string', value: '1' }],
+                    },
+                ],
             },
         } satisfies CStatement)
     })
@@ -295,6 +307,10 @@ describe('Lowering Tests', () => {
             value: {
                 kind: 'function-call',
                 name: 'truthvalue¸or',
+                arguments: [
+                    { kind: 'var-ref', name: 'c_false' },
+                    { kind: 'var-ref', name: 'c_true' },
+                ],
             },
         } satisfies CStatement)
     })

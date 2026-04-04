@@ -1222,6 +1222,76 @@ describe('Lowering Tests', () => {
         })
     })
 
+    it('releases branch-local reference declarations inside if-branch scope', () => {
+        const program: SemanticProgramFixture = {
+            body: [
+                {
+                    kind: 'data-decl',
+                    name: 'Box',
+                    fields: [{ name: 'value', type: 'truthvalue' }],
+                    position: somePosition,
+                    visibility: 'public',
+                },
+                {
+                    kind: 'if',
+                    condition: {
+                        kind: 'truthvalue',
+                        value: 'true',
+                        position: somePosition,
+                    },
+                    thenBranch: [
+                        {
+                            kind: 'var-decl',
+                            semantics: 'const',
+                            name: 'branchBox',
+                            valueSet: { type: 'Box' },
+                            value: {
+                                kind: 'data-literal',
+                                fields: {
+                                    value: {
+                                        kind: 'truthvalue',
+                                        value: 'true',
+                                        position: somePosition,
+                                    },
+                                },
+                                position: somePosition,
+                            },
+                            ownership: {
+                                releaseAtScopeExit: true,
+                                retains: [],
+                            },
+                        },
+                    ],
+                    elseBranch: undefined,
+                    position: somePosition,
+                },
+            ],
+        }
+
+        const module = new IRGenerator().generate(toModule(program))
+        const ifStmt = module.functions[0].body[0]
+        expect(ifStmt).toMatchObject({ kind: 'if' })
+
+        const typedIf = ifStmt as Extract<CStatement, { kind: 'if' }>
+        const hasBranchRelease = typedIf.thenBranch.some(
+            (stmt) =>
+                stmt.kind === 'function-call' &&
+                stmt.name === 'releaseRC' &&
+                stmt.arguments[0]?.kind === 'var-ref' &&
+                stmt.arguments[0].name === 'branchBox',
+        )
+        expect(hasBranchRelease).toBe(true)
+
+        const hasTopLevelBranchRelease = module.functions[0].body.some(
+            (stmt) =>
+                stmt.kind === 'function-call' &&
+                stmt.name === 'releaseRC' &&
+                stmt.arguments[0]?.kind === 'var-ref' &&
+                stmt.arguments[0].name === 'branchBox',
+        )
+        expect(hasTopLevelBranchRelease).toBe(false)
+    })
+
     it('lowers while conditions as strict true checks', () => {
         const program: SemanticProgramFixture = {
             body: [

@@ -211,12 +211,10 @@ export class IRGenerator {
         return {
             kind: 'if',
             condition: this.lowerTruthyCondition(stmt.condition),
-            thenBranch: stmt.thenBranch.flatMap((child) =>
-                this.lowerStatement(child, context),
-            ),
-            elseBranch: stmt.elseBranch?.flatMap((child) =>
-                this.lowerStatement(child, context),
-            ),
+            thenBranch: this.lowerScopedStatements(stmt.thenBranch, context),
+            elseBranch: stmt.elseBranch
+                ? this.lowerScopedStatements(stmt.elseBranch, context)
+                : undefined,
         }
     }
 
@@ -227,9 +225,7 @@ export class IRGenerator {
         return {
             kind: 'while',
             condition: this.lowerTruthyCondition(stmt.condition),
-            body: stmt.body.flatMap((child) =>
-                this.lowerStatement(child, context),
-            ),
+            body: this.lowerScopedStatements(stmt.body, context),
         }
     }
 
@@ -277,9 +273,7 @@ export class IRGenerator {
                             expression: `ARRAY_ELEMENT_AT_CHECKED(${indexName}, ${iterableName}, ${elementType})`,
                         },
                     },
-                    ...stmt.body.flatMap((child) =>
-                        this.lowerStatement(child, context),
-                    ),
+                    ...this.lowerScopedStatements(stmt.body, context),
                     {
                         kind: 'assign',
                         target: { kind: 'var-ref', name: indexName },
@@ -290,6 +284,33 @@ export class IRGenerator {
                     },
                 ],
             },
+        ]
+    }
+
+    private lowerScopedStatements(
+        statements: SemanticStatement[],
+        context: LoweringContext,
+    ): CStatement[] {
+        const outerReleaseSet = new Set(context.releaseAtExit)
+        const lowered = statements.flatMap((child) =>
+            this.lowerStatement(child, context),
+        )
+
+        const localReleaseNames = [...context.releaseAtExit]
+            .filter((name) => !outerReleaseSet.has(name))
+            .sort()
+
+        for (const name of localReleaseNames) {
+            context.releaseAtExit.delete(name)
+        }
+
+        return [
+            ...lowered,
+            ...localReleaseNames.map((name) => ({
+                kind: 'function-call' as const,
+                name: 'releaseRC',
+                arguments: [{ kind: 'var-ref' as const, name }],
+            })),
         ]
     }
 

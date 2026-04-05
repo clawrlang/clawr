@@ -38,6 +38,7 @@ interface LoweringContext {
     tempCounter: number
     declaredReturnType?: string
     declaredReturnSemantics?: 'const' | 'ref'
+    currentOwnerType?: string
 }
 
 type DataLiteralVariableDeclaration = SemanticVariableDeclaration & {
@@ -63,6 +64,10 @@ type ArrayLiteralVariableDeclaration = SemanticVariableDeclaration & {
 
 type LowerableAssignment = SemanticAssignment & {
     value: Exclude<SemanticAssignment['value'], { kind: 'data-literal' }>
+}
+
+type DataLiteralAssignment = SemanticAssignment & {
+    value: Extract<SemanticAssignment['value'], { kind: 'data-literal' }>
 }
 
 type IdentifierAssignment = LowerableAssignment & {
@@ -143,6 +148,7 @@ export class IRGenerator {
             tempCounter: 0,
             declaredReturnType: fn.returnType,
             declaredReturnSemantics: fn.returnSemantics,
+            currentOwnerType: methodOwnerType(fn.name),
         }
 
         const isMain = fn.name === 'main'
@@ -190,7 +196,7 @@ export class IRGenerator {
             case 'print':
                 return this.lowerPrint(stmt, context)
             case 'assign':
-                return this.lowerAssignment(stmt)
+                return this.lowerAssignment(stmt, context)
             case 'if':
                 return [this.lowerIfStatement(stmt, context)]
             case 'while':
@@ -671,9 +677,15 @@ export class IRGenerator {
         ]
     }
 
-    private lowerAssignment(stmt: SemanticAssignment): CStatement[] {
+    private lowerAssignment(
+        stmt: SemanticAssignment,
+        context: LoweringContext,
+    ): CStatement[] {
         if (stmt.value.kind === 'data-literal') {
-            throw new Error('Data-literal assignment is unsupported for now')
+            return this.lowerDataLiteralAssignment(
+                stmt as DataLiteralAssignment,
+                context,
+            )
         }
 
         if (this.isLowerableAssignment(stmt)) {
@@ -681,6 +693,63 @@ export class IRGenerator {
         }
 
         throw new Error('Unsupported assignment value kind')
+    }
+
+    private lowerDataLiteralAssignment(
+        stmt: DataLiteralAssignment,
+        context: LoweringContext,
+    ): CStatement[] {
+        if (stmt.target.kind !== 'identifier' || stmt.target.name !== 'self') {
+            throw new Error(
+                "Data-literal assignment is currently only supported for target 'self'",
+            )
+        }
+
+        const ownerType = context.currentOwnerType
+        if (!ownerType) {
+            throw new Error(
+                "Cannot resolve owning type for data-literal assignment target 'self'",
+            )
+        }
+
+        const structFields = lowerStructLiteralFields(
+            this.module,
+            ownerType,
+            stmt.value.fields,
+        )
+        const superInitializerStatements =
+            this.lowerDataLiteralSuperInitializer({
+                kind: 'var-decl',
+                semantics: 'const',
+                name: 'self',
+                valueSet: { type: ownerType },
+                value: stmt.value,
+                ownership: {},
+                position: stmt.position,
+            })
+
+        return [
+            {
+                kind: 'function-call',
+                name: 'memcpy',
+                arguments: [
+                    {
+                        kind: 'raw-expression',
+                        expression: '(__rc_header*)self + 1',
+                    },
+                    {
+                        kind: 'raw-expression',
+                        expression: `&(${ownerType}ˇfields){ ${structFields} }`,
+                    },
+                    {
+                        kind: 'raw-expression',
+                        expression: `sizeof(${ownerType}) - sizeof(__rc_header)`,
+                    },
+                ],
+            },
+            ...superInitializerStatements,
+            ...this.lowerOwnershipPrefix(stmt.ownership),
+        ]
     }
 
     private lowerNonDataLiteralAssignment(
@@ -983,4 +1052,10 @@ function mangleCallableName(name: string, labels: string[]): string {
         .map((label) => label.replace(/[^a-zA-Z0-9_]/g, '_'))
         .join('__')
     return labelSuffix.length > 0 ? `${name}__${labelSuffix}` : name
+}
+
+function methodOwnerType(functionName: string): string | undefined {
+    const separator = functionName.indexOf('·')
+    if (separator <= 0) return undefined
+    return functionName.slice(0, separator)
 }

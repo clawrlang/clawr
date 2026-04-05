@@ -1003,7 +1003,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects direct calls to inheritance initializer methods', () => {
             expect(() =>
                 analyze(
-                    'object Super { inheritance: func new() -> Super { return { base: true } } data: base: truthvalue }\nobject Sub: Super { data: child: truthvalue }\nconst s: Super = { base: true }\nconst bad: Super = s.new()',
+                    'object Super { inheritance: func new() => { base: true } data: base: truthvalue }\nobject Sub: Super { data: child: truthvalue }\nconst s: Super = { base: true }\nconst bad: Super = s.new()',
                 ),
             ).toThrow(
                 "Inheritance initializer 'Super.new()' cannot be called directly",
@@ -1012,7 +1012,7 @@ describe('SemanticAnalyzer', () => {
 
         it('allows inheritance initializer calls as the first entry in subtype literals', () => {
             const module = analyze(
-                'object Super { inheritance: func new(seed value: integer) -> Super { return { base: true } } data: base: truthvalue }\nobject Sub: Super { data: child: truthvalue }\nconst value: Sub = { super.new(seed: 42), child: true }',
+                'object Super { inheritance: func new(seed value: integer) => { base: true } data: base: truthvalue }\nobject Sub: Super { data: child: truthvalue }\nconst value: Sub = { super.new(seed: 42), child: true }',
             )
 
             expect(module.functions[0].body).toMatchObject([

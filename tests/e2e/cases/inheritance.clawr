@@ -4,7 +4,7 @@ object Super {
   }
 
 inheritance:
-  func new() -> Super => {dataField: 42}
+  func new() => {dataField: 42}
 
 data:
   dataField: integer

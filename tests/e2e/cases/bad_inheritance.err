@@ -1,1 +1,1 @@
-Error: 7:1:Object 'Subtype' cannot inherit from 'Super' because it has no inheritance section
+Error: 7:17:Object 'Subtype' cannot inherit from 'Super' because it has no inheritance section

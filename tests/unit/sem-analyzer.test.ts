@@ -129,6 +129,14 @@ describe('SemanticAnalyzer', () => {
                 ),
             ).toThrow("3:1:Missing field 'y' for data type 'Point'")
         })
+
+        it('reports unknown field using unknown field name position', () => {
+            expect(() =>
+                analyze(
+                    'object Subtype {\ndata:\n    knownField: integer\n}\n\nfunc makeSubtype() -> Subtype => {\n    unknownField: 47\n}',
+                ),
+            ).toThrow('7:5:Field unknownField not found in type Subtype')
+        })
     })
 
     describe('unsupported data literal constructs', () => {
@@ -565,7 +573,7 @@ describe('SemanticAnalyzer', () => {
                     value: {
                         kind: 'data-literal',
                         fields: {
-                            x: { kind: 'truthvalue', value: 'true' },
+                            x: { value: { kind: 'truthvalue', value: 'true' } },
                         },
                     },
                 },
@@ -919,7 +927,7 @@ describe('SemanticAnalyzer', () => {
     describe('inheritance semantics', () => {
         it('rejects object declarations with unknown supertypes', () => {
             expect(() => analyze('object Student: Entity { }')).toThrow(
-                "1:1:Unknown supertype 'Entity' for object 'Student'",
+                "1:17:Unknown supertype 'Entity' for object 'Student'",
             )
         })
 
@@ -1056,8 +1064,10 @@ describe('SemanticAnalyzer', () => {
                         kind: 'data-literal',
                         fields: {
                             child: {
-                                kind: 'truthvalue',
-                                value: 'true',
+                                value: {
+                                    kind: 'truthvalue',
+                                    value: 'true',
+                                },
                             },
                         },
                     },

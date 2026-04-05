@@ -1,0 +1,1 @@
+Error: 2:17:Object 'Subtype' cannot inherit from 'NotInheritable' because it has no inheritance section

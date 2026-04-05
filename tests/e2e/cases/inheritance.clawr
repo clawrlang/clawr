@@ -4,13 +4,14 @@ object Super {
   }
 
 inheritance:
-  func new() => {dataField: 42}
+  func new() => {dataField: 47}
 
 data:
   dataField: integer
 }
 
 object Subtype: Super {
+  // Override method in super
   func pureMethod() -> integer {
     return 42
   }

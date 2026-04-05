@@ -1249,9 +1249,11 @@ describe('Lowering Tests', () => {
                                 kind: 'data-literal',
                                 fields: {
                                     value: {
-                                        kind: 'truthvalue',
-                                        value: 'true',
-                                        position: somePosition,
+                                        value: {
+                                            kind: 'truthvalue',
+                                            value: 'true',
+                                            position: somePosition,
+                                        },
                                     },
                                 },
                                 position: somePosition,
@@ -1437,14 +1439,18 @@ describe('Lowering Tests', () => {
                         kind: 'data-literal',
                         fields: {
                             x: {
-                                kind: 'truthvalue',
-                                value: 'true',
-                                position: somePosition,
+                                value: {
+                                    kind: 'truthvalue',
+                                    value: 'true',
+                                    position: somePosition,
+                                },
                             },
                             y: {
-                                kind: 'truthvalue',
-                                value: 'false',
-                                position: somePosition,
+                                value: {
+                                    kind: 'truthvalue',
+                                    value: 'false',
+                                    position: somePosition,
+                                },
                             },
                         },
                         position: somePosition,
@@ -1512,14 +1518,18 @@ describe('Lowering Tests', () => {
                         kind: 'data-literal',
                         fields: {
                             value: {
-                                kind: 'integer',
-                                value: 42n,
-                                position: somePosition,
+                                value: {
+                                    kind: 'integer',
+                                    value: 42n,
+                                    position: somePosition,
+                                },
                             },
                             flag: {
-                                kind: 'truthvalue',
-                                value: 'true',
-                                position: somePosition,
+                                value: {
+                                    kind: 'truthvalue',
+                                    value: 'true',
+                                    position: somePosition,
+                                },
                             },
                         },
                         position: somePosition,
@@ -1574,20 +1584,26 @@ describe('Lowering Tests', () => {
                         kind: 'data-literal',
                         fields: {
                             p: {
-                                kind: 'data-literal',
-                                fields: {
-                                    x: {
-                                        kind: 'truthvalue',
-                                        value: 'true',
-                                        position: somePosition,
+                                value: {
+                                    kind: 'data-literal',
+                                    fields: {
+                                        x: {
+                                            value: {
+                                                kind: 'truthvalue',
+                                                value: 'true',
+                                                position: somePosition,
+                                            },
+                                        },
+                                        y: {
+                                            value: {
+                                                kind: 'truthvalue',
+                                                value: 'false',
+                                                position: somePosition,
+                                            },
+                                        },
                                     },
-                                    y: {
-                                        kind: 'truthvalue',
-                                        value: 'false',
-                                        position: somePosition,
-                                    },
+                                    position: somePosition,
                                 },
-                                position: somePosition,
                             },
                         },
                         position: somePosition,

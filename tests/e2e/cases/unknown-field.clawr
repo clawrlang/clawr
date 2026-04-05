@@ -1,0 +1,5 @@
+object Subtype {}
+
+func makeSubtype() -> Subtype => {
+    unknownField: 47
+}

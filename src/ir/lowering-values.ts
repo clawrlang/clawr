@@ -58,7 +58,7 @@ export function lowerStructLiteralFields(
           })()
 
     return Object.entries(fields)
-        .map(([fieldName, expr]) => {
+        .map(([fieldName, fieldEntry]) => {
             const fieldType = fieldTypes.get(fieldName)
             if (!fieldType) {
                 throw new Error(
@@ -66,7 +66,11 @@ export function lowerStructLiteralFields(
                 )
             }
 
-            const lowered = lowerStructFieldExpression(module, expr, fieldType)
+            const lowered = lowerStructFieldExpression(
+                module,
+                fieldEntry.value,
+                fieldType,
+            )
             return `.${fieldName} = ${lowered}`
         })
         .join(', ')

@@ -1,0 +1,2 @@
+object NotInheritable {}
+object Subtype: NotInheritable {}

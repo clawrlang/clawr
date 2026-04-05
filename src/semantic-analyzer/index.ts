@@ -344,6 +344,19 @@ export class SemanticAnalyzer {
             )
         }
 
+        // Now validate data literal fields if this is a data literal
+        if (stmt.value.kind === 'data-literal') {
+            this.validateDataLiteral(
+                stmt.value as ASTDataLiteral,
+                this.currentFunctionReturnType,
+            )
+        } else if (stmt.value.kind === 'array-literal') {
+            this.validateArrayLiteral(
+                stmt.value,
+                this.currentFunctionReturnType,
+            )
+        }
+
         if (
             returnType &&
             !this.isTypeAssignable(returnType, this.currentFunctionReturnType)
@@ -1158,8 +1171,9 @@ export class SemanticAnalyzer {
 
         const supertypeKind = this.lookupTypeKind(objectDecl.supertype)
         if (!supertypeKind) {
+            const pos = objectDecl.supertypePosition ?? objectDecl.position
             throw new Error(
-                `${objectDecl.position.line}:${objectDecl.position.column}:Unknown supertype '${objectDecl.supertype}' for object '${objectDecl.name}'`,
+                `${pos.line}:${pos.column}:Unknown supertype '${objectDecl.supertype}' for object '${objectDecl.name}'`,
             )
         }
 
@@ -1170,8 +1184,9 @@ export class SemanticAnalyzer {
         }
 
         if (!this.inheritableObjects.has(objectDecl.supertype)) {
+            const pos = objectDecl.supertypePosition ?? objectDecl.position
             throw new Error(
-                `${objectDecl.position.line}:${objectDecl.position.column}:Object '${objectDecl.name}' cannot inherit from '${objectDecl.supertype}' because it has no inheritance section`,
+                `${pos.line}:${pos.column}:Object '${objectDecl.name}' cannot inherit from '${objectDecl.supertype}' because it has no inheritance section`,
             )
         }
     }
@@ -1802,26 +1817,18 @@ export class SemanticAnalyzer {
             ? (directFields ?? new Map<string, VariableBinding>())
             : expectedFields
 
-        for (const [fieldName, fieldInfo] of requiredFields.entries()) {
-            if (!(fieldName in value.fields)) {
-                const position = fieldInfo.declarationPosition ?? value.position
-                throw new Error(
-                    `${position.line}:${position.column}:Missing field '${fieldName}' for data type '${expectedType}'`,
-                )
-            }
-        }
-
-        for (const [fieldName, fieldValue] of Object.entries(value.fields)) {
+        for (const [fieldName, fieldEntry] of Object.entries(value.fields)) {
             const expectedFieldInfo = requiredFields.get(fieldName)
             if (!expectedFieldInfo) {
+                const pos = fieldEntry.namePosition
                 throw new Error(
-                    `${fieldValue.position.line}:${fieldValue.position.column}:Unknown field '${fieldName}' for data type '${expectedType}'`,
+                    `${pos.line}:${pos.column}:Field ${fieldName} not found in type ${expectedType}`,
                 )
             }
 
-            this.validateDataLiteralFieldExpression(fieldValue)
+            this.validateDataLiteralFieldExpression(fieldEntry.value)
 
-            const inferredFieldType = this.inferExpressionType(fieldValue)
+            const inferredFieldType = this.inferExpressionType(fieldEntry.value)
             if (
                 !inferredFieldType ||
                 !this.isTypeAssignable(
@@ -1829,8 +1836,18 @@ export class SemanticAnalyzer {
                     expectedFieldInfo.type,
                 )
             ) {
+                const pos = fieldEntry.namePosition
                 throw new Error(
-                    `${fieldValue.position.line}:${fieldValue.position.column}:Type mismatch for field '${fieldName}': expected '${expectedFieldInfo.type}' but got '${inferredFieldType ?? fieldValue.kind}'`,
+                    `${pos.line}:${pos.column}:Type mismatch for field '${fieldName}': expected '${expectedFieldInfo.type}' but got '${inferredFieldType ?? fieldEntry.value.kind}'`,
+                )
+            }
+        }
+
+        for (const [fieldName, fieldInfo] of requiredFields.entries()) {
+            if (!(fieldName in value.fields)) {
+                const position = fieldInfo.declarationPosition ?? value.position
+                throw new Error(
+                    `${position.line}:${position.column}:Missing field '${fieldName}' for data type '${expectedType}'`,
                 )
             }
         }
@@ -1864,7 +1881,7 @@ export class SemanticAnalyzer {
         if (fieldValue.kind === 'data-literal') {
             const fields = Object.values(fieldValue.fields)
             for (const nestedField of fields) {
-                this.validateDataLiteralFieldExpression(nestedField)
+                this.validateDataLiteralFieldExpression(nestedField.value)
             }
         }
     }

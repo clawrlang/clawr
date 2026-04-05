@@ -86,6 +86,24 @@ describe('SemanticAnalyzer', () => {
                 },
             ])
         })
+
+        it('rejects duplicate type declarations across object/service/data', () => {
+            expect(() =>
+                analyze('object DuplicatedName {}\nservice DuplicatedName {}'),
+            ).toThrow(
+                "test.clawr:2:1:Type 'DuplicatedName' is already declared",
+            )
+        })
+
+        it('rejects duplicate function declarations with the same signature', () => {
+            expect(() =>
+                analyze(
+                    'func duplicatedName() -> integer { return 42 }\nfunc duplicatedName() {}',
+                ),
+            ).toThrow(
+                "test.clawr:2:1:Function 'duplicatedName()' is already declared",
+            )
+        })
     })
 
     describe('data field semantics', () => {
@@ -135,7 +153,9 @@ describe('SemanticAnalyzer', () => {
                 analyze(
                     'object Subtype {\ndata:\n    knownField: integer\n}\n\nfunc makeSubtype() -> Subtype => {\n    unknownField: 47\n}',
                 ),
-            ).toThrow('test.clawr:7:5:Field unknownField not found in type Subtype')
+            ).toThrow(
+                'test.clawr:7:5:Field unknownField not found in type Subtype',
+            )
         })
     })
 
@@ -510,7 +530,9 @@ describe('SemanticAnalyzer', () => {
         it('rejects non-integer array index expressions', () => {
             expect(() =>
                 analyze('const xs: [integer] = [1, 2]\nconst x = xs[true]'),
-            ).toThrow("test.clawr:2:13:Array index must be integer, got 'truthvalue'")
+            ).toThrow(
+                "test.clawr:2:13:Array index must be integer, got 'truthvalue'",
+            )
         })
 
         it('infers when expression type from branch values', () => {
@@ -615,7 +637,9 @@ describe('SemanticAnalyzer', () => {
                 analyze(
                     'data Point {\n  x: truthvalue\n}\nconst p: Point = { x: true }\np.x = false',
                 ),
-            ).toThrow("test.clawr:5:1:Cannot mutate field through const variable 'p'")
+            ).toThrow(
+                "test.clawr:5:1:Cannot mutate field through const variable 'p'",
+            )
         })
     })
 
@@ -765,7 +789,9 @@ describe('SemanticAnalyzer', () => {
         it('rejects for-in over non-array iterables', () => {
             expect(() =>
                 analyze('const x: integer = 1\nfor y in x { print y }'),
-            ).toThrow("test.clawr:2:1:for-in iterable must be array, got 'integer'")
+            ).toThrow(
+                "test.clawr:2:1:for-in iterable must be array, got 'integer'",
+            )
         })
 
         it('rejects non-truthvalue if condition', () => {
@@ -773,7 +799,9 @@ describe('SemanticAnalyzer', () => {
                 analyze(
                     'data Box { value: truthvalue }\nconst b: Box = { value: true }\nif b { print true }',
                 ),
-            ).toThrow("test.clawr:3:1:if condition must be truthvalue, got 'Box'")
+            ).toThrow(
+                "test.clawr:3:1:if condition must be truthvalue, got 'Box'",
+            )
         })
 
         it('rejects non-truthvalue while condition', () => {
@@ -781,7 +809,9 @@ describe('SemanticAnalyzer', () => {
                 analyze(
                     'data Box { value: truthvalue }\nconst b: Box = { value: true }\nwhile b { break }',
                 ),
-            ).toThrow("test.clawr:3:1:while condition must be truthvalue, got 'Box'")
+            ).toThrow(
+                "test.clawr:3:1:while condition must be truthvalue, got 'Box'",
+            )
         })
 
         it('rejects break outside while', () => {
@@ -1147,7 +1177,9 @@ describe('SemanticAnalyzer', () => {
         it('rejects non-ref service parameters', () => {
             expect(() =>
                 analyze('service Clock { }\nfunc use(clock: Clock) { }'),
-            ).toThrow("test.clawr:2:10:Service parameter 'clock' must use 'ref' semantics")
+            ).toThrow(
+                "test.clawr:2:10:Service parameter 'clock' must use 'ref' semantics",
+            )
         })
 
         it('rejects service returns without ref return semantics', () => {

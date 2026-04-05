@@ -122,12 +122,12 @@ describe('SemanticAnalyzer', () => {
             )
         })
 
-        it('reports missing field using declaration field position', () => {
+        it('reports missing field using data literal position', () => {
             expect(() =>
                 analyze(
                     'data Point {\nx: truthvalue\ny: truthvalue\n}\nconst p: Point = { x: true }',
                 ),
-            ).toThrow("3:1:Missing field 'y' for data type 'Point'")
+            ).toThrow("5:18:Missing field 'y' for data type 'Point'")
         })
 
         it('reports unknown field using unknown field name position', () => {

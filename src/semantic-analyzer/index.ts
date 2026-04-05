@@ -1845,9 +1845,8 @@ export class SemanticAnalyzer {
 
         for (const [fieldName, fieldInfo] of requiredFields.entries()) {
             if (!(fieldName in value.fields)) {
-                const position = fieldInfo.declarationPosition ?? value.position
                 throw new Error(
-                    `${position.line}:${position.column}:Missing field '${fieldName}' for data type '${expectedType}'`,
+                    `${value.position.line}:${value.position.column}:Missing field '${fieldName}' for data type '${expectedType}'`,
                 )
             }
         }

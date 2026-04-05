@@ -37,3 +37,6 @@
   - Should be: `lexer__assembleTwoTokens(first: sirstToken, second: secondToken)`
   - or: `func lexer__assembleTwoTokens(_ first: Token, _ second: Token) -> [Token]`
 - Method override should be explicit
+- Multiple errors in the same file - only the first error is indicated
+  - The semantic analyser throws Error. It should perhaps collect errors instead
+  - Is it possible to recover after an error or will all subsequent errors be suspect?

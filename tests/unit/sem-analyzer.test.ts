@@ -131,6 +131,38 @@ describe('SemanticAnalyzer', () => {
         })
     })
 
+    describe('unsupported data literal constructs', () => {
+        it('rejects call expressions in data literal fields', () => {
+            expect(() =>
+                analyze(
+                    'func getValue() -> truthvalue { return true }\ndata Point { x: truthvalue y: truthvalue }\nconst p: Point = { x: getValue(), y: true }',
+                ),
+            ).toThrow(
+                'Call expressions are not supported in data literal fields',
+            )
+        })
+
+        it('rejects data-literal arguments in function calls', () => {
+            expect(() =>
+                analyze(
+                    'data Point { x: truthvalue }\nfunc take(p: Point) -> truthvalue { return true }\nconst result: truthvalue = take({ x: true })',
+                ),
+            ).toThrow(
+                'Data literal arguments are not supported in function calls',
+            )
+        })
+
+        it('rejects nested call expressions in data literal fields', () => {
+            expect(() =>
+                analyze(
+                    'func getValue() -> truthvalue { return true }\ndata Point { x: truthvalue y: truthvalue }\ndata Quad { a: Point b: Point }\nconst q: Quad = { a: { x: getValue(), y: true }, b: { x: true, y: true } }',
+                ),
+            ).toThrow(
+                'Call expressions are not supported in data literal fields',
+            )
+        })
+    })
+
     describe('variable declaration type inference', () => {
         it('infers declaration type from truthvalue literal', () => {
             const module = analyze('const x = ambiguous')

@@ -1819,6 +1819,8 @@ export class SemanticAnalyzer {
                 )
             }
 
+            this.validateDataLiteralFieldExpression(fieldValue)
+
             const inferredFieldType = this.inferExpressionType(fieldValue)
             if (
                 !inferredFieldType ||
@@ -1830,6 +1832,39 @@ export class SemanticAnalyzer {
                 throw new Error(
                     `${fieldValue.position.line}:${fieldValue.position.column}:Type mismatch for field '${fieldName}': expected '${expectedFieldInfo.type}' but got '${inferredFieldType ?? fieldValue.kind}'`,
                 )
+            }
+        }
+    }
+
+    private validateDataLiteralFieldExpression(
+        fieldValue: ASTExpression,
+    ): void {
+        if (fieldValue.kind === 'call') {
+            throw new Error(
+                `${fieldValue.position.line}:${fieldValue.position.column}:Call expressions are not supported in data literal fields`,
+            )
+        }
+
+        if (fieldValue.kind === 'array-literal') {
+            throw new Error(
+                `${fieldValue.position.line}:${fieldValue.position.column}:Array literals are not supported in data literal fields`,
+            )
+        }
+
+        if (
+            fieldValue.kind === 'binary' &&
+            fieldValue.operator === '.' &&
+            fieldValue.left.kind === 'call'
+        ) {
+            throw new Error(
+                `${fieldValue.position.line}:${fieldValue.position.column}:Call expressions are not supported in data literal fields`,
+            )
+        }
+
+        if (fieldValue.kind === 'data-literal') {
+            const fields = Object.values(fieldValue.fields)
+            for (const nestedField of fields) {
+                this.validateDataLiteralFieldExpression(nestedField)
             }
         }
     }
@@ -2156,6 +2191,11 @@ export class SemanticAnalyzer {
                 }
 
                 for (const arg of value.arguments) {
+                    if (arg.value.kind === 'data-literal') {
+                        throw new Error(
+                            `${arg.value.position.line}:${arg.value.position.column}:Data literal arguments are not supported in function calls`,
+                        )
+                    }
                     this.inferExpressionType(arg.value)
                 }
 

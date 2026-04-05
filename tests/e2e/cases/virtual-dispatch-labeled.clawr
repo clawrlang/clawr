@@ -1,4 +1,6 @@
 object Shape {
+    inheritance:
+
     func adjust(self: const Shape, down amount: integer) -> integer {
         return 1
     }

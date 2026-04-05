@@ -1,4 +1,6 @@
 object Shape {
+    inheritance:
+
     data: const edges: integer
 }
 

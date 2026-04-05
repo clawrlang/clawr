@@ -1,0 +1,6 @@
+object Test {
+}
+
+func pureMethod(self: Test) -> integer {
+  return 42
+}

@@ -51,6 +51,7 @@ export class SemanticAnalyzer {
     private functionSignatures: Map<string, FunctionSignature>
     private typeKinds: Map<string, TypeKind>
     private objectSupertypes: Map<string, string>
+    private inheritableObjects: Set<string>
 
     constructor(
         private ast: ASTProgram,
@@ -59,6 +60,7 @@ export class SemanticAnalyzer {
         functionSignatures?: Map<string, FunctionSignature>,
         typeKinds?: Map<string, TypeKind>,
         objectSupertypes?: Map<string, string>,
+        inheritableObjects?: Set<string>,
         private loopDepth = 0,
         private currentFunctionReturnType?: string,
         private currentOwnerType?: string,
@@ -72,6 +74,8 @@ export class SemanticAnalyzer {
         this.typeKinds = typeKinds ?? parent?.typeKinds ?? new Map()
         this.objectSupertypes =
             objectSupertypes ?? parent?.objectSupertypes ?? new Map()
+        this.inheritableObjects =
+            inheritableObjects ?? parent?.inheritableObjects ?? new Set()
     }
 
     analyze(): SemanticModule {
@@ -208,6 +212,7 @@ export class SemanticAnalyzer {
             this.functionSignatures,
             this.typeKinds,
             this.objectSupertypes,
+            this.inheritableObjects,
             this.loopDepth,
             this.currentFunctionReturnType,
             this.currentOwnerType,
@@ -225,6 +230,7 @@ export class SemanticAnalyzer {
             this.functionSignatures,
             this.typeKinds,
             this.objectSupertypes,
+            this.inheritableObjects,
             this.loopDepth + 1,
             this.currentFunctionReturnType,
             this.currentOwnerType,
@@ -249,6 +255,7 @@ export class SemanticAnalyzer {
             this.functionSignatures,
             this.typeKinds,
             this.objectSupertypes,
+            this.inheritableObjects,
             0, // reset loop depth — break/continue inside a nested function is not the outer loop's
             returnType,
             ownerType,
@@ -848,6 +855,7 @@ export class SemanticAnalyzer {
     private analyzeFunctionDeclaration(
         stmt: ASTFunctionDeclaration,
     ): SemanticFunction {
+        this.validateSelfParameterRestrictions(stmt)
         this.validateMethodDeclarationRules(stmt)
         this.validateServiceFunctionRestrictions(stmt)
 
@@ -859,6 +867,14 @@ export class SemanticAnalyzer {
         )
 
         // Inject parameters as bindings in the function scope.
+        if (this.currentOwnerType) {
+            bodyAnalyzer.bindings.set('self', {
+                type: this.currentOwnerType,
+                semantics: this.currentMethodMutating ? 'mut' : 'const',
+                declarationPosition: stmt.position,
+            })
+        }
+
         for (const param of stmt.parameters) {
             bodyAnalyzer.bindings.set(param.name, {
                 type: param.type,
@@ -899,6 +915,21 @@ export class SemanticAnalyzer {
 
         throw new Error(
             `${stmt.position.line}:${stmt.position.column}:Immutable method '${this.currentOwnerType}.${stmt.name}' must declare a return type`,
+        )
+    }
+
+    private validateSelfParameterRestrictions(
+        stmt: ASTFunctionDeclaration,
+    ): void {
+        if (this.currentOwnerType) return
+
+        const selfParameter = stmt.parameters.find(
+            (param) => param.name === 'self',
+        )
+        if (!selfParameter) return
+
+        throw new Error(
+            `${selfParameter.position.line}:${selfParameter.position.column}:Parameter name 'self' is reserved for implicit method receivers and is not allowed in free functions`,
         )
     }
 
@@ -955,6 +986,14 @@ export class SemanticAnalyzer {
         if (
             typeKind === 'object' &&
             stmt.kind === 'object-decl' &&
+            stmt.sections.some((section) => section.kind === 'inheritance')
+        ) {
+            this.inheritableObjects.add(stmt.name)
+        }
+
+        if (
+            typeKind === 'object' &&
+            stmt.kind === 'object-decl' &&
             stmt.supertype
         ) {
             this.objectSupertypes.set(stmt.name, stmt.supertype)
@@ -987,6 +1026,12 @@ export class SemanticAnalyzer {
                 `${objectDecl.position.line}:${objectDecl.position.column}:Object '${objectDecl.name}' cannot inherit from non-object type '${objectDecl.supertype}'`,
             )
         }
+
+        if (!this.inheritableObjects.has(objectDecl.supertype)) {
+            throw new Error(
+                `${objectDecl.position.line}:${objectDecl.position.column}:Object '${objectDecl.name}' cannot inherit from '${objectDecl.supertype}' because it has no inheritance section`,
+            )
+        }
     }
 
     private validateInheritanceCycle(objectDecl: ASTObjectDeclaration): void {
@@ -1007,7 +1052,11 @@ export class SemanticAnalyzer {
 
     private validateMethodOverrides(objectDecl: ASTObjectDeclaration): void {
         for (const section of objectDecl.sections) {
-            if (section.kind !== 'methods' && section.kind !== 'mutating') {
+            if (
+                section.kind !== 'methods' &&
+                section.kind !== 'mutating' &&
+                section.kind !== 'inheritance'
+            ) {
                 continue
             }
 
@@ -1093,7 +1142,11 @@ export class SemanticAnalyzer {
         sections: ASTObjectDeclaration['sections'],
     ) {
         for (const section of sections) {
-            if (section.kind !== 'methods' && section.kind !== 'mutating') {
+            if (
+                section.kind !== 'methods' &&
+                section.kind !== 'mutating' &&
+                section.kind !== 'inheritance'
+            ) {
                 continue
             }
 
@@ -1138,7 +1191,11 @@ export class SemanticAnalyzer {
     ): SemanticFunction[] {
         const methods: SemanticFunction[] = []
         for (const section of sections) {
-            if (section.kind !== 'methods' && section.kind !== 'mutating') {
+            if (
+                section.kind !== 'methods' &&
+                section.kind !== 'mutating' &&
+                section.kind !== 'inheritance'
+            ) {
                 continue
             }
 
@@ -1219,7 +1276,7 @@ export class SemanticAnalyzer {
 
     private methodEffectLevel(
         ownerKind: 'object' | 'service',
-        sectionKind: 'methods' | 'mutating',
+        sectionKind: 'methods' | 'mutating' | 'inheritance',
     ): EffectLevel {
         if (ownerKind === 'service') return 'external'
         return sectionKind === 'mutating' ? 'self-mutation' : 'pure'

@@ -1,0 +1,8 @@
+object Super {
+data:
+  dataField: integer
+}
+
+// This should be an error as Super lacks an ´inheritance´ section and cannot be inherited from.
+object Subtype: Super {
+}

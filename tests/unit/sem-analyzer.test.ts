@@ -894,14 +894,16 @@ describe('SemanticAnalyzer', () => {
         })
 
         it('rejects cyclic object inheritance', () => {
-            expect(() => analyze('object A: B { }\nobject B: A { }')).toThrow(
-                "1:1:Cyclic inheritance involving 'A'",
-            )
+            expect(() =>
+                analyze(
+                    'object A: B { inheritance: }\nobject B: A { inheritance: }',
+                ),
+            ).toThrow("1:1:Cyclic inheritance involving 'A'")
         })
 
         it('allows calling inherited methods on subtype values', () => {
             const module = analyze(
-                'object Entity { func id(self: const Entity) -> truthvalue { return true } }\nobject Student: Entity { }\nconst student: Student = { }\nconst id: truthvalue = student.id()',
+                'object Entity { inheritance: func id(self: const Entity) -> truthvalue { return true } }\nobject Student: Entity { }\nconst student: Student = { }\nconst id: truthvalue = student.id()',
             )
 
             expect(module.functions[0].body).toMatchObject([
@@ -933,7 +935,7 @@ describe('SemanticAnalyzer', () => {
 
         it('allows assigning subtype values to supertype variables', () => {
             const module = analyze(
-                'object Entity { }\nobject Student: Entity { }\nconst student: Student = { }\nconst entity: Entity = student',
+                'object Entity { inheritance: }\nobject Student: Entity { }\nconst student: Student = { }\nconst entity: Entity = student',
             )
 
             expect(module.functions[0].body).toMatchObject([
@@ -953,7 +955,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects overrides with incompatible return types', () => {
             expect(() =>
                 analyze(
-                    'object Entity { func id(self: const Entity) -> truthvalue { return true } }\nobject Student: Entity { func id(self: const Student) -> integer { return 1 } }',
+                    'object Entity { inheritance: func id(self: const Entity) -> truthvalue { return true } }\nobject Student: Entity { func id(self: const Student) -> integer { return 1 } }',
                 ),
             ).toThrow(
                 "2:26:Override 'Student.id()' must match return type 'truthvalue', got 'integer'",
@@ -963,7 +965,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects overrides with incompatible effect levels', () => {
             expect(() =>
                 analyze(
-                    'object Entity { func id(self: const Entity) -> truthvalue { return true } }\nobject Student: Entity { mutating: func id(self: ref Student) -> truthvalue { return true } }',
+                    'object Entity { inheritance: func id(self: const Entity) -> truthvalue { return true } }\nobject Student: Entity { mutating: func id(self: ref Student) -> truthvalue { return true } }',
                 ),
             ).toThrow(
                 "2:36:Override 'Student.id()' must match effect level 'pure', got 'self-mutation'",
@@ -973,7 +975,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects overrides with incompatible parameter semantics', () => {
             expect(() =>
                 analyze(
-                    'object Entity { func link(self: const Entity, other: ref Entity) -> truthvalue { return true } }\nobject Student: Entity { func link(self: const Student, other: const Entity) -> truthvalue { return true } }',
+                    'object Entity { inheritance: func link(self: const Entity, other: ref Entity) -> truthvalue { return true } }\nobject Student: Entity { func link(self: const Student, other: const Entity) -> truthvalue { return true } }',
                 ),
             ).toThrow(
                 "2:26:Override 'Student.link(_:)' must match parameter semantics of inherited method",
@@ -983,7 +985,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects overrides with incompatible return semantics', () => {
             expect(() =>
                 analyze(
-                    'object Entity { func id(self: const Entity) -> ref Entity { return { } } }\nobject Student: Entity { func id(self: const Student) -> Entity { return { } } }',
+                    'object Entity { inheritance: func id(self: const Entity) -> ref Entity { return { } } }\nobject Student: Entity { func id(self: const Student) -> Entity { return { } } }',
                 ),
             ).toThrow(
                 "2:26:Override 'Student.id()' must match return semantics 'ref', got 'unique'",

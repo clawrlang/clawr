@@ -26,7 +26,13 @@
 - Parser: Is a method call parsed as target-expr `.` function-call?
 - `object` should be allowed side-effects in `DEBUG` mode
   - Mark specific debug APIs (that are removed in production) as pure
-- Methods should not need to declare `self` parameter
+- Methods should not declare `self` parameter
   - `func adjust(self: const Square, down amount: integer)`
   - `func adjust(down amount: integer)`
 - `print poly.edges` should be an error. Expose `edges` through a getter instead.
+- `self: const Square` -- `self` parameter should be implicit
+- labels should be required if declared
+  - This is wrong: `lexer__assembleTwoTokens(firstToken, secondToken)`
+  - if the declaration is this: `func lexer__assembleTwoTokens(first: Token, second: Token) -> [Token]`
+  - Should be: `lexer__assembleTwoTokens(first: sirstToken, second: secondToken)`
+  - or: `func lexer__assembleTwoTokens(_ first: Token, _ second: Token) -> [Token]`

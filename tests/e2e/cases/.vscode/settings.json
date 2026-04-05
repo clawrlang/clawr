@@ -1,0 +1,30 @@
+{
+    "editor.semanticTokenColorCustomizations": {
+        "enabled": true, // enable for all themes
+        "rules": {
+            "variable": "#93cfbb",
+            "*.shared": {
+                "fontStyle": "italic underline",
+                "foreground": "#c877ae"
+            },
+            "*.readonly": {
+                "fontStyle": "italic bold"
+            },
+            "*.static": {
+                "foreground": "#ff0000",
+                "fontStyle": "bold"
+            },
+            "*.defaultLibrary": {
+                "fontStyle": "italic bold"
+            },
+            "type": {
+                "foreground": "#00aa00"
+            }
+        }
+    },
+
+    "clawr.diagnostics.enabled": true,
+    "clawr.diagnostics.trace": true,
+    "clawr.semanticTokens.enabled": true,
+    "clawr.diagnostics.maxLines": 550
+}

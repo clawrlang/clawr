@@ -1,2 +1,2 @@
-Error: 1:11:Unknown identifier 'nope'
-Error: 2:11:Unknown identifier 'alsoNope'
+Error: multiple-errors.clawr:1:11:Unknown identifier 'nope'
+Error: multiple-errors.clawr:2:11:Unknown identifier 'alsoNope'

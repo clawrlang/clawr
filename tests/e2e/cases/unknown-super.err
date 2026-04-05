@@ -1,1 +1,1 @@
-Error: 1:17:Unknown supertype 'UnknownSuper' for object 'Subtype'
+Error: unknown-super.clawr:1:17:Unknown supertype 'UnknownSuper' for object 'Subtype'

@@ -1,1 +1,1 @@
-Error: 4:17:Parameter name 'self' is reserved for the implicit receiver and may not be declared explicitly
+Error: noself.clawr:4:17:Parameter name 'self' is reserved for the implicit receiver and may not be declared explicitly

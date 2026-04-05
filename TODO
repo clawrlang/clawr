@@ -36,3 +36,4 @@
   - if the declaration is this: `func lexer__assembleTwoTokens(first: Token, second: Token) -> [Token]`
   - Should be: `lexer__assembleTwoTokens(first: sirstToken, second: secondToken)`
   - or: `func lexer__assembleTwoTokens(_ first: Token, _ second: Token) -> [Token]`
+- Method override should be explicit

@@ -26,3 +26,7 @@ func makeSubtype() -> Subtype => {
     super.new()
     childField: 47
 }
+
+const o = makeSubtype()
+
+print o.pureMethod()

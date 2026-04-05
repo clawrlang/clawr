@@ -3,7 +3,10 @@
 import fs from 'fs'
 import { Command } from 'commander'
 import type { ASTProgram, ASTStatement } from '../ast'
-import { SemanticAnalyzer } from '../semantic-analyzer'
+import {
+    CompilerDiagnosticsError,
+    SemanticAnalyzer,
+} from '../semantic-analyzer'
 import {
     buildModuleGraph,
     type ModuleGraph,
@@ -57,7 +60,11 @@ cli.name('rwrc')
                 throw new Error(errorMessage)
             }
         } catch (err) {
-            console.error(`Error: ${(err as Error).message}`)
+            if (err instanceof CompilerDiagnosticsError) {
+                console.error(err.message)
+            } else {
+                console.error(`Error: ${(err as Error).message}`)
+            }
             process.exit(1)
         }
     })

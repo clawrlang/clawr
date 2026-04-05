@@ -1032,6 +1032,41 @@ describe('SemanticAnalyzer', () => {
                 },
             ])
         })
+
+        it('rejects reading self before inheritance initializer assigns it', () => {
+            expect(() =>
+                analyze(
+                    'object Base { inheritance: func new() { const x = self.base\nself = { base: true } } data: base: truthvalue }',
+                ),
+            ).toThrow("Cannot use 'self' before it is initialized")
+        })
+
+        it('allows reading self after all control-flow branches initialize it', () => {
+            const module = analyze(
+                'object Base { inheritance: func new() { if true { self = { base: true } } else { self = { base: false } }\nconst x = self.base } data: base: truthvalue }',
+            )
+
+            expect(
+                module.functions.find((f) => f.name === 'Base·new')?.body,
+            ).toMatchObject([
+                {
+                    kind: 'if',
+                },
+                {
+                    kind: 'var-decl',
+                    name: 'x',
+                    valueSet: { type: 'truthvalue' },
+                },
+            ])
+        })
+
+        it('rejects reading self when some control-flow path leaves it uninitialized', () => {
+            expect(() =>
+                analyze(
+                    'object Base { inheritance: func new() { if true { self = { base: true } }\nconst x = self.base } data: base: truthvalue }',
+                ),
+            ).toThrow("Cannot use 'self' before it is initialized")
+        })
     })
 
     describe('service reference restrictions', () => {

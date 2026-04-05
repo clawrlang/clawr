@@ -67,6 +67,7 @@ export class SemanticAnalyzer {
         private currentOwnerKind?: 'object' | 'service',
         private currentMethodMutating = false,
         private currentInheritanceInitializer = false,
+        private currentInheritanceSelfInitialized = true,
         private currentFunctionEffectLevel: EffectLevel | null = null,
     ) {
         this.dataTypes = dataTypes ?? parent?.dataTypes ?? new Map()
@@ -221,6 +222,7 @@ export class SemanticAnalyzer {
             this.currentOwnerKind,
             this.currentMethodMutating,
             this.currentInheritanceInitializer,
+            this.currentInheritanceSelfInitialized,
             this.currentFunctionEffectLevel,
         )
     }
@@ -240,6 +242,7 @@ export class SemanticAnalyzer {
             this.currentOwnerKind,
             this.currentMethodMutating,
             this.currentInheritanceInitializer,
+            this.currentInheritanceSelfInitialized,
             this.currentFunctionEffectLevel,
         )
     }
@@ -253,6 +256,7 @@ export class SemanticAnalyzer {
     ): SemanticAnalyzer {
         // For free functions, infer effect level; for methods, we already know it
         const inferEffect = ownerType ? null : ('pure' as EffectLevel)
+        const inheritanceSelfInitialized = !inheritanceInitializer
         return new SemanticAnalyzer(
             this.ast,
             this,
@@ -267,6 +271,7 @@ export class SemanticAnalyzer {
             ownerKind,
             methodMutating,
             inheritanceInitializer,
+            inheritanceSelfInitialized,
             inferEffect,
         )
     }
@@ -365,14 +370,21 @@ export class SemanticAnalyzer {
             thenAnalyzer.analyzeStatement(child),
         )
 
+        let elseAnalyzer: SemanticAnalyzer | undefined
         const elseBranch = stmt.elseBranch
             ? (() => {
-                  const elseAnalyzer = this.createChildScope()
+                  elseAnalyzer = this.createChildScope()
                   return stmt.elseBranch.map((child) =>
-                      elseAnalyzer.analyzeStatement(child),
+                      elseAnalyzer!.analyzeStatement(child),
                   )
               })()
             : undefined
+
+        this.mergeInheritanceInitializationAfterIf(
+            thenAnalyzer,
+            elseAnalyzer,
+            Boolean(elseBranch),
+        )
 
         return {
             kind: 'if',
@@ -381,6 +393,20 @@ export class SemanticAnalyzer {
             elseBranch,
             position: stmt.position,
         }
+    }
+
+    private mergeInheritanceInitializationAfterIf(
+        thenAnalyzer: SemanticAnalyzer,
+        elseAnalyzer: SemanticAnalyzer | undefined,
+        hasElseBranch: boolean,
+    ): void {
+        if (!this.currentInheritanceInitializer) return
+        if (this.currentInheritanceSelfInitialized) return
+
+        this.currentInheritanceSelfInitialized =
+            hasElseBranch &&
+            thenAnalyzer.currentInheritanceSelfInitialized &&
+            Boolean(elseAnalyzer?.currentInheritanceSelfInitialized)
     }
 
     private analyzeWhileStatement(
@@ -521,10 +547,25 @@ export class SemanticAnalyzer {
         }
 
         this.validateMethodAssignmentRules(stmt.target, stmt.position)
-
         this.validateAssignmentMutationSemantics(stmt.target)
 
-        const targetType = this.inferExpressionType(stmt.target)
+        const isSelfInitializationAssignment =
+            this.isInheritanceSelfInitializationAssignment(stmt)
+
+        if (
+            this.currentInheritanceInitializer &&
+            stmt.target.kind === 'identifier' &&
+            stmt.target.name === 'self' &&
+            stmt.value.kind !== 'data-literal'
+        ) {
+            throw new Error(
+                `${stmt.position.line}:${stmt.position.column}:Inheritance initializer must initialize 'self' with a data literal before using it`,
+            )
+        }
+
+        const targetType = isSelfInitializationAssignment
+            ? (this.lookupBinding('self')?.type ?? null)
+            : this.inferExpressionType(stmt.target)
         const valueType =
             stmt.value.kind === 'data-literal'
                 ? targetType
@@ -564,6 +605,10 @@ export class SemanticAnalyzer {
             rewrittenValue,
             stmt.position,
         )
+
+        if (isSelfInitializationAssignment) {
+            this.currentInheritanceSelfInitialized = true
+        }
 
         return {
             kind: 'assign',
@@ -630,6 +675,27 @@ export class SemanticAnalyzer {
             target.kind === 'identifier' ||
             (target.kind === 'binary' &&
                 (target.operator === '.' || target.operator === '[]'))
+        )
+    }
+
+    private isInheritanceSelfInitializationAssignment(
+        stmt: ASTAssignment,
+    ): boolean {
+        return (
+            this.currentInheritanceInitializer &&
+            stmt.target.kind === 'identifier' &&
+            stmt.target.name === 'self' &&
+            stmt.value.kind === 'data-literal'
+        )
+    }
+
+    private assertSelfReadable(identifier: ASTIdentifier): void {
+        if (!this.currentInheritanceInitializer) return
+        if (this.currentInheritanceSelfInitialized) return
+        if (identifier.name !== 'self') return
+
+        throw new Error(
+            `${identifier.position.line}:${identifier.position.column}:Cannot use 'self' before it is initialized; assign to 'self' with a data literal first`,
         )
     }
 
@@ -2119,6 +2185,8 @@ export class SemanticAnalyzer {
                 return signature.returnType
             }
             case 'identifier': {
+                this.assertSelfReadable(value)
+
                 const binding = this.lookupBinding(value.name)
                 if (!binding) {
                     throw new Error(

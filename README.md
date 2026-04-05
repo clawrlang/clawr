@@ -43,7 +43,7 @@ The repository includes settings for VS Code.
 
 ### Default Tasks
 
-There is a tasks.jaon file that is set up to run the `npm` scripts from a keyboard shortcut.
+There is a tasks.json file that is set up to run the `npm` scripts from a keyboard shortcut.
 
 - ⇧⌘U: Run unit tests (skip E2E system tests)
 - ⇧⌘B: Build the rwrc exe and run the full test suite

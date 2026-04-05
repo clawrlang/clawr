@@ -163,7 +163,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects call expressions in data literal fields', () => {
             expect(() =>
                 analyze(
-                    'func getValue() -> truthvalue { return true }\ndata Point { x: truthvalue y: truthvalue }\nconst p: Point = { x: getValue(), y: true }',
+                    'func getValue() -> truthvalue { return true }\ndata Point { x: truthvalue, y: truthvalue }\nconst p: Point = { x: getValue(), y: true }',
                 ),
             ).toThrow(
                 'Call expressions are not supported in data literal fields',
@@ -183,7 +183,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects nested call expressions in data literal fields', () => {
             expect(() =>
                 analyze(
-                    'func getValue() -> truthvalue { return true }\ndata Point { x: truthvalue y: truthvalue }\ndata Quad { a: Point b: Point }\nconst q: Quad = { a: { x: getValue(), y: true }, b: { x: true, y: true } }',
+                    'func getValue() -> truthvalue { return true }\ndata Point { x: truthvalue, y: truthvalue }\ndata Quad { a: Point, b: Point }\nconst q: Quad = { a: { x: getValue(), y: true }, b: { x: true, y: true } }',
                 ),
             ).toThrow(
                 'Call expressions are not supported in data literal fields',

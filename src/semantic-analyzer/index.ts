@@ -921,15 +921,13 @@ export class SemanticAnalyzer {
     private validateSelfParameterRestrictions(
         stmt: ASTFunctionDeclaration,
     ): void {
-        if (this.currentOwnerType) return
-
         const selfParameter = stmt.parameters.find(
-            (param) => param.name === 'self',
+            (param) => param.name === 'self' || param.label === 'self',
         )
         if (!selfParameter) return
 
         throw new Error(
-            `${selfParameter.position.line}:${selfParameter.position.column}:Parameter name 'self' is reserved for implicit method receivers and is not allowed in free functions`,
+            `${selfParameter.position.line}:${selfParameter.position.column}:Parameter name 'self' is reserved for the implicit receiver and may not be declared explicitly`,
         )
     }
 
@@ -1208,6 +1206,15 @@ export class SemanticAnalyzer {
                 )
                 const analyzed =
                     methodAnalyzer.analyzeFunctionDeclaration(method)
+                const receiverParameter = {
+                    name: 'self',
+                    type: ownerType,
+                    semantics:
+                        section.kind === 'mutating'
+                            ? ('ref' as const)
+                            : ('const' as const),
+                    position: method.position,
+                }
                 const callableParams =
                     method.parameters[0]?.name === 'self'
                         ? method.parameters.slice(1)
@@ -1216,6 +1223,7 @@ export class SemanticAnalyzer {
                 methods.push({
                     ...analyzed,
                     name: `${ownerType}·${mangleCallableName(method.name, labels)}`,
+                    parameters: [receiverParameter, ...analyzed.parameters],
                 })
             }
         }
@@ -1577,12 +1585,6 @@ export class SemanticAnalyzer {
     ): void {
         for (const param of stmt.parameters) {
             if (!this.isServiceType(param.type)) continue
-
-            const isServiceSelfParameter =
-                param.name === 'self' &&
-                this.currentOwnerKind === 'service' &&
-                this.currentOwnerType === param.type
-            if (isServiceSelfParameter) continue
 
             if (param.semantics !== 'ref') {
                 throw new Error(

@@ -1,13 +1,13 @@
 object Shape {
     inheritance:
 
-    func sides(self: const Shape) -> integer {
+    func sides() -> integer {
         return 0
     }
 }
 
 object Square: Shape {
-    func sides(self: const Square) -> integer {
+    func sides() -> integer {
         return 4
     }
 }

@@ -1,7 +1,7 @@
 object Shape {
     inheritance:
 
-    func sides(self: const Shape) -> integer {
+    func sides() -> integer {
         return 3
     }
 }

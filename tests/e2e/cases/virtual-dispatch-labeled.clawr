@@ -1,9 +1,9 @@
 object Shape {
-    inheritance:
-
     func adjust(down amount: integer) -> integer {
         return 1
     }
+
+    inheritance:
 }
 
 object Square: Shape {

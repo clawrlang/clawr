@@ -1,9 +1,9 @@
 object Shape {
-    inheritance:
-
     func sides() -> integer {
         return 0
     }
+
+    inheritance:
 }
 
 object Square: Shape {

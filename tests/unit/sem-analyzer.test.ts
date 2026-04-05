@@ -911,7 +911,7 @@ describe('SemanticAnalyzer', () => {
 
         it('allows calling inherited methods on subtype values', () => {
             const module = analyze(
-                'object Entity { inheritance: func id() -> truthvalue { return true } }\nobject Student: Entity { }\nconst student: Student = { }\nconst id: truthvalue = student.id()',
+                'object Entity { func id() -> truthvalue { return true } inheritance: }\nobject Student: Entity { }\nconst student: Student = { }\nconst id: truthvalue = student.id()',
             )
 
             expect(module.functions[0].body).toMatchObject([
@@ -963,7 +963,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects overrides with incompatible return types', () => {
             expect(() =>
                 analyze(
-                    'object Entity { inheritance: func id() -> truthvalue { return true } }\nobject Student: Entity { func id() -> integer { return 1 } }',
+                    'object Entity { func id() -> truthvalue { return true } inheritance: }\nobject Student: Entity { func id() -> integer { return 1 } }',
                 ),
             ).toThrow(
                 "2:26:Override 'Student.id()' must match return type 'truthvalue', got 'integer'",
@@ -973,7 +973,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects overrides with incompatible effect levels', () => {
             expect(() =>
                 analyze(
-                    'object Entity { inheritance: func id() -> truthvalue { return true } }\nobject Student: Entity { mutating: func id() -> truthvalue { return true } }',
+                    'object Entity { func id() -> truthvalue { return true } inheritance: }\nobject Student: Entity { mutating: func id() -> truthvalue { return true } }',
                 ),
             ).toThrow(
                 "2:36:Override 'Student.id()' must match effect level 'pure', got 'self-mutation'",
@@ -983,7 +983,7 @@ describe('SemanticAnalyzer', () => {
         it('rejects overrides with incompatible parameter semantics', () => {
             expect(() =>
                 analyze(
-                    'object Entity { inheritance: func link(other: ref Entity) -> truthvalue { return true } }\nobject Student: Entity { func link(other: const Entity) -> truthvalue { return true } }',
+                    'object Entity { func link(other: ref Entity) -> truthvalue { return true } inheritance: }\nobject Student: Entity { func link(other: const Entity) -> truthvalue { return true } }',
                 ),
             ).toThrow(
                 "2:26:Override 'Student.link(_:)' must match parameter semantics of inherited method",
@@ -993,11 +993,44 @@ describe('SemanticAnalyzer', () => {
         it('rejects overrides with incompatible return semantics', () => {
             expect(() =>
                 analyze(
-                    'object Entity { inheritance: func id() -> ref Entity { return { } } }\nobject Student: Entity { func id() -> Entity { return { } } }',
+                    'object Entity { func id() -> ref Entity { return { } } inheritance: }\nobject Student: Entity { func id() -> Entity { return { } } }',
                 ),
             ).toThrow(
                 "2:26:Override 'Student.id()' must match return semantics 'ref', got 'unique'",
             )
+        })
+
+        it('rejects direct calls to inheritance initializer methods', () => {
+            expect(() =>
+                analyze(
+                    'object Super { inheritance: func new() -> Super { return { base: true } } data: base: truthvalue }\nobject Sub: Super { data: child: truthvalue }\nconst s: Super = { base: true }\nconst bad: Super = s.new()',
+                ),
+            ).toThrow(
+                "Inheritance initializer 'Super.new()' cannot be called directly",
+            )
+        })
+
+        it('allows inheritance initializer calls as the first entry in subtype literals', () => {
+            const module = analyze(
+                'object Super { inheritance: func new(seed value: integer) -> Super { return { base: true } } data: base: truthvalue }\nobject Sub: Super { data: child: truthvalue }\nconst value: Sub = { super.new(seed: 42), child: true }',
+            )
+
+            expect(module.functions[0].body).toMatchObject([
+                {
+                    kind: 'var-decl',
+                    name: 'value',
+                    valueSet: { type: 'Sub' },
+                    value: {
+                        kind: 'data-literal',
+                        fields: {
+                            child: {
+                                kind: 'truthvalue',
+                                value: 'true',
+                            },
+                        },
+                    },
+                },
+            ])
         })
     })
 

@@ -1,8 +1,10 @@
 object Super {
-inheritance:
-  func inheritableMarker() -> integer {
-    return 1
+  func pureMethod() -> integer {
+    return self.dataField
   }
+
+inheritance:
+  func new() -> Super => {dataField: 42}
 
 data:
   dataField: integer
@@ -18,4 +20,9 @@ mutating:
 
 data:
    childField: integer
+}
+
+func makeSubtype() -> Subtype => {
+    super.new()
+    childField: 47
 }

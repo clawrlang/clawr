@@ -117,6 +117,7 @@ export class SemanticAnalyzer {
                             (param) => param.semantics ?? 'const',
                         ),
                         effectLevel: 'external',
+                        isInheritanceInitializer: false,
                     },
                 )
             }
@@ -1176,6 +1177,8 @@ export class SemanticAnalyzer {
                             ownerKind,
                             section.kind,
                         ),
+                        isInheritanceInitializer:
+                            section.kind === 'inheritance',
                     },
                 )
             }
@@ -1646,7 +1649,16 @@ export class SemanticAnalyzer {
         const expectedFields = this.lookupAllTypeFields(expectedType)
         if (!expectedFields) return
 
-        for (const [fieldName, fieldInfo] of expectedFields.entries()) {
+        if (value.superInitializer) {
+            this.validateDataLiteralSuperInitializer(value, expectedType)
+        }
+
+        const directFields = this.lookupDataType(expectedType)
+        const requiredFields = value.superInitializer
+            ? (directFields ?? new Map<string, VariableBinding>())
+            : expectedFields
+
+        for (const [fieldName, fieldInfo] of requiredFields.entries()) {
             if (!(fieldName in value.fields)) {
                 const position = fieldInfo.declarationPosition ?? value.position
                 throw new Error(
@@ -1656,7 +1668,7 @@ export class SemanticAnalyzer {
         }
 
         for (const [fieldName, fieldValue] of Object.entries(value.fields)) {
-            const expectedFieldInfo = expectedFields.get(fieldName)
+            const expectedFieldInfo = requiredFields.get(fieldName)
             if (!expectedFieldInfo) {
                 throw new Error(
                     `${fieldValue.position.line}:${fieldValue.position.column}:Unknown field '${fieldName}' for data type '${expectedType}'`,
@@ -1675,6 +1687,78 @@ export class SemanticAnalyzer {
                     `${fieldValue.position.line}:${fieldValue.position.column}:Type mismatch for field '${fieldName}': expected '${expectedFieldInfo.type}' but got '${inferredFieldType ?? fieldValue.kind}'`,
                 )
             }
+        }
+    }
+
+    private validateDataLiteralSuperInitializer(
+        value: ASTDataLiteral,
+        expectedType: string,
+    ): void {
+        const superInitializer = value.superInitializer
+        if (!superInitializer) return
+
+        const declaredSupertype = this.lookupObjectSupertype(expectedType)
+        if (!declaredSupertype) {
+            throw new Error(
+                `${superInitializer.position.line}:${superInitializer.position.column}:Type '${expectedType}' has no direct supertype for a super initializer call`,
+            )
+        }
+
+        const callee = superInitializer.callee
+        if (
+            callee.kind !== 'binary' ||
+            callee.operator !== '.' ||
+            callee.left.kind !== 'identifier' ||
+            callee.left.name !== 'super' ||
+            callee.right.kind !== 'identifier'
+        ) {
+            throw new Error(
+                `${superInitializer.position.line}:${superInitializer.position.column}:Super initializer must be a direct call in the form super.name(...)`,
+            )
+        }
+
+        const argumentLabels = superInitializer.arguments.map(
+            (arg) => arg.label ?? '_',
+        )
+        const signature = this.lookupFunctionSignature(
+            buildFunctionSignatureKey(
+                callee.right.name,
+                argumentLabels,
+                declaredSupertype,
+            ),
+        )
+
+        if (!signature || !signature.isInheritanceInitializer) {
+            throw new Error(
+                `${superInitializer.position.line}:${superInitializer.position.column}:No inheritance initializer '${declaredSupertype}.${callee.right.name}' matches this call`,
+            )
+        }
+
+        for (let i = 0; i < superInitializer.arguments.length; i++) {
+            const argument = superInitializer.arguments[i]
+            const expectedType = signature.parameterTypes[i]
+            const actualType = this.inferExpressionType(argument.value)
+            if (
+                expectedType &&
+                actualType &&
+                !this.isTypeAssignable(actualType, expectedType)
+            ) {
+                throw new Error(
+                    `${argument.value.position.line}:${argument.value.position.column}:Argument ${i + 1} type mismatch for super initializer '${declaredSupertype}.${callee.right.name}': expected '${expectedType}' but got '${actualType}'`,
+                )
+            }
+        }
+
+        if (!signature.returnType) {
+            throw new Error(
+                `${superInitializer.position.line}:${superInitializer.position.column}:Inheritance initializer '${declaredSupertype}.${callee.right.name}' must declare a return type`,
+            )
+        }
+
+        if (!this.isTypeAssignable(signature.returnType, declaredSupertype)) {
+            throw new Error(
+                `${superInitializer.position.line}:${superInitializer.position.column}:Super initializer '${declaredSupertype}.${callee.right.name}' must return '${declaredSupertype}' (or a subtype), got '${signature.returnType}'`,
+            )
         }
     }
 
@@ -1708,7 +1792,10 @@ export class SemanticAnalyzer {
         }
     }
 
-    private inferExpressionType(value: ASTExpression): string | null {
+    private inferExpressionType(
+        value: ASTExpression,
+        options?: { allowInheritanceInitializerCall?: boolean },
+    ): string | null {
         switch (value.kind) {
             case 'truthvalue':
                 return 'truthvalue'
@@ -1904,6 +1991,15 @@ export class SemanticAnalyzer {
                 ) {
                     throw new Error(
                         `${value.position.line}:${value.position.column}:Method '${renderFunctionSignature(calleeName, argumentLabels, signature.ownerType)}' is helper and only callable inside '${signature.ownerType}'`,
+                    )
+                }
+
+                if (
+                    signature.isInheritanceInitializer &&
+                    !options?.allowInheritanceInitializerCall
+                ) {
+                    throw new Error(
+                        `${value.position.line}:${value.position.column}:Inheritance initializer '${renderFunctionSignature(calleeName, argumentLabels, signature.ownerType)}' cannot be called directly; use it as the first entry in a subtype object literal`,
                     )
                 }
 
@@ -2491,6 +2587,7 @@ type FunctionSignature = {
     parameterTypes: string[]
     parameterSemantics: Array<'const' | 'mut' | 'ref'>
     effectLevel: EffectLevel
+    isInheritanceInitializer: boolean
 }
 
 function effectRank(level: EffectLevel): number {

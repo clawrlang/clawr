@@ -1,4 +1,5 @@
 // Lowering from analyzed semantic AST to IR.
+import type { ASTExpression } from '../ast'
 import type {
     SemanticExpression,
     SemanticFunction,
@@ -11,7 +12,7 @@ import type {
     SemanticStatement,
     SemanticVariableDeclaration,
 } from '../semantic-analyzer'
-import type { CModule, CStatement, CFunctionDeclaration } from '.'
+import type { CExpression, CModule, CStatement, CFunctionDeclaration } from '.'
 import {
     lowerStruct,
     lowerStructHooks,
@@ -27,6 +28,7 @@ import {
 } from './lowering-types'
 import {
     lowerOwnedValue,
+    lowerStructFieldExpression,
     lowerStructLiteralFields,
     lowerValue,
 } from './lowering-values'
@@ -34,6 +36,8 @@ import {
 interface LoweringContext {
     releaseAtExit: Set<string>
     tempCounter: number
+    declaredReturnType?: string
+    declaredReturnSemantics?: 'const' | 'ref'
 }
 
 type DataLiteralVariableDeclaration = SemanticVariableDeclaration & {
@@ -137,6 +141,8 @@ export class IRGenerator {
         const context: LoweringContext = {
             releaseAtExit: new Set(),
             tempCounter: 0,
+            declaredReturnType: fn.returnType,
+            declaredReturnSemantics: fn.returnSemantics,
         }
 
         const isMain = fn.name === 'main'
@@ -196,7 +202,7 @@ export class IRGenerator {
             case 'continue':
                 return [{ kind: 'continue' }]
             case 'return':
-                return this.lowerReturnStatement(stmt)
+                return this.lowerReturnStatement(stmt, context)
             default:
                 throw new Error(
                     `Unknown AST statement kind ${(stmt as any).kind}`,
@@ -477,6 +483,8 @@ export class IRGenerator {
         stmt: DataLiteralVariableDeclaration,
     ): CStatement[] {
         const structTypeName = stmt.valueSet.type
+        const superInitializerStatements =
+            this.lowerDataLiteralSuperInitializer(stmt)
         const structFields = lowerStructLiteralFields(
             this.module,
             structTypeName,
@@ -524,14 +532,97 @@ export class IRGenerator {
                     },
                 ],
             },
+            ...superInitializerStatements,
             ...this.lowerOwnershipPrefix(stmt.ownership),
         ]
 
         return statements
     }
 
+    private lowerDataLiteralSuperInitializer(
+        stmt: DataLiteralVariableDeclaration,
+    ): CStatement[] {
+        const superInitializer = stmt.value.superInitializer
+        if (!superInitializer) return []
+
+        const callee = superInitializer.callee
+        if (
+            callee.kind !== 'binary' ||
+            callee.operator !== '.' ||
+            callee.left.kind !== 'identifier' ||
+            callee.left.name !== 'super' ||
+            callee.right.kind !== 'identifier'
+        ) {
+            throw new Error(
+                'Super initializer must be a direct call in the form super.name(...)',
+            )
+        }
+
+        const ownerObject = this.module.objects.find(
+            (objectDecl) => objectDecl.name === stmt.valueSet.type,
+        )
+        if (!ownerObject?.supertype) {
+            throw new Error(
+                `Type '${stmt.valueSet.type}' has no direct supertype for super initializer lowering`,
+            )
+        }
+
+        const labels = superInitializer.arguments.map((arg) => arg.label ?? '_')
+        const methodName = callee.right.name
+        const signature = this.module.functionSignatures.get(
+            buildFunctionSignatureKey(
+                methodName,
+                labels,
+                ownerObject.supertype,
+            ),
+        )
+
+        if (!signature || !signature.isInheritanceInitializer) {
+            throw new Error(
+                `No inheritance initializer '${ownerObject.supertype}.${methodName}' matches this call`,
+            )
+        }
+
+        const loweredName = `${ownerObject.supertype}·${mangleCallableName(methodName, labels)}`
+        const loweredArguments: CExpression[] = [
+            { kind: 'var-ref', name: stmt.name },
+            ...superInitializer.arguments.map((arg, index) => {
+                const declaredParameterType = signature.parameterTypes[index]
+                if (!declaredParameterType) {
+                    throw new Error(
+                        `Missing parameter type for '${ownerObject.supertype}.${methodName}' argument ${index + 1}`,
+                    )
+                }
+
+                return {
+                    kind: 'raw-expression' as const,
+                    expression: this.lowerDataLiteralArgumentExpression(
+                        arg.value,
+                        declaredParameterType,
+                    ),
+                }
+            }),
+        ]
+
+        return [
+            {
+                kind: 'function-call',
+                name: loweredName,
+                arguments: loweredArguments,
+            },
+        ]
+    }
+
+    private lowerDataLiteralArgumentExpression(
+        expr: ASTExpression,
+        declaredType: string,
+    ): string {
+        return lowerStructFieldExpression(this.module, expr, declaredType)
+    }
+
     private lowerReturnStatement(
         stmt: Extract<SemanticStatement, { kind: 'return' }>,
+        context: LoweringContext,
     ): CStatement[] {
         if (stmt.value === undefined) {
             return [
@@ -543,7 +634,33 @@ export class IRGenerator {
         }
 
         if (stmt.value.kind === 'data-literal') {
-            throw new Error('Data-literal return is unsupported for now')
+            if (!context.declaredReturnType) {
+                throw new Error(
+                    'Data-literal return requires a declared function return type',
+                )
+            }
+
+            const tempName = this.nextTempName(context)
+            const temporaryDeclaration: DataLiteralVariableDeclaration = {
+                kind: 'var-decl',
+                semantics:
+                    context.declaredReturnSemantics === 'ref' ? 'ref' : 'const',
+                name: tempName,
+                valueSet: { type: context.declaredReturnType },
+                value: stmt.value,
+                ownership: {},
+                position: stmt.position,
+            }
+
+            return [
+                ...this.lowerDataLiteralVariableDeclaration(
+                    temporaryDeclaration,
+                ),
+                {
+                    kind: 'return',
+                    value: { kind: 'var-ref', name: tempName },
+                },
+            ]
         }
 
         return [
@@ -850,4 +967,20 @@ export class IRGenerator {
     ): print is LowerablePrintStatement {
         return print.value.kind !== 'data-literal'
     }
+}
+
+function buildFunctionSignatureKey(
+    name: string,
+    labels: string[],
+    ownerType?: string,
+): string {
+    const qualifier = ownerType ? `${ownerType}.` : ''
+    return `${qualifier}${name}(${labels.join(':')})`
+}
+
+function mangleCallableName(name: string, labels: string[]): string {
+    const labelSuffix = labels
+        .map((label) => label.replace(/[^a-zA-Z0-9_]/g, '_'))
+        .join('__')
+    return labelSuffix.length > 0 ? `${name}__${labelSuffix}` : name
 }

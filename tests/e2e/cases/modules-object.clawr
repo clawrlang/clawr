@@ -1,5 +1,5 @@
 import Object from "./module-fixtures/object"
 import makeObject from "./module-fixtures/object"
 
-const anObject: Object = makeObject(42)
+const anObject: Object = makeObject(field: 42)
 print anObject.field()

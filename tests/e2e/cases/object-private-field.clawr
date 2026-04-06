@@ -8,6 +8,6 @@ data:
 
 func makeObject(field: integer) -> Object => { field: field }
 
-const anObject: Object = makeObject(42)
+const anObject: Object = makeObject(field: 42)
 print anObject.field
 print anObject.help()

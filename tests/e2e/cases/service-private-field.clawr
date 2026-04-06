@@ -8,6 +8,6 @@ data:
 
 func makeService(field: integer) -> ref Service => { field: field }
 
-ref aService: Service = makeService(42)
+ref aService: Service = makeService(field: 42)
 print aService.field
 print aService.help()

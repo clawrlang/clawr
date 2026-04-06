@@ -339,18 +339,18 @@ export class SemanticAnalyzer {
     private analyzeStatement(stmt: ASTStatement): SemanticStatement {
         switch (stmt.kind) {
             case 'data-decl':
-                throw new Error('Unexpected data declaration in statement body')
+                throw new Error(`${posStr(stmt.position)}:Unexpected data declaration in statement body`)
             case 'func-decl':
                 throw new Error(
-                    'Unexpected function declaration in statement body',
+                    `${posStr(stmt.position)}:Unexpected function declaration in statement body`,
                 )
             case 'object-decl':
                 throw new Error(
-                    'Unexpected object declaration in statement body',
+                    `${posStr(stmt.position)}:Unexpected object declaration in statement body`,
                 )
             case 'service-decl':
                 throw new Error(
-                    'Unexpected service declaration in statement body',
+                    `${posStr(stmt.position)}:Unexpected service declaration in statement body`,
                 )
             case 'var-decl':
                 return this.analyzeVariableDeclaration(stmt)

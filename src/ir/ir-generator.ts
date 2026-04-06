@@ -25,6 +25,7 @@ import {
     lowerObjectHooks,
     lowerObjectVtable,
     lowerObjectVtableInstance,
+    mangleCallableName,
 } from './lowering-types'
 import {
     lowerOwnedValue,
@@ -143,12 +144,13 @@ export class IRGenerator {
     }
 
     private lowerFunction(fn: SemanticFunction): CFunctionDeclaration {
+        const ownerType = methodOwnerType(fn.name)
         const context: LoweringContext = {
             releaseAtExit: new Set(),
             tempCounter: 0,
             declaredReturnType: fn.returnType,
             declaredReturnSemantics: fn.returnSemantics,
-            currentOwnerType: methodOwnerType(fn.name),
+            currentOwnerType: ownerType,
         }
 
         const isMain = fn.name === 'main'
@@ -162,9 +164,22 @@ export class IRGenerator {
             type: lowerValueSetType(param.type),
         }))
 
+        let cName: string
+        if (isMain) {
+            cName = 'main'
+        } else if (ownerType) {
+            const methodPart = fn.name.slice(ownerType.length + '·'.length)
+            const callableParams = fn.parameters.slice(1)
+            const labels = callableParams.map((p) => p.label ?? '_')
+            cName = `${ownerType}·${mangleCallableName(methodPart, labels)}`
+        } else {
+            const labels = fn.parameters.map((p) => p.label ?? '_')
+            cName = mangleCallableName(fn.name, labels)
+        }
+
         return {
             kind: 'function',
-            name: fn.name,
+            name: cName,
             returnType,
             parameters,
             body: [
@@ -1045,13 +1060,6 @@ function buildFunctionSignatureKey(
 ): string {
     const qualifier = ownerType ? `${ownerType}.` : ''
     return `${qualifier}${name}(${labels.join(':')})`
-}
-
-function mangleCallableName(name: string, labels: string[]): string {
-    const labelSuffix = labels
-        .map((label) => label.replace(/[^a-zA-Z0-9_]/g, '_'))
-        .join('__')
-    return labelSuffix.length > 0 ? `${name}__${labelSuffix}` : name
 }
 
 function methodOwnerType(functionName: string): string | undefined {

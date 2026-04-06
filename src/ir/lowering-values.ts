@@ -4,8 +4,8 @@ import type {
     SemanticModule,
     SemanticOwnershipEffects,
 } from '../semantic-analyzer'
-import type { CExpression } from '.'
-import { lowerValueSetType } from './lowering-types'
+import type { CCallDispatch, CExpression } from '.'
+import { lowerValueSetType, mangleCallableName } from './lowering-types'
 
 export function lowerStructLiteralFields(
     module: SemanticModule,
@@ -170,11 +170,29 @@ export function lowerValue(
             return { kind: 'var-ref', name: `c_${val.value}` }
         case 'identifier':
             return { kind: 'var-ref', name: val.name }
-        case 'call':
+        case 'call': {
+            const dispatch = val.dispatch
+            const cDispatch: CCallDispatch | undefined = dispatch
+                ? {
+                      kind: dispatch.kind,
+                      methodName: dispatch.methodName,
+                      ownerType: dispatch.ownerType,
+                      receiverType: dispatch.receiverType,
+                      slotName:
+                          dispatch.methodName && dispatch.parameters
+                              ? mangleCallableName(
+                                    dispatch.methodName,
+                                    dispatch.parameters.map(
+                                        (p) => p.label ?? '_',
+                                    ),
+                                )
+                              : undefined,
+                  }
+                : undefined
             return {
                 kind: 'function-call',
                 name: mangleCallName(val.callee, val.arguments),
-                dispatch: val.dispatch,
+                dispatch: cDispatch,
                 arguments: val.arguments.map((arg) => {
                     if (arg.value.kind === 'data-literal') {
                         throw new Error(
@@ -194,6 +212,7 @@ export function lowerValue(
                           )
                         : undefined,
             }
+        }
         case 'field-access':
             return {
                 kind: 'field-reference',

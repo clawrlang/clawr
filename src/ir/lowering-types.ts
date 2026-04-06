@@ -461,7 +461,7 @@ function isReferenceCountedType(type: string): boolean {
     return type !== 'truthvalue'
 }
 
-function mangleCallableName(name: string, labels: string[]): string {
+export function mangleCallableName(name: string, labels: string[]): string {
     const suffix = labels
         .filter((label) => label !== '_')
         .map((label) => `__${label}`)

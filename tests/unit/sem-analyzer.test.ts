@@ -265,6 +265,19 @@ describe('SemanticAnalyzer', () => {
             )
         })
 
+        it('does not report declared variable as unknown after explicit initializer failure', () => {
+            try {
+                analyze(
+                    'const aValue: integer = missingFunction(42)\nprint aValue',
+                )
+                throw new Error('Expected analyze to throw')
+            } catch (error) {
+                expect((error as Error).message).toBe(
+                    "Error: test.clawr:1:25:Unknown identifier 'missingFunction'",
+                )
+            }
+        })
+
         it('fails when redeclaring a variable in the same scope', () => {
             expect(() => analyze('const x = ambiguous\nmut x = true')).toThrow(
                 "test.clawr:2:1:Variable 'x' is already declared in this scope",

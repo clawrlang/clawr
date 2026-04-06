@@ -26,10 +26,7 @@
 - Parser: Is a method call parsed as target-expr `.` function-call?
 - `object` should be allowed side-effects in `DEBUG` mode
   - Mark specific debug APIs (that are removed in production) as pure
-- Methods should not declare `self` parameter
-  - `func adjust(self: const Square, down amount: integer)`
-  - `func adjust(down amount: integer)`
-- `print poly.edges` should be an error. Expose `edges` through a getter instead.
+- `print poly.edges` should be an error. Fields in an `object` are always private. Expose `edges` through a getter instead.
 - `self: const Square` -- `self` parameter should be implicit
 - labels should be required if declared
   - This is wrong: `lexer__assembleTwoTokens(firstToken, secondToken)`
@@ -37,6 +34,3 @@
   - Should be: `lexer__assembleTwoTokens(first: sirstToken, second: secondToken)`
   - or: `func lexer__assembleTwoTokens(_ first: Token, _ second: Token) -> [Token]`
 - Method override should be explicit
-- Multiple errors in the same file - only the first error is indicated
-  - The semantic analyser throws Error. It should perhaps collect errors instead
-  - Is it possible to recover after an error or will all subsequent errors be suspect?

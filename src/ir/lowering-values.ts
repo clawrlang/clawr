@@ -5,7 +5,7 @@ import type {
     SemanticOwnershipEffects,
 } from '../semantic-analyzer'
 import type { CCallDispatch, CExpression } from '.'
-import { lowerValueSetType, mangleCallableName } from './lowering-types'
+import { lowerValueSetType } from './lowering-types'
 
 export function lowerStructLiteralFields(
     module: SemanticModule,
@@ -191,7 +191,10 @@ export function lowerValue(
                 : undefined
             return {
                 kind: 'function-call',
-                name: mangleCallName(val.callee, val.arguments),
+                name: mangleCallableName(
+                    extractCallName(val.callee),
+                    val.arguments.map((arg) => arg.label),
+                ),
                 dispatch: cDispatch,
                 arguments: val.arguments.map((arg) => {
                     if (arg.value.kind === 'data-literal') {
@@ -454,16 +457,13 @@ function extractCallName(callee: SemanticExpression): string {
     throw new Error(`Unsupported call callee kind '${callee.kind}'`)
 }
 
-function mangleCallName(
-    callee: SemanticExpression,
-    arguments_: Extract<SemanticExpression, { kind: 'call' }>['arguments'],
+export function mangleCallableName(
+    name: string,
+    labels: (string | undefined)[],
 ): string {
-    const base = extractCallName(callee)
-    const suffix = arguments_
-        .map((arg) => arg.label)
-        .filter((label): label is string => Boolean(label && label !== '_'))
-        .map((label) => `__${label}`)
-        .join('')
+    const base = name
+    const _labels = labels.map((arg) => (!arg || arg == '_' ? '' : arg))
+    if (_labels.every((label) => label === '')) return base
 
-    return `${base}${suffix}`
+    return `${base}${_labels.map((label) => `_${label}`).join('')}`
 }

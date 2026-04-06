@@ -574,14 +574,21 @@ describe('Lowering Tests', () => {
                         kind: 'call',
                         callee: {
                             kind: 'identifier',
-                            name: 'adjust',
+                            name: 'Counter·adjust',
                             position: somePosition,
+                        },
+                        dispatch: {
+                            kind: 'virtual',
+                            methodName: 'adjust',
+                            ownerType: 'Counter',
+                            receiverType: 'Counter',
                         },
                         arguments: [
                             {
+                                label: 'value',
                                 value: {
-                                    kind: 'integer',
-                                    value: 1n,
+                                    kind: 'identifier',
+                                    name: 'counter',
                                     position: somePosition,
                                 },
                             },
@@ -607,13 +614,15 @@ describe('Lowering Tests', () => {
             name: 'x',
             value: {
                 kind: 'function-call',
-                name: 'adjust__down',
+                name: 'Counter·adjust_value_down',
+                dispatch: {
+                    kind: 'virtual',
+                    methodName: 'adjust',
+                    ownerType: 'Counter',
+                    receiverType: 'Counter',
+                },
                 arguments: [
-                    {
-                        kind: 'function-call',
-                        name: 'Integer¸fromCString',
-                        arguments: [{ kind: 'string', value: '1' }],
-                    },
+                    { kind: 'var-ref', name: 'counter' },
                     {
                         kind: 'function-call',
                         name: 'Integer¸fromCString',
@@ -624,7 +633,7 @@ describe('Lowering Tests', () => {
         } satisfies CStatement)
     })
 
-    it('mangles qualified method call names and preserves receiver as first arg', () => {
+    it('mangles unlabeled arguments as empty placeholders', () => {
         const program: SemanticProgramFixture = {
             body: [
                 {

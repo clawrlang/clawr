@@ -10,6 +10,7 @@ import type {
     CStruct,
     CVariableDeclaration,
 } from '.'
+import { mangleCallableName } from './lowering-values'
 
 export function lowerType(stmt: SemanticVariableDeclaration): string {
     return lowerValueSetType(stmt.valueSet.type)
@@ -459,12 +460,4 @@ function getObjectAllDataFields(
 
 function isReferenceCountedType(type: string): boolean {
     return type !== 'truthvalue'
-}
-
-export function mangleCallableName(name: string, labels: string[]): string {
-    const suffix = labels
-        .filter((label) => label !== '_')
-        .map((label) => `__${label}`)
-        .join('')
-    return `${name}${suffix}`
 }

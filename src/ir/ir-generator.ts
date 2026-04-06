@@ -25,13 +25,13 @@ import {
     lowerObjectHooks,
     lowerObjectVtable,
     lowerObjectVtableInstance,
-    mangleCallableName,
 } from './lowering-types'
 import {
     lowerOwnedValue,
     lowerStructFieldExpression,
     lowerStructLiteralFields,
     lowerValue,
+    mangleCallableName,
 } from './lowering-values'
 
 interface LoweringContext {

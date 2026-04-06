@@ -1,0 +1,13 @@
+object Object {
+    func field() -> integer => self.field
+    helper func help() -> integer => 42
+
+data:
+    field: integer
+}
+
+func makeObject(field: integer) -> Object => { field: field }
+
+const anObject: Object = makeObject(42)
+print anObject.field
+print anObject.help()

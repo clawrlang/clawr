@@ -1,0 +1,2 @@
+Error: object-private-field.clawr:12:15:Field 'Object.field' is private and only accessible inside 'Object'
+Error: object-private-field.clawr:13:20:Method 'Object.help()' is helper and only callable inside 'Object'

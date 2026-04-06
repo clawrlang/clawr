@@ -1,0 +1,2 @@
+Error: service-private-field.clawr:12:15:Field 'Service.field' is private and only accessible inside 'Service'
+Error: service-private-field.clawr:13:20:Method 'Service.help()' is helper and only callable inside 'Service'

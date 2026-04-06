@@ -1,0 +1,13 @@
+service Service {
+    func field() -> integer => self.field
+    helper func help() -> integer => 42
+
+data:
+    field: integer
+}
+
+func makeService(field: integer) -> ref Service => { field: field }
+
+ref aService: Service = makeService(42)
+print aService.field
+print aService.help()

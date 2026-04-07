@@ -18,6 +18,7 @@ import { VariableDeclarationParser } from './statement-parsers/variable-declarat
 import { AssignmentParser } from './statement-parsers/assignment-parser'
 import { FunctionDeclarationParser } from './statement-parsers/function-declaration-parser'
 import { ObjectDeclarationParser } from './statement-parsers/object-declaration-parser'
+import { ExpressionStatementParser } from './statement-parsers/expression-statement-parser'
 
 interface StatementParser {
     isNext(): boolean
@@ -35,6 +36,7 @@ export class Parser {
             new ObjectDeclarationParser(stream),
             new PrintStatementParser(stream),
             new AssignmentParser(stream),
+            new ExpressionStatementParser(stream),
         ]
     }
 

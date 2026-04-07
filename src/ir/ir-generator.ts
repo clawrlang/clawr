@@ -204,6 +204,17 @@ export class IRGenerator {
         context: LoweringContext,
     ): CStatement[] {
         switch (stmt.kind) {
+            case 'expression': {
+                // Only allow call expressions as statements
+                if (stmt.value.kind === 'call') {
+                    const lowered = lowerValue(stmt.value)
+                    if (lowered.kind === 'function-call') {
+                        return [lowered]
+                    }
+                }
+                // Ignore non-call expressions as statements (could warn or error)
+                return []
+            }
             case 'var-decl':
                 if (stmt.ownership.releaseAtScopeExit)
                     context.releaseAtExit.add(stmt.name)

@@ -6,12 +6,15 @@ export class AssignmentParser {
     constructor(private stream: TokenStream) {}
 
     isNext(): boolean {
-        const token = this.stream.peek()
-        return (
-            token?.kind === 'IDENTIFIER' ||
-            (token?.kind === 'KEYWORD' &&
-                (token.keyword === 'self' || token.keyword === 'super'))
-        )
+        const clone = this.stream.clone()
+        try {
+            // Parse a potential assignment target (identifier, field access, etc.)
+            new ExpressionParser(clone).parse()
+            const next = clone.peek({ stopAtNewline: true })
+            return next?.kind === 'PUNCTUATION' && next.symbol === '='
+        } catch {
+            return false
+        }
     }
 
     parse(): ASTStatement {
@@ -20,7 +23,9 @@ export class AssignmentParser {
         let target = new ExpressionParser(this.stream).parse()
         // After parseExpression, expect '='
         if (!this.stream.isNext('PUNCTUATION', '=')) {
-            throw new Error(`${this.stream.file}:${firstToken.line}:${firstToken.column}:Expected = in assignment`)
+            throw new Error(
+                `${this.stream.file}:${firstToken.line}:${firstToken.column}:Expected = in assignment`,
+            )
         }
         this.stream.next() // consume '='
         const value = new ExpressionParser(this.stream).parse()
@@ -28,7 +33,11 @@ export class AssignmentParser {
             kind: 'assign',
             target,
             value,
-            position: { file: this.stream.file, line: firstToken.line, column: firstToken.column },
+            position: {
+                file: this.stream.file,
+                line: firstToken.line,
+                column: firstToken.column,
+            },
         }
     }
 }

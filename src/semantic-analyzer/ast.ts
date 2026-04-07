@@ -184,6 +184,12 @@ export interface SemanticReturnStatement {
     position: ASTPosition
 }
 
+export interface SemanticExpressionStatement {
+    kind: 'expression'
+    value: SemanticExpression
+    position?: ASTPosition
+}
+
 export type SemanticStatement =
     | SemanticVariableDeclaration
     | SemanticPrintStatement
@@ -194,6 +200,7 @@ export type SemanticStatement =
     | SemanticBreakStatement
     | SemanticContinueStatement
     | SemanticReturnStatement
+    | SemanticExpressionStatement
 
 export interface SemanticDataDeclaration extends Omit<
     ASTDataDeclaration,

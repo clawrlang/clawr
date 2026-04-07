@@ -1,0 +1,2 @@
+func callMe() {}
+callMe()

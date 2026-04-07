@@ -339,7 +339,9 @@ export class SemanticAnalyzer {
     private analyzeStatement(stmt: ASTStatement): SemanticStatement {
         switch (stmt.kind) {
             case 'data-decl':
-                throw new Error(`${posStr(stmt.position)}:Unexpected data declaration in statement body`)
+                throw new Error(
+                    `${posStr(stmt.position)}:Unexpected data declaration in statement body`,
+                )
             case 'func-decl':
                 throw new Error(
                     `${posStr(stmt.position)}:Unexpected function declaration in statement body`,
@@ -370,6 +372,19 @@ export class SemanticAnalyzer {
                 return this.analyzeContinueStatement(stmt)
             case 'return':
                 return this.analyzeReturnStatement(stmt)
+            case 'expression': {
+                // Only allow call expressions as standalone statements
+                if (stmt.value.kind !== 'call') {
+                    throw new Error(
+                        `${posStr((stmt.value as any).position ?? { line: 0, column: 0 })}:Only function or method calls are allowed as standalone expression statements`,
+                    )
+                }
+                return {
+                    kind: 'expression',
+                    value: this.rewriteExpression(stmt.value),
+                    position: (stmt.value as any).position,
+                }
+            }
             default:
                 return stmt
         }

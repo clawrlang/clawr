@@ -23,6 +23,23 @@ export class ObjectDeclarationParser {
     parse(
         visibility: ASTVisibility = 'public',
     ): ASTObjectDeclaration | ASTServiceDeclaration {
+        // Parse annotations before the object/service declaration
+        const annotations: import('../../ast').ASTAnnotation[] = []
+        while (this.stream.isNext('PUNCTUATION', '@')) {
+            const atToken = this.stream.expect('PUNCTUATION', '@')
+            const nameToken = this.stream.expect('IDENTIFIER')
+            let args: { [key: string]: any } | undefined = undefined
+            annotations.push({
+                name: nameToken.identifier,
+                arguments: args,
+                position: {
+                    file: this.stream.file,
+                    line: atToken.line,
+                    column: atToken.column,
+                },
+            })
+        }
+
         let isService = false
         let position: ASTPosition
 
@@ -70,6 +87,7 @@ export class ObjectDeclarationParser {
                 visibility,
                 sections,
                 position,
+                annotations,
             }
         }
         return {
@@ -80,6 +98,7 @@ export class ObjectDeclarationParser {
             visibility,
             sections,
             position,
+            annotations,
         }
     }
 

@@ -1,5 +1,12 @@
 // AST for Clawr data structures and related constructs
 
+// ----- Annotations -----
+export interface ASTAnnotation {
+    name: string
+    arguments?: { [key: string]: any }
+    position: ASTPosition
+}
+
 export interface ASTPosition {
     file?: string
     line: number
@@ -141,6 +148,7 @@ export interface ASTFunctionDeclaration {
     returnSemantics?: 'const' | 'ref' // absent = unique/unbound return
     body: ASTFunctionBody
     position: ASTPosition
+    annotations?: ASTAnnotation[]
 }
 
 // Block body `{ stmts }` or shorthand body `=> expr`
@@ -171,6 +179,7 @@ export interface ASTObjectDeclaration {
     visibility: ASTVisibility
     sections: ASTObjectSection[]
     position: ASTPosition
+    annotations?: ASTAnnotation[]
 }
 
 export interface ASTServiceDeclaration {
@@ -179,6 +188,7 @@ export interface ASTServiceDeclaration {
     visibility: ASTVisibility
     sections: ASTObjectSection[]
     position: ASTPosition
+    annotations?: ASTAnnotation[]
 }
 
 // ----- Statements -----

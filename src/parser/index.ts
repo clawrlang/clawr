@@ -42,11 +42,15 @@ export class Parser {
         const imports: ASTImportDeclaration[] = []
         const body: ASTStatement[] = []
         while (this.stream.peek()) {
+            const pendingAnnotations: import('../ast').ASTAnnotation[] =
+                this.parseAnnotations()
+
             const before = this.stream.peek()
-            const stmt = this.parseTopLevel(imports)
-            if (stmt) {
-                body.push(stmt)
-            }
+            const stmt = this.parseTopLevel(
+                imports,
+                pendingAnnotations.length ? pendingAnnotations : undefined,
+            )
+            if (stmt) body.push(stmt)
 
             if (this.stream.peek() && !this.stream.isNext('NEWLINE')) {
                 const next = this.stream.peek()!
@@ -65,8 +69,67 @@ export class Parser {
         return { imports, body }
     }
 
+    private parseAnnotations() {
+        const pendingAnnotations: import('../ast').ASTAnnotation[] = []
+        // Collect annotations before a declaration
+        while (this.stream.isNext('PUNCTUATION', '@')) {
+            const atToken = this.stream.expect('PUNCTUATION', '@')
+            const nameToken = this.stream.expect('IDENTIFIER')
+            let args: { [key: string]: any } | undefined = undefined
+            if (this.stream.isNext('PUNCTUATION', '(')) {
+                this.stream.expect('PUNCTUATION', '(')
+                args = {}
+                let first = true
+                while (!this.stream.isNext('PUNCTUATION', ')')) {
+                    if (!first) this.stream.expect('PUNCTUATION', ',')
+                    first = false
+                    const keyToken = this.stream.expect('IDENTIFIER')
+                    let value: any = true
+                    if (this.stream.isNext('PUNCTUATION', '=')) {
+                        this.stream.expect('PUNCTUATION', '=')
+                        const valToken = this.stream.peek()
+                        if (valToken?.kind === 'STRING_LITERAL') {
+                            const t = this.stream.expect(
+                                'STRING_LITERAL' as any,
+                            )
+                            value = (
+                                t as unknown as import('../lexer/token').StringLiteralToken
+                            ).value
+                        } else if (valToken?.kind === 'INTEGER_LITERAL') {
+                            const t = this.stream.expect(
+                                'INTEGER_LITERAL' as any,
+                            )
+                            value = (
+                                t as unknown as import('../lexer/token').IntegerLiteralToken
+                            ).value
+                        } else if (valToken?.kind === 'IDENTIFIER') {
+                            value = this.stream.expect('IDENTIFIER').identifier
+                        } else {
+                            throw new Error(
+                                `Unsupported annotation argument value at ${valToken?.line}:${valToken?.column}`,
+                            )
+                        }
+                    }
+                    args[keyToken.identifier] = value
+                }
+                this.stream.expect('PUNCTUATION', ')')
+            }
+            pendingAnnotations.push({
+                name: nameToken.identifier,
+                arguments: args,
+                position: {
+                    file: this.stream.file,
+                    line: atToken.line,
+                    column: atToken.column,
+                },
+            })
+        }
+        return pendingAnnotations
+    }
+
     private parseTopLevel(
         imports: ASTImportDeclaration[],
+        annotations?: import('../ast').ASTAnnotation[],
     ): ASTStatement | undefined {
         if (this.stream.isNext('KEYWORD', 'import')) {
             imports.push(this.parseImportDeclaration())
@@ -77,6 +140,26 @@ export class Parser {
             return this.parseHelperTopLevelDeclaration()
         }
 
+        // Patch annotations into the next declaration if supported
+        // Only function, object, and service declarations support annotations
+        if (this.stream.isNext('KEYWORD', 'func')) {
+            const fnParser = new FunctionDeclarationParser(this.stream)
+            const fn = fnParser.parse('public')
+            if (annotations && annotations.length) fn.annotations = annotations
+            return fn
+        }
+        if (
+            this.stream.isNext('KEYWORD', 'object') ||
+            this.stream.isNext('KEYWORD', 'service')
+        ) {
+            const objParser = new ObjectDeclarationParser(this.stream)
+            const decl = objParser.parse('public')
+            if (annotations && annotations.length)
+                decl.annotations = annotations
+            return decl
+        }
+        // Data declarations could support annotations if desired
+        // Otherwise, fallback to normal statement parsing
         return this.parseStatement()
     }
 

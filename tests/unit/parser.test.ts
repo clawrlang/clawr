@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { TokenStream } from '../../src/lexer'
 import { Parser } from '../../src/parser'
 
-describe('Parser Tests', () => {
+describe('Parser', () => {
     describe('variable declaration', () => {
         for (const keyword of ['const', 'mut', 'ref'] as const)
             it(`parses ${keyword} truthvalue variable declaration correctly`, () => {
@@ -611,7 +611,7 @@ describe('Parser Tests', () => {
     })
 })
 
-describe('Function declaration tests', () => {
+describe('Function declaration', () => {
     it('parses a simple function with no parameters and no return type', () => {
         const ast = parse('func greet() { print true }')
         expect(ast).toMatchObject({
@@ -773,7 +773,7 @@ function parse(code: string) {
     return parser.parse()
 }
 
-describe('Object and service declaration tests', () => {
+describe('Object and service declaration', () => {
     it('parses a minimal object with no sections', () => {
         const ast = parse('object Empty { }')
         expect(ast.body[0]).toMatchObject({
@@ -929,7 +929,7 @@ describe('Object and service declaration tests', () => {
     })
 })
 
-describe('Return statement tests', () => {
+describe('Return statement', () => {
     it('parses a bare return inside a function body', () => {
         const ast = parse('func quit() { return }')
         const fn = ast.body[0]
@@ -994,7 +994,7 @@ describe('Return statement tests', () => {
     })
 })
 
-describe('Call expression tests', () => {
+describe('Call expression', () => {
     it('parses a simple call expression in variable initialization', () => {
         const ast = parse('const x: truthvalue = yes()')
         expect(ast.body[0]).toMatchObject({
@@ -1058,7 +1058,7 @@ describe('Call expression tests', () => {
     })
 })
 
-describe('Expression precedence tests', () => {
+describe('Expression precedence', () => {
     it('parses string concatenation expressions', () => {
         const ast = parse('const s: string = "hello" + " world"')
         expect(ast.body[0]).toMatchObject({
@@ -1180,6 +1180,52 @@ describe('Expression precedence tests', () => {
                 left: { kind: 'identifier', name: 'xs' },
                 right: { kind: 'integer', value: 1n },
             },
+        })
+    })
+
+    describe('Annotation parsing', () => {
+        it('parses a function with a single annotation', () => {
+            const ast = parse(`@Test func foo() {}`)
+            expect(ast.body[0]).toMatchObject({
+                kind: 'func-decl',
+                name: 'foo',
+                annotations: [{ name: 'Test', arguments: undefined }],
+            })
+        })
+
+        it('parses a function with multiple annotations and arguments', () => {
+            const ast = parse(
+                `@Test @Tag(name = "fast", value = 1) func bar() {}`,
+            )
+            expect(ast.body[0]).toMatchObject({
+                kind: 'func-decl',
+                name: 'bar',
+                annotations: [
+                    { name: 'Test', arguments: undefined },
+                    { name: 'Tag', arguments: { name: 'fast', value: 1n } },
+                ],
+            })
+        })
+
+        it('parses an object with an annotation', () => {
+            const ast = parse(`@Entity object Foo {}`)
+            expect(ast.body[0]).toMatchObject({
+                kind: 'object-decl',
+                name: 'Foo',
+                annotations: [{ name: 'Entity', arguments: undefined }],
+            })
+        })
+
+        it('parses an object with multiple annotations and arguments', () => {
+            const ast = parse(`@Entity @Meta(author = "alice") object Bar {}`)
+            expect(ast.body[0]).toMatchObject({
+                kind: 'object-decl',
+                name: 'Bar',
+                annotations: [
+                    { name: 'Entity', arguments: undefined },
+                    { name: 'Meta', arguments: { author: 'alice' } },
+                ],
+            })
         })
     })
 })

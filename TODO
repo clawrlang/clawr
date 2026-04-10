@@ -16,3 +16,5 @@
 - `object` should be allowed side-effects in `DEBUG` mode
   - Mark specific debug APIs (that are removed in production) as pure
 - Method override should be explicit
+- The `@Test` annotation should have an explicit implementation. The `SemanticAnalyzer`
+  should not be coupled to testing

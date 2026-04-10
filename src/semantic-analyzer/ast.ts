@@ -250,5 +250,4 @@ export interface SemanticModule {
     globals: SemanticVariableDeclaration[]
     typeKinds: Map<string, SemanticTypeKind>
     functionSignatures: Map<string, SemanticFunctionSignature>
-    tests: SemanticFunction[]
 }

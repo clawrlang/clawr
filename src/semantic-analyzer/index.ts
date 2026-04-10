@@ -227,15 +227,36 @@ export class SemanticAnalyzer {
         }
 
         // Test discovery: collect all top-level functions with @Test annotation
-        const tests: SemanticFunction[] = []
+        const testFunctionNames: string[] = []
         for (const fn of userFunctions) {
             const astFn = this.ast.body.find(
                 (stmt) => stmt.kind === 'func-decl' && stmt.name === fn.name,
             ) as import('../ast').ASTFunctionDeclaration | undefined
             if (astFn?.annotations?.some((a) => a.name === 'Test')) {
-                tests.push(fn)
+                testFunctionNames.push(fn.name)
             }
         }
+
+        // Inject a global variable referencing all test functions
+        const testGlobals = [
+            {
+                kind: 'var-decl' as const,
+                semantics: 'const' as const,
+                name: '__clawr_tests__',
+                valueSet: { type: '[function]' },
+                value: {
+                    kind: 'array-literal' as const,
+                    elements: testFunctionNames.map((name) => ({
+                        kind: 'identifier' as const,
+                        name,
+                        position: { file: undefined, line: 0, column: 0 },
+                    })),
+                    position: { file: undefined, line: 0, column: 0 },
+                },
+                ownership: {},
+                position: { file: undefined, line: 0, column: 0 },
+            },
+        ]
 
         return {
             imports: this.ast.imports.map((imp) => ({
@@ -246,10 +267,9 @@ export class SemanticAnalyzer {
             types,
             objects,
             services,
-            globals: [],
+            globals: testGlobals,
             typeKinds: this.typeKinds,
             functionSignatures: this.functionSignatures,
-            tests,
         }
     }
 

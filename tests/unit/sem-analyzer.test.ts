@@ -641,7 +641,7 @@ describe('SemanticAnalyzer', () => {
                     'data Point {\n  x: truthvalue\n}\nmut p: Point = { x: true }\np.x = p',
                 ),
             ).toThrow(
-                "test.clawr:5:1:Assignment type mismatch: target is 'truthvalue' but value is 'Point'",
+                "test.clawr:5:2:Assignment type mismatch: target is 'truthvalue' but value is 'Point'",
             )
         })
 

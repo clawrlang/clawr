@@ -15,7 +15,6 @@ import { ExpressionParser } from './expression-parser'
 import { PrintStatementParser } from './statement-parsers/print-statement-parser'
 import { DataDeclarationParser } from './statement-parsers/data-declaration-parser'
 import { VariableDeclarationParser } from './statement-parsers/variable-declaration-parser'
-import { AssignmentParser } from './statement-parsers/assignment-parser'
 import { FunctionDeclarationParser } from './statement-parsers/function-declaration-parser'
 import { ObjectDeclarationParser } from './statement-parsers/object-declaration-parser'
 import { ExpressionStatementParser } from './statement-parsers/expression-statement-parser'
@@ -35,7 +34,6 @@ export class Parser {
             new FunctionDeclarationParser(stream),
             new ObjectDeclarationParser(stream),
             new PrintStatementParser(stream),
-            new AssignmentParser(stream),
             new ExpressionStatementParser(stream),
         ]
     }

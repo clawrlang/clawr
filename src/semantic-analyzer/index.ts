@@ -226,6 +226,17 @@ export class SemanticAnalyzer {
             body: mainBody,
         }
 
+        // Test discovery: collect all top-level functions with @Test annotation
+        const tests: SemanticFunction[] = []
+        for (const fn of userFunctions) {
+            const astFn = this.ast.body.find(
+                (stmt) => stmt.kind === 'func-decl' && stmt.name === fn.name,
+            ) as import('../ast').ASTFunctionDeclaration | undefined
+            if (astFn?.annotations?.some((a) => a.name === 'Test')) {
+                tests.push(fn)
+            }
+        }
+
         return {
             imports: this.ast.imports.map((imp) => ({
                 ...imp,
@@ -238,6 +249,7 @@ export class SemanticAnalyzer {
             globals: [],
             typeKinds: this.typeKinds,
             functionSignatures: this.functionSignatures,
+            tests,
         }
     }
 

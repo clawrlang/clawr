@@ -1604,6 +1604,33 @@ describe('Call expression analysis', () => {
     })
 })
 
+describe('test discovery', () => {
+    it('discovers functions annotated with @Test', () => {
+        const module = analyze(`
+                @Test func test_add() {}
+                func not_a_test() {}
+                @Test func test_subtract() {}
+            `)
+        expect(module.tests.map((f) => f.name).sort()).toEqual([
+            'test_add',
+            'test_subtract',
+        ])
+    })
+
+    it('does not include non-annotated functions in tests', () => {
+        const module = analyze(`
+                func not_a_test() {}
+                func also_not_a_test() {}
+            `)
+        expect(module.tests).toEqual([])
+    })
+
+    it('handles no functions gracefully', () => {
+        const module = analyze('const x = ambiguous')
+        expect(module.tests).toEqual([])
+    })
+})
+
 function analyze(code: string) {
     const stream = new TokenStream(code, 'test.clawr')
     const parser = new Parser(stream)

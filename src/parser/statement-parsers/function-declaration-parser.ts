@@ -99,62 +99,60 @@ export class FunctionDeclarationParser {
                 this.stream.expect('PUNCTUATION', ',')
             }
 
-            // Swift-like parameter labels:
-            // - `name: Type` => label=name, internal name=name
-            // - `label name: Type` => explicit external/internal names
-            // - `_ name: Type` => unlabeled external name
-            const firstToken = this.parseParameterNameToken()
+            // Parse parameter label/name
             let label: string | undefined
-            let paramName: string
+            let name: string
+            let labelToken = this.parseParameterNameToken()
 
+            // Check for explicit label + name (e.g., 'label name: Type')
             if (
                 this.stream.isNext('IDENTIFIER') ||
                 this.stream.isNext('KEYWORD', 'self')
             ) {
-                const secondToken = this.parseParameterNameToken()
+                // Explicit label and name
                 label =
-                    firstToken.identifier === '_'
-                        ? undefined
-                        : firstToken.identifier
-                paramName = secondToken.identifier
+                    labelToken.identifier !== '_'
+                        ? labelToken.identifier
+                        : undefined
+                const nameToken = this.parseParameterNameToken()
+                name = nameToken.identifier
             } else {
-                if (firstToken.identifier === '_') {
-                    throw new Error(
-                        `${this.stream.file}:${firstToken.line}:${firstToken.column}:Parameter '_' requires an internal name (use '_ name: Type')`,
-                    )
-                }
-
-                // Single identifier acts as both external label and internal name.
-                label = firstToken.identifier
-                paramName = firstToken.identifier
+                // Single identifier (label = name), or unlabeled (_)
+                label =
+                    labelToken.identifier !== '_'
+                        ? labelToken.identifier
+                        : undefined
+                name = labelToken.identifier
             }
 
+            // Expect ':'
             this.stream.expect('PUNCTUATION', ':')
 
-            // Optional semantics after ':': `name: const Type` / `name: ref Type`
+            // Optional parameter semantics (const/mut/ref)
             let semantics: 'const' | 'mut' | 'ref' | undefined
-            const maybeSem = this.stream.peek()
-            if (
-                maybeSem?.kind === 'KEYWORD' &&
-                (maybeSem.keyword === 'const' ||
-                    maybeSem.keyword === 'mut' ||
-                    maybeSem.keyword === 'ref')
-            ) {
-                semantics = maybeSem.keyword
+            if (this.stream.isNext('KEYWORD', 'const')) {
+                semantics = 'const'
+                this.stream.next()
+            } else if (this.stream.isNext('KEYWORD', 'mut')) {
+                semantics = 'mut'
+                this.stream.next()
+            } else if (this.stream.isNext('KEYWORD', 'ref')) {
+                semantics = 'ref'
                 this.stream.next()
             }
 
-            const paramType = this.parseTypeReference()
+            // Parse type
+            const type = this.parseTypeReference()
 
             params.push({
                 label,
-                name: paramName,
-                type: paramType,
+                name,
+                type,
                 semantics,
                 position: {
                     file: this.stream.file,
-                    line: firstToken.line,
-                    column: firstToken.column,
+                    line: labelToken.line,
+                    column: labelToken.column,
                 },
             })
         }

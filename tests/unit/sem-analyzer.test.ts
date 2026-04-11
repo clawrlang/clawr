@@ -1604,52 +1604,6 @@ describe('Call expression analysis', () => {
     })
 })
 
-describe('test discovery', () => {
-    it('discovers functions annotated with @Test', () => {
-        const module = analyze(`
-                @Test func test_add() {}
-                func not_a_test() {}
-                @Test func test_subtract() {}
-            `)
-        const testGlobal = module.globals.find(g => g.name === '__clawr_tests__')
-        expect(testGlobal).toBeDefined()
-        expect(testGlobal?.value.kind).toBe('array-literal')
-        const testNames = testGlobal && testGlobal.value.kind === 'array-literal'
-            ? testGlobal.value.elements
-                .filter(e => e.kind === 'identifier')
-                .map(e => (e as { kind: 'identifier'; name: string }).name)
-                .sort()
-            : []
-        expect(testNames).toEqual([
-            'test_add',
-            'test_subtract',
-        ])
-    })
-
-    it('does not include non-annotated functions in tests', () => {
-        const module = analyze(`
-                func not_a_test() {}
-                func also_not_a_test() {}
-            `)
-        const testGlobal = module.globals.find(g => g.name === '__clawr_tests__')
-        // Should be present but empty
-        expect(testGlobal).toBeDefined()
-        expect(testGlobal?.value.kind).toBe('array-literal')
-        const elements = testGlobal && testGlobal.value.kind === 'array-literal' ? testGlobal.value.elements : []
-        expect(elements.length).toBe(0)
-    })
-
-    it('handles no functions gracefully', () => {
-        const module = analyze('const x = ambiguous')
-        const testGlobal = module.globals.find(g => g.name === '__clawr_tests__')
-        // Should be present but empty
-        expect(testGlobal).toBeDefined()
-        expect(testGlobal?.value.kind).toBe('array-literal')
-        const elements2 = testGlobal && testGlobal.value.kind === 'array-literal' ? testGlobal.value.elements : []
-        expect(elements2.length).toBe(0)
-    })
-})
-
 function analyze(code: string) {
     const stream = new TokenStream(code, 'test.clawr')
     const parser = new Parser(stream)

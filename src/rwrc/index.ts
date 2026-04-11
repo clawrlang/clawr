@@ -47,7 +47,9 @@ cli.name('rwrc')
 
 cli.command('test')
     .argument('<directory>', 'path to directory containing .clawr source files')
-    .description('Run all @Test-annotated void functions under the directory tree')
+    .description(
+        'Run all @Test-annotated void functions under the directory tree',
+    )
     .action(async (directory: string) => {
         let workDir: string | undefined
         let exitCode = 0
@@ -120,21 +122,37 @@ async function compileClawrEntry(
 ): Promise<void> {
     const graph = await buildModuleGraph(sourceFile)
     const ast = graph.modules.get(graph.entry)
-    if (!ast) {
-        throw new Error('Entry module missing from module graph')
-    }
+    if (!ast) throw new Error('Entry module missing from module graph')
+
     const compositeProgram = composeEntryProgram(graph)
     const semanticModule = new SemanticAnalyzer(compositeProgram).analyze()
     const program = new IRGenerator().generate(semanticModule)
     const cCode = codegenC(program)
     await fs.promises.writeFile(outFilePath + '.c', cCode)
 
-    const runtimeDir = path.resolve(process.cwd(), 'src/runtime')
+    await compileCCode(
+        outFilePath + '.c',
+        outFilePath,
+        resolveRuntimeDirectory(),
+    )
+}
+
+function resolveRuntimeDirectory(): string {
+    return process.execPath.endsWith('rwrc')
+        ? path.resolve(path.dirname(process.execPath), 'runtime')
+        : path.join(__dirname, '..', 'runtime')
+}
+
+async function compileCCode(
+    sourceFile: string,
+    outFilePath: string,
+    runtimeDir: string,
+) {
     const runtimeSources = await glob(path.join(runtimeDir, '*.c'))
     const result = await exec('clang', [
         '-I',
         path.join(runtimeDir, 'include'),
-        outFilePath + '.c',
+        sourceFile,
         ...runtimeSources,
         '-o',
         outFilePath,

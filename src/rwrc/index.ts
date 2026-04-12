@@ -7,10 +7,8 @@ import {
     CompilerDiagnosticsError,
     SemanticAnalyzer,
 } from '../semantic-analyzer'
-import {
-    buildModuleGraph,
-    type ModuleGraph,
-} from '../semantic-analyzer/module-graph'
+import { buildModuleGraph } from '../semantic-analyzer/module-graph'
+import { findClawrFiles } from './package-discovery'
 import { IRGenerator } from '../ir/ir-generator'
 import { codegenC } from '../codegen'
 import child_process from 'node:child_process'
@@ -23,18 +21,27 @@ import {
 } from './test-harness'
 import { composeEntryProgram } from '../semantic-analyzer/module-composer'
 
-const cli = new Command()
+const cli = new Command().name('rwrc').description('Clawr prototype compiler')
 
-cli.name('rwrc')
-    .description('Clawr prototype compiler')
-    .command('build')
-    .argument('<sourceFile>', 'path to .clawr source file')
+cli.command('build')
+    .argument('<input>', 'path to .clawr source file or directory')
     .option('-o, --outdir <dir>', 'directory for output executable', '.')
-    .action(async (sourceFile: string, options: { outdir: string }) => {
+    .action(async (input: string, options: { outdir: string }) => {
         try {
-            const basename = path.basename(sourceFile, '.clawr')
-            const outFilePath = path.resolve(options.outdir, basename)
-            await compileClawrEntry(sourceFile, outFilePath)
+            const stat = await fs.promises.stat(input)
+            let basename: string
+            let outFilePath: string
+            if (stat.isDirectory()) {
+                // Package mode: parse all .clawr files in the directory
+                basename = path.basename(path.resolve(input))
+                outFilePath = path.resolve(options.outdir, basename)
+                await compileClawrPackage(input, outFilePath)
+            } else {
+                // Script mode: single file
+                basename = path.basename(input, '.clawr')
+                outFilePath = path.resolve(options.outdir, basename)
+                await compileClawrEntry(input, outFilePath)
+            }
         } catch (err) {
             if (err instanceof CompilerDiagnosticsError) {
                 console.error(err.message)
@@ -120,6 +127,7 @@ async function compileClawrEntry(
     sourceFile: string,
     outFilePath: string,
 ): Promise<void> {
+    // Script mode: parse and compile a single file
     const graph = await buildModuleGraph(sourceFile)
     const ast = graph.modules.get(graph.entry)
     if (!ast) throw new Error('Entry module missing from module graph')
@@ -135,6 +143,25 @@ async function compileClawrEntry(
         outFilePath,
         resolveRuntimeDirectory(),
     )
+}
+
+async function compileClawrPackage(
+    dir: string,
+    outFilePath: string,
+): Promise<void> {
+    // Package mode: parse all .clawr files in the directory
+    const files = await findClawrFiles(dir)
+    // TODO: Build a package AST or module graph from all files, then analyze and compile
+    // For now, just error if no files found
+    if (files.length === 0) {
+        throw new Error(`No .clawr files found in directory: ${dir}`)
+    }
+    // Placeholder: just compile main.clawr if it exists
+    const mainFile = files.find((f) => path.basename(f) === 'main.clawr')
+    if (!mainFile) {
+        throw new Error(`No main.clawr found in package directory: ${dir}`)
+    }
+    await compileClawrEntry(mainFile, outFilePath)
 }
 
 function resolveRuntimeDirectory(): string {

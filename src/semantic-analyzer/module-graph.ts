@@ -5,6 +5,7 @@ import { Parser } from '../parser'
 import type {
     ASTDataDeclaration,
     ASTFunctionDeclaration,
+    ASTImportItem,
     ASTProgram,
 } from '../ast'
 import type { ASTObjectDeclaration, ASTServiceDeclaration } from '../ast'
@@ -24,7 +25,7 @@ export async function buildModuleGraph(
         string,
         Array<{
             target: string
-            importedItems: ASTProgram['imports'][number]['items']
+            importedItems: ASTImportItem[]
             modulePath: string
         }>
     >()
@@ -45,9 +46,11 @@ export async function buildModuleGraph(
         if (visited.has(filePath)) return
 
         if (visiting.has(filePath)) {
+            // NOTE: The EcmaScript specification states that sets must preserve
+            // the order of insertion, so the cycle should be reported in the correct order.
             const cycle = [...visiting, filePath]
                 .map((p) => path.relative(process.cwd(), p) || p)
-                .join(' -> ')
+                .join(' → ')
             throw new Error(`Import cycle detected: ${cycle}`)
         }
 
@@ -83,7 +86,7 @@ export async function buildModuleGraph(
         importerFile: string,
         imports: Array<{
             target: string
-            importedItems: ASTProgram['imports'][number]['items']
+            importedItems: ASTImportItem[]
             modulePath: string
         }>,
     ): void {

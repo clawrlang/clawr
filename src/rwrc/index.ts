@@ -3,7 +3,6 @@
 import fs from 'fs'
 import os from 'node:os'
 import { Command } from 'commander'
-import type { ASTProgram, ASTStatement } from '../ast'
 import {
     CompilerDiagnosticsError,
     SemanticAnalyzer,
@@ -22,6 +21,7 @@ import {
     formatDiscoverySkipWarning,
     generateHarnessSource,
 } from './test-harness'
+import { composeEntryProgram } from '../semantic-analyzer/module-composer'
 
 const cli = new Command()
 
@@ -194,65 +194,4 @@ type ExecResult = {
     code: number
     stdout: string
     stderr: string
-}
-
-function composeEntryProgram(graph: ModuleGraph): ASTProgram {
-    const entry = graph.modules.get(graph.entry)
-    if (!entry) {
-        throw new Error('Entry module missing from module graph')
-    }
-
-    const mergedDeclarations: ASTStatement[] = []
-
-    for (const modulePath of graph.order) {
-        const program = graph.modules.get(modulePath)
-        if (!program) {
-            throw new Error(`Module missing from graph: ${modulePath}`)
-        }
-
-        const declarationStatements = program.body.filter((stmt) => {
-            const isDeclaration =
-                stmt.kind === 'data-decl' ||
-                stmt.kind === 'func-decl' ||
-                stmt.kind === 'object-decl' ||
-                stmt.kind === 'service-decl'
-            if (!isDeclaration) return false
-            if (modulePath === graph.entry) return true
-            return stmt.visibility === 'public'
-        })
-        mergedDeclarations.push(...declarationStatements)
-
-        // Keep execution semantics explicit for this slice: only entry module may
-        // define executable top-level statements.
-        if (modulePath !== graph.entry) {
-            const executableStatements = program.body.filter(
-                (stmt): stmt is ASTStatement =>
-                    stmt.kind !== 'data-decl' &&
-                    stmt.kind !== 'func-decl' &&
-                    stmt.kind !== 'object-decl' &&
-                    stmt.kind !== 'service-decl',
-            )
-            if (executableStatements.length > 0) {
-                throw new Error(
-                    `${path.relative(process.cwd(), modulePath)} has top-level executable statements; only declarations are allowed in imported modules`,
-                )
-            }
-        }
-    }
-
-    const entryExecutableStatements = entry.body.filter(
-        (stmt): stmt is ASTStatement =>
-            stmt.kind !== 'data-decl' &&
-            stmt.kind !== 'func-decl' &&
-            stmt.kind !== 'object-decl' &&
-            stmt.kind !== 'service-decl',
-    )
-
-    return {
-        imports: entry.imports.map((imp) => ({
-            ...imp,
-            items: imp.items.map((item) => ({ ...item })),
-        })),
-        body: [...mergedDeclarations, ...entryExecutableStatements],
-    }
 }

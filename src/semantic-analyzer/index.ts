@@ -227,10 +227,6 @@ export class SemanticAnalyzer {
         }
 
         return {
-            imports: this.ast.imports.map((imp) => ({
-                ...imp,
-                items: imp.items.map((item) => ({ ...item })),
-            })),
             functions: [mainFunction, ...userFunctions, ...typeMethods],
             types,
             objects,

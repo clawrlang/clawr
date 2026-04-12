@@ -94,7 +94,6 @@ function toModule(program: SemanticProgramFixture): SemanticModule {
     const typeNames = new Set(types.map((t) => t.name))
 
     return {
-        imports: [],
         functions: [
             {
                 kind: 'function',

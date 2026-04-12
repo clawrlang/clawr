@@ -5,18 +5,10 @@ import { SemanticAnalyzer } from '../../src/semantic-analyzer'
 
 describe('SemanticAnalyzer', () => {
     describe('module metadata', () => {
-        it('carries imports and declaration visibility into semantic module', () => {
+        it('carries declaration visibility into semantic module', () => {
             const module = analyze(
-                'import Token as Tok from "lexer/tokens"\nhelper data ParserState { value: truthvalue }\nconst x = ambiguous',
+                'helper data ParserState { value: truthvalue }',
             )
-
-            expect(module.imports).toMatchObject([
-                {
-                    kind: 'import',
-                    items: [{ name: 'Token', alias: 'Tok' }],
-                    modulePath: 'lexer/tokens',
-                },
-            ])
 
             expect(module.types).toMatchObject([
                 {
@@ -32,7 +24,6 @@ describe('SemanticAnalyzer', () => {
                 'data Point { x: truthvalue }\nconst p: Point = { x: true }\nprint p.x',
             )
 
-            expect(module.imports).toEqual([])
             expect(module.types).toMatchObject([
                 {
                     kind: 'data-decl',

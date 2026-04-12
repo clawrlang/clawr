@@ -4,7 +4,6 @@ import type {
     ASTDataLiteral,
     ASTFunctionParameter,
     ASTIdentifier,
-    ASTImportDeclaration,
     ASTIntegerLiteral,
     ASTObjectDeclaration,
     ASTPosition,
@@ -12,8 +11,6 @@ import type {
     ASTStringLiteral,
     ASTTruthValueLiteral,
 } from '../ast'
-
-export type SemanticImportDeclaration = ASTImportDeclaration
 
 export interface SemanticFieldAccess {
     kind: 'field-access'
@@ -240,7 +237,6 @@ export interface SemanticFunctionSignature {
 }
 
 export interface SemanticModule {
-    imports: SemanticImportDeclaration[]
     functions: SemanticFunction[]
     types: SemanticDataDeclaration[]
     objects: ASTObjectDeclaration[]

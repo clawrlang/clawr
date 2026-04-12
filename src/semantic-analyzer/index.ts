@@ -374,15 +374,15 @@ export class SemanticAnalyzer {
                 return this.analyzeReturnStatement(stmt)
             case 'expression': {
                 // Only allow call expressions as standalone statements
-                if (stmt.value.kind !== 'call') {
+                if (stmt.expr.kind !== 'call') {
                     throw new Error(
-                        `${posStr((stmt.value as any).position ?? { line: 0, column: 0 })}:Only function or method calls are allowed as standalone expression statements`,
+                        `${posStr((stmt.expr as any).position ?? { line: 0, column: 0 })}:Only function or method calls are allowed as standalone expression statements`,
                     )
                 }
                 return {
                     kind: 'expression',
-                    value: this.rewriteExpression(stmt.value),
-                    position: (stmt.value as any).position,
+                    expr: this.rewriteExpression(stmt.expr),
+                    position: (stmt.expr as any).position,
                 }
             }
             default:

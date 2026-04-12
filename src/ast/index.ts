@@ -206,7 +206,7 @@ export type ASTStatement =
     | ASTFunctionDeclaration
     | ASTObjectDeclaration
     | ASTServiceDeclaration
-    | { kind: 'expression'; value: ASTExpression }
+    | { kind: 'expression'; expr: ASTExpression }
 
 export interface ASTAssignment {
     kind: 'assign'

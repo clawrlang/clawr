@@ -1,5 +1,4 @@
 import type {
-    ASTArrayLiteral,
     ASTCallArgument,
     ASTDataDeclaration,
     ASTDataLiteral,
@@ -12,7 +11,6 @@ import type {
     ASTServiceDeclaration,
     ASTStringLiteral,
     ASTTruthValueLiteral,
-    ASTWhenPattern,
 } from '../ast'
 
 export type SemanticImportDeclaration = ASTImportDeclaration
@@ -186,7 +184,7 @@ export interface SemanticReturnStatement {
 
 export interface SemanticExpressionStatement {
     kind: 'expression'
-    value: SemanticExpression
+    expr: SemanticExpression
     position?: ASTPosition
 }
 

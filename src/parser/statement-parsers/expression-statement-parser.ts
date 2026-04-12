@@ -25,6 +25,6 @@ export class ExpressionStatementParser {
                 },
             }
         }
-        return { kind: 'expression', value: target }
+        return { kind: 'expression', expr: target }
     }
 }

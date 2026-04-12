@@ -206,8 +206,8 @@ export class IRGenerator {
         switch (stmt.kind) {
             case 'expression': {
                 // Only allow call expressions as statements
-                if (stmt.value.kind === 'call') {
-                    const lowered = lowerValue(stmt.value)
+                if (stmt.expr.kind === 'call') {
+                    const lowered = lowerValue(stmt.expr)
                     if (lowered.kind === 'function-call') {
                         return [lowered]
                     }

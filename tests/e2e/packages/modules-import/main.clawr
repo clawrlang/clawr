@@ -1,4 +1,4 @@
-import Point from "./module-fixtures/point"
+import Point from "./point"
 
 const p: Point = {
     x: true

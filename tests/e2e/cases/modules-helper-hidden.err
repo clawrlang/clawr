@@ -1,1 +1,0 @@
-Error: tests/e2e/cases/modules-helper-hidden.clawr imports 'Scratch' from './module-fixtures/shapes', but 'Scratch' is helper-only in tests/e2e/cases/module-fixtures/shapes.clawr

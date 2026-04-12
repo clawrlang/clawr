@@ -1,4 +1,4 @@
-import DataStructure from "./module-fixtures/data-structure"
+import DataStructure from "./data-structure"
 
 const isolatedSource: DataStructure = {
     field: true

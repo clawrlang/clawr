@@ -1,5 +1,2 @@
-import Object from "./object"
-import makeObject from "./object"
-
 const anObject: Object = makeObject(field: 42)
 print anObject.field()

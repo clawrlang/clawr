@@ -163,6 +163,8 @@ async function compileClawrPackage(
     const { Parser } = await import('../parser/index.js')
     const { TokenStream } = await import('../lexer/index.js')
     const fsPromises = fs.promises
+    const allAsts = []
+    let mainAst = null
     for (const file of files) {
         const source = await fsPromises.readFile(file, 'utf-8')
         const ast = new Parser(
@@ -184,9 +186,50 @@ async function compileClawrPackage(
                     `${path.relative(dir, file)}: Only main.clawr may contain top-level executable statements in a package`,
                 )
             }
+        } else {
+            mainAst = ast
         }
+        allAsts.push(ast)
     }
-    await compileClawrEntry(mainFile, outFilePath)
+
+    if (!mainAst) {
+        throw new Error(
+            'Internal error: main.clawr AST not found after parsing.',
+        )
+    }
+
+    // Merge all declarations from all files, and all executable statements from main.clawr
+    const mergedBody = []
+    for (const ast of allAsts) {
+        if (ast === mainAst) continue
+        mergedBody.push(
+            ...ast.body.filter((stmt: any) =>
+                [
+                    'data-decl',
+                    'func-decl',
+                    'object-decl',
+                    'service-decl',
+                ].includes(stmt.kind),
+            ),
+        )
+    }
+    // Add main.clawr's declarations and executable statements
+    mergedBody.push(...mainAst.body)
+    // Compose a merged AST
+    const mergedAst = {
+        ...mainAst,
+        body: mergedBody,
+    }
+    // Compile the merged AST
+    const semanticModule = new SemanticAnalyzer(mergedAst).analyze()
+    const program = new IRGenerator().generate(semanticModule)
+    const cCode = codegenC(program)
+    await fs.promises.writeFile(outFilePath + '.c', cCode)
+    await compileCCode(
+        outFilePath + '.c',
+        outFilePath,
+        resolveRuntimeDirectory(),
+    )
 }
 
 function resolveRuntimeDirectory(): string {

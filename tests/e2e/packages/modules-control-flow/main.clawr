@@ -1,5 +1,3 @@
-import Point from "./point"
-
 const p: Point = {
     x: true
     y: false

@@ -2,8 +2,6 @@ import {
     ASTDataDeclaration,
     ASTForInStatement,
     ASTIfStatement,
-    ASTImportDeclaration,
-    ASTImportItem,
     ASTProgram,
     ASTReturnStatement,
     ASTStatement,
@@ -39,7 +37,6 @@ export class Parser {
     }
 
     parse(): ASTProgram {
-        const imports: ASTImportDeclaration[] = []
         const body: ASTStatement[] = []
         while (this.stream.peek()) {
             const pendingAnnotations: import('../ast').ASTAnnotation[] =
@@ -47,7 +44,6 @@ export class Parser {
 
             const before = this.stream.peek()
             const stmt = this.parseTopLevel(
-                imports,
                 pendingAnnotations.length ? pendingAnnotations : undefined,
             )
             if (stmt) body.push(stmt)
@@ -66,7 +62,7 @@ export class Parser {
                 )
             }
         }
-        return { imports, body }
+        return { body }
     }
 
     private parseAnnotations() {
@@ -128,14 +124,8 @@ export class Parser {
     }
 
     private parseTopLevel(
-        imports: ASTImportDeclaration[],
         annotations?: import('../ast').ASTAnnotation[],
     ): ASTStatement | undefined {
-        if (this.stream.isNext('KEYWORD', 'import')) {
-            imports.push(this.parseImportDeclaration())
-            return undefined
-        }
-
         if (this.stream.isNext('KEYWORD', 'helper')) {
             return this.parseHelperTopLevelDeclaration()
         }
@@ -328,103 +318,6 @@ export class Parser {
             kind: 'return',
             value: new ExpressionParser(this.stream).parse(),
             position,
-        }
-    }
-
-    private parseImportDeclaration(): ASTImportDeclaration {
-        const importToken = this.stream.expect('KEYWORD', 'import')
-        const items: ASTImportItem[] = []
-
-        while (true) {
-            const nextToken = this.stream.peek()
-            if (!nextToken) {
-                throw new Error(
-                    `${this.stream.file}:${importToken.line}:${importToken.column}:Expected identifier in import list, got EOF`,
-                )
-            }
-
-            if (nextToken.kind !== 'IDENTIFIER') {
-                throw new Error(
-                    `${this.stream.file}:${nextToken.line}:${nextToken.column}:Expected identifier in import list, got ${describeToken(nextToken)}`,
-                )
-            }
-
-            const nameToken = this.stream.expect('IDENTIFIER')
-            let alias: string | undefined
-
-            if (this.stream.isNext('KEYWORD', 'as')) {
-                this.stream.expect('KEYWORD', 'as')
-                alias = this.stream.expect('IDENTIFIER').identifier
-            }
-
-            items.push({
-                name: nameToken.identifier,
-                alias,
-                position: {
-                    file: this.stream.file,
-                    line: nameToken.line,
-                    column: nameToken.column,
-                },
-            })
-
-            if (this.stream.isNext('KEYWORD', 'from')) {
-                break
-            }
-
-            if (!this.stream.isNext('PUNCTUATION', ',')) {
-                const separatorToken = this.stream.peek()
-                if (!separatorToken) {
-                    throw new Error(
-                        `${this.stream.file}:${importToken.line}:${importToken.column}:Expected ',' or 'from' after import item, got EOF`,
-                    )
-                }
-
-                throw new Error(
-                    `${this.stream.file}:${separatorToken.line}:${separatorToken.column}:Expected ',' or 'from' after import item, got ${describeToken(separatorToken)}`,
-                )
-            }
-
-            this.stream.expect('PUNCTUATION', ',')
-
-            if (this.stream.isNext('KEYWORD', 'from')) {
-                const fromToken = this.stream.peek()
-                throw new Error(
-                    `${this.stream.file}:${fromToken?.line ?? importToken.line}:${fromToken?.column ?? importToken.column}:Expected identifier after ',' in import list, got 'from'`,
-                )
-            }
-        }
-
-        const fromToken = this.stream.peek()
-        if (!fromToken) {
-            throw new Error(
-                `${this.stream.file}:${importToken.line}:${importToken.column}:Expected 'from' after import list, got EOF`,
-            )
-        }
-
-        if (fromToken.kind !== 'KEYWORD' || fromToken.keyword !== 'from') {
-            throw new Error(
-                `${this.stream.file}:${fromToken.line}:${fromToken.column}:Expected 'from' after import list, got ${describeToken(fromToken)}`,
-            )
-        }
-
-        this.stream.expect('KEYWORD', 'from')
-        const modulePathToken = this.stream.next()
-        if (!modulePathToken || modulePathToken.kind !== 'STRING_LITERAL') {
-            throw new Error(
-                `${this.stream.file}:${fromToken.line}:${fromToken.column}:Expected module path string literal after 'from', got ${modulePathToken ? describeToken(modulePathToken) : 'EOF'}`,
-            )
-        }
-        const modulePath = modulePathToken.value
-
-        return {
-            kind: 'import',
-            items,
-            modulePath,
-            position: {
-                file: this.stream.file,
-                line: importToken.line,
-                column: importToken.column,
-            },
         }
     }
 

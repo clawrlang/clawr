@@ -15,19 +15,6 @@ export interface ASTPosition {
 
 export type ASTVisibility = 'public' | 'helper'
 
-export interface ASTImportItem {
-    name: string
-    alias?: string
-    position: ASTPosition
-}
-
-export interface ASTImportDeclaration {
-    kind: 'import'
-    items: ASTImportItem[]
-    modulePath: string
-    position: ASTPosition
-}
-
 // ----- Expressions -----
 export type ASTExpression =
     | ASTIntegerLiteral
@@ -295,6 +282,5 @@ export type ASTValueSet = {
 
 // ----- Top-level module structure -----
 export interface ASTProgram {
-    imports: ASTImportDeclaration[]
     body: ASTStatement[]
 }

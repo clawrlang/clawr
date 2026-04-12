@@ -74,7 +74,7 @@ describe('rwrc test harness', () => {
         ])
     })
 
-    it('generates harness with imports and calls', () => {
+    it('generates harness with calls to test functions', () => {
         const harness = '/tmp/harness/entry.clawr'
         const tests = [
             {
@@ -83,23 +83,6 @@ describe('rwrc test harness', () => {
             },
         ]
         const src = generateHarnessSource(harness, tests)
-        expect(src).toContain('import foo from "../tests/t.clawr"')
         expect(src).toContain('foo()')
-    })
-
-    it('dedupes and sorts names in a shared import line', () => {
-        const harness = '/tmp/h/entry.clawr'
-        const tests = [
-            {
-                absolutePath: '/tmp/h/../lib/t.clawr',
-                functionName: 'b',
-            },
-            {
-                absolutePath: '/tmp/h/../lib/t.clawr',
-                functionName: 'a',
-            },
-        ]
-        const src = generateHarnessSource(harness, tests)
-        expect(src).toContain('import a, b from "../lib/t.clawr"')
     })
 })

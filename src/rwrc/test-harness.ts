@@ -142,21 +142,13 @@ export function generateHarnessSource(
     const byModule = new Map<string, string[]>()
 
     for (const t of tests) {
-        const rel = path.relative(harnessDir, t.absolutePath).replace(
-            /\\/g,
-            '/',
-        )
+        const rel = path
+            .relative(harnessDir, t.absolutePath)
+            .replace(/\\/g, '/')
         if (!byModule.has(rel)) {
             byModule.set(rel, [])
         }
         byModule.get(rel)!.push(t.functionName)
-    }
-
-    const importLines: string[] = []
-    const sortedMods = [...byModule.keys()].sort()
-    for (const mod of sortedMods) {
-        const names = [...new Set(byModule.get(mod)!)].sort()
-        importLines.push(`import ${names.join(', ')} from "${mod}"`)
     }
 
     const ordered = [...tests].sort((a, b) => {
@@ -165,5 +157,5 @@ export function generateHarnessSource(
         return a.functionName.localeCompare(b.functionName)
     })
     const calls = ordered.map((t) => `${t.functionName}()`).join('\n')
-    return `${importLines.join('\n')}\n\n${calls}\n`
+    return `\n${calls}\n`
 }

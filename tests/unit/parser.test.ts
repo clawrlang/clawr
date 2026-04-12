@@ -274,32 +274,6 @@ describe('Parser', () => {
         })
     })
 
-    it('parses field access chain in body following import block', () => {
-        const ast = parse(
-            'import Point from "models"\nconst x: truthvalue = p.a.b',
-        )
-        expect(ast).toMatchObject({
-            imports: [{ kind: 'import', items: [{ name: 'Point' }] }],
-            body: [
-                {
-                    kind: 'var-decl',
-                    name: 'x',
-                    value: {
-                        kind: 'binary',
-                        operator: '.',
-                        left: {
-                            kind: 'binary',
-                            operator: '.',
-                            left: { kind: 'identifier', name: 'p' },
-                            right: { kind: 'identifier', name: 'a' },
-                        },
-                        right: { kind: 'identifier', name: 'b' },
-                    },
-                },
-            ],
-        })
-    })
-
     it('parses assignment correctly', () => {
         const program = 'a = true'
         const ast = parse(program)
@@ -524,53 +498,11 @@ describe('Parser', () => {
         })
     })
 
-    it('parses import declarations with aliases before top-level body', () => {
-        const program =
-            'import Token as Tok, Span from "lexer/tokens"\nconst x = ambiguous'
-        const ast = parse(program)
-
-        expect(ast).toMatchObject({
-            imports: [
-                {
-                    kind: 'import',
-                    items: [{ name: 'Token', alias: 'Tok' }, { name: 'Span' }],
-                    modulePath: 'lexer/tokens',
-                },
-            ],
-            body: [
-                {
-                    kind: 'var-decl',
-                    semantics: 'const',
-                    name: 'x',
-                    value: { kind: 'truthvalue', value: 'ambiguous' },
-                },
-            ],
-        })
-    })
-
-    it('parses single-item import declarations without aliases', () => {
-        const ast = parse('import Point from "models/point"\nprint true')
-
-        expect(ast).toMatchObject({
-            imports: [
-                {
-                    kind: 'import',
-                    items: [{ name: 'Point' }],
-                    modulePath: 'models/point',
-                },
-            ],
-            body: [
-                { kind: 'print', value: { kind: 'truthvalue', value: 'true' } },
-            ],
-        })
-    })
-
     it('parses helper data declarations at top level', () => {
         const program = 'helper data ParserState { value: truthvalue }'
         const ast = parse(program)
 
         expect(ast).toMatchObject({
-            imports: [],
             body: [
                 {
                     kind: 'data-decl',
@@ -587,26 +519,6 @@ describe('Parser', () => {
     it('rejects helper before unsupported top-level declarations', () => {
         expect(() => parse('helper const x = ambiguous')).toThrow(
             'test.clawr:1:1:helper is only supported before data, func, object, or service declarations',
-        )
-    })
-
-    it('reports malformed import lists precisely', () => {
-        expect(() => parse('import Token, from "lexer/tokens"')).toThrow(
-            "test.clawr:1:15:Expected identifier after ',' in import list, got 'from'",
-        )
-
-        expect(() => parse('import Token Span from "lexer/tokens"')).toThrow(
-            "test.clawr:1:14:Expected ',' or 'from' after import item, got identifier 'Span'",
-        )
-    })
-
-    it('reports missing import module path strings precisely', () => {
-        expect(() => parse('import Token from')).toThrow(
-            "test.clawr:1:14:Expected module path string literal after 'from', got EOF",
-        )
-
-        expect(() => parse('import Token from ambiguous')).toThrow(
-            "test.clawr:1:14:Expected module path string literal after 'from', got truth literal 'ambiguous'",
         )
     })
 })

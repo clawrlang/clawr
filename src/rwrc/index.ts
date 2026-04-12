@@ -7,7 +7,6 @@ import {
     CompilerDiagnosticsError,
     SemanticAnalyzer,
 } from '../semantic-analyzer'
-import { buildModuleGraph } from '../semantic-analyzer/module-graph'
 import { findClawrFiles } from './package-discovery'
 import { IRGenerator } from '../ir/ir-generator'
 import { codegenC } from '../codegen'
@@ -19,7 +18,8 @@ import {
     formatDiscoverySkipWarning,
     generateHarnessSource,
 } from './test-harness'
-import { composeEntryProgram } from '../semantic-analyzer/module-composer'
+import { TokenStream } from '../lexer/stream'
+import { Parser } from '../parser/index.js'
 
 const cli = new Command().name('rwrc').description('Clawr prototype compiler')
 
@@ -90,12 +90,75 @@ cli.command('test')
                     'utf-8',
                 )
 
-                await compileClawrEntry(harnessPath, outFilePath)
+                // Collect all .clawr files in the testRoot, add the harness as main
+                const files = await findClawrFiles(testRoot)
+                files.push(harnessPath)
+                await compileClawrPackageWithMain(
+                    files,
+                    harnessPath,
+                    outFilePath,
+                )
 
                 const run = await exec(outFilePath, [])
                 if (run.stdout) process.stdout.write(run.stdout)
                 if (run.stderr) process.stderr.write(run.stderr)
                 exitCode = run.code
+            }
+            // Like compileClawrPackage, but with explicit file list and main file
+            async function compileClawrPackageWithMain(
+                files: string[],
+                mainFile: string,
+                outFilePath: string,
+            ): Promise<void> {
+                const { Parser } = await import('../parser/index.js')
+                const { TokenStream } = await import('../lexer/index.js')
+                const fsPromises = fs.promises
+                const allAsts = []
+                let mainAst = null
+                for (const file of files) {
+                    const source = await fsPromises.readFile(file, 'utf-8')
+                    const ast = new Parser(
+                        new TokenStream(source, path.basename(file)),
+                    ).parse()
+                    if (file === mainFile) {
+                        mainAst = ast
+                    }
+                    allAsts.push(ast)
+                }
+                if (!mainAst) {
+                    throw new Error(
+                        'Internal error: test harness AST not found after parsing.',
+                    )
+                }
+                // Merge all declarations from all files, and all executable statements from main
+                const mergedBody = []
+                for (const ast of allAsts) {
+                    if (ast === mainAst) continue
+                    mergedBody.push(
+                        ...ast.body.filter((stmt: any) =>
+                            [
+                                'data-decl',
+                                'func-decl',
+                                'object-decl',
+                                'service-decl',
+                            ].includes(stmt.kind),
+                        ),
+                    )
+                }
+                mergedBody.push(...mainAst.body)
+                const mergedAst = {
+                    ...mainAst,
+                    body: mergedBody,
+                }
+                const semanticModule = new SemanticAnalyzer(mergedAst).analyze()
+                const program = new IRGenerator().generate(semanticModule)
+                const cCode = codegenC(program)
+                await fsPromises.writeFile(outFilePath + '.c', cCode)
+                await compileCCode(
+                    outFilePath + '.c',
+                    outFilePath,
+                    resolveRuntimeDirectory(),
+                )
             }
         } catch (err) {
             exitCode = 1
@@ -128,14 +191,13 @@ async function compileClawrEntry(
     outFilePath: string,
 ): Promise<void> {
     // Script mode: parse and compile a single file
-    const graph = await buildModuleGraph(sourceFile)
-    const ast = graph.modules.get(graph.entry)
-    if (!ast) throw new Error('Entry module missing from module graph')
+    const source = await fs.promises.readFile(sourceFile, 'utf-8')
+    const stream = new TokenStream(source, path.basename(sourceFile))
+    const program = new Parser(stream).parse()
 
-    const compositeProgram = composeEntryProgram(graph)
-    const semanticModule = new SemanticAnalyzer(compositeProgram).analyze()
-    const program = new IRGenerator().generate(semanticModule)
-    const cCode = codegenC(program)
+    const semanticModule = new SemanticAnalyzer(program).analyze()
+    const cIr = new IRGenerator().generate(semanticModule)
+    const cCode = codegenC(cIr)
     await fs.promises.writeFile(outFilePath + '.c', cCode)
 
     await compileCCode(

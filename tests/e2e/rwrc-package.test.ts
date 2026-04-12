@@ -20,10 +20,37 @@ describe('rwrc package mode', () => {
     })
 
     it('compiles and runs main.clawr in package mode', async () => {
-        await exec('./dist/rwrc', ['build', pkgDir, '--outdir', outDir])
+        const result = await exec('./dist/rwrc', [
+            'build',
+            pkgDir,
+            '--outdir',
+            outDir,
+        ])
+
+        expect(result).toMatchObject({
+            code: 0,
+            stderr: '',
+        })
 
         const output = execFileSync(binary, { encoding: 'utf-8' })
         expect(output).toContain('Hello from package!')
+    })
+
+    it('errors if non-main file has top-level statements', async () => {
+        const badPkgDir = path.join(__dirname, 'packages', 'bad-top-level')
+        const badOutDir = path.join(badPkgDir, 'out')
+        if (!fs.existsSync(badOutDir)) fs.mkdirSync(badOutDir)
+        const result = await exec('./dist/rwrc', [
+            'build',
+            badPkgDir,
+            '--outdir',
+            badOutDir,
+        ])
+
+        expect(result.code).toBe(1)
+        expect(result.stderr).toMatch(
+            /other\.clawr: Only main\.clawr may contain top-level executable statements/,
+        )
     })
 })
 

@@ -151,15 +151,40 @@ async function compileClawrPackage(
 ): Promise<void> {
     // Package mode: parse all .clawr files in the directory
     const files = await findClawrFiles(dir)
-    // TODO: Build a package AST or module graph from all files, then analyze and compile
-    // For now, just error if no files found
     if (files.length === 0) {
         throw new Error(`No .clawr files found in directory: ${dir}`)
     }
-    // Placeholder: just compile main.clawr if it exists
     const mainFile = files.find((f) => path.basename(f) === 'main.clawr')
     if (!mainFile) {
         throw new Error(`No main.clawr found in package directory: ${dir}`)
+    }
+
+    // Parse all files and check for top-level executable statements
+    const { Parser } = await import('../parser/index.js')
+    const { TokenStream } = await import('../lexer/index.js')
+    const fsPromises = fs.promises
+    for (const file of files) {
+        const source = await fsPromises.readFile(file, 'utf-8')
+        const ast = new Parser(
+            new TokenStream(source, path.basename(file)),
+        ).parse()
+        if (file !== mainFile) {
+            // Check for top-level executable statements (not declarations)
+            const hasExecutable = ast.body.some(
+                (stmt: any) =>
+                    ![
+                        'data-decl',
+                        'func-decl',
+                        'object-decl',
+                        'service-decl',
+                    ].includes(stmt.kind),
+            )
+            if (hasExecutable) {
+                throw new Error(
+                    `${path.relative(dir, file)}: Only main.clawr may contain top-level executable statements in a package`,
+                )
+            }
+        }
     }
     await compileClawrEntry(mainFile, outFilePath)
 }

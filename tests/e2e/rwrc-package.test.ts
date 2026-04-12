@@ -1,57 +1,70 @@
 import { execFileSync } from 'child_process'
 import path from 'path'
 import fs from 'fs'
-import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
+import { afterAll, beforeAll, describe, expect, it, test } from 'bun:test'
 import child_process from 'node:child_process'
 
+const CASES_DIR = path.join(__dirname, 'packages')
+const OUTPUT_DIR = path.join(CASES_DIR, 'out')
+
 describe('rwrc package mode', () => {
-    const pkgDir = path.join(__dirname, 'packages', 'simple-package')
-    const outDir = path.join(pkgDir, 'out')
-    const binary = path.join(outDir, 'simple-package')
+    const pkgDir = path.join(CASES_DIR, 'simple-package')
+    const binary = path.join(OUTPUT_DIR, 'simple-package')
 
-    beforeAll(() => {
-        if (!fs.existsSync(outDir)) fs.mkdirSync(outDir)
+    beforeAll(async () => {
+        if (!fs.existsSync(OUTPUT_DIR)) await fs.promises.mkdir(OUTPUT_DIR)
     })
 
-    afterAll(() => {
-        if (fs.existsSync(binary)) fs.unlinkSync(binary)
-        if (fs.existsSync(binary + '.c')) fs.unlinkSync(binary + '.c')
-        if (fs.existsSync(outDir)) fs.rmdirSync(outDir)
+    afterAll(async () => {
+        if (fs.existsSync(OUTPUT_DIR))
+            await fs.promises.rm(OUTPUT_DIR, { recursive: true, force: true })
     })
 
-    it('compiles and runs main.clawr in package mode', async () => {
-        const result = await exec('./dist/rwrc', [
-            'build',
-            pkgDir,
-            '--outdir',
-            outDir,
-        ])
+    const cases = fs
+        .readdirSync(CASES_DIR, { withFileTypes: true })
+        .filter((n) => n.isDirectory())
+    for (const d of cases) {
+        test(d.name, async () => {
+            const dir = path.join(CASES_DIR, d.name)
+            const expectedErrFile = `${dir}.err`
+            const expectedOutFile = `${dir}.out`
 
-        expect(result).toMatchObject({
-            code: 0,
-            stderr: '',
+            const result = await exec('./dist/rwrc', [
+                'build',
+                dir,
+                '--outdir',
+                OUTPUT_DIR,
+            ])
+
+            if (fs.existsSync(expectedErrFile)) {
+                const expectedErr = await fs.promises.readFile(
+                    expectedErrFile,
+                    'utf-8',
+                )
+                expect(result).toMatchObject({
+                    code: 1,
+                    stderr: expectedErr,
+                })
+                return
+            }
+
+            expect(result).toMatchObject({
+                code: 0,
+                stderr: '',
+            })
+
+            if (fs.existsSync(expectedOutFile)) {
+                const expectedOut = await fs.promises.readFile(
+                    expectedOutFile,
+                    'utf-8',
+                )
+                const output = execFileSync(path.join(OUTPUT_DIR, d.name), {
+                    encoding: 'utf-8',
+                })
+                expect(output).toBe(expectedOut)
+            }
         })
-
-        const output = execFileSync(binary, { encoding: 'utf-8' })
-        expect(output).toContain('Hello from package!')
-    })
-
-    it('errors if non-main file has top-level statements', async () => {
-        const badPkgDir = path.join(__dirname, 'packages', 'bad-top-level')
-        const badOutDir = path.join(badPkgDir, 'out')
-        if (!fs.existsSync(badOutDir)) fs.mkdirSync(badOutDir)
-        const result = await exec('./dist/rwrc', [
-            'build',
-            badPkgDir,
-            '--outdir',
-            badOutDir,
-        ])
-
-        expect(result.code).toBe(1)
-        expect(result.stderr).toMatch(
-            /other\.clawr: Only main\.clawr may contain top-level executable statements/,
-        )
-    })
+    }
 })
 
 async function exec(command: string, args: string[]) {

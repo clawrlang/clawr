@@ -104,62 +104,6 @@ cli.command('test')
                 if (run.stderr) process.stderr.write(run.stderr)
                 exitCode = run.code
             }
-            // Like compileClawrPackage, but with explicit file list and main file
-            async function compileClawrPackageWithMain(
-                files: string[],
-                mainFile: string,
-                outFilePath: string,
-            ): Promise<void> {
-                const { Parser } = await import('../parser/index.js')
-                const { TokenStream } = await import('../lexer/index.js')
-                const fsPromises = fs.promises
-                const allAsts = []
-                let mainAst = null
-                for (const file of files) {
-                    const source = await fsPromises.readFile(file, 'utf-8')
-                    const ast = new Parser(
-                        new TokenStream(source, path.basename(file)),
-                    ).parse()
-                    if (file === mainFile) {
-                        mainAst = ast
-                    }
-                    allAsts.push(ast)
-                }
-                if (!mainAst) {
-                    throw new Error(
-                        'Internal error: test harness AST not found after parsing.',
-                    )
-                }
-                // Merge all declarations from all files, and all executable statements from main
-                const mergedBody = []
-                for (const ast of allAsts) {
-                    if (ast === mainAst) continue
-                    mergedBody.push(
-                        ...ast.body.filter((stmt: any) =>
-                            [
-                                'data-decl',
-                                'func-decl',
-                                'object-decl',
-                                'service-decl',
-                            ].includes(stmt.kind),
-                        ),
-                    )
-                }
-                mergedBody.push(...mainAst.body)
-                const mergedAst = {
-                    ...mainAst,
-                    body: mergedBody,
-                }
-                const semanticModule = new SemanticAnalyzer(mergedAst).analyze()
-                const program = new IRGenerator().generate(semanticModule)
-                const cCode = codegenC(program)
-                await fsPromises.writeFile(outFilePath + '.c', cCode)
-                await compileCCode(
-                    outFilePath + '.c',
-                    outFilePath,
-                    resolveRuntimeDirectory(),
-                )
-            }
         } catch (err) {
             exitCode = 1
             if (err instanceof CompilerDiagnosticsError) {
@@ -184,6 +128,62 @@ async function pathExists(p: string): Promise<boolean> {
     } catch {
         return false
     }
+}
+
+// Like compileClawrPackage, but with explicit file list and main file
+async function compileClawrPackageWithMain(
+    files: string[],
+    mainFile: string,
+    outFilePath: string,
+): Promise<void> {
+    const { Parser } = await import('../parser/index.js')
+    const { TokenStream } = await import('../lexer/index.js')
+    const allAsts = []
+    let mainAst = null
+    for (const file of files) {
+        const source = await fs.promises.readFile(file, 'utf-8')
+        const ast = new Parser(
+            new TokenStream(source, path.basename(file)),
+        ).parse()
+        if (file === mainFile) {
+            mainAst = ast
+        }
+        allAsts.push(ast)
+    }
+    if (!mainAst) {
+        throw new Error(
+            'Internal error: test harness AST not found after parsing.',
+        )
+    }
+    // Merge all declarations from all files, and all executable statements from main
+    const mergedBody = []
+    for (const ast of allAsts) {
+        if (ast === mainAst) continue
+        mergedBody.push(
+            ...ast.body.filter((stmt: any) =>
+                [
+                    'data-decl',
+                    'func-decl',
+                    'object-decl',
+                    'service-decl',
+                ].includes(stmt.kind),
+            ),
+        )
+    }
+    mergedBody.push(...mainAst.body)
+    const mergedAst = {
+        ...mainAst,
+        body: mergedBody,
+    }
+    const semanticModule = new SemanticAnalyzer(mergedAst).analyze()
+    const program = new IRGenerator().generate(semanticModule)
+    const cCode = codegenC(program)
+    await fs.promises.writeFile(outFilePath + '.c', cCode)
+    await compileCCode(
+        outFilePath + '.c',
+        outFilePath,
+        resolveRuntimeDirectory(),
+    )
 }
 
 async function compileClawrEntry(
@@ -224,11 +224,10 @@ async function compileClawrPackage(
     // Parse all files and check for top-level executable statements
     const { Parser } = await import('../parser/index.js')
     const { TokenStream } = await import('../lexer/index.js')
-    const fsPromises = fs.promises
     const allAsts = []
     let mainAst = null
     for (const file of files) {
-        const source = await fsPromises.readFile(file, 'utf-8')
+        const source = await fs.promises.readFile(file, 'utf-8')
         const ast = new Parser(
             new TokenStream(source, path.basename(file)),
         ).parse()

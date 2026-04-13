@@ -1,20 +1,23 @@
 import fs from 'fs'
-import path from 'path'
+import { RealFilePath } from '../filesystem'
 
 /**
  * Recursively find all .clawr files in a directory tree.
- * Returns a list of absolute file paths.
  */
-export async function findClawrFiles(rootDir: string): Promise<string[]> {
-    const result: string[] = []
-    async function walk(dir: string) {
-        const entries = await fs.promises.readdir(dir, { withFileTypes: true })
+export async function findClawrFiles(
+    rootDir: RealFilePath,
+): Promise<RealFilePath[]> {
+    const result: RealFilePath[] = []
+    async function walk(dir: RealFilePath) {
+        const entries = await fs.promises.readdir(dir.absolutePath, {
+            withFileTypes: true,
+        })
         for (const entry of entries) {
-            const fullPath = path.join(dir, entry.name)
+            const fullPath = dir.realSubpath(entry.name)
             if (entry.isDirectory()) {
                 await walk(fullPath)
             } else if (entry.isFile() && entry.name.endsWith('.clawr')) {
-                result.push(fullPath)
+                result.push(RealFilePath.resolve(fullPath.absolutePath))
             }
         }
     }

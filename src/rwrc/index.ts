@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import fs from 'fs'
-import os from 'node:os'
 import { Command } from 'commander'
 import {
     CompilerDiagnosticsError,
@@ -20,6 +19,7 @@ import {
 } from './test-harness'
 import { TokenStream } from '../lexer/stream'
 import { Parser } from '../parser/index.js'
+import { NewFilePath, RealFilePath } from '../filesystem'
 
 const cli = new Command().name('rwrc').description('Clawr prototype compiler')
 
@@ -28,19 +28,20 @@ cli.command('build')
     .option('-o, --outdir <dir>', 'directory for output executable', '.')
     .action(async (input: string, options: { outdir: string }) => {
         try {
-            const stat = await fs.promises.stat(input)
-            let basename: string
-            let outFilePath: string
-            if (stat.isDirectory()) {
+            const inputPath = RealFilePath.resolve(input)
+            const outDirPath = RealFilePath.resolve(options.outdir)
+            if (inputPath.isDirectory) {
                 // Package mode: parse all .clawr files in the directory
-                basename = path.basename(path.resolve(input))
-                outFilePath = path.resolve(options.outdir, basename)
-                await compileClawrPackage(input, outFilePath)
+                await compileClawrPackage(
+                    inputPath,
+                    outDirPath.newSubpath(inputPath.basename),
+                )
             } else {
                 // Script mode: single file
-                basename = path.basename(input, '.clawr')
-                outFilePath = path.resolve(options.outdir, basename)
-                await compileClawrEntry(input, outFilePath)
+                await compileScript(
+                    inputPath,
+                    outDirPath.newSubpath(inputPath.basenameWithoutExtension),
+                )
             }
         } catch (err) {
             if (err instanceof CompilerDiagnosticsError) {
@@ -58,17 +59,12 @@ cli.command('test')
         'Run all @Test-annotated void functions under the directory tree',
     )
     .action(async (directory: string) => {
-        let workDir: string | undefined
+        let workDir: RealFilePath | undefined
         let exitCode = 0
         try {
-            const testRoot = path.resolve(directory)
-            if (!(await pathExists(testRoot))) {
-                throw new Error(`No such directory: ${testRoot}`)
-            }
-            const stat = await fs.promises.stat(testRoot)
-            if (!stat.isDirectory()) {
-                throw new Error(`Not a directory: ${testRoot}`)
-            }
+            const testRoot = RealFilePath.resolve(directory)
+            if (!testRoot.isDirectory)
+                throw new Error(`Not a directory: ${testRoot.absolutePath}`)
 
             const { tests, skipped } = await discoverTestsInTree(testRoot)
             for (const s of skipped) {
@@ -78,16 +74,11 @@ cli.command('test')
             if (tests.length === 0) {
                 console.error('rwrc test: no runnable @Test functions found')
             } else {
-                workDir = await fs.promises.mkdtemp(
-                    path.join(os.tmpdir(), 'clawr-test-'),
-                )
-                const harnessPath = path.join(workDir, 'entry.clawr')
-                const outFilePath = path.join(workDir, 'runner')
-
-                await fs.promises.writeFile(
-                    harnessPath,
-                    generateHarnessSource(harnessPath, tests),
-                    'utf-8',
+                workDir = await RealFilePath.createTemporary('clawr-test-')
+                const outFilePath = workDir.newSubpath('runner')
+                const harnessPath = await workDir.writeFile(
+                    'entry.clawr',
+                    generateHarnessSource(workDir, tests),
                 )
 
                 // Collect all .clawr files in the testRoot, add the harness as main
@@ -99,7 +90,7 @@ cli.command('test')
                     outFilePath,
                 )
 
-                const run = await exec(outFilePath, [])
+                const run = await exec(outFilePath.absolutePath, [])
                 if (run.stdout) process.stdout.write(run.stdout)
                 if (run.stderr) process.stderr.write(run.stderr)
                 exitCode = run.code
@@ -113,7 +104,10 @@ cli.command('test')
             }
         } finally {
             if (workDir) {
-                await fs.promises.rm(workDir, { recursive: true, force: true })
+                await fs.promises.rm(workDir.absolutePath, {
+                    recursive: true,
+                    force: true,
+                })
             }
         }
         process.exit(exitCode)
@@ -121,31 +115,20 @@ cli.command('test')
 
 cli.parseAsync(process.argv)
 
-async function pathExists(p: string): Promise<boolean> {
-    try {
-        await fs.promises.access(p)
-        return true
-    } catch {
-        return false
-    }
-}
-
 // Like compileClawrPackage, but with explicit file list and main file
 async function compileClawrPackageWithMain(
-    files: string[],
-    mainFile: string,
-    outFilePath: string,
+    files: RealFilePath[],
+    mainFile: RealFilePath,
+    outFilePath: NewFilePath,
 ): Promise<void> {
     const { Parser } = await import('../parser/index.js')
     const { TokenStream } = await import('../lexer/index.js')
     const allAsts = []
     let mainAst = null
     for (const file of files) {
-        const source = await fs.promises.readFile(file, 'utf-8')
-        const ast = new Parser(
-            new TokenStream(source, path.basename(file)),
-        ).parse()
-        if (file === mainFile) {
+        const source = await file.readFile()
+        const ast = new Parser(new TokenStream(source, file.basename)).parse()
+        if (file.equals(mainFile)) {
             mainAst = ast
         }
         allAsts.push(ast)
@@ -178,47 +161,52 @@ async function compileClawrPackageWithMain(
     const semanticModule = new SemanticAnalyzer(mergedAst).analyze()
     const program = new IRGenerator().generate(semanticModule)
     const cCode = codegenC(program)
-    await fs.promises.writeFile(outFilePath + '.c', cCode)
-    await compileCCode(
-        outFilePath + '.c',
-        outFilePath,
-        resolveRuntimeDirectory(),
+    const resolvedParent = RealFilePath.resolveNew(outFilePath.parent)
+    const cFilePath = await resolvedParent.writeFile(
+        `${outFilePath.basename}.c`,
+        cCode,
     )
+    await compileCCode(cFilePath, outFilePath)
 }
 
-async function compileClawrEntry(
-    sourceFile: string,
-    outFilePath: string,
+async function compileScript(
+    sourceFile: RealFilePath,
+    outFilePath: NewFilePath,
 ): Promise<void> {
     // Script mode: parse and compile a single file
-    const source = await fs.promises.readFile(sourceFile, 'utf-8')
-    const stream = new TokenStream(source, path.basename(sourceFile))
+    const stream = new TokenStream(
+        await sourceFile.readFile(),
+        sourceFile.basename,
+    )
     const program = new Parser(stream).parse()
 
     const semanticModule = new SemanticAnalyzer(program).analyze()
     const cIr = new IRGenerator().generate(semanticModule)
     const cCode = codegenC(cIr)
-    await fs.promises.writeFile(outFilePath + '.c', cCode)
-
-    await compileCCode(
-        outFilePath + '.c',
-        outFilePath,
-        resolveRuntimeDirectory(),
+    const resolvedParent = RealFilePath.resolveNew(outFilePath.parent)
+    const cFilePath = await resolvedParent.writeFile(
+        `${outFilePath.basename}.c`,
+        cCode,
     )
+    await compileCCode(cFilePath, outFilePath)
 }
 
 async function compileClawrPackage(
-    dir: string,
-    outFilePath: string,
+    dir: RealFilePath,
+    outFilePath: NewFilePath,
 ): Promise<void> {
     // Package mode: parse all .clawr files in the directory
     const files = await findClawrFiles(dir)
     if (files.length === 0) {
-        throw new Error(`No .clawr files found in directory: ${dir}`)
+        throw new Error(
+            `No .clawr files found in directory: ${dir.absolutePath}`,
+        )
     }
-    const mainFile = files.find((f) => path.basename(f) === 'main.clawr')
+    const mainFile = files.find((f) => f.basename === 'main.clawr')
     if (!mainFile) {
-        throw new Error(`No main.clawr found in package directory: ${dir}`)
+        throw new Error(
+            `No main.clawr found in package directory: ${dir.absolutePath}`,
+        )
     }
 
     // Parse all files and check for top-level executable statements
@@ -227,10 +215,8 @@ async function compileClawrPackage(
     const allAsts = []
     let mainAst = null
     for (const file of files) {
-        const source = await fs.promises.readFile(file, 'utf-8')
-        const ast = new Parser(
-            new TokenStream(source, path.basename(file)),
-        ).parse()
+        const source = await file.readFile()
+        const ast = new Parser(new TokenStream(source, file.basename)).parse()
         if (file !== mainFile) {
             // Check for top-level executable statements (not declarations)
             const hasExecutable = ast.body.some(
@@ -244,7 +230,7 @@ async function compileClawrPackage(
             )
             if (hasExecutable) {
                 throw new Error(
-                    `${path.relative(dir, file)}: Only main.clawr may contain top-level executable statements in a package`,
+                    `${path.relative(dir.absolutePath, file.absolutePath)}: Only main.clawr may contain top-level executable statements in a package`,
                 )
             }
         } else {
@@ -285,33 +271,33 @@ async function compileClawrPackage(
     const semanticModule = new SemanticAnalyzer(mergedAst).analyze()
     const program = new IRGenerator().generate(semanticModule)
     const cCode = codegenC(program)
-    await fs.promises.writeFile(outFilePath + '.c', cCode)
-    await compileCCode(
-        outFilePath + '.c',
-        outFilePath,
-        resolveRuntimeDirectory(),
+    const resolvedParent = RealFilePath.resolveNew(outFilePath.parent)
+    const cFilePath = await resolvedParent.writeFile(
+        `${outFilePath.basename}.c`,
+        cCode,
     )
+    await compileCCode(cFilePath, outFilePath)
 }
 
-function resolveRuntimeDirectory(): string {
+async function resolveRuntimeDirectory(): Promise<RealFilePath> {
     return process.execPath.endsWith('rwrc')
-        ? path.resolve(path.dirname(process.execPath), 'runtime')
-        : path.join(__dirname, '..', 'runtime')
+        ? RealFilePath.resolve(path.dirname(process.execPath), 'runtime')
+        : RealFilePath.resolve(__dirname, '..', 'runtime')
 }
 
 async function compileCCode(
-    sourceFile: string,
-    outFilePath: string,
-    runtimeDir: string,
+    sourceFile: RealFilePath,
+    outFilePath: NewFilePath,
 ) {
-    const runtimeSources = await glob(path.join(runtimeDir, '*.c'))
+    const runtimeDir = await resolveRuntimeDirectory()
+    const runtimeSources = await glob(path.join(runtimeDir.absolutePath, '*.c'))
     const result = await exec('clang', [
         '-I',
-        path.join(runtimeDir, 'include'),
-        sourceFile,
+        path.join(runtimeDir.absolutePath, 'include'),
+        sourceFile.absolutePath,
         ...runtimeSources,
         '-o',
-        outFilePath,
+        outFilePath.absolutePath,
     ])
 
     if (result.code !== 0) {

@@ -3,11 +3,6 @@
 ## Technical Debt
 
 - `compileClawrPackage` ≈ `compileClawrPackageWithMain`
-- Create a value-object for path strings
-  - Now I have to track if compared paths are both relative, normalised etc
-  - `RelativePath` (from executable? from CWD?) and `CanonicalPath`?
-  - internal `relativePath` + `root`?
-  - always canonical `/...`?
 - Errors without position tagging
 - **`IRGenerator`**: contains a reference to `ASTExpression`
 - Convert `print` statement to a function call (tagged as `external`)

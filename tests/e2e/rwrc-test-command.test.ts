@@ -1,12 +1,12 @@
-import path from 'node:path'
 import child_process from 'node:child_process'
 import { describe, expect, it } from 'bun:test'
+import { RealFilePath } from '../../src/filesystem'
 
-const FIXTURE = path.join(__dirname, 'cases', 'rwrc-test-fixture')
+const FIXTURE = RealFilePath.resolve(__dirname, 'cases', 'rwrc-test-fixture')
 
 describe('rwrc test command', () => {
     it('runs all @Test functions under a directory', async () => {
-        const result = await exec('./dist/rwrc', ['test', FIXTURE])
+        const result = await exec('./dist/rwrc', ['test', FIXTURE.absolutePath])
         expect(result).toMatchObject({
             code: 0,
             stderr: '',
@@ -21,9 +21,7 @@ async function exec(command: string, args: string[]) {
         stderr: string
         stdout: string
     }>((resolve) => {
-        const proc = child_process.spawn(command, args, {
-            cwd: path.join(__dirname, '..', '..'),
-        })
+        const proc = child_process.spawn(command, args)
 
         let stdout = ''
         let stderr = ''

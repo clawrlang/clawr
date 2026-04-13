@@ -7,6 +7,7 @@ import {
     finalizeDiscoveredTests,
     generateHarnessSource,
 } from '../../src/rwrc/test-harness'
+import { NewFilePath } from '../../src/filesystem'
 
 function parse(code: string) {
     return new Parser(new TokenStream(code, 't.clawr')).parse()
@@ -75,10 +76,10 @@ describe('rwrc test harness', () => {
     })
 
     it('generates harness with calls to test functions', () => {
-        const harness = '/tmp/harness/entry.clawr'
+        const harness = NewFilePath.resolve('/tmp/harness')
         const tests = [
             {
-                absolutePath: '/tmp/harness/../tests/t.clawr',
+                absolutePath: '/tmp/tests/t.clawr',
                 functionName: 'foo',
             },
         ]

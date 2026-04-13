@@ -1,9 +1,9 @@
-import fs from 'node:fs'
 import path from 'node:path'
 import { glob } from 'fast-glob'
 import type { ASTProgram } from '../ast'
 import { TokenStream } from '../lexer'
 import { Parser } from '../parser'
+import { NewFilePath, RealFilePath } from '../filesystem'
 
 /** One runnable @Test; call sites must use `functionName` (merged program keeps declaration names). */
 export interface DiscoveredTest {
@@ -100,27 +100,25 @@ export function formatDiscoverySkipWarning(skip: DiscoverySkip): string {
 }
 
 export async function discoverTestsInTree(
-    testRoot: string,
+    testRoot: RealFilePath,
 ): Promise<{ tests: DiscoveredTest[]; skipped: DiscoverySkip[] }> {
-    const root = path.resolve(testRoot)
-    const files = await glob('**/*.clawr', {
-        cwd: root,
+    const _files = await glob('**/*.clawr', {
+        cwd: testRoot.absolutePath,
         absolute: true,
         onlyFiles: true,
     })
-    files.sort()
+    _files.sort()
+    const files = _files.map((f) => RealFilePath.resolve(f))
 
     const rawAccepted: RawDiscoveredTest[] = []
     const skipped: DiscoverySkip[] = []
 
     for (const file of files) {
-        const source = await fs.promises.readFile(file, 'utf-8')
-        const ast = new Parser(
-            new TokenStream(source, path.basename(file)),
-        ).parse()
+        const source = await file.readFile()
+        const ast = new Parser(new TokenStream(source, file.basename)).parse()
         const { accepted, skipped: fileSkipped } = extractRunnableTestsFromAst(
             ast,
-            file,
+            file.absolutePath,
         )
         rawAccepted.push(...accepted)
         skipped.push(...fileSkipped)
@@ -131,19 +129,18 @@ export async function discoverTestsInTree(
 }
 
 export function generateHarnessSource(
-    harnessAbsolutePath: string,
+    harnessDirectory: RealFilePath | NewFilePath,
     tests: DiscoveredTest[],
 ): string {
     if (tests.length === 0) {
         return ''
     }
 
-    const harnessDir = path.dirname(harnessAbsolutePath)
     const byModule = new Map<string, string[]>()
 
     for (const t of tests) {
         const rel = path
-            .relative(harnessDir, t.absolutePath)
+            .relative(harnessDirectory.absolutePath, t.absolutePath)
             .replace(/\\/g, '/')
         if (!byModule.has(rel)) {
             byModule.set(rel, [])

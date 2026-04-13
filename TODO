@@ -2,6 +2,12 @@
 
 ## Technical Debt
 
+- `compileClawrPackage` ≈ `compileClawrPackageWithMain`
+- Create a value-object for path strings
+  - Now I have to track if compared paths are both relative, normalised etc
+  - `RelativePath` (from executable? from CWD?) and `CanonicalPath`?
+  - internal `relativePath` + `root`?
+  - always canonical `/...`?
 - Errors without position tagging
 - **`IRGenerator`**: contains a reference to `ASTExpression`
 - Convert `print` statement to a function call (tagged as `external`)
@@ -10,11 +16,7 @@
   - Or use something like C# implicit/explicit operator instead of `toString()`?
 - Object-oriented lowering helpers?
 - `visibility: 'helper'` -> `isHelper: true`?
-- `import`: too TypeScript?
-- Should helper types/functions be visible to all modules in the package/library?
 - **`SemanticAnalyzer`**: Object method may not have external side-effects
 - `object` should be allowed side-effects in `DEBUG` mode
   - Mark specific debug APIs (that are removed in production) as pure
 - Method override should be explicit
-- The `@Test` annotation should have an explicit implementation. The `SemanticAnalyzer`
-  should not be coupled to testing

@@ -14,14 +14,14 @@
     },
     {
       "type": "npm",
-      "script": "test:runtime",
+      "script": "test:e2e",
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "problemMatcher": [],
-      "label": "npm: test:runtime",
-      "detail": "npm-run-all build --serial test:runtime"
+      "label": "npm: test:e2e",
+      "detail": "npm-run-all build --serial test:e2e"
     }
   ]
 }

@@ -11,6 +11,17 @@
       "problemMatcher": [],
       "label": "npm: test",
       "detail": "bun test tests/unit"
+    },
+    {
+      "type": "npm",
+      "script": "test:runtime",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "label": "npm: test:runtime",
+      "detail": "npm-run-all build --serial test:runtime"
     }
   ]
 }

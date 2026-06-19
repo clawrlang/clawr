@@ -11,7 +11,9 @@
     }
   },
   "scripts": {
-    "test": "tsc --noEmit && bun test ./tests/unit/"
+    "test": "tsc --noEmit && bun test ./tests/unit/",
+    "build:runtime": "rm -rf dist/include && bun run cp -R src/runtime/include dist/include && clang -I dist/include src/runtime/*.c -dynamiclib -fvisibility=hidden -current_version 0.0.1 -compatibility_version 0.0.1 -o dist/libClawr.A.dylib",
+    "test:runtime": "npm run build:runtime && bun test ./tests/runtime/*.test.ts"
   },
   "author": "Clawr Community",
   "license": "MIT",

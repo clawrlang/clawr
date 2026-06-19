@@ -1,0 +1,6 @@
+eq(1, 1): true
+ne(1, 2): true
+lt(1, 2): true
+le(1, 1): true
+gt(2, 1): true
+ge(2, 2): true

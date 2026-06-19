@@ -1,0 +1,5 @@
+eq(null, null): true
+eq(null, hello): false
+eq(hello, null): false
+eq(hello, hello): true
+eq(hello, world): false

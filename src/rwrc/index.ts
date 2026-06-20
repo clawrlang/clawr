@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import fs from 'fs'
+import fs from 'fs/promises'
 import path from 'path'
 import { Command } from 'commander'
 import Bun from 'bun'
@@ -25,9 +25,10 @@ program
                 return 0;
             }`
         try {
-            if (!fs.existsSync(resolvedOutDir))
-                fs.mkdirSync(resolvedOutDir, { recursive: true })
-            fs.writeFileSync(cFilePath, cCode)
+            if (!(await fs.stat(resolvedOutDir).catch(() => false))) {
+                await fs.mkdir(resolvedOutDir, { recursive: true })
+            }
+            await fs.writeFile(cFilePath, cCode)
 
             const proc = Bun.spawn(
                 [

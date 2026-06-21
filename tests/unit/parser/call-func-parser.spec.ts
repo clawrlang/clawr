@@ -24,4 +24,40 @@ describe('Function Call Parsing', () => {
             ],
         })
     })
+
+    it('converts print(integer) to printInteger()', () => {
+        const input = 'print(1)'
+        const tokenStream = TokenStream.read(
+            input,
+            new TestErrorReporter('test.clawr'),
+        )
+        const parser = CallParser.create(tokenStream)
+        const result = parser.parse()
+        expect(result).toMatchObject({
+            type: 'CALL_FUNC',
+            signature: {
+                baseName: 'printInteger',
+                parameters: [{ type: 'integer' }],
+            },
+            arguments: [{ type: 'INTEGER_LITERAL', value: '1' }],
+        })
+    })
+
+    it('converts print(truthvalue) to printTruthvalue()', () => {
+        const input = 'print(true)'
+        const tokenStream = TokenStream.read(
+            input,
+            new TestErrorReporter('test.clawr'),
+        )
+        const parser = CallParser.create(tokenStream)
+        const result = parser.parse()
+        expect(result).toMatchObject({
+            type: 'CALL_FUNC',
+            signature: {
+                baseName: 'printTruthvalue',
+                parameters: [{ type: 'truthvalue' }],
+            },
+            arguments: [{ type: 'TRUTHVALUE_LITERAL', value: 'true' }],
+        })
+    })
 })

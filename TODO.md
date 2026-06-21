@@ -7,15 +7,12 @@ First vertical slice
 - Implement frontend parsers for…
   - @main body
   - module with @main
-- Parse `print()` statement
-- Generate CIR `CALL_FUNC` node for `print`
-  - `print(truthvalue)` as `printTruthvalue(truthvalue)`
-  - `print(integer)` as `printInteger(integer)`
 - Generate `$main` CIR node
 - Write end-to-end test case
 
 ## Later Items
 
+- Separate parsing from analysis/conversion
 - Allow at most one @main body in the module
 - Generate AST for syntax coloring
 - Handle `Integer*` when lowering

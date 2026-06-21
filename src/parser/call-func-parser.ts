@@ -28,7 +28,10 @@ export class CallParser {
         return {
             type: 'CALL_FUNC',
             signature: {
-                baseName: nameToken.identifier,
+                baseName:
+                    nameToken.identifier == 'print'
+                        ? `print${args[0].type === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
+                        : nameToken.identifier,
                 parameters: args.map((arg) => {
                     switch (arg.type) {
                         case 'INTEGER_LITERAL':

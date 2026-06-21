@@ -25,7 +25,6 @@
 
 ## TODO Items
 
-- Add `printInteger` and `printTruthValue` (inofficial)
 - First vertical slice
   - Parse `TruthvalueLiteral` expression
   - Parse `IntegerLiteral` expression

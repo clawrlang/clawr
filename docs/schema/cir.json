@@ -26,19 +26,22 @@
                 "type": "object",
                 "properties": {
                   "label": { "type": "string" },
-                  "type": { "type": "string" },
-                  "argument": { "$ref": "#/definitions/expression" }
+                  "type": { "type": "string" }
                 },
-                "required": ["type", "argument"],
+                "required": ["type"],
                 "additionalProperties": false
               }
             }
           },
           "required": ["baseName", "parameters"],
           "additionalProperties": false
+        },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/expression" }
         }
       },
-      "required": ["type", "signature"],
+      "required": ["type", "signature", "arguments"],
       "additionalProperties": false
     },
     "expression": {

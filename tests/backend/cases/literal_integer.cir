@@ -4,25 +4,27 @@
         {
             "type": "CALL_FUNC",
             "signature": {
-                "baseName": "println",
+                "baseName": "printf",
                 "parameters": [
                     {
-                        "type": "string",
-                        "argument": {
-                            "type": "STRING_LITERAL",
-                            "value": "%d\\n"
-                        }
+                        "type": "string"
                     },
                     {
                         "label": "value",
-                        "type": "integer",
-                        "argument": {
-                            "type": "INTEGER_LITERAL",
-                            "value": "1"
-                        }
+                        "type": "integer"
                     }
                 ]
-            }
+            },
+            "arguments": [
+                {
+                    "type": "STRING_LITERAL",
+                    "value": "%d\\n"
+                },
+                {
+                    "type": "INTEGER_LITERAL",
+                    "value": "1"
+                }
+            ]
         }
     ]
 }

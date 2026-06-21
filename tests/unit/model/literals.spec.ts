@@ -8,7 +8,7 @@ describe('Literals', () => {
         for (const input of cases) {
             it(`outputs ${input} as TRUTHVALUE_LITERAL`, () => {
                 const literal = TruthValueLiteral.create(input)
-                expect(literal.toCir()).toMatchObject({
+                expect(literal.toCIR()).toMatchObject({
                     type: 'TRUTHVALUE_LITERAL',
                     value: input,
                 })
@@ -21,7 +21,7 @@ describe('Literals', () => {
         for (const input of cases) {
             it(`outputs ${input} as INTEGER_LITERAL`, () => {
                 const literal = IntegerLiteral.create(BigInt(input))
-                expect(literal.toCir()).toMatchObject({
+                expect(literal.toCIR()).toMatchObject({
                     type: 'INTEGER_LITERAL',
                     value: input,
                 })

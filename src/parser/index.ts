@@ -60,7 +60,7 @@ export class ModuleParser {
         const statements: cir.Statement[] = []
         while (!this.tokenStream.isNext('PUNCTUATION', '}')) {
             statements.push(
-                CallFuncParser.create(this.tokenStream).parse().toCir(),
+                CallFuncParser.create(this.tokenStream).parse().toCIR(),
             )
         }
         return statements

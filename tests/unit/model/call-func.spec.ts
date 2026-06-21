@@ -10,7 +10,7 @@ describe('CallFunc', () => {
                 { value: TruthValueLiteral.create('ambiguous') },
             ],
         })
-        expect(statement.toCir()).toMatchObject({
+        expect(statement.toCIR()).toMatchObject({
             type: 'CALL_FUNC',
             signature: {
                 baseName: 'foo',
@@ -28,7 +28,7 @@ describe('CallFunc', () => {
             baseName: 'print',
             arguments: [{ value: IntegerLiteral.create(1n) }],
         })
-        expect(statement.toCir()).toMatchObject({
+        expect(statement.toCIR()).toMatchObject({
             type: 'CALL_FUNC',
             signature: {
                 baseName: 'printInteger',
@@ -43,7 +43,7 @@ describe('CallFunc', () => {
             baseName: 'print',
             arguments: [{ value: TruthValueLiteral.create('true') }],
         })
-        expect(statement.toCir()).toMatchObject({
+        expect(statement.toCIR()).toMatchObject({
             type: 'CALL_FUNC',
             signature: {
                 baseName: 'printTruthvalue',

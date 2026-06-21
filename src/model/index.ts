@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 
 export interface Expression {
-    toCir(): cir.Expression
+    toCIR(): cir.Expression
 }
 
 export class TruthValueLiteral implements Expression {
@@ -11,7 +11,7 @@ export class TruthValueLiteral implements Expression {
         return new TruthValueLiteral(value)
     }
 
-    toCir(): cir.Expression {
+    toCIR(): cir.Expression {
         return { type: 'TRUTHVALUE_LITERAL', value: this.value }
     }
 }
@@ -23,13 +23,13 @@ export class IntegerLiteral implements Expression {
         return new IntegerLiteral(value)
     }
 
-    toCir(): cir.Expression {
+    toCIR(): cir.Expression {
         return { type: 'INTEGER_LITERAL', value: this.value.toString() }
     }
 }
 
 export interface Statement {
-    toCir(): cir.Statement
+    toCIR(): cir.Statement
 }
 
 export class CallFunc implements Statement {
@@ -48,23 +48,23 @@ export class CallFunc implements Statement {
         return new CallFunc(baseName, args)
     }
 
-    toCir(): cir.Statement {
+    toCIR(): cir.Statement {
         return {
             type: 'CALL_FUNC',
             signature: {
                 baseName:
                     this.baseName === 'print'
-                        ? `print${this.args[0].value.toCir().type === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
+                        ? `print${this.args[0].value.toCIR().type === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
                         : this.baseName,
                 parameters: this.args.map((arg, index) => ({
                     label: this.args[index].label,
                     type:
-                        arg.value.toCir().type === 'INTEGER_LITERAL'
+                        arg.value.toCIR().type === 'INTEGER_LITERAL'
                             ? 'integer'
                             : 'truthvalue',
                 })),
             },
-            arguments: this.args.map((arg) => arg.value.toCir()),
+            arguments: this.args.map((arg) => arg.value.toCIR()),
         }
     }
 }

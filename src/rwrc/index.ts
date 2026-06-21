@@ -41,7 +41,7 @@ program
                 )
             },
         })
-        const cir = ModuleParser.create(stream).parse()
+        const cir = ModuleParser.create(stream).parse().toCIR()
         const cCode = backend.lower(cir)
 
         try {

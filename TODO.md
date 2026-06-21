@@ -2,10 +2,9 @@
 
 ## In Progress
 
-- Separate parsing from analysis/conversion
-
 ## Later Items
 
+- Parse argument labels
 - Allow at most one @main body in the module
 - Generate AST for syntax coloring
 - Handle `Integer*` when lowering

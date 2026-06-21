@@ -1,4 +1,3 @@
-import * as cir from '../cir'
 import * as model from '../model'
 import { TokenStream } from '../lexer'
 import { CallFuncParser } from './call-func-parser'
@@ -48,20 +47,17 @@ export class ModuleParser {
         return new ModuleParser(tokenStream)
     }
 
-    parse(): cir.Cir {
+    parse(): model.Module {
         this.tokenStream.expect('ANNOTATION', '@main')
         this.tokenStream.expect('PUNCTUATION', '{')
         const body = this.parseStatements()
         this.tokenStream.expect('PUNCTUATION', '}')
-        return { $main: body }
+        return model.Module.create({ main: body })
     }
-
-    private parseStatements(): cir.Statement[] {
-        const statements: cir.Statement[] = []
+    private parseStatements() {
+        const statements: model.Statement[] = []
         while (!this.tokenStream.isNext('PUNCTUATION', '}')) {
-            statements.push(
-                CallFuncParser.create(this.tokenStream).parse().toCIR(),
-            )
+            statements.push(CallFuncParser.create(this.tokenStream).parse())
         }
         return statements
     }

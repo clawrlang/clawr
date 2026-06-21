@@ -17,14 +17,10 @@ describe('Module Parser', () => {
         const parser = ModuleParser.create(tokenStream)
         const result = parser.parse()
         expect(result).toMatchObject({
-            $main: [
+            main: [
                 {
-                    type: 'CALL_FUNC',
-                    signature: {
-                        baseName: 'printInteger',
-                        parameters: [{ type: 'integer' }],
-                    },
-                    arguments: [{ type: 'INTEGER_LITERAL', value: '42' }],
+                    baseName: 'print',
+                    args: [{ value: { value: 42n } }],
                 },
             ],
         })

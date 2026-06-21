@@ -68,3 +68,17 @@ export class CallFunc implements Statement {
         }
     }
 }
+
+export class Module {
+    private constructor(private main: Statement[]) {}
+
+    static create({ main }: { main: Statement[] }): Module {
+        return new Module(main)
+    }
+
+    toCIR(): cir.Cir {
+        return {
+            $main: this.main.map((stmt) => stmt.toCIR()),
+        }
+    }
+}

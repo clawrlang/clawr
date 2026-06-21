@@ -4,22 +4,14 @@
         {
             "type": "CALL_FUNC",
             "signature": {
-                "baseName": "printf",
+                "baseName": "printInteger",
                 "parameters": [
                     {
-                        "type": "string"
-                    },
-                    {
-                        "label": "value",
                         "type": "integer"
                     }
                 ]
             },
             "arguments": [
-                {
-                    "type": "STRING_LITERAL",
-                    "value": "%d\\n"
-                },
                 {
                     "type": "INTEGER_LITERAL",
                     "value": "1"

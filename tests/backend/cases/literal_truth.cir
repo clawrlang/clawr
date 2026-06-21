@@ -4,11 +4,8 @@
         {
             "type": "CALL_FUNC",
             "signature": {
-                "baseName": "printf",
+                "baseName": "printTruthvalue",
                 "parameters": [
-                    {
-                        "type": "string"
-                    },
                     {
                         "type": "truthvalue"
                     }
@@ -16,25 +13,8 @@
             },
             "arguments": [
                 {
-                    "type": "STRING_LITERAL",
-                    "value": "%s\\n"
-                },
-                {
-                    "type": "CALL_FUNC",
-                    "signature": {
-                        "baseName": "truthvalue·toCString",
-                        "parameters": [
-                            {
-                                "type": "string"
-                            }
-                        ]
-                    },
-                    "arguments": [
-                        {
-                            "type": "TRUTHVALUE_LITERAL",
-                            "value": "ambiguous"
-                        }
-                    ]
+                    "type": "TRUTHVALUE_LITERAL",
+                    "value": "ambiguous"
                 }
             ]
         }

@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import child_process from 'node:child_process'
 import { describe, expect, test } from 'bun:test'
+import backend from '../../src/backend'
 
 const CASES_DIR = path.join(__dirname, 'cases')
 const OUTPUT_DIR = path.join(__dirname, '.out')
@@ -62,19 +63,15 @@ describe('Lowering Tests', () => {
 })
 
 async function lower(fileName: string) {
+    const inputFilePath = path.join(CASES_DIR, fileName)
     const outputFilePath = path.join(
         OUTPUT_DIR,
         `${fileName.replace(/.cir$/, '')}.c`,
     )
 
-    const code = `
-        #include <stdio.h>
-
-        int main() {
-            printf("%d\\n", 1);
-            return 0;
-        }
-        `
+    const cirData = fs.readFileSync(inputFilePath, 'utf-8')
+    const cir = JSON.parse(cirData)
+    const code = backend.lower(cir)
     await fs.promises.mkdir(OUTPUT_DIR, { recursive: true })
     await fs.promises.writeFile(outputFilePath, code)
 }

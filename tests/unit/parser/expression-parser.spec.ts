@@ -1,19 +1,16 @@
 import { describe, expect, it } from 'bun:test'
-import { Expression } from '../../../src/cir'
 import { ErrorReporter, SourceCodeSpan } from '../../../src/diagnostics'
 import { TokenStream } from '../../../src/lexer'
 import { ExpressionParser } from '../../../src/parser'
+import { Expression } from '../../../src/model'
 
-describe('Literal Parsing', () => {
+describe('Expression Parser', () => {
     describe('truthvalue literals', () => {
         const cases: Truthvalue[] = ['true', 'false', 'ambiguous'] as const
         for (const input of cases) {
             it(`parses ${input} as Truthvalue`, () => {
                 const literal = parseLiteral(input)
-                expect(literal).toMatchObject({
-                    type: 'TRUTHVALUE_LITERAL',
-                    value: input,
-                })
+                expect(literal).toMatchObject({ value: input })
             })
         }
     })
@@ -23,10 +20,7 @@ describe('Literal Parsing', () => {
         for (const input of cases) {
             it(`parses ${input} as Integer`, () => {
                 const literal = parseLiteral(input)
-                expect(literal).toMatchObject({
-                    type: 'INTEGER_LITERAL',
-                    value: input,
-                })
+                expect(literal).toMatchObject({ value: BigInt(input) })
             })
         }
     })
@@ -34,7 +28,7 @@ describe('Literal Parsing', () => {
 
 function parseLiteral(input: string): Expression {
     const tokenStream = TokenStream.read(input, new TestErrorReporter())
-    return ExpressionParser.create(tokenStream).parse().toCir()
+    return ExpressionParser.create(tokenStream).parse()
 }
 
 class TestErrorReporter implements ErrorReporter {
@@ -49,4 +43,4 @@ class TestErrorReporter implements ErrorReporter {
     }
 }
 
-type Truthvalue = Extract<Expression, { type: 'TRUTHVALUE_LITERAL' }>['value']
+type Truthvalue = 'true' | 'false' | 'ambiguous'

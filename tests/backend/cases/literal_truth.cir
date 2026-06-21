@@ -1,0 +1,42 @@
+{
+    "$schema": "../../../docs/schema/cir.json",
+    "$main": [
+        {
+            "type": "CALL_FUNC",
+            "signature": {
+                "baseName": "printf",
+                "parameters": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "truthvalue"
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "type": "STRING_LITERAL",
+                    "value": "%s\\n"
+                },
+                {
+                    "type": "CALL_FUNC",
+                    "signature": {
+                        "baseName": "truthvalue·toCString",
+                        "parameters": [
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "arguments": [
+                        {
+                            "type": "TRUTHVALUE_LITERAL",
+                            "value": "ambiguous"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

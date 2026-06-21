@@ -59,10 +59,28 @@
           "type": "object",
           "properties": {
             "type": { "const": "INTEGER_LITERAL" },
-            "value": { "type": "string", "pattern": "^\\d+$" }
+            "value": { "type": "string", "pattern": "^-?\\d+$" }
           },
           "required": ["type", "value"],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "TRUTHVALUE_LITERAL" },
+            "value": {
+              "oneOf": [
+                { "const": "false" },
+                { "const": "ambiguous" },
+                { "const": "true" }
+              ]
+            }
+          },
+          "required": ["type", "value"],
+          "additionalProperties": false
+        },
+        {
+          "$ref": "#/definitions/call_func"
         }
       ]
     }

@@ -26,8 +26,6 @@
 ## TODO Items
 
 - First vertical slice
-  - Parse `TruthvalueLiteral` expression
-  - Parse `IntegerLiteral` expression
   - Parse `RealLiteral` expression
   - Parse `print()` statement
   - Generate `INTEGER_LITERAL` AST node for lowering

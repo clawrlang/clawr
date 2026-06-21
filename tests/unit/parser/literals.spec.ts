@@ -2,19 +2,21 @@ import { describe, expect, it } from 'bun:test'
 import { Expression } from '../../../src/cir'
 import { ErrorReporter, SourceCodeSpan } from '../../../src/diagnostics'
 import { TokenStream } from '../../../src/lexer'
-import { TruthvalueLiteralParser } from '../../../src/parser'
+import {
+    ExpressionParser,
+    IntegerLiteralParser,
+    TruthvalueLiteralParser,
+} from '../../../src/parser'
 
 describe('Literal Parsing', () => {
     describe('truthvalue literals', () => {
         const cases: Truthvalue[] = ['true', 'false', 'ambiguous'] as const
         for (const input of cases) {
             it(`parses ${input} as Truthvalue`, () => {
-                const tokenStream = TokenStream.read(
+                const literal = parseLiteral(
                     input,
-                    new TestErrorReporter(),
+                    TruthvalueLiteralParser.create,
                 )
-                const parser = TruthvalueLiteralParser.create(tokenStream)
-                const literal = parser.parse()
                 expect(literal).toMatchObject({
                     type: 'TRUTHVALUE_LITERAL',
                     value: input,
@@ -22,7 +24,29 @@ describe('Literal Parsing', () => {
             })
         }
     })
+
+    describe('integer literals', () => {
+        const cases = ['0', '1', '2', '-1', '123456789'] as const
+        for (const input of cases) {
+            it(`parses ${input} as Integer`, () => {
+                const literal = parseLiteral(input, IntegerLiteralParser.create)
+                expect(literal).toMatchObject({
+                    type: 'INTEGER_LITERAL',
+                    value: input,
+                })
+            })
+        }
+    })
 })
+
+function parseLiteral(
+    input: string,
+    parserFactory: (tokenStream: TokenStream) => ExpressionParser,
+): Expression {
+    const tokenStream = TokenStream.read(input, new TestErrorReporter())
+    const parser = parserFactory(tokenStream)
+    return parser.parse()
+}
 
 class TestErrorReporter implements ErrorReporter {
     reportFatalError(message: string, location: SourceCodeSpan): never {

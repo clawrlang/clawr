@@ -1,4 +1,3 @@
-import * as cir from '../cir'
 import { ExpressionParser } from '.'
 import { TokenStream } from '../lexer'
 import { CallFunc, Expression } from '../model'
@@ -27,10 +26,7 @@ export class CallFuncParser {
             this.tokenStream.expect('PUNCTUATION', ',')
         }
         return CallFunc.create({
-            baseName:
-                nameToken.identifier == 'print'
-                    ? `print${args[0].toCir().type === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
-                    : nameToken.identifier,
+            baseName: nameToken.identifier,
             arguments: args.map((arg) => ({
                 value: arg,
             })),

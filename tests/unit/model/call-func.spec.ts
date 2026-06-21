@@ -1,18 +1,16 @@
 import { describe, it, expect } from 'bun:test'
-import { TokenStream } from '../../../src/lexer'
-import { TestErrorReporter } from '../../util'
-import { CallFuncParser } from '../../../src/parser/call-func-parser'
+import { CallFunc, IntegerLiteral, TruthValueLiteral } from '../../../src/model'
 
 describe('CallFunc', () => {
     it('parses a simple function call', () => {
-        const input = 'foo(42, ambiguous)'
-        const tokenStream = TokenStream.read(
-            input,
-            new TestErrorReporter('test.clawr'),
-        )
-        const parser = CallFuncParser.create(tokenStream)
-        const result = parser.parse().toCir()
-        expect(result).toMatchObject({
+        const statement = CallFunc.create({
+            baseName: 'foo',
+            arguments: [
+                { value: IntegerLiteral.create(42n) },
+                { value: TruthValueLiteral.create('ambiguous') },
+            ],
+        })
+        expect(statement.toCir()).toMatchObject({
             type: 'CALL_FUNC',
             signature: {
                 baseName: 'foo',
@@ -26,14 +24,11 @@ describe('CallFunc', () => {
     })
 
     it('converts print(integer) to printInteger()', () => {
-        const input = 'print(1)'
-        const tokenStream = TokenStream.read(
-            input,
-            new TestErrorReporter('test.clawr'),
-        )
-        const parser = CallFuncParser.create(tokenStream)
-        const result = parser.parse().toCir()
-        expect(result).toMatchObject({
+        const statement = CallFunc.create({
+            baseName: 'print',
+            arguments: [{ value: IntegerLiteral.create(1n) }],
+        })
+        expect(statement.toCir()).toMatchObject({
             type: 'CALL_FUNC',
             signature: {
                 baseName: 'printInteger',
@@ -44,14 +39,11 @@ describe('CallFunc', () => {
     })
 
     it('converts print(truthvalue) to printTruthvalue()', () => {
-        const input = 'print(true)'
-        const tokenStream = TokenStream.read(
-            input,
-            new TestErrorReporter('test.clawr'),
-        )
-        const parser = CallFuncParser.create(tokenStream)
-        const result = parser.parse().toCir()
-        expect(result).toMatchObject({
+        const statement = CallFunc.create({
+            baseName: 'print',
+            arguments: [{ value: TruthValueLiteral.create('true') }],
+        })
+        expect(statement.toCir()).toMatchObject({
             type: 'CALL_FUNC',
             signature: {
                 baseName: 'printTruthvalue',

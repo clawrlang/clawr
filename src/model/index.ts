@@ -52,7 +52,10 @@ export class CallFunc implements Statement {
         return {
             type: 'CALL_FUNC',
             signature: {
-                baseName: this.baseName,
+                baseName:
+                    this.baseName === 'print'
+                        ? `print${this.args[0].value.toCir().type === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
+                        : this.baseName,
                 parameters: this.args.map((arg, index) => ({
                     label: this.args[index].label,
                     type:

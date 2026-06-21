@@ -20,32 +20,4 @@ describe('CallFunc Parser', () => {
             ],
         })
     })
-
-    it('converts print(integer) to printInteger()', () => {
-        const input = 'print(1)'
-        const tokenStream = TokenStream.read(
-            input,
-            new TestErrorReporter('test.clawr'),
-        )
-        const parser = CallFuncParser.create(tokenStream)
-        const result = parser.parse()
-        expect(result).toMatchObject({
-            baseName: 'printInteger',
-            args: [{ value: { value: 1n } }],
-        })
-    })
-
-    it('converts print(truthvalue) to printTruthvalue()', () => {
-        const input = 'print(true)'
-        const tokenStream = TokenStream.read(
-            input,
-            new TestErrorReporter('test.clawr'),
-        )
-        const parser = CallFuncParser.create(tokenStream)
-        const result = parser.parse()
-        expect(result).toMatchObject({
-            baseName: 'printTruthvalue',
-            args: [{ value: { value: 'true' } }],
-        })
-    })
 })

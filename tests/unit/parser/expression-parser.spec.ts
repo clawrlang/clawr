@@ -6,7 +6,7 @@ import { Expression } from '../../../src/model'
 
 describe('Expression Parser', () => {
     describe('truthvalue literals', () => {
-        const cases: Truthvalue[] = ['true', 'false', 'ambiguous'] as const
+        const cases = ['true', 'false', 'ambiguous'] as const
         for (const input of cases) {
             it(`parses ${input} as Truthvalue`, () => {
                 const literal = parseLiteral(input)
@@ -42,5 +42,3 @@ class TestErrorReporter implements ErrorReporter {
         throw new Error('Method not implemented.')
     }
 }
-
-type Truthvalue = 'true' | 'false' | 'ambiguous'

@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import * as model from '../model'
 import { TokenStream } from '../lexer'
-import { CallParser } from './call-func-parser'
+import { CallFuncParser } from './call-func-parser'
 
 export class ExpressionParser {
     private constructor(private tokenStream: TokenStream) {}
@@ -59,7 +59,9 @@ export class ModuleParser {
     private parseStatements(): cir.Statement[] {
         const statements: cir.Statement[] = []
         while (!this.tokenStream.isNext('PUNCTUATION', '}')) {
-            statements.push(CallParser.create(this.tokenStream).parse())
+            statements.push(
+                CallFuncParser.create(this.tokenStream).parse().toCir(),
+            )
         }
         return statements
     }

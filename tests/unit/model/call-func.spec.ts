@@ -3,7 +3,7 @@ import { TokenStream } from '../../../src/lexer'
 import { TestErrorReporter } from '../../util'
 import { CallFuncParser } from '../../../src/parser/call-func-parser'
 
-describe('CallFunc Parser', () => {
+describe('CallFunc', () => {
     it('parses a simple function call', () => {
         const input = 'foo(42, ambiguous)'
         const tokenStream = TokenStream.read(
@@ -11,12 +11,16 @@ describe('CallFunc Parser', () => {
             new TestErrorReporter('test.clawr'),
         )
         const parser = CallFuncParser.create(tokenStream)
-        const result = parser.parse()
+        const result = parser.parse().toCir()
         expect(result).toMatchObject({
-            baseName: 'foo',
-            args: [
-                { value: { value: 42n } },
-                { value: { value: 'ambiguous' } },
+            type: 'CALL_FUNC',
+            signature: {
+                baseName: 'foo',
+                parameters: [{ type: 'integer' }, { type: 'truthvalue' }],
+            },
+            arguments: [
+                { type: 'INTEGER_LITERAL', value: '42' },
+                { type: 'TRUTHVALUE_LITERAL', value: 'ambiguous' },
             ],
         })
     })
@@ -28,10 +32,14 @@ describe('CallFunc Parser', () => {
             new TestErrorReporter('test.clawr'),
         )
         const parser = CallFuncParser.create(tokenStream)
-        const result = parser.parse()
+        const result = parser.parse().toCir()
         expect(result).toMatchObject({
-            baseName: 'printInteger',
-            args: [{ value: { value: 1n } }],
+            type: 'CALL_FUNC',
+            signature: {
+                baseName: 'printInteger',
+                parameters: [{ type: 'integer' }],
+            },
+            arguments: [{ type: 'INTEGER_LITERAL', value: '1' }],
         })
     })
 
@@ -42,10 +50,14 @@ describe('CallFunc Parser', () => {
             new TestErrorReporter('test.clawr'),
         )
         const parser = CallFuncParser.create(tokenStream)
-        const result = parser.parse()
+        const result = parser.parse().toCir()
         expect(result).toMatchObject({
-            baseName: 'printTruthvalue',
-            args: [{ value: { value: 'true' } }],
+            type: 'CALL_FUNC',
+            signature: {
+                baseName: 'printTruthvalue',
+                parameters: [{ type: 'truthvalue' }],
+            },
+            arguments: [{ type: 'TRUTHVALUE_LITERAL', value: 'true' }],
         })
     })
 })

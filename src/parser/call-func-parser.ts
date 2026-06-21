@@ -1,51 +1,39 @@
+import * as cir from '../cir'
 import { ExpressionParser } from '.'
-import { Expression, Statement } from '../cir'
 import { TokenStream } from '../lexer'
+import { CallFunc, Expression } from '../model'
 
-export class CallParser {
+export class CallFuncParser {
     private constructor(private tokenStream: TokenStream) {}
 
-    static create(tokenStream: TokenStream): CallParser {
-        return new CallParser(tokenStream)
+    static create(tokenStream: TokenStream): CallFuncParser {
+        return new CallFuncParser(tokenStream)
     }
 
-    parse(): Statement {
+    parse(): CallFunc {
         const nameToken = this.tokenStream.expect('IDENTIFIER')
         this.tokenStream.expect('PUNCTUATION', '(')
         const args: Expression[] = []
 
         while (!this.tokenStream.isNext('PUNCTUATION', ')', ',')) {
             const arg = ExpressionParser.create(this.tokenStream).parse()
-            args.push(arg.toCir())
+            args.push(arg)
 
             if (this.tokenStream.isNext('PUNCTUATION', ')')) {
-                this.tokenStream.next() // Consume the closing parenthesis
+                this.tokenStream.next()
                 break
             }
 
             this.tokenStream.expect('PUNCTUATION', ',')
         }
-        return {
-            type: 'CALL_FUNC',
-            signature: {
-                baseName:
-                    nameToken.identifier == 'print'
-                        ? `print${args[0].type === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
-                        : nameToken.identifier,
-                parameters: args.map((arg) => {
-                    switch (arg.type) {
-                        case 'INTEGER_LITERAL':
-                            return { type: 'integer' }
-                        case 'TRUTHVALUE_LITERAL':
-                            return { type: 'truthvalue' }
-                        default:
-                            throw new Error(
-                                `Unsupported argument type: ${arg.type}`,
-                            )
-                    }
-                }),
-            },
-            arguments: args,
-        }
+        return CallFunc.create({
+            baseName:
+                nameToken.identifier == 'print'
+                    ? `print${args[0].toCir().type === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
+                    : nameToken.identifier,
+            arguments: args.map((arg) => ({
+                value: arg,
+            })),
+        })
     }
 }

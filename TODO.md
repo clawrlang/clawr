@@ -2,45 +2,24 @@
 
 ## In Progress
 
+First vertical slice
+
 - Implement frontend parsers for…
-  - truthvalue literal
-  - integer literal
-  - string literal
   - function call
   - @main body
-  - simple module
-- Write end-to-end test cases:
+  - module with @main
+- Parse `print()` statement
+- Generate CIR `CALL_FUNC` node for `print`
+  - `print(truthvalue)` as `printTruthvalue(truthvalue)`
+  - `print(integer)` as `printInteger(integer)`
+- Generate `$main` CIR node
+- Write end-to-end test case
 
-  ```clawr
-  @main {
-      printTruthValue(true)
-  }
-  ```
+## Later Items
 
-  ```clawr
-  @main {
-      printInteger(1)
-  }
-  ```
-
-## TODO Items
-
-- First vertical slice
-  - Parse `RealLiteral` expression
-  - Parse `print()` statement
-  - Generate `INTEGER_LITERAL` AST node for lowering
-  - Generate `INTEGER_LITERAL` AST node for syntax coloring
-  - Generate `FUNCTION_CALL` AST node for lowering
-  - Generate `FUNCTION_CALL` AST node for syntax coloring
-  - Lower literals to C-IR
-    - `c_false`, `c_ambiguous`, `c_true`
-    - `int64_t` (postpone arbitrary precision until later)
-    - `double`
-  - Lower `FUNCTION_CALL` to C-IR
-  - Lower literals to C code
-  - Lower `FUNCTION_CALL` to C code
-  - Compile C code using Clang
-  - Add test cases
+- Allow at most one @main body in the module
+- Generate AST for syntax coloring
+- Handle `Integer*` when lowering
 
 ## Feature Template
 

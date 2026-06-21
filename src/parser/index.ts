@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Expression } from '../cir'
+import * as model from '../model'
 import { TokenStream } from '../lexer'
 import { CallParser } from './call-func-parser'
 
@@ -10,7 +10,7 @@ export class ExpressionParser {
         return new ExpressionParser(tokenStream)
     }
 
-    parse(): Expression {
+    parse(): model.Expression {
         const nextToken = this.tokenStream.peek()
         if (!nextToken) {
             throw new Error('Unexpected end of input while parsing expression')
@@ -18,13 +18,10 @@ export class ExpressionParser {
         switch (nextToken.kind) {
             case 'TRUTHVALUE_LITERAL':
                 this.tokenStream.next() // Consume the token
-                return { type: 'TRUTHVALUE_LITERAL', value: nextToken.value }
+                return model.TruthValueLiteral.create(nextToken.value)
             case 'INTEGER_LITERAL':
                 this.tokenStream.next() // Consume the token
-                return {
-                    type: 'INTEGER_LITERAL',
-                    value: nextToken.value.toString(),
-                }
+                return model.IntegerLiteral.create(nextToken.value)
             case 'OPERATOR':
                 if (nextToken.operator === '-') {
                     this.tokenStream.next() // Consume the token
@@ -34,10 +31,7 @@ export class ExpressionParser {
                             'Expected integer literal after "-" operator',
                         )
                     }
-                    return {
-                        type: 'INTEGER_LITERAL',
-                        value: `-${nextToken.value.toString()}`,
-                    }
+                    return model.IntegerLiteral.create(-nextToken.value)
                 }
             default:
                 throw new Error(
@@ -46,6 +40,7 @@ export class ExpressionParser {
         }
     }
 }
+
 export class ModuleParser {
     private constructor(private tokenStream: TokenStream) {}
 

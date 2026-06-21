@@ -34,7 +34,7 @@ describe('Literal Parsing', () => {
 
 function parseLiteral(input: string): Expression {
     const tokenStream = TokenStream.read(input, new TestErrorReporter())
-    return ExpressionParser.create(tokenStream).parse()
+    return ExpressionParser.create(tokenStream).parse().toCir()
 }
 
 class TestErrorReporter implements ErrorReporter {

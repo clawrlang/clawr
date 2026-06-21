@@ -16,7 +16,7 @@ export class CallParser {
 
         while (!this.tokenStream.isNext('PUNCTUATION', ')', ',')) {
             const arg = ExpressionParser.create(this.tokenStream).parse()
-            args.push(arg)
+            args.push(arg.toCir())
 
             if (this.tokenStream.isNext('PUNCTUATION', ')')) {
                 this.tokenStream.next() // Consume the closing parenthesis

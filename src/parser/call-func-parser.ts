@@ -1,4 +1,4 @@
-import { IntegerLiteralParser, TruthvalueLiteralParser } from '.'
+import { ExpressionParser } from '.'
 import { Expression } from '../cir'
 import { TokenStream } from '../lexer'
 
@@ -15,17 +15,8 @@ export class CallParser {
         const args: Expression[] = []
 
         while (!this.tokenStream.isNext('PUNCTUATION', ')', ',')) {
-            if (this.tokenStream.peek()?.kind === 'INTEGER_LITERAL') {
-                args.push(IntegerLiteralParser.create(this.tokenStream).parse())
-            } else if (this.tokenStream.peek()?.kind === 'TRUTHVALUE_LITERAL') {
-                args.push(
-                    TruthvalueLiteralParser.create(this.tokenStream).parse(),
-                )
-            } else {
-                throw new Error(
-                    `Unsupported argument type: ${this.tokenStream.peek()?.kind}`,
-                )
-            }
+            const arg = ExpressionParser.create(this.tokenStream).parse()
+            args.push(arg)
 
             if (this.tokenStream.isNext('PUNCTUATION', ')')) {
                 this.tokenStream.next() // Consume the closing parenthesis

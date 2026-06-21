@@ -1,11 +1,29 @@
 import { Expression } from '../cir'
 import { TokenStream } from '../lexer'
 
-export interface ExpressionParser {
-    parse(): Expression
+export class ExpressionParser {
+    private constructor(private tokenStream: TokenStream) {}
+
+    static create(tokenStream: TokenStream): ExpressionParser {
+        return new ExpressionParser(tokenStream)
+    }
+
+    parse(): Expression {
+        const nextToken = this.tokenStream.peek()
+        if (!nextToken) {
+            throw new Error('Unexpected end of input while parsing expression')
+        }
+        switch (nextToken.kind) {
+            case 'TRUTHVALUE_LITERAL':
+                return TruthvalueLiteralParser.create(this.tokenStream).parse()
+            case 'INTEGER_LITERAL':
+            default:
+                return IntegerLiteralParser.create(this.tokenStream).parse()
+        }
+    }
 }
 
-export class TruthvalueLiteralParser implements ExpressionParser {
+class TruthvalueLiteralParser {
     private constructor(private tokenStream: TokenStream) {}
 
     static create(tokenStream: TokenStream): TruthvalueLiteralParser {
@@ -21,7 +39,7 @@ export class TruthvalueLiteralParser implements ExpressionParser {
     }
 }
 
-export class IntegerLiteralParser implements ExpressionParser {
+class IntegerLiteralParser {
     private constructor(private tokenStream: TokenStream) {}
 
     static create(tokenStream: TokenStream): IntegerLiteralParser {

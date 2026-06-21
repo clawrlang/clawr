@@ -15,51 +15,32 @@ export class ExpressionParser {
         }
         switch (nextToken.kind) {
             case 'TRUTHVALUE_LITERAL':
-                return TruthvalueLiteralParser.create(this.tokenStream).parse()
+                this.tokenStream.next() // Consume the token
+                return { type: 'TRUTHVALUE_LITERAL', value: nextToken.value }
             case 'INTEGER_LITERAL':
+                this.tokenStream.next() // Consume the token
+                return {
+                    type: 'INTEGER_LITERAL',
+                    value: nextToken.value.toString(),
+                }
+            case 'OPERATOR':
+                if (nextToken.operator === '-') {
+                    this.tokenStream.next() // Consume the token
+                    const nextToken = this.tokenStream.next()
+                    if (nextToken?.kind !== 'INTEGER_LITERAL') {
+                        throw new Error(
+                            'Expected integer literal after "-" operator',
+                        )
+                    }
+                    return {
+                        type: 'INTEGER_LITERAL',
+                        value: `-${nextToken.value.toString()}`,
+                    }
+                }
             default:
-                return IntegerLiteralParser.create(this.tokenStream).parse()
+                throw new Error(
+                    `Unexpected token kind: ${nextToken.kind} while parsing expression`,
+                )
         }
-    }
-}
-
-class TruthvalueLiteralParser {
-    private constructor(private tokenStream: TokenStream) {}
-
-    static create(tokenStream: TokenStream): TruthvalueLiteralParser {
-        return new TruthvalueLiteralParser(tokenStream)
-    }
-
-    parse(): Extract<Expression, { type: 'TRUTHVALUE_LITERAL' }> {
-        const token = this.tokenStream.next()
-        if (token?.kind !== 'TRUTHVALUE_LITERAL') {
-            throw new Error('Expected truthvalue literal')
-        }
-        return { type: 'TRUTHVALUE_LITERAL', value: token.value }
-    }
-}
-
-class IntegerLiteralParser {
-    private constructor(private tokenStream: TokenStream) {}
-
-    static create(tokenStream: TokenStream): IntegerLiteralParser {
-        return new IntegerLiteralParser(tokenStream)
-    }
-
-    parse(): Extract<Expression, { type: 'INTEGER_LITERAL' }> {
-        const token = this.tokenStream.next()
-        if (token?.kind === 'OPERATOR' && token.operator === '-') {
-            const nextToken = this.tokenStream.next()
-            if (nextToken?.kind !== 'INTEGER_LITERAL') {
-                throw new Error('Expected integer literal after "-" operator')
-            }
-            return {
-                type: 'INTEGER_LITERAL',
-                value: `-${nextToken.value.toString()}`,
-            }
-        } else if (token?.kind !== 'INTEGER_LITERAL') {
-            throw new Error('Expected integer literal')
-        }
-        return { type: 'INTEGER_LITERAL', value: token.value.toString() }
     }
 }

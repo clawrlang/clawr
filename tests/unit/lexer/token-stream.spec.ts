@@ -217,7 +217,7 @@ describe('TokenStream', () => {
     })
 
     describe('PUNCTUATION', () => {
-        const symbols = ['=', '[', ']', '(', ')', '{', '}', ',', ':', '@', '=>']
+        const symbols = ['=', '[', ']', '(', ')', '{', '}', ',', ':', '=>']
         for (const symbol of symbols) {
             test(symbol, () => {
                 const tokens = [...tokenize(symbol)]
@@ -349,6 +349,25 @@ describe('TokenStream', () => {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 3 },
             })
+        })
+    })
+
+    describe('ANNOTATION', () => {
+        it('reads @main annotation', () => {
+            const tokens = [...tokenize('@main')]
+            expect(tokens).toHaveLength(1)
+            expect(tokens[0]).toMatchObject({
+                kind: 'ANNOTATION',
+                annotation: '@main',
+                start: { line: 1, column: 1 },
+                end: { line: 1, column: 6 },
+            })
+        })
+
+        it('rejects unknown annotations', () => {
+            expect(() => [...tokenize('@unknown')]).toThrow(
+                /Unknown annotation/,
+            )
         })
     })
 

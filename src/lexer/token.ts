@@ -1,5 +1,6 @@
 import { SourceCodeSpan } from '../diagnostics'
 import type {
+    Annotation,
     Keyword,
     Operator,
     PunctuationSymbol,
@@ -10,6 +11,7 @@ import { decimal } from 'decimalish'
 export type Token =
     | NewlineToken
     | KeywordToken
+    | AnnotationToken
     | IdentifierToken
     | RealLiteralToken
     | IntegerLiteralToken
@@ -25,6 +27,10 @@ export type NewlineToken = {
 export type KeywordToken = {
     kind: 'KEYWORD'
     keyword: Keyword
+} & SourceCodeSpan
+export type AnnotationToken = {
+    kind: 'ANNOTATION'
+    annotation: Annotation
 } & SourceCodeSpan
 export type IdentifierToken = {
     kind: 'IDENTIFIER'

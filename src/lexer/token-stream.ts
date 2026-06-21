@@ -16,6 +16,7 @@ import {
     truthValues,
 } from './kinds'
 import type {
+    Annotation,
     Keyword,
     Operator,
     PunctuationSymbol,
@@ -166,6 +167,42 @@ export class TokenStream {
                     end: this.source.location,
                 },
             )
+        }
+
+        if (current === '@') {
+            const loc = { ...this.source.location }
+            this.source.skip(1)
+            const identifier = this.readIdentifier()
+            if (!identifier) {
+                this.errorReporter.reportFatalError(
+                    `Expected annotation name after '@'`,
+                    { start: loc, end: loc },
+                )
+            } else if (identifier !== 'main') {
+                this.errorReporter.reportFatalError(
+                    `Unknown annotation '@${identifier}'`,
+                    {
+                        start: loc,
+                        end: {
+                            line: loc.line,
+                            column: loc.column + identifier.length,
+                        },
+                    },
+                )
+            }
+
+            this.source.skip(identifier.length)
+            return {
+                kind: 'ANNOTATION',
+                annotation: '@main',
+                start: loc,
+                end: {
+                    line: this.source.location.line,
+                    column: this.source.location.column,
+                },
+            }
+
+            return asToken(`@${identifier}`, loc)
         }
 
         if (current === '"') return this.consumeStringLiteral()

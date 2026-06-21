@@ -128,6 +128,7 @@ export type PunctuationSymbol = (typeof PUNCTUATION)[number]
 export type Operator = (typeof OPERATORS)[number]
 export type Keyword = (typeof ALL_KW)[number]
 export type TruthvalueLiteral = (typeof ALL_TRUTHVALUE_LITERALS)[number]
+export type Annotation = '@main'
 
 export const punctuationSymbols = new Set(PUNCTUATION)
 export const operators = new Set<string>(OPERATORS)

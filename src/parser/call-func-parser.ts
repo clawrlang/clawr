@@ -12,11 +12,20 @@ export class CallFuncParser {
     parse(): CallFunc {
         const nameToken = this.tokenStream.expect('IDENTIFIER')
         this.tokenStream.expect('PUNCTUATION', '(')
-        const args: Expression[] = []
+        const args: { label?: string; value: Expression }[] = []
 
         while (!this.tokenStream.isNext('PUNCTUATION', ')', ',')) {
+            const label = this.tokenStream.attempt((clone) => {
+                try {
+                    const labelToken = clone.expect('IDENTIFIER')
+                    clone.expect('PUNCTUATION', ':')
+                    return { label: labelToken.identifier }
+                } catch {
+                    return null
+                }
+            })
             const arg = ExpressionParser.create(this.tokenStream).parse()
-            args.push(arg)
+            args.push({ label: label?.label, value: arg })
 
             if (this.tokenStream.isNext('PUNCTUATION', ')')) {
                 this.tokenStream.next()
@@ -27,9 +36,7 @@ export class CallFuncParser {
         }
         return CallFunc.create({
             baseName: nameToken.identifier,
-            arguments: args.map((arg) => ({
-                value: arg,
-            })),
+            arguments: args,
         })
     }
 }

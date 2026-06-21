@@ -25,19 +25,18 @@ program
         const sourceCode = await fs.readFile(file, 'utf-8')
         const stream = TokenStream.read(sourceCode, {
             reportFatalError(message, location) {
-                console.error(
-                    `Fatal Error: ${message} at ${location.start}-${location.end}`,
+                throw new Error(
+                    `Fatal Error: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
                 )
-                process.exit(1)
             },
             reportWarning(message, location) {
                 console.warn(
-                    `Warning: ${message} at ${location.start}-${location.end}`,
+                    `Warning: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
                 )
             },
             reportError(message, location) {
                 console.error(
-                    `Error: ${message} at ${location.start}-${location.end}`,
+                    `Error: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
                 )
             },
         })

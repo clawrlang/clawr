@@ -20,4 +20,21 @@ describe('CallFunc Parser', () => {
             ],
         })
     })
+
+    it('parses a function call with labels', () => {
+        const input = 'foo(x: 42, y: ambiguous)'
+        const tokenStream = TokenStream.read(
+            input,
+            new TestErrorReporter('test.clawr'),
+        )
+        const parser = CallFuncParser.create(tokenStream)
+        const result = parser.parse()
+        expect(result).toMatchObject({
+            baseName: 'foo',
+            args: [
+                { label: 'x', value: { value: 42n } },
+                { label: 'y', value: { value: 'ambiguous' } },
+            ],
+        })
+    })
 })

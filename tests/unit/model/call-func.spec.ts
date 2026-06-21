@@ -2,7 +2,7 @@ import { describe, it, expect } from 'bun:test'
 import { CallFunc, IntegerLiteral, TruthValueLiteral } from '../../../src/model'
 
 describe('CallFunc', () => {
-    it('parses a simple function call', () => {
+    it('converts to CIR', () => {
         const statement = CallFunc.create({
             baseName: 'foo',
             arguments: [
@@ -20,6 +20,23 @@ describe('CallFunc', () => {
                 { type: 'INTEGER_LITERAL', value: '42' },
                 { type: 'TRUTHVALUE_LITERAL', value: 'ambiguous' },
             ],
+        })
+    })
+
+    it('includes argument labels in signature', () => {
+        const statement = CallFunc.create({
+            baseName: 'foo',
+            arguments: [
+                { label: 'x', value: TruthValueLiteral.create('ambiguous') },
+            ],
+        })
+        expect(statement.toCIR()).toMatchObject({
+            type: 'CALL_FUNC',
+            signature: {
+                baseName: 'foo',
+                parameters: [{ label: 'x', type: 'truthvalue' }],
+            },
+            arguments: [{ type: 'TRUTHVALUE_LITERAL', value: 'ambiguous' }],
         })
     })
 

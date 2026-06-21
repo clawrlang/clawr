@@ -4,6 +4,9 @@ import fs from 'fs/promises'
 import path from 'path'
 import { Command } from 'commander'
 import Bun from 'bun'
+import { ModuleParser } from '../parser'
+import { TokenStream } from '../lexer'
+import * as backend from '../backend'
 
 const exeDir = path.dirname(process.execPath)
 const program = new Command()
@@ -19,11 +22,28 @@ program
         const cFilePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '.c')}`
         const exePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '')}`
 
-        const cCode = `#include <stdio.h>
-            int main() {
-                printf("%d\\n", 1);
-                return 0;
-            }`
+        const sourceCode = await fs.readFile(file, 'utf-8')
+        const stream = TokenStream.read(sourceCode, {
+            reportFatalError(message, location) {
+                console.error(
+                    `Fatal Error: ${message} at ${location.start}-${location.end}`,
+                )
+                process.exit(1)
+            },
+            reportWarning(message, location) {
+                console.warn(
+                    `Warning: ${message} at ${location.start}-${location.end}`,
+                )
+            },
+            reportError(message, location) {
+                console.error(
+                    `Error: ${message} at ${location.start}-${location.end}`,
+                )
+            },
+        })
+        const cir = ModuleParser.create(stream).parse()
+        const cCode = backend.lower(cir)
+
         try {
             if (!(await fs.stat(resolvedOutDir).catch(() => false))) {
                 await fs.mkdir(resolvedOutDir, { recursive: true })

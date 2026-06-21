@@ -2,10 +2,6 @@
 
 ## In Progress
 
-First vertical slice
-
-- Write end-to-end test case
-
 ## Later Items
 
 - Separate parsing from analysis/conversion

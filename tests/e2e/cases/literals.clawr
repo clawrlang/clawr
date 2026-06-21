@@ -1,0 +1,7 @@
+@main {
+    print(true)
+    print(false)
+    print(ambiguous)
+    print(42)
+    print(123_456_789)
+}

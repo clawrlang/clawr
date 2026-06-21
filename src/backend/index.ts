@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 
-function lower(cir: cir.Cir): string {
+export function lower(cir: cir.Cir): string {
     return `#include <stdio.h>
         #include "runtime.h"
         int main() {
@@ -44,8 +44,4 @@ function lowerTruthvalueLiteral(
     expr: Extract<cir.Expression, { type: 'TRUTHVALUE_LITERAL' }>,
 ): string {
     return `c_${expr.value}`
-}
-
-export default {
-    lower,
 }

@@ -1,4 +1,5 @@
 import type {
+    AnnotationToken,
     IdentifierToken,
     KeywordToken,
     NewlineToken,
@@ -16,7 +17,6 @@ import {
     truthValues,
 } from './kinds'
 import type {
-    Annotation,
     Keyword,
     Operator,
     PunctuationSymbol,
@@ -85,6 +85,7 @@ export class TokenStream {
 
     expect(kind: 'NEWLINE'): NewlineToken
     expect(kind: 'IDENTIFIER'): IdentifierToken
+    expect(kind: 'ANNOTATION', ...annotations: string[]): AnnotationToken
     expect(kind: 'OPERATOR', ...operators: Operator[]): OperatorToken
     expect(kind: 'KEYWORD', ...keywords: Keyword[]): KeywordToken
     expect(
@@ -112,7 +113,9 @@ export class TokenStream {
                   ? { kind: 'operator', value: token.operator }
                   : token.kind === 'KEYWORD'
                     ? { kind: 'keyword', value: token.keyword }
-                    : undefined
+                    : token.kind === 'ANNOTATION'
+                      ? { kind: 'annotation', value: token.annotation }
+                      : undefined
 
         if (token.kind !== kind)
             this.errorReporter.reportFatalError(

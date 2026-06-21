@@ -4,10 +4,6 @@
 
 First vertical slice
 
-- Implement frontend parsers for…
-  - @main body
-  - module with @main
-- Generate `$main` CIR node
 - Write end-to-end test case
 
 ## Later Items

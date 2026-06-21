@@ -1,5 +1,5 @@
 import { ExpressionParser } from '.'
-import { Expression } from '../cir'
+import { Expression, Statement } from '../cir'
 import { TokenStream } from '../lexer'
 
 export class CallParser {
@@ -9,7 +9,7 @@ export class CallParser {
         return new CallParser(tokenStream)
     }
 
-    parse() {
+    parse(): Statement {
         const nameToken = this.tokenStream.expect('IDENTIFIER')
         this.tokenStream.expect('PUNCTUATION', '(')
         const args: Expression[] = []

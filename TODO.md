@@ -5,7 +5,6 @@
 First vertical slice
 
 - Implement frontend parsers for…
-  - function call
   - @main body
   - module with @main
 - Parse `print()` statement

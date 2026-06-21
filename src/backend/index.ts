@@ -10,7 +10,7 @@ export function lower(cir: cir.Cir): string {
         `
 }
 
-function lowerStmt(stmt: cir.Statement): string {
+export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.type) {
         case 'CALL_FUNC': {
             return `${stmt.signature.baseName}(${stmt.arguments.map(lowerExpr).join(', ')});`
@@ -21,7 +21,7 @@ function lowerStmt(stmt: cir.Statement): string {
     }
 }
 
-function lowerExpr(expr: cir.Expression): string {
+export function lowerExpr(expr: cir.Expression): string {
     switch (expr.type) {
         case 'STRING_LITERAL': {
             return `"${expr.value}"`
@@ -40,7 +40,7 @@ function lowerExpr(expr: cir.Expression): string {
     }
 }
 
-function lowerTruthvalueLiteral(
+export function lowerTruthvalueLiteral(
     expr: Extract<cir.Expression, { type: 'TRUTHVALUE_LITERAL' }>,
 ): string {
     return `c_${expr.value}`

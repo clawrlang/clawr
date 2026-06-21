@@ -1,0 +1,28 @@
+{
+    "$schema": "../../../docs/schema/cir.json",
+    "$main": [
+        {
+            "type": "CALL_FUNC",
+            "signature": {
+                "baseName": "println",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "argument": {
+                            "type": "STRING_LITERAL",
+                            "value": "%d\\n"
+                        }
+                    },
+                    {
+                        "label": "value",
+                        "type": "integer",
+                        "argument": {
+                            "type": "INTEGER_LITERAL",
+                            "value": "1"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

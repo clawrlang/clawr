@@ -14,14 +14,14 @@
     },
     {
       "type": "npm",
-      "script": "test:e2e",
+      "script": "test:backend",
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "problemMatcher": [],
-      "label": "npm: test:e2e",
-      "detail": "npm-run-all build --serial test:e2e"
+      "label": "npm: test:backend",
+      "detail": "npm-run-all build --serial test:backend"
     }
   ]
 }

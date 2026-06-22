@@ -4,11 +4,12 @@
 
 Next vertical slice
 
-- `data` type declaration
-- data-literal
+- variable declaration
 
 ## Later Items
 
+- `data` type declaration
+- data-literal
 - Allow at most one @main block in the module/in total
 - Generate AST for syntax coloring
 - Handle `Integer*` when lowering

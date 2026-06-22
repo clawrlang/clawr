@@ -18,6 +18,7 @@
   "definitions": {
     "declaration": {
       "oneOf": [
+        { "$ref": "#/definitions/variable_declaration" },
         {
           "type": "object",
           "title": "Data Declaration",
@@ -42,8 +43,23 @@
         }
       ]
     },
+    "variable_declaration": {
+      "type": "object",
+      "title": "Variable Declaration",
+      "properties": {
+        "type": { "const": "VARIABLE_DECL" },
+        "name": { "type": "string" },
+        "varType": { "type": "string" },
+        "initialValue": { "$ref": "#/definitions/expression" }
+      },
+      "required": ["type", "name", "varType", "initialValue"],
+      "additionalProperties": false
+    },
     "statement": {
-      "oneOf": [{ "$ref": "#/definitions/call_func" }]
+      "oneOf": [
+        { "$ref": "#/definitions/call_func" },
+        { "$ref": "#/definitions/variable_declaration" }
+      ]
     },
     "call_func": {
       "type": "object",

@@ -131,6 +131,16 @@
           "required": ["kind", "value"],
           "additionalProperties": false
         },
+        {
+          "type": "object",
+          "title": "Variable Reference",
+          "properties": {
+            "kind": { "const": "VARIABLE_REF" },
+            "name": { "type": "string" }
+          },
+          "required": ["kind", "name"],
+          "additionalProperties": false
+        },
         { "$ref": "#/definitions/data_literal" },
         { "$ref": "#/definitions/field_lookup" },
         { "$ref": "#/definitions/call_func" }

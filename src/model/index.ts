@@ -78,7 +78,7 @@ export class Module {
 
     toCIR(): cir.Cir {
         return {
-            $main: this.main.map((stmt) => stmt.toCIR()),
+            startBlock: this.main.map((stmt) => stmt.toCIR()),
         }
     }
 }

@@ -4,7 +4,7 @@ export function lower(cir: cir.Cir): string {
     return `#include <stdio.h>
         #include "runtime.h"
         int main() {
-            ${cir.$main ? cir.$main.map(lowerStmt).join('\n') : ''}
+            ${cir.startBlock ? cir.startBlock.map(lowerStmt).join('\n') : ''}
             return 0;
         }
         `

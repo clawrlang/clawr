@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "$schema": { "type": "string" },
-    "$main": {
+    "startBlock": {
       "type": "array",
       "items": { "$ref": "#/definitions/statement" }
     }

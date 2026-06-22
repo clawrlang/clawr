@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { CallFunc, IntegerLiteral, Module } from '../../../src/model'
 
 describe('Module', () => {
-    it('outputs $main statements', () => {
+    it('outputs the main block', () => {
         const module = Module.create({
             main: [
                 CallFunc.create({
@@ -16,7 +16,7 @@ describe('Module', () => {
         })
         const result = module.toCIR()
         expect(result).toMatchObject({
-            $main: [
+            startBlock: [
                 {
                     type: 'CALL_FUNC',
                     signature: {

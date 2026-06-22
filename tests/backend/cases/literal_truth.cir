@@ -1,6 +1,6 @@
 {
     "$schema": "../../../docs/schema/cir.json",
-    "$main": [
+    "startBlock": [
         {
             "type": "CALL_FUNC",
             "signature": {

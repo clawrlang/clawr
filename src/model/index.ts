@@ -69,6 +69,23 @@ export class CallFunc implements Statement {
     }
 }
 
+export class VariableDeclaration implements Statement {
+    constructor(
+        public name: string,
+        public type: string,
+        public initialValue: Expression,
+    ) {}
+
+    toCIR(): cir.Statement {
+        return {
+            kind: 'VARIABLE_DECL',
+            name: this.name,
+            type: this.type,
+            initialValue: this.initialValue.toCIR(),
+        }
+    }
+}
+
 export class Module {
     private constructor(private main: Statement[]) {}
 

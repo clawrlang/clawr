@@ -52,18 +52,21 @@ This project is written in TypeScript for [Node.js](https://nodejs.org/en/downlo
 
 ```sh
 npm install
-npm run test
+npm test
+npm run test:unit     # Quick unit tests only
+npm run test:backend  # Run backend tests
+npm run test:e2e      # Run end-to-end tests
+
+npx bun test ./tests/unit/parser/module-parser.spec.ts # Run a single test module
 ```
 
-The example runtime can be built and tested using:
+### Runtime
+
+The example runtime does not change much and is not included in the main test suite. It can be built and tested using the following commands:
 
 ```sh
 npm run build:runtime # Build/update dist/libClawr.A.dylib
 npm run test:runtime  # Rebuild and run the runtime tests
-npm run test:e2e      # Rebuild and run end-to-end tests
-
-npx bun test ./tests/unit/sst-output/not-expression.spec.ts # Run a specific test
-## NOTE: Bun might not be installed globally, `npx bun` will work regardless.
 ```
 
 ## IDE Configuration (Visual Studio Code)
@@ -74,8 +77,8 @@ The repository includes settings for VS Code.
 
 There is a tasks.json file that is set up to run the `npm` scripts from a keyboard shortcut.
 
-- ⇧⌘U: Run frontend unit tests
-- ⇧⌘B: Run runtime tests
+- ⇧⌘U: Run unit tests
+- ⇧⌘B: Run full compiler test suite (not runtime tests)
 
 > [!note]
 > **Windows/Linux Users**

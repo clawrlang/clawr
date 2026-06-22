@@ -34,6 +34,9 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'CALL_FUNC': {
             return `${expr.signature.baseName}(${expr.arguments.map(lowerExpr).join(', ')})`
         }
+        case 'VARIABLE_REF': {
+            return expr.name
+        }
         default: {
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
         }

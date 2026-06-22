@@ -76,7 +76,7 @@ export class Module {
         return new Module(main)
     }
 
-    toCIR(): cir.Cir {
+    toCIR(): cir.ClawrModule {
         return {
             startBlock: this.main.map((stmt) => stmt.toCIR()),
         }

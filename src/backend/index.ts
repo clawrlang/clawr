@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 
-export function lower(cir: cir.Cir): string {
+export function lower(cir: cir.ClawrModule): string {
     return `#include <stdio.h>
         #include "runtime.h"
         int main() {

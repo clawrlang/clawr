@@ -1,5 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/schema/cir",
+  "title": "Clawr Module",
   "type": "object",
   "properties": {
     "$schema": { "type": "string" },
@@ -18,6 +20,7 @@
       "oneOf": [
         {
           "type": "object",
+          "title": "Data Declaration",
           "properties": {
             "type": { "const": "DATA_DECL" },
             "name": { "type": "string" },
@@ -78,6 +81,7 @@
       "oneOf": [
         {
           "type": "object",
+          "title": "String Literal",
           "properties": {
             "type": { "const": "STRING_LITERAL" },
             "value": { "type": "string" }
@@ -87,6 +91,7 @@
         },
         {
           "type": "object",
+          "title": "Integer Literal",
           "properties": {
             "type": { "const": "INTEGER_LITERAL" },
             "value": { "type": "string", "pattern": "^-?\\d+$" }
@@ -96,6 +101,7 @@
         },
         {
           "type": "object",
+          "title": "Truth Value Literal",
           "properties": {
             "type": { "const": "TRUTHVALUE_LITERAL" },
             "value": {
@@ -109,12 +115,8 @@
           "required": ["type", "value"],
           "additionalProperties": false
         },
-        {
-          "$ref": "#/definitions/data_literal"
-        },
-        {
-          "$ref": "#/definitions/call_func"
-        }
+        { "$ref": "#/definitions/data_literal" },
+        { "$ref": "#/definitions/call_func" }
       ]
     },
     "data_literal": {

@@ -3,11 +3,34 @@ import * as cir from '../cir'
 export function lower(cir: cir.ClawrModule): string {
     return `#include <stdio.h>
         #include "runtime.h"
+        ${cir.declarations ? cir.declarations.map(lowerDecl).join('\n') : ''}
         int main() {
             ${cir.startBlock ? cir.startBlock.map(lowerStmt).join('\n') : ''}
             return 0;
         }
         `
+}
+
+export function lowerDecl(decl: cir.Declaration): string {
+    switch (decl.kind) {
+        case 'VARIABLE_DECL': {
+            return `${lowerType(decl.type)} ${decl.name} = ${lowerExpr(decl.initialValue)};`
+        }
+        default: {
+            throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
+        }
+    }
+}
+
+function lowerType(type: string): string {
+    switch (type) {
+        case 'integer':
+            return 'int64_t'
+        case 'truthvalue':
+            return 'truthvalue_t'
+        default:
+            throw new Error(`Unsupported type: ${type}`)
+    }
 }
 
 export function lowerStmt(stmt: cir.Statement): string {

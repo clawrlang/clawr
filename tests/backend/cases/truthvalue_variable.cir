@@ -1,0 +1,33 @@
+{
+    "$schema": "../../../docs/schema/cir.schema.json",
+    "declarations": [
+        {
+            "kind": "VARIABLE_DECL",
+            "name": "foo",
+            "type": "truthvalue",
+            "initialValue": {
+                "kind": "TRUTHVALUE_LITERAL",
+                "value": "ambiguous"
+            }
+        }
+    ],
+    "startBlock": [
+        {
+            "kind": "CALL_FUNC",
+            "signature": {
+                "baseName": "printTruthvalue",
+                "parameters": [
+                    {
+                        "type": "truthvalue"
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "kind": "VARIABLE_REF",
+                    "name": "foo"
+                }
+            ]
+        }
+    ]
+}

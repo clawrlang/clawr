@@ -28,6 +28,18 @@ export class IntegerLiteral implements Expression {
     }
 }
 
+export class VariableReference implements Expression {
+    private constructor(private name: string) {}
+
+    static create(name: string): VariableReference {
+        return new VariableReference(name)
+    }
+
+    toCIR(): cir.Expression {
+        return { kind: 'VARIABLE_REF', name: this.name }
+    }
+}
+
 export interface Statement {
     toCIR(): cir.Statement
 }

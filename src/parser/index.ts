@@ -21,6 +21,9 @@ export class ExpressionParser {
             case 'INTEGER_LITERAL':
                 this.tokenStream.next() // Consume the token
                 return model.IntegerLiteral.create(nextToken.value)
+            case 'IDENTIFIER':
+                this.tokenStream.next() // Consume the token
+                return model.VariableReference.create(nextToken.identifier)
             case 'OPERATOR':
                 if (nextToken.operator === '-') {
                     this.tokenStream.next() // Consume the token
@@ -31,6 +34,10 @@ export class ExpressionParser {
                         )
                     }
                     return model.IntegerLiteral.create(-nextToken.value)
+                } else {
+                    throw new Error(
+                        `Unexpected operator "${nextToken.operator}" while parsing expression`,
+                    )
                 }
             default:
                 throw new Error(

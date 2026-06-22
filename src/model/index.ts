@@ -71,6 +71,7 @@ export class CallFunc implements Statement {
 
 export class VariableDeclaration implements Statement {
     constructor(
+        public semantics: 'const' | 'mut',
         public name: string,
         public type: string,
         public initialValue: Expression,

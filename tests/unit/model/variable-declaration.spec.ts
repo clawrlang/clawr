@@ -4,6 +4,7 @@ import { IntegerLiteral, VariableDeclaration } from '../../../src/model'
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
         const decl = new VariableDeclaration(
+            'const',
             'foo',
             'integer',
             IntegerLiteral.create(1n),

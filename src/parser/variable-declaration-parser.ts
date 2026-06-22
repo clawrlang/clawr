@@ -18,7 +18,8 @@ export class VariableDeclarationParser {
     }
 
     parse(): VariableDeclaration {
-        this.stream.expect('KEYWORD', 'const')
+        const semanticsToken = this.stream.expect('KEYWORD', 'const', 'mut')
+        const semantics = semanticsToken.keyword as 'const' | 'mut'
         const nameToken = this.stream.expect('IDENTIFIER')
         const name = nameToken.identifier
         this.stream.expect('PUNCTUATION', ':')
@@ -27,6 +28,6 @@ export class VariableDeclarationParser {
         this.stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse()
         this.stream.expect('PUNCTUATION', ';')
-        return new VariableDeclaration(name, type, initialValue)
+        return new VariableDeclaration(semantics, name, type, initialValue)
     }
 }

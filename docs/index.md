@@ -1,3 +1,3 @@
 # Clawr Schema
 
-- [Clawr IR](./schema/cir.json)
+- [Clawr IR](./schema/cir.schema.json)

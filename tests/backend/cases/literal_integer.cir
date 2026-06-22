@@ -1,5 +1,5 @@
 {
-    "$schema": "../../../docs/schema/cir.json",
+    "$schema": "../../../docs/schema/cir.schema.json",
     "startBlock": [
         {
             "type": "CALL_FUNC",

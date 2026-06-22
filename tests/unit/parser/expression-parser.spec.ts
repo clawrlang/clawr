@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'bun:test'
-import { ErrorReporter, SourceCodeSpan } from '../../../src/diagnostics'
 import { TokenStream } from '../../../src/lexer'
 import { ExpressionParser } from '../../../src/parser'
 import { Expression } from '../../../src/model'
+import { TestErrorReporter } from '../../util'
 
 describe('Expression Parser', () => {
     describe('truthvalue literals', () => {
@@ -27,18 +27,9 @@ describe('Expression Parser', () => {
 })
 
 function parseLiteral(input: string): Expression {
-    const tokenStream = TokenStream.read(input, new TestErrorReporter())
+    const tokenStream = TokenStream.read(
+        input,
+        new TestErrorReporter('test.clawr'),
+    )
     return ExpressionParser.create(tokenStream).parse()
-}
-
-class TestErrorReporter implements ErrorReporter {
-    reportFatalError(message: string, location: SourceCodeSpan): never {
-        throw new Error('Method not implemented.')
-    }
-    reportWarning(message: string, location: SourceCodeSpan): void {
-        throw new Error('Method not implemented.')
-    }
-    reportError(message: string, location: SourceCodeSpan): void {
-        throw new Error('Method not implemented.')
-    }
 }

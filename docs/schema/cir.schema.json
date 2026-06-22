@@ -116,6 +116,7 @@
           "additionalProperties": false
         },
         { "$ref": "#/definitions/data_literal" },
+        { "$ref": "#/definitions/field_lookup" },
         { "$ref": "#/definitions/call_func" }
       ]
     },
@@ -137,6 +138,19 @@
         }
       },
       "required": ["type", "fields"],
+      "additionalProperties": false
+    },
+    "field_lookup": {
+      "type": "object",
+      "title": "Field Lookup",
+      "properties": {
+        "type": { "const": "FIELD_LOOKUP" },
+        "object": {
+          "$ref": "#/definitions/expression"
+        },
+        "field": { "type": "string" }
+      },
+      "required": ["type", "object", "field"],
       "additionalProperties": false
     }
   }

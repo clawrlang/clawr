@@ -38,6 +38,9 @@ export function lowerStmt(stmt: cir.Statement): string {
         case 'CALL_FUNC': {
             return `${stmt.signature.baseName}(${stmt.arguments.map(lowerExpr).join(', ')});`
         }
+        case 'VARIABLE_DECL': {
+            return lowerDecl(stmt)
+        }
         default: {
             throw new Error(`Unknown statement kind: ${(stmt as any).kind}`)
         }

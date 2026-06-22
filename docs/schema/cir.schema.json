@@ -23,7 +23,7 @@
           "type": "object",
           "title": "Data Declaration",
           "properties": {
-            "type": { "const": "DATA_DECL" },
+            "kind": { "const": "DATA_DECL" },
             "name": { "type": "string" },
             "fields": {
               "type": "array",
@@ -38,7 +38,7 @@
               }
             }
           },
-          "required": ["type", "name", "fields"],
+          "required": ["kind", "name", "fields"],
           "additionalProperties": false
         }
       ]
@@ -47,12 +47,12 @@
       "type": "object",
       "title": "Variable Declaration",
       "properties": {
-        "type": { "const": "VARIABLE_DECL" },
+        "kind": { "const": "VARIABLE_DECL" },
         "name": { "type": "string" },
-        "varType": { "type": "string" },
+        "type": { "type": "string" },
         "initialValue": { "$ref": "#/definitions/expression" }
       },
-      "required": ["type", "name", "varType", "initialValue"],
+      "required": ["kind", "name", "type", "initialValue"],
       "additionalProperties": false
     },
     "statement": {
@@ -64,7 +64,7 @@
     "call_func": {
       "type": "object",
       "properties": {
-        "type": { "const": "CALL_FUNC" },
+        "kind": { "const": "CALL_FUNC" },
         "signature": {
           "type": "object",
           "properties": {
@@ -90,7 +90,7 @@
           "items": { "$ref": "#/definitions/expression" }
         }
       },
-      "required": ["type", "signature", "arguments"],
+      "required": ["kind", "signature", "arguments"],
       "additionalProperties": false
     },
     "expression": {
@@ -99,27 +99,27 @@
           "type": "object",
           "title": "String Literal",
           "properties": {
-            "type": { "const": "STRING_LITERAL" },
+            "kind": { "const": "STRING_LITERAL" },
             "value": { "type": "string" }
           },
-          "required": ["type", "value"],
+          "required": ["kind", "value"],
           "additionalProperties": false
         },
         {
           "type": "object",
           "title": "Integer Literal",
           "properties": {
-            "type": { "const": "INTEGER_LITERAL" },
+            "kind": { "const": "INTEGER_LITERAL" },
             "value": { "type": "string", "pattern": "^-?\\d+$" }
           },
-          "required": ["type", "value"],
+          "required": ["kind", "value"],
           "additionalProperties": false
         },
         {
           "type": "object",
           "title": "Truth Value Literal",
           "properties": {
-            "type": { "const": "TRUTHVALUE_LITERAL" },
+            "kind": { "const": "TRUTHVALUE_LITERAL" },
             "value": {
               "oneOf": [
                 { "const": "false" },
@@ -128,7 +128,7 @@
               ]
             }
           },
-          "required": ["type", "value"],
+          "required": ["kind", "value"],
           "additionalProperties": false
         },
         { "$ref": "#/definitions/data_literal" },
@@ -139,7 +139,7 @@
     "data_literal": {
       "type": "object",
       "properties": {
-        "type": { "const": "DATA_LITERAL" },
+        "kind": { "const": "DATA_LITERAL" },
         "fields": {
           "type": "array",
           "items": {
@@ -153,20 +153,20 @@
           }
         }
       },
-      "required": ["type", "fields"],
+      "required": ["kind", "fields"],
       "additionalProperties": false
     },
     "field_lookup": {
       "type": "object",
       "title": "Field Lookup",
       "properties": {
-        "type": { "const": "FIELD_LOOKUP" },
+        "kind": { "const": "FIELD_LOOKUP" },
         "object": {
           "$ref": "#/definitions/expression"
         },
         "field": { "type": "string" }
       },
-      "required": ["type", "object", "field"],
+      "required": ["kind", "object", "field"],
       "additionalProperties": false
     }
   }

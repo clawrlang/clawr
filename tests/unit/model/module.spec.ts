@@ -18,14 +18,14 @@ describe('Module', () => {
         expect(result).toMatchObject({
             startBlock: [
                 {
-                    type: 'CALL_FUNC',
+                    kind: 'CALL_FUNC',
                     signature: {
                         baseName: 'add',
                         parameters: [{ type: 'integer' }, { type: 'integer' }],
                     },
                     arguments: [
-                        { type: 'INTEGER_LITERAL', value: '1' },
-                        { type: 'INTEGER_LITERAL', value: '2' },
+                        { kind: 'INTEGER_LITERAL', value: '1' },
+                        { kind: 'INTEGER_LITERAL', value: '2' },
                     ],
                 },
             ],

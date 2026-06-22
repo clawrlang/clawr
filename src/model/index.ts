@@ -12,7 +12,7 @@ export class TruthValueLiteral implements Expression {
     }
 
     toCIR(): cir.Expression {
-        return { type: 'TRUTHVALUE_LITERAL', value: this.value }
+        return { kind: 'TRUTHVALUE_LITERAL', value: this.value }
     }
 }
 
@@ -24,7 +24,7 @@ export class IntegerLiteral implements Expression {
     }
 
     toCIR(): cir.Expression {
-        return { type: 'INTEGER_LITERAL', value: this.value.toString() }
+        return { kind: 'INTEGER_LITERAL', value: this.value.toString() }
     }
 }
 
@@ -50,16 +50,16 @@ export class CallFunc implements Statement {
 
     toCIR(): cir.Statement {
         return {
-            type: 'CALL_FUNC',
+            kind: 'CALL_FUNC',
             signature: {
                 baseName:
                     this.baseName === 'print'
-                        ? `print${this.args[0].value.toCIR().type === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
+                        ? `print${this.args[0].value.toCIR().kind === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
                         : this.baseName,
                 parameters: this.args.map((arg, index) => ({
                     label: this.args[index].label,
                     type:
-                        arg.value.toCIR().type === 'INTEGER_LITERAL'
+                        arg.value.toCIR().kind === 'INTEGER_LITERAL'
                             ? 'integer'
                             : 'truthvalue',
                 })),

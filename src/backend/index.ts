@@ -11,18 +11,18 @@ export function lower(cir: cir.ClawrModule): string {
 }
 
 export function lowerStmt(stmt: cir.Statement): string {
-    switch (stmt.type) {
+    switch (stmt.kind) {
         case 'CALL_FUNC': {
             return `${stmt.signature.baseName}(${stmt.arguments.map(lowerExpr).join(', ')});`
         }
         default: {
-            throw new Error(`Unknown statement type: ${(stmt as any).type}`)
+            throw new Error(`Unknown statement kind: ${(stmt as any).kind}`)
         }
     }
 }
 
 export function lowerExpr(expr: cir.Expression): string {
-    switch (expr.type) {
+    switch (expr.kind) {
         case 'STRING_LITERAL': {
             return `"${expr.value}"`
         }
@@ -35,13 +35,13 @@ export function lowerExpr(expr: cir.Expression): string {
             return `${expr.signature.baseName}(${expr.arguments.map(lowerExpr).join(', ')})`
         }
         default: {
-            throw new Error(`Unknown expression type: ${(expr as any).type}`)
+            throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
         }
     }
 }
 
 export function lowerTruthvalueLiteral(
-    expr: Extract<cir.Expression, { type: 'TRUTHVALUE_LITERAL' }>,
+    expr: Extract<cir.Expression, { kind: 'TRUTHVALUE_LITERAL' }>,
 ): string {
     return `c_${expr.value}`
 }

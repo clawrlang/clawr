@@ -11,14 +11,14 @@ describe('CallFunc', () => {
             ],
         })
         expect(statement.toCIR()).toMatchObject({
-            type: 'CALL_FUNC',
+            kind: 'CALL_FUNC',
             signature: {
                 baseName: 'foo',
                 parameters: [{ type: 'integer' }, { type: 'truthvalue' }],
             },
             arguments: [
-                { type: 'INTEGER_LITERAL', value: '42' },
-                { type: 'TRUTHVALUE_LITERAL', value: 'ambiguous' },
+                { kind: 'INTEGER_LITERAL', value: '42' },
+                { kind: 'TRUTHVALUE_LITERAL', value: 'ambiguous' },
             ],
         })
     })
@@ -31,12 +31,12 @@ describe('CallFunc', () => {
             ],
         })
         expect(statement.toCIR()).toMatchObject({
-            type: 'CALL_FUNC',
+            kind: 'CALL_FUNC',
             signature: {
                 baseName: 'foo',
                 parameters: [{ label: 'x', type: 'truthvalue' }],
             },
-            arguments: [{ type: 'TRUTHVALUE_LITERAL', value: 'ambiguous' }],
+            arguments: [{ kind: 'TRUTHVALUE_LITERAL', value: 'ambiguous' }],
         })
     })
 
@@ -46,12 +46,12 @@ describe('CallFunc', () => {
             arguments: [{ value: IntegerLiteral.create(1n) }],
         })
         expect(statement.toCIR()).toMatchObject({
-            type: 'CALL_FUNC',
+            kind: 'CALL_FUNC',
             signature: {
                 baseName: 'printInteger',
                 parameters: [{ type: 'integer' }],
             },
-            arguments: [{ type: 'INTEGER_LITERAL', value: '1' }],
+            arguments: [{ kind: 'INTEGER_LITERAL', value: '1' }],
         })
     })
 
@@ -61,12 +61,12 @@ describe('CallFunc', () => {
             arguments: [{ value: TruthValueLiteral.create('true') }],
         })
         expect(statement.toCIR()).toMatchObject({
-            type: 'CALL_FUNC',
+            kind: 'CALL_FUNC',
             signature: {
                 baseName: 'printTruthvalue',
                 parameters: [{ type: 'truthvalue' }],
             },
-            arguments: [{ type: 'TRUTHVALUE_LITERAL', value: 'true' }],
+            arguments: [{ kind: 'TRUTHVALUE_LITERAL', value: 'true' }],
         })
     })
 })

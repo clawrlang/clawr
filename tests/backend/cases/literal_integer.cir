@@ -2,7 +2,7 @@
     "$schema": "../../../docs/schema/cir.schema.json",
     "startBlock": [
         {
-            "type": "CALL_FUNC",
+            "kind": "CALL_FUNC",
             "signature": {
                 "baseName": "printInteger",
                 "parameters": [
@@ -13,7 +13,7 @@
             },
             "arguments": [
                 {
-                    "type": "INTEGER_LITERAL",
+                    "kind": "INTEGER_LITERAL",
                     "value": "1"
                 }
             ]

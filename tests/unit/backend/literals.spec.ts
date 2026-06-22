@@ -5,7 +5,7 @@ import { lowerExpr } from '../../../src/backend'
 describe('Lowering Literals', () => {
     it('lowers string literals correctly', () => {
         const expr: Expression = {
-            type: 'STRING_LITERAL',
+            kind: 'STRING_LITERAL',
             value: 'Hello, World!',
         }
         const result = lowerExpr(expr)
@@ -14,7 +14,7 @@ describe('Lowering Literals', () => {
 
     it('lowers integer literals correctly', () => {
         const expr: Expression = {
-            type: 'INTEGER_LITERAL',
+            kind: 'INTEGER_LITERAL',
             value: '42',
         }
         const result = lowerExpr(expr)
@@ -30,7 +30,7 @@ describe('Lowering Literals', () => {
         for (const [input, expected] of Object.entries(mapping)) {
             test(`${input} -> ${expected}`, () => {
                 const expr: Expression = {
-                    type: 'TRUTHVALUE_LITERAL',
+                    kind: 'TRUTHVALUE_LITERAL',
                     value: input as 'false' | 'ambiguous' | 'true',
                 }
                 const result = lowerExpr(expr)

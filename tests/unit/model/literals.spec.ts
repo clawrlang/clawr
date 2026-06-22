@@ -9,7 +9,7 @@ describe('Literals', () => {
             it(`outputs ${input} as TRUTHVALUE_LITERAL`, () => {
                 const literal = TruthValueLiteral.create(input)
                 expect(literal.toCIR()).toMatchObject({
-                    type: 'TRUTHVALUE_LITERAL',
+                    kind: 'TRUTHVALUE_LITERAL',
                     value: input,
                 })
             })
@@ -22,7 +22,7 @@ describe('Literals', () => {
             it(`outputs ${input} as INTEGER_LITERAL`, () => {
                 const literal = IntegerLiteral.create(BigInt(input))
                 expect(literal.toCIR()).toMatchObject({
-                    type: 'INTEGER_LITERAL',
+                    kind: 'INTEGER_LITERAL',
                     value: input,
                 })
             })
@@ -30,4 +30,4 @@ describe('Literals', () => {
     })
 })
 
-type Truthvalue = Extract<Expression, { type: 'TRUTHVALUE_LITERAL' }>['value']
+type Truthvalue = Extract<Expression, { kind: 'TRUTHVALUE_LITERAL' }>['value']

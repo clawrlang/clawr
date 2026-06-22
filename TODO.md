@@ -2,11 +2,18 @@
 
 ## In Progress
 
+Next vertical slice
+
+- `data` type declaration
+- data-literal
+
 ## Later Items
 
-- Allow at most one @main body in the module
+- Allow at most one @main block in the module/in total
 - Generate AST for syntax coloring
 - Handle `Integer*` when lowering
+- Support multi-module artifacts
+- Define library product where `@main {}` is ignored
 
 ## Feature Template
 

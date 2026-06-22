@@ -11,7 +11,7 @@
     }
   },
   "scripts": {
-    "cir:generate": "npx json-schema-to-typescript --strictIndexSignatures --bannerComment '' -i ./docs/schema/cir.json -o ./src/cir/index.ts",
+    "cir:generate": "npx json-schema-to-typescript --bannerComment '' -i ./docs/schema/cir.json -o ./src/cir/index.ts",
     "test:unit": "npm run cir:generate && tsc --noEmit && bun test ./tests/unit/",
     "build": "tsc --noEmit && npm run build:runtime && bun build src/rwrc/index.ts --compile --outfile dist/rwrc",
     "test:backend": "npm run cir:generate && npm run build && bun test ./tests/backend/*.test.ts",

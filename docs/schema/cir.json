@@ -6,10 +6,39 @@
     "startBlock": {
       "type": "array",
       "items": { "$ref": "#/definitions/statement" }
+    },
+    "declarations": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/declaration" }
     }
   },
   "additionalProperties": false,
   "definitions": {
+    "declaration": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "DATA_DECL" },
+            "name": { "type": "string" },
+            "fields": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "type": { "type": "string" }
+                },
+                "required": ["name", "type"],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": ["type", "name", "fields"],
+          "additionalProperties": false
+        }
+      ]
+    },
     "statement": {
       "oneOf": [{ "$ref": "#/definitions/call_func" }]
     },
@@ -81,9 +110,32 @@
           "additionalProperties": false
         },
         {
+          "$ref": "#/definitions/data_literal"
+        },
+        {
           "$ref": "#/definitions/call_func"
         }
       ]
+    },
+    "data_literal": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "DATA_LITERAL" },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "value": { "$ref": "#/definitions/expression" }
+            },
+            "required": ["name", "value"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["type", "fields"],
+      "additionalProperties": false
     }
   }
 }

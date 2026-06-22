@@ -1,0 +1,9 @@
+@main {
+const truest: truthvalue = true
+const falsest: truthvalue = false
+const ambiguity: truthvalue = ambiguous
+
+    print(truest)
+    print(falsest)
+    print(ambiguity)
+}

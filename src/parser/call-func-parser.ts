@@ -1,6 +1,6 @@
 import { ExpressionParser } from '.'
 import { TokenStream } from '../lexer'
-import { CallFunc, Expression } from '../model'
+import { CallFunc, Expression, Statement } from '../model'
 
 export class CallFuncParser {
     private constructor(private tokenStream: TokenStream) {}
@@ -9,7 +9,7 @@ export class CallFuncParser {
         return new CallFuncParser(tokenStream)
     }
 
-    parse(): CallFunc {
+    parse(): Statement {
         const nameToken = this.tokenStream.expect('IDENTIFIER')
         this.tokenStream.expect('PUNCTUATION', '(')
         const args: { label?: string; value: Expression }[] = []

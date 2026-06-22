@@ -1,6 +1,7 @@
 import * as model from '../model'
 import { TokenStream } from '../lexer'
 import { CallFuncParser } from './call-func-parser'
+import { VariableDeclarationParser } from './variable-declaration-parser'
 
 export class ExpressionParser {
     private constructor(private tokenStream: TokenStream) {}
@@ -62,9 +63,17 @@ export class ModuleParser {
         return model.Module.create({ main: body })
     }
     private parseStatements() {
+        const callFuncParser = CallFuncParser.create(this.tokenStream)
+        const variableDeclarationParser = VariableDeclarationParser.create({
+            tokenStream: this.tokenStream,
+        })
         const statements: model.Statement[] = []
         while (!this.tokenStream.isNext('PUNCTUATION', '}')) {
-            statements.push(CallFuncParser.create(this.tokenStream).parse())
+            if (this.tokenStream.isNext('KEYWORD', 'const', 'mut')) {
+                statements.push(variableDeclarationParser.parse())
+            } else {
+                statements.push(callFuncParser.parse())
+            }
         }
         return statements
     }

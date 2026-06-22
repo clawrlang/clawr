@@ -15,6 +15,7 @@ Next vertical slice
 - Handle `Integer*` when lowering
 - Support multi-module artifacts
 - Define library product where `@main {}` is ignored
+- Choose `printInteger` or `printTruthvalue` based on expression type, not kind
 
 ## Feature Template
 

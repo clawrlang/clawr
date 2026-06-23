@@ -148,3 +148,24 @@ export class Module {
         }
     }
 }
+type DataField = {
+    name: string
+    type: string
+}
+
+export class DataDeclaration {
+    private constructor(
+        private name: string,
+        private fields: DataField[],
+    ) {}
+
+    static create({
+        name,
+        fields,
+    }: {
+        name: string
+        fields: DataField[]
+    }): DataDeclaration {
+        return new DataDeclaration(name, fields)
+    }
+}

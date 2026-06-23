@@ -7,6 +7,7 @@ type Context = {
 }
 
 export interface Expression {
+    type(context: Context): string
     toCIR(context: Context): cir.Expression
 }
 
@@ -20,6 +21,10 @@ export class TruthValueLiteral implements Expression {
     toCIR(_: Context): cir.Expression {
         return { kind: 'TRUTHVALUE_LITERAL', value: this.value }
     }
+
+    type(_: Context): string {
+        return 'truthvalue'
+    }
 }
 
 export class IntegerLiteral implements Expression {
@@ -32,6 +37,10 @@ export class IntegerLiteral implements Expression {
     toCIR(_: Context): cir.Expression {
         return { kind: 'INTEGER_LITERAL', value: this.value.toString() }
     }
+
+    type(_: Context): string {
+        return 'integer'
+    }
 }
 
 export class VariableReference implements Expression {
@@ -43,6 +52,15 @@ export class VariableReference implements Expression {
 
     toCIR(_: Context): cir.Expression {
         return { kind: 'VARIABLE_REF', name: this.name }
+    }
+
+    type(context: Context): string {
+        const type = context.variableTypes.get(this.name)
+        if (!type)
+            throw new Error(
+                `Variable ${this.name} is not defined in the current context`,
+            )
+        return type
     }
 }
 

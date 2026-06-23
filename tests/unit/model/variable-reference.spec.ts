@@ -10,4 +10,12 @@ describe('Variable Reference', () => {
             name: 'myVar',
         })
     })
+
+    it('infers its type from the context', () => {
+        const context = newSemanticContext()
+        context.variableTypes.set('myVar', 'integer')
+
+        const variableRef = VariableReference.create('myVar')
+        expect(variableRef.type(context)).toBe('integer')
+    })
 })

@@ -4,10 +4,13 @@
 
 Next vertical slice
 
-- variable declaration
+- Add `integer` variables to the e2e test
+  - Choose `printInteger` or `printTruthvalue` based on expression type, not kind
+  - Add scope, register variables and lookup variable-ref for type
 
 ## Later Items
 
+- Infer variable types
 - `data` type declaration
 - data-literal
 - Allow at most one @main block in the module/in total
@@ -15,7 +18,6 @@ Next vertical slice
 - Handle `Integer*` when lowering
 - Support multi-module artifacts
 - Define library product where `@main {}` is ignored
-- Choose `printInteger` or `printTruthvalue` based on expression type, not kind
 
 ## Feature Template
 

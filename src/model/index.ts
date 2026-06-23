@@ -104,10 +104,10 @@ export class CallFunc implements Statement {
 
 export class VariableDeclaration implements Statement {
     private constructor(
-        public semantics: 'const' | 'mut',
-        public name: string,
-        public type: string,
-        public initialValue: Expression,
+        private semantics: 'const' | 'mut',
+        private name: string,
+        private type: string,
+        private initialValue: Expression,
     ) {}
 
     static create({

@@ -4,16 +4,18 @@
 
 Next vertical slice
 
+- `data` type declaration
+- data-literal
+
 ## Later Items
 
 - Infer variable types
-- `data` type declaration
-- data-literal
+- Nested scopes (global+local vars)
 - Allow at most one @main block in the module/in total
 - Generate AST for syntax coloring
 - Handle `Integer*` when lowering
 - Support multi-module artifacts
-- Define library product where `@main {}` is ignored
+- Define library product where `@main {}` is ignored (disallowed?)
 
 ## Feature Template
 

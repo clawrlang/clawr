@@ -4,12 +4,12 @@ import { TestErrorReporter } from '../../util'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
-        const decl = new VariableDeclaration(
-            'const',
-            'foo',
-            'integer',
-            IntegerLiteral.create(1n),
-        )
+        const decl = VariableDeclaration.create({
+            semantics: 'const',
+            name: 'foo',
+            type: 'integer',
+            initialValue: IntegerLiteral.create(1n),
+        })
         expect(decl.toCIR(emptyContext)).toEqual({
             kind: 'VARIABLE_DECL',
             name: 'foo',

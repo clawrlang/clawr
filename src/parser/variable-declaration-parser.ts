@@ -27,6 +27,11 @@ export class VariableDeclarationParser {
         const type = typeToken.identifier
         this.stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse()
-        return new VariableDeclaration(semantics, name, type, initialValue)
+        return VariableDeclaration.create({
+            semantics,
+            name,
+            type,
+            initialValue,
+        })
     }
 }

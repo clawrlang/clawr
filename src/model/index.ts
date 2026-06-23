@@ -88,12 +88,26 @@ export class CallFunc implements Statement {
 }
 
 export class VariableDeclaration implements Statement {
-    constructor(
+    private constructor(
         public semantics: 'const' | 'mut',
         public name: string,
         public type: string,
         public initialValue: Expression,
     ) {}
+
+    static create({
+        semantics,
+        name,
+        type,
+        initialValue,
+    }: {
+        semantics: 'const' | 'mut'
+        name: string
+        type: string
+        initialValue: Expression
+    }): VariableDeclaration {
+        return new VariableDeclaration(semantics, name, type, initialValue)
+    }
 
     toCIR(context: Context): cir.Statement {
         return {

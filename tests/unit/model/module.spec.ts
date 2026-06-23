@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { CallFunc, IntegerLiteral, Module } from '../../../src/model'
-import { TestErrorReporter } from '../../util'
+import { newSemanticContext } from '../../util'
 
 describe('Module', () => {
     it('outputs the main block', () => {
@@ -15,7 +15,7 @@ describe('Module', () => {
                 }),
             ],
         })
-        const result = module.toCIR(emptyContext)
+        const result = module.toCIR(newSemanticContext())
         expect(result).toMatchObject({
             startBlock: [
                 {
@@ -33,8 +33,3 @@ describe('Module', () => {
         })
     })
 })
-
-const emptyContext = {
-    variableTypes: new Map(),
-    errorReporter: new TestErrorReporter('test.clawr'),
-}

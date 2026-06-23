@@ -17,3 +17,9 @@ export class TestErrorReporter implements ErrorReporter {
         this.errors.push({ message, location })
     }
 }
+export function newSemanticContext() {
+    return {
+        variableTypes: new Map(),
+        errorReporter: new TestErrorReporter('test.clawr'),
+    } as const
+}

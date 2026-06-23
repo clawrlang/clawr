@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test'
 import { CallFunc, IntegerLiteral, TruthValueLiteral } from '../../../src/model'
-import { TestErrorReporter } from '../../util'
+import { newSemanticContext } from '../../util'
 
 describe('CallFunc', () => {
     it('converts to CIR', () => {
@@ -11,7 +11,7 @@ describe('CallFunc', () => {
                 { value: TruthValueLiteral.create('ambiguous') },
             ],
         })
-        expect(statement.toCIR(emptyContext)).toMatchObject({
+        expect(statement.toCIR(newSemanticContext())).toMatchObject({
             kind: 'CALL_FUNC',
             signature: {
                 baseName: 'foo',
@@ -31,7 +31,7 @@ describe('CallFunc', () => {
                 { label: 'x', value: TruthValueLiteral.create('ambiguous') },
             ],
         })
-        expect(statement.toCIR(emptyContext)).toMatchObject({
+        expect(statement.toCIR(newSemanticContext())).toMatchObject({
             kind: 'CALL_FUNC',
             signature: {
                 baseName: 'foo',
@@ -46,7 +46,7 @@ describe('CallFunc', () => {
             baseName: 'print',
             arguments: [{ value: IntegerLiteral.create(1n) }],
         })
-        expect(statement.toCIR(emptyContext)).toMatchObject({
+        expect(statement.toCIR(newSemanticContext())).toMatchObject({
             kind: 'CALL_FUNC',
             signature: {
                 baseName: 'printInteger',
@@ -61,7 +61,7 @@ describe('CallFunc', () => {
             baseName: 'print',
             arguments: [{ value: TruthValueLiteral.create('true') }],
         })
-        expect(statement.toCIR(emptyContext)).toMatchObject({
+        expect(statement.toCIR(newSemanticContext())).toMatchObject({
             kind: 'CALL_FUNC',
             signature: {
                 baseName: 'printTruthvalue',
@@ -71,8 +71,3 @@ describe('CallFunc', () => {
         })
     })
 })
-
-const emptyContext = {
-    variableTypes: new Map(),
-    errorReporter: new TestErrorReporter('test.clawr'),
-}

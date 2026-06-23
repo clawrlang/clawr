@@ -4,10 +4,6 @@
 
 Next vertical slice
 
-- Add `integer` variables to the e2e test
-  - Choose `printInteger` or `printTruthvalue` based on expression type, not kind
-  - Add scope, register variables and lookup variable-ref for type
-
 ## Later Items
 
 - Infer variable types

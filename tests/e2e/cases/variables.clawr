@@ -2,8 +2,12 @@
 const truest: truthvalue = true
 const falsest: truthvalue = false
 const ambiguity: truthvalue = ambiguous
+const fourtyTwo: integer = 42
+const sixDigits: integer = 123_456_789
 
     print(truest)
     print(falsest)
     print(ambiguity)
+    print(fourtyTwo)
+    print(sixDigits)
 }

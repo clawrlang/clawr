@@ -17,4 +17,16 @@ describe('VariableDeclaration', () => {
             initialValue: { kind: 'INTEGER_LITERAL', value: '1' },
         })
     })
+
+    it('registers itself in the context', () => {
+        const decl = VariableDeclaration.create({
+            semantics: 'const',
+            name: 'x',
+            type: 'integer',
+            initialValue: IntegerLiteral.create(42n),
+        })
+        const context = newSemanticContext()
+        decl.toCIR(context)
+        expect(context.variableTypes.get('x')).toBe('integer')
+    })
 })

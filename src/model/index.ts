@@ -110,6 +110,7 @@ export class VariableDeclaration implements Statement {
     }
 
     toCIR(context: Context): cir.Statement {
+        context.variableTypes.set(this.name, this.type)
         return {
             kind: 'VARIABLE_DECL',
             name: this.name,

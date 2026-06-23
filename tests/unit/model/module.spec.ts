@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'bun:test'
-import { CallFunc, IntegerLiteral, Module } from '../../../src/model'
+import {
+    CallFunc,
+    IntegerLiteral,
+    Module,
+    VariableDeclaration,
+} from '../../../src/model'
 import { newSemanticContext } from '../../util'
 
 describe('Module', () => {
@@ -31,5 +36,21 @@ describe('Module', () => {
                 },
             ],
         })
+    })
+
+    it('registers variable types in the context', () => {
+        const module = Module.create({
+            main: [
+                VariableDeclaration.create({
+                    semantics: 'const',
+                    name: 'x',
+                    type: 'integer',
+                    initialValue: IntegerLiteral.create(42n),
+                }),
+            ],
+        })
+        const context = newSemanticContext()
+        module.toCIR(context)
+        expect(context.variableTypes.get('x')).toBe('integer')
     })
 })

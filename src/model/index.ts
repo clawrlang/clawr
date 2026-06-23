@@ -90,14 +90,11 @@ export class CallFunc implements Statement {
             signature: {
                 baseName:
                     this.baseName === 'print'
-                        ? `print${this.args[0].value.toCIR(context).kind === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
+                        ? `print${this.args[0].value.type(context) === 'integer' ? 'Integer' : 'Truthvalue'}`
                         : this.baseName,
                 parameters: this.args.map((arg, index) => ({
                     label: this.args[index].label,
-                    type:
-                        arg.value.toCIR(context).kind === 'INTEGER_LITERAL'
-                            ? 'integer'
-                            : 'truthvalue',
+                    type: arg.value.type(context),
                 })),
             },
             arguments: this.args.map((arg) => arg.value.toCIR(context)),

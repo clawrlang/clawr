@@ -17,7 +17,7 @@ export class TruthValueLiteral implements Expression {
         return new TruthValueLiteral(value)
     }
 
-    toCIR(context: Context): cir.Expression {
+    toCIR(_: Context): cir.Expression {
         return { kind: 'TRUTHVALUE_LITERAL', value: this.value }
     }
 }
@@ -29,7 +29,7 @@ export class IntegerLiteral implements Expression {
         return new IntegerLiteral(value)
     }
 
-    toCIR(context: Context): cir.Expression {
+    toCIR(_: Context): cir.Expression {
         return { kind: 'INTEGER_LITERAL', value: this.value.toString() }
     }
 }
@@ -41,7 +41,7 @@ export class VariableReference implements Expression {
         return new VariableReference(name)
     }
 
-    toCIR(context: Context): cir.Expression {
+    toCIR(_: Context): cir.Expression {
         return { kind: 'VARIABLE_REF', name: this.name }
     }
 }

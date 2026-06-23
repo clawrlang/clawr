@@ -1,7 +1,13 @@
 import * as cir from '../cir'
+import { ErrorReporter } from '../diagnostics'
+
+type Context = {
+    variableTypes: Map<string, string>
+    errorReporter: ErrorReporter
+}
 
 export interface Expression {
-    toCIR(): cir.Expression
+    toCIR(context: Context): cir.Expression
 }
 
 export class TruthValueLiteral implements Expression {
@@ -11,7 +17,7 @@ export class TruthValueLiteral implements Expression {
         return new TruthValueLiteral(value)
     }
 
-    toCIR(): cir.Expression {
+    toCIR(context: Context): cir.Expression {
         return { kind: 'TRUTHVALUE_LITERAL', value: this.value }
     }
 }
@@ -23,7 +29,7 @@ export class IntegerLiteral implements Expression {
         return new IntegerLiteral(value)
     }
 
-    toCIR(): cir.Expression {
+    toCIR(context: Context): cir.Expression {
         return { kind: 'INTEGER_LITERAL', value: this.value.toString() }
     }
 }
@@ -35,13 +41,13 @@ export class VariableReference implements Expression {
         return new VariableReference(name)
     }
 
-    toCIR(): cir.Expression {
+    toCIR(context: Context): cir.Expression {
         return { kind: 'VARIABLE_REF', name: this.name }
     }
 }
 
 export interface Statement {
-    toCIR(): cir.Statement
+    toCIR(context: Context): cir.Statement
 }
 
 export class CallFunc implements Statement {
@@ -60,23 +66,23 @@ export class CallFunc implements Statement {
         return new CallFunc(baseName, args)
     }
 
-    toCIR(): cir.Statement {
+    toCIR(context: Context): cir.Statement {
         return {
             kind: 'CALL_FUNC',
             signature: {
                 baseName:
                     this.baseName === 'print'
-                        ? `print${this.args[0].value.toCIR().kind === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
+                        ? `print${this.args[0].value.toCIR(context).kind === 'INTEGER_LITERAL' ? 'Integer' : 'Truthvalue'}`
                         : this.baseName,
                 parameters: this.args.map((arg, index) => ({
                     label: this.args[index].label,
                     type:
-                        arg.value.toCIR().kind === 'INTEGER_LITERAL'
+                        arg.value.toCIR(context).kind === 'INTEGER_LITERAL'
                             ? 'integer'
                             : 'truthvalue',
                 })),
             },
-            arguments: this.args.map((arg) => arg.value.toCIR()),
+            arguments: this.args.map((arg) => arg.value.toCIR(context)),
         }
     }
 }
@@ -89,12 +95,12 @@ export class VariableDeclaration implements Statement {
         public initialValue: Expression,
     ) {}
 
-    toCIR(): cir.Statement {
+    toCIR(context: Context): cir.Statement {
         return {
             kind: 'VARIABLE_DECL',
             name: this.name,
             type: this.type,
-            initialValue: this.initialValue.toCIR(),
+            initialValue: this.initialValue.toCIR(context),
         }
     }
 }
@@ -106,9 +112,9 @@ export class Module {
         return new Module(main)
     }
 
-    toCIR(): cir.ClawrModule {
+    toCIR(context: Context): cir.ClawrModule {
         return {
-            startBlock: this.main.map((stmt) => stmt.toCIR()),
+            startBlock: this.main.map((stmt) => stmt.toCIR(context)),
         }
     }
 }

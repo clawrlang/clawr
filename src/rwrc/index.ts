@@ -18,12 +18,7 @@ program
     .option('-o, --outdir <dir>', 'Output directory', 'dist')
     .description('Compile a Clawr source file')
     .action(async (file: string, options: { outdir: string }) => {
-        const resolvedOutDir = path.resolve(options.outdir)
-        const cFilePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '.c')}`
-        const exePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '')}`
-
-        const sourceCode = await fs.readFile(file, 'utf-8')
-        const stream = TokenStream.read(sourceCode, {
+        const errorReporter: import('../diagnostics').ErrorReporter = {
             reportFatalError(message, location) {
                 throw new Error(
                     `Fatal Error: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
@@ -39,8 +34,18 @@ program
                     `Error: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
                 )
             },
+        }
+
+        const resolvedOutDir = path.resolve(options.outdir)
+        const cFilePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '.c')}`
+        const exePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '')}`
+
+        const sourceCode = await fs.readFile(file, 'utf-8')
+        const stream = TokenStream.read(sourceCode, errorReporter)
+        const cir = ModuleParser.create(stream).parse().toCIR({
+            errorReporter,
+            variableTypes: new Map(),
         })
-        const cir = ModuleParser.create(stream).parse().toCIR()
         const cCode = backend.lower(cir)
 
         try {

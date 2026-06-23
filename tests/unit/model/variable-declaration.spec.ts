@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { IntegerLiteral, VariableDeclaration } from '../../../src/model'
+import { TestErrorReporter } from '../../util'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -9,7 +10,7 @@ describe('VariableDeclaration', () => {
             'integer',
             IntegerLiteral.create(1n),
         )
-        expect(decl.toCIR()).toEqual({
+        expect(decl.toCIR(emptyContext)).toEqual({
             kind: 'VARIABLE_DECL',
             name: 'foo',
             type: 'integer',
@@ -17,3 +18,8 @@ describe('VariableDeclaration', () => {
         })
     })
 })
+
+const emptyContext = {
+    variableTypes: new Map(),
+    errorReporter: new TestErrorReporter('test.clawr'),
+}

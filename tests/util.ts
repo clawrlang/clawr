@@ -1,4 +1,4 @@
-import { ErrorReporter, Position, SourceCodeSpan } from '../src/diagnostics'
+import { ErrorReporter, SourceCodeSpan } from '../src/diagnostics'
 
 export class TestErrorReporter implements ErrorReporter {
     errors: { message: string; location: SourceCodeSpan }[] = []

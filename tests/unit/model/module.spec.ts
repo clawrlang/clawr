@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import {
     CallFunc,
+    DataDeclaration,
     IntegerLiteral,
     Module,
     VariableDeclaration,
@@ -51,6 +52,30 @@ describe('Module', () => {
         })
         const context = newSemanticContext()
         module.toCIR(context)
-        expect(context.variableTypes.get('x')).toBe('integer')
+        expect(context.scope.variableTypes.get('x')).toBe('integer')
+    })
+
+    it('registers data declarations in the context', () => {
+        const module = Module.create({
+            main: [],
+            declarations: [
+                DataDeclaration.create({
+                    name: 'MyData',
+                    fields: [
+                        { name: 'field1', type: 'integer' },
+                        { name: 'field2', type: 'truthvalue' },
+                    ],
+                }),
+            ],
+        })
+        const context = newSemanticContext()
+        module.toCIR(context)
+        expect(context.scope.declarations.get('MyData')).toMatchObject({
+            name: 'MyData',
+            fields: [
+                { name: 'field1', type: 'integer' },
+                { name: 'field2', type: 'truthvalue' },
+            ],
+        })
     })
 })

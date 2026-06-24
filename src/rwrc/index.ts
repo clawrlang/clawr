@@ -35,6 +35,10 @@ program
                 )
             },
         }
+        const context = {
+            errorReporter,
+            scope: { variableTypes: new Map(), declarations: new Map() },
+        }
 
         const resolvedOutDir = path.resolve(options.outdir)
         const cFilePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '.c')}`
@@ -42,10 +46,7 @@ program
 
         const sourceCode = await fs.readFile(file, 'utf-8')
         const stream = TokenStream.read(sourceCode, errorReporter)
-        const cir = ModuleParser.create(stream).parse().toCIR({
-            errorReporter,
-            variableTypes: new Map(),
-        })
+        const cir = ModuleParser.create(stream).parse().toCIR(context)
         const cCode = backend.lower(cir)
 
         try {

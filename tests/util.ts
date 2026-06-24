@@ -19,7 +19,10 @@ export class TestErrorReporter implements ErrorReporter {
 }
 export function newSemanticContext() {
     return {
-        variableTypes: new Map(),
+        scope: {
+            declarations: new Map(),
+            variableTypes: new Map(),
+        },
         errorReporter: new TestErrorReporter('test.clawr'),
     } as const
 }

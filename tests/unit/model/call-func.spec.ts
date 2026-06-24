@@ -78,7 +78,7 @@ describe('CallFunc', () => {
 
     it('converts print(intvar) to printInt64()', () => {
         const context = newSemanticContext()
-        context.variableTypes.set('x', 'integer')
+        context.scope.variableTypes.set('x', 'integer')
 
         const statement = CallFunc.create({
             baseName: 'print',

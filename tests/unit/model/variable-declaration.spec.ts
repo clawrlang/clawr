@@ -27,6 +27,6 @@ describe('VariableDeclaration', () => {
         })
         const context = newSemanticContext()
         decl.toCIR(context)
-        expect(context.variableTypes.get('x')).toBe('integer')
+        expect(context.scope.variableTypes.get('x')).toBe('integer')
     })
 })

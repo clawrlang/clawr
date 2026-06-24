@@ -2,7 +2,10 @@ import * as cir from '../cir'
 import { ErrorReporter } from '../diagnostics'
 
 type Context = {
-    variableTypes: Map<string, string>
+    scope: {
+        variableTypes: Map<string, string>
+        declarations: Map<string, Declaration>
+    }
     errorReporter: ErrorReporter
 }
 
@@ -55,7 +58,7 @@ export class VariableReference implements Expression {
     }
 
     type(context: Context): string {
-        const type = context.variableTypes.get(this.name)
+        const type = context.scope.variableTypes.get(this.name)
         if (!type)
             throw new Error(
                 `Variable ${this.name} is not defined in the current context`,
@@ -125,7 +128,7 @@ export class VariableDeclaration implements Statement {
     }
 
     toCIR(context: Context): cir.Statement {
-        context.variableTypes.set(this.name, this.type)
+        context.scope.variableTypes.set(this.name, this.type)
         return {
             kind: 'VARIABLE_DECL',
             name: this.name,
@@ -152,6 +155,11 @@ export class Module {
     }
 
     toCIR(context: Context): cir.ClawrModule {
+        this.declarations.forEach((decl) => {
+            if (decl instanceof DataDeclaration) {
+                context.scope.declarations.set(decl.name, decl)
+            }
+        })
         return {
             startBlock: this.main.map((stmt) => stmt.toCIR(context)),
         }
@@ -167,7 +175,7 @@ type DataField = {
 
 export class DataDeclaration {
     private constructor(
-        private name: string,
+        public name: string,
         private fields: DataField[],
     ) {}
 

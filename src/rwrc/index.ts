@@ -47,6 +47,17 @@ program
         const sourceCode = await fs.readFile(file, 'utf-8')
         const stream = TokenStream.read(sourceCode, errorReporter)
         const cir = ModuleParser.create(stream).parse().toCIR(context)
+
+        await fs
+            .writeFile(
+                `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '.json')}`,
+                JSON.stringify(cir, null, 2),
+            )
+            .catch((err) => {
+                console.error('Failed to write CIR JSON:', err)
+                process.exit(1)
+            })
+
         const cCode = backend.lower(cir)
 
         try {

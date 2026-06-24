@@ -7,7 +7,7 @@ int main() {
     memcpy(((__rc_header*)original) + 1, &(DataStructureˇfields) {
         .x = 47,
         .y = 42,
-    }, sizeof(DataStructure) - sizeof(__rc_header));
+    }, sizeof(DataStructureˇfields));
 
     // Clawr: `ref isolated = original`
     DataStructure* reference = retainRC(original);

@@ -7,6 +7,8 @@ import Bun from 'bun'
 import { ModuleParser } from '../parser'
 import { TokenStream } from '../lexer'
 import * as backend from '../backend'
+import { ClawrModule } from '../cir'
+import { SourceCodeSpan } from '../diagnostics'
 
 const exeDir = path.dirname(process.execPath)
 const program = new Command()
@@ -18,70 +20,13 @@ program
     .option('-o, --outdir <dir>', 'Output directory', 'dist')
     .description('Compile a Clawr source file')
     .action(async (file: string, options: { outdir: string }) => {
-        const errorReporter: import('../diagnostics').ErrorReporter = {
-            reportFatalError(message, location) {
-                throw new Error(
-                    `Fatal Error: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
-                )
-            },
-            reportWarning(message, location) {
-                console.warn(
-                    `Warning: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
-                )
-            },
-            reportError(message, location) {
-                console.error(
-                    `Error: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
-                )
-            },
-        }
-        const context = {
-            errorReporter,
-            scope: { variableTypes: new Map(), declarations: new Map() },
-        }
-
         const resolvedOutDir = path.resolve(options.outdir)
-        const cFilePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '.c')}`
-        const exePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '')}`
+        const outputFilePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '.json')}`
 
-        const sourceCode = await fs.readFile(file, 'utf-8')
-        const stream = TokenStream.read(sourceCode, errorReporter)
-        const cir = ModuleParser.create(stream).parse().toCIR(context)
-
-        await fs
-            .writeFile(
-                `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '.json')}`,
-                JSON.stringify(cir, null, 2),
-            )
-            .catch((err) => {
-                console.error('Failed to write CIR JSON:', err)
-                process.exit(1)
-            })
-
-        const cCode = backend.lower(cir)
+        await parseToCIR({ file, outputFilePath })
 
         try {
-            if (!(await fs.stat(resolvedOutDir).catch(() => false))) {
-                await fs.mkdir(resolvedOutDir, { recursive: true })
-            }
-            await fs.writeFile(cFilePath, cCode)
-
-            const proc = Bun.spawn(
-                [
-                    'clang',
-                    '-I',
-                    path.join(exeDir, 'include'),
-                    cFilePath,
-                    path.join(exeDir, 'libClawr.A.dylib'),
-                    '-o',
-                    exePath,
-                ],
-                {
-                    stdout: 'inherit',
-                    stderr: 'inherit',
-                },
-            )
-            await proc.exited
+            await compileCIR(outputFilePath)
         } catch (err) {
             console.error(err instanceof Error ? err.message : err)
             // For debugging:
@@ -91,3 +36,74 @@ program
     })
 
 program.parse(process.argv)
+
+async function parseToCIR({
+    file,
+    outputFilePath,
+}: {
+    file: string
+    outputFilePath: string
+}) {
+    const context = {
+        errorReporter: {
+            reportFatalError(message: string, location: SourceCodeSpan) {
+                throw new Error(
+                    `Fatal Error: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
+                )
+            },
+            reportWarning(message: string, location: SourceCodeSpan) {
+                console.warn(
+                    `Warning: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
+                )
+            },
+            reportError(message: string, location: SourceCodeSpan) {
+                console.error(
+                    `Error: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
+                )
+            },
+        },
+        scope: { variableTypes: new Map(), declarations: new Map() },
+    }
+
+    const sourceCode = await fs.readFile(file, 'utf-8')
+    const stream = TokenStream.read(sourceCode, context.errorReporter)
+    const cir = ModuleParser.create(stream).parse().toCIR(context)
+
+    await ensureDirectoryExists(path.dirname(outputFilePath))
+    await fs.writeFile(outputFilePath, JSON.stringify(cir))
+}
+
+async function compileCIR(cirFilePath: string) {
+    const exePath = `${cirFilePath.replace(/\.[^/.]+$/, '')}`
+    const cFilePath = `${exePath}.c`
+
+    const cir = JSON.parse(
+        await fs.readFile(cirFilePath, 'utf-8'),
+    ) as ClawrModule
+    const cCode = backend.lower(cir)
+
+    await fs.writeFile(cFilePath, cCode)
+
+    const proc = Bun.spawn(
+        [
+            'clang',
+            '-I',
+            path.join(exeDir, 'include'),
+            cFilePath,
+            path.join(exeDir, 'libClawr.A.dylib'),
+            '-o',
+            exePath,
+        ],
+        {
+            stdout: 'inherit',
+            stderr: 'inherit',
+        },
+    )
+    await proc.exited
+}
+
+async function ensureDirectoryExists(outputDir: string) {
+    if (!(await fs.stat(outputDir).catch(() => false))) {
+        await fs.mkdir(outputDir, { recursive: true })
+    }
+}

@@ -183,7 +183,7 @@ type DataField = {
 export class DataDeclaration {
     private constructor(
         public name: string,
-        private fields: DataField[],
+        public fields: DataField[],
     ) {}
 
     static create({
@@ -251,8 +251,26 @@ export class FieldLookupExpression implements Expression {
         return new FieldLookupExpression(object, field)
     }
 
-    type(_: Context): string {
-        return 'field_lookup'
+    type(context: Context): string {
+        const objectType = this.object.type(context)
+        const declaration = context.scope.declarations.get(objectType)
+        if (!declaration) {
+            throw new Error(
+                `Type ${objectType} is not defined in the current context`,
+            )
+        }
+        if (!(declaration instanceof DataDeclaration)) {
+            throw new Error(
+                `Type ${objectType} is not a data type, cannot access fields`,
+            )
+        }
+        const field = declaration.fields.find((f) => f.name === this.field)
+        if (!field) {
+            throw new Error(
+                `Field ${this.field} does not exist on type ${objectType}`,
+            )
+        }
+        return field.type
     }
 
     toCIR(context: Context): cir.Expression {

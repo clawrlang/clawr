@@ -4,9 +4,6 @@
 
 Next vertical slice
 
-- `data` type declaration
-- data-literal
-
 ## Later Items
 
 - Add reference-counting to `data`

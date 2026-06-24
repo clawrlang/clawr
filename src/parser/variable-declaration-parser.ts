@@ -1,4 +1,4 @@
-import { ExpressionParser } from '.'
+import { ExpressionParser } from './expression.parser'
 import { TokenStream } from '../lexer'
 import { VariableDeclaration } from '../model'
 

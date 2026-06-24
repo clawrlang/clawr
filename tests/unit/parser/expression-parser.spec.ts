@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { TokenStream } from '../../../src/lexer'
-import { ExpressionParser } from '../../../src/parser'
+import { ExpressionParser } from '../../../src/parser/expression.parser'
 import {
     Expression,
     FieldLookupExpression,

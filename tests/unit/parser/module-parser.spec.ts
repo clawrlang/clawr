@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
-import { ModuleParser } from '../../../src/parser'
+import { ModuleParser } from '../../../src/parser/module-parser'
 
 describe('Module Parser', () => {
     it('parses a simple main body module', () => {

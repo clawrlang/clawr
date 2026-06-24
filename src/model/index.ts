@@ -169,3 +169,16 @@ export class DataDeclaration {
         return new DataDeclaration(name, fields)
     }
 }
+
+type FieldValue = {
+    name: string
+    value: Expression
+}
+
+export class DataLiteral {
+    fields: FieldValue[] = []
+
+    constructor(fields: FieldValue[]) {
+        this.fields = fields
+    }
+}

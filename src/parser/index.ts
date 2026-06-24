@@ -3,6 +3,7 @@ import { TokenStream } from '../lexer'
 import { CallFuncParser } from './call-func-parser'
 import { VariableDeclarationParser } from './variable-declaration-parser'
 import { DataDeclarationParser } from './data-declaration-parser'
+import { DataLiteralParser } from './data-literal-parser'
 
 export class ExpressionParser {
     private constructor(private tokenStream: TokenStream) {}
@@ -39,6 +40,16 @@ export class ExpressionParser {
                     })
                 }
                 return model.VariableReference.create(nextToken.identifier)
+            case 'PUNCTUATION':
+                if (nextToken.symbol === '{') {
+                    return DataLiteralParser.create({
+                        tokenStream: this.tokenStream,
+                    }).parse()
+                } else {
+                    throw new Error(
+                        `Unexpected punctuation symbol: ${nextToken.symbol} while parsing expression`,
+                    )
+                }
             case 'OPERATOR':
                 if (nextToken.operator === '-') {
                     this.tokenStream.next() // Consume the token

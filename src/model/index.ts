@@ -213,11 +213,19 @@ type FieldValue = {
     value: Expression
 }
 
-export class DataLiteral {
+export class DataLiteral implements Expression {
     fields: FieldValue[] = []
 
     constructor(fields: FieldValue[]) {
         this.fields = fields
+    }
+
+    type(_: Context): string {
+        throw new Error('not implemented')
+    }
+
+    toCIR(context: Context): cir.Expression {
+        throw new Error('not implemented')
     }
 }
 

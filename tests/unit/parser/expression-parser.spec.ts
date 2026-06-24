@@ -9,6 +9,7 @@ import {
     VariableReference,
 } from '../../../src/model'
 import { TestErrorReporter } from '../../util'
+import { DataLiteralParser } from '../../../src/parser/data-literal-parser'
 
 describe('Expression Parser', () => {
     describe('truthvalue literals', () => {
@@ -31,6 +32,26 @@ describe('Expression Parser', () => {
                 expect(literal).toBeInstanceOf(IntegerLiteral)
             })
         }
+    })
+
+    it('parses a data literal', () => {
+        const code = `
+            {
+                x: 42
+                y: 17
+            }`
+        const tokenStream = TokenStream.read(
+            code,
+            new TestErrorReporter('test.clawr'),
+        )
+        const parser = ExpressionParser.create(tokenStream)
+        const result = parser.parse()
+        expect(result).toMatchObject({
+            fields: [
+                { name: 'x', value: { value: 42n } },
+                { name: 'y', value: { value: 17n } },
+            ],
+        })
     })
 
     it('parses variable references', () => {

@@ -24,6 +24,19 @@ export class ExpressionParser {
                 return model.IntegerLiteral.create(nextToken.value)
             case 'IDENTIFIER':
                 this.tokenStream.next() // Consume the token
+                if (this.tokenStream.isNext('OPERATOR', '.')) {
+                    this.tokenStream.next() // Consume the '.'
+                    const fieldToken = this.tokenStream.next()
+                    if (fieldToken?.kind !== 'IDENTIFIER') {
+                        throw new Error('Expected field name after "."')
+                    }
+                    return model.FieldLookupExpression.create({
+                        object: model.VariableReference.create(
+                            nextToken.identifier,
+                        ),
+                        field: fieldToken.identifier,
+                    })
+                }
                 return model.VariableReference.create(nextToken.identifier)
             case 'OPERATOR':
                 if (nextToken.operator === '-') {

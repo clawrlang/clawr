@@ -182,3 +182,32 @@ export class DataLiteral {
         this.fields = fields
     }
 }
+
+export class FieldLookupExpression implements Expression {
+    private constructor(
+        private object: Expression,
+        private field: string,
+    ) {}
+
+    static create({
+        object,
+        field,
+    }: {
+        object: Expression
+        field: string
+    }): FieldLookupExpression {
+        return new FieldLookupExpression(object, field)
+    }
+
+    type(_: Context): string {
+        return 'field_lookup'
+    }
+
+    toCIR(context: Context): cir.Expression {
+        return {
+            kind: 'FIELD_LOOKUP',
+            object: this.object.toCIR(context),
+            field: this.field,
+        }
+    }
+}

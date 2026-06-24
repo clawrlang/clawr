@@ -3,6 +3,7 @@ import { TokenStream } from '../../../src/lexer'
 import { ExpressionParser } from '../../../src/parser'
 import {
     Expression,
+    FieldLookupExpression,
     IntegerLiteral,
     TruthValueLiteral,
     VariableReference,
@@ -37,6 +38,16 @@ describe('Expression Parser', () => {
         const variableRef = parseExpression(input)
         expect(variableRef).toMatchObject({ name: input })
         expect(variableRef).toBeInstanceOf(VariableReference)
+    })
+
+    it('parses field lookup expressions', () => {
+        const input = 'myVar.field'
+        const fieldAccess = parseExpression(input)
+        expect(fieldAccess).toMatchObject({
+            object: { name: 'myVar' },
+            field: 'field',
+        })
+        expect(fieldAccess).toBeInstanceOf(FieldLookupExpression)
     })
 })
 

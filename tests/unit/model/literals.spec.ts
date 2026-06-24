@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { Expression } from '../../../src/cir'
-import { IntegerLiteral, TruthValueLiteral } from '../../../src/model'
+import {
+    DataLiteral,
+    IntegerLiteral,
+    TruthValueLiteral,
+} from '../../../src/model'
 import { newSemanticContext } from '../../util'
 
 describe('Literals', () => {
@@ -28,6 +32,29 @@ describe('Literals', () => {
                 })
             })
         }
+    })
+
+    describe('data literals', () => {
+        it('outputs a data literal as DATA_LITERAL', () => {
+            const dataLiteral = new DataLiteral([
+                { name: 'x', value: IntegerLiteral.create(42n) },
+                { name: 'y', value: IntegerLiteral.create(17n) },
+            ])
+
+            expect(dataLiteral.toCIR(newSemanticContext())).toMatchObject({
+                kind: 'DATA_LITERAL',
+                fields: [
+                    {
+                        name: 'x',
+                        value: { kind: 'INTEGER_LITERAL', value: '42' },
+                    },
+                    {
+                        name: 'y',
+                        value: { kind: 'INTEGER_LITERAL', value: '17' },
+                    },
+                ],
+            })
+        })
     })
 })
 

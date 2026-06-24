@@ -225,7 +225,13 @@ export class DataLiteral implements Expression {
     }
 
     toCIR(context: Context): cir.Expression {
-        throw new Error('not implemented')
+        return {
+            kind: 'DATA_LITERAL',
+            fields: this.fields.map((field) => ({
+                name: field.name,
+                value: field.value.toCIR(context),
+            })),
+        }
     }
 }
 

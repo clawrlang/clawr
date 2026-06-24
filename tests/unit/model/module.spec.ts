@@ -9,7 +9,7 @@ import {
 import { newSemanticContext } from '../../util'
 
 describe('Module', () => {
-    it('outputs the main block', () => {
+    it('outputs the main block in CIR', () => {
         const module = Module.create({
             main: [
                 CallFunc.create({
@@ -34,6 +34,31 @@ describe('Module', () => {
                         { kind: 'INTEGER_LITERAL', value: '1' },
                         { kind: 'INTEGER_LITERAL', value: '2' },
                     ],
+                },
+            ],
+        })
+    })
+
+    it('outputs data declarations in CIR', () => {
+        const module = Module.create({
+            main: [],
+            declarations: [
+                DataDeclaration.create({
+                    name: 'MyData',
+                    fields: [
+                        { name: 'field1', type: 'integer' },
+                        { name: 'field2', type: 'truthvalue' },
+                    ],
+                }),
+            ],
+        })
+        const result = module.toCIR(newSemanticContext())
+        expect(result).toMatchObject({
+            startBlock: [],
+            declarations: [
+                {
+                    kind: 'DATA_DECL',
+                    name: 'MyData',
                 },
             ],
         })

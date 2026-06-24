@@ -161,6 +161,13 @@ export class Module {
             }
         })
         return {
+            declarations: this.declarations.map((decl) => {
+                if (decl instanceof DataDeclaration) {
+                    return decl.toCIR(context)
+                } else {
+                    throw new Error('Unknown declaration type')
+                }
+            }),
             startBlock: this.main.map((stmt) => stmt.toCIR(context)),
         }
     }
@@ -187,6 +194,17 @@ export class DataDeclaration {
         fields: DataField[]
     }): DataDeclaration {
         return new DataDeclaration(name, fields)
+    }
+
+    toCIR(_: Context): cir.Declaration {
+        return {
+            kind: 'DATA_DECL',
+            name: this.name,
+            fields: this.fields.map((field) => ({
+                name: field.name,
+                type: field.type,
+            })),
+        }
     }
 }
 

@@ -2,6 +2,7 @@ import * as model from '../model'
 import { TokenStream } from '../lexer'
 import { CallFuncParser } from './call-func-parser'
 import { VariableDeclarationParser } from './variable-declaration-parser'
+import { DataDeclarationParser } from './data-declaration-parser'
 
 export class ExpressionParser {
     private constructor(private tokenStream: TokenStream) {}
@@ -69,11 +70,26 @@ export class ModuleParser {
     }
 
     parse(): model.Module {
-        this.tokenStream.expect('ANNOTATION', '@main')
-        this.tokenStream.expect('PUNCTUATION', '{')
-        const body = this.parseStatements()
-        this.tokenStream.expect('PUNCTUATION', '}')
-        return model.Module.create({ main: body })
+        let main: model.Statement[] = []
+        const declarations: model.Declaration[] = []
+
+        if (this.tokenStream.isNext('ANNOTATION', '@main')) {
+            this.tokenStream.expect('ANNOTATION', '@main')
+            this.tokenStream.expect('PUNCTUATION', '{')
+            main = this.parseStatements()
+            this.tokenStream.expect('PUNCTUATION', '}')
+        } else if (this.tokenStream.isNext('KEYWORD', 'data')) {
+            declarations.push(
+                DataDeclarationParser.create({
+                    tokenStream: this.tokenStream,
+                }).parse(),
+            )
+        } else {
+            throw new Error(
+                `Unexpected token kind: ${this.tokenStream.peek()?.kind} while parsing module`,
+            )
+        }
+        return model.Module.create({ main, declarations })
     }
     private parseStatements() {
         const callFuncParser = CallFuncParser.create(this.tokenStream)

@@ -136,10 +136,19 @@ export class VariableDeclaration implements Statement {
 }
 
 export class Module {
-    private constructor(private main: Statement[]) {}
+    private constructor(
+        private main: Statement[],
+        private declarations: Declaration[],
+    ) {}
 
-    static create({ main }: { main: Statement[] }): Module {
-        return new Module(main)
+    static create({
+        main,
+        declarations,
+    }: {
+        main?: Statement[]
+        declarations?: Declaration[]
+    }): Module {
+        return new Module(main ?? [], declarations ?? [])
     }
 
     toCIR(context: Context): cir.ClawrModule {
@@ -148,6 +157,9 @@ export class Module {
         }
     }
 }
+
+export type Declaration = VariableDeclaration | DataDeclaration
+
 type DataField = {
     name: string
     type: string

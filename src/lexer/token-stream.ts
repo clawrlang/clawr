@@ -17,6 +17,7 @@ import {
     truthValues,
 } from './kinds'
 import type {
+    Annotation,
     Keyword,
     Operator,
     PunctuationSymbol,
@@ -61,6 +62,7 @@ export class TokenStream {
 
     isNext(kind: 'NEWLINE'): boolean
     isNext(kind: 'IDENTIFIER'): boolean
+    isNext(kind: 'ANNOTATION', ...annotations: Annotation[]): boolean
     isNext(kind: 'OPERATOR', ...operators: Operator[]): boolean
     isNext(kind: 'KEYWORD', ...keywords: Keyword[]): boolean
     isNext(kind: 'PUNCTUATION', ...symbols: PunctuationSymbol[]): boolean
@@ -78,6 +80,8 @@ export class TokenStream {
                 return values.includes(token.operator)
             case 'KEYWORD':
                 return values.includes(token.keyword)
+            case 'ANNOTATION':
+                return values.includes(token.annotation)
             default:
                 return false
         }
@@ -85,7 +89,7 @@ export class TokenStream {
 
     expect(kind: 'NEWLINE'): NewlineToken
     expect(kind: 'IDENTIFIER'): IdentifierToken
-    expect(kind: 'ANNOTATION', ...annotations: string[]): AnnotationToken
+    expect(kind: 'ANNOTATION', ...annotations: Annotation[]): AnnotationToken
     expect(kind: 'OPERATOR', ...operators: Operator[]): OperatorToken
     expect(kind: 'KEYWORD', ...keywords: Keyword[]): KeywordToken
     expect(

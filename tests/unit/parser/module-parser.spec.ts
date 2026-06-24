@@ -66,4 +66,17 @@ describe('Module Parser', () => {
             ],
         })
     })
+
+    it('parses data declarations in global scope', () => {
+        const code = 'data MyData { }'
+        const tokenStream = TokenStream.read(
+            code,
+            new TestErrorReporter('test.clawr'),
+        )
+        const parser = ModuleParser.create(tokenStream)
+        const result = parser.parse()
+        expect(result).toMatchObject({
+            declarations: [{ name: 'MyData' }],
+        })
+    })
 })

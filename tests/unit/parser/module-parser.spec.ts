@@ -20,7 +20,7 @@ describe('Module Parser', () => {
             main: [
                 {
                     baseName: 'print',
-                    args: [{ value: { value: 42n } }],
+                    arguments: [{ value: { value: 42n } }],
                 },
             ],
         })
@@ -57,11 +57,11 @@ describe('Module Parser', () => {
                 },
                 {
                     baseName: 'print',
-                    args: [{ value: { name: 'x' } }],
+                    arguments: [{ value: { name: 'x' } }],
                 },
                 {
                     baseName: 'print',
-                    args: [{ value: { name: 'y' } }],
+                    arguments: [{ value: { name: 'y' } }],
                 },
             ],
         })
@@ -95,7 +95,9 @@ describe('Module Parser', () => {
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             declarations: [{ name: 'MyData' }],
-            main: [{ baseName: 'print' }],
+            main: [
+                { baseName: 'print', arguments: [{ value: { value: 42n } }] },
+            ],
         })
     })
 })

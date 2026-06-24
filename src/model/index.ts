@@ -72,10 +72,14 @@ export interface Statement {
 }
 
 export class CallFunc implements Statement {
+    private arguments: { label?: string; value: Expression }[] = []
+
     private constructor(
         private baseName: string,
-        private args: { label?: string; value: Expression }[],
-    ) {}
+        args: { label?: string; value: Expression }[],
+    ) {
+        this.arguments = args
+    }
 
     static create({
         baseName,
@@ -93,14 +97,14 @@ export class CallFunc implements Statement {
             signature: {
                 baseName:
                     this.baseName === 'print'
-                        ? `print${this.args[0].value.type(context) === 'integer' ? 'Int64' : 'Truthvalue'}`
+                        ? `print${this.arguments[0].value.type(context) === 'integer' ? 'Int64' : 'Truthvalue'}`
                         : this.baseName,
-                parameters: this.args.map((arg, index) => ({
-                    label: this.args[index].label,
+                parameters: this.arguments.map((arg, index) => ({
+                    label: this.arguments[index].label,
                     type: arg.value.type(context),
                 })),
             },
-            arguments: this.args.map((arg) => arg.value.toCIR(context)),
+            arguments: this.arguments.map((arg) => arg.value.toCIR(context)),
         }
     }
 }

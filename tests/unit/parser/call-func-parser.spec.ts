@@ -14,7 +14,7 @@ describe('CallFunc Parser', () => {
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             baseName: 'foo',
-            args: [
+            arguments: [
                 { value: { value: 42n } },
                 { value: { value: 'ambiguous' } },
             ],
@@ -31,7 +31,7 @@ describe('CallFunc Parser', () => {
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             baseName: 'foo',
-            args: [
+            arguments: [
                 { label: 'x', value: { value: 42n } },
                 { label: 'y', value: { value: 'ambiguous' } },
             ],

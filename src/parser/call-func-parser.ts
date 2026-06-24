@@ -3,19 +3,19 @@ import { TokenStream } from '../lexer'
 import { CallFunc, Expression, Statement } from '../model'
 
 export class CallFuncParser {
-    private constructor(private tokenStream: TokenStream) {}
+    private constructor() {}
 
-    static create(tokenStream: TokenStream): CallFuncParser {
-        return new CallFuncParser(tokenStream)
+    static create(): CallFuncParser {
+        return new CallFuncParser()
     }
 
-    parse(): Statement {
-        const nameToken = this.tokenStream.expect('IDENTIFIER')
-        this.tokenStream.expect('PUNCTUATION', '(')
+    parse(stream: TokenStream): Statement {
+        const nameToken = stream.expect('IDENTIFIER')
+        stream.expect('PUNCTUATION', '(')
         const args: { label?: string; value: Expression }[] = []
 
-        while (!this.tokenStream.isNext('PUNCTUATION', ')', ',')) {
-            const label = this.tokenStream.attempt((clone) => {
+        while (!stream.isNext('PUNCTUATION', ')', ',')) {
+            const label = stream.attempt((clone) => {
                 try {
                     const labelToken = clone.expect('IDENTIFIER')
                     clone.expect('PUNCTUATION', ':')
@@ -24,15 +24,15 @@ export class CallFuncParser {
                     return null
                 }
             })
-            const arg = ExpressionParser.create(this.tokenStream).parse()
+            const arg = ExpressionParser.create().parse(stream)
             args.push({ label: label?.label, value: arg })
 
-            if (this.tokenStream.isNext('PUNCTUATION', ')')) {
-                this.tokenStream.next()
+            if (stream.isNext('PUNCTUATION', ')')) {
+                stream.next()
                 break
             }
 
-            this.tokenStream.expect('PUNCTUATION', ',')
+            stream.expect('PUNCTUATION', ',')
         }
         return CallFunc.create({
             baseName: nameToken.identifier,

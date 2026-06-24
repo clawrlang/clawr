@@ -3,24 +3,24 @@ import { TokenStream } from '../lexer'
 import { DataLiteral } from '../model'
 
 export class DataLiteralParser {
-    constructor(private tokenStream: TokenStream) {}
+    constructor() {}
 
-    static create({ tokenStream }: { tokenStream: TokenStream }) {
-        return new DataLiteralParser(tokenStream)
+    static create() {
+        return new DataLiteralParser()
     }
 
-    parse(): DataLiteral {
+    parse(stream: TokenStream): DataLiteral {
         const fields: DataLiteral['fields'] = []
-        this.tokenStream.expect('PUNCTUATION', '{')
-        while (!this.tokenStream.isNext('PUNCTUATION', '}')) {
-            const key = this.tokenStream.expect('IDENTIFIER').identifier
-            this.tokenStream.expect('PUNCTUATION', ':')
+        stream.expect('PUNCTUATION', '{')
+        while (!stream.isNext('PUNCTUATION', '}')) {
+            const key = stream.expect('IDENTIFIER').identifier
+            stream.expect('PUNCTUATION', ':')
             fields.push({
                 name: key,
-                value: ExpressionParser.create(this.tokenStream).parse(),
+                value: ExpressionParser.create().parse(stream),
             })
         }
-        this.tokenStream.expect('PUNCTUATION', '}')
+        stream.expect('PUNCTUATION', '}')
         return new DataLiteral(fields)
     }
 }

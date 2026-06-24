@@ -14,8 +14,8 @@ describe('DataLiteralParser', () => {
             code,
             new TestErrorReporter('test.clawr'),
         )
-        const parser = DataLiteralParser.create({ tokenStream })
-        const result = parser.parse()
+        const parser = DataLiteralParser.create()
+        const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             fields: [
                 { name: 'x', value: { value: 42n } },

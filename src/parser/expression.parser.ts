@@ -3,29 +3,29 @@ import * as model from '../model'
 import { DataLiteralParser } from './data-literal-parser'
 
 export class ExpressionParser {
-    private constructor(private tokenStream: TokenStream) {}
+    private constructor() {}
 
-    static create(tokenStream: TokenStream): ExpressionParser {
-        return new ExpressionParser(tokenStream)
+    static create(): ExpressionParser {
+        return new ExpressionParser()
     }
 
-    parse(): model.Expression {
-        const nextToken = this.tokenStream.peek()
+    parse(stream: TokenStream): model.Expression {
+        const nextToken = stream.peek()
         if (!nextToken) {
             throw new Error('Unexpected end of input while parsing expression')
         }
         switch (nextToken.kind) {
             case 'TRUTHVALUE_LITERAL':
-                this.tokenStream.next() // Consume the token
+                stream.next() // Consume the token
                 return model.TruthValueLiteral.create(nextToken.value)
             case 'INTEGER_LITERAL':
-                this.tokenStream.next() // Consume the token
+                stream.next() // Consume the token
                 return model.IntegerLiteral.create(nextToken.value)
             case 'IDENTIFIER':
-                this.tokenStream.next() // Consume the token
-                if (this.tokenStream.isNext('OPERATOR', '.')) {
-                    this.tokenStream.next() // Consume the '.'
-                    const fieldToken = this.tokenStream.next()
+                stream.next() // Consume the token
+                if (stream.isNext('OPERATOR', '.')) {
+                    stream.next() // Consume the '.'
+                    const fieldToken = stream.next()
                     if (fieldToken?.kind !== 'IDENTIFIER') {
                         throw new Error('Expected field name after "."')
                     }
@@ -39,9 +39,7 @@ export class ExpressionParser {
                 return model.VariableReference.create(nextToken.identifier)
             case 'PUNCTUATION':
                 if (nextToken.symbol === '{') {
-                    return DataLiteralParser.create({
-                        tokenStream: this.tokenStream,
-                    }).parse()
+                    return DataLiteralParser.create().parse(stream)
                 } else {
                     throw new Error(
                         `Unexpected punctuation symbol: ${nextToken.symbol} while parsing expression`,
@@ -49,8 +47,8 @@ export class ExpressionParser {
                 }
             case 'OPERATOR':
                 if (nextToken.operator === '-') {
-                    this.tokenStream.next() // Consume the token
-                    const nextToken = this.tokenStream.next()
+                    stream.next() // Consume the token
+                    const nextToken = stream.next()
                     if (nextToken?.kind !== 'INTEGER_LITERAL') {
                         throw new Error(
                             'Expected integer literal after "-" operator',

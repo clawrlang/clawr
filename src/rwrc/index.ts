@@ -68,7 +68,7 @@ async function parseToCIR({
 
     const sourceCode = await fs.readFile(file, 'utf-8')
     const stream = TokenStream.read(sourceCode, context.errorReporter)
-    const cir = ModuleParser.create(stream).parse().toCIR(context)
+    const cir = ModuleParser.create().parse(stream).toCIR(context)
 
     await ensureDirectoryExists(path.dirname(outputFilePath))
     await fs.writeFile(outputFilePath, JSON.stringify(cir))

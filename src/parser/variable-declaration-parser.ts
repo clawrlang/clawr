@@ -5,28 +5,24 @@ import { VariableDeclaration } from '../model'
 export class VariableDeclarationParser {
     private expressionParser: ExpressionParser
 
-    private constructor(private stream: TokenStream) {
-        this.expressionParser = ExpressionParser.create(stream)
+    private constructor() {
+        this.expressionParser = ExpressionParser.create()
     }
 
-    static create({
-        tokenStream,
-    }: {
-        tokenStream: TokenStream
-    }): VariableDeclarationParser {
-        return new VariableDeclarationParser(tokenStream)
+    static create(): VariableDeclarationParser {
+        return new VariableDeclarationParser()
     }
 
-    parse(): VariableDeclaration {
-        const semanticsToken = this.stream.expect('KEYWORD', 'const', 'mut')
+    parse(stream: TokenStream): VariableDeclaration {
+        const semanticsToken = stream.expect('KEYWORD', 'const', 'mut')
         const semantics = semanticsToken.keyword as 'const' | 'mut'
-        const nameToken = this.stream.expect('IDENTIFIER')
+        const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
-        this.stream.expect('PUNCTUATION', ':')
-        const typeToken = this.stream.expect('IDENTIFIER')
+        stream.expect('PUNCTUATION', ':')
+        const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
-        this.stream.expect('PUNCTUATION', '=')
-        const initialValue = this.expressionParser.parse()
+        stream.expect('PUNCTUATION', '=')
+        const initialValue = this.expressionParser.parse(stream)
         return VariableDeclaration.create({
             semantics,
             name,

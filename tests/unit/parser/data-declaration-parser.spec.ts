@@ -14,8 +14,8 @@ describe('DataDeclarationParser', () => {
             code,
             new TestErrorReporter('test.clawr'),
         )
-        const parser = DataDeclarationParser.create({ tokenStream })
-        const result = parser.parse()
+        const parser = DataDeclarationParser.create()
+        const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             name: 'MyData',
             fields: [

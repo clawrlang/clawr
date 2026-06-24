@@ -27,7 +27,7 @@ describe('VariableDeclarationParser', () => {
 
 function parseVariableDeclaration(source: string) {
     const tokenStream = TokenStream.read(source, new TestErrorReporter('test'))
-    const parser = VariableDeclarationParser.create({ tokenStream })
-    const decl = parser.parse()
+    const parser = VariableDeclarationParser.create()
+    const decl = parser.parse(tokenStream)
     return decl
 }

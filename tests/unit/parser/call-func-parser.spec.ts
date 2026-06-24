@@ -10,8 +10,8 @@ describe('CallFunc Parser', () => {
             input,
             new TestErrorReporter('test.clawr'),
         )
-        const parser = CallFuncParser.create(tokenStream)
-        const result = parser.parse()
+        const parser = CallFuncParser.create()
+        const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             baseName: 'foo',
             args: [
@@ -27,8 +27,8 @@ describe('CallFunc Parser', () => {
             input,
             new TestErrorReporter('test.clawr'),
         )
-        const parser = CallFuncParser.create(tokenStream)
-        const result = parser.parse()
+        const parser = CallFuncParser.create()
+        const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             baseName: 'foo',
             args: [

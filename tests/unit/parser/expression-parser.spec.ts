@@ -44,8 +44,8 @@ describe('Expression Parser', () => {
             code,
             new TestErrorReporter('test.clawr'),
         )
-        const parser = ExpressionParser.create(tokenStream)
-        const result = parser.parse()
+        const parser = ExpressionParser.create()
+        const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             fields: [
                 { name: 'x', value: { value: 42n } },
@@ -77,5 +77,5 @@ function parseExpression(input: string): Expression {
         input,
         new TestErrorReporter('test.clawr'),
     )
-    return ExpressionParser.create(tokenStream).parse()
+    return ExpressionParser.create().parse(tokenStream)
 }

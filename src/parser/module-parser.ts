@@ -5,46 +5,45 @@ import { StatementParser } from './statement-parser'
 
 export class ModuleParser {
     private constructor(
-        private tokenStream: TokenStream,
         private statementParser: StatementParser,
+        private dataDeclarationParser: DataDeclarationParser,
     ) {}
 
-    static create(tokenStream: TokenStream): ModuleParser {
-        return new ModuleParser(tokenStream, StatementParser.create())
+    static create(): ModuleParser {
+        return new ModuleParser(
+            StatementParser.create(),
+            DataDeclarationParser.create(),
+        )
     }
 
-    parse(): model.Module {
+    parse(stream: TokenStream): model.Module {
         let main: model.Statement[] | undefined = undefined
         const declarations: model.Declaration[] = []
 
-        while (this.tokenStream.peek()) {
-            if (this.tokenStream.isNext('ANNOTATION', '@main')) {
+        while (stream.peek()) {
+            if (stream.isNext('ANNOTATION', '@main')) {
                 if (main !== undefined) {
                     throw new Error('Multiple @main blocks found')
                 }
 
-                this.tokenStream.expect('ANNOTATION', '@main')
-                this.tokenStream.expect('PUNCTUATION', '{')
-                main = this.parseStatements()
-                this.tokenStream.expect('PUNCTUATION', '}')
-            } else if (this.tokenStream.isNext('KEYWORD', 'data')) {
-                declarations.push(
-                    DataDeclarationParser.create({
-                        tokenStream: this.tokenStream,
-                    }).parse(),
-                )
+                stream.expect('ANNOTATION', '@main')
+                stream.expect('PUNCTUATION', '{')
+                main = this.parseStatements(stream)
+                stream.expect('PUNCTUATION', '}')
+            } else if (stream.isNext('KEYWORD', 'data')) {
+                declarations.push(this.dataDeclarationParser.parse(stream))
             } else {
                 throw new Error(
-                    `Unexpected token kind: ${this.tokenStream.peek()?.kind} while parsing module`,
+                    `Unexpected token kind: ${stream.peek()?.kind} while parsing module`,
                 )
             }
         }
         return model.Module.create({ main, declarations })
     }
-    private parseStatements() {
+    private parseStatements(stream: TokenStream): model.Statement[] {
         const statements: model.Statement[] = []
-        while (!this.tokenStream.isNext('PUNCTUATION', '}')) {
-            statements.push(this.statementParser.parse(this.tokenStream))
+        while (!stream.isNext('PUNCTUATION', '}')) {
+            statements.push(this.statementParser.parse(stream))
         }
         return statements
     }

@@ -1,7 +1,7 @@
 import { TokenStream } from '../lexer'
-import * as model from '../model'
 import { DataDeclarationParser } from './data-declaration-parser'
 import { BlockParser } from './block-parser'
+import { Declaration, Module, Statement } from '../model'
 
 export class ModuleParser {
     private constructor(
@@ -16,9 +16,9 @@ export class ModuleParser {
         )
     }
 
-    parse(stream: TokenStream): model.Module {
-        let main: model.Statement[] | undefined = undefined
-        const declarations: model.Declaration[] = []
+    parse(stream: TokenStream): Module {
+        let main: Statement[] | undefined = undefined
+        const declarations: Declaration[] = []
 
         while (stream.peek()) {
             if (stream.isNext('ANNOTATION', '@main')) {
@@ -36,6 +36,6 @@ export class ModuleParser {
                 )
             }
         }
-        return model.Module.create({ main, declarations })
+        return Module.create({ main, declarations })
     }
 }

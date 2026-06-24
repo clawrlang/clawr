@@ -1,5 +1,11 @@
 import { TokenStream } from '../lexer'
-import * as model from '../model'
+import {
+    Expression,
+    FieldLookupExpression,
+    IntegerLiteral,
+    TruthValueLiteral,
+    VariableReference,
+} from '../model'
 import { DataLiteralParser } from './data-literal-parser'
 
 export class ExpressionParser {
@@ -9,7 +15,7 @@ export class ExpressionParser {
         return new ExpressionParser()
     }
 
-    parse(stream: TokenStream): model.Expression {
+    parse(stream: TokenStream): Expression {
         const nextToken = stream.peek()
         if (!nextToken) {
             throw new Error('Unexpected end of input while parsing expression')
@@ -17,10 +23,10 @@ export class ExpressionParser {
         switch (nextToken.kind) {
             case 'TRUTHVALUE_LITERAL':
                 stream.next() // Consume the token
-                return model.TruthValueLiteral.create(nextToken.value)
+                return TruthValueLiteral.create(nextToken.value)
             case 'INTEGER_LITERAL':
                 stream.next() // Consume the token
-                return model.IntegerLiteral.create(nextToken.value)
+                return IntegerLiteral.create(nextToken.value)
             case 'IDENTIFIER':
                 stream.next() // Consume the token
                 if (stream.isNext('OPERATOR', '.')) {
@@ -29,14 +35,12 @@ export class ExpressionParser {
                     if (fieldToken?.kind !== 'IDENTIFIER') {
                         throw new Error('Expected field name after "."')
                     }
-                    return model.FieldLookupExpression.create({
-                        object: model.VariableReference.create(
-                            nextToken.identifier,
-                        ),
+                    return FieldLookupExpression.create({
+                        object: VariableReference.create(nextToken.identifier),
                         field: fieldToken.identifier,
                     })
                 }
-                return model.VariableReference.create(nextToken.identifier)
+                return VariableReference.create(nextToken.identifier)
             case 'PUNCTUATION':
                 if (nextToken.symbol === '{') {
                     return DataLiteralParser.create().parse(stream)
@@ -54,7 +58,7 @@ export class ExpressionParser {
                             'Expected integer literal after "-" operator',
                         )
                     }
-                    return model.IntegerLiteral.create(-nextToken.value)
+                    return IntegerLiteral.create(-nextToken.value)
                 } else {
                     throw new Error(
                         `Unexpected operator "${nextToken.operator}" while parsing expression`,

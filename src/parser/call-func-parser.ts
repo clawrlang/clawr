@@ -1,12 +1,17 @@
 import { ExpressionParser } from './expression.parser'
 import { TokenStream } from '../lexer'
 import { CallFunc, Expression, Statement } from '../model'
+import { StatementParser } from './statement-parser'
 
-export class CallFuncParser {
+export class CallFuncParser implements StatementParser<Statement> {
     private constructor() {}
 
     static create(): CallFuncParser {
         return new CallFuncParser()
+    }
+
+    isNext(stream: TokenStream): boolean {
+        return stream.isNext('IDENTIFIER')
     }
 
     parse(stream: TokenStream): Statement {

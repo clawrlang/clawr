@@ -1,8 +1,9 @@
 import { ExpressionParser } from './expression.parser'
 import { TokenStream } from '../lexer'
 import { VariableDeclaration } from '../model'
+import { StatementParser } from './statement-parser'
 
-export class VariableDeclarationParser {
+export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser
 
     private constructor() {
@@ -11,6 +12,10 @@ export class VariableDeclarationParser {
 
     static create(): VariableDeclarationParser {
         return new VariableDeclarationParser()
+    }
+
+    isNext(stream: TokenStream): boolean {
+        return stream.isNext('KEYWORD', 'const', 'mut')
     }
 
     parse(stream: TokenStream): VariableDeclaration {

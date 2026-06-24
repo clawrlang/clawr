@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { VariableReference } from '../../../src/model'
+import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext } from '../../util'
 
 describe('Variable Reference', () => {

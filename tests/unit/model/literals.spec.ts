@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'bun:test'
 import { Expression } from '../../../src/cir'
-import {
-    DataLiteral,
-    IntegerLiteral,
-    TruthValueLiteral,
-} from '../../../src/model'
 import { newSemanticContext } from '../../util'
+import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
+import { IntegerLiteral } from '../../../src/model/integer-literal'
+import { DataLiteral } from '../../../src/model/data-literal'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {

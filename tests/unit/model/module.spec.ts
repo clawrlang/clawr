@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'bun:test'
-import {
-    CallFunc,
-    DataDeclaration,
-    IntegerLiteral,
-    Module,
-    VariableDeclaration,
-} from '../../../src/model'
 import { newSemanticContext } from '../../util'
+import { Module } from '../../../src/model/module'
+import { CallFunc } from '../../../src/model/call-func'
+import { IntegerLiteral } from '../../../src/model/integer-literal'
+import { DataDeclaration } from '../../../src/model/data-declaration'
+import { VariableDeclaration } from '../../../src/model/variable-declaration'
 
 describe('Module', () => {
     it('outputs the main block in CIR', () => {

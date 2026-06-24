@@ -1,7 +1,8 @@
 import { ExpressionParser } from './expression.parser'
 import { TokenStream } from '../lexer'
-import { CallFunc, Expression, Statement } from '../model'
+import { Expression, Statement } from '../model'
 import { StatementParser } from './statement-parser'
+import { CallFunc } from '../model/call-func'
 
 export class CallFuncParser implements StatementParser<Statement> {
     private constructor() {}

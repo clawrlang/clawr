@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { newSemanticContext } from '../../util'
-import { DataDeclaration } from '../../../src/model'
+import { DataDeclaration } from '../../../src/model/data-declaration'
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {

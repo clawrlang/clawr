@@ -1,11 +1,9 @@
 import { describe, it, expect } from 'bun:test'
-import {
-    CallFunc,
-    IntegerLiteral,
-    TruthValueLiteral,
-    VariableReference,
-} from '../../../src/model'
 import { newSemanticContext } from '../../util'
+import { CallFunc } from '../../../src/model/call-func'
+import { IntegerLiteral } from '../../../src/model/integer-literal'
+import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
+import { VariableReference } from '../../../src/model/variable-reference'
 
 describe('CallFunc', () => {
     it('converts to CIR', () => {

@@ -1,5 +1,5 @@
 import { TokenStream } from '../lexer'
-import { DataDeclaration } from '../model'
+import { DataDeclaration } from '../model/data-declaration'
 
 export class DataDeclarationParser {
     private constructor() {}

@@ -1,6 +1,6 @@
 import { ExpressionParser } from './expression.parser'
 import { TokenStream } from '../lexer'
-import { VariableDeclaration } from '../model'
+import { VariableDeclaration } from '../model/variable-declaration'
 import { StatementParser } from './statement-parser'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {

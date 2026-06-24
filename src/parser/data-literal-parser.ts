@@ -1,6 +1,6 @@
 import { ExpressionParser } from './expression.parser'
 import { TokenStream } from '../lexer'
-import { DataLiteral } from '../model'
+import { DataLiteral } from '../model/data-literal'
 
 export class DataLiteralParser {
     constructor() {}

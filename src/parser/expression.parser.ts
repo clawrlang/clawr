@@ -1,11 +1,9 @@
 import { TokenStream } from '../lexer'
-import {
-    Expression,
-    FieldLookupExpression,
-    IntegerLiteral,
-    TruthValueLiteral,
-    VariableReference,
-} from '../model'
+import { Expression } from '../model'
+import { FieldLookupExpression } from '../model/field-lookup-expression'
+import { IntegerLiteral } from '../model/integer-literal'
+import { TruthValueLiteral } from '../model/truthvalue-literal'
+import { VariableReference } from '../model/variable-reference'
 import { DataLiteralParser } from './data-literal-parser'
 
 export class ExpressionParser {

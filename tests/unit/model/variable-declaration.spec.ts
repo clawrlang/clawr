@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
-import { IntegerLiteral, VariableDeclaration } from '../../../src/model'
+import { IntegerLiteral } from '../../../src/model/integer-literal'
+import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { newSemanticContext } from '../../util'
 
 describe('VariableDeclaration', () => {

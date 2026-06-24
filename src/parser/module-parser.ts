@@ -1,7 +1,8 @@
 import { TokenStream } from '../lexer'
 import { DataDeclarationParser } from './data-declaration-parser'
 import { BlockParser } from './block-parser'
-import { Declaration, Module, Statement } from '../model'
+import { Declaration, Statement } from '../model'
+import { Module } from '../model/module'
 
 export class ModuleParser {
     private constructor(

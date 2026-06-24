@@ -6,13 +6,13 @@ void printReference(__rc_proxy* proxy) {
     if (reference == NULL)
         printf("weak reference is NULL\n");
     else
-        printf("weak reference: %d\n", reference->x);
+        printf("weak reference: %d\n", reference->fields.x);
 }
 
 int main() {
     // Clawr: `ref original = DataStructure { x: 47 }`
     DataStructure* original = allocRC(DataStructure, __rc_SHARED);
-    original->x = 47;
+    original->fields.x = 47;
 
     // Clawr: `weak ref isolated = original`
     void* proxy = retainWeakly(original);

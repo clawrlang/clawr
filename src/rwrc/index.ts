@@ -2,11 +2,12 @@
 
 import fs from 'fs/promises'
 import path from 'path'
-import { Command } from 'commander'
 import Bun from 'bun'
+import { Command } from 'commander'
+
+import * as backend from '../backend'
 import { ModuleParser } from '../parser'
 import { TokenStream } from '../lexer'
-import * as backend from '../backend'
 import { ClawrModule } from '../cir'
 import { SourceCodeSpan } from '../diagnostics'
 
@@ -21,7 +22,7 @@ program
     .description('Compile a Clawr source file')
     .action(async (file: string, options: { outdir: string }) => {
         const resolvedOutDir = path.resolve(options.outdir)
-        const outputFilePath = `${resolvedOutDir}/${path.basename(file).replace(/.clawr$/, '.json')}`
+        const outputFilePath = `${resolvedOutDir}/${path.basename(file).replace(/\.[^/.]+$/, '.cir')}`
 
         await parseToCIR({ file, outputFilePath })
 

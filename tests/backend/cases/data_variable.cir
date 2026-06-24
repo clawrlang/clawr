@@ -1,0 +1,55 @@
+{
+    "$schema": "../../../docs/schema/cir.schema.json",
+    "declarations": [
+        {
+            "kind": "DATA_DECL",
+            "name": "FooData",
+            "fields": [
+                {
+                    "name": "bar",
+                    "type": "integer"
+                }
+            ]
+        },
+        {
+            "kind": "VARIABLE_DECL",
+            "name": "foo",
+            "type": "FooData",
+            "initialValue": {
+                "kind": "DATA_LITERAL",
+                "fields": [
+                    {
+                        "name": "bar",
+                        "value": {
+                            "kind": "INTEGER_LITERAL",
+                            "value": "1"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "startBlock": [
+        {
+            "kind": "CALL_FUNC",
+            "signature": {
+                "baseName": "printInteger",
+                "parameters": [
+                    {
+                        "type": "integer"
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "kind": "FIELD_LOOKUP",
+                    "object": {
+                        "kind": "VARIABLE_REF",
+                        "name": "foo"
+                    },
+                    "field": "bar"
+                }
+            ]
+        }
+    ]
+}

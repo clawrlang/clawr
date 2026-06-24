@@ -9,6 +9,13 @@ Next vertical slice
 
 ## Later Items
 
+- Add reference-counting to `data`
+  - Add `__rc_header` to `struct` (see [datastructure.h](tests/runtime/cases/data_structure.h))
+  - Lower as `ˇfields` (see [copy-on-write.h](tests/runtime/cases/copy-on-write.c))
+  - `ALLOC(Type, COW|SHARE)`
+  - `ASSIGN_FIELDS`
+  - `ENSURE_UNIQUE` before editing if `COW`
+  - `RELEASE` on descope
 - Infer variable types
 - Nested scopes (global+local vars)
 - Allow at most one @main block in the module/in total

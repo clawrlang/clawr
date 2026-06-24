@@ -13,6 +13,14 @@ export function lower(cir: cir.ClawrModule): string {
 
 export function lowerDecl(decl: cir.Declaration): string {
     switch (decl.kind) {
+        case 'DATA_DECL': {
+            const fields = decl.fields
+                .map((field) => `${lowerType(field.type)} ${field.name};`)
+                .join('\n')
+            return `typedef struct {
+                ${fields}
+            } ${decl.name};`
+        }
         case 'VARIABLE_DECL': {
             return `${lowerType(decl.type)} ${decl.name} = ${lowerExpr(decl.initialValue)};`
         }
@@ -29,7 +37,7 @@ function lowerType(type: string): string {
         case 'truthvalue':
             return 'truthvalue_t'
         default:
-            throw new Error(`Unsupported type: ${type}`)
+            return type // For user-defined types, we assume they are already valid C types
     }
 }
 
@@ -62,6 +70,15 @@ export function lowerExpr(expr: cir.Expression): string {
         }
         case 'VARIABLE_REF': {
             return expr.name
+        }
+        case 'DATA_LITERAL': {
+            const fields = expr.fields
+                .map((field) => `${lowerExpr(field.value)}`)
+                .join(', ')
+            return `{ ${fields} }`
+        }
+        case 'FIELD_LOOKUP': {
+            return `${lowerExpr(expr.object)}.${expr.field}`
         }
         default: {
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)

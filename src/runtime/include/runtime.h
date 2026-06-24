@@ -15,7 +15,7 @@ static void printTruthvalue(truthvalue_t value) {
     printf("%s\n", truthvalue·toCString(value));
 }
 
-static void printInteger(int64_t value) {
+static void printInt64(int64_t value) {
     printf("%lld\n", value);
 }
 

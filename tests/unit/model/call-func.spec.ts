@@ -54,7 +54,7 @@ describe('CallFunc', () => {
         expect(statement.toCIR(newSemanticContext())).toMatchObject({
             kind: 'CALL_FUNC',
             signature: {
-                baseName: 'printInteger',
+                baseName: 'printInt64',
                 parameters: [{ type: 'integer' }],
             },
             arguments: [{ kind: 'INTEGER_LITERAL', value: '1' }],
@@ -76,7 +76,7 @@ describe('CallFunc', () => {
         })
     })
 
-    it('converts print(intvar) to printInteger()', () => {
+    it('converts print(intvar) to printInt64()', () => {
         const context = newSemanticContext()
         context.variableTypes.set('x', 'integer')
 
@@ -87,7 +87,7 @@ describe('CallFunc', () => {
         expect(statement.toCIR(context)).toMatchObject({
             kind: 'CALL_FUNC',
             signature: {
-                baseName: 'printInteger',
+                baseName: 'printInt64',
                 parameters: [{ type: 'integer' }],
             },
             arguments: [{ kind: 'VARIABLE_REF', name: 'x' }],

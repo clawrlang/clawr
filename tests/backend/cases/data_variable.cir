@@ -33,7 +33,7 @@
         {
             "kind": "CALL_FUNC",
             "signature": {
-                "baseName": "printInteger",
+                "baseName": "printInt64",
                 "parameters": [
                     {
                         "type": "integer"

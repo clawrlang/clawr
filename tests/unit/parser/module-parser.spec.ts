@@ -79,4 +79,23 @@ describe('Module Parser', () => {
             declarations: [{ name: 'MyData' }],
         })
     })
+
+    it('parses data declarations and main in the same module', () => {
+        const code = `
+            data MyData { }
+            @main {
+                print(42)
+            }
+        `
+        const tokenStream = TokenStream.read(
+            code,
+            new TestErrorReporter('test.clawr'),
+        )
+        const parser = ModuleParser.create(tokenStream)
+        const result = parser.parse()
+        expect(result).toMatchObject({
+            declarations: [{ name: 'MyData' }],
+            main: [{ baseName: 'print' }],
+        })
+    })
 })

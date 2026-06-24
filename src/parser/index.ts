@@ -81,24 +81,30 @@ export class ModuleParser {
     }
 
     parse(): model.Module {
-        let main: model.Statement[] = []
+        let main: model.Statement[] | undefined = undefined
         const declarations: model.Declaration[] = []
 
-        if (this.tokenStream.isNext('ANNOTATION', '@main')) {
-            this.tokenStream.expect('ANNOTATION', '@main')
-            this.tokenStream.expect('PUNCTUATION', '{')
-            main = this.parseStatements()
-            this.tokenStream.expect('PUNCTUATION', '}')
-        } else if (this.tokenStream.isNext('KEYWORD', 'data')) {
-            declarations.push(
-                DataDeclarationParser.create({
-                    tokenStream: this.tokenStream,
-                }).parse(),
-            )
-        } else {
-            throw new Error(
-                `Unexpected token kind: ${this.tokenStream.peek()?.kind} while parsing module`,
-            )
+        while (this.tokenStream.peek()) {
+            if (this.tokenStream.isNext('ANNOTATION', '@main')) {
+                if (main !== undefined) {
+                    throw new Error('Multiple @main blocks found')
+                }
+
+                this.tokenStream.expect('ANNOTATION', '@main')
+                this.tokenStream.expect('PUNCTUATION', '{')
+                main = this.parseStatements()
+                this.tokenStream.expect('PUNCTUATION', '}')
+            } else if (this.tokenStream.isNext('KEYWORD', 'data')) {
+                declarations.push(
+                    DataDeclarationParser.create({
+                        tokenStream: this.tokenStream,
+                    }).parse(),
+                )
+            } else {
+                throw new Error(
+                    `Unexpected token kind: ${this.tokenStream.peek()?.kind} while parsing module`,
+                )
+            }
         }
         return model.Module.create({ main, declarations })
     }

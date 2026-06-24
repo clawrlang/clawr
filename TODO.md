@@ -4,6 +4,10 @@
 
 Next vertical slice
 
+- Assignments
+  - to variable
+  - to field
+
 ## Later Items
 
 - Add reference-counting to `data`
@@ -32,4 +36,4 @@ Next vertical slice
    1. Employ TDD to build strong unit tests for the frontend code
    2. Implement necessary lexer and parser changes
    3. Implement semantic analysis changes
-4. Replace lowering tests with end-to-end tests Clawr source -> frontend -> backend -> run program
+4. Add end-to-end tests — Clawr source → program output

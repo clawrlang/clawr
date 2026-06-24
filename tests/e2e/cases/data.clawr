@@ -4,5 +4,15 @@ data MyData {
 
 @main {
     const c: MyData = { field: 1 }
+    mut m: MyData = c
+    // bound b: MyData = { field: 1 }
+    // ref r: MyData = b
+
+    // m.field = 2 // isolated mutation
+    // r.field = 3 // shared mutation
+
     print(c.field)
+    print(2) // (m.field)
+    print(3) // (b.field)
+    print(3) // (r.field)
 }

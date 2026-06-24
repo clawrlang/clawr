@@ -2,10 +2,10 @@ import { Expression, Context } from '.'
 import * as cir from '../cir'
 
 export class DataLiteral implements Expression {
-    fields: FieldValue[] = []
+    private constructor(private fields: FieldValue[]) {}
 
-    constructor(fields: FieldValue[]) {
-        this.fields = fields
+    static create(fields: FieldValue[]): DataLiteral {
+        return new DataLiteral(fields)
     }
 
     type(_: Context): string {

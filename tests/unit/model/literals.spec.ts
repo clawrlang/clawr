@@ -34,7 +34,7 @@ describe('Literals', () => {
 
     describe('data literals', () => {
         it('outputs a data literal as DATA_LITERAL', () => {
-            const dataLiteral = new DataLiteral([
+            const dataLiteral = DataLiteral.create([
                 { name: 'x', value: IntegerLiteral.create(42n) },
                 { name: 'y', value: IntegerLiteral.create(17n) },
             ])

@@ -21,6 +21,6 @@ export class DataLiteralParser {
             })
         }
         stream.expect('PUNCTUATION', '}')
-        return new DataLiteral(fields)
+        return DataLiteral.create(fields)
     }
 }

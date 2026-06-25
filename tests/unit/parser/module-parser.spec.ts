@@ -30,8 +30,8 @@ describe('Module Parser', () => {
     it('parses variable declarations in main body', () => {
         const code = `
             @main {
-                const x: int = 10
-                mut y: int = 20
+                const x: integer = 10
+                mut y: integer = 20
                 print(x)
                 print(y)
             }
@@ -48,13 +48,13 @@ describe('Module Parser', () => {
                 {
                     semantics: 'const',
                     name: 'x',
-                    type: 'int',
+                    type: 'integer',
                     initialValue: { value: 10n },
                 },
                 {
                     semantics: 'mut',
                     name: 'y',
-                    type: 'int',
+                    type: 'integer',
                     initialValue: { value: 20n },
                 },
                 {

@@ -2,24 +2,27 @@
 
 ## In Progress
 
-Next vertical slice
-
-## Later Items
+## Next
 
 - Add reference-counting to `data`
   - Add `__rc_header` to `struct` (see [datastructure.h](tests/runtime/cases/data_structure.h))
   - Lower as `ˇfields` (see [copy-on-write.h](tests/runtime/cases/copy-on-write.c))
-  - `ALLOC(Type, COW|SHARE)`
+  - `ALLOC(Type, COW|REF)`
   - `ASSIGN_FIELDS`
   - `ENSURE_UNIQUE` before editing if `COW`
   - `RELEASE` on descope
-- Infer variable types
-- Nested scopes (global+local vars)
-- Allow at most one @main block in the module/in total
+- Infer variable types / value-sets
+- Nested scopes (global/local vars)
 - Generate AST for syntax coloring
+
+## Later
+
 - Handle `Integer*` when lowering
-- Support multi-module artifacts
-- Define library product where `@main {}` is ignored (disallowed?)
+- Support multi-module programs
+  - Allow `@main` in one module only
+  - Define library product where `@main {}` is ignored (disallowed?)
+- local/anonymous types
+- nested functions/closures
 
 ## Feature Template
 

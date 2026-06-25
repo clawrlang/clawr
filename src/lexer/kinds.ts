@@ -66,6 +66,7 @@ const ALL_KW = [
     // Variable Semantics
     'const',
     'mut',
+    'bound',
     'ref',
 
     // Functions / methods / operators

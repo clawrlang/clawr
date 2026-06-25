@@ -1,9 +1,12 @@
-import { Statement, Expression, Context } from '.'
 import * as cir from '../cir'
+import { Statement, Expression, Context } from '.'
+
+export const VARIABLE_SEMANTICS = ['const', 'mut', 'bound', 'ref'] as const
+export type Semantics = (typeof VARIABLE_SEMANTICS)[number]
 
 export class VariableDeclaration implements Statement {
     private constructor(
-        private semantics: 'const' | 'mut',
+        private semantics: Semantics,
         private name: string,
         private type: string,
         private initialValue: Expression,
@@ -15,7 +18,7 @@ export class VariableDeclaration implements Statement {
         type,
         initialValue,
     }: {
-        semantics: 'const' | 'mut'
+        semantics: Semantics
         name: string
         type: string
         initialValue: Expression

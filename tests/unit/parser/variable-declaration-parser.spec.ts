@@ -23,6 +23,26 @@ describe('VariableDeclarationParser', () => {
             initialValue: { value: 1n },
         })
     })
+
+    it('parses bound reference variable declaration', () => {
+        const source = `bound foo: Type = 1;`
+        expect(parseVariableDeclaration(source)).toMatchObject({
+            semantics: 'bound',
+            name: 'foo',
+            type: 'Type',
+            initialValue: { value: 1n },
+        })
+    })
+
+    it('parses mutable reference variable declaration', () => {
+        const source = `ref foo: Type = 1;`
+        expect(parseVariableDeclaration(source)).toMatchObject({
+            semantics: 'ref',
+            name: 'foo',
+            type: 'Type',
+            initialValue: { value: 1n },
+        })
+    })
 })
 
 function parseVariableDeclaration(source: string) {

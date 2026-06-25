@@ -24,4 +24,20 @@ describe('DataLiteralParser', () => {
             ],
         })
     })
+
+    it('parses a comma-separated data literal', () => {
+        const code = '{ x: 42, y: 17 }'
+        const errorReporter = new TestErrorReporter('test.clawr')
+        const tokenStream = TokenStream.read(code, errorReporter)
+        const parser = DataLiteralParser.create(
+            ExpressionParser.create({ errorReporter }),
+        )
+        const result = parser.parse(tokenStream)
+        expect(result).toMatchObject({
+            fields: [
+                { name: 'x', value: { value: 42n } },
+                { name: 'y', value: { value: 17n } },
+            ],
+        })
+    })
 })

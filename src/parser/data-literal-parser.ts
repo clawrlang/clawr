@@ -19,6 +19,11 @@ export class DataLiteralParser {
                 name: key,
                 value: this.expressionParser.parse(stream),
             })
+            if (stream.isNext('PUNCTUATION', ',')) {
+                stream.next()
+            } else if (!stream.isNext('NEWLINE')) {
+                break
+            }
         }
         stream.expect('PUNCTUATION', '}')
         return DataLiteral.create(fields)

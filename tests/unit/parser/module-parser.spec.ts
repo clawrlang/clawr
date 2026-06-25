@@ -69,6 +69,41 @@ describe('Module Parser', () => {
         })
     })
 
+    it('parses assignments in main body', () => {
+        const code = `
+            @main {
+                mut y: integer = 20
+                y = 30
+                print(y)
+            }
+        `
+        const tokenStream = TokenStream.read(
+            code,
+            new TestErrorReporter('test.clawr'),
+        )
+        const errorReporter = new TestErrorReporter('test.clawr')
+        const parser = ModuleParser.create({ errorReporter })
+        const result = parser.parse(tokenStream)
+        expect(result).toMatchObject({
+            main: [
+                {
+                    semantics: 'mut',
+                    name: 'y',
+                    type: 'integer',
+                    initialValue: { value: 20n },
+                },
+                {
+                    target: { name: 'y' },
+                    value: { value: 30n },
+                },
+                {
+                    baseName: 'print',
+                    arguments: [{ value: { name: 'y' } }],
+                },
+            ],
+        })
+    })
+
     it('parses data declarations in global scope', () => {
         const code = 'data MyData { }'
         const tokenStream = TokenStream.read(

@@ -17,7 +17,14 @@ export class CallFuncParser implements StatementParser<Statement> {
     }
 
     isNext(stream: TokenStream): boolean {
-        return stream.isNext('IDENTIFIER')
+        const clone = stream.clone()
+        try {
+            clone.expect('IDENTIFIER')
+            clone.expect('PUNCTUATION', '(')
+            return true
+        } catch {
+            return false
+        }
     }
 
     parse(stream: TokenStream): Statement {

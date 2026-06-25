@@ -1,3 +1,4 @@
+import { ErrorReporter } from '../diagnostics'
 import { TokenStream } from '../lexer'
 import { Expression } from '../model'
 import { FieldLookupExpression } from '../model/field-lookup-expression'
@@ -7,10 +8,14 @@ import { VariableReference } from '../model/variable-reference'
 import { DataLiteralParser } from './data-literal-parser'
 
 export class ExpressionParser {
-    private constructor() {}
+    private constructor(private errorReporter: ErrorReporter) {}
 
-    static create(): ExpressionParser {
-        return new ExpressionParser()
+    static create({
+        errorReporter,
+    }: {
+        errorReporter: ErrorReporter
+    }): ExpressionParser {
+        return new ExpressionParser(errorReporter)
     }
 
     parse(stream: TokenStream): Expression {
@@ -30,41 +35,64 @@ export class ExpressionParser {
                 if (stream.isNext('OPERATOR', '.')) {
                     stream.next() // Consume the '.'
                     const fieldToken = stream.next()
-                    if (fieldToken?.kind !== 'IDENTIFIER') {
-                        throw new Error('Expected field name after "."')
-                    }
-                    return FieldLookupExpression.create({
-                        object: VariableReference.create(nextToken.identifier),
-                        field: fieldToken.identifier,
-                    })
+                    if (fieldToken?.kind === 'IDENTIFIER')
+                        return FieldLookupExpression.create({
+                            object: VariableReference.create(
+                                nextToken.identifier,
+                            ),
+                            field: fieldToken.identifier,
+                        })
+                    this.errorReporter.reportFatalError(
+                        'Expected field name after "."',
+                        {
+                            start: fieldToken?.start || nextToken.start,
+                            end: fieldToken?.end || nextToken.end,
+                        },
+                    )
                 }
                 return VariableReference.create(nextToken.identifier)
             case 'PUNCTUATION':
                 if (nextToken.symbol === '{') {
-                    return DataLiteralParser.create().parse(stream)
+                    return DataLiteralParser.create(this).parse(stream)
                 } else {
-                    throw new Error(
+                    this.errorReporter.reportFatalError(
                         `Unexpected punctuation symbol: ${nextToken.symbol} while parsing expression`,
+                        {
+                            start: nextToken.start,
+                            end: nextToken.end,
+                        },
                     )
                 }
             case 'OPERATOR':
                 if (nextToken.operator === '-') {
                     stream.next() // Consume the token
-                    const nextToken = stream.next()
-                    if (nextToken?.kind !== 'INTEGER_LITERAL') {
-                        throw new Error(
+                    const literalToken = stream.next()
+                    if (literalToken?.kind !== 'INTEGER_LITERAL')
+                        this.errorReporter.reportFatalError(
                             'Expected integer literal after "-" operator',
+                            {
+                                start: literalToken?.start || nextToken.start,
+                                end: literalToken?.end || nextToken.end,
+                            },
                         )
-                    }
-                    return IntegerLiteral.create(-nextToken.value)
+
+                    return IntegerLiteral.create(-literalToken.value)
                 } else {
-                    throw new Error(
+                    this.errorReporter.reportFatalError(
                         `Unexpected operator "${nextToken.operator}" while parsing expression`,
+                        {
+                            start: nextToken.start,
+                            end: nextToken.end,
+                        },
                     )
                 }
             default:
-                throw new Error(
+                this.errorReporter.reportFatalError(
                     `Unexpected token kind: ${nextToken.kind} while parsing expression`,
+                    {
+                        start: nextToken.start,
+                        end: nextToken.end,
+                    },
                 )
         }
     }

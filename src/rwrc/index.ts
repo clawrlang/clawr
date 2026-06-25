@@ -9,7 +9,7 @@ import * as backend from '../backend'
 import { ModuleParser } from '../parser'
 import { TokenStream } from '../lexer'
 import { ClawrModule } from '../cir'
-import { SourceCodeSpan } from '../diagnostics'
+import { ErrorReporter } from './error-reporter'
 
 const exeDir = path.dirname(process.execPath)
 const program = new Command()
@@ -24,14 +24,11 @@ program
         const resolvedOutDir = path.resolve(options.outdir)
         const outputFilePath = `${resolvedOutDir}/${path.basename(file).replace(/\.[^/.]+$/, '.cir')}`
 
-        await parseToCIR({ file, outputFilePath })
-
         try {
+            await parseToCIR({ file, outputFilePath })
             await compileCIR(outputFilePath)
         } catch (err) {
             console.error(err instanceof Error ? err.message : err)
-            // For debugging:
-            // console.error('error:', err)
             process.exit(1)
         }
     })
@@ -46,29 +43,13 @@ async function parseToCIR({
     outputFilePath: string
 }) {
     const context = {
-        errorReporter: {
-            reportFatalError(message: string, location: SourceCodeSpan) {
-                throw new Error(
-                    `Fatal Error: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
-                )
-            },
-            reportWarning(message: string, location: SourceCodeSpan) {
-                console.warn(
-                    `Warning: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
-                )
-            },
-            reportError(message: string, location: SourceCodeSpan) {
-                console.error(
-                    `Error: ${message} at ${location.start.line}:${location.start.column}-${location.end.line}:${location.end.column}`,
-                )
-            },
-        },
+        errorReporter: new ErrorReporter(file),
         scope: { variableTypes: new Map(), declarations: new Map() },
     }
 
     const sourceCode = await fs.readFile(file, 'utf-8')
     const stream = TokenStream.read(sourceCode, context.errorReporter)
-    const cir = ModuleParser.create().parse(stream).toCIR(context)
+    const cir = ModuleParser.create(context).parse(stream).toCIR(context)
 
     await ensureDirectoryExists(path.dirname(outputFilePath))
     await fs.writeFile(outputFilePath, JSON.stringify(cir))

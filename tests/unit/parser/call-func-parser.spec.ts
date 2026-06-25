@@ -6,11 +6,9 @@ import { CallFuncParser } from '../../../src/parser/call-func-parser'
 describe('CallFunc Parser', () => {
     it('parses a simple function call', () => {
         const input = 'foo(42, ambiguous)'
-        const tokenStream = TokenStream.read(
-            input,
-            new TestErrorReporter('test.clawr'),
-        )
-        const parser = CallFuncParser.create()
+        const errorReporter = new TestErrorReporter('test.clawr')
+        const tokenStream = TokenStream.read(input, errorReporter)
+        const parser = CallFuncParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             baseName: 'foo',
@@ -23,11 +21,9 @@ describe('CallFunc Parser', () => {
 
     it('parses a function call with labels', () => {
         const input = 'foo(x: 42, y: ambiguous)'
-        const tokenStream = TokenStream.read(
-            input,
-            new TestErrorReporter('test.clawr'),
-        )
-        const parser = CallFuncParser.create()
+        const errorReporter = new TestErrorReporter('test.clawr')
+        const tokenStream = TokenStream.read(input, errorReporter)
+        const parser = CallFuncParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             baseName: 'foo',

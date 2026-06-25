@@ -3,10 +3,10 @@ import { TokenStream } from '../lexer'
 import { DataLiteral } from '../model/data-literal'
 
 export class DataLiteralParser {
-    constructor() {}
+    constructor(private expressionParser: ExpressionParser) {}
 
-    static create() {
-        return new DataLiteralParser()
+    static create(expressionParser: ExpressionParser) {
+        return new DataLiteralParser(expressionParser)
     }
 
     parse(stream: TokenStream): DataLiteral {
@@ -17,7 +17,7 @@ export class DataLiteralParser {
             stream.expect('PUNCTUATION', ':')
             fields.push({
                 name: key,
-                value: ExpressionParser.create().parse(stream),
+                value: this.expressionParser.parse(stream),
             })
         }
         stream.expect('PUNCTUATION', '}')

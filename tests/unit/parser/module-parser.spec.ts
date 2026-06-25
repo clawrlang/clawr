@@ -14,7 +14,8 @@ describe('Module Parser', () => {
             code,
             new TestErrorReporter('test.clawr'),
         )
-        const parser = ModuleParser.create()
+        const errorReporter = new TestErrorReporter('test.clawr')
+        const parser = ModuleParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             main: [
@@ -39,7 +40,8 @@ describe('Module Parser', () => {
             code,
             new TestErrorReporter('test.clawr'),
         )
-        const parser = ModuleParser.create()
+        const errorReporter = new TestErrorReporter('test.clawr')
+        const parser = ModuleParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             main: [
@@ -73,7 +75,8 @@ describe('Module Parser', () => {
             code,
             new TestErrorReporter('test.clawr'),
         )
-        const parser = ModuleParser.create()
+        const errorReporter = new TestErrorReporter('test.clawr')
+        const parser = ModuleParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             declarations: [{ name: 'MyData' }],
@@ -87,11 +90,9 @@ describe('Module Parser', () => {
                 print(42)
             }
         `
-        const tokenStream = TokenStream.read(
-            code,
-            new TestErrorReporter('test.clawr'),
-        )
-        const parser = ModuleParser.create()
+        const errorReporter = new TestErrorReporter('test.clawr')
+        const tokenStream = TokenStream.read(code, errorReporter)
+        const parser = ModuleParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             declarations: [{ name: 'MyData' }],

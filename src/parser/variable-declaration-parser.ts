@@ -2,16 +2,21 @@ import { ExpressionParser } from './expression.parser'
 import { TokenStream } from '../lexer'
 import { VariableDeclaration } from '../model/variable-declaration'
 import { StatementParser } from './statement-parser'
+import { ErrorReporter } from '../diagnostics'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser
 
-    private constructor() {
-        this.expressionParser = ExpressionParser.create()
+    private constructor(private errorReporter: ErrorReporter) {
+        this.expressionParser = ExpressionParser.create({ errorReporter })
     }
 
-    static create(): VariableDeclarationParser {
-        return new VariableDeclarationParser()
+    static create({
+        errorReporter,
+    }: {
+        errorReporter: ErrorReporter
+    }): VariableDeclarationParser {
+        return new VariableDeclarationParser(errorReporter)
     }
 
     isNext(stream: TokenStream): boolean {

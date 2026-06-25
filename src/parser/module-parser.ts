@@ -3,17 +3,24 @@ import { DataDeclarationParser } from './data-declaration-parser'
 import { BlockParser } from './block-parser'
 import { Declaration, Statement } from '../model'
 import { Module } from '../model/module'
+import { ErrorReporter } from '../diagnostics'
 
 export class ModuleParser {
     private constructor(
         private blockParser: BlockParser,
         private dataDeclarationParser: DataDeclarationParser,
+        private errorReporter: ErrorReporter,
     ) {}
 
-    static create(): ModuleParser {
+    static create({
+        errorReporter,
+    }: {
+        errorReporter: ErrorReporter
+    }): ModuleParser {
         return new ModuleParser(
-            BlockParser.create(),
-            DataDeclarationParser.create(),
+            BlockParser.create({ errorReporter }),
+            DataDeclarationParser.create({ errorReporter }),
+            errorReporter,
         )
     }
 
@@ -24,7 +31,11 @@ export class ModuleParser {
         while (stream.peek()) {
             if (stream.isNext('ANNOTATION', '@main')) {
                 if (main !== undefined) {
-                    throw new Error('Multiple @main blocks found')
+                    const { start, end } = stream.peek()!!
+                    this.errorReporter.reportFatalError(
+                        'Multiple @main blocks found',
+                        { start, end },
+                    )
                 }
 
                 stream.expect('ANNOTATION', '@main')
@@ -32,8 +43,10 @@ export class ModuleParser {
             } else if (stream.isNext('KEYWORD', 'data')) {
                 declarations.push(this.dataDeclarationParser.parse(stream))
             } else {
-                throw new Error(
+                const { start, end } = stream.peek()!!
+                this.errorReporter.reportFatalError(
                     `Unexpected token kind: ${stream.peek()?.kind} while parsing module`,
+                    { start, end },
                 )
             }
         }

@@ -49,6 +49,9 @@ export function lowerStmt(stmt: cir.Statement): string {
         case 'VARIABLE_DECL': {
             return lowerDecl(stmt)
         }
+        case 'ASSIGN': {
+            return `${lowerExpr(stmt.target)} = (${lowerExpr(stmt.value)});`
+        }
         default: {
             throw new Error(`Unknown statement kind: ${(stmt as any).kind}`)
         }

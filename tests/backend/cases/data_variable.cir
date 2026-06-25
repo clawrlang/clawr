@@ -22,7 +22,7 @@
                         "name": "bar",
                         "value": {
                             "kind": "INTEGER_LITERAL",
-                            "value": "1"
+                            "value": "2"
                         }
                     }
                 ]
@@ -30,6 +30,21 @@
         }
     ],
     "startBlock": [
+        {
+            "kind": "ASSIGN",
+            "target": {
+                "kind": "FIELD_LOOKUP",
+                "object": {
+                    "kind": "VARIABLE_REF",
+                    "name": "foo"
+                },
+                "field": "bar"
+            },
+            "value": {
+                "kind": "INTEGER_LITERAL",
+                "value": "1"
+            }
+        },
         {
             "kind": "CALL_FUNC",
             "signature": {

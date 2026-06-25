@@ -58,7 +58,8 @@
     "statement": {
       "oneOf": [
         { "$ref": "#/definitions/call_func" },
-        { "$ref": "#/definitions/variable_declaration" }
+        { "$ref": "#/definitions/variable_declaration" },
+        { "$ref": "#/definitions/assignment" }
       ]
     },
     "call_func": {
@@ -91,6 +92,21 @@
         }
       },
       "required": ["kind", "signature", "arguments"],
+      "additionalProperties": false
+    },
+    "assignment": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "ASSIGN" },
+        "target": {
+          "oneOf": [
+            { "$ref": "#/definitions/variable_reference" },
+            { "$ref": "#/definitions/field_lookup" }
+          ]
+        },
+        "value": { "$ref": "#/definitions/expression" }
+      },
+      "required": ["kind", "target", "value"],
       "additionalProperties": false
     },
     "expression": {
@@ -131,16 +147,7 @@
           "required": ["kind", "value"],
           "additionalProperties": false
         },
-        {
-          "type": "object",
-          "title": "Variable Reference",
-          "properties": {
-            "kind": { "const": "VARIABLE_REF" },
-            "name": { "type": "string" }
-          },
-          "required": ["kind", "name"],
-          "additionalProperties": false
-        },
+        { "$ref": "#/definitions/variable_reference" },
         { "$ref": "#/definitions/data_literal" },
         { "$ref": "#/definitions/field_lookup" },
         { "$ref": "#/definitions/call_func" }
@@ -177,6 +184,16 @@
         "field": { "type": "string" }
       },
       "required": ["kind", "object", "field"],
+      "additionalProperties": false
+    },
+    "variable_reference": {
+      "type": "object",
+      "title": "Variable Reference",
+      "properties": {
+        "kind": { "const": "VARIABLE_REF" },
+        "name": { "type": "string" }
+      },
+      "required": ["kind", "name"],
       "additionalProperties": false
     }
   }

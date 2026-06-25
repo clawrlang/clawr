@@ -3,6 +3,8 @@ import { Assignment } from '../model/assignment'
 import { ExpressionParser } from './expression.parser'
 import { StatementParser } from './statement-parser'
 import { ErrorReporter } from '../diagnostics'
+import { FieldLookupExpression } from '../model/field-lookup-expression'
+import { VariableReference } from '../model/variable-reference'
 
 export class AssignmentParser implements StatementParser<Assignment> {
     private constructor(private errorReporter: ErrorReporter) {}
@@ -29,8 +31,18 @@ export class AssignmentParser implements StatementParser<Assignment> {
             errorReporter: this.errorReporter,
         })
         const target = expressionParser.parse(stream)
-        stream.expect('PUNCTUATION', '=')
-        const value = expressionParser.parse(stream)
-        return Assignment.create({ target, value })
+        if (
+            target instanceof VariableReference ||
+            target instanceof FieldLookupExpression
+        ) {
+            stream.expect('PUNCTUATION', '=')
+            const value = expressionParser.parse(stream)
+            return Assignment.create({ target, value })
+        } else {
+            this.errorReporter.reportFatalError(
+                'Invalid assignment target. Only variables and fields are allowed.',
+                { start: stream.peek()!!.start, end: stream.peek()!!.end },
+            )
+        }
     }
 }

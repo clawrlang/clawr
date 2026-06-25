@@ -1,9 +1,11 @@
-import { Statement, Expression, Context } from '.'
 import * as cir from '../cir'
+import { Statement, Expression, Context } from '.'
+import { FieldLookupExpression } from './field-lookup-expression'
+import { VariableReference } from './variable-reference'
 
 export class Assignment implements Statement {
     private constructor(
-        public target: Expression,
+        public target: FieldLookupExpression | VariableReference,
         public value: Expression,
     ) {}
 
@@ -11,13 +13,17 @@ export class Assignment implements Statement {
         target,
         value,
     }: {
-        target: Expression
+        target: FieldLookupExpression | VariableReference
         value: Expression
     }) {
         return new Assignment(target, value)
     }
 
     toCIR(context: Context): cir.Statement {
-        throw new Error('Method not implemented.')
+        return {
+            kind: 'ASSIGN',
+            target: this.target.toCIR(context),
+            value: this.value.toCIR(context),
+        }
     }
 }

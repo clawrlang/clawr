@@ -8,7 +8,7 @@ export class VariableReference implements Expression {
         return new VariableReference(name)
     }
 
-    toCIR(_: Context): cir.Expression {
+    toCIR(_: Context): cir.VariableReference {
         return { kind: 'VARIABLE_REF', name: this.name }
     }
 

@@ -4,10 +4,6 @@
 
 Next vertical slice
 
-- Assignments
-  - to variable
-  - to field
-
 ## Later Items
 
 - Add reference-counting to `data`

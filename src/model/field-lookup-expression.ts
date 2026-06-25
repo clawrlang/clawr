@@ -40,7 +40,7 @@ export class FieldLookupExpression implements Expression {
         return field.type
     }
 
-    toCIR(context: Context): cir.Expression {
+    toCIR(context: Context): cir.FieldLookup {
         return {
             kind: 'FIELD_LOOKUP',
             object: this.object.toCIR(context),

@@ -24,23 +24,33 @@ describe('VariableDeclarationParser', () => {
         })
     })
 
-    it('parses bound reference variable declaration', () => {
-        const source = `bound foo: Type = 1;`
+    it('parses mutable reference variable declaration', () => {
+        const source = `mutref foo: Type = { x: 1, y: 2 }`
         expect(parseVariableDeclaration(source)).toMatchObject({
-            semantics: 'bound',
+            semantics: 'mutref',
             name: 'foo',
             type: 'Type',
-            initialValue: { value: 1n },
+            initialValue: {
+                fields: [
+                    { name: 'x', value: { value: 1n } },
+                    { name: 'y', value: { value: 2n } },
+                ],
+            },
         })
     })
 
-    it('parses mutable reference variable declaration', () => {
-        const source = `ref foo: Type = 1;`
+    it('parses non-reassignable reference variable declaration', () => {
+        const source = `ref foo: Type = { x: 1, y: 2 }`
         expect(parseVariableDeclaration(source)).toMatchObject({
             semantics: 'ref',
             name: 'foo',
             type: 'Type',
-            initialValue: { value: 1n },
+            initialValue: {
+                fields: [
+                    { name: 'x', value: { value: 1n } },
+                    { name: 'y', value: { value: 2n } },
+                ],
+            },
         })
     })
 })

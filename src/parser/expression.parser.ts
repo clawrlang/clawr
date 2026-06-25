@@ -1,7 +1,7 @@
 import { ErrorReporter } from '../diagnostics'
 import { TokenStream } from '../lexer'
 import { Expression } from '../model'
-import { FieldLookupExpression } from '../model/field-lookup-expression'
+import { FieldReference } from '../model/field-reference'
 import { IntegerLiteral } from '../model/integer-literal'
 import { TruthValueLiteral } from '../model/truthvalue-literal'
 import { VariableReference } from '../model/variable-reference'
@@ -36,7 +36,7 @@ export class ExpressionParser {
                     stream.next() // Consume the '.'
                     const fieldToken = stream.next()
                     if (fieldToken?.kind === 'IDENTIFIER')
-                        return FieldLookupExpression.create({
+                        return FieldReference.create({
                             object: VariableReference.create(
                                 nextToken.identifier,
                             ),

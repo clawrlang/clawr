@@ -1,11 +1,11 @@
 import * as cir from '../cir'
 import { Statement, Expression, Context } from '.'
-import { FieldLookupExpression } from './field-lookup-expression'
+import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 
 export class Assignment implements Statement {
     private constructor(
-        public target: FieldLookupExpression | VariableReference,
+        public target: FieldReference | VariableReference,
         public value: Expression,
     ) {}
 
@@ -13,7 +13,7 @@ export class Assignment implements Statement {
         target,
         value,
     }: {
-        target: FieldLookupExpression | VariableReference
+        target: FieldReference | VariableReference
         value: Expression
     }) {
         return new Assignment(target, value)

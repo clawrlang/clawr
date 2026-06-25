@@ -33,7 +33,7 @@
         {
             "kind": "ASSIGN",
             "target": {
-                "kind": "FIELD_LOOKUP",
+                "kind": "FIELD_REF",
                 "object": {
                     "kind": "VARIABLE_REF",
                     "name": "foo"
@@ -57,7 +57,7 @@
             },
             "arguments": [
                 {
-                    "kind": "FIELD_LOOKUP",
+                    "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
                         "name": "foo"

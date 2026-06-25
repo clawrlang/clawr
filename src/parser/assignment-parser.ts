@@ -3,7 +3,7 @@ import { Assignment } from '../model/assignment'
 import { ExpressionParser } from './expression.parser'
 import { StatementParser } from './statement-parser'
 import { ErrorReporter } from '../diagnostics'
-import { FieldLookupExpression } from '../model/field-lookup-expression'
+import { FieldReference } from '../model/field-reference'
 import { VariableReference } from '../model/variable-reference'
 
 export class AssignmentParser implements StatementParser<Assignment> {
@@ -33,7 +33,7 @@ export class AssignmentParser implements StatementParser<Assignment> {
         const target = expressionParser.parse(stream)
         if (
             target instanceof VariableReference ||
-            target instanceof FieldLookupExpression
+            target instanceof FieldReference
         ) {
             stream.expect('PUNCTUATION', '=')
             const value = expressionParser.parse(stream)

@@ -1,8 +1,7 @@
 import { Expression, Context } from '.'
-import { DataDeclaration } from './data-declaration'
 import * as cir from '../cir'
 
-export class FieldLookupExpression implements Expression {
+export class FieldReference implements Expression {
     private constructor(
         private object: Expression,
         private field: string,
@@ -14,8 +13,8 @@ export class FieldLookupExpression implements Expression {
     }: {
         object: Expression
         field: string
-    }): FieldLookupExpression {
-        return new FieldLookupExpression(object, field)
+    }): FieldReference {
+        return new FieldReference(object, field)
     }
 
     type(context: Context): string {
@@ -40,9 +39,9 @@ export class FieldLookupExpression implements Expression {
         return field.type
     }
 
-    toCIR(context: Context): cir.FieldLookup {
+    toCIR(context: Context): cir.FieldReference {
         return {
-            kind: 'FIELD_LOOKUP',
+            kind: 'FIELD_REF',
             object: this.object.toCIR(context),
             field: this.field,
         }

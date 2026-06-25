@@ -80,7 +80,7 @@ export function lowerExpr(expr: cir.Expression): string {
                 .join(', ')
             return `{ ${fields} }`
         }
-        case 'FIELD_LOOKUP': {
+        case 'FIELD_REF': {
             return `${lowerExpr(expr.object)}.${expr.field}`
         }
         default: {

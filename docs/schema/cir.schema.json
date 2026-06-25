@@ -101,7 +101,7 @@
         "target": {
           "oneOf": [
             { "$ref": "#/definitions/variable_reference" },
-            { "$ref": "#/definitions/field_lookup" }
+            { "$ref": "#/definitions/field_reference" }
           ]
         },
         "value": { "$ref": "#/definitions/expression" }
@@ -149,7 +149,7 @@
         },
         { "$ref": "#/definitions/variable_reference" },
         { "$ref": "#/definitions/data_literal" },
-        { "$ref": "#/definitions/field_lookup" },
+        { "$ref": "#/definitions/field_reference" },
         { "$ref": "#/definitions/call_func" }
       ]
     },
@@ -173,11 +173,11 @@
       "required": ["kind", "fields"],
       "additionalProperties": false
     },
-    "field_lookup": {
+    "field_reference": {
       "type": "object",
-      "title": "Field Lookup",
+      "title": "Field Reference",
       "properties": {
-        "kind": { "const": "FIELD_LOOKUP" },
+        "kind": { "const": "FIELD_REF" },
         "object": {
           "$ref": "#/definitions/expression"
         },

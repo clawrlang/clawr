@@ -27,3 +27,7 @@ export function newSemanticContext(): Context {
         errorReporter: new TestErrorReporter('test.clawr'),
     } as const
 }
+export const someCodeSpan = {
+    start: { line: 0, column: 0 },
+    end: { line: 0, column: 0 },
+}

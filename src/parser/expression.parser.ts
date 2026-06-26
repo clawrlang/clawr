@@ -61,8 +61,11 @@ export class ExpressionParser {
     }
 
     private parseVariableReference(stream: TokenStream) {
-        const nextToken = stream.expect('IDENTIFIER')
-        return VariableReference.create(nextToken.identifier)
+        const token = stream.expect('IDENTIFIER')
+        return VariableReference.create({
+            name: token.identifier,
+            span: { start: token.start, end: token.end },
+        })
     }
 
     private parseTruthValueLiteral(stream: TokenStream) {

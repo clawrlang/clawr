@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'bun:test'
 import { VariableReference } from '../../../src/model/variable-reference'
-import { newSemanticContext } from '../../util'
+import { newSemanticContext, someCodeSpan } from '../../util'
 
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
-        const variableRef = VariableReference.create('myVar')
+        const variableRef = VariableReference.create({
+            name: 'myVar',
+            span: someCodeSpan,
+        })
         expect(variableRef.toCIR(newSemanticContext())).toEqual({
             kind: 'VARIABLE_REF',
             name: 'myVar',
@@ -15,7 +18,10 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', { kind: 'const', type: 'integer' })
 
-        const variableRef = VariableReference.create('myVar')
+        const variableRef = VariableReference.create({
+            name: 'myVar',
+            span: someCodeSpan,
+        })
         expect(variableRef.type(context)).toBe('integer')
     })
 
@@ -32,7 +38,10 @@ describe('Variable Reference', () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', { kind, type: 'integer' })
 
-                const variableRef = VariableReference.create('myVar')
+                const variableRef = VariableReference.create({
+                    name: 'myVar',
+                    span: someCodeSpan,
+                })
                 expect(variableRef.isIsolated(context)).toBe(expected)
             })
         }

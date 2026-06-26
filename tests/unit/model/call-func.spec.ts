@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test'
-import { newSemanticContext } from '../../util'
+import { newSemanticContext, someCodeSpan } from '../../util'
 import { CallFunc } from '../../../src/model/call-func'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
@@ -80,7 +80,14 @@ describe('CallFunc', () => {
 
         const statement = CallFunc.create({
             baseName: 'print',
-            arguments: [{ value: VariableReference.create('x') }],
+            arguments: [
+                {
+                    value: VariableReference.create({
+                        name: 'x',
+                        span: someCodeSpan,
+                    }),
+                },
+            ],
         })
         expect(statement.toCIR(context)).toMatchObject({
             kind: 'CALL_FUNC',

@@ -1,5 +1,5 @@
-import { Expression, Context } from '.'
 import * as cir from '../cir'
+import { Expression, Context, ValueSet } from '.'
 
 export class DataLiteral implements Expression {
     private constructor(private fields: FieldValue[]) {}
@@ -8,8 +8,8 @@ export class DataLiteral implements Expression {
         return new DataLiteral(fields)
     }
 
-    type(_: Context): string {
-        throw new Error('not implemented')
+    valueSet(context: Context & { type: string }): ValueSet {
+        return { kind: 'UNIQUE', type: context.type }
     }
 
     toCIR(context: Context): cir.Expression {

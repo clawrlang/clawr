@@ -25,11 +25,8 @@ describe('Variable Reference', () => {
         test('toCIR', () => {
             expect(() => variableRef.toCIR(newSemanticContext())).toThrow()
         })
-        test('type', () => {
-            expect(() => variableRef.type(newSemanticContext())).toThrow()
-        })
-        test('isIsolated', () => {
-            expect(() => variableRef.isIsolated(newSemanticContext())).toThrow()
+        test('info', () => {
+            expect(() => variableRef.valueSet(newSemanticContext())).toThrow()
         })
     })
 
@@ -41,15 +38,15 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.type(context)).toBe('integer')
+        expect(variableRef.valueSet(context).type).toBe('integer')
     })
 
     describe('infers isolation level from the context', () => {
         const cases = [
-            { kind: 'const', expected: true },
-            { kind: 'mut', expected: true },
-            { kind: 'ref', expected: false },
-            { kind: 'mutref', expected: false },
+            { kind: 'const', expected: 'COW' },
+            { kind: 'mut', expected: 'COW' },
+            { kind: 'ref', expected: 'REF' },
+            { kind: 'mutref', expected: 'REF' },
         ] as const
 
         for (const { kind, expected } of cases) {
@@ -61,7 +58,7 @@ describe('Variable Reference', () => {
                     name: 'myVar',
                     span: someCodeSpan,
                 })
-                expect(variableRef.isIsolated(context)).toBe(expected)
+                expect(variableRef.valueSet(context).kind).toBe(expected)
             })
         }
     })

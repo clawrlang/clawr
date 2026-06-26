@@ -1,5 +1,5 @@
-import { Expression, Context } from '.'
 import * as cir from '../cir'
+import { Expression, Context, ValueSet } from '.'
 
 export class IntegerLiteral implements Expression {
     get negated(): IntegerLiteral {
@@ -16,7 +16,10 @@ export class IntegerLiteral implements Expression {
         return { kind: 'INTEGER_LITERAL', value: this.value.toString() }
     }
 
-    type(_: Context): string {
-        return 'integer'
+    valueSet(_: Context): ValueSet {
+        return {
+            kind: 'COW',
+            type: 'integer',
+        }
     }
 }

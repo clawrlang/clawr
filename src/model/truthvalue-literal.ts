@@ -1,4 +1,4 @@
-import { Expression, Context } from '.'
+import { Expression, Context, ValueSet } from '.'
 import * as cir from '../cir'
 
 export class TruthValueLiteral implements Expression {
@@ -12,7 +12,7 @@ export class TruthValueLiteral implements Expression {
         return { kind: 'TRUTHVALUE_LITERAL', value: this.value }
     }
 
-    type(_: Context): string {
-        return 'truthvalue'
+    valueSet(_: Context): ValueSet {
+        return { kind: 'COW', type: 'truthvalue' }
     }
 }

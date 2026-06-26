@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Expression, Context } from '.'
+import { Expression, Context, ValueSet } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 
 export class VariableReference implements Expression {
@@ -23,14 +23,11 @@ export class VariableReference implements Expression {
         return { kind: 'VARIABLE_REF', name: this.name }
     }
 
-    isIsolated(context: Context): any {
+    valueSet(context: Context): ValueSet {
         const variable = this.lookupInScope(context)
-        return variable.kind === 'const' || variable.kind === 'mut'
-    }
-
-    type(context: Context): string {
-        const variable = this.lookupInScope(context)
-        return variable.type
+        const kind =
+            variable.kind === 'const' || variable.kind === 'mut' ? 'COW' : 'REF'
+        return { kind, type: variable.type }
     }
 
     lookupInScope(context: Context) {

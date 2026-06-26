@@ -10,8 +10,13 @@ export type Context = {
     errorReporter: ErrorReporter
 }
 
+export type ValueSet = {
+    kind: 'COW' | 'REF' | 'UNIQUE'
+    type: string
+}
+
 export interface Expression {
-    type(context: Context): string
+    valueSet(context: Context): ValueSet
     toCIR(context: Context): cir.Expression
 }
 

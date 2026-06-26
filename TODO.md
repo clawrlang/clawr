@@ -2,27 +2,44 @@
 
 ## In Progress
 
+- Include locations in error diagnostics
+
 ## Next
 
+- Infer expression isolation levels
+- Enforce `const`/`mut` vs `ref`/`mutref` separation
+- Retain code-spans and use in error diagnostics
+- Allow explicit copying (using `copy(of:)`)
 - Add reference-counting to `data`
   - Add `__rc_header` to `struct` (see [datastructure.h](tests/runtime/cases/data_structure.h))
-  - Lower as `ˇfields` (see [copy-on-write.h](tests/runtime/cases/copy-on-write.c))
+  - Lower as `fields` (see [copy-on-write.h](tests/runtime/cases/copy-on-write.c))
   - `ALLOC(Type, COW|REF)`
   - `ASSIGN_FIELDS`
   - `ENSURE_UNIQUE` before editing if `COW`
   - `RELEASE` on descope
-- Infer variable types / value-sets
 - Nested scopes (global/local vars)
 - Generate AST for syntax coloring
 
 ## Later
 
 - Handle `Integer*` when lowering
+  - Add types and ranges to CIR expressions
 - Support multi-module programs
   - Allow `@main` in one module only
   - Define library product where `@main {}` is ignored (disallowed?)
 - local/anonymous types
 - nested functions/closures
+- Infer variable types/value-sets
+- Infer expression value-sets
+- Split `call_func`
+  - `message` (no return value)
+  - `query` (has return value)
+  - Should support both free functions and methods (when `object`/`service` exist)
+- `object`/`service`
+  - Same thing to the backend/CIR - Both are defined by their methods, not their fields
+  - Enforce on frontend:
+    - `object` may not reach outside itself (its fields)
+    - Fields are private (only accessible via `self`)
 
 ## Feature Template
 

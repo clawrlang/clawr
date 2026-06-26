@@ -19,6 +19,29 @@ export class ExpressionParser {
     }
 
     parse(stream: TokenStream): Expression {
+        if (stream.isNext('OPERATOR', '-')) {
+            stream.next() // Consume the '-'
+            const expression = this.parsePrimaryExpression(stream)
+            if (!(expression instanceof IntegerLiteral))
+                throw new Error(
+                    'Unary negation can only be applied to integer literals',
+                )
+            return expression.negated
+        }
+        const expression = this.parsePrimaryExpression(stream)
+        if (!stream.isNext('OPERATOR', '.')) return expression
+
+        stream.next() // Consume the '.'
+        const fieldToken = stream.next()
+        if (fieldToken?.kind !== 'IDENTIFIER')
+            throw new Error('Expected field name after "."')
+        return FieldReference.create({
+            object: expression,
+            field: fieldToken.identifier,
+        })
+    }
+
+    private parsePrimaryExpression(stream: TokenStream): Expression {
         const nextToken = stream.peek()
         if (!nextToken) {
             throw new Error('Unexpected end of input while parsing expression')
@@ -32,24 +55,6 @@ export class ExpressionParser {
                 return IntegerLiteral.create(nextToken.value)
             case 'IDENTIFIER':
                 stream.next() // Consume the token
-                if (stream.isNext('OPERATOR', '.')) {
-                    stream.next() // Consume the '.'
-                    const fieldToken = stream.next()
-                    if (fieldToken?.kind === 'IDENTIFIER')
-                        return FieldReference.create({
-                            object: VariableReference.create(
-                                nextToken.identifier,
-                            ),
-                            field: fieldToken.identifier,
-                        })
-                    this.errorReporter.reportFatalError(
-                        'Expected field name after "."',
-                        {
-                            start: fieldToken?.start || nextToken.start,
-                            end: fieldToken?.end || nextToken.end,
-                        },
-                    )
-                }
                 return VariableReference.create(nextToken.identifier)
             case 'PUNCTUATION':
                 if (nextToken.symbol === '{') {
@@ -66,16 +71,11 @@ export class ExpressionParser {
             case 'OPERATOR':
                 if (nextToken.operator === '-') {
                     stream.next() // Consume the token
-                    const literalToken = stream.next()
+                    const literalToken = stream.peek()
                     if (literalToken?.kind !== 'INTEGER_LITERAL')
-                        this.errorReporter.reportFatalError(
-                            'Expected integer literal after "-" operator',
-                            {
-                                start: literalToken?.start || nextToken.start,
-                                end: literalToken?.end || nextToken.end,
-                            },
-                        )
+                        throw new Error('Expected integer literal after "-"')
 
+                    stream.next() // Consume the token
                     return IntegerLiteral.create(-literalToken.value)
                 } else {
                     this.errorReporter.reportFatalError(

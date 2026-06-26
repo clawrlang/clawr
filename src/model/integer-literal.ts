@@ -2,6 +2,10 @@ import { Expression, Context } from '.'
 import * as cir from '../cir'
 
 export class IntegerLiteral implements Expression {
+    get negated(): IntegerLiteral {
+        return new IntegerLiteral(-this.value)
+    }
+
     private constructor(private value: bigint) {}
 
     static create(value: bigint): IntegerLiteral {

@@ -20,14 +20,8 @@ export class Assignment implements Statement {
     }
 
     toCIR(context: Context): cir.Statement {
-        if (this.target instanceof VariableReference) {
-            const variable = this.target.lookupInScope(context)
-            if (variable.semantics === 'const' || variable.semantics === 'ref')
-                context.errorReporter.reportFatalError(
-                    `Variable ${this.target.name} is not mutable and cannot be assigned to`,
-                    this.target.span,
-                )
-        }
+        if (this.target.isEffectivelyConst(context))
+            throw new Error(`Not mutable and cannot be assigned to`)
 
         return {
             kind: 'ASSIGN',

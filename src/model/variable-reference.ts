@@ -18,6 +18,11 @@ export class VariableReference implements Expression {
         return new VariableReference(name, span)
     }
 
+    isEffectivelyConst(context: Context): boolean {
+        const variable = this.lookupInScope(context)
+        return variable.semantics === 'const' || variable.semantics === 'ref'
+    }
+
     toCIR(context: Context): cir.VariableReference {
         this.lookupInScope(context)
         return { kind: 'VARIABLE_REF', name: this.name }

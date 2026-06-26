@@ -15,6 +15,7 @@ export type ValueSet = {
 }
 
 export interface Expression {
+    isEffectivelyConst(context: Context): boolean
     semantics(context: Context): 'COW' | 'REF' | 'UNIQUE'
     valueSet(context: Context): ValueSet
     toCIR(context: Context): cir.Expression

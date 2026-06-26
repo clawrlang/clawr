@@ -19,4 +19,8 @@ export class TruthValueLiteral implements Expression {
     valueSet(_: Context): ValueSet {
         return { type: 'truthvalue' }
     }
+
+    isEffectivelyConst(context: Context): boolean {
+        return true
+    }
 }

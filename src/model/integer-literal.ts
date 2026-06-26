@@ -23,4 +23,8 @@ export class IntegerLiteral implements Expression {
     valueSet(_: Context): ValueSet {
         return { type: 'integer' }
     }
+
+    isEffectivelyConst(context: Context): boolean {
+        return true
+    }
 }

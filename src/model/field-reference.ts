@@ -17,6 +17,15 @@ export class FieldReference implements Expression {
         return new FieldReference(object, field)
     }
 
+    isEffectivelyConst(context: Context): boolean {
+        // TODO: The field is assumed to be `mut`. Add field semantics and handle other cases.
+        if (this.object.semantics(context) === 'REF') {
+            return false
+        } else {
+            return this.object.isEffectivelyConst(context)
+        }
+    }
+
     semantics(context: Context) {
         return 'COW' as const
     }

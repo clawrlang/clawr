@@ -1,9 +1,10 @@
 import * as cir from '../cir'
 import { ErrorReporter } from '../diagnostics'
+import { VaribleKind } from './variable-declaration'
 
 export type Context = {
     scope: {
-        variableTypes: Map<string, string>
+        variables: Map<string, Variable>
         declarations: Map<string, Declaration>
     }
     errorReporter: ErrorReporter
@@ -21,4 +22,9 @@ export interface Statement {
 export interface Declaration {
     fields?: { name: string; type: string }[]
     toCIR(context: Context): cir.Declaration
+}
+
+type Variable = {
+    kind: VaribleKind
+    type: string
 }

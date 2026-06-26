@@ -44,7 +44,7 @@ async function parseToCIR({
 }) {
     const context = {
         errorReporter: new ErrorReporter(file),
-        scope: { variableTypes: new Map(), declarations: new Map() },
+        scope: { variables: new Map(), declarations: new Map() },
     }
 
     const sourceCode = await fs.readFile(file, 'utf-8')

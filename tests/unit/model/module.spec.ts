@@ -62,7 +62,7 @@ describe('Module', () => {
         })
     })
 
-    it('registers variable types in the context', () => {
+    it('registers variables in the context', () => {
         const module = Module.create({
             main: [
                 VariableDeclaration.create({
@@ -75,7 +75,10 @@ describe('Module', () => {
         })
         const context = newSemanticContext()
         module.toCIR(context)
-        expect(context.scope.variableTypes.get('x')).toBe('integer')
+        expect(context.scope.variables.get('x')).toEqual({
+            kind: 'const',
+            type: 'integer',
+        })
     })
 
     it('registers data declarations in the context', () => {

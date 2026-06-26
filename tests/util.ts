@@ -1,4 +1,5 @@
 import { ErrorReporter, SourceCodeSpan } from '../src/diagnostics'
+import { Context } from '../src/model'
 
 export class TestErrorReporter implements ErrorReporter {
     errors: { message: string; location: SourceCodeSpan }[] = []
@@ -17,11 +18,11 @@ export class TestErrorReporter implements ErrorReporter {
         this.errors.push({ message, location })
     }
 }
-export function newSemanticContext() {
+export function newSemanticContext(): Context {
     return {
         scope: {
             declarations: new Map(),
-            variableTypes: new Map(),
+            variables: new Map(),
         },
         errorReporter: new TestErrorReporter('test.clawr'),
     } as const

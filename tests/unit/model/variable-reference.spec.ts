@@ -13,7 +13,7 @@ describe('Variable Reference', () => {
 
     it('infers its type from the context', () => {
         const context = newSemanticContext()
-        context.scope.variableTypes.set('myVar', 'integer')
+        context.scope.variables.set('myVar', { kind: 'const', type: 'integer' })
 
         const variableRef = VariableReference.create('myVar')
         expect(variableRef.type(context)).toBe('integer')

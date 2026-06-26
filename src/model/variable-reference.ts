@@ -13,11 +13,12 @@ export class VariableReference implements Expression {
     }
 
     type(context: Context): string {
-        const type = context.scope.variableTypes.get(this.name)
-        if (!type)
+        const variable = context.scope.variables.get(this.name)
+        if (!variable) {
             throw new Error(
                 `Variable ${this.name} is not defined in the current context`,
             )
-        return type
+        }
+        return variable.type
     }
 }

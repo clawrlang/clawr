@@ -8,8 +8,12 @@ export class DataLiteral implements Expression {
         return new DataLiteral(fields)
     }
 
+    semantics(context: Context) {
+        return 'UNIQUE' as const
+    }
+
     valueSet(context: Context & { type: string }): ValueSet {
-        return { kind: 'UNIQUE', type: context.type }
+        return { type: context.type }
     }
 
     toCIR(context: Context): cir.Expression {

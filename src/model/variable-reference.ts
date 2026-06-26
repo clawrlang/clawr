@@ -23,11 +23,21 @@ export class VariableReference implements Expression {
         return { kind: 'VARIABLE_REF', name: this.name }
     }
 
+    semantics(context: Context) {
+        const variable = this.lookupInScope(context)
+        switch (variable.semantics) {
+            case 'const':
+            case 'mut':
+                return 'COW'
+            case 'ref':
+            case 'mutref':
+                return 'REF'
+        }
+    }
+
     valueSet(context: Context): ValueSet {
         const variable = this.lookupInScope(context)
-        const kind =
-            variable.kind === 'const' || variable.kind === 'mut' ? 'COW' : 'REF'
-        return { kind, type: variable.type }
+        return { type: variable.type }
     }
 
     lookupInScope(context: Context) {

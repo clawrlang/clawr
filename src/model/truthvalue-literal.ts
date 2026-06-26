@@ -12,7 +12,11 @@ export class TruthValueLiteral implements Expression {
         return { kind: 'TRUTHVALUE_LITERAL', value: this.value }
     }
 
+    semantics(context: Context) {
+        return 'COW' as const
+    }
+
     valueSet(_: Context): ValueSet {
-        return { kind: 'COW', type: 'truthvalue' }
+        return { type: 'truthvalue' }
     }
 }

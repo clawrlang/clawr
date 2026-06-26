@@ -29,7 +29,7 @@ describe('VariableDeclaration', () => {
         const context = newSemanticContext()
         decl.toCIR(context)
         expect(context.scope.variables.get('x')).toEqual({
-            kind: 'const',
+            semantics: 'const',
             type: 'integer',
         })
     })

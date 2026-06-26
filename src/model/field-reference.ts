@@ -17,6 +17,10 @@ export class FieldReference implements Expression {
         return new FieldReference(object, field)
     }
 
+    semantics(context: Context) {
+        return 'COW' as const
+    }
+
     valueSet(context: Context): ValueSet {
         const objectInfo = this.object.valueSet(context)
         const declaration = context.scope.declarations.get(objectInfo.type)
@@ -36,7 +40,7 @@ export class FieldReference implements Expression {
                 `Field ${this.field} does not exist on type ${objectInfo.type}`,
             )
         }
-        return { type: field.type, kind: 'COW' }
+        return { type: field.type }
     }
 
     toCIR(context: Context): cir.FieldReference {

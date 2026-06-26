@@ -16,10 +16,11 @@ export class IntegerLiteral implements Expression {
         return { kind: 'INTEGER_LITERAL', value: this.value.toString() }
     }
 
+    semantics(context: Context) {
+        return 'COW' as const
+    }
+
     valueSet(_: Context): ValueSet {
-        return {
-            kind: 'COW',
-            type: 'integer',
-        }
+        return { type: 'integer' }
     }
 }

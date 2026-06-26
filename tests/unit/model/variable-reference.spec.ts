@@ -5,7 +5,10 @@ import { newSemanticContext, someCodeSpan } from '../../util'
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('myVar', { kind: 'const', type: 'integer' })
+        context.scope.variables.set('myVar', {
+            semantics: 'const',
+            type: 'integer',
+        })
 
         const variableRef = VariableReference.create({
             name: 'myVar',
@@ -32,7 +35,10 @@ describe('Variable Reference', () => {
 
     it('infers its type from the context', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('myVar', { kind: 'const', type: 'integer' })
+        context.scope.variables.set('myVar', {
+            semantics: 'const',
+            type: 'integer',
+        })
 
         const variableRef = VariableReference.create({
             name: 'myVar',
@@ -52,13 +58,16 @@ describe('Variable Reference', () => {
         for (const { kind, expected } of cases) {
             it(`returns ${expected} for ${kind} variable`, () => {
                 const context = newSemanticContext()
-                context.scope.variables.set('myVar', { kind, type: 'integer' })
+                context.scope.variables.set('myVar', {
+                    semantics: kind,
+                    type: 'integer',
+                })
 
                 const variableRef = VariableReference.create({
                     name: 'myVar',
                     span: someCodeSpan,
                 })
-                expect(variableRef.valueSet(context).kind).toBe(expected)
+                expect(variableRef.semantics(context)).toBe(expected)
             })
         }
     })

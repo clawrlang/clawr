@@ -7,7 +7,7 @@ import { IntegerLiteral } from '../../../src/model/integer-literal'
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('x', { kind: 'mut', type: 'integer' })
+        context.scope.variables.set('x', { semantics: 'mut', type: 'integer' })
 
         const assignment = Assignment.create({
             target: VariableReference.create({ name: 'x', span: someCodeSpan }),
@@ -33,7 +33,10 @@ describe('Assignment', () => {
         for (const kind of ['const', 'ref'] as const) {
             test(kind, () => {
                 const context = newSemanticContext()
-                context.scope.variables.set('x', { kind, type: 'integer' })
+                context.scope.variables.set('x', {
+                    semantics: kind,
+                    type: 'integer',
+                })
 
                 const assignment = Assignment.create({
                     target: VariableReference.create({

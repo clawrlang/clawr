@@ -11,11 +11,11 @@ export type Context = {
 }
 
 export type ValueSet = {
-    kind: 'COW' | 'REF' | 'UNIQUE'
     type: string
 }
 
 export interface Expression {
+    semantics(context: Context): 'COW' | 'REF' | 'UNIQUE'
     valueSet(context: Context): ValueSet
     toCIR(context: Context): cir.Expression
 }
@@ -30,6 +30,6 @@ export interface Declaration {
 }
 
 type Variable = {
-    kind: VaribleKind
+    semantics: VaribleKind
     type: string
 }

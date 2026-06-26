@@ -76,7 +76,7 @@ describe('Module', () => {
         const context = newSemanticContext()
         module.toCIR(context)
         expect(context.scope.variables.get('x')).toEqual({
-            kind: 'const',
+            semantics: 'const',
             type: 'integer',
         })
     })

@@ -12,6 +12,16 @@ export class VariableReference implements Expression {
         return { kind: 'VARIABLE_REF', name: this.name }
     }
 
+    isIsolated(context: Context): any {
+        const variable = context.scope.variables.get(this.name)
+        if (!variable) {
+            throw new Error(
+                `Variable ${this.name} is not defined in the current context`,
+            )
+        }
+        return variable.kind === 'const' || variable.kind === 'mut'
+    }
+
     type(context: Context): string {
         const variable = context.scope.variables.get(this.name)
         if (!variable) {

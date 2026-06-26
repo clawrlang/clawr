@@ -1,13 +1,16 @@
 import type {
     AnnotationToken,
     IdentifierToken,
+    IntegerLiteralToken,
     KeywordToken,
     NewlineToken,
     OperatorToken,
     PunctuationToken,
+    RealLiteralToken,
     RegexLiteralToken,
     StringLiteralToken,
     Token,
+    TruthvalueLiteralToken,
 } from './token'
 import {
     keywords,
@@ -87,6 +90,23 @@ export class TokenStream {
         }
     }
 
+    expectToken(): Token {
+        const token = this.next()
+        if (!token) {
+            this.errorReporter.reportFatalError(
+                `Expected token, but got end of file`,
+                {
+                    start: this.source.location,
+                    end: this.source.location,
+                },
+            )
+        }
+        return token
+    }
+
+    expect(kind: 'TRUTHVALUE_LITERAL'): TruthvalueLiteralToken
+    expect(kind: 'INTEGER_LITERAL'): IntegerLiteralToken
+    expect(kind: 'REAL_LITERAL'): RealLiteralToken
     expect(kind: 'NEWLINE'): NewlineToken
     expect(kind: 'IDENTIFIER'): IdentifierToken
     expect(kind: 'ANNOTATION', ...annotations: Annotation[]): AnnotationToken

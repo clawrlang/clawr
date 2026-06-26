@@ -1,5 +1,6 @@
 import { ErrorReporter } from '../diagnostics'
 import { TokenStream } from '../lexer'
+import { TruthvalueLiteralToken } from '../lexer/token'
 import { Expression } from '../model'
 import { FieldReference } from '../model/field-reference'
 import { IntegerLiteral } from '../model/integer-literal'
@@ -22,11 +23,10 @@ export class ExpressionParser {
         if (stream.isNext('OPERATOR', '-')) {
             stream.next() // Consume the '-'
             const expression = this.parsePrimaryExpression(stream)
-            if (!(expression instanceof IntegerLiteral))
-                throw new Error(
-                    'Unary negation can only be applied to integer literals',
-                )
-            return expression.negated
+            if (expression instanceof IntegerLiteral) return expression.negated
+            throw new Error(
+                'Unary negation is so far only supported for integer literals',
+            )
         }
         const expression = this.parsePrimaryExpression(stream)
         if (!stream.isNext('OPERATOR', '.')) return expression
@@ -43,57 +43,39 @@ export class ExpressionParser {
 
     private parsePrimaryExpression(stream: TokenStream): Expression {
         const nextToken = stream.peek()
-        if (!nextToken) {
-            throw new Error('Unexpected end of input while parsing expression')
-        }
-        switch (nextToken.kind) {
+        switch (nextToken?.kind) {
             case 'TRUTHVALUE_LITERAL':
-                stream.next() // Consume the token
-                return TruthValueLiteral.create(nextToken.value)
+                return this.parseTruthValueLiteral(stream)
             case 'INTEGER_LITERAL':
-                stream.next() // Consume the token
-                return IntegerLiteral.create(nextToken.value)
+                return this.parseIntegerLiteral(stream)
             case 'IDENTIFIER':
-                stream.next() // Consume the token
-                return VariableReference.create(nextToken.identifier)
+                return this.parseVariableReference(stream)
             case 'PUNCTUATION':
-                if (nextToken.symbol === '{') {
-                    return DataLiteralParser.create(this).parse(stream)
-                } else {
-                    this.errorReporter.reportFatalError(
-                        `Unexpected punctuation symbol: ${nextToken.symbol} while parsing expression`,
-                        {
-                            start: nextToken.start,
-                            end: nextToken.end,
-                        },
-                    )
-                }
-            case 'OPERATOR':
-                if (nextToken.operator === '-') {
-                    stream.next() // Consume the token
-                    const literalToken = stream.peek()
-                    if (literalToken?.kind !== 'INTEGER_LITERAL')
-                        throw new Error('Expected integer literal after "-"')
-
-                    stream.next() // Consume the token
-                    return IntegerLiteral.create(-literalToken.value)
-                } else {
-                    this.errorReporter.reportFatalError(
-                        `Unexpected operator "${nextToken.operator}" while parsing expression`,
-                        {
-                            start: nextToken.start,
-                            end: nextToken.end,
-                        },
-                    )
-                }
-            default:
-                this.errorReporter.reportFatalError(
-                    `Unexpected token kind: ${nextToken.kind} while parsing expression`,
-                    {
-                        start: nextToken.start,
-                        end: nextToken.end,
-                    },
-                )
+                return this.parseDataLiteral(stream)
         }
+        const token = stream.expectToken()
+        this.errorReporter.reportFatalError(`Unexpected ${token.kind}`, {
+            start: token.start,
+            end: token.end,
+        })
+    }
+
+    private parseVariableReference(stream: TokenStream) {
+        const nextToken = stream.expect('IDENTIFIER')
+        return VariableReference.create(nextToken.identifier)
+    }
+
+    private parseTruthValueLiteral(stream: TokenStream) {
+        const nextToken = stream.expect('TRUTHVALUE_LITERAL')
+        return TruthValueLiteral.create(nextToken.value)
+    }
+
+    private parseIntegerLiteral(stream: TokenStream) {
+        const nextToken = stream.expect('INTEGER_LITERAL')
+        return IntegerLiteral.create(nextToken.value)
+    }
+
+    private parseDataLiteral(stream: TokenStream): Expression {
+        return DataLiteralParser.create(this).parse(stream)
     }
 }

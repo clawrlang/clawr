@@ -18,7 +18,14 @@ export class VariableReference implements Expression {
         return new VariableReference(name, span)
     }
 
-    toCIR(_: Context): cir.VariableReference {
+    toCIR(context: Context): cir.VariableReference {
+        const variable = context.scope.variables.get(this.name)
+        if (!variable) {
+            context.errorReporter.reportFatalError(
+                `Variable ${this.name} is not defined in the current context`,
+                this.span,
+            )
+        }
         return { kind: 'VARIABLE_REF', name: this.name }
     }
 

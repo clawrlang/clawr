@@ -6,11 +6,14 @@ import { IntegerLiteral } from '../../../src/model/integer-literal'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
+        const context = newSemanticContext()
+        context.scope.variables.set('x', { kind: 'mut', type: 'integer' })
+
         const assignment = Assignment.create({
             target: VariableReference.create({ name: 'x', span: someCodeSpan }),
             value: IntegerLiteral.create(42n),
         })
-        const cir = assignment.toCIR(newSemanticContext())
+        const cir = assignment.toCIR(context)
 
         expect(cir).toMatchObject({
             kind: 'ASSIGN',

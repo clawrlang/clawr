@@ -1,16 +1,35 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it, test } from 'bun:test'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
 
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
+        const context = newSemanticContext()
+        context.scope.variables.set('myVar', { kind: 'const', type: 'integer' })
+
         const variableRef = VariableReference.create({
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.toCIR(newSemanticContext())).toEqual({
+        expect(variableRef.toCIR(context)).toEqual({
             kind: 'VARIABLE_REF',
             name: 'myVar',
+        })
+    })
+
+    describe('throws if variable is not in context', () => {
+        const variableRef = VariableReference.create({
+            name: 'myVar',
+            span: someCodeSpan,
+        })
+        test('toCIR', () => {
+            expect(() => variableRef.toCIR(newSemanticContext())).toThrow()
+        })
+        test('type', () => {
+            expect(() => variableRef.type(newSemanticContext())).toThrow()
+        })
+        test('isIsolated', () => {
+            expect(() => variableRef.isIsolated(newSemanticContext())).toThrow()
         })
     })
 

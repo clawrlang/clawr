@@ -21,16 +21,27 @@ describe('Variable Reference', () => {
     })
 
     describe('throws if variable is not in context', () => {
-        const variableRef = VariableReference.create({
-            name: 'myVar',
-            span: someCodeSpan,
-        })
-        test('toCIR', () => {
-            expect(() => variableRef.toCIR(newSemanticContext())).toThrow()
-        })
-        test('info', () => {
-            expect(() => variableRef.valueSet(newSemanticContext())).toThrow()
-        })
+        const span = {
+            start: { line: 1, column: 1 },
+            end: { line: 1, column: 6 },
+        }
+        const variableRef = VariableReference.create({ name: 'myVar', span })
+        const cases = ['toCIR', 'valueSet'] as const
+        for (const method of cases) {
+            test(method, () => {
+                const context = newSemanticContext()
+                const call = () => variableRef[method](context)
+                expect(call).toThrow()
+                expect(context.errorReporter).toMatchObject({
+                    errors: [
+                        {
+                            message: `Variable myVar is not defined in the current context`,
+                            location: span,
+                        },
+                    ],
+                })
+            })
+        }
     })
 
     it('infers its type from the context', () => {

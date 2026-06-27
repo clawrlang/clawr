@@ -3,20 +3,21 @@
 ## In Progress
 
 - Include locations in error diagnostics
+- Enforce `const`/`mut` vs `ref`/`mutref` separation
+- Use `->` for field-access when `this.object` is `REF`
 
 ## Next
 
-- Infer expression isolation levels
-- Enforce `const`/`mut` vs `ref`/`mutref` separation
-- Retain code-spans and use in error diagnostics
+- `DataLiteral.valueSet().type`
+- Add semantics to fields
 - Allow explicit copying (using `copy(of:)`)
 - Add reference-counting to `data`
   - Add `__rc_header` to `struct` (see [datastructure.h](tests/runtime/cases/data_structure.h))
   - Lower as `fields` (see [copy-on-write.h](tests/runtime/cases/copy-on-write.c))
-  - `ALLOC(Type, COW|REF)`
-  - `ASSIGN_FIELDS`
-  - `ENSURE_UNIQUE` before editing if `COW`
-  - `RELEASE` on descope
+  - `ALLOC(Type, COW|REF)` - expression
+  - `ASSIGN_FIELDS` - statement
+  - `ENSURE_UNIQUE` before editing if `COW` - statement
+  - `RELEASE` on descope - statement
 - Nested scopes (global/local vars)
 - Generate AST for syntax coloring
 
@@ -32,9 +33,11 @@
 - Infer variable types/value-sets
 - Infer expression value-sets
 - Split `call_func`
-  - `message` (no return value)
-  - `query` (has return value)
+  - `message` (no return value) - statement
+  - `query` (has return value) - expression
   - Should support both free functions and methods (when `object`/`service` exist)
+  - Allow `query` as statement by assigning to `_`
+  - Make `_` a keyword? handle like `self`/`super`
 - `object`/`service`
   - Same thing to the backend/CIR - Both are defined by their methods, not their fields
   - Enforce on frontend:

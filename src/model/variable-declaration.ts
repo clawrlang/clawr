@@ -1,5 +1,6 @@
 import * as cir from '../cir'
 import { Statement, Expression, Context } from '.'
+import { convertSemantics } from './variable-reference'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -31,6 +32,16 @@ export class VariableDeclaration implements Statement {
             semantics: this.semantics,
             type: this.type,
         })
+
+        const valueSemantics = this.initialValue.semantics(context)
+        const targetSemantics = convertSemantics(this.semantics)
+        const isValueSemanticsMismatch =
+            valueSemantics !== 'UNIQUE' && targetSemantics !== valueSemantics
+        if (isValueSemanticsMismatch)
+            throw new Error(
+                `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
+            )
+
         return {
             kind: 'VARIABLE_DECL',
             name: this.name,

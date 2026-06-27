@@ -3,7 +3,6 @@
 ## In Progress
 
 - Include locations in error diagnostics
-- Enforce `const`/`mut` vs `ref`/`mutref` separation
 
 ## Next
 

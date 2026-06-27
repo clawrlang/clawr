@@ -190,4 +190,103 @@ describe('Field Reference', () => {
             })
         }
     })
+
+    describe('effectively const', () => {
+        const cases = [
+            { semantics: 'const', expected: true },
+            { semantics: 'mut', expected: false },
+            { semantics: 'ref', expected: false },
+            { semantics: 'mutref', expected: false },
+        ] as const
+
+        for (const { semantics, expected } of cases) {
+            it(`returns ${expected} if the object is ${semantics}`, () => {
+                const context = newSemanticContext()
+                context.scope.variables.set('myVar', {
+                    semantics,
+                    type: 'MyType',
+                })
+                context.scope.declarations.set(
+                    'MyType',
+                    DataDeclaration.create({
+                        name: 'MyType',
+                        fields: [
+                            { name: 'myField', type: 'integer', semantics },
+                        ],
+                    }),
+                )
+
+                const fieldRef = FieldReference.create({
+                    object: VariableReference.create({
+                        name: 'myVar',
+                        span: someCodeSpan,
+                    }),
+                    operator: '.',
+                    field: 'myField',
+                    fieldSpan: someCodeSpan,
+                })
+                expect(fieldRef.isEffectivelyConst(context)).toBe(expected)
+            })
+        }
+
+        it('returns true if the object is immutable', () => {
+            const context = newSemanticContext()
+            context.scope.variables.set('myVar', {
+                semantics: 'const',
+                type: 'MyType',
+            })
+            context.scope.declarations.set(
+                'MyType',
+                DataDeclaration.create({
+                    name: 'MyType',
+                    fields: [
+                        {
+                            name: 'myField',
+                            type: 'integer',
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+
+            const fieldRef = FieldReference.create({
+                object: VariableReference.create({
+                    name: 'myVar',
+                    span: someCodeSpan,
+                }),
+                operator: '.',
+                field: 'myField',
+                fieldSpan: someCodeSpan,
+            })
+            expect(fieldRef.isEffectivelyConst(context)).toBe(true)
+        })
+
+        it('returns false if the object is mutable', () => {
+            const context = newSemanticContext()
+            context.scope.variables.set('myVar', {
+                semantics: 'mut',
+                type: 'MyType',
+            })
+            context.scope.declarations.set(
+                'MyType',
+                DataDeclaration.create({
+                    name: 'MyType',
+                    fields: [
+                        { name: 'myField', type: 'integer', semantics: 'mut' },
+                    ],
+                }),
+            )
+
+            const fieldRef = FieldReference.create({
+                object: VariableReference.create({
+                    name: 'myVar',
+                    span: someCodeSpan,
+                }),
+                operator: '.',
+                field: 'myField',
+                fieldSpan: someCodeSpan,
+            })
+            expect(fieldRef.isEffectivelyConst(context)).toBe(false)
+        })
+    })
 })

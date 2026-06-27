@@ -34,7 +34,6 @@ export class FieldReference implements Expression {
     }
 
     isEffectivelyConst(context: Context): boolean {
-        // TODO: The field is assumed to be `mut`. Add field semantics and handle other cases.
         if (this.object.semantics(context) === 'REF') return false
 
         return this.object.isEffectivelyConst(context)

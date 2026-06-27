@@ -5,6 +5,7 @@ import { SourceCodeSpan } from '../diagnostics'
 export class FieldReference implements Expression {
     private constructor(
         private object: Expression,
+        private operator: '.' | '->',
         private field: string,
         private fieldSpan: SourceCodeSpan,
     ) {}
@@ -20,7 +21,7 @@ export class FieldReference implements Expression {
         field: string
         fieldSpan: SourceCodeSpan
     }): FieldReference {
-        return new FieldReference(object, field, fieldSpan)
+        return new FieldReference(object, operator, field, fieldSpan)
     }
 
     allowAssignment(context: Context) {
@@ -65,10 +66,20 @@ export class FieldReference implements Expression {
     }
 
     toCIR(context: Context): cir.FieldReference {
+        this.checkOperatorCompatibility(context)
         return {
             kind: 'FIELD_REF',
             object: this.object.toCIR(context),
             field: this.field,
         }
+    }
+
+    private checkOperatorCompatibility(context: Context) {
+        const semantics = this.object.semantics(context)
+        if ((semantics === 'REF') !== (this.operator === '->'))
+            context.errorReporter.reportFatalError(
+                `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
+                this.fieldSpan,
+            )
     }
 }

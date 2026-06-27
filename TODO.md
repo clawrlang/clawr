@@ -4,7 +4,6 @@
 
 - Include locations in error diagnostics
 - Enforce `const`/`mut` vs `ref`/`mutref` separation
-- Use `->` for field-access when `this.object` is `REF`
 
 ## Next
 

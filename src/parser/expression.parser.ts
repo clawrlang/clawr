@@ -28,14 +28,15 @@ export class ExpressionParser {
             )
         }
         const expression = this.parsePrimaryExpression(stream)
-        if (!stream.isNext('OPERATOR', '.')) return expression
+        if (!stream.isNext('OPERATOR', '.', '->')) return expression
 
-        stream.next() // Consume the '.'
-        const fieldToken = stream.next()
-        if (fieldToken?.kind !== 'IDENTIFIER')
-            throw new Error('Expected field name after "."')
+        const operator = stream.expect('OPERATOR', '.', '->').operator as
+            | '.'
+            | '->'
+        const fieldToken = stream.expect('IDENTIFIER')
         return FieldReference.create({
             object: expression,
+            operator,
             field: fieldToken.identifier,
             fieldSpan: { start: fieldToken.start, end: fieldToken.end },
         })

@@ -62,6 +62,16 @@ describe('Expression Parser', () => {
         })
         expect(fieldAccess).toBeInstanceOf(FieldReference)
     })
+
+    it('parses field lookup expressions', () => {
+        const input = 'myVar->field'
+        const fieldAccess = parseExpression(input)
+        expect(fieldAccess).toMatchObject({
+            object: { name: 'myVar' },
+            field: 'field',
+        })
+        expect(fieldAccess).toBeInstanceOf(FieldReference)
+    })
 })
 
 function parseExpression(input: string): Expression {

@@ -24,6 +24,7 @@ describe('Field Reference', () => {
                 name: 'myVar',
                 span: someCodeSpan,
             }),
+            operator: '.',
             field: 'myField',
             fieldSpan: someCodeSpan,
         })
@@ -49,6 +50,7 @@ describe('Field Reference', () => {
                 name: 'myVar',
                 span: someCodeSpan,
             }),
+            operator: '.',
             field: 'myField',
             fieldSpan: someCodeSpan,
         })
@@ -74,6 +76,7 @@ describe('Field Reference', () => {
                 name: 'myVar',
                 span: someCodeSpan,
             }),
+            operator: '.',
             field: 'myField',
             fieldSpan: someCodeSpan,
         })

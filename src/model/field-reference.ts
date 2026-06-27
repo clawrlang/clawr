@@ -11,10 +11,12 @@ export class FieldReference implements Expression {
 
     static create({
         object,
+        operator,
         field,
         fieldSpan,
     }: {
         object: Expression
+        operator: '.' | '->'
         field: string
         fieldSpan: SourceCodeSpan
     }): FieldReference {

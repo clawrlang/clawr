@@ -104,6 +104,7 @@ describe('Assignment', () => {
                     name: 'x',
                     span: someCodeSpan,
                 }),
+                operator: '.',
                 field: 'myField',
                 fieldSpan: {
                     start: { line: 1, column: 3 },

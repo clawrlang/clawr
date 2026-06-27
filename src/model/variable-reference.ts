@@ -20,7 +20,10 @@ export class VariableReference implements Expression {
 
     allowAssignment(context: Context) {
         if (this.isEffectivelyConst(context))
-            throw new Error(`Variable ${this.name} is not mutable`)
+            context.errorReporter.reportFatalError(
+                `Variable ${this.name} is not mutable`,
+                this.span,
+            )
     }
 
     isEffectivelyConst(context: Context): boolean {

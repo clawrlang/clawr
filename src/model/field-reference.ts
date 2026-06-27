@@ -1,26 +1,31 @@
 import { Expression, Context, ValueSet } from '.'
 import * as cir from '../cir'
+import { SourceCodeSpan } from '../diagnostics'
 
 export class FieldReference implements Expression {
     private constructor(
         private object: Expression,
         private field: string,
+        private fieldSpan: SourceCodeSpan,
     ) {}
 
     static create({
         object,
         field,
+        fieldSpan,
     }: {
         object: Expression
         field: string
+        fieldSpan: SourceCodeSpan
     }): FieldReference {
-        return new FieldReference(object, field)
+        return new FieldReference(object, field, fieldSpan)
     }
 
     allowAssignment(context: Context) {
         if (this.isEffectivelyConst(context))
-            throw new Error(
+            context.errorReporter.reportFatalError(
                 `Cannot mutate field ${this.field} of a reference type object`,
+                this.fieldSpan,
             )
     }
 

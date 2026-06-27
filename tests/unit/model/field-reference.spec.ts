@@ -25,6 +25,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
             }),
             field: 'myField',
+            fieldSpan: someCodeSpan,
         })
         expect(fieldRef.valueSet(context).type).toBe('integer')
     })
@@ -49,6 +50,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
             }),
             field: 'myField',
+            fieldSpan: someCodeSpan,
         })
         expect(fieldRef.semantics(context)).toBe('COW')
     })
@@ -73,6 +75,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
             }),
             field: 'myField',
+            fieldSpan: someCodeSpan,
         })
         expect(fieldRef.valueSet(context).type).toBe('integer')
         expect(fieldRef.semantics(context)).toBe('COW')

@@ -38,6 +38,7 @@ export class ExpressionParser {
         return FieldReference.create({
             object: expression,
             field: fieldToken.identifier,
+            fieldSpan: { start: fieldToken.start, end: fieldToken.end },
         })
     }
 

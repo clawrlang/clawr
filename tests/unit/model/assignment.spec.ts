@@ -25,10 +25,28 @@ describe('Assignment', () => {
 
     it('throws if the target variable is not in context', () => {
         const assignment = Assignment.create({
-            target: VariableReference.create({ name: 'x', span: someCodeSpan }),
+            target: VariableReference.create({
+                name: 'x',
+                span: {
+                    start: { line: 1, column: 1 },
+                    end: { line: 1, column: 2 },
+                },
+            }),
             value: IntegerLiteral.create(42n),
         })
-        expect(() => assignment.toCIR(newSemanticContext())).toThrow()
+        const context = newSemanticContext()
+        expect(() => assignment.toCIR(context)).toThrow()
+        expect(context.errorReporter).toMatchObject({
+            errors: [
+                {
+                    message: `Variable x is not defined in the current context`,
+                    location: {
+                        start: { line: 1, column: 1 },
+                        end: { line: 1, column: 2 },
+                    },
+                },
+            ],
+        })
     })
 
     describe('throws if the target variable is immutable/non-assignable', () => {
@@ -43,11 +61,25 @@ describe('Assignment', () => {
                 const assignment = Assignment.create({
                     target: VariableReference.create({
                         name: 'x',
-                        span: someCodeSpan,
+                        span: {
+                            start: { line: 1, column: 1 },
+                            end: { line: 1, column: 2 },
+                        },
                     }),
                     value: IntegerLiteral.create(42n),
                 })
                 expect(() => assignment.toCIR(context)).toThrow()
+                expect(context.errorReporter).toMatchObject({
+                    errors: [
+                        {
+                            message: `Variable x is not mutable`,
+                            location: {
+                                start: { line: 1, column: 1 },
+                                end: { line: 1, column: 2 },
+                            },
+                        },
+                    ],
+                })
             })
         }
     })
@@ -73,9 +105,25 @@ describe('Assignment', () => {
                     span: someCodeSpan,
                 }),
                 field: 'myField',
+                fieldSpan: {
+                    start: { line: 1, column: 3 },
+                    end: { line: 1, column: 4 },
+                },
             }),
             value: IntegerLiteral.create(42n),
         })
         expect(() => assignment.toCIR(context)).toThrow()
+        expect(context.errorReporter).toMatchObject({
+            errors: [
+                {
+                    message:
+                        'Cannot mutate field myField of a reference type object',
+                    location: {
+                        start: { line: 1, column: 3 },
+                        end: { line: 1, column: 4 },
+                    },
+                },
+            ],
+        })
     })
 })

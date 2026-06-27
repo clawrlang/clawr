@@ -12,7 +12,7 @@ export class TruthValueLiteral implements Expression {
         return { kind: 'TRUTHVALUE_LITERAL', value: this.value }
     }
 
-    semantics(context: Context) {
+    semantics(_: Context) {
         return 'COW' as const
     }
 
@@ -20,7 +20,7 @@ export class TruthValueLiteral implements Expression {
         return { type: 'truthvalue' }
     }
 
-    isEffectivelyConst(context: Context): boolean {
+    isEffectivelyConst(_: Context): boolean {
         return true
     }
 }

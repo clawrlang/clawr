@@ -16,7 +16,7 @@ export class IntegerLiteral implements Expression {
         return { kind: 'INTEGER_LITERAL', value: this.value.toString() }
     }
 
-    semantics(context: Context) {
+    semantics(_: Context) {
         return 'COW' as const
     }
 
@@ -24,7 +24,7 @@ export class IntegerLiteral implements Expression {
         return { type: 'integer' }
     }
 
-    isEffectivelyConst(context: Context): boolean {
+    isEffectivelyConst(_: Context): boolean {
         return true
     }
 }

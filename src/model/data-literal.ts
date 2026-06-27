@@ -8,11 +8,11 @@ export class DataLiteral implements Expression {
         return new DataLiteral(fields)
     }
 
-    isEffectivelyConst(context: Context): boolean {
+    isEffectivelyConst(_: Context): boolean {
         return true
     }
 
-    semantics(context: Context) {
+    semantics(_: Context) {
         return 'UNIQUE' as const
     }
 

@@ -57,6 +57,67 @@
     },
     "statement": {
       "oneOf": [
+        {
+          "type": "object",
+          "title": "Assign Fields",
+          "properties": {
+            "kind": { "const": "ASSIGN_FIELDS" },
+            "target": {
+              "oneOf": [
+                { "$ref": "#/definitions/variable_reference" },
+                { "$ref": "#/definitions/field_reference" }
+              ]
+            },
+            "fields": { "$ref": "#/definitions/data_literal" }
+          },
+          "required": ["kind", "target", "fields"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "title": "Ensure Unique",
+          "properties": {
+            "kind": { "const": "ENSURE_UNIQUE" },
+            "object": {
+              "oneOf": [
+                { "$ref": "#/definitions/variable_reference" },
+                { "$ref": "#/definitions/field_reference" }
+              ]
+            }
+          },
+          "required": ["kind", "object"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "title": "Retain",
+          "properties": {
+            "kind": { "const": "RETAIN" },
+            "object": {
+              "oneOf": [
+                { "$ref": "#/definitions/variable_reference" },
+                { "$ref": "#/definitions/field_reference" }
+              ]
+            }
+          },
+          "required": ["kind", "object"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "title": "Release",
+          "properties": {
+            "kind": { "const": "RELEASE" },
+            "object": {
+              "oneOf": [
+                { "$ref": "#/definitions/variable_reference" },
+                { "$ref": "#/definitions/field_reference" }
+              ]
+            }
+          },
+          "required": ["kind", "object"],
+          "additionalProperties": false
+        },
         { "$ref": "#/definitions/call_func" },
         { "$ref": "#/definitions/variable_declaration" },
         { "$ref": "#/definitions/assignment" }
@@ -145,6 +206,31 @@
             }
           },
           "required": ["kind", "value"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "title": "Allocation",
+          "properties": {
+            "kind": { "const": "ALLOCATE" },
+            "type": { "type": "string" },
+            "semantics": {
+              "description": "Specifies the allocation semantics",
+              "type": "string",
+              "enum": ["REF", "COW"]
+            }
+          },
+          "required": ["kind", "type", "semantics"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "title": "Copy",
+          "properties": {
+            "kind": { "const": "COPY" },
+            "object": { "$ref": "#/definitions/expression" }
+          },
+          "required": ["kind", "object"],
           "additionalProperties": false
         },
         { "$ref": "#/definitions/variable_reference" },

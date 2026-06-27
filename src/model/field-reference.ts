@@ -17,13 +17,18 @@ export class FieldReference implements Expression {
         return new FieldReference(object, field)
     }
 
+    allowAssignment(context: Context) {
+        if (this.isEffectivelyConst(context))
+            throw new Error(
+                `Cannot mutate field ${this.field} of a reference type object`,
+            )
+    }
+
     isEffectivelyConst(context: Context): boolean {
         // TODO: The field is assumed to be `mut`. Add field semantics and handle other cases.
-        if (this.object.semantics(context) === 'REF') {
-            return false
-        } else {
-            return this.object.isEffectivelyConst(context)
-        }
+        if (this.object.semantics(context) === 'REF') return false
+
+        return this.object.isEffectivelyConst(context)
     }
 
     semantics(context: Context) {

@@ -18,6 +18,11 @@ export class VariableReference implements Expression {
         return new VariableReference(name, span)
     }
 
+    allowAssignment(context: Context) {
+        if (this.isEffectivelyConst(context))
+            throw new Error(`Variable ${this.name} is not mutable`)
+    }
+
     isEffectivelyConst(context: Context): boolean {
         const variable = this.lookupInScope(context)
         return variable.semantics === 'const' || variable.semantics === 'ref'

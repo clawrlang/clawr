@@ -20,9 +20,7 @@ export class Assignment implements Statement {
     }
 
     toCIR(context: Context): cir.Statement {
-        if (this.target.isEffectivelyConst(context))
-            throw new Error(`Not mutable and cannot be assigned to`)
-
+        this.target.allowAssignment(context)
         return {
             kind: 'ASSIGN',
             target: this.target.toCIR(context),

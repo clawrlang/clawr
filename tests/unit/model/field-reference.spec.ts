@@ -174,11 +174,11 @@ describe('Field Reference', () => {
                     }),
                     operator,
                     field: 'myField',
-                    span: someCodeSpan,
-                    fieldSpan: {
+                    span: {
                         start: { line: 1, column: 1 },
                         end: { line: 1, column: 10 },
                     },
+                    fieldSpan: someCodeSpan,
                 })
                 expect(() => fieldRef.toCIR(context)).toThrow()
                 expect(context.errorReporter).toMatchObject({

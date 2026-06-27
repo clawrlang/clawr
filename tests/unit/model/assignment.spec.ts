@@ -132,11 +132,11 @@ describe('Assignment', () => {
                 }),
                 operator: '.',
                 field: 'myField',
-                span: someCodeSpan,
-                fieldSpan: {
+                span: {
                     start: { line: 1, column: 3 },
                     end: { line: 1, column: 4 },
                 },
+                fieldSpan: someCodeSpan,
             }),
             value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,

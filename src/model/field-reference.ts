@@ -32,7 +32,7 @@ export class FieldReference implements Expression {
         if (this.isEffectivelyConst(context))
             context.errorReporter.reportFatalError(
                 `Cannot mutate field ${this.field} of a reference type object`,
-                this.fieldSpan,
+                this.span,
             )
     }
 
@@ -45,22 +45,25 @@ export class FieldReference implements Expression {
     semantics(context: Context) {
         const objectInfo = this.object.valueSet(context)
         const declaration = context.scope.declarations.get(objectInfo.type)
-        if (!declaration) {
-            throw new Error(
+        if (!declaration)
+            context.errorReporter.reportFatalError(
                 `Type ${objectInfo.type} is not defined in the current context`,
+                this.span,
             )
-        }
-        if (!declaration.fields) {
-            throw new Error(
+
+        if (!declaration.fields)
+            context.errorReporter.reportFatalError(
                 `Type ${objectInfo.type} is not a data type, cannot access fields`,
+                this.span,
             )
-        }
+
         const field = declaration.fields.find((f) => f.name === this.field)
-        if (!field) {
-            throw new Error(
+        if (!field)
+            context.errorReporter.reportFatalError(
                 `Field ${this.field} does not exist on type ${objectInfo.type}`,
+                this.fieldSpan,
             )
-        }
+
         return convertSemantics(field.semantics)
     }
 
@@ -68,19 +71,22 @@ export class FieldReference implements Expression {
         const objectInfo = this.object.valueSet(context)
         const declaration = context.scope.declarations.get(objectInfo.type)
         if (!declaration) {
-            throw new Error(
+            context.errorReporter.reportFatalError(
                 `Type ${objectInfo.type} is not defined in the current context`,
+                this.span,
             )
         }
         if (!declaration.fields) {
-            throw new Error(
+            context.errorReporter.reportFatalError(
                 `Type ${objectInfo.type} is not a data type, cannot access fields`,
+                this.span,
             )
         }
         const field = declaration.fields.find((f) => f.name === this.field)
         if (!field) {
-            throw new Error(
+            context.errorReporter.reportFatalError(
                 `Field ${this.field} does not exist on type ${objectInfo.type}`,
+                this.fieldSpan,
             )
         }
         return { type: field.type }
@@ -100,7 +106,7 @@ export class FieldReference implements Expression {
         if ((semantics === 'REF') !== (this.operator === '->'))
             context.errorReporter.reportFatalError(
                 `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
-                this.fieldSpan,
+                this.span,
             )
     }
 }

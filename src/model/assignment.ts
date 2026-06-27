@@ -38,7 +38,10 @@ export class Assignment implements Statement {
         return {
             kind: 'ASSIGN',
             target: this.target.toCIR(context),
-            value: this.value.toCIR(context),
+            value: this.value.toCIR({
+                ...context,
+                ...this.target.valueSet(context),
+            }),
         }
     }
 }

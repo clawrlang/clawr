@@ -27,10 +27,13 @@ export class DataLiteral implements Expression {
     }
 
     valueSet(context: Context & { type: string }): ValueSet {
+        if (!context.type)
+            throw new Error('DataLiteral.toCIR: context.type is required')
         return { type: context.type }
     }
 
-    toCIR(context: Context): cir.Expression {
+    toCIR(context: Context & { type: string }): cir.Expression {
+        this.valueSet(context)
         return {
             kind: 'DATA_LITERAL',
             fields: this.fields.map((field) => ({

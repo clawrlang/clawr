@@ -4,7 +4,6 @@
 
 ## Next
 
-- `DataLiteral.valueSet().type`
 - Allow explicit copying (using `copy(of:)`)
 - Add reference-counting to `data`
   - Add `__rc_header` to `struct` (see [datastructure.h](tests/runtime/cases/data_structure.h))

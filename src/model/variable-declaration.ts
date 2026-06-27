@@ -50,7 +50,10 @@ export class VariableDeclaration implements Statement {
             kind: 'VARIABLE_DECL',
             name: this.name,
             type: this.type,
-            initialValue: this.initialValue.toCIR(context),
+            initialValue: this.initialValue.toCIR({
+                ...context,
+                ...{ type: this.type },
+            }),
         }
     }
 }

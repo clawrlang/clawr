@@ -60,7 +60,9 @@ describe('Literals', () => {
                 span: someCodeSpan,
             })
 
-            expect(dataLiteral.toCIR(newSemanticContext())).toMatchObject({
+            expect(
+                dataLiteral.toCIR({ ...newSemanticContext(), type: 'MyType' }),
+            ).toMatchObject({
                 kind: 'DATA_LITERAL',
                 fields: [
                     {

@@ -1,8 +1,8 @@
 import * as cir from '../cir'
 import { Statement, Expression, Context } from '.'
 
-export const VARIABLE_KINDS = ['const', 'mut', 'ref', 'mutref'] as const
-export type VariableSemantics = (typeof VARIABLE_KINDS)[number]
+export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
+export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
 
 export class VariableDeclaration implements Statement {
     private constructor(

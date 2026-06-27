@@ -2,7 +2,7 @@ import { ExpressionParser } from './expression.parser'
 import { TokenStream } from '../lexer'
 import {
     VariableSemantics,
-    VARIABLE_KINDS,
+    VARIABLE_SEMANTICS,
     VariableDeclaration,
 } from '../model/variable-declaration'
 import { StatementParser } from './statement-parser'
@@ -24,11 +24,11 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
     }
 
     isNext(stream: TokenStream): boolean {
-        return stream.isNext('KEYWORD', ...VARIABLE_KINDS)
+        return stream.isNext('KEYWORD', ...VARIABLE_SEMANTICS)
     }
 
     parse(stream: TokenStream): VariableDeclaration {
-        const semanticsToken = stream.expect('KEYWORD', ...VARIABLE_KINDS)
+        const semanticsToken = stream.expect('KEYWORD', ...VARIABLE_SEMANTICS)
         const semantics = semanticsToken.keyword as VariableSemantics
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier

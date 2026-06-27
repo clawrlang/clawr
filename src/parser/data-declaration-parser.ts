@@ -1,7 +1,7 @@
 import { TokenStream } from '../lexer'
 import { DataDeclaration } from '../model/data-declaration'
 import {
-    VARIABLE_KINDS,
+    VARIABLE_SEMANTICS,
     VariableSemantics,
 } from '../model/variable-declaration'
 
@@ -36,8 +36,11 @@ export class DataDeclarationParser {
     }
 
     private parseFieldSemantics(stream: TokenStream) {
-        if (stream.isNext('KEYWORD', ...VARIABLE_KINDS)) {
-            const semanticsToken = stream.expect('KEYWORD', ...VARIABLE_KINDS)
+        if (stream.isNext('KEYWORD', ...VARIABLE_SEMANTICS)) {
+            const semanticsToken = stream.expect(
+                'KEYWORD',
+                ...VARIABLE_SEMANTICS,
+            )
             return semanticsToken.keyword as VariableSemantics
         }
         return 'mut'

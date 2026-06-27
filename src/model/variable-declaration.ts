@@ -38,8 +38,12 @@ export class VariableDeclaration implements Statement {
         const isValueSemanticsMismatch =
             valueSemantics !== 'UNIQUE' && targetSemantics !== valueSemantics
         if (isValueSemanticsMismatch)
-            throw new Error(
+            context.errorReporter.reportFatalError(
                 `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
+                {
+                    start: this.initialValue.span.start,
+                    end: this.initialValue.span.end,
+                },
             )
 
         return {

@@ -1,11 +1,21 @@
 import * as cir from '../cir'
 import { Expression, Context, ValueSet } from '.'
+import { SourceCodeSpan } from '../diagnostics'
 
 export class DataLiteral implements Expression {
-    private constructor(private fields: FieldValue[]) {}
+    private constructor(
+        private fields: FieldValue[],
+        public span: SourceCodeSpan,
+    ) {}
 
-    static create(fields: FieldValue[]): DataLiteral {
-        return new DataLiteral(fields)
+    static create({
+        fields,
+        span,
+    }: {
+        fields: FieldValue[]
+        span: SourceCodeSpan
+    }): DataLiteral {
+        return new DataLiteral(fields, span)
     }
 
     isEffectivelyConst(_: Context): boolean {

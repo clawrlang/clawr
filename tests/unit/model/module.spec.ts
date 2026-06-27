@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { newSemanticContext } from '../../util'
+import { newSemanticContext, someCodeSpan } from '../../util'
 import { Module } from '../../../src/model/module'
 import { CallFunc } from '../../../src/model/call-func'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
@@ -13,8 +13,18 @@ describe('Module', () => {
                 CallFunc.create({
                     baseName: 'add',
                     arguments: [
-                        { value: IntegerLiteral.create(1n) },
-                        { value: IntegerLiteral.create(2n) },
+                        {
+                            value: IntegerLiteral.create({
+                                value: 1n,
+                                span: someCodeSpan,
+                            }),
+                        },
+                        {
+                            value: IntegerLiteral.create({
+                                value: 2n,
+                                span: someCodeSpan,
+                            }),
+                        },
                     ],
                 }),
             ],
@@ -73,7 +83,10 @@ describe('Module', () => {
                     semantics: 'const',
                     name: 'x',
                     type: 'integer',
-                    initialValue: IntegerLiteral.create(42n),
+                    initialValue: IntegerLiteral.create({
+                        value: 42n,
+                        span: someCodeSpan,
+                    }),
                 }),
             ],
         })

@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { ErrorReporter } from '../diagnostics'
+import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
 import { VariableSemantics } from './variable-declaration'
 
 export type Context = {
@@ -15,6 +15,7 @@ export type ValueSet = {
 }
 
 export interface Expression {
+    get span(): SourceCodeSpan
     isEffectivelyConst(context: Context): boolean
     semantics(context: Context): 'COW' | 'REF' | 'UNIQUE'
     valueSet(context: Context): ValueSet

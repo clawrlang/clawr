@@ -1,15 +1,25 @@
 import * as cir from '../cir'
 import { Expression, Context, ValueSet } from '.'
+import { SourceCodeSpan } from '../diagnostics'
 
 export class IntegerLiteral implements Expression {
     get negated(): IntegerLiteral {
-        return new IntegerLiteral(-this.value)
+        return new IntegerLiteral(-this.value, this.span)
     }
 
-    private constructor(private value: bigint) {}
+    private constructor(
+        private value: bigint,
+        public span: SourceCodeSpan,
+    ) {}
 
-    static create(value: bigint): IntegerLiteral {
-        return new IntegerLiteral(value)
+    static create({
+        value,
+        span,
+    }: {
+        value: bigint
+        span: SourceCodeSpan
+    }): IntegerLiteral {
+        return new IntegerLiteral(value, span)
     }
 
     toCIR(_: Context): cir.Expression {

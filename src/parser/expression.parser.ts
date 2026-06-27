@@ -38,6 +38,7 @@ export class ExpressionParser {
             object: expression,
             operator,
             field: fieldToken.identifier,
+            span: { start: expression.span.start, end: fieldToken.end },
             fieldSpan: { start: fieldToken.start, end: fieldToken.end },
         })
     }
@@ -71,12 +72,18 @@ export class ExpressionParser {
 
     private parseTruthValueLiteral(stream: TokenStream) {
         const nextToken = stream.expect('TRUTHVALUE_LITERAL')
-        return TruthValueLiteral.create(nextToken.value)
+        return TruthValueLiteral.create({
+            value: nextToken.value,
+            span: { start: nextToken.start, end: nextToken.end },
+        })
     }
 
     private parseIntegerLiteral(stream: TokenStream) {
         const nextToken = stream.expect('INTEGER_LITERAL')
-        return IntegerLiteral.create(nextToken.value)
+        return IntegerLiteral.create({
+            value: nextToken.value,
+            span: { start: nextToken.start, end: nextToken.end },
+        })
     }
 
     private parseDataLiteral(stream: TokenStream): Expression {

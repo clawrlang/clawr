@@ -10,8 +10,18 @@ describe('CallFunc', () => {
         const statement = CallFunc.create({
             baseName: 'foo',
             arguments: [
-                { value: IntegerLiteral.create(42n) },
-                { value: TruthValueLiteral.create('ambiguous') },
+                {
+                    value: IntegerLiteral.create({
+                        value: 42n,
+                        span: someCodeSpan,
+                    }),
+                },
+                {
+                    value: TruthValueLiteral.create({
+                        value: 'ambiguous',
+                        span: someCodeSpan,
+                    }),
+                },
             ],
         })
         expect(statement.toCIR(newSemanticContext())).toMatchObject({
@@ -31,7 +41,13 @@ describe('CallFunc', () => {
         const statement = CallFunc.create({
             baseName: 'foo',
             arguments: [
-                { label: 'x', value: TruthValueLiteral.create('ambiguous') },
+                {
+                    label: 'x',
+                    value: TruthValueLiteral.create({
+                        value: 'ambiguous',
+                        span: someCodeSpan,
+                    }),
+                },
             ],
         })
         expect(statement.toCIR(newSemanticContext())).toMatchObject({
@@ -47,7 +63,14 @@ describe('CallFunc', () => {
     it('converts print(integer) to printInteger()', () => {
         const statement = CallFunc.create({
             baseName: 'print',
-            arguments: [{ value: IntegerLiteral.create(1n) }],
+            arguments: [
+                {
+                    value: IntegerLiteral.create({
+                        value: 1n,
+                        span: someCodeSpan,
+                    }),
+                },
+            ],
         })
         expect(statement.toCIR(newSemanticContext())).toMatchObject({
             kind: 'CALL_FUNC',
@@ -62,7 +85,14 @@ describe('CallFunc', () => {
     it('converts print(truthvalue) to printTruthvalue()', () => {
         const statement = CallFunc.create({
             baseName: 'print',
-            arguments: [{ value: TruthValueLiteral.create('true') }],
+            arguments: [
+                {
+                    value: TruthValueLiteral.create({
+                        value: 'true',
+                        span: someCodeSpan,
+                    }),
+                },
+            ],
         })
         expect(statement.toCIR(newSemanticContext())).toMatchObject({
             kind: 'CALL_FUNC',

@@ -28,6 +28,7 @@ describe('Field Reference', () => {
             }),
             operator: '.',
             field: 'myField',
+            span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
         expect(fieldRef.valueSet(context).type).toBe('integer')
@@ -56,6 +57,7 @@ describe('Field Reference', () => {
             }),
             operator: '.',
             field: 'myField',
+            span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
         expect(fieldRef.semantics(context)).toBe('COW')
@@ -97,6 +99,7 @@ describe('Field Reference', () => {
                     }),
                     operator: '.',
                     field: 'myField',
+                    span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
                 expect(fieldRef.valueSet(context).type).toBe('integer')
@@ -127,6 +130,7 @@ describe('Field Reference', () => {
             }),
             operator: '.',
             field: 'nonExistentField',
+            span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
         expect(() => fieldRef.valueSet(context)).toThrowError(
@@ -170,6 +174,7 @@ describe('Field Reference', () => {
                     }),
                     operator,
                     field: 'myField',
+                    span: someCodeSpan,
                     fieldSpan: {
                         start: { line: 1, column: 1 },
                         end: { line: 1, column: 10 },
@@ -223,6 +228,7 @@ describe('Field Reference', () => {
                     }),
                     operator: '.',
                     field: 'myField',
+                    span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
                 expect(fieldRef.isEffectivelyConst(context)).toBe(expected)
@@ -256,6 +262,7 @@ describe('Field Reference', () => {
                 }),
                 operator: '.',
                 field: 'myField',
+                span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
             expect(fieldRef.isEffectivelyConst(context)).toBe(true)
@@ -284,6 +291,7 @@ describe('Field Reference', () => {
                 }),
                 operator: '.',
                 field: 'myField',
+                span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
             expect(fieldRef.isEffectivelyConst(context)).toBe(false)

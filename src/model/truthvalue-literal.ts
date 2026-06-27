@@ -1,11 +1,21 @@
 import { Expression, Context, ValueSet } from '.'
 import * as cir from '../cir'
+import { SourceCodeSpan } from '../diagnostics'
 
 export class TruthValueLiteral implements Expression {
-    private constructor(private value: 'false' | 'ambiguous' | 'true') {}
+    private constructor(
+        private value: 'false' | 'ambiguous' | 'true',
+        public span: SourceCodeSpan,
+    ) {}
 
-    static create(value: 'false' | 'ambiguous' | 'true'): TruthValueLiteral {
-        return new TruthValueLiteral(value)
+    static create({
+        value,
+        span,
+    }: {
+        value: 'false' | 'ambiguous' | 'true'
+        span: SourceCodeSpan
+    }): TruthValueLiteral {
+        return new TruthValueLiteral(value, span)
     }
 
     toCIR(_: Context): cir.Expression {

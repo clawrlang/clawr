@@ -12,7 +12,10 @@ describe('VariableDeclaration', () => {
             semantics: 'const',
             name: 'foo',
             type: 'integer',
-            initialValue: IntegerLiteral.create(1n),
+            initialValue: IntegerLiteral.create({
+                value: 1n,
+                span: someCodeSpan,
+            }),
         })
         expect(decl.toCIR(newSemanticContext())).toEqual({
             kind: 'VARIABLE_DECL',
@@ -27,7 +30,10 @@ describe('VariableDeclaration', () => {
             semantics: 'const',
             name: 'x',
             type: 'integer',
-            initialValue: IntegerLiteral.create(42n),
+            initialValue: IntegerLiteral.create({
+                value: 42n,
+                span: someCodeSpan,
+            }),
         })
         const context = newSemanticContext()
         decl.toCIR(context)
@@ -73,10 +79,24 @@ describe('VariableDeclaration', () => {
                     type: 'MyType',
                     initialValue: VariableReference.create({
                         name: 'value',
-                        span: someCodeSpan,
+                        span: {
+                            start: { line: 1, column: 3 },
+                            end: { line: 1, column: 4 },
+                        },
                     }),
                 })
                 expect(() => declaration.toCIR(context)).toThrow()
+                expect(context.errorReporter).toMatchObject({
+                    errors: [
+                        {
+                            message: `Cannot assign ${valueSemantics[1]} value to ${targetSemantics[1]} target`,
+                            location: {
+                                start: { line: 1, column: 3 },
+                                end: { line: 1, column: 4 },
+                            },
+                        },
+                    ],
+                })
             })
         })
 
@@ -100,12 +120,18 @@ describe('VariableDeclaration', () => {
                 semantics: 'const',
                 name: 'target',
                 type: 'MyType',
-                initialValue: DataLiteral.create([
-                    {
-                        name: 'myField',
-                        value: IntegerLiteral.create(42n),
-                    },
-                ]),
+                initialValue: DataLiteral.create({
+                    fields: [
+                        {
+                            name: 'myField',
+                            value: IntegerLiteral.create({
+                                value: 42n,
+                                span: someCodeSpan,
+                            }),
+                        },
+                    ],
+                    span: someCodeSpan,
+                }),
             })
             expect(() => declaration.toCIR(context)).not.toThrow()
         })

@@ -8,6 +8,7 @@ export class FieldReference implements Expression {
         private object: Expression,
         private operator: '.' | '->',
         private field: string,
+        public span: SourceCodeSpan,
         private fieldSpan: SourceCodeSpan,
     ) {}
 
@@ -15,14 +16,16 @@ export class FieldReference implements Expression {
         object,
         operator,
         field,
+        span,
         fieldSpan,
     }: {
         object: Expression
         operator: '.' | '->'
         field: string
+        span: SourceCodeSpan
         fieldSpan: SourceCodeSpan
     }): FieldReference {
-        return new FieldReference(object, operator, field, fieldSpan)
+        return new FieldReference(object, operator, field, span, fieldSpan)
     }
 
     allowAssignment(context: Context) {

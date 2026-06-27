@@ -14,7 +14,7 @@ describe('Assignment', () => {
 
         const assignment = Assignment.create({
             target: VariableReference.create({ name: 'x', span: someCodeSpan }),
-            value: IntegerLiteral.create(42n),
+            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
 
@@ -34,7 +34,7 @@ describe('Assignment', () => {
                     end: { line: 1, column: 2 },
                 },
             }),
-            value: IntegerLiteral.create(42n),
+            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
         const context = newSemanticContext()
@@ -132,12 +132,13 @@ describe('Assignment', () => {
                 }),
                 operator: '.',
                 field: 'myField',
+                span: someCodeSpan,
                 fieldSpan: {
                     start: { line: 1, column: 3 },
                     end: { line: 1, column: 4 },
                 },
             }),
-            value: IntegerLiteral.create(42n),
+            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
         expect(() => assignment.toCIR(context)).toThrow()
@@ -197,6 +198,7 @@ describe('Assignment', () => {
                         }),
                         operator: '.',
                         field: 'myField',
+                        span: someCodeSpan,
                         fieldSpan: someCodeSpan,
                     }),
                     span: {
@@ -251,18 +253,25 @@ describe('Assignment', () => {
                     }),
                     operator: '.',
                     field: 'myField',
+                    span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 }),
                 span: {
                     start: { line: 1, column: 3 },
                     end: { line: 1, column: 4 },
                 },
-                value: DataLiteral.create([
-                    {
-                        name: 'myField',
-                        value: IntegerLiteral.create(42n),
-                    },
-                ]),
+                value: DataLiteral.create({
+                    fields: [
+                        {
+                            name: 'myField',
+                            value: IntegerLiteral.create({
+                                value: 42n,
+                                span: someCodeSpan,
+                            }),
+                        },
+                    ],
+                    span: someCodeSpan,
+                }),
             })
             expect(() => assignment.toCIR(context)).not.toThrow()
         })

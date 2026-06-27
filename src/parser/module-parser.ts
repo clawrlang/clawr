@@ -19,7 +19,7 @@ export class ModuleParser {
     }): ModuleParser {
         return new ModuleParser(
             BlockParser.create({ errorReporter }),
-            DataDeclarationParser.create({ errorReporter }),
+            DataDeclarationParser.create(),
             errorReporter,
         )
     }

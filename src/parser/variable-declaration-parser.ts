@@ -11,7 +11,7 @@ import { ErrorReporter } from '../diagnostics'
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser
 
-    private constructor(private errorReporter: ErrorReporter) {
+    private constructor(errorReporter: ErrorReporter) {
         this.expressionParser = ExpressionParser.create({ errorReporter })
     }
 

@@ -1,6 +1,5 @@
 import { ErrorReporter } from '../diagnostics'
 import { TokenStream } from '../lexer'
-import { TruthvalueLiteralToken } from '../lexer/token'
 import { Expression } from '../model'
 import { FieldReference } from '../model/field-reference'
 import { IntegerLiteral } from '../model/integer-literal'

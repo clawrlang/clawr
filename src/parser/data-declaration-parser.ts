@@ -1,16 +1,11 @@
-import { ErrorReporter } from '../diagnostics'
 import { TokenStream } from '../lexer'
 import { DataDeclaration } from '../model/data-declaration'
 
 export class DataDeclarationParser {
-    private constructor(private errorReporter: ErrorReporter) {}
+    private constructor() {}
 
-    static create({
-        errorReporter,
-    }: {
-        errorReporter: ErrorReporter
-    }): DataDeclarationParser {
-        return new DataDeclarationParser(errorReporter)
+    static create(): DataDeclarationParser {
+        return new DataDeclarationParser()
     }
 
     parse(stream: TokenStream): DataDeclaration {

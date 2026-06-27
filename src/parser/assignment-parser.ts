@@ -35,9 +35,13 @@ export class AssignmentParser implements StatementParser<Assignment> {
             target instanceof VariableReference ||
             target instanceof FieldReference
         ) {
-            stream.expect('PUNCTUATION', '=')
+            const equalsToken = stream.expect('PUNCTUATION', '=')
             const value = expressionParser.parse(stream)
-            return Assignment.create({ target, value })
+            return Assignment.create({
+                target,
+                value,
+                span: { start: equalsToken.start, end: equalsToken.end },
+            })
         } else {
             this.errorReporter.reportFatalError(
                 'Invalid assignment target. Only variables and fields are allowed.',

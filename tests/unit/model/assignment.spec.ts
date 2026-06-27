@@ -14,6 +14,7 @@ describe('Assignment', () => {
         const assignment = Assignment.create({
             target: VariableReference.create({ name: 'x', span: someCodeSpan }),
             value: IntegerLiteral.create(42n),
+            span: someCodeSpan,
         })
 
         expect(assignment.toCIR(context)).toMatchObject({
@@ -33,6 +34,7 @@ describe('Assignment', () => {
                 },
             }),
             value: IntegerLiteral.create(42n),
+            span: someCodeSpan,
         })
         const context = newSemanticContext()
         expect(() => assignment.toCIR(context)).toThrow()
@@ -53,26 +55,41 @@ describe('Assignment', () => {
         for (const kind of ['const', 'ref'] as const) {
             test(kind, () => {
                 const context = newSemanticContext()
-                context.scope.variables.set('x', {
+                context.scope.declarations.set(
+                    'MyType',
+                    DataDeclaration.create({
+                        name: 'MyType',
+                        fields: [{ name: 'myField', type: 'integer' }],
+                    }),
+                )
+                context.scope.variables.set('target', {
                     semantics: kind,
-                    type: 'integer',
+                    type: 'MyType',
+                })
+                context.scope.variables.set('value', {
+                    semantics: kind,
+                    type: 'MyType',
                 })
 
                 const assignment = Assignment.create({
                     target: VariableReference.create({
-                        name: 'x',
+                        name: 'target',
                         span: {
                             start: { line: 1, column: 1 },
                             end: { line: 1, column: 2 },
                         },
                     }),
-                    value: IntegerLiteral.create(42n),
+                    value: VariableReference.create({
+                        name: 'value',
+                        span: someCodeSpan,
+                    }),
+                    span: someCodeSpan,
                 })
                 expect(() => assignment.toCIR(context)).toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
-                            message: `Variable x is not mutable`,
+                            message: `Variable target is not mutable`,
                             location: {
                                 start: { line: 1, column: 1 },
                                 end: { line: 1, column: 2 },
@@ -112,6 +129,7 @@ describe('Assignment', () => {
                 },
             }),
             value: IntegerLiteral.create(42n),
+            span: someCodeSpan,
         })
         expect(() => assignment.toCIR(context)).toThrow()
         expect(context.errorReporter).toMatchObject({
@@ -125,6 +143,69 @@ describe('Assignment', () => {
                     },
                 },
             ],
+        })
+    })
+
+    describe('throws if the value and target have incompatible semantics', () => {
+        const cases = [
+            { targetSemantics: ['mut', 'COW'], valueSemantics: ['ref', 'REF'] },
+            {
+                targetSemantics: ['mut', 'COW'],
+                valueSemantics: ['mutref', 'REF'],
+            },
+        ] as const
+
+        cases.forEach(({ targetSemantics, valueSemantics }) => {
+            it(`${targetSemantics} target = ${valueSemantics} value`, () => {
+                const context = newSemanticContext()
+                context.scope.declarations.set(
+                    'MyType',
+                    DataDeclaration.create({
+                        name: 'MyType',
+                        fields: [{ name: 'myField', type: 'integer' }],
+                    }),
+                )
+                context.scope.variables.set('target', {
+                    semantics: targetSemantics[0],
+                    type: 'MyType',
+                })
+                context.scope.variables.set('value', {
+                    semantics: valueSemantics[0],
+                    type: 'MyType',
+                })
+
+                const assignment = Assignment.create({
+                    target: FieldReference.create({
+                        object: VariableReference.create({
+                            name: 'target',
+                            span: someCodeSpan,
+                        }),
+                        operator: '.',
+                        field: 'myField',
+                        fieldSpan: someCodeSpan,
+                    }),
+                    span: {
+                        start: { line: 1, column: 3 },
+                        end: { line: 1, column: 4 },
+                    },
+                    value: VariableReference.create({
+                        name: 'value',
+                        span: someCodeSpan,
+                    }),
+                })
+                expect(() => assignment.toCIR(context)).toThrow()
+                expect(context.errorReporter).toMatchObject({
+                    errors: [
+                        {
+                            message: `Cannot assign ${valueSemantics[1]} value to ${targetSemantics[1]} target`,
+                            location: {
+                                start: { line: 1, column: 3 },
+                                end: { line: 1, column: 4 },
+                            },
+                        },
+                    ],
+                })
+            })
         })
     })
 })

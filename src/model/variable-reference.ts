@@ -38,14 +38,8 @@ export class VariableReference implements Expression {
 
     semantics(context: Context) {
         const variable = this.lookupInScope(context)
-        switch (variable.semantics) {
-            case 'const':
-            case 'mut':
-                return 'COW'
-            case 'ref':
-            case 'mutref':
-                return 'REF'
-        }
+        const semantics = variable.semantics
+        return convertSemantics(semantics)
     }
 
     valueSet(context: Context): ValueSet {
@@ -63,4 +57,8 @@ export class VariableReference implements Expression {
         }
         return variable
     }
+}
+
+export function convertSemantics(semantics: string) {
+    return semantics === 'mut' || semantics === 'const' ? 'COW' : 'REF'
 }

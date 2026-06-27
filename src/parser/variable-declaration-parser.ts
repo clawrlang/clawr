@@ -1,7 +1,7 @@
 import { ExpressionParser } from './expression.parser'
 import { TokenStream } from '../lexer'
 import {
-    VaribleKind,
+    VariableSemantics,
     VARIABLE_KINDS,
     VariableDeclaration,
 } from '../model/variable-declaration'
@@ -29,7 +29,7 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
 
     parse(stream: TokenStream): VariableDeclaration {
         const semanticsToken = stream.expect('KEYWORD', ...VARIABLE_KINDS)
-        const semantics = semanticsToken.keyword as VaribleKind
+        const semantics = semanticsToken.keyword as VariableSemantics
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
         stream.expect('PUNCTUATION', ':')

@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 import { ErrorReporter } from '../diagnostics'
-import { VaribleKind } from './variable-declaration'
+import { VariableSemantics } from './variable-declaration'
 
 export type Context = {
     scope: {
@@ -26,11 +26,11 @@ export interface Statement {
 }
 
 export interface Declaration {
-    fields?: { name: string; type: string }[]
+    fields?: { name: string; type: string; semantics: VariableSemantics }[]
     toCIR(context: Context): cir.Declaration
 }
 
 type Variable = {
-    semantics: VaribleKind
+    semantics: VariableSemantics
     type: string
 }

@@ -59,7 +59,13 @@ describe('Assignment', () => {
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
-                        fields: [{ name: 'myField', type: 'integer' }],
+                        fields: [
+                            {
+                                name: 'myField',
+                                type: 'integer',
+                                semantics: 'mut',
+                            },
+                        ],
                     }),
                 )
                 context.scope.variables.set('target', {
@@ -107,7 +113,9 @@ describe('Assignment', () => {
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
-                fields: [{ name: 'myField', type: 'integer' }],
+                fields: [
+                    { name: 'myField', type: 'integer', semantics: 'mut' },
+                ],
             }),
         )
         context.scope.variables.set('x', {
@@ -162,7 +170,13 @@ describe('Assignment', () => {
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
-                        fields: [{ name: 'myField', type: 'integer' }],
+                        fields: [
+                            {
+                                name: 'myField',
+                                type: 'integer',
+                                semantics: 'mut',
+                            },
+                        ],
                     }),
                 )
                 context.scope.variables.set('target', {

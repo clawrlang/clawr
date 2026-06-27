@@ -8,14 +8,16 @@ describe('Field Reference', () => {
     it('infers its type from the context', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
-            semantics: 'const',
+            semantics: 'mut',
             type: 'MyType',
         })
         context.scope.declarations.set(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
-                fields: [{ name: 'myField', type: 'integer' }],
+                fields: [
+                    { name: 'myField', type: 'integer', semantics: 'mut' },
+                ],
             }),
         )
 
@@ -34,14 +36,16 @@ describe('Field Reference', () => {
     it('infers its isolation level from the context', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
-            semantics: 'const',
+            semantics: 'mut',
             type: 'MyType',
         })
         context.scope.declarations.set(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
-                fields: [{ name: 'myField', type: 'integer' }],
+                fields: [
+                    { name: 'myField', type: 'integer', semantics: 'mut' },
+                ],
             }),
         )
 
@@ -57,44 +61,62 @@ describe('Field Reference', () => {
         expect(fieldRef.semantics(context)).toBe('COW')
     })
 
-    it('infers its type and isolation level from the context', () => {
-        const context = newSemanticContext()
-        context.scope.variables.set('myVar', {
-            semantics: 'mutref',
-            type: 'MyType',
-        })
-        context.scope.declarations.set(
-            'MyType',
-            DataDeclaration.create({
-                name: 'MyType',
-                fields: [{ name: 'myField', type: 'integer' }],
-            }),
-        )
+    describe('infers its type and isolation level from the context', () => {
+        const cases = [
+            { semantics: 'const', expectedSemantics: 'COW' },
+            { semantics: 'mut', expectedSemantics: 'COW' },
+            { semantics: 'ref', expectedSemantics: 'REF' },
+            { semantics: 'mutref', expectedSemantics: 'REF' },
+        ] as const
 
-        const fieldRef = FieldReference.create({
-            object: VariableReference.create({
-                name: 'myVar',
-                span: someCodeSpan,
-            }),
-            operator: '.',
-            field: 'myField',
-            fieldSpan: someCodeSpan,
-        })
-        expect(fieldRef.valueSet(context).type).toBe('integer')
-        expect(fieldRef.semantics(context)).toBe('COW')
+        for (const { semantics, expectedSemantics } of cases)
+            test(`${semantics} object`, () => {
+                const context = newSemanticContext()
+                context.scope.variables.set('myVar', {
+                    semantics,
+                    type: 'MyType',
+                })
+                context.scope.declarations.set(
+                    'MyType',
+                    DataDeclaration.create({
+                        name: 'MyType',
+                        fields: [
+                            {
+                                name: 'myField',
+                                type: 'integer',
+                                semantics,
+                            },
+                        ],
+                    }),
+                )
+
+                const fieldRef = FieldReference.create({
+                    object: VariableReference.create({
+                        name: 'myVar',
+                        span: someCodeSpan,
+                    }),
+                    operator: '.',
+                    field: 'myField',
+                    fieldSpan: someCodeSpan,
+                })
+                expect(fieldRef.valueSet(context).type).toBe('integer')
+                expect(fieldRef.semantics(context)).toBe(expectedSemantics)
+            })
     })
 
     it('throws if the field does not exist on the type', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
-            semantics: 'const',
+            semantics: 'mut',
             type: 'MyType',
         })
         context.scope.declarations.set(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
-                fields: [{ name: 'myField', type: 'integer' }],
+                fields: [
+                    { name: 'myField', type: 'integer', semantics: 'mut' },
+                ],
             }),
         )
 
@@ -131,7 +153,13 @@ describe('Field Reference', () => {
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
-                        fields: [{ name: 'myField', type: 'integer' }],
+                        fields: [
+                            {
+                                name: 'myField',
+                                type: 'integer',
+                                semantics: 'mut',
+                            },
+                        ],
                     }),
                 )
 

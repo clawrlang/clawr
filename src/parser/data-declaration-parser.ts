@@ -13,14 +13,18 @@ export class DataDeclarationParser {
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
         stream.expect('PUNCTUATION', '{')
-        const fields: { name: string; type: string }[] = []
+        const fields: {
+            name: string
+            type: string
+            semantics: 'const' | 'mut' | 'ref' | 'mutref'
+        }[] = []
         while (!stream.isNext('PUNCTUATION', '}')) {
             const fieldNameToken = stream.expect('IDENTIFIER')
             const fieldName = fieldNameToken.identifier
             stream.expect('PUNCTUATION', ':')
             const fieldTypeToken = stream.expect('IDENTIFIER')
             const fieldType = fieldTypeToken.identifier
-            fields.push({ name: fieldName, type: fieldType })
+            fields.push({ name: fieldName, type: fieldType, semantics: 'mut' }) // Default semantics to 'mut' for now
         }
         stream.expect('PUNCTUATION', '}')
         return DataDeclaration.create({ name, fields })

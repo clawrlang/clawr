@@ -44,8 +44,12 @@ describe('Module', () => {
                 DataDeclaration.create({
                     name: 'MyData',
                     fields: [
-                        { name: 'field1', type: 'integer' },
-                        { name: 'field2', type: 'truthvalue' },
+                        { name: 'field1', type: 'integer', semantics: 'mut' },
+                        {
+                            name: 'field2',
+                            type: 'truthvalue',
+                            semantics: 'mut',
+                        },
                     ],
                 }),
             ],
@@ -88,8 +92,12 @@ describe('Module', () => {
                 DataDeclaration.create({
                     name: 'MyData',
                     fields: [
-                        { name: 'field1', type: 'integer' },
-                        { name: 'field2', type: 'truthvalue' },
+                        { name: 'field1', type: 'integer', semantics: 'mut' },
+                        {
+                            name: 'field2',
+                            type: 'truthvalue',
+                            semantics: 'mut',
+                        },
                     ],
                 }),
             ],

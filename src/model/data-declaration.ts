@@ -1,9 +1,11 @@
 import * as cir from '../cir'
 import { Context, Declaration } from '.'
+import { VariableSemantics } from './variable-declaration'
 
 type DataField = {
     name: string
     type: string
+    semantics: VariableSemantics
 }
 
 export class DataDeclaration implements Declaration {

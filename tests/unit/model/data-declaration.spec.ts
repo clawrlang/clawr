@@ -7,8 +7,8 @@ describe('DataDeclaration', () => {
         const dataDecl = DataDeclaration.create({
             name: 'MyData',
             fields: [
-                { name: 'field1', type: 'integer' },
-                { name: 'field2', type: 'truthvalue' },
+                { name: 'field1', type: 'integer', semantics: 'mut' },
+                { name: 'field2', type: 'truthvalue', semantics: 'mut' },
             ],
         })
         const context = newSemanticContext()

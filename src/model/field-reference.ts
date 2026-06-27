@@ -43,52 +43,12 @@ export class FieldReference implements Expression {
     }
 
     semantics(context: Context) {
-        const objectInfo = this.object.valueSet(context)
-        const declaration = context.scope.declarations.get(objectInfo.type)
-        if (!declaration)
-            context.errorReporter.reportFatalError(
-                `Type ${objectInfo.type} is not defined in the current context`,
-                this.span,
-            )
-
-        if (!declaration.fields)
-            context.errorReporter.reportFatalError(
-                `Type ${objectInfo.type} is not a data type, cannot access fields`,
-                this.span,
-            )
-
-        const field = declaration.fields.find((f) => f.name === this.field)
-        if (!field)
-            context.errorReporter.reportFatalError(
-                `Field ${this.field} does not exist on type ${objectInfo.type}`,
-                this.fieldSpan,
-            )
-
+        const field = this.getFieldFromContext(context)
         return convertSemantics(field.semantics)
     }
 
     valueSet(context: Context): ValueSet {
-        const objectInfo = this.object.valueSet(context)
-        const declaration = context.scope.declarations.get(objectInfo.type)
-        if (!declaration) {
-            context.errorReporter.reportFatalError(
-                `Type ${objectInfo.type} is not defined in the current context`,
-                this.span,
-            )
-        }
-        if (!declaration.fields) {
-            context.errorReporter.reportFatalError(
-                `Type ${objectInfo.type} is not a data type, cannot access fields`,
-                this.span,
-            )
-        }
-        const field = declaration.fields.find((f) => f.name === this.field)
-        if (!field) {
-            context.errorReporter.reportFatalError(
-                `Field ${this.field} does not exist on type ${objectInfo.type}`,
-                this.fieldSpan,
-            )
-        }
+        const field = this.getFieldFromContext(context)
         return { type: field.type }
     }
 
@@ -99,6 +59,31 @@ export class FieldReference implements Expression {
             object: this.object.toCIR(context),
             field: this.field,
         }
+    }
+
+    private getFieldFromContext(context: Context) {
+        const objectType = this.object.valueSet(context).type
+        const declaration = context.scope.declarations.get(objectType)
+        if (!declaration) {
+            context.errorReporter.reportFatalError(
+                `Type ${objectType} is not defined in the current context`,
+                this.span,
+            )
+        }
+        if (!declaration.fields) {
+            context.errorReporter.reportFatalError(
+                `Type ${objectType} is not a data type, cannot access fields`,
+                this.span,
+            )
+        }
+        const field = declaration.fields.find((f) => f.name === this.field)
+        if (!field) {
+            context.errorReporter.reportFatalError(
+                `Field ${this.field} does not exist on type ${objectType}`,
+                this.fieldSpan,
+            )
+        }
+        return field
     }
 
     private checkOperatorCompatibility(context: Context) {

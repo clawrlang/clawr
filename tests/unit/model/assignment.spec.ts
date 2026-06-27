@@ -5,6 +5,7 @@ import { VariableReference } from '../../../src/model/variable-reference'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { FieldReference } from '../../../src/model/field-reference'
 import { DataDeclaration } from '../../../src/model/data-declaration'
+import { DataLiteral } from '../../../src/model/data-literal'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -220,6 +221,50 @@ describe('Assignment', () => {
                     ],
                 })
             })
+        })
+
+        it('does not throw if the value is UNIQUE', () => {
+            const context = newSemanticContext()
+            context.scope.declarations.set(
+                'MyType',
+                DataDeclaration.create({
+                    name: 'MyType',
+                    fields: [
+                        {
+                            name: 'myField',
+                            type: 'integer',
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+            context.scope.variables.set('target', {
+                semantics: 'mut',
+                type: 'MyType',
+            })
+
+            const assignment = Assignment.create({
+                target: FieldReference.create({
+                    object: VariableReference.create({
+                        name: 'target',
+                        span: someCodeSpan,
+                    }),
+                    operator: '.',
+                    field: 'myField',
+                    fieldSpan: someCodeSpan,
+                }),
+                span: {
+                    start: { line: 1, column: 3 },
+                    end: { line: 1, column: 4 },
+                },
+                value: DataLiteral.create([
+                    {
+                        name: 'myField',
+                        value: IntegerLiteral.create(42n),
+                    },
+                ]),
+            })
+            expect(() => assignment.toCIR(context)).not.toThrow()
         })
     })
 })

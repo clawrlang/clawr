@@ -24,9 +24,13 @@ export class Assignment implements Statement {
     }
 
     toCIR(context: Context): cir.Statement {
-        if (this.target.semantics(context) !== this.value.semantics(context))
+        const valueSemantics = this.value.semantics(context)
+        const targetSemantics = this.target.semantics(context)
+        const isValueSemanticsMismatch =
+            valueSemantics !== 'UNIQUE' && targetSemantics !== valueSemantics
+        if (isValueSemanticsMismatch)
             context.errorReporter.reportFatalError(
-                `Cannot assign ${this.value.semantics(context)} value to ${this.target.semantics(context)} target`,
+                `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
                 { start: this.span.start, end: this.span.end },
             )
 

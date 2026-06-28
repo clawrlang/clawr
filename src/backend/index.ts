@@ -19,6 +19,11 @@ export function lowerDecl(decl: cir.Declaration): string {
                 .join('\n')
             return `typedef struct {
                 ${fields}
+            } ${decl.name}ˇfields;
+
+            typedef struct {
+                __rc_header header;
+                ${decl.name}ˇfields fields;
             } ${decl.name};`
         }
         case 'VARIABLE_DECL': {
@@ -76,12 +81,16 @@ export function lowerExpr(expr: cir.Expression): string {
         }
         case 'DATA_LITERAL': {
             const fields = expr.fields
-                .map((field) => `${lowerExpr(field.value)}`)
+                .map((field) => `.${field.name} = ${lowerExpr(field.value)}`)
                 .join(', ')
-            return `{ ${fields} }`
+            return `{
+                .fields = {
+                    ${fields}
+                }
+            }`
         }
         case 'FIELD_REF': {
-            return `${lowerExpr(expr.object)}.${expr.field}`
+            return `${lowerExpr(expr.object)}.fields.${expr.field}`
         }
         default: {
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)

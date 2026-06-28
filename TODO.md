@@ -6,7 +6,6 @@
 
 - Allow explicit copying (using `copy(of:)`)
 - Add reference-counting to `data`
-  - Add `__rc_header` to `struct` (see [datastructure.h](tests/runtime/cases/data_structure.h))
   - Lower as `fields` (see [copy-on-write.h](tests/runtime/cases/copy-on-write.c))
   - `ALLOC(Type, COW|REF)` - expression
   - `ASSIGN_FIELDS` - statement

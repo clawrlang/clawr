@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://example.com/schema/cir",
+  "$id": "http://clawr.lang/schema/cir/DRAFT-0",
   "title": "Clawr Module",
   "type": "object",
   "properties": {

@@ -4,6 +4,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import Bun from 'bun'
 import { Command } from 'commander'
+import { Validator } from 'jsonschema'
 
 import * as backend from '../backend'
 import { ModuleParser } from '../parser'
@@ -62,6 +63,7 @@ async function compileCIR(cirFilePath: string) {
     const cir = JSON.parse(
         await fs.readFile(cirFilePath, 'utf-8'),
     ) as ClawrModule
+    await validateCIR(cir)
     const cCode = backend.lower(cir)
 
     await fs.writeFile(cFilePath, cCode)
@@ -82,6 +84,13 @@ async function compileCIR(cirFilePath: string) {
         },
     )
     await proc.exited
+}
+
+async function validateCIR(cir: ClawrModule) {
+    const schema = JSON.parse(
+        await fs.readFile(path.join(exeDir, 'cir.schema.json'), 'utf-8'),
+    )
+    new Validator().validate(cir, schema, { throwError: true })
 }
 
 async function ensureDirectoryExists(outputDir: string) {

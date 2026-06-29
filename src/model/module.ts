@@ -25,6 +25,7 @@ export class Module {
             }
         })
         return {
+            $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
             declarations: this.declarations.map((decl) => {
                 if (decl instanceof DataDeclaration) {
                     return decl.toCIR(context)

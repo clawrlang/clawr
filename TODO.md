@@ -49,3 +49,11 @@
    2. Implement necessary lexer and parser changes
    3. Implement semantic analysis changes
 4. Add end-to-end tests — Clawr source → program output
+
+## Schema Validation
+
+- Publish the schema to a URL and require `$schema` to be that URL
+  - Add versioning to the URL
+  - Keep loading the schema from dist/cir.schema.json
+- When developing, keep `$schema` as generic `string` and use a local path
+  - Create a script that replaces `$schema` with the URL for publishing

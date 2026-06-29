@@ -4,7 +4,12 @@
   "title": "Clawr Module",
   "type": "object",
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "enum": [
+        "http://clawr.lang/schema/cir/DRAFT-0",
+        "../../../docs/schema/cir.schema.json"
+      ]
+    },
     "startBlock": {
       "type": "array",
       "items": { "$ref": "#/definitions/statement" }
@@ -14,6 +19,7 @@
       "items": { "$ref": "#/definitions/declaration" }
     }
   },
+  "required": ["$schema"],
   "additionalProperties": false,
   "definitions": {
     "declaration": {

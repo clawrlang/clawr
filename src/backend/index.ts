@@ -96,6 +96,9 @@ export function lowerStmt(stmt: cir.Statement): string {
         case 'ENSURE_UNIQUE': {
             return `mutateRC(${lowerExpr(stmt.object)});`
         }
+        case 'RELEASE': {
+            return `releaseRC(${lowerExpr(stmt.object)});`
+        }
         default: {
             throw new Error(`Unknown statement kind: ${(stmt as any).kind}`)
         }

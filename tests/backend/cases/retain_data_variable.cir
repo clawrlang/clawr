@@ -107,6 +107,20 @@
                     "field": "bar"
                 }
             ]
+        },
+        {
+            "kind": "RELEASE",
+            "object": {
+                "kind": "VARIABLE_REF",
+                "name": "one"
+            }
+        },
+        {
+            "kind": "RELEASE",
+            "object": {
+                "kind": "VARIABLE_REF",
+                "name": "two"
+            }
         }
     ]
 }

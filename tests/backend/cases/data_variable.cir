@@ -67,6 +67,13 @@
                     "field": "bar"
                 }
             ]
+        },
+        {
+            "kind": "RELEASE",
+            "object": {
+                "kind": "VARIABLE_REF",
+                "name": "foo"
+            }
         }
     ]
 }

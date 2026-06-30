@@ -5,7 +5,6 @@
 - Emit `RETAIN` on assignment
 - Emit `ENSURE_UNIQUE` before editing if `COW` - statement
 - Remove the ugly hack in `lowerStmt`
-- Lower `RELEASE`
 - Emit `RELEASE` on reassignment
 - Emit `RELEASE` on scope exit
 

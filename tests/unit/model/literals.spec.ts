@@ -63,7 +63,9 @@ describe('Literals', () => {
             expect(
                 dataLiteral.toCIR({ ...newSemanticContext(), type: 'MyType' }),
             ).toMatchObject({
-                kind: 'DATA_LITERAL',
+                kind: 'ALLOCATE',
+                type: 'MyType',
+                // semantics: 'REF',
                 fields: [
                     {
                         name: 'x',

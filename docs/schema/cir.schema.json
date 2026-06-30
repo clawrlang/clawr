@@ -65,22 +65,6 @@
       "oneOf": [
         {
           "type": "object",
-          "title": "Assign Fields",
-          "properties": {
-            "kind": { "const": "ASSIGN_FIELDS" },
-            "target": {
-              "oneOf": [
-                { "$ref": "#/definitions/variable_reference" },
-                { "$ref": "#/definitions/field_reference" }
-              ]
-            },
-            "fields": { "$ref": "#/definitions/data_literal" }
-          },
-          "required": ["kind", "target", "fields"],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
           "title": "Ensure Unique",
           "properties": {
             "kind": { "const": "ENSURE_UNIQUE" },
@@ -220,13 +204,21 @@
           "properties": {
             "kind": { "const": "ALLOCATE" },
             "type": { "type": "string" },
-            "semantics": {
-              "description": "Specifies the allocation semantics",
-              "type": "string",
-              "enum": ["REF", "COW"]
+            "semantics": { "enum": ["REF", "COW"] },
+            "fields": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "value": { "$ref": "#/definitions/expression" }
+                },
+                "required": ["name", "value"],
+                "additionalProperties": false
+              }
             }
           },
-          "required": ["kind", "type", "semantics"],
+          "required": ["kind", "type", "semantics", "fields"],
           "additionalProperties": false
         },
         {
@@ -240,30 +232,9 @@
           "additionalProperties": false
         },
         { "$ref": "#/definitions/variable_reference" },
-        { "$ref": "#/definitions/data_literal" },
         { "$ref": "#/definitions/field_reference" },
         { "$ref": "#/definitions/call_func" }
       ]
-    },
-    "data_literal": {
-      "type": "object",
-      "properties": {
-        "kind": { "const": "DATA_LITERAL" },
-        "fields": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string" },
-              "value": { "$ref": "#/definitions/expression" }
-            },
-            "required": ["name", "value"],
-            "additionalProperties": false
-          }
-        }
-      },
-      "required": ["kind", "fields"],
-      "additionalProperties": false
     },
     "field_reference": {
       "type": "object",

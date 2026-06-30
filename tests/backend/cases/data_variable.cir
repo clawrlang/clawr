@@ -16,7 +16,9 @@
             "name": "foo",
             "type": "FooData",
             "initialValue": {
-                "kind": "DATA_LITERAL",
+                "kind": "ALLOCATE",
+                "type": "FooData",
+                "semantics": "REF",
                 "fields": [
                     {
                         "name": "bar",

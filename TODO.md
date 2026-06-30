@@ -7,8 +7,6 @@
 - Allow explicit copying (using `copy(of:)`)
 - Add reference-counting to `data`
   - Lower as `fields` (see [copy-on-write.h](tests/runtime/cases/copy-on-write.c))
-  - `ALLOC(Type, COW|REF)` - expression
-  - `ASSIGN_FIELDS` - statement
   - `ENSURE_UNIQUE` before editing if `COW` - statement
   - `RELEASE` on descope - statement
 - Nested scopes (global/local vars)

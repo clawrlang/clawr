@@ -35,7 +35,9 @@ export class DataLiteral implements Expression {
     toCIR(context: Context & { type: string }): cir.Expression {
         this.valueSet(context)
         return {
-            kind: 'DATA_LITERAL',
+            kind: 'ALLOCATE',
+            type: context.type,
+            semantics: 'REF',
             fields: this.fields.map((field) => ({
                 name: field.name,
                 value: field.value.toCIR(context),

@@ -79,7 +79,7 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'VARIABLE_REF': {
             return expr.name
         }
-        case 'DATA_LITERAL': {
+        case 'ALLOCATE': {
             const fields = expr.fields
                 .map((field) => `.${field.name} = ${lowerExpr(field.value)}`)
                 .join(', ')

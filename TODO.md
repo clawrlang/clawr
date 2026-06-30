@@ -2,12 +2,19 @@
 
 ## In Progress
 
+- Lower `RETAIN`
+- Emit `RETAIN` on assignment
+- Lower `ENSURE_UNIQUE`
+- Emit `ENSURE_UNIQUE` before editing if `COW` - statement
+- Remove the ugly hack in `lowerStmt`
+- Lower `RELEASE`
+- Emit `RELEASE` on reassignment
+- Emit `RELEASE` on scope exit
+
 ## Next
 
 - Allow explicit copying (using `copy(of:)`)
-- Add reference-counting to `data`
-  - `ENSURE_UNIQUE` before editing if `COW` - statement
-  - `RELEASE` on descope - statement
+- Add `copy(of: T) -> T` (`UNIQUE` ret value)
 - Nested scopes (global/local vars)
 - Generate AST for syntax coloring
 

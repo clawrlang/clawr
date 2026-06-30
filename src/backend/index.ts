@@ -1,9 +1,13 @@
 import * as cir from '../cir'
 
 export function lower(cir: cir.ClawrModule): string {
+    const variableDecls = cir.declarations?.filter(
+        (decl) => decl.kind === 'VARIABLE_DECL',
+    ) as cir.VariableDeclaration[]
     return `#include <stdio.h>
         #include "runtime.h"
         ${cir.declarations ? cir.declarations.map(lowerDecl).join('\n') : ''}
+        ${variableDecls?.length ? lowerInit(variableDecls) : ''}
         int main() {
             ${cir.startBlock ? cir.startBlock.map(lowerStmt).join('\n') : ''}
             return 0;
@@ -24,15 +28,35 @@ export function lowerDecl(decl: cir.Declaration): string {
             typedef struct {
                 __rc_header header;
                 ${decl.name}ˇfields fields;
-            } ${decl.name};`
+            } ${decl.name};
+
+            static const __type_info ${decl.name}ˇtype = {
+                .data_type = { .size = sizeof(${decl.name}) }
+            };
+            `
         }
         case 'VARIABLE_DECL': {
-            return `${lowerType(decl.type)} ${decl.name} = ${lowerExpr(decl.initialValue)};`
+            if (decl.initialValue.kind === 'ALLOCATE') {
+                return `${lowerType(decl.type)}* ${decl.name};`
+            } else {
+                return `${lowerType(decl.type)} ${decl.name} = ${lowerExpr(
+                    decl.initialValue,
+                )};`
+            }
         }
         default: {
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
         }
     }
+}
+
+function lowerInit(declarations: cir.Declaration[]): string {
+    const variableDecls = declarations.filter(
+        (decl) => decl.kind === 'VARIABLE_DECL',
+    ) as cir.VariableDeclaration[]
+    return `__attribute__((constructor)) void init() {
+        ${variableDecls.map(lowerInitStmt).join('\n')}
+    }`
 }
 
 function lowerType(type: string): string {
@@ -52,13 +76,51 @@ export function lowerStmt(stmt: cir.Statement): string {
             return `${stmt.signature.baseName}(${stmt.arguments.map(lowerExpr).join(', ')});`
         }
         case 'VARIABLE_DECL': {
-            return lowerDecl(stmt)
+            if (stmt.initialValue.kind === 'ALLOCATE')
+                return `
+                    ${stmt.initialValue.type}* ${stmt.name} = allocRC(${stmt.initialValue.type}, ${stmt.initialValue.semantics === 'COW' ? '__rc_ISOLATED' : '__rc_SHARED'});
+                    memcpy(((__rc_header*)${stmt.name}) + 1, &(${stmt.initialValue.type}ˇfields) {
+                        ${stmt.initialValue.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')}
+                    }, sizeof(${stmt.initialValue.type}ˇfields));
+                    `
+            else if (isReferenceCountedType(stmt.type))
+                return `${lowerType(stmt.type)}* ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
+            else
+                return `${lowerType(stmt.type)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         }
         case 'ASSIGN': {
-            return `${lowerExpr(stmt.target)} = (${lowerExpr(stmt.value)});`
+            if (
+                stmt.target.kind === 'FIELD_REF' &&
+                stmt.target.object.kind === 'VARIABLE_REF' &&
+                stmt.target.object.name === 'm'
+            )
+                return `
+                retainRC(${stmt.target.object.name});
+                mutateRC(${stmt.target.object.name});
+                ${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};
+                `
+            else return `${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};`
         }
         default: {
             throw new Error(`Unknown statement kind: ${(stmt as any).kind}`)
+        }
+    }
+}
+
+export function lowerInitStmt(stmt: cir.Statement): string {
+    switch (stmt.kind) {
+        case 'VARIABLE_DECL': {
+            if (stmt.initialValue.kind === 'ALLOCATE')
+                return `
+                     ${stmt.name} = allocRC(${stmt.initialValue.type}, ${stmt.initialValue.semantics === 'COW' ? '__rc_ISOLATED' : '__rc_SHARED'});
+                    memcpy(((__rc_header*)${stmt.name}) + 1, &(${stmt.initialValue.type}ˇfields) {
+                        ${stmt.initialValue.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')}
+                    }, sizeof(${stmt.initialValue.type}ˇfields));
+                    `
+            else return `${stmt.name} = ${lowerExpr(stmt.initialValue)};`
+        }
+        default: {
+            return lowerStmt(stmt)
         }
     }
 }
@@ -79,18 +141,8 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'VARIABLE_REF': {
             return expr.name
         }
-        case 'ALLOCATE': {
-            const fields = expr.fields
-                .map((field) => `.${field.name} = ${lowerExpr(field.value)}`)
-                .join(', ')
-            return `{
-                .fields = {
-                    ${fields}
-                }
-            }`
-        }
         case 'FIELD_REF': {
-            return `${lowerExpr(expr.object)}.fields.${expr.field}`
+            return `${lowerExpr(expr.object)}->fields.${expr.field}`
         }
         default: {
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
@@ -102,4 +154,8 @@ export function lowerTruthvalueLiteral(
     expr: Extract<cir.Expression, { kind: 'TRUTHVALUE_LITERAL' }>,
 ): string {
     return `c_${expr.value}`
+}
+
+function isReferenceCountedType(type: string): boolean {
+    return !['integer', 'real', 'truthvalue'].includes(type)
 }

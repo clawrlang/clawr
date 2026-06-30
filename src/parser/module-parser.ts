@@ -4,20 +4,25 @@ import { BlockParser } from './block-parser'
 import { Declaration, Statement } from '../model'
 import { Module } from '../model/module'
 import { Context } from '.'
+import { VariableDeclarationParser } from './variable-declaration-parser'
+import { VARIABLE_SEMANTICS } from '../model/variable-declaration'
 
 export class ModuleParser {
-    private constructor(
-        private blockParser: BlockParser,
-        private dataDeclarationParser: DataDeclarationParser,
-        private context: Context,
-    ) {}
+    private blockParser: BlockParser
+    private dataDeclarationParser: DataDeclarationParser
+    private variableDeclarationParser: VariableDeclarationParser
+
+    private constructor(private context: Context) {
+        this.blockParser = BlockParser.create({
+            errorReporter: context.errorReporter,
+        })
+        this.dataDeclarationParser = DataDeclarationParser.create(context)
+        this.variableDeclarationParser =
+            VariableDeclarationParser.create(context)
+    }
 
     static create(context: Context): ModuleParser {
-        return new ModuleParser(
-            BlockParser.create({ errorReporter: context.errorReporter }),
-            DataDeclarationParser.create(context),
-            context,
-        )
+        return new ModuleParser(context)
     }
 
     parse(stream: TokenStream): Module {
@@ -38,6 +43,8 @@ export class ModuleParser {
                 main = this.blockParser.parse(stream)
             } else if (stream.isNext('KEYWORD', 'data')) {
                 declarations.push(this.dataDeclarationParser.parse(stream))
+            } else if (stream.isNext('KEYWORD', ...VARIABLE_SEMANTICS)) {
+                declarations.push(this.variableDeclarationParser.parse(stream))
             } else {
                 const { start, end } = stream.peek()!!
                 this.context.errorReporter.reportFatalError(

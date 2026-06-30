@@ -2,13 +2,14 @@ data MyData {
     field: integer
 }
 
-@main {
-    const c: MyData = { field: 1 }
-    mut m: MyData = c
-    // ref r: MyData = { field: 1 }
-    // mutref mr: MyData = r
+const c: MyData = { field: 1 }
+// ref r: MyData = copy(of: c)
 
+@main {
+    mut m: MyData = c
     m.field = 2 // isolated mutation
+
+    // mutref mr: MyData = r
     // r.field = 3 // shared mutation
 
     print(c.field)

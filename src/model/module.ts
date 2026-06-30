@@ -1,6 +1,7 @@
 import { Statement, Declaration, Context } from '.'
 import * as cir from '../cir'
 import { DataDeclaration } from './data-declaration'
+import { VariableDeclaration } from './variable-declaration'
 
 export class Module {
     private constructor(
@@ -28,6 +29,8 @@ export class Module {
             $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
             declarations: this.declarations.map((decl) => {
                 if (decl instanceof DataDeclaration) {
+                    return decl.toCIR(context)
+                } else if (decl instanceof VariableDeclaration) {
                     return decl.toCIR(context)
                 } else {
                     throw new Error('Unknown declaration type')

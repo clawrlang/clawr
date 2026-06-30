@@ -1,11 +1,11 @@
 import * as cir from '../cir'
-import { Statement, Expression, Context } from '.'
+import { Statement, Expression, Context, Declaration } from '.'
 import { convertSemantics } from './variable-reference'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
 
-export class VariableDeclaration implements Statement {
+export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private semantics: VariableSemantics,
         private name: string,
@@ -27,7 +27,7 @@ export class VariableDeclaration implements Statement {
         return new VariableDeclaration(semantics, name, type, initialValue)
     }
 
-    toCIR(context: Context): cir.Statement {
+    toCIR(context: Context): cir.VariableDeclaration {
         context.scope.variables.set(this.name, {
             semantics: this.semantics,
             type: this.type,

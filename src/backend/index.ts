@@ -36,13 +36,12 @@ export function lowerDecl(decl: cir.Declaration): string {
             `
         }
         case 'VARIABLE_DECL': {
-            if (decl.initialValue.kind === 'ALLOCATE') {
-                return `${lowerType(decl.type)}* ${decl.name};`
-            } else {
+            if (decl.initialValue.kind === 'ALLOCATE')
+                return `${lowerType(decl.type)} ${decl.name};`
+            else
                 return `${lowerType(decl.type)} ${decl.name} = ${lowerExpr(
                     decl.initialValue,
                 )};`
-            }
         }
         default: {
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
@@ -66,7 +65,7 @@ function lowerType(type: string): string {
         case 'truthvalue':
             return 'truthvalue_t'
         default:
-            return type // For user-defined types, we assume they are already valid C types
+            return `${type}*`
     }
 }
 
@@ -78,8 +77,6 @@ export function lowerStmt(stmt: cir.Statement): string {
         case 'VARIABLE_DECL': {
             if (stmt.initialValue.kind === 'ALLOCATE')
                 return `${stmt.initialValue.type}* ${lowerInitStmt(stmt)};`
-            else if (isReferenceCountedType(stmt.type))
-                return `${lowerType(stmt.type)}* ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
             else
                 return `${lowerType(stmt.type)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         }

@@ -80,21 +80,6 @@
         },
         {
           "type": "object",
-          "title": "Retain",
-          "properties": {
-            "kind": { "const": "RETAIN" },
-            "object": {
-              "oneOf": [
-                { "$ref": "#/definitions/variable_reference" },
-                { "$ref": "#/definitions/field_reference" }
-              ]
-            }
-          },
-          "required": ["kind", "object"],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
           "title": "Release",
           "properties": {
             "kind": { "const": "RELEASE" },
@@ -219,6 +204,21 @@
             }
           },
           "required": ["kind", "type", "semantics", "fields"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "title": "Retain",
+          "properties": {
+            "kind": { "const": "RETAIN" },
+            "object": {
+              "oneOf": [
+                { "$ref": "#/definitions/variable_reference" },
+                { "$ref": "#/definitions/field_reference" }
+              ]
+            }
+          },
+          "required": ["kind", "object"],
           "additionalProperties": false
         },
         {

@@ -93,6 +93,9 @@ export function lowerStmt(stmt: cir.Statement): string {
                     `
             else return `${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};`
         }
+        case 'ENSURE_UNIQUE': {
+            return `mutateRC(${lowerExpr(stmt.object)});`
+        }
         default: {
             throw new Error(`Unknown statement kind: ${(stmt as any).kind}`)
         }
@@ -119,6 +122,9 @@ export function lowerInitStmt(stmt: cir.Statement): string {
 
 export function lowerExpr(expr: cir.Expression): string {
     switch (expr.kind) {
+        case 'RETAIN': {
+            return `retainRC(${lowerExpr(expr.object)})`
+        }
         case 'STRING_LITERAL': {
             return `"${expr.value}"`
         }

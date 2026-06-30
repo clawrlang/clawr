@@ -1,0 +1,112 @@
+{
+    "$schema": "../../../docs/schema/cir.schema.json",
+    "declarations": [
+        {
+            "kind": "DATA_DECL",
+            "name": "FooData",
+            "fields": [
+                {
+                    "name": "bar",
+                    "type": "integer"
+                }
+            ]
+        },
+        {
+            "kind": "VARIABLE_DECL",
+            "name": "two",
+            "type": "FooData",
+            "initialValue": {
+                "kind": "ALLOCATE",
+                "type": "FooData",
+                "semantics": "COW",
+                "fields": [
+                    {
+                        "name": "bar",
+                        "value": {
+                            "kind": "INTEGER_LITERAL",
+                            "value": "2"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "startBlock": [
+        {
+            "kind": "VARIABLE_DECL",
+            "name": "one",
+            "type": "FooData",
+            "initialValue": {
+                "kind": "RETAIN",
+                "object": {
+                    "kind": "VARIABLE_REF",
+                    "name": "two"
+                }
+            }
+        },
+        {
+            "kind": "ENSURE_UNIQUE",
+            "object": {
+                "kind": "VARIABLE_REF",
+                "name": "one"
+            }
+        },
+        {
+            "kind": "ASSIGN",
+            "target": {
+                "kind": "FIELD_REF",
+                "object": {
+                    "kind": "VARIABLE_REF",
+                    "name": "one"
+                },
+                "field": "bar"
+            },
+            "value": {
+                "kind": "INTEGER_LITERAL",
+                "value": "1"
+            }
+        },
+        {
+            "kind": "CALL_FUNC",
+            "signature": {
+                "baseName": "printInt64",
+                "parameters": [
+                    {
+                        "type": "integer"
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "kind": "FIELD_REF",
+                    "object": {
+                        "kind": "VARIABLE_REF",
+                        "name": "two"
+                    },
+                    "field": "bar"
+                }
+            ]
+        },
+        {
+            "kind": "CALL_FUNC",
+            "signature": {
+                "baseName": "printInt64",
+                "parameters": [
+                    {
+                        "type": "integer"
+                    }
+                ]
+            },
+            "arguments": [
+                {
+                    "kind": "FIELD_REF",
+                    "object": {
+                        "kind": "VARIABLE_REF",
+                        "name": "one"
+                    },
+                    "field": "bar"
+                }
+            ]
+        }
+    ]
+}

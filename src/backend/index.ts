@@ -77,12 +77,7 @@ export function lowerStmt(stmt: cir.Statement): string {
         }
         case 'VARIABLE_DECL': {
             if (stmt.initialValue.kind === 'ALLOCATE')
-                return `
-                    ${stmt.initialValue.type}* ${stmt.name} = allocRC(${stmt.initialValue.type}, ${stmt.initialValue.semantics === 'COW' ? '__rc_ISOLATED' : '__rc_SHARED'});
-                    memcpy(((__rc_header*)${stmt.name}) + 1, &(${stmt.initialValue.type}ˇfields) {
-                        ${stmt.initialValue.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')}
-                    }, sizeof(${stmt.initialValue.type}ˇfields));
-                    `
+                return `${stmt.initialValue.type}* ${lowerInitStmt(stmt)};`
             else if (isReferenceCountedType(stmt.type))
                 return `${lowerType(stmt.type)}* ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
             else
@@ -95,10 +90,10 @@ export function lowerStmt(stmt: cir.Statement): string {
                 stmt.target.object.name === 'm'
             )
                 return `
-                retainRC(${stmt.target.object.name});
-                mutateRC(${stmt.target.object.name});
-                ${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};
-                `
+                    retainRC(${stmt.target.object.name});
+                    mutateRC(${stmt.target.object.name});
+                    ${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};
+                    `
             else return `${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};`
         }
         default: {
@@ -112,7 +107,7 @@ export function lowerInitStmt(stmt: cir.Statement): string {
         case 'VARIABLE_DECL': {
             if (stmt.initialValue.kind === 'ALLOCATE')
                 return `
-                     ${stmt.name} = allocRC(${stmt.initialValue.type}, ${stmt.initialValue.semantics === 'COW' ? '__rc_ISOLATED' : '__rc_SHARED'});
+                    ${stmt.name} = allocRC(${stmt.initialValue.type}, ${stmt.initialValue.semantics === 'COW' ? '__rc_ISOLATED' : '__rc_SHARED'});
                     memcpy(((__rc_header*)${stmt.name}) + 1, &(${stmt.initialValue.type}ˇfields) {
                         ${stmt.initialValue.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')}
                     }, sizeof(${stmt.initialValue.type}ˇfields));

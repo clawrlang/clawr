@@ -6,7 +6,6 @@
 
 - Allow explicit copying (using `copy(of:)`)
 - Add reference-counting to `data`
-  - Lower as `ˇfields` (see [data_structure.h](tests/runtime/cases/data_structure.h))
   - `ENSURE_UNIQUE` before editing if `COW` - statement
   - `RELEASE` on descope - statement
 - Nested scopes (global/local vars)

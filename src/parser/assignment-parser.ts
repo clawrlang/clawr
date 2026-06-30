@@ -2,23 +2,21 @@ import { TokenStream } from '../lexer'
 import { Assignment } from '../model/assignment'
 import { ExpressionParser } from './expression.parser'
 import { StatementParser } from './statement-parser'
-import { ErrorReporter } from '../diagnostics'
 import { FieldReference } from '../model/field-reference'
 import { VariableReference } from '../model/variable-reference'
+import { Context } from '.'
 
 export class AssignmentParser implements StatementParser<Assignment> {
-    private constructor(private errorReporter: ErrorReporter) {}
+    private constructor(private context: Context) {}
 
-    static create({ errorReporter }: { errorReporter: ErrorReporter }) {
-        return new AssignmentParser(errorReporter)
+    static create(context: Context) {
+        return new AssignmentParser(context)
     }
 
     isNext(stream: TokenStream): boolean {
         const clone = stream.clone()
         try {
-            ExpressionParser.create({
-                errorReporter: this.errorReporter,
-            }).parse(clone)
+            ExpressionParser.create(this.context).parse(clone)
             clone.expect('PUNCTUATION', '=')
             return true
         } catch {
@@ -27,9 +25,7 @@ export class AssignmentParser implements StatementParser<Assignment> {
     }
 
     parse(stream: TokenStream) {
-        const expressionParser = ExpressionParser.create({
-            errorReporter: this.errorReporter,
-        })
+        const expressionParser = ExpressionParser.create(this.context)
         const target = expressionParser.parse(stream)
         if (
             target instanceof VariableReference ||
@@ -43,7 +39,7 @@ export class AssignmentParser implements StatementParser<Assignment> {
                 span: { start: equalsToken.start, end: equalsToken.end },
             })
         } else {
-            this.errorReporter.reportFatalError(
+            this.context.errorReporter.reportFatalError(
                 'Invalid assignment target. Only variables and fields are allowed.',
                 { start: stream.peek()!!.start, end: stream.peek()!!.end },
             )

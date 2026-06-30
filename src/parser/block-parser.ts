@@ -1,4 +1,4 @@
-import { ErrorReporter } from '../diagnostics'
+import { Context } from '.'
 import { TokenStream } from '../lexer'
 import { Statement } from '../model'
 import { AssignmentParser } from './assignment-parser'
@@ -8,23 +8,19 @@ import { VariableDeclarationParser } from './variable-declaration-parser'
 
 export class BlockParser {
     private statementParsers: StatementParser<Statement>[]
-    private errorReporter: ErrorReporter
+    private context: Context
 
-    private constructor(errorReporter: ErrorReporter) {
-        this.errorReporter = errorReporter
+    private constructor(context: Context) {
+        this.context = context
         this.statementParsers = [
-            CallFuncParser.create({ errorReporter }),
-            VariableDeclarationParser.create({ errorReporter }),
-            AssignmentParser.create({ errorReporter }),
+            CallFuncParser.create(context),
+            VariableDeclarationParser.create(context),
+            AssignmentParser.create(context),
         ]
     }
 
-    static create({
-        errorReporter,
-    }: {
-        errorReporter: ErrorReporter
-    }): BlockParser {
-        return new BlockParser(errorReporter)
+    static create(context: Context): BlockParser {
+        return new BlockParser(context)
     }
 
     parse(stream: TokenStream): Statement[] {
@@ -46,7 +42,7 @@ export class BlockParser {
         )
         if (!parser) {
             const { start, end } = stream.peek()!!
-            this.errorReporter.reportFatalError(
+            this.context.errorReporter.reportFatalError(
                 'No suitable parser found for the next statement',
                 { start, end },
             )

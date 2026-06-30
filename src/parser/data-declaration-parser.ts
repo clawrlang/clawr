@@ -1,3 +1,4 @@
+import { Context } from '.'
 import { TokenStream } from '../lexer'
 import { DataDeclaration } from '../model/data-declaration'
 import {
@@ -6,10 +7,10 @@ import {
 } from '../model/variable-declaration'
 
 export class DataDeclarationParser {
-    private constructor() {}
+    private constructor(_: Context) {}
 
-    static create(): DataDeclarationParser {
-        return new DataDeclarationParser()
+    static create(context: Context): DataDeclarationParser {
+        return new DataDeclarationParser(context)
     }
 
     parse(stream: TokenStream): DataDeclaration {

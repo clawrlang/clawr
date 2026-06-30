@@ -1,12 +1,23 @@
 import { ExpressionParser } from './expression.parser'
 import { TokenStream } from '../lexer'
 import { DataLiteral } from '../model/data-literal'
+import { Context } from '.'
 
 export class DataLiteralParser {
-    constructor(private expressionParser: ExpressionParser) {}
+    private constructor(
+        _: Context,
+        private expressionParser: ExpressionParser,
+    ) {}
 
-    static create(expressionParser: ExpressionParser) {
-        return new DataLiteralParser(expressionParser)
+    static create(
+        context: Context,
+        {
+            expressionParser,
+        }: {
+            expressionParser: ExpressionParser
+        },
+    ) {
+        return new DataLiteralParser(context, expressionParser)
     }
 
     parse(stream: TokenStream): DataLiteral {

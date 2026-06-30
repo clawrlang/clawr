@@ -14,7 +14,10 @@ describe('DataLiteralParser', () => {
         const errorReporter = new TestErrorReporter('test.clawr')
         const tokenStream = TokenStream.read(code, errorReporter)
         const parser = DataLiteralParser.create(
-            ExpressionParser.create({ errorReporter }),
+            { errorReporter },
+            {
+                expressionParser: ExpressionParser.create({ errorReporter }),
+            },
         )
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
@@ -30,7 +33,8 @@ describe('DataLiteralParser', () => {
         const errorReporter = new TestErrorReporter('test.clawr')
         const tokenStream = TokenStream.read(code, errorReporter)
         const parser = DataLiteralParser.create(
-            ExpressionParser.create({ errorReporter }),
+            { errorReporter },
+            { expressionParser: ExpressionParser.create({ errorReporter }) },
         )
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({

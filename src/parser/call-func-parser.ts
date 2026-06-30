@@ -3,17 +3,13 @@ import { TokenStream } from '../lexer'
 import { Expression, Statement } from '../model'
 import { StatementParser } from './statement-parser'
 import { CallFunc } from '../model/call-func'
-import { ErrorReporter } from '../diagnostics'
+import { Context } from '.'
 
 export class CallFuncParser implements StatementParser<Statement> {
-    private constructor(private errorReporter: ErrorReporter) {}
+    private constructor(private context: Context) {}
 
-    static create({
-        errorReporter,
-    }: {
-        errorReporter: ErrorReporter
-    }): CallFuncParser {
-        return new CallFuncParser(errorReporter)
+    static create(context: Context): CallFuncParser {
+        return new CallFuncParser(context)
     }
 
     isNext(stream: TokenStream): boolean {
@@ -42,9 +38,7 @@ export class CallFuncParser implements StatementParser<Statement> {
                     return null
                 }
             })
-            const arg = ExpressionParser.create({
-                errorReporter: this.errorReporter,
-            }).parse(stream)
+            const arg = ExpressionParser.create(this.context).parse(stream)
             args.push({ label: label?.label, value: arg })
 
             if (stream.isNext('PUNCTUATION', ')')) {

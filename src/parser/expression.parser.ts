@@ -1,4 +1,4 @@
-import { ErrorReporter } from '../diagnostics'
+import { Context } from '.'
 import { TokenStream } from '../lexer'
 import { Expression } from '../model'
 import { FieldReference } from '../model/field-reference'
@@ -8,14 +8,16 @@ import { VariableReference } from '../model/variable-reference'
 import { DataLiteralParser } from './data-literal-parser'
 
 export class ExpressionParser {
-    private constructor(private errorReporter: ErrorReporter) {}
+    readonly dataLiteralParser: DataLiteralParser
 
-    static create({
-        errorReporter,
-    }: {
-        errorReporter: ErrorReporter
-    }): ExpressionParser {
-        return new ExpressionParser(errorReporter)
+    private constructor(private context: Context) {
+        this.dataLiteralParser = DataLiteralParser.create(this.context, {
+            expressionParser: this,
+        })
+    }
+
+    static create(context: Context): ExpressionParser {
+        return new ExpressionParser(context)
     }
 
     parse(stream: TokenStream): Expression {
@@ -56,10 +58,13 @@ export class ExpressionParser {
                 return this.parseDataLiteral(stream)
         }
         const token = stream.expectToken()
-        this.errorReporter.reportFatalError(`Unexpected ${token.kind}`, {
-            start: token.start,
-            end: token.end,
-        })
+        this.context.errorReporter.reportFatalError(
+            `Unexpected ${token.kind}`,
+            {
+                start: token.start,
+                end: token.end,
+            },
+        )
     }
 
     private parseVariableReference(stream: TokenStream) {
@@ -87,6 +92,6 @@ export class ExpressionParser {
     }
 
     private parseDataLiteral(stream: TokenStream): Expression {
-        return DataLiteralParser.create(this).parse(stream)
+        return this.dataLiteralParser.parse(stream)
     }
 }

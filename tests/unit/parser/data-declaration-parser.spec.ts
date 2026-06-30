@@ -12,7 +12,7 @@ describe('DataDeclarationParser', () => {
             }`
         const errorReporter = new TestErrorReporter('test.clawr')
         const tokenStream = TokenStream.read(code, errorReporter)
-        const parser = DataDeclarationParser.create()
+        const parser = DataDeclarationParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             name: 'MyData',
@@ -31,7 +31,7 @@ describe('DataDeclarationParser', () => {
             }`
         const errorReporter = new TestErrorReporter('test.clawr')
         const tokenStream = TokenStream.read(code, errorReporter)
-        const parser = DataDeclarationParser.create()
+        const parser = DataDeclarationParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             name: 'MyData',

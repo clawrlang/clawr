@@ -6,21 +6,17 @@ import {
     VariableDeclaration,
 } from '../model/variable-declaration'
 import { StatementParser } from './statement-parser'
-import { ErrorReporter } from '../diagnostics'
+import { Context } from '.'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser
 
-    private constructor(errorReporter: ErrorReporter) {
-        this.expressionParser = ExpressionParser.create({ errorReporter })
+    private constructor(context: Context) {
+        this.expressionParser = ExpressionParser.create(context)
     }
 
-    static create({
-        errorReporter,
-    }: {
-        errorReporter: ErrorReporter
-    }): VariableDeclarationParser {
-        return new VariableDeclarationParser(errorReporter)
+    static create(context: Context): VariableDeclarationParser {
+        return new VariableDeclarationParser(context)
     }
 
     isNext(stream: TokenStream): boolean {

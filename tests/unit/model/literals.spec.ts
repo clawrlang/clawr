@@ -39,7 +39,7 @@ describe('Literals', () => {
     })
 
     describe('data literals', () => {
-        it('outputs a data literal as DATA_LITERAL', () => {
+        it('outputs a data literal as ALLOCATE', () => {
             const dataLiteral = DataLiteral.create({
                 fields: [
                     {
@@ -61,11 +61,15 @@ describe('Literals', () => {
             })
 
             expect(
-                dataLiteral.toCIR({ ...newSemanticContext(), type: 'MyType' }),
+                dataLiteral.toCIR({
+                    ...newSemanticContext(),
+                    type: 'MyType',
+                    semantics: 'REF',
+                }),
             ).toMatchObject({
                 kind: 'ALLOCATE',
                 type: 'MyType',
-                // semantics: 'REF',
+                semantics: 'REF',
                 fields: [
                     {
                         name: 'x',

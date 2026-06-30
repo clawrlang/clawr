@@ -52,7 +52,10 @@ export class VariableDeclaration implements Statement {
             type: this.type,
             initialValue: this.initialValue.toCIR({
                 ...context,
-                ...{ type: this.type },
+                ...{
+                    type: this.type,
+                    semantics: convertSemantics(this.semantics),
+                },
             }),
         }
     }

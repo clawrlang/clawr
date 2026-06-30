@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Statement, Expression, Context } from '.'
 import { FieldReference } from './field-reference'
-import { VariableReference } from './variable-reference'
+import { convertSemantics, VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
 
 export class Assignment implements Statement {
@@ -41,6 +41,7 @@ export class Assignment implements Statement {
             value: this.value.toCIR({
                 ...context,
                 ...this.target.valueSet(context),
+                ...{ semantics: this.target.semantics(context) },
             }),
         }
     }

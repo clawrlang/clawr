@@ -32,12 +32,24 @@ export class DataLiteral implements Expression {
         return { type: context.type }
     }
 
-    toCIR(context: Context & { type: string }): cir.Expression {
+    toCIR(
+        context: Context & { type: string; semantics: 'REF' | 'COW' },
+    ): cir.Expression {
+        if (!context.type)
+            context.errorReporter.reportFatalError(
+                'DataLiteral.toCIR: context.type is required',
+                this.span,
+            )
+        if (!context.semantics)
+            context.errorReporter.reportFatalError(
+                'DataLiteral.toCIR: context.semantics is required',
+                this.span,
+            )
         this.valueSet(context)
         return {
             kind: 'ALLOCATE',
             type: context.type,
-            semantics: 'REF',
+            semantics: context.semantics,
             fields: this.fields.map((field) => ({
                 name: field.name,
                 value: field.value.toCIR(context),

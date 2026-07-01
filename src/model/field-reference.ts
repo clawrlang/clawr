@@ -39,7 +39,7 @@ export class FieldReference implements Expression {
             return [
                 {
                     kind: 'ENSURE_UNIQUE',
-                    object: this.object.toCIR(context) as any,
+                    object: this.object.toCIR(context),
                 },
             ]
         }

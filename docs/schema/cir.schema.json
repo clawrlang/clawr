@@ -68,12 +68,7 @@
           "title": "Ensure Unique",
           "properties": {
             "kind": { "const": "ENSURE_UNIQUE" },
-            "object": {
-              "oneOf": [
-                { "$ref": "#/definitions/variable_reference" },
-                { "$ref": "#/definitions/field_reference" }
-              ]
-            }
+            "object": { "$ref": "#/definitions/expression" }
           },
           "required": ["kind", "object"],
           "additionalProperties": false

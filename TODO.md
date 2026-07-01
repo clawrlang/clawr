@@ -5,7 +5,6 @@
 - Emit `RELEASE` on reassignment
 - Emit `RELEASE` on scope exit
 - `isReferenceCounted` is duplicated
-- `as any` in `assignmentPrelude`
 
 ## Next
 

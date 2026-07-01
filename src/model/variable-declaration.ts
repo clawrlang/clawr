@@ -46,17 +46,34 @@ export class VariableDeclaration implements Statement, Declaration {
                 },
             )
 
-        return {
-            kind: 'VARIABLE_DECL',
-            name: this.name,
-            type: this.type,
-            initialValue: this.initialValue.toCIR({
-                ...context,
-                ...{
-                    type: this.type,
-                    semantics: convertSemantics(this.semantics),
-                },
-            }),
-        }
+        const valueCIR = this.initialValue.toCIR({
+            ...context,
+            ...{
+                type: this.type,
+                semantics: convertSemantics(this.semantics),
+            },
+        })
+        if (
+            (valueCIR.kind === 'FIELD_REF' ||
+                valueCIR.kind === 'VARIABLE_REF') &&
+            isReferenceCounted(this.type)
+        )
+            return {
+                kind: 'VARIABLE_DECL',
+                name: this.name,
+                type: this.type,
+                initialValue: { kind: 'RETAIN', object: valueCIR },
+            }
+        else
+            return {
+                kind: 'VARIABLE_DECL',
+                name: this.name,
+                type: this.type,
+                initialValue: valueCIR,
+            }
     }
+}
+
+function isReferenceCounted(type: string): boolean {
+    return !['integer', 'truthvalue', 'string'].includes(type)
 }

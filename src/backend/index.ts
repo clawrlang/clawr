@@ -87,7 +87,6 @@ export function lowerStmt(stmt: cir.Statement): string {
                 stmt.target.object.name === 'm'
             )
                 return `
-                    retainRC(${stmt.target.object.name});
                     mutateRC(${stmt.target.object.name});
                     ${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};
                     `

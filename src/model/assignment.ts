@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Statement, Expression, Context } from '.'
 import { FieldReference } from './field-reference'
-import { convertSemantics, VariableReference } from './variable-reference'
+import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
 
 export class Assignment implements Statement {

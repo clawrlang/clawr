@@ -1,5 +1,11 @@
 import * as cir from '../cir'
-import { Statement, Expression, Context, Declaration } from '.'
+import {
+    Statement,
+    Expression,
+    Context,
+    Declaration,
+    isReferenceCounted,
+} from '.'
 import { convertSemantics } from './variable-reference'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
@@ -76,8 +82,4 @@ export class VariableDeclaration implements Statement, Declaration {
                 initialValue: valueCIR,
             }
     }
-}
-
-function isReferenceCounted(type: string): boolean {
-    return !['integer', 'truthvalue', 'string'].includes(type)
 }

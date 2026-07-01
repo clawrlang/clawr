@@ -146,7 +146,3 @@ export function lowerTruthvalueLiteral(
 ): string {
     return `c_${expr.value}`
 }
-
-function isReferenceCountedType(type: string): boolean {
-    return !['integer', 'real', 'truthvalue'].includes(type)
-}

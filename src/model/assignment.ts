@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Statement, Expression, Context } from '.'
+import { Statement, Expression, Context, isReferenceCounted } from '.'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
@@ -64,8 +64,4 @@ export class Assignment implements Statement {
                 },
             ]
     }
-}
-
-function isReferenceCounted(type: string): boolean {
-    return !['integer', 'truthvalue', 'string'].includes(type)
 }

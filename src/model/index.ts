@@ -35,3 +35,7 @@ type Variable = {
     semantics: VariableSemantics
     type: string
 }
+
+export function isReferenceCounted(type: string): boolean {
+    return !['integer', 'truthvalue', 'string'].includes(type)
+}

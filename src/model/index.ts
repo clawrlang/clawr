@@ -23,7 +23,7 @@ export interface Expression {
 }
 
 export interface Statement {
-    toCIR(context: Context): cir.Statement
+    toCIRStatements(context: Context): cir.Statement[]
 }
 
 export interface Declaration {

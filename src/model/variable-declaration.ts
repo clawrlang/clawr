@@ -27,6 +27,10 @@ export class VariableDeclaration implements Statement, Declaration {
         return new VariableDeclaration(semantics, name, type, initialValue)
     }
 
+    toCIRStatements(context: Context): cir.Statement[] {
+        return [this.toCIR(context)]
+    }
+
     toCIR(context: Context): cir.VariableDeclaration {
         context.scope.variables.set(this.name, {
             semantics: this.semantics,

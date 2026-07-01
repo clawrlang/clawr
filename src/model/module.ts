@@ -36,7 +36,9 @@ export class Module {
                     throw new Error('Unknown declaration type')
                 }
             }),
-            startBlock: this.main.map((stmt) => stmt.toCIR(context)),
+            startBlock: this.main.flatMap((stmt) =>
+                stmt.toCIRStatements(context),
+            ),
         }
     }
 }

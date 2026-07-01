@@ -23,7 +23,7 @@ export class Assignment implements Statement {
         return new Assignment(target, value, span)
     }
 
-    toCIR(context: Context): cir.Statement {
+    toCIRStatements(context: Context): cir.Statement[] {
         const valueSemantics = this.value.semantics(context)
         const targetSemantics = this.target.semantics(context)
         const isValueSemanticsMismatch =
@@ -45,17 +45,21 @@ export class Assignment implements Statement {
                 valueCIR.kind === 'VARIABLE_REF') &&
             isReferenceCounted(this.target.valueSet(context).type)
         )
-            return {
-                kind: 'ASSIGN',
-                target: this.target.toCIR(context),
-                value: { kind: 'RETAIN', object: valueCIR },
-            }
+            return [
+                {
+                    kind: 'ASSIGN',
+                    target: this.target.toCIR(context),
+                    value: { kind: 'RETAIN', object: valueCIR },
+                },
+            ]
         else
-            return {
-                kind: 'ASSIGN',
-                target: this.target.toCIR(context),
-                value: valueCIR,
-            }
+            return [
+                {
+                    kind: 'ASSIGN',
+                    target: this.target.toCIR(context),
+                    value: valueCIR,
+                },
+            ]
     }
 }
 

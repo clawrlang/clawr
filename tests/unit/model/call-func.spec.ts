@@ -24,17 +24,19 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        expect(statement.toCIR(newSemanticContext())).toMatchObject({
-            kind: 'CALL_FUNC',
-            signature: {
-                baseName: 'foo',
-                parameters: [{ type: 'integer' }, { type: 'truthvalue' }],
+        expect(statement.toCIRStatements(newSemanticContext())).toMatchObject([
+            {
+                kind: 'CALL_FUNC',
+                signature: {
+                    baseName: 'foo',
+                    parameters: [{ type: 'integer' }, { type: 'truthvalue' }],
+                },
+                arguments: [
+                    { kind: 'INTEGER_LITERAL', value: '42' },
+                    { kind: 'TRUTHVALUE_LITERAL', value: 'ambiguous' },
+                ],
             },
-            arguments: [
-                { kind: 'INTEGER_LITERAL', value: '42' },
-                { kind: 'TRUTHVALUE_LITERAL', value: 'ambiguous' },
-            ],
-        })
+        ])
     })
 
     it('includes argument labels in signature', () => {
@@ -50,14 +52,16 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        expect(statement.toCIR(newSemanticContext())).toMatchObject({
-            kind: 'CALL_FUNC',
-            signature: {
-                baseName: 'foo',
-                parameters: [{ label: 'x', type: 'truthvalue' }],
+        expect(statement.toCIRStatements(newSemanticContext())).toMatchObject([
+            {
+                kind: 'CALL_FUNC',
+                signature: {
+                    baseName: 'foo',
+                    parameters: [{ label: 'x', type: 'truthvalue' }],
+                },
+                arguments: [{ kind: 'TRUTHVALUE_LITERAL', value: 'ambiguous' }],
             },
-            arguments: [{ kind: 'TRUTHVALUE_LITERAL', value: 'ambiguous' }],
-        })
+        ])
     })
 
     it('converts print(integer) to printInteger()', () => {
@@ -72,14 +76,16 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        expect(statement.toCIR(newSemanticContext())).toMatchObject({
-            kind: 'CALL_FUNC',
-            signature: {
-                baseName: 'printInt64',
-                parameters: [{ type: 'integer' }],
+        expect(statement.toCIRStatements(newSemanticContext())).toMatchObject([
+            {
+                kind: 'CALL_FUNC',
+                signature: {
+                    baseName: 'printInt64',
+                    parameters: [{ type: 'integer' }],
+                },
+                arguments: [{ kind: 'INTEGER_LITERAL', value: '1' }],
             },
-            arguments: [{ kind: 'INTEGER_LITERAL', value: '1' }],
-        })
+        ])
     })
 
     it('converts print(truthvalue) to printTruthvalue()', () => {
@@ -94,14 +100,16 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        expect(statement.toCIR(newSemanticContext())).toMatchObject({
-            kind: 'CALL_FUNC',
-            signature: {
-                baseName: 'printTruthvalue',
-                parameters: [{ type: 'truthvalue' }],
+        expect(statement.toCIRStatements(newSemanticContext())).toMatchObject([
+            {
+                kind: 'CALL_FUNC',
+                signature: {
+                    baseName: 'printTruthvalue',
+                    parameters: [{ type: 'truthvalue' }],
+                },
+                arguments: [{ kind: 'TRUTHVALUE_LITERAL', value: 'true' }],
             },
-            arguments: [{ kind: 'TRUTHVALUE_LITERAL', value: 'true' }],
-        })
+        ])
     })
 
     it('converts print(intvar) to printInt64()', () => {
@@ -122,13 +130,15 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        expect(statement.toCIR(context)).toMatchObject({
-            kind: 'CALL_FUNC',
-            signature: {
-                baseName: 'printInt64',
-                parameters: [{ type: 'integer' }],
+        expect(statement.toCIRStatements(context)).toMatchObject([
+            {
+                kind: 'CALL_FUNC',
+                signature: {
+                    baseName: 'printInt64',
+                    parameters: [{ type: 'integer' }],
+                },
+                arguments: [{ kind: 'VARIABLE_REF', name: 'x' }],
             },
-            arguments: [{ kind: 'VARIABLE_REF', name: 'x' }],
-        })
+        ])
     })
 })

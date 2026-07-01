@@ -18,11 +18,13 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        expect(assignment.toCIR(context)).toMatchObject({
-            kind: 'ASSIGN',
-            target: { kind: 'VARIABLE_REF', name: 'x' },
-            value: { kind: 'INTEGER_LITERAL', value: '42' },
-        })
+        expect(assignment.toCIRStatements(context)).toMatchObject([
+            {
+                kind: 'ASSIGN',
+                target: { kind: 'VARIABLE_REF', name: 'x' },
+                value: { kind: 'INTEGER_LITERAL', value: '42' },
+            },
+        ])
     })
 
     describe('injects RETAIN statement', () => {
@@ -81,18 +83,20 @@ describe('Assignment', () => {
                 span: someCodeSpan,
             })
 
-            expect(assignment.toCIR(context)).toMatchObject({
-                kind: 'ASSIGN',
-                target: { kind: 'VARIABLE_REF', name: 'foo' },
-                value: {
-                    kind: 'RETAIN',
-                    object: {
-                        kind: 'FIELD_REF',
-                        object: { kind: 'VARIABLE_REF', name: 'bar' },
-                        field: 'field',
+            expect(assignment.toCIRStatements(context)).toMatchObject([
+                {
+                    kind: 'ASSIGN',
+                    target: { kind: 'VARIABLE_REF', name: 'foo' },
+                    value: {
+                        kind: 'RETAIN',
+                        object: {
+                            kind: 'FIELD_REF',
+                            object: { kind: 'VARIABLE_REF', name: 'bar' },
+                            field: 'field',
+                        },
                     },
                 },
-            })
+            ])
         })
 
         test('for a VariableReference', () => {
@@ -131,17 +135,19 @@ describe('Assignment', () => {
                 span: someCodeSpan,
             })
 
-            expect(assignment.toCIR(context)).toMatchObject({
-                kind: 'ASSIGN',
-                target: { kind: 'VARIABLE_REF', name: 'foo' },
-                value: {
-                    kind: 'RETAIN',
-                    object: {
-                        kind: 'VARIABLE_REF',
-                        name: 'bar',
+            expect(assignment.toCIRStatements(context)).toMatchObject([
+                {
+                    kind: 'ASSIGN',
+                    target: { kind: 'VARIABLE_REF', name: 'foo' },
+                    value: {
+                        kind: 'RETAIN',
+                        object: {
+                            kind: 'VARIABLE_REF',
+                            name: 'bar',
+                        },
                     },
                 },
-            })
+            ])
         })
     })
 
@@ -158,7 +164,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
-        expect(() => assignment.toCIR(context)).toThrow()
+        expect(() => assignment.toCIRStatements(context)).toThrow()
         expect(context.errorReporter).toMatchObject({
             errors: [
                 {
@@ -212,7 +218,7 @@ describe('Assignment', () => {
                     }),
                     span: someCodeSpan,
                 })
-                expect(() => assignment.toCIR(context)).toThrow()
+                expect(() => assignment.toCIRStatements(context)).toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
@@ -261,7 +267,7 @@ describe('Assignment', () => {
             value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
-        expect(() => assignment.toCIR(context)).toThrow()
+        expect(() => assignment.toCIRStatements(context)).toThrow()
         expect(context.errorReporter).toMatchObject({
             errors: [
                 {
@@ -330,7 +336,7 @@ describe('Assignment', () => {
                         span: someCodeSpan,
                     }),
                 })
-                expect(() => assignment.toCIR(context)).toThrow()
+                expect(() => assignment.toCIRStatements(context)).toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
@@ -393,7 +399,7 @@ describe('Assignment', () => {
                     span: someCodeSpan,
                 }),
             })
-            expect(() => assignment.toCIR(context)).not.toThrow()
+            expect(() => assignment.toCIRStatements(context)).not.toThrow()
         })
     })
 })

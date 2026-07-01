@@ -151,6 +151,53 @@ describe('Assignment', () => {
         })
     })
 
+    it('injects ENSURE_UNIQUE for COW target before assignment', () => {
+        const context = newSemanticContext()
+        context.scope.declarations.set(
+            'MyType',
+            DataDeclaration.create({
+                name: 'MyType',
+                fields: [
+                    {
+                        name: 'field',
+                        type: 'integer',
+                        semantics: 'mut',
+                    },
+                ],
+            }),
+        )
+        context.scope.variables.set('foo', {
+            semantics: 'mut',
+            type: 'MyType',
+        })
+
+        const assignment = Assignment.create({
+            target: FieldReference.create({
+                object: VariableReference.create({
+                    name: 'foo',
+                    span: someCodeSpan,
+                }),
+                field: 'field',
+                operator: '.',
+                span: someCodeSpan,
+                fieldSpan: someCodeSpan,
+            }),
+            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
+            span: someCodeSpan,
+        })
+
+        expect(assignment.toCIRStatements(context)).toMatchObject([
+            {
+                kind: 'ENSURE_UNIQUE',
+                object: { kind: 'VARIABLE_REF', name: 'foo' },
+            },
+            {
+                kind: 'ASSIGN',
+                target: { object: { name: 'foo' } },
+            },
+        ])
+    })
+
     it('throws if the target variable is not in context', () => {
         const assignment = Assignment.create({
             target: VariableReference.create({

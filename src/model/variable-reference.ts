@@ -18,12 +18,13 @@ export class VariableReference implements Expression {
         return new VariableReference(name, span)
     }
 
-    allowAssignment(context: Context) {
+    assignmentPrelude(context: Context): cir.Statement[] {
         if (this.isEffectivelyConst(context))
             context.errorReporter.reportFatalError(
                 `Variable ${this.name} is not mutable`,
                 this.span,
             )
+        return []
     }
 
     isEffectivelyConst(context: Context): boolean {

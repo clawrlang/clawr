@@ -5,7 +5,7 @@ import { convertSemantics } from './variable-reference'
 
 export class FieldReference implements Expression {
     private constructor(
-        private object: Expression,
+        public object: Expression,
         private operator: '.' | '->',
         private field: string,
         public span: SourceCodeSpan,
@@ -28,12 +28,22 @@ export class FieldReference implements Expression {
         return new FieldReference(object, operator, field, span, fieldSpan)
     }
 
-    allowAssignment(context: Context) {
+    assignmentPrelude(context: Context): cir.Statement[] {
         if (this.isEffectivelyConst(context))
             context.errorReporter.reportFatalError(
                 `Cannot mutate field ${this.field} of a reference type object`,
                 this.span,
             )
+
+        if (this.object.semantics(context) === 'COW') {
+            return [
+                {
+                    kind: 'ENSURE_UNIQUE',
+                    object: this.object.toCIR(context) as any,
+                },
+            ]
+        }
+        return []
     }
 
     isEffectivelyConst(context: Context): boolean {

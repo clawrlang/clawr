@@ -81,16 +81,7 @@ export function lowerStmt(stmt: cir.Statement): string {
                 return `${lowerType(stmt.type)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         }
         case 'ASSIGN': {
-            if (
-                stmt.target.kind === 'FIELD_REF' &&
-                stmt.target.object.kind === 'VARIABLE_REF' &&
-                stmt.target.object.name === 'm'
-            )
-                return `
-                    mutateRC(${stmt.target.object.name});
-                    ${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};
-                    `
-            else return `${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};`
+            return `${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};`
         }
         case 'ENSURE_UNIQUE': {
             return `mutateRC(${lowerExpr(stmt.object)});`

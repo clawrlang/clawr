@@ -2,10 +2,10 @@
 
 ## In Progress
 
-- Emit `ENSURE_UNIQUE` before editing if `COW` - statement
-- Remove the ugly hack in `lowerStmt`
 - Emit `RELEASE` on reassignment
 - Emit `RELEASE` on scope exit
+- `isReferenceCounted` is duplicated
+- `as any` in `assignmentPrelude`
 
 ## Next
 

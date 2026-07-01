@@ -34,18 +34,20 @@ export class Assignment implements Statement {
                 { start: this.span.start, end: this.span.end },
             )
 
-        this.target.allowAssignment(context)
+        const prelude = this.target.assignmentPrelude(context)
         const valueCIR = this.value.toCIR({
             ...context,
             ...this.target.valueSet(context),
             ...{ semantics: this.target.semantics(context) },
         })
+
         if (
             (valueCIR.kind === 'FIELD_REF' ||
                 valueCIR.kind === 'VARIABLE_REF') &&
             isReferenceCounted(this.target.valueSet(context).type)
         )
             return [
+                ...prelude,
                 {
                     kind: 'ASSIGN',
                     target: this.target.toCIR(context),
@@ -54,6 +56,7 @@ export class Assignment implements Statement {
             ]
         else
             return [
+                ...prelude,
                 {
                     kind: 'ASSIGN',
                     target: this.target.toCIR(context),

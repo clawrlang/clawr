@@ -25,6 +25,126 @@ describe('Assignment', () => {
         })
     })
 
+    describe('injects RETAIN statement', () => {
+        test('for a FieldReference', () => {
+            const context = newSemanticContext()
+            context.scope.declarations.set(
+                'InnerType',
+                DataDeclaration.create({
+                    name: 'InnerType',
+                    fields: [
+                        {
+                            name: 'innerField',
+                            type: 'integer',
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+            context.scope.declarations.set(
+                'OuterType',
+                DataDeclaration.create({
+                    name: 'OuterType',
+                    fields: [
+                        {
+                            name: 'field',
+                            type: 'InnerType',
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+            context.scope.variables.set('bar', {
+                semantics: 'const',
+                type: 'OuterType',
+            })
+            context.scope.variables.set('foo', {
+                semantics: 'mut',
+                type: 'InnerType',
+            })
+
+            const assignment = Assignment.create({
+                target: VariableReference.create({
+                    name: 'foo',
+                    span: someCodeSpan,
+                }),
+                value: FieldReference.create({
+                    object: VariableReference.create({
+                        name: 'bar',
+                        span: someCodeSpan,
+                    }),
+                    field: 'field',
+                    operator: '.',
+                    span: someCodeSpan,
+                    fieldSpan: someCodeSpan,
+                }),
+                span: someCodeSpan,
+            })
+
+            expect(assignment.toCIR(context)).toMatchObject({
+                kind: 'ASSIGN',
+                target: { kind: 'VARIABLE_REF', name: 'foo' },
+                value: {
+                    kind: 'RETAIN',
+                    object: {
+                        kind: 'FIELD_REF',
+                        object: { kind: 'VARIABLE_REF', name: 'bar' },
+                        field: 'field',
+                    },
+                },
+            })
+        })
+
+        test('for a VariableReference', () => {
+            const context = newSemanticContext()
+            context.scope.declarations.set(
+                'MyType',
+                DataDeclaration.create({
+                    name: 'MyType',
+                    fields: [
+                        {
+                            name: 'field',
+                            type: 'integer',
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+            context.scope.variables.set('bar', {
+                semantics: 'const',
+                type: 'MyType',
+            })
+            context.scope.variables.set('foo', {
+                semantics: 'mut',
+                type: 'MyType',
+            })
+
+            const assignment = Assignment.create({
+                target: VariableReference.create({
+                    name: 'foo',
+                    span: someCodeSpan,
+                }),
+                value: VariableReference.create({
+                    name: 'bar',
+                    span: someCodeSpan,
+                }),
+                span: someCodeSpan,
+            })
+
+            expect(assignment.toCIR(context)).toMatchObject({
+                kind: 'ASSIGN',
+                target: { kind: 'VARIABLE_REF', name: 'foo' },
+                value: {
+                    kind: 'RETAIN',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'bar',
+                    },
+                },
+            })
+        })
+    })
+
     it('throws if the target variable is not in context', () => {
         const assignment = Assignment.create({
             target: VariableReference.create({

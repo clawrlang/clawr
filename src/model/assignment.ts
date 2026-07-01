@@ -35,14 +35,30 @@ export class Assignment implements Statement {
             )
 
         this.target.allowAssignment(context)
-        return {
-            kind: 'ASSIGN',
-            target: this.target.toCIR(context),
-            value: this.value.toCIR({
-                ...context,
-                ...this.target.valueSet(context),
-                ...{ semantics: this.target.semantics(context) },
-            }),
-        }
+        const valueCIR = this.value.toCIR({
+            ...context,
+            ...this.target.valueSet(context),
+            ...{ semantics: this.target.semantics(context) },
+        })
+        if (
+            (valueCIR.kind === 'FIELD_REF' ||
+                valueCIR.kind === 'VARIABLE_REF') &&
+            isReferenceCounted(this.target.valueSet(context).type)
+        )
+            return {
+                kind: 'ASSIGN',
+                target: this.target.toCIR(context),
+                value: { kind: 'RETAIN', object: valueCIR },
+            }
+        else
+            return {
+                kind: 'ASSIGN',
+                target: this.target.toCIR(context),
+                value: valueCIR,
+            }
     }
+}
+
+function isReferenceCounted(type: string): boolean {
+    return !['integer', 'truthvalue', 'string'].includes(type)
 }

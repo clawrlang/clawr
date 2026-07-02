@@ -1,4 +1,3 @@
-import * as cir from '../cir'
 import { Statement, Expression, Context, isReferenceCounted } from '.'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
@@ -47,19 +46,28 @@ export class Assignment implements Statement {
             (valueCIR.kind === 'FIELD_REF' ||
                 valueCIR.kind === 'VARIABLE_REF') &&
             isReferenceCounted(this.target.valueSet(context).type)
-        )
+        ) {
+            const tempVar = `__temp_${this.target.span.start.line}`
+
+            context.scope.emitted.statements.push({
+                kind: 'VARIABLE_DECL' as const,
+                name: tempVar,
+                type: this.target.valueSet(context).type,
+                initialValue: this.target.toCIRExpression(context),
+            })
+
             context.scope.emitted.statements.push(
-                {
-                    kind: 'RELEASE',
-                    object: this.target.toCIRExpression(context),
-                },
                 {
                     kind: 'ASSIGN',
                     target: this.target.toCIRExpression(context),
                     value: { kind: 'RETAIN', object: valueCIR },
                 },
+                {
+                    kind: 'RELEASE',
+                    object: { kind: 'VARIABLE_REF', name: tempVar },
+                },
             )
-        else
+        } else
             context.scope.emitted.statements.push({
                 kind: 'ASSIGN',
                 target: this.target.toCIRExpression(context),

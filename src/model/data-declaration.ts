@@ -24,14 +24,15 @@ export class DataDeclaration implements Declaration {
         return new DataDeclaration(name, fields)
     }
 
-    toCIR(_: Context): cir.Declaration {
-        return {
+    emitDeclaration(context: Context) {
+        context.scope.declarations.set(this.name, this)
+        context.scope.emitted.declarations.push({
             kind: 'DATA_DECL',
             name: this.name,
             fields: this.fields.map((field) => ({
                 name: field.name,
                 type: field.type,
             })),
-        }
+        })
     }
 }

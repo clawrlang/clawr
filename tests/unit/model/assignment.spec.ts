@@ -18,7 +18,9 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        expect(assignment.toCIRStatements(context)).toMatchObject([
+        assignment.emitStatement(context)
+
+        expect(context.scope.emitted.statements).toMatchObject([
             {
                 kind: 'ASSIGN',
                 target: { kind: 'VARIABLE_REF', name: 'x' },
@@ -83,7 +85,8 @@ describe('Assignment', () => {
                 span: someCodeSpan,
             })
 
-            expect(assignment.toCIRStatements(context)).toMatchObject([
+            assignment.emitStatement(context)
+            expect(context.scope.emitted.statements).toMatchObject([
                 {
                     kind: 'ASSIGN',
                     target: { kind: 'VARIABLE_REF', name: 'foo' },
@@ -135,7 +138,8 @@ describe('Assignment', () => {
                 span: someCodeSpan,
             })
 
-            expect(assignment.toCIRStatements(context)).toMatchObject([
+            assignment.emitStatement(context)
+            expect(context.scope.emitted.statements).toMatchObject([
                 {
                     kind: 'ASSIGN',
                     target: { kind: 'VARIABLE_REF', name: 'foo' },
@@ -186,7 +190,8 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        expect(assignment.toCIRStatements(context)).toMatchObject([
+        assignment.emitStatement(context)
+        expect(context.scope.emitted.statements).toMatchObject([
             {
                 kind: 'ENSURE_UNIQUE',
                 object: { kind: 'VARIABLE_REF', name: 'foo' },
@@ -211,7 +216,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
-        expect(() => assignment.toCIRStatements(context)).toThrow()
+        expect(() => assignment.emitStatement(context)).toThrow()
         expect(context.errorReporter).toMatchObject({
             errors: [
                 {
@@ -265,7 +270,7 @@ describe('Assignment', () => {
                     }),
                     span: someCodeSpan,
                 })
-                expect(() => assignment.toCIRStatements(context)).toThrow()
+                expect(() => assignment.emitStatement(context)).toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
@@ -314,7 +319,7 @@ describe('Assignment', () => {
             value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
-        expect(() => assignment.toCIRStatements(context)).toThrow()
+        expect(() => assignment.emitStatement(context)).toThrow()
         expect(context.errorReporter).toMatchObject({
             errors: [
                 {
@@ -383,7 +388,7 @@ describe('Assignment', () => {
                         span: someCodeSpan,
                     }),
                 })
-                expect(() => assignment.toCIRStatements(context)).toThrow()
+                expect(() => assignment.emitStatement(context)).toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
@@ -446,7 +451,7 @@ describe('Assignment', () => {
                     span: someCodeSpan,
                 }),
             })
-            expect(() => assignment.toCIRStatements(context)).not.toThrow()
+            expect(() => assignment.emitStatement(context)).not.toThrow()
         })
     })
 })

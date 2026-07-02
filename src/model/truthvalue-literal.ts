@@ -1,5 +1,5 @@
-import { Expression, Context, ValueSet } from '.'
 import * as cir from '../cir'
+import { Context, Expression, ValueSet } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 
 export class TruthValueLiteral implements Expression {
@@ -18,7 +18,7 @@ export class TruthValueLiteral implements Expression {
         return new TruthValueLiteral(value, span)
     }
 
-    toCIR(_: Context): cir.Expression {
+    toCIRExpression(_: Context): cir.Expression {
         return { kind: 'TRUTHVALUE_LITERAL', value: this.value }
     }
 

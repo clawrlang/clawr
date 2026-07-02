@@ -14,7 +14,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.toCIR(context)).toEqual({
+        expect(variableRef.toCIRExpression(context)).toEqual({
             kind: 'VARIABLE_REF',
             name: 'myVar',
         })
@@ -26,7 +26,7 @@ describe('Variable Reference', () => {
             end: { line: 1, column: 6 },
         }
         const variableRef = VariableReference.create({ name: 'myVar', span })
-        const cases = ['toCIR', 'valueSet'] as const
+        const cases = ['toCIRExpression', 'valueSet'] as const
         for (const method of cases) {
             test(method, () => {
                 const context = newSemanticContext()

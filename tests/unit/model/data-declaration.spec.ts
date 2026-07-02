@@ -12,14 +12,16 @@ describe('DataDeclaration', () => {
             ],
         })
         const context = newSemanticContext()
-        const cir = dataDecl.toCIR(context)
-        expect(cir).toEqual({
-            kind: 'DATA_DECL',
-            name: 'MyData',
-            fields: [
-                { name: 'field1', type: 'integer' },
-                { name: 'field2', type: 'truthvalue' },
-            ],
-        })
+        dataDecl.emitDeclaration(context)
+        expect(context.scope.emitted.declarations).toEqual([
+            {
+                kind: 'DATA_DECL',
+                name: 'MyData',
+                fields: [
+                    { name: 'field1', type: 'integer' },
+                    { name: 'field2', type: 'truthvalue' },
+                ],
+            },
+        ])
     })
 })

@@ -180,7 +180,7 @@ describe('Field Reference', () => {
                     },
                     fieldSpan: someCodeSpan,
                 })
-                expect(() => fieldRef.toCIR(context)).toThrow()
+                expect(() => fieldRef.toCIRExpression(context)).toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {

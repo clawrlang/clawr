@@ -2,11 +2,27 @@ import * as cir from '../cir'
 import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
 import { VariableSemantics } from './variable-declaration'
 
-export type Context = {
-    scope: {
-        variables: Map<string, Variable>
-        declarations: Map<string, Declaration>
+export class Scope {
+    public variables: Map<string, Variable> = new Map()
+    public declarations: Map<string, Declaration> = new Map()
+    public emitted: {
+        declarations: cir.Declaration[]
+        statements: cir.Statement[]
+    } = { declarations: [], statements: [] }
+
+    private constructor(public parentScope?: Scope) {}
+
+    static createRoot() {
+        return new Scope()
     }
+
+    createChildScope() {
+        return new Scope(this)
+    }
+}
+
+export type Context = {
+    scope: Scope
     errorReporter: ErrorReporter
 }
 
@@ -19,16 +35,15 @@ export interface Expression {
     isEffectivelyConst(context: Context): boolean
     semantics(context: Context): 'COW' | 'REF' | 'UNIQUE'
     valueSet(context: Context): ValueSet
-    toCIR(context: Context): cir.Expression
+    toCIRExpression(context: Context): cir.Expression
 }
 
 export interface Statement {
-    toCIRStatements(context: Context): cir.Statement[]
+    emitStatement(context: Context): void
 }
 
 export interface Declaration {
-    fields?: { name: string; type: string; semantics: VariableSemantics }[]
-    toCIR(context: Context): cir.Declaration
+    emitDeclaration(context: Context): void
 }
 
 type Variable = {

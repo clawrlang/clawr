@@ -11,6 +11,7 @@ import { ModuleParser } from '../parser'
 import { TokenStream } from '../lexer'
 import { ClawrModule } from '../cir'
 import { ErrorReporter } from './error-reporter'
+import { Scope } from '../model'
 
 const exeDir = path.dirname(process.execPath)
 const program = new Command()
@@ -45,7 +46,7 @@ async function parseToCIR({
 }) {
     const context = {
         errorReporter: new ErrorReporter(file),
-        scope: { variables: new Map(), declarations: new Map() },
+        scope: Scope.createRoot(),
     }
 
     const sourceCode = await fs.readFile(file, 'utf-8')

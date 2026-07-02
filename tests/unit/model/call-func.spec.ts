@@ -24,7 +24,9 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        expect(statement.toCIRStatements(newSemanticContext())).toMatchObject([
+        const context = newSemanticContext()
+        statement.emitStatement(context)
+        expect(context.scope.emitted.statements).toMatchObject([
             {
                 kind: 'CALL_FUNC',
                 signature: {
@@ -52,7 +54,9 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        expect(statement.toCIRStatements(newSemanticContext())).toMatchObject([
+        const context = newSemanticContext()
+        statement.emitStatement(context)
+        expect(context.scope.emitted.statements).toMatchObject([
             {
                 kind: 'CALL_FUNC',
                 signature: {
@@ -76,7 +80,9 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        expect(statement.toCIRStatements(newSemanticContext())).toMatchObject([
+        const context = newSemanticContext()
+        statement.emitStatement(context)
+        expect(context.scope.emitted.statements).toMatchObject([
             {
                 kind: 'CALL_FUNC',
                 signature: {
@@ -100,7 +106,9 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        expect(statement.toCIRStatements(newSemanticContext())).toMatchObject([
+        const context = newSemanticContext()
+        statement.emitStatement(context)
+        expect(context.scope.emitted.statements).toMatchObject([
             {
                 kind: 'CALL_FUNC',
                 signature: {
@@ -130,7 +138,8 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        expect(statement.toCIRStatements(context)).toMatchObject([
+        statement.emitStatement(context)
+        expect(context.scope.emitted.statements).toMatchObject([
             {
                 kind: 'CALL_FUNC',
                 signature: {

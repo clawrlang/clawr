@@ -32,7 +32,7 @@ export class VariableReference implements Expression {
         return variable.semantics === 'const' || variable.semantics === 'ref'
     }
 
-    toCIR(context: Context): cir.VariableReference {
+    toCIRExpression(context: Context): cir.VariableReference {
         this.lookupInScope(context)
         return { kind: 'VARIABLE_REF', name: this.name }
     }

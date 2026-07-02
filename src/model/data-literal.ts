@@ -28,21 +28,21 @@ export class DataLiteral implements Expression {
 
     valueSet(context: Context & { type: string }): ValueSet {
         if (!context.type)
-            throw new Error('DataLiteral.toCIR: context.type is required')
+            throw new Error('DataLiteral.valueSet: context.type is required')
         return { type: context.type }
     }
 
-    toCIR(
+    toCIRExpression(
         context: Context & { type: string; semantics: 'REF' | 'COW' },
     ): cir.Expression {
         if (!context.type)
             context.errorReporter.reportFatalError(
-                'DataLiteral.toCIR: context.type is required',
+                'DataLiteral.toCIRExpression: context.type is required',
                 this.span,
             )
         if (!context.semantics)
             context.errorReporter.reportFatalError(
-                'DataLiteral.toCIR: context.semantics is required',
+                'DataLiteral.toCIRExpression: context.semantics is required',
                 this.span,
             )
         this.valueSet(context)
@@ -52,7 +52,7 @@ export class DataLiteral implements Expression {
             semantics: context.semantics,
             fields: this.fields.map((field) => ({
                 name: field.name,
-                value: field.value.toCIR(context),
+                value: field.value.toCIRExpression(context),
             })),
         }
     }

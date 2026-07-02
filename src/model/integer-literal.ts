@@ -22,7 +22,7 @@ export class IntegerLiteral implements Expression {
         return new IntegerLiteral(value, span)
     }
 
-    toCIR(_: Context): cir.Expression {
+    toCIRExpression(_: Context): cir.Expression {
         return { kind: 'INTEGER_LITERAL', value: this.value.toString() }
     }
 

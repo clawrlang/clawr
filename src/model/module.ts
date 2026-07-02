@@ -1,7 +1,5 @@
-import { Statement, Declaration, Context } from '.'
 import * as cir from '../cir'
-import { DataDeclaration } from './data-declaration'
-import { VariableDeclaration } from './variable-declaration'
+import { Context, Declaration, Statement } from '.'
 
 export class Module {
     private constructor(
@@ -20,25 +18,12 @@ export class Module {
     }
 
     toCIR(context: Context): cir.ClawrModule {
-        this.declarations.forEach((decl) => {
-            if (decl instanceof DataDeclaration) {
-                context.scope.declarations.set(decl.name, decl)
-            }
-        })
+        for (const decl of this.declarations) decl.emitDeclaration(context)
+        for (const stmt of this.main) stmt.emitStatement(context)
         return {
             $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
-            declarations: this.declarations.map((decl) => {
-                if (decl instanceof DataDeclaration) {
-                    return decl.toCIR(context)
-                } else if (decl instanceof VariableDeclaration) {
-                    return decl.toCIR(context)
-                } else {
-                    throw new Error('Unknown declaration type')
-                }
-            }),
-            startBlock: this.main.flatMap((stmt) =>
-                stmt.toCIRStatements(context),
-            ),
+            declarations: context.scope.emitted.declarations,
+            startBlock: context.scope.emitted.statements,
         }
     }
 }

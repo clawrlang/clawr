@@ -33,16 +33,23 @@ export class VariableDeclaration implements Statement, Declaration {
         return new VariableDeclaration(semantics, name, type, initialValue)
     }
 
-    toCIRStatements(context: Context): cir.Statement[] {
-        return [this.toCIR(context)]
-    }
-
-    toCIR(context: Context): cir.VariableDeclaration {
+    emitDeclaration(context: Context): void {
         context.scope.variables.set(this.name, {
             semantics: this.semantics,
             type: this.type,
         })
+        context.scope.emitted.declarations.push(this.toCIR(context))
+    }
 
+    emitStatement(context: Context) {
+        context.scope.variables.set(this.name, {
+            semantics: this.semantics,
+            type: this.type,
+        })
+        context.scope.emitted.statements.push(this.toCIR(context))
+    }
+
+    private toCIR(context: Context): cir.VariableDeclaration {
         const valueSemantics = this.initialValue.semantics(context)
         const targetSemantics = convertSemantics(this.semantics)
         const isValueSemanticsMismatch =
@@ -56,7 +63,7 @@ export class VariableDeclaration implements Statement, Declaration {
                 },
             )
 
-        const valueCIR = this.initialValue.toCIR({
+        const valueCIR = this.initialValue.toCIRExpression({
             ...context,
             ...{
                 type: this.type,

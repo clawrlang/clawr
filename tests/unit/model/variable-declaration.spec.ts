@@ -18,7 +18,9 @@ describe('VariableDeclaration', () => {
                 span: someCodeSpan,
             }),
         })
-        expect(decl.toCIR(newSemanticContext())).toEqual({
+        const context = newSemanticContext()
+        decl.emitStatement(context)
+        expect(context.scope.emitted.statements[0]).toEqual({
             kind: 'VARIABLE_DECL',
             name: 'foo',
             type: 'integer',
@@ -75,15 +77,18 @@ describe('VariableDeclaration', () => {
                     fieldSpan: someCodeSpan,
                 }),
             })
-            expect(decl.toCIR(context).initialValue).toMatchObject({
-                kind: 'RETAIN',
-                object: {
-                    kind: 'FIELD_REF',
+            decl.emitStatement(context)
+            expect(context.scope.emitted.statements[0]).toMatchObject({
+                initialValue: {
+                    kind: 'RETAIN',
                     object: {
-                        kind: 'VARIABLE_REF',
-                        name: 'bar',
+                        kind: 'FIELD_REF',
+                        object: {
+                            kind: 'VARIABLE_REF',
+                            name: 'bar',
+                        },
+                        field: 'field',
                     },
-                    field: 'field',
                 },
             })
         })
@@ -117,11 +122,14 @@ describe('VariableDeclaration', () => {
                     span: someCodeSpan,
                 }),
             })
-            expect(decl.toCIR(context).initialValue).toMatchObject({
-                kind: 'RETAIN',
-                object: {
-                    kind: 'VARIABLE_REF',
-                    name: 'bar',
+            decl.emitStatement(context)
+            expect(context.scope.emitted.statements[0]).toMatchObject({
+                initialValue: {
+                    kind: 'RETAIN',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'bar',
+                    },
                 },
             })
         })
@@ -138,7 +146,7 @@ describe('VariableDeclaration', () => {
             }),
         })
         const context = newSemanticContext()
-        decl.toCIR(context)
+        decl.emitStatement(context)
         expect(context.scope.variables.get('x')).toEqual({
             semantics: 'const',
             type: 'integer',
@@ -187,7 +195,7 @@ describe('VariableDeclaration', () => {
                         },
                     }),
                 })
-                expect(() => declaration.toCIR(context)).toThrow()
+                expect(() => declaration.emitStatement(context)).toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
@@ -235,7 +243,7 @@ describe('VariableDeclaration', () => {
                     span: someCodeSpan,
                 }),
             })
-            expect(() => declaration.toCIR(context)).not.toThrow()
+            expect(() => declaration.emitStatement(context)).not.toThrow()
         })
     })
 })

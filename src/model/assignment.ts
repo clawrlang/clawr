@@ -23,7 +23,7 @@ export class Assignment implements Statement {
         return new Assignment(target, value, span)
     }
 
-    toCIRStatements(context: Context): cir.Statement[] {
+    emitStatement(context: Context) {
         const valueSemantics = this.value.semantics(context)
         const targetSemantics = this.target.semantics(context)
         const isValueSemanticsMismatch =
@@ -35,7 +35,9 @@ export class Assignment implements Statement {
             )
 
         const prelude = this.target.assignmentPrelude(context)
-        const valueCIR = this.value.toCIR({
+        context.scope.emitted.statements.push(...prelude)
+
+        const valueCIR = this.value.toCIRExpression({
             ...context,
             ...this.target.valueSet(context),
             ...{ semantics: this.target.semantics(context) },
@@ -46,22 +48,16 @@ export class Assignment implements Statement {
                 valueCIR.kind === 'VARIABLE_REF') &&
             isReferenceCounted(this.target.valueSet(context).type)
         )
-            return [
-                ...prelude,
-                {
-                    kind: 'ASSIGN',
-                    target: this.target.toCIR(context),
-                    value: { kind: 'RETAIN', object: valueCIR },
-                },
-            ]
+            context.scope.emitted.statements.push({
+                kind: 'ASSIGN',
+                target: this.target.toCIRExpression(context),
+                value: { kind: 'RETAIN', object: valueCIR },
+            })
         else
-            return [
-                ...prelude,
-                {
-                    kind: 'ASSIGN',
-                    target: this.target.toCIR(context),
-                    value: valueCIR,
-                },
-            ]
+            context.scope.emitted.statements.push({
+                kind: 'ASSIGN',
+                target: this.target.toCIRExpression(context),
+                value: valueCIR,
+            })
     }
 }

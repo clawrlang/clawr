@@ -1,6 +1,7 @@
 import { Expression, Context, ValueSet } from '.'
 import * as cir from '../cir'
 import { SourceCodeSpan } from '../diagnostics'
+import { DataDeclaration } from './data-declaration'
 import { convertSemantics } from './variable-reference'
 
 export class FieldReference implements Expression {
@@ -39,7 +40,7 @@ export class FieldReference implements Expression {
             return [
                 {
                     kind: 'ENSURE_UNIQUE',
-                    object: this.object.toCIR(context),
+                    object: this.object.toCIRExpression(context),
                 },
             ]
         }
@@ -62,11 +63,11 @@ export class FieldReference implements Expression {
         return { type: field.type }
     }
 
-    toCIR(context: Context): cir.FieldReference {
+    toCIRExpression(context: Context): cir.FieldReference {
         this.checkOperatorCompatibility(context)
         return {
             kind: 'FIELD_REF',
-            object: this.object.toCIR(context),
+            object: this.object.toCIRExpression(context),
             field: this.field,
         }
     }
@@ -80,7 +81,7 @@ export class FieldReference implements Expression {
                 this.span,
             )
         }
-        if (!declaration.fields) {
+        if (!(declaration instanceof DataDeclaration)) {
             context.errorReporter.reportFatalError(
                 `Type ${objectType} is not a data type, cannot access fields`,
                 this.span,

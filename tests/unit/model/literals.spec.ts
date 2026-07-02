@@ -14,7 +14,9 @@ describe('Literals', () => {
                     value: input,
                     span: someCodeSpan,
                 })
-                expect(literal.toCIR(newSemanticContext())).toMatchObject({
+                expect(
+                    literal.toCIRExpression(newSemanticContext()),
+                ).toMatchObject({
                     kind: 'TRUTHVALUE_LITERAL',
                     value: input,
                 })
@@ -30,7 +32,9 @@ describe('Literals', () => {
                     value: BigInt(input),
                     span: someCodeSpan,
                 })
-                expect(literal.toCIR(newSemanticContext())).toMatchObject({
+                expect(
+                    literal.toCIRExpression(newSemanticContext()),
+                ).toMatchObject({
                     kind: 'INTEGER_LITERAL',
                     value: input,
                 })
@@ -61,7 +65,7 @@ describe('Literals', () => {
             })
 
             expect(
-                dataLiteral.toCIR({
+                dataLiteral.toCIRExpression({
                     ...newSemanticContext(),
                     type: 'MyType',
                     semantics: 'REF',

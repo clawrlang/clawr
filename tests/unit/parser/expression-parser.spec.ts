@@ -75,7 +75,7 @@ describe('Expression Parser', () => {
 })
 
 function parseExpression(input: string): Expression {
-    const errorReporter = new TestErrorReporter('test.clawr')
+    const errorReporter = new TestErrorReporter()
     const tokenStream = TokenStream.read(input, errorReporter)
     return ExpressionParser.create({
         errorReporter,

@@ -10,11 +10,8 @@ describe('Module Parser', () => {
                 print(42)
             }
         `
-        const tokenStream = TokenStream.read(
-            code,
-            new TestErrorReporter('test.clawr'),
-        )
-        const errorReporter = new TestErrorReporter('test.clawr')
+        const errorReporter = new TestErrorReporter()
+        const tokenStream = TokenStream.read(code, errorReporter)
         const parser = ModuleParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
@@ -36,11 +33,8 @@ describe('Module Parser', () => {
                 print(y)
             }
         `
-        const tokenStream = TokenStream.read(
-            code,
-            new TestErrorReporter('test.clawr'),
-        )
-        const errorReporter = new TestErrorReporter('test.clawr')
+        const errorReporter = new TestErrorReporter()
+        const tokenStream = TokenStream.read(code, errorReporter)
         const parser = ModuleParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
@@ -77,11 +71,8 @@ describe('Module Parser', () => {
                 print(y)
             }
         `
-        const tokenStream = TokenStream.read(
-            code,
-            new TestErrorReporter('test.clawr'),
-        )
-        const errorReporter = new TestErrorReporter('test.clawr')
+        const errorReporter = new TestErrorReporter()
+        const tokenStream = TokenStream.read(code, errorReporter)
         const parser = ModuleParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
@@ -106,11 +97,8 @@ describe('Module Parser', () => {
 
     it('parses data declarations in global scope', () => {
         const code = 'data MyData { }'
-        const tokenStream = TokenStream.read(
-            code,
-            new TestErrorReporter('test.clawr'),
-        )
-        const errorReporter = new TestErrorReporter('test.clawr')
+        const errorReporter = new TestErrorReporter()
+        const tokenStream = TokenStream.read(code, errorReporter)
         const parser = ModuleParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
@@ -120,11 +108,8 @@ describe('Module Parser', () => {
 
     it('parses variable declarations in global scope', () => {
         const code = 'const x: integer = 10'
-        const tokenStream = TokenStream.read(
-            code,
-            new TestErrorReporter('test.clawr'),
-        )
-        const errorReporter = new TestErrorReporter('test.clawr')
+        const errorReporter = new TestErrorReporter()
+        const tokenStream = TokenStream.read(code, errorReporter)
         const parser = ModuleParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
@@ -139,7 +124,7 @@ describe('Module Parser', () => {
                 print(42)
             }
         `
-        const errorReporter = new TestErrorReporter('test.clawr')
+        const errorReporter = new TestErrorReporter()
         const tokenStream = TokenStream.read(code, errorReporter)
         const parser = ModuleParser.create({ errorReporter })
         const result = parser.parse(tokenStream)

@@ -5,8 +5,6 @@ export class TestErrorReporter implements ErrorReporter {
     errors: { message: string; location: SourceCodeSpan }[] = []
     warnings: { message: string; location: SourceCodeSpan }[] = []
 
-    constructor(private file: string) {}
-
     reportFatalError(message: string, location: SourceCodeSpan): never {
         this.reportError(message, location)
         throw new Error(message)
@@ -24,7 +22,7 @@ export function newSemanticContext(): Context {
             declarations: new Map(),
             variables: new Map(),
         },
-        errorReporter: new TestErrorReporter('test.clawr'),
+        errorReporter: new TestErrorReporter(),
     } as const
 }
 export const someCodeSpan = {

@@ -517,7 +517,7 @@ describe('TokenStream', () => {
     let errorReporter: TestErrorReporter
 
     function* tokenize(source: string): Generator<Token> {
-        errorReporter = new TestErrorReporter('test-stream')
+        errorReporter = new TestErrorReporter()
         const stream = TokenStream.read(source, errorReporter)
         while (true) {
             const t = stream.next({ stopAtNewline: true })

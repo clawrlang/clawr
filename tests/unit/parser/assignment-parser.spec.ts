@@ -27,7 +27,7 @@ describe('Assignment Parser', () => {
 })
 
 function parseAssignment(input: string) {
-    const errorReporter = new TestErrorReporter('test.clawr')
+    const errorReporter = new TestErrorReporter()
     const stream = TokenStream.read(input, errorReporter)
     return AssignmentParser.create({ errorReporter }).parse(stream)
 }

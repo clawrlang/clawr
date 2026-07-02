@@ -10,7 +10,7 @@ describe('DataDeclarationParser', () => {
                 field1: integer
                 field2: truthvalue
             }`
-        const errorReporter = new TestErrorReporter('test.clawr')
+        const errorReporter = new TestErrorReporter()
         const tokenStream = TokenStream.read(code, errorReporter)
         const parser = DataDeclarationParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
@@ -29,7 +29,7 @@ describe('DataDeclarationParser', () => {
                 ref field1: integer
                 const field2: truthvalue
             }`
-        const errorReporter = new TestErrorReporter('test.clawr')
+        const errorReporter = new TestErrorReporter()
         const tokenStream = TokenStream.read(code, errorReporter)
         const parser = DataDeclarationParser.create({ errorReporter })
         const result = parser.parse(tokenStream)

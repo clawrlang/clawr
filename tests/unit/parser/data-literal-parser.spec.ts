@@ -11,7 +11,7 @@ describe('DataLiteralParser', () => {
                 x: 42
                 y: 17
             }`
-        const errorReporter = new TestErrorReporter('test.clawr')
+        const errorReporter = new TestErrorReporter()
         const tokenStream = TokenStream.read(code, errorReporter)
         const parser = DataLiteralParser.create(
             { errorReporter },
@@ -30,7 +30,7 @@ describe('DataLiteralParser', () => {
 
     it('parses a comma-separated data literal', () => {
         const code = '{ x: 42, y: 17 }'
-        const errorReporter = new TestErrorReporter('test.clawr')
+        const errorReporter = new TestErrorReporter()
         const tokenStream = TokenStream.read(code, errorReporter)
         const parser = DataLiteralParser.create(
             { errorReporter },

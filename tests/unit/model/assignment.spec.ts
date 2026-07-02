@@ -29,7 +29,7 @@ describe('Assignment', () => {
         ])
     })
 
-    describe('injects RETAIN statement', () => {
+    describe('injects RELEASE/RETAIN statements', () => {
         test('for a FieldReference', () => {
             const context = newSemanticContext()
             context.scope.declarations.set(
@@ -88,6 +88,13 @@ describe('Assignment', () => {
             assignment.emitStatement(context)
             expect(context.scope.emitted.statements).toMatchObject([
                 {
+                    kind: 'RELEASE',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'foo',
+                    },
+                },
+                {
                     kind: 'ASSIGN',
                     target: { kind: 'VARIABLE_REF', name: 'foo' },
                     value: {
@@ -140,6 +147,13 @@ describe('Assignment', () => {
 
             assignment.emitStatement(context)
             expect(context.scope.emitted.statements).toMatchObject([
+                {
+                    kind: 'RELEASE',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'foo',
+                    },
+                },
                 {
                     kind: 'ASSIGN',
                     target: { kind: 'VARIABLE_REF', name: 'foo' },

@@ -48,11 +48,17 @@ export class Assignment implements Statement {
                 valueCIR.kind === 'VARIABLE_REF') &&
             isReferenceCounted(this.target.valueSet(context).type)
         )
-            context.scope.emitted.statements.push({
-                kind: 'ASSIGN',
-                target: this.target.toCIRExpression(context),
-                value: { kind: 'RETAIN', object: valueCIR },
-            })
+            context.scope.emitted.statements.push(
+                {
+                    kind: 'RELEASE',
+                    object: this.target.toCIRExpression(context),
+                },
+                {
+                    kind: 'ASSIGN',
+                    target: this.target.toCIRExpression(context),
+                    value: { kind: 'RETAIN', object: valueCIR },
+                },
+            )
         else
             context.scope.emitted.statements.push({
                 kind: 'ASSIGN',

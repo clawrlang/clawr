@@ -2,8 +2,6 @@
 
 ## In Progress
 
-- Emit `RELEASE` on reassignment
-- Emit `RELEASE` on scope exit
 
 ## Next
 
@@ -34,6 +32,8 @@
   - Enforce on frontend:
     - `object` may not reach outside itself (its fields)
     - Fields are private (only accessible via `self`)
+- Function/method
+  - Emit `RELEASE` on scope exit
 
 ## Feature Template
 

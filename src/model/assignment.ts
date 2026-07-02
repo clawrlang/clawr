@@ -47,7 +47,7 @@ export class Assignment implements Statement {
                 valueCIR.kind === 'VARIABLE_REF') &&
             isReferenceCounted(this.target.valueSet(context).type)
         ) {
-            const tempVar = `__temp_${this.target.span.start.line}`
+            const tempVar = context.scope.nextTempVar()
 
             context.scope.emitted.statements.push({
                 kind: 'VARIABLE_DECL' as const,

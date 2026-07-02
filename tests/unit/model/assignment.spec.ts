@@ -89,7 +89,7 @@ describe('Assignment', () => {
             expect(context.scope.emitted.statements).toMatchObject([
                 {
                     kind: 'VARIABLE_DECL',
-                    name: '__temp_0',
+                    name: '__tempˇ0',
                     type: 'InnerType',
                     initialValue: {
                         kind: 'VARIABLE_REF',
@@ -112,7 +112,7 @@ describe('Assignment', () => {
                     kind: 'RELEASE',
                     object: {
                         kind: 'VARIABLE_REF',
-                        name: '__temp_0',
+                        name: '__tempˇ0',
                     },
                 },
             ])
@@ -158,7 +158,7 @@ describe('Assignment', () => {
             expect(context.scope.emitted.statements).toMatchObject([
                 {
                     kind: 'VARIABLE_DECL',
-                    name: `__temp_${assignment.target.span.start.line}`,
+                    name: '__tempˇ0',
                     type: 'MyType',
                     initialValue: {
                         kind: 'VARIABLE_REF',
@@ -180,7 +180,7 @@ describe('Assignment', () => {
                     kind: 'RELEASE',
                     object: {
                         kind: 'VARIABLE_REF',
-                        name: '__temp_0',
+                        name: '__tempˇ0',
                     },
                 },
             ])

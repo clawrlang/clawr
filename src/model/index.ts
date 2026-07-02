@@ -9,6 +9,7 @@ export class Scope {
         declarations: cir.Declaration[]
         statements: cir.Statement[]
     } = { declarations: [], statements: [] }
+    private nextTempVarCounter = 0
 
     private constructor(public parentScope?: Scope) {}
 
@@ -18,6 +19,10 @@ export class Scope {
 
     createChildScope() {
         return new Scope(this)
+    }
+
+    nextTempVar() {
+        return `__tempˇ${this.nextTempVarCounter++}`
     }
 }
 

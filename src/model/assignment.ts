@@ -36,23 +36,24 @@ export class Assignment implements Statement {
         const prelude = this.target.assignmentPrelude(context)
         context.scope.emitted.statements.push(...prelude)
 
+        const targetValueSet = this.target.valueSet(context)
         const valueCIR = this.value.toCIRExpression({
             ...context,
-            ...this.target.valueSet(context),
-            ...{ semantics: this.target.semantics(context) },
+            ...targetValueSet,
+            ...{ semantics: targetSemantics },
         })
 
         if (
             (valueCIR.kind === 'FIELD_REF' ||
                 valueCIR.kind === 'VARIABLE_REF') &&
-            isReferenceCounted(this.target.valueSet(context).type)
+            isReferenceCounted(targetValueSet.type)
         ) {
             const tempVar = context.scope.nextTempVar()
 
             context.scope.emitted.statements.push({
                 kind: 'VARIABLE_DECL' as const,
                 name: tempVar,
-                type: this.target.valueSet(context).type,
+                type: targetValueSet.type,
                 initialValue: this.target.toCIRExpression(context),
             })
 

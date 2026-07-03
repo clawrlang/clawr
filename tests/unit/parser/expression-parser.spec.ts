@@ -7,6 +7,8 @@ import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { FieldReference } from '../../../src/model/field-reference'
 import { Expression } from '../../../src/model'
+import { CallFunc } from '../../../src/model/call-func'
+import { Query } from '../../../src/model/query'
 
 describe('Expression Parser', () => {
     describe('truthvalue literals', () => {
@@ -71,6 +73,16 @@ describe('Expression Parser', () => {
             field: 'field',
         })
         expect(fieldAccess).toBeInstanceOf(FieldReference)
+    })
+
+    it('parses a function call', () => {
+        const code = 'add(1, 2)'
+        const result = parseExpression(code)
+        expect(result).toBeInstanceOf(Query)
+        expect(result).toMatchObject({
+            baseName: 'add',
+            arguments: [{ value: { value: 1n } }, { value: { value: 2n } }],
+        })
     })
 })
 

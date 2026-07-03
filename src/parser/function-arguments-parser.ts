@@ -1,4 +1,5 @@
 import { Context } from '.'
+import { Position } from '../diagnostics'
 import { TokenStream } from '../lexer'
 import { Expression } from '../model'
 import { ExpressionParser } from './expression-parser'
@@ -10,7 +11,10 @@ export class FunctionArgumentsParser {
         return new FunctionArgumentsParser(context)
     }
 
-    parse(stream: TokenStream): { label?: string; value: Expression }[] {
+    parse(stream: TokenStream): {
+        arguments: { label?: string; value: Expression }[]
+        end: Position
+    } {
         stream.expect('PUNCTUATION', '(')
         const args: { label?: string; value: Expression }[] = []
 
@@ -27,13 +31,14 @@ export class FunctionArgumentsParser {
             const arg = ExpressionParser.create(this.context).parse(stream)
             args.push({ label: label?.label, value: arg })
 
-            if (stream.isNext('PUNCTUATION', ')')) {
-                stream.next()
-                break
-            }
+            if (stream.isNext('PUNCTUATION', ')')) break
 
             stream.expect('PUNCTUATION', ',')
         }
-        return args
+
+        return {
+            arguments: args,
+            end: stream.expect('PUNCTUATION', ')').end,
+        }
     }
 }

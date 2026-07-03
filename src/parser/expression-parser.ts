@@ -3,9 +3,11 @@ import { TokenStream } from '../lexer'
 import { Expression } from '../model'
 import { FieldReference } from '../model/field-reference'
 import { IntegerLiteral } from '../model/integer-literal'
+import { Query } from '../model/query'
 import { TruthValueLiteral } from '../model/truthvalue-literal'
 import { VariableReference } from '../model/variable-reference'
 import { DataLiteralParser } from './data-literal-parser'
+import { FunctionArgumentsParser } from './function-arguments-parser'
 
 export class ExpressionParser {
     readonly dataLiteralParser: DataLiteralParser
@@ -30,6 +32,27 @@ export class ExpressionParser {
             )
         }
         const expression = this.parsePrimaryExpression(stream)
+
+        if (stream.isNext('PUNCTUATION', '(')) {
+            if (!(expression instanceof VariableReference)) {
+                throw new Error(
+                    'Function calls can only be made on variable references',
+                )
+            }
+
+            const { arguments: args, end } = FunctionArgumentsParser.create(
+                this.context,
+            ).parse(stream)
+            return Query.create({
+                baseName: expression.name,
+                arguments: args,
+                span: {
+                    start: expression.span.start,
+                    end,
+                },
+            })
+        }
+
         if (!stream.isNext('OPERATOR', '.', '->')) return expression
 
         const operator = stream.expect('OPERATOR', '.', '->').operator as

@@ -29,7 +29,7 @@ export class CallFuncParser implements StatementParser<Statement> {
         const args = FunctionArgumentsParser.create(this.context).parse(stream)
         return CallFunc.create({
             baseName: nameToken.identifier,
-            arguments: args,
+            arguments: args.arguments,
         })
     }
 }

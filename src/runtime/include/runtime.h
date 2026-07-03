@@ -19,4 +19,8 @@ static void printInt64(int64_t value) {
     printf("%lld\n", value);
 }
 
+static void* copy_of(void* value) {
+    return copyRC(value, __rc_SHARED);
+}
+
 #endif // CLAWR_RUNTIME_H

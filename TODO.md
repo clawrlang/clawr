@@ -4,8 +4,6 @@
 
 ## Later
 
-- Allow explicit copying (using `copy(of:)`)
-  - Add `copy(of: T) -> T` (`UNIQUE` ret value)
 - Nested scopes (global/local vars)
 - Generate IDE diagnostics for syntax coloring
   - errors

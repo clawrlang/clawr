@@ -36,12 +36,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             `
         }
         case 'VARIABLE_DECL': {
-            if (decl.initialValue.kind === 'ALLOCATE')
-                return `${lowerType(decl.type)} ${decl.name};`
-            else
-                return `${lowerType(decl.type)} ${decl.name} = ${lowerExpr(
-                    decl.initialValue,
-                )};`
+            return `${lowerType(decl.type)} ${decl.name};`
         }
         default: {
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
@@ -49,12 +44,9 @@ export function lowerDecl(decl: cir.Declaration): string {
     }
 }
 
-function lowerInit(declarations: cir.Declaration[]): string {
-    const variableDecls = declarations.filter(
-        (decl) => decl.kind === 'VARIABLE_DECL',
-    ) as cir.VariableDeclaration[]
+function lowerInit(declarations: cir.VariableDeclaration[]): string {
     return `__attribute__((constructor)) void init() {
-        ${variableDecls.map(lowerInitStmt).join('\n')}
+        ${declarations.map(lowerInitStmt).join('\n')}
     }`
 }
 

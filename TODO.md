@@ -2,36 +2,39 @@
 
 ## In Progress
 
-
-## Next
-
-- Allow explicit copying (using `copy(of:)`)
-- Add `copy(of: T) -> T` (`UNIQUE` ret value)
-- Nested scopes (global/local vars)
-- Generate AST for syntax coloring
-
 ## Later
 
+- Allow explicit copying (using `copy(of:)`)
+  - Add `copy(of: T) -> T` (`UNIQUE` ret value)
+- Nested scopes (global/local vars)
+- Generate IDE diagnostics for syntax coloring
+  - errors
+  - did-you-mean suggestions
+  - fixits
 - Handle `Integer*` when lowering
   - Add types and ranges to CIR expressions
 - Support multi-module programs
   - Allow `@main` in one module only
   - Define library product where `@main {}` is ignored (disallowed?)
 - local/anonymous types
+  - `data` only?
+  - Can it also be a `union`/`enum` type?
 - nested functions/closures
 - Infer variable types/value-sets
 - Infer expression value-sets
 - Split `call_func`
-  - `message` (no return value) - statement
-  - `query` (has return value) - expression
+  - `MESSAGE` (no return value) - statement
+  - `QUERY` (has return value) - expression
   - Should support both free functions and methods (when `object`/`service` exist)
-  - Allow `query` as statement by assigning to `_`
+  - Convert `QUERY` into a statement by assigning to `_`
   - Make `_` a keyword? handle like `self`/`super`
 - `object`/`service`
   - Same thing to the backend/CIR - Both are defined by their methods, not their fields
   - Enforce on frontend:
     - `object` may not reach outside itself (its fields)
     - Fields are private (only accessible via `self`)
+- Replace `copy(of:)` with `{...value}`
+  - CIR: `ALLOCATE(fields = {name: FieldReference[]})`
 - Function/method
   - Emit `RELEASE` on scope exit
 

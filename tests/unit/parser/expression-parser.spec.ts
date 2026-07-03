@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { TokenStream } from '../../../src/lexer'
-import { ExpressionParser } from '../../../src/parser/expression.parser'
+import { ExpressionParser } from '../../../src/parser/expression-parser'
 import { TestErrorReporter } from '../../util'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { IntegerLiteral } from '../../../src/model/integer-literal'

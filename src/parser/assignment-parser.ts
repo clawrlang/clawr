@@ -1,6 +1,6 @@
 import { TokenStream } from '../lexer'
 import { Assignment } from '../model/assignment'
-import { ExpressionParser } from './expression.parser'
+import { ExpressionParser } from './expression-parser'
 import { StatementParser } from './statement-parser'
 import { FieldReference } from '../model/field-reference'
 import { VariableReference } from '../model/variable-reference'

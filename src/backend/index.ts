@@ -72,7 +72,8 @@ function lowerType(type: string): string {
 export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
         case 'CALL_FUNC': {
-            return `${stmt.signature.baseName}(${stmt.arguments.map(lowerExpr).join(', ')});`
+            const name = lowerCallFuncName(stmt)
+            return `${name}(${stmt.arguments.map(lowerExpr).join(', ')});`
         }
         case 'VARIABLE_DECL': {
             if (stmt.initialValue.kind === 'ALLOCATE')
@@ -127,7 +128,8 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
         case 'CALL_FUNC': {
-            return `${expr.signature.baseName}(${expr.arguments.map(lowerExpr).join(', ')})`
+            const name = lowerCallFuncName(expr)
+            return `${name}(${expr.arguments.map(lowerExpr).join(', ')})`
         }
         case 'VARIABLE_REF': {
             return expr.name
@@ -139,6 +141,15 @@ export function lowerExpr(expr: cir.Expression): string {
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
         }
     }
+}
+
+function lowerCallFuncName(
+    signature: (cir.Expression | cir.Statement) & { kind: 'CALL_FUNC' },
+): string {
+    return `${signature.signature.baseName}${signature.signature.parameters
+        .filter((param) => param.label)
+        .map((param) => `_${param.label}`)
+        .join('')}`
 }
 
 export function lowerTruthvalueLiteral(

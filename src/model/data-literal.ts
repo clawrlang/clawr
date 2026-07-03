@@ -45,7 +45,10 @@ export class DataLiteral implements Expression {
                 'DataLiteral.toCIRExpression: context.semantics is required',
                 this.span,
             )
-        this.valueSet(context)
+        if (!context.type || !context.semantics)
+            throw new Error(
+                'DataLiteral.toCIRExpression: context.type and context.semantics are required',
+            )
         return {
             kind: 'ALLOCATE',
             type: context.type,

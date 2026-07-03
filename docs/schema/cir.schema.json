@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "http://json-schema.org/draft/2020-12/schema",
   "$id": "http://clawr.lang/schema/cir/DRAFT-0",
   "title": "Clawr Module",
   "type": "object",
@@ -12,19 +12,19 @@
     },
     "startBlock": {
       "type": "array",
-      "items": { "$ref": "#/definitions/statement" }
+      "items": { "$ref": "#/$defs/statement" }
     },
     "declarations": {
       "type": "array",
-      "items": { "$ref": "#/definitions/declaration" }
+      "items": { "$ref": "#/$defs/declaration" }
     }
   },
   "required": ["$schema"],
   "additionalProperties": false,
-  "definitions": {
+  "$defs": {
     "declaration": {
       "oneOf": [
-        { "$ref": "#/definitions/variable_declaration" },
+        { "$ref": "#/$defs/variable_declaration" },
         {
           "type": "object",
           "title": "Data Declaration",
@@ -56,7 +56,7 @@
         "kind": { "const": "VARIABLE_DECL" },
         "name": { "type": "string" },
         "type": { "type": "string" },
-        "initialValue": { "$ref": "#/definitions/expression" }
+        "initialValue": { "$ref": "#/$defs/expression" }
       },
       "required": ["kind", "name", "type", "initialValue"],
       "additionalProperties": false
@@ -68,7 +68,7 @@
           "title": "Ensure Unique",
           "properties": {
             "kind": { "const": "ENSURE_UNIQUE" },
-            "object": { "$ref": "#/definitions/expression" }
+            "object": { "$ref": "#/$defs/expression" }
           },
           "required": ["kind", "object"],
           "additionalProperties": false
@@ -80,17 +80,17 @@
             "kind": { "const": "RELEASE" },
             "object": {
               "oneOf": [
-                { "$ref": "#/definitions/variable_reference" },
-                { "$ref": "#/definitions/field_reference" }
+                { "$ref": "#/$defs/variable_reference" },
+                { "$ref": "#/$defs/field_reference" }
               ]
             }
           },
           "required": ["kind", "object"],
           "additionalProperties": false
         },
-        { "$ref": "#/definitions/call_func" },
-        { "$ref": "#/definitions/variable_declaration" },
-        { "$ref": "#/definitions/assignment" }
+        { "$ref": "#/$defs/call_func" },
+        { "$ref": "#/$defs/variable_declaration" },
+        { "$ref": "#/$defs/assignment" }
       ]
     },
     "call_func": {
@@ -119,7 +119,7 @@
         },
         "arguments": {
           "type": "array",
-          "items": { "$ref": "#/definitions/expression" }
+          "items": { "$ref": "#/$defs/expression" }
         }
       },
       "required": ["kind", "signature", "arguments"],
@@ -131,11 +131,11 @@
         "kind": { "const": "ASSIGN" },
         "target": {
           "oneOf": [
-            { "$ref": "#/definitions/variable_reference" },
-            { "$ref": "#/definitions/field_reference" }
+            { "$ref": "#/$defs/variable_reference" },
+            { "$ref": "#/$defs/field_reference" }
           ]
         },
-        "value": { "$ref": "#/definitions/expression" }
+        "value": { "$ref": "#/$defs/expression" }
       },
       "required": ["kind", "target", "value"],
       "additionalProperties": false
@@ -191,7 +191,7 @@
                 "type": "object",
                 "properties": {
                   "name": { "type": "string" },
-                  "value": { "$ref": "#/definitions/expression" }
+                  "value": { "$ref": "#/$defs/expression" }
                 },
                 "required": ["name", "value"],
                 "additionalProperties": false
@@ -208,8 +208,8 @@
             "kind": { "const": "RETAIN" },
             "object": {
               "oneOf": [
-                { "$ref": "#/definitions/variable_reference" },
-                { "$ref": "#/definitions/field_reference" }
+                { "$ref": "#/$defs/variable_reference" },
+                { "$ref": "#/$defs/field_reference" }
               ]
             }
           },
@@ -221,14 +221,14 @@
           "title": "Copy",
           "properties": {
             "kind": { "const": "COPY" },
-            "object": { "$ref": "#/definitions/expression" }
+            "object": { "$ref": "#/$defs/expression" }
           },
           "required": ["kind", "object"],
           "additionalProperties": false
         },
-        { "$ref": "#/definitions/variable_reference" },
-        { "$ref": "#/definitions/field_reference" },
-        { "$ref": "#/definitions/call_func" }
+        { "$ref": "#/$defs/variable_reference" },
+        { "$ref": "#/$defs/field_reference" },
+        { "$ref": "#/$defs/call_func" }
       ]
     },
     "field_reference": {
@@ -237,7 +237,7 @@
       "properties": {
         "kind": { "const": "FIELD_REF" },
         "object": {
-          "$ref": "#/definitions/expression"
+          "$ref": "#/$defs/expression"
         },
         "field": { "type": "string" }
       },

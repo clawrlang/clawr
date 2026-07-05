@@ -1,4 +1,4 @@
-export interface ClawrModule {
+export type ClawrModule = {
     $schema: 'http://clawr.lang/schema/cir/DRAFT-0'
     startBlock?: Statement[]
     declarations?: Declaration[]
@@ -6,14 +6,14 @@ export interface ClawrModule {
 
 export type Declaration = VariableDeclaration | DataDeclaration
 
-export interface VariableDeclaration {
+export type VariableDeclaration = {
     kind: 'VARIABLE_DECL'
     name: string
     type: string
     initialValue: Expression
 }
 
-export interface DataDeclaration {
+export type DataDeclaration = {
     kind: 'DATA_DECL'
     name: string
     fields: {
@@ -29,12 +29,12 @@ export type Statement =
     | VariableDeclaration
     | Assignment
 
-export interface EnsureUnique {
+export type EnsureUnique = {
     kind: 'ENSURE_UNIQUE'
     object: Expression
 }
 
-export interface CallFunc {
+export type CallFunc = {
     kind: 'CALL_FUNC'
     signature: {
         baseName: string
@@ -46,12 +46,12 @@ export interface CallFunc {
     arguments: Expression[]
 }
 
-export interface Release {
+export type Release = {
     kind: 'RELEASE'
     object: VariableReference | FieldReference
 }
 
-export interface Assignment {
+export type Assignment = {
     kind: 'ASSIGN'
     target: VariableReference | FieldReference
     value: Expression
@@ -67,22 +67,22 @@ export type Expression =
     | FieldReference
     | CallFunc
 
-export interface StringLiteral {
+export type StringLiteral = {
     kind: 'STRING_LITERAL'
     value: string
 }
 
-export interface IntegerLiteral {
+export type IntegerLiteral = {
     kind: 'INTEGER_LITERAL'
     value: string
 }
 
-export interface TruthValueLiteral {
+export type TruthValueLiteral = {
     kind: 'TRUTHVALUE_LITERAL'
     value: 'false' | 'ambiguous' | 'true'
 }
 
-export interface Allocation {
+export type Allocation = {
     kind: 'ALLOCATE'
     type: string
     semantics: 'REF' | 'COW'
@@ -92,17 +92,17 @@ export interface Allocation {
     }[]
 }
 
-export interface Retain {
+export type Retain = {
     kind: 'RETAIN'
     object: VariableReference | FieldReference
 }
 
-export interface VariableReference {
+export type VariableReference = {
     kind: 'VARIABLE_REF'
     name: string
 }
 
-export interface FieldReference {
+export type FieldReference = {
     kind: 'FIELD_REF'
     object: Expression
     field: string

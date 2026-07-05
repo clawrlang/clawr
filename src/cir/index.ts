@@ -6,14 +6,14 @@ export type ClawrModule = {
 
 export type Declaration = VariableDeclaration | DataDeclaration
 
-export type VariableDeclaration = {
+type VariableDeclaration = {
     kind: 'VARIABLE_DECL'
     name: string
     type: string
     initialValue: Expression
 }
 
-export type DataDeclaration = {
+type DataDeclaration = {
     kind: 'DATA_DECL'
     name: string
     fields: {
@@ -29,12 +29,12 @@ export type Statement =
     | VariableDeclaration
     | Assignment
 
-export type EnsureUnique = {
+type EnsureUnique = {
     kind: 'ENSURE_UNIQUE'
     object: Expression
 }
 
-export type CallFunc = {
+type CallFunc = {
     kind: 'CALL_FUNC'
     signature: {
         baseName: string
@@ -46,12 +46,12 @@ export type CallFunc = {
     arguments: Expression[]
 }
 
-export type Release = {
+type Release = {
     kind: 'RELEASE'
     object: VariableReference | FieldReference
 }
 
-export type Assignment = {
+type Assignment = {
     kind: 'ASSIGN'
     target: VariableReference | FieldReference
     value: Expression
@@ -67,22 +67,22 @@ export type Expression =
     | FieldReference
     | CallFunc
 
-export type StringLiteral = {
+type StringLiteral = {
     kind: 'STRING_LITERAL'
     value: string
 }
 
-export type IntegerLiteral = {
+type IntegerLiteral = {
     kind: 'INTEGER_LITERAL'
     value: string
 }
 
-export type TruthValueLiteral = {
+type TruthValueLiteral = {
     kind: 'TRUTHVALUE_LITERAL'
     value: 'false' | 'ambiguous' | 'true'
 }
 
-export type Allocation = {
+type Allocation = {
     kind: 'ALLOCATE'
     type: string
     semantics: 'REF' | 'COW'
@@ -92,17 +92,17 @@ export type Allocation = {
     }[]
 }
 
-export type Retain = {
+type Retain = {
     kind: 'RETAIN'
     object: VariableReference | FieldReference
 }
 
-export type VariableReference = {
+type VariableReference = {
     kind: 'VARIABLE_REF'
     name: string
 }
 
-export type FieldReference = {
+type FieldReference = {
     kind: 'FIELD_REF'
     object: Expression
     field: string

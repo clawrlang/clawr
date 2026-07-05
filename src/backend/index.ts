@@ -1,9 +1,8 @@
 import * as cir from '../cir'
 
 export function lower(cir: cir.ClawrModule): string {
-    const variableDecls = cir.declarations?.filter(
-        (decl) => decl.kind === 'VARIABLE_DECL',
-    ) as cir.VariableDeclaration[]
+    const variableDecls =
+        cir.declarations?.filter((decl) => decl.kind === 'VARIABLE_DECL') ?? []
     return `#include <stdio.h>
         #include "runtime.h"
         ${cir.declarations ? cir.declarations.map(lowerDecl).join('\n') : ''}
@@ -44,7 +43,9 @@ export function lowerDecl(decl: cir.Declaration): string {
     }
 }
 
-function lowerInit(declarations: cir.VariableDeclaration[]): string {
+function lowerInit(
+    declarations: Extract<cir.Declaration, { kind: 'VARIABLE_DECL' }>[],
+): string {
     return `__attribute__((constructor)) void init() {
         ${declarations.map(lowerInitStmt).join('\n')}
     }`

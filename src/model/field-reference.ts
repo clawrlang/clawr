@@ -63,7 +63,9 @@ export class FieldReference implements Expression {
         return { type: field.type }
     }
 
-    toCIRExpression(context: Context): cir.FieldReference {
+    toCIRExpression(
+        context: Context,
+    ): Extract<cir.Expression, { kind: 'FIELD_REF' }> {
         this.checkOperatorCompatibility(context)
         return {
             kind: 'FIELD_REF',

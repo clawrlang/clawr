@@ -49,7 +49,7 @@ export class VariableDeclaration implements Statement, Declaration {
         context.scope.emitted.statements.push(this.toCIR(context))
     }
 
-    private toCIR(context: Context): cir.VariableDeclaration {
+    private toCIR(context: Context): cir.Declaration & cir.Statement {
         const valueSemantics = this.initialValue.semantics(context)
         const targetSemantics = convertSemantics(this.semantics)
         const isValueSemanticsMismatch =
@@ -76,14 +76,14 @@ export class VariableDeclaration implements Statement, Declaration {
             isReferenceCounted(this.type)
         )
             return {
-                kind: 'VARIABLE_DECL',
+                kind: 'VARIABLE_DECL' as const,
                 name: this.name,
                 type: this.type,
                 initialValue: { kind: 'RETAIN', object: valueCIR },
             }
         else
             return {
-                kind: 'VARIABLE_DECL',
+                kind: 'VARIABLE_DECL' as const,
                 name: this.name,
                 type: this.type,
                 initialValue: valueCIR,

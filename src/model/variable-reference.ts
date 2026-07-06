@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Expression, Context, ValueSet } from '.'
+import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 
 export class VariableReference implements Expression {
@@ -45,9 +45,20 @@ export class VariableReference implements Expression {
         return convertSemantics(semantics)
     }
 
-    valueSet(context: Context): ValueSet {
+    valueSet(context: Context): cir.ValueSet {
         const variable = this.lookupInScope(context)
-        return { type: variable.type }
+        switch (variable.type) {
+            case 'integer':
+            case 'truthvalue':
+            case 'string':
+                return { type: variable.type }
+            default:
+                return {
+                    type: 'rc-type',
+                    typeName: variable.type,
+                    semantics: convertSemantics(variable.semantics),
+                }
+        }
     }
 
     lookupInScope(context: Context) {

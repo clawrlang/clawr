@@ -31,15 +31,11 @@ export type Context = {
     errorReporter: ErrorReporter
 }
 
-export type ValueSet = {
-    type: string
-}
-
 export interface Expression {
     get span(): SourceCodeSpan
     isEffectivelyConst(context: Context): boolean
     semantics(context: Context): 'COW' | 'REF' | 'UNIQUE'
-    valueSet(context: Context): ValueSet
+    valueSet(context: Context): cir.ValueSet
     toCIRExpression(context: Context): cir.Expression
 }
 

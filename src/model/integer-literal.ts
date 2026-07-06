@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Expression, Context, ValueSet } from '.'
+import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 
 export class IntegerLiteral implements Expression {
@@ -30,7 +30,7 @@ export class IntegerLiteral implements Expression {
         return 'COW' as const
     }
 
-    valueSet(_: Context): ValueSet {
+    valueSet(_: Context): cir.ValueSet {
         return { type: 'integer' }
     }
 

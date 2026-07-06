@@ -1,4 +1,4 @@
-import { Expression, Context, ValueSet } from '.'
+import { Context, Expression } from '.'
 import * as cir from '../cir'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
@@ -58,9 +58,20 @@ export class FieldReference implements Expression {
         return convertSemantics(field.semantics)
     }
 
-    valueSet(context: Context): ValueSet {
+    valueSet(context: Context): cir.ValueSet {
         const field = this.getFieldFromContext(context)
-        return { type: field.type }
+        switch (field.type) {
+            case 'integer':
+            case 'truthvalue':
+            case 'string':
+                return { type: field.type }
+            default:
+                return {
+                    type: 'rc-type',
+                    typeName: field.type,
+                    semantics: convertSemantics(field.semantics),
+                }
+        }
     }
 
     toCIRExpression(
@@ -75,7 +86,11 @@ export class FieldReference implements Expression {
     }
 
     private getFieldFromContext(context: Context) {
-        const objectType = this.object.valueSet(context).type
+        const objectValueSet = this.object.valueSet(context)
+        const objectType =
+            objectValueSet.type === 'rc-type'
+                ? objectValueSet.typeName
+                : objectValueSet.type
         const declaration = context.scope.declarations.get(objectType)
         if (!declaration) {
             context.errorReporter.reportFatalError(

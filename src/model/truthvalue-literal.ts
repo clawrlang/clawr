@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Context, Expression, ValueSet } from '.'
+import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 
 export class TruthValueLiteral implements Expression {
@@ -26,7 +26,7 @@ export class TruthValueLiteral implements Expression {
         return 'COW' as const
     }
 
-    valueSet(_: Context): ValueSet {
+    valueSet(_: Context): cir.ValueSet {
         return { type: 'truthvalue' }
     }
 

@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Expression, Context, ValueSet } from '.'
+import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 
 export class DataLiteral implements Expression {
@@ -26,10 +26,23 @@ export class DataLiteral implements Expression {
         return 'UNIQUE' as const
     }
 
-    valueSet(context: Context & { type: string }): ValueSet {
+    valueSet(context: Context & { type: string }): cir.ValueSet {
         if (!context.type)
             throw new Error('DataLiteral.valueSet: context.type is required')
-        return { type: context.type }
+        switch (context.type) {
+            case 'integer':
+                return { type: 'integer' }
+            case 'truthvalue':
+                return { type: 'truthvalue' }
+            case 'string':
+                return { type: 'string' }
+            default:
+                return {
+                    type: 'rc-type',
+                    typeName: context.type,
+                    semantics: 'UNIQUE',
+                }
+        }
     }
 
     toCIRExpression(

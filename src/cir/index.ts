@@ -87,3 +87,22 @@ export type Expression =
           field: string
       }
     | Extract<Statement, { kind: 'CALL_FUNC' }>
+
+export type ValueSet =
+    | {
+          type: 'integer'
+          min?: string
+          max?: string
+      }
+    | {
+          type: 'truthvalue'
+          values?: ('false' | 'ambiguous' | 'true')[]
+      }
+    | {
+          type: 'string'
+      }
+    | {
+          type: 'rc-type'
+          typeName: string
+          semantics: 'REF' | 'COW' | 'UNIQUE'
+      }

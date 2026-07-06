@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { Query } from '../../../src/model/query'
+import { IntegerLiteral } from '../../../src/model/integer-literal'
 
 describe('Query', () => {
     it('converts to CIR', () => {
@@ -26,9 +27,8 @@ describe('Query', () => {
             arguments: [
                 {
                     label: 'x',
-                    value: Query.create({
-                        baseName: 'bar',
-                        arguments: [],
+                    value: IntegerLiteral.create({
+                        value: 42n,
                         span: someCodeSpan,
                     }),
                 },
@@ -40,16 +40,12 @@ describe('Query', () => {
             kind: 'CALL_FUNC',
             signature: {
                 baseName: 'foo',
-                parameters: [{ label: 'x', type: 'unknown' }],
+                parameters: [{ label: 'x', type: 'integer' }],
             },
             arguments: [
                 {
-                    kind: 'CALL_FUNC',
-                    signature: {
-                        baseName: 'bar',
-                        parameters: [],
-                    },
-                    arguments: [],
+                    kind: 'INTEGER_LITERAL',
+                    value: '42',
                 },
             ],
         })

@@ -1,7 +1,9 @@
 {
   "name": "clawr",
-  "version": "0.1.0",
   "description": "Clawr Semantic Library",
+  "author": "Clawr Community",
+  "license": "MIT",
+  "version": "0.1.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -20,8 +22,6 @@
     "test:runtime": "npm run build:runtime && bun test ./tests/runtime/*.test.ts",
     "test": "npm run test:unit && npm run test:backend && npm run test:e2e"
   },
-  "author": "Clawr Community",
-  "license": "MIT",
   "dependencies": {
     "commander": "^15.0.0",
     "decimalish": "^0.1.2",

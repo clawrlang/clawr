@@ -8,7 +8,7 @@ export type Declaration =
     | {
           kind: 'VARIABLE_DECL'
           name: string
-          type: string
+          valueSet: ValueSet
           initialValue: Expression
       }
     | {
@@ -16,7 +16,7 @@ export type Declaration =
           name: string
           fields: {
               name: string
-              type: string
+              valueSet: ValueSet
           }[]
       }
 
@@ -27,7 +27,10 @@ export type Statement =
       }
     | {
           kind: 'RELEASE'
-          object: Extract<Expression, { kind: 'VARIABLE_REF' | 'FIELD_REF' }>
+          object: Extract<
+              Expression,
+              { kind: 'VARIABLE_REF' | 'FIELD_REF'; valueSet?: ValueSet }
+          >
       }
     | {
           kind: 'CALL_FUNC'

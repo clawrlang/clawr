@@ -1,6 +1,7 @@
 import * as cir from '../cir'
 import { Context, Declaration } from '.'
 import { VariableSemantics } from './variable-declaration'
+import { convertSemantics } from './variable-reference'
 
 type DataField = {
     name: string
@@ -31,8 +32,25 @@ export class DataDeclaration implements Declaration {
             name: this.name,
             fields: this.fields.map((field) => ({
                 name: field.name,
-                type: field.type,
+                valueSet: buildValueSet(field),
             })),
         })
+    }
+}
+
+function buildValueSet(field: DataField): cir.ValueSet {
+    switch (field.type) {
+        case 'integer':
+            return { type: 'integer' }
+        case 'truthvalue':
+            return { type: 'truthvalue' }
+        case 'string':
+            return { type: 'string' }
+        default:
+            return {
+                type: 'rc-type',
+                typeName: field.type,
+                semantics: convertSemantics(field.semantics),
+            }
     }
 }

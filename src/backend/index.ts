@@ -18,7 +18,7 @@ export function lowerDecl(decl: cir.Declaration): string {
     switch (decl.kind) {
         case 'DATA_DECL': {
             const fields = decl.fields
-                .map((field) => `${lowerType(field.type)} ${field.name};`)
+                .map((field) => `${lowerType(field.valueSet)} ${field.name};`)
                 .join('\n')
             return `typedef struct {
                 ${fields}
@@ -35,7 +35,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             `
         }
         case 'VARIABLE_DECL': {
-            return `${lowerType(decl.type)} ${decl.name};`
+            return `${lowerType(decl.valueSet)} ${decl.name};`
         }
         default: {
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
@@ -51,14 +51,16 @@ function lowerInit(
     }`
 }
 
-function lowerType(type: string): string {
-    switch (type) {
+function lowerType(valueSet: cir.ValueSet): string {
+    switch (valueSet.type) {
         case 'integer':
             return 'int64_t'
         case 'truthvalue':
             return 'truthvalue_t'
+        case 'rc-type':
+            return `${valueSet.typeName}*`
         default:
-            return `${type}*`
+            throw new Error(`Unknown value set type: ${(valueSet as any).type}`)
     }
 }
 
@@ -72,7 +74,7 @@ export function lowerStmt(stmt: cir.Statement): string {
             if (stmt.initialValue.kind === 'ALLOCATE')
                 return `${stmt.initialValue.type}* ${lowerInitStmt(stmt)};`
             else
-                return `${lowerType(stmt.type)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
+                return `${lowerType(stmt.valueSet)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         }
         case 'ASSIGN': {
             return `${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};`

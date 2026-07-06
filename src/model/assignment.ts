@@ -53,10 +53,7 @@ export class Assignment implements Statement {
             context.scope.emitted.statements.push({
                 kind: 'VARIABLE_DECL' as const,
                 name: tempVar,
-                type:
-                    targetValueSet.type === 'rc-type'
-                        ? targetValueSet.typeName
-                        : targetValueSet.type,
+                valueSet: targetValueSet,
                 initialValue: this.target.toCIRExpression(context),
             })
 

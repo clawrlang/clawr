@@ -39,7 +39,7 @@
 ## Feature Template
 
 1. Define Clawr syntax/semantics to support next
-2. Identify and perform needed changes to the [Clawr IR schema](./docs/schema/cir.schema.json)
+2. Add or modify the [Clawr IR types](./src/cir/index.ts)
    1. Employ TDD to build strong unit tests for the backend code
    2. Implement lowering for new/changed IR nodes
    3. Write IR test cases that lower all the way to executables and run them

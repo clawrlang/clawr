@@ -7,7 +7,7 @@ describe('Lowering Variables', () => {
         const decl: Declaration = {
             kind: 'VARIABLE_DECL',
             name: 'x',
-            type: 'integer',
+            valueSet: { type: 'integer' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
                 value: '42',

@@ -23,7 +23,7 @@ describe('VariableDeclaration', () => {
         expect(context.scope.emitted.statements[0]).toEqual({
             kind: 'VARIABLE_DECL',
             name: 'foo',
-            type: 'integer',
+            valueSet: { type: 'integer' },
             initialValue: { kind: 'INTEGER_LITERAL', value: '1' },
         })
     })

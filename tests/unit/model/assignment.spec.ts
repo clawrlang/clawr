@@ -90,7 +90,11 @@ describe('Assignment', () => {
                 {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
-                    type: 'InnerType',
+                    valueSet: {
+                        type: 'rc-type',
+                        typeName: 'InnerType',
+                        semantics: 'COW',
+                    },
                     initialValue: {
                         kind: 'VARIABLE_REF',
                         name: 'foo',
@@ -159,7 +163,11 @@ describe('Assignment', () => {
                 {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
-                    type: 'MyType',
+                    valueSet: {
+                        type: 'rc-type',
+                        typeName: 'MyType',
+                        semantics: 'COW',
+                    },
                     initialValue: {
                         kind: 'VARIABLE_REF',
                         name: 'foo',

@@ -1,10 +1,12 @@
 {
-    "$schema": "../../../docs/schema/cir.schema.json",
+    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
     "declarations": [
         {
             "kind": "VARIABLE_DECL",
             "name": "foo",
-            "type": "integer",
+            "valueSet": {
+                "type": "integer"
+            },
             "initialValue": {
                 "kind": "INTEGER_LITERAL",
                 "value": "1"
@@ -18,7 +20,9 @@
                 "baseName": "printInt64",
                 "parameters": [
                     {
-                        "type": "integer"
+                        "valueSet": {
+                            "type": "integer"
+                        }
                     }
                 ]
             },

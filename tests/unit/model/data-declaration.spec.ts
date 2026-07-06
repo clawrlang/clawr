@@ -18,8 +18,8 @@ describe('DataDeclaration', () => {
                 kind: 'DATA_DECL',
                 name: 'MyData',
                 fields: [
-                    { name: 'field1', type: 'integer' },
-                    { name: 'field2', type: 'truthvalue' },
+                    { name: 'field1', valueSet: { type: 'integer' } },
+                    { name: 'field2', valueSet: { type: 'truthvalue' } },
                 ],
             },
         ])

@@ -1,5 +1,5 @@
 {
-    "$schema": "../../../docs/schema/cir.schema.json",
+    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
     "declarations": [
         {
             "kind": "DATA_DECL",
@@ -7,14 +7,20 @@
             "fields": [
                 {
                     "name": "bar",
-                    "type": "integer"
+                    "valueSet": {
+                        "type": "integer"
+                    }
                 }
             ]
         },
         {
             "kind": "VARIABLE_DECL",
             "name": "foo",
-            "type": "FooData",
+            "valueSet": {
+                "type": "rc-type",
+                "typeName": "FooData",
+                "semantics": "REF"
+            },
             "initialValue": {
                 "kind": "ALLOCATE",
                 "type": "FooData",
@@ -53,7 +59,9 @@
                 "baseName": "printInt64",
                 "parameters": [
                     {
-                        "type": "integer"
+                        "valueSet": {
+                            "type": "integer"
+                        }
                     }
                 ]
             },

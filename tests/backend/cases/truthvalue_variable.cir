@@ -1,10 +1,12 @@
 {
-    "$schema": "../../../docs/schema/cir.schema.json",
+    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
     "declarations": [
         {
             "kind": "VARIABLE_DECL",
             "name": "foo",
-            "type": "truthvalue",
+            "valueSet": {
+                "type": "truthvalue"
+            },
             "initialValue": {
                 "kind": "TRUTHVALUE_LITERAL",
                 "value": "ambiguous"
@@ -18,7 +20,9 @@
                 "baseName": "printTruthvalue",
                 "parameters": [
                     {
-                        "type": "truthvalue"
+                        "valueSet": {
+                            "type": "truthvalue"
+                        }
                     }
                 ]
             },

@@ -9,7 +9,13 @@
             },
             "initialValue": {
                 "kind": "TRUTHVALUE_LITERAL",
-                "value": "ambiguous"
+                "value": "ambiguous",
+                "valueSet": {
+                    "type": "truthvalue",
+                    "values": [
+                        "ambiguous"
+                    ]
+                }
             }
         }
     ],
@@ -27,7 +33,13 @@
             "arguments": [
                 {
                     "kind": "VARIABLE_REF",
-                    "name": "foo"
+                    "name": "foo",
+                    "valueSet": {
+                        "type": "truthvalue",
+                        "values": [
+                            "ambiguous"
+                        ]
+                    }
                 }
             ]
         }

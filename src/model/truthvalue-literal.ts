@@ -18,16 +18,20 @@ export class TruthValueLiteral implements Expression {
         return new TruthValueLiteral(value, span)
     }
 
-    toCIRExpression(_: Context): cir.Expression {
-        return { kind: 'TRUTHVALUE_LITERAL', value: this.value }
+    toCIRExpression(context: Context): cir.Expression {
+        return {
+            kind: 'TRUTHVALUE_LITERAL',
+            value: this.value,
+            valueSet: this.valueSet(context),
+        }
     }
 
     semantics(_: Context) {
         return 'COW' as const
     }
 
-    valueSet(_: Context): cir.ValueSet {
-        return { type: 'truthvalue' }
+    valueSet(_: Context): Extract<cir.ValueSet, { type: 'truthvalue' }> {
+        return { type: 'truthvalue', values: [this.value] }
     }
 
     isEffectivelyConst(_: Context): boolean {

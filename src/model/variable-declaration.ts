@@ -79,7 +79,15 @@ export class VariableDeclaration implements Statement, Declaration {
                 kind: 'VARIABLE_DECL' as const,
                 name: this.name,
                 valueSet: this.buildValueSet(),
-                initialValue: { kind: 'RETAIN', object: valueCIR },
+                initialValue: {
+                    kind: 'RETAIN',
+                    object: valueCIR,
+                    valueSet: {
+                        type: 'rc-type',
+                        typeName: this.type,
+                        semantics: convertSemantics(this.semantics),
+                    },
+                },
             }
         else
             return {

@@ -72,7 +72,7 @@ export function lowerStmt(stmt: cir.Statement): string {
         }
         case 'VARIABLE_DECL': {
             if (stmt.initialValue.kind === 'ALLOCATE')
-                return `${stmt.initialValue.type}* ${lowerInitStmt(stmt)};`
+                return `${lowerType(stmt.initialValue.valueSet)} ${lowerInitStmt(stmt)};`
             else
                 return `${lowerType(stmt.valueSet)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         }
@@ -96,10 +96,10 @@ export function lowerInitStmt(stmt: cir.Statement): string {
         case 'VARIABLE_DECL': {
             if (stmt.initialValue.kind === 'ALLOCATE')
                 return `
-                    ${stmt.name} = allocRC(${stmt.initialValue.type}, ${stmt.initialValue.semantics === 'COW' ? '__rc_ISOLATED' : '__rc_SHARED'});
-                    memcpy(((__rc_header*)${stmt.name}) + 1, &(${stmt.initialValue.type}ˇfields) {
+                    ${stmt.name} = allocRC(${stmt.initialValue.valueSet.typeName}, ${stmt.initialValue.valueSet.semantics === 'COW' ? '__rc_ISOLATED' : '__rc_SHARED'});
+                    memcpy(((__rc_header*)${stmt.name}) + 1, &(${stmt.initialValue.valueSet.typeName}ˇfields) {
                         ${stmt.initialValue.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')}
-                    }, sizeof(${stmt.initialValue.type}ˇfields));
+                    }, sizeof(${stmt.initialValue.valueSet.typeName}ˇfields));
                     `
             else return `${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         }

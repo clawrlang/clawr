@@ -64,8 +64,11 @@ export class DataLiteral implements Expression {
             )
         return {
             kind: 'ALLOCATE',
-            type: context.type,
-            semantics: context.semantics,
+            valueSet: {
+                type: 'rc-type',
+                typeName: context.type,
+                semantics: context.semantics,
+            },
             fields: this.fields.map((field) => ({
                 name: field.name,
                 value: field.value.toCIRExpression(context),

@@ -72,8 +72,11 @@ describe('Literals', () => {
                 }),
             ).toMatchObject({
                 kind: 'ALLOCATE',
-                type: 'MyType',
-                semantics: 'REF',
+                valueSet: {
+                    type: 'rc-type',
+                    typeName: 'MyType',
+                    semantics: 'REF',
+                },
                 fields: [
                     {
                         name: 'x',

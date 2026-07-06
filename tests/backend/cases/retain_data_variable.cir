@@ -23,14 +23,22 @@
             },
             "initialValue": {
                 "kind": "ALLOCATE",
-                "type": "FooData",
-                "semantics": "COW",
+                "valueSet": {
+                    "type": "rc-type",
+                    "typeName": "FooData",
+                    "semantics": "COW"
+                },
                 "fields": [
                     {
                         "name": "bar",
                         "value": {
                             "kind": "INTEGER_LITERAL",
-                            "value": "2"
+                            "value": "2",
+                            "valueSet": {
+                                "type": "integer",
+                                "min": "2",
+                                "max": "2"
+                            }
                         }
                     }
                 ]
@@ -50,7 +58,17 @@
                 "kind": "RETAIN",
                 "object": {
                     "kind": "VARIABLE_REF",
-                    "name": "two"
+                    "name": "two",
+                    "valueSet": {
+                        "type": "rc-type",
+                        "typeName": "FooData",
+                        "semantics": "COW"
+                    }
+                },
+                "valueSet": {
+                    "type": "rc-type",
+                    "typeName": "FooData",
+                    "semantics": "COW"
                 }
             }
         },
@@ -58,7 +76,12 @@
             "kind": "ENSURE_UNIQUE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "one"
+                "name": "one",
+                "valueSet": {
+                    "type": "rc-type",
+                    "typeName": "FooData",
+                    "semantics": "COW"
+                }
             }
         },
         {
@@ -67,13 +90,28 @@
                 "kind": "FIELD_REF",
                 "object": {
                     "kind": "VARIABLE_REF",
-                    "name": "one"
+                    "name": "one",
+                    "valueSet": {
+                        "type": "rc-type",
+                        "typeName": "FooData",
+                        "semantics": "COW"
+                    }
                 },
-                "field": "bar"
+                "field": "bar",
+                "valueSet": {
+                    "type": "rc-type",
+                    "typeName": "FooData",
+                    "semantics": "COW"
+                }
             },
             "value": {
                 "kind": "INTEGER_LITERAL",
-                "value": "1"
+                "value": "1",
+                "valueSet": {
+                    "type": "integer",
+                    "min": "1",
+                    "max": "1"
+                }
             }
         },
         {
@@ -91,9 +129,19 @@
                     "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
-                        "name": "two"
+                        "name": "two",
+                        "valueSet": {
+                            "type": "rc-type",
+                            "typeName": "FooData",
+                            "semantics": "COW"
+                        }
                     },
-                    "field": "bar"
+                    "field": "bar",
+                    "valueSet": {
+                        "type": "integer",
+                        "min": "1",
+                        "max": "1"
+                    }
                 }
             ]
         },
@@ -112,9 +160,19 @@
                     "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
-                        "name": "one"
+                        "name": "one",
+                        "valueSet": {
+                            "type": "rc-type",
+                            "typeName": "FooData",
+                            "semantics": "COW"
+                        }
                     },
-                    "field": "bar"
+                    "field": "bar",
+                    "valueSet": {
+                        "type": "integer",
+                        "min": "1",
+                        "max": "1"
+                    }
                 }
             ]
         },
@@ -122,14 +180,24 @@
             "kind": "RELEASE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "one"
+                "name": "one",
+                "valueSet": {
+                    "type": "rc-type",
+                    "typeName": "FooData",
+                    "semantics": "COW"
+                }
             }
         },
         {
             "kind": "RELEASE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "two"
+                "name": "two",
+                "valueSet": {
+                    "type": "rc-type",
+                    "typeName": "FooData",
+                    "semantics": "COW"
+                }
             }
         }
     ]

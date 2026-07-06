@@ -15,9 +15,18 @@ describe('Function Calls', () => {
                     ],
                 },
                 arguments: [
-                    { kind: 'INTEGER_LITERAL', value: '42' },
-                    { kind: 'STRING_LITERAL', value: 'Hello' },
+                    {
+                        kind: 'INTEGER_LITERAL',
+                        value: '42',
+                        valueSet: { type: 'integer', min: '42', max: '42' },
+                    },
+                    {
+                        kind: 'STRING_LITERAL',
+                        value: 'Hello',
+                        valueSet: { type: 'string' },
+                    },
                 ],
+                valueSet: { type: 'truthvalue' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myFunction_param1_param2(42, "Hello")')
@@ -34,8 +43,16 @@ describe('Function Calls', () => {
                     ],
                 },
                 arguments: [
-                    { kind: 'INTEGER_LITERAL', value: '42' },
-                    { kind: 'STRING_LITERAL', value: 'Hello' },
+                    {
+                        kind: 'INTEGER_LITERAL',
+                        value: '42',
+                        valueSet: { type: 'integer', min: '42', max: '42' },
+                    },
+                    {
+                        kind: 'STRING_LITERAL',
+                        value: 'Hello',
+                        valueSet: { type: 'string' },
+                    },
                 ],
             }
             const result = lowerStmt(stmt)
@@ -55,9 +72,18 @@ describe('Function Calls', () => {
                     ],
                 },
                 arguments: [
-                    { kind: 'INTEGER_LITERAL', value: '42' },
-                    { kind: 'STRING_LITERAL', value: 'Hello' },
+                    {
+                        kind: 'INTEGER_LITERAL',
+                        value: '42',
+                        valueSet: { type: 'integer', min: '42', max: '42' },
+                    },
+                    {
+                        kind: 'STRING_LITERAL',
+                        value: 'Hello',
+                        valueSet: { type: 'string' },
+                    },
                 ],
+                valueSet: { type: 'truthvalue' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myFunction_param1(42, "Hello")')
@@ -74,8 +100,16 @@ describe('Function Calls', () => {
                     ],
                 },
                 arguments: [
-                    { kind: 'INTEGER_LITERAL', value: '42' },
-                    { kind: 'STRING_LITERAL', value: 'Hello' },
+                    {
+                        kind: 'INTEGER_LITERAL',
+                        value: '42',
+                        valueSet: { type: 'integer', min: '42', max: '42' },
+                    },
+                    {
+                        kind: 'STRING_LITERAL',
+                        value: 'Hello',
+                        valueSet: { type: 'string' },
+                    },
                 ],
             }
             const result = lowerStmt(stmt)
@@ -92,6 +126,7 @@ describe('Function Calls', () => {
                     parameters: [],
                 },
                 arguments: [],
+                valueSet: { type: 'truthvalue' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('noParamFunction()')

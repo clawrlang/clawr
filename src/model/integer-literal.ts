@@ -22,16 +22,24 @@ export class IntegerLiteral implements Expression {
         return new IntegerLiteral(value, span)
     }
 
-    toCIRExpression(_: Context): cir.Expression {
-        return { kind: 'INTEGER_LITERAL', value: this.value.toString() }
+    toCIRExpression(context: Context): cir.Expression {
+        return {
+            kind: 'INTEGER_LITERAL',
+            value: this.value.toString(),
+            valueSet: this.valueSet(context),
+        }
     }
 
     semantics(_: Context) {
         return 'COW' as const
     }
 
-    valueSet(_: Context): cir.ValueSet {
-        return { type: 'integer' }
+    valueSet(_: Context): Extract<cir.ValueSet, { type: 'integer' }> {
+        return {
+            type: 'integer',
+            min: this.value.toString(),
+            max: this.value.toString(),
+        }
     }
 
     isEffectivelyConst(_: Context): boolean {

@@ -17,6 +17,7 @@ describe('Variable Reference', () => {
         expect(variableRef.toCIRExpression(context)).toEqual({
             kind: 'VARIABLE_REF',
             name: 'myVar',
+            valueSet: { type: 'integer' },
         })
     })
 

@@ -52,6 +52,7 @@ export class Query implements Expression {
             arguments: this.arguments.map((arg) =>
                 arg.value.toCIRExpression(context),
             ),
+            valueSet: this.valueSet(context),
         }
     }
 }

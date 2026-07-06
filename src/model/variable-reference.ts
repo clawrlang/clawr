@@ -36,7 +36,11 @@ export class VariableReference implements Expression {
         context: Context,
     ): Extract<cir.Expression, { kind: 'VARIABLE_REF' }> {
         this.lookupInScope(context)
-        return { kind: 'VARIABLE_REF', name: this.name }
+        return {
+            kind: 'VARIABLE_REF',
+            name: this.name,
+            valueSet: this.valueSet(context),
+        }
     }
 
     semantics(context: Context) {

@@ -24,7 +24,11 @@ describe('VariableDeclaration', () => {
             kind: 'VARIABLE_DECL',
             name: 'foo',
             valueSet: { type: 'integer' },
-            initialValue: { kind: 'INTEGER_LITERAL', value: '1' },
+            initialValue: {
+                kind: 'INTEGER_LITERAL',
+                value: '1',
+                valueSet: { type: 'integer', min: '1', max: '1' },
+            },
         })
     })
 

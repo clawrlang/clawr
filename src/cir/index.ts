@@ -54,19 +54,21 @@ export type Expression =
     | {
           kind: 'STRING_LITERAL'
           value: string
+          valueSet: Extract<ValueSet, { type: 'string' }>
       }
     | {
           kind: 'INTEGER_LITERAL'
           value: string
+          valueSet: Extract<ValueSet, { type: 'integer' }>
       }
     | {
           kind: 'TRUTHVALUE_LITERAL'
           value: 'false' | 'ambiguous' | 'true'
+          valueSet: Extract<ValueSet, { type: 'truthvalue' }>
       }
     | {
           kind: 'ALLOCATE'
-          type: string
-          semantics: 'REF' | 'COW'
+          valueSet: Extract<ValueSet, { type: 'rc-type' }>
           fields: {
               name: string
               value: Expression
@@ -75,17 +77,20 @@ export type Expression =
     | {
           kind: 'RETAIN'
           object: Extract<Expression, { kind: 'VARIABLE_REF' | 'FIELD_REF' }>
+          valueSet: Extract<ValueSet, { type: 'rc-type' }>
       }
     | {
           kind: 'VARIABLE_REF'
           name: string
+          valueSet: ValueSet
       }
     | {
           kind: 'FIELD_REF'
           object: Expression
           field: string
+          valueSet: ValueSet
       }
-    | Extract<Statement, { kind: 'CALL_FUNC' }>
+    | (Extract<Statement, { kind: 'CALL_FUNC' }> & { valueSet: ValueSet })
 
 export type ValueSet =
     | {

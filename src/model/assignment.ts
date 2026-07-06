@@ -61,11 +61,19 @@ export class Assignment implements Statement {
                 {
                     kind: 'ASSIGN',
                     target: this.target.toCIRExpression(context),
-                    value: { kind: 'RETAIN', object: valueCIR },
+                    value: {
+                        kind: 'RETAIN',
+                        object: valueCIR,
+                        valueSet: targetValueSet as any,
+                    },
                 },
                 {
                     kind: 'RELEASE',
-                    object: { kind: 'VARIABLE_REF', name: tempVar },
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: tempVar,
+                        valueSet: targetValueSet,
+                    },
                 },
             )
         } else

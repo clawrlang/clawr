@@ -10,7 +10,7 @@ import { ModuleParser } from '../parser'
 import { TokenStream } from '../lexer'
 import { ClawrModule } from '../cir'
 import { ErrorReporter } from './error-reporter'
-import { Scope } from '../model'
+import { Scope } from '../model/scope'
 import typia from 'typia'
 
 const exeDir = path.dirname(process.execPath)

@@ -2,6 +2,12 @@
 
 ## In Progress
 
+- Add `currentValue` to `fields`
+  - `DataLiteral.fields.toCIRExpression`
+- Declare Function/method in scope
+  - Create child scope and add statements
+  - Emit `RELEASE` on scope exit
+
 ## Later
 
 - Nested scopes (global/local vars)
@@ -33,8 +39,6 @@
     - Fields are private (only accessible via `self`)
 - Replace `copy(of:)` with `{...value}`
   - CIR: `ALLOCATE(fields = {name: FieldReference[]})`
-- Function/method
-  - Emit `RELEASE` on scope exit
 
 ## Feature Template
 

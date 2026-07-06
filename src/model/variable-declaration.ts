@@ -1,6 +1,7 @@
 import * as cir from '../cir'
 import { Statement, Expression, Context, Declaration } from '.'
 import { convertSemantics } from './variable-reference'
+import { Scope } from './scope'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -28,19 +29,29 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     emitDeclaration(context: Context): void {
-        context.scope.variables.set(this.name, {
-            semantics: this.semantics,
-            type: this.type,
-        })
-        context.scope.rootScope.emitted.push(this.toCIR(context))
+        this.emit(context.scope.rootScope, context)
     }
 
     emitStatement(context: Context) {
-        context.scope.variables.set(this.name, {
+        this.emit(context.scope, context)
+    }
+
+    private emit(scope: Scope | Scope['rootScope'], context: Context) {
+        const myValueSet = this.buildValueSet()
+        const currentValue = {
+            ...this.initialValue.toCIRExpression({
+                ...context,
+                targetValueSet: myValueSet,
+            }).valueSet,
+            ...{ semantics: (myValueSet as any).semantics },
+        }
+        scope.variables.set(this.name, {
             semantics: this.semantics,
-            type: this.type,
+            allowedValues:
+                this.semantics === 'const' ? currentValue : myValueSet,
+            currentValue,
         })
-        context.scope.emitted.push(this.toCIR(context))
+        scope.emitted.push(this.toCIR(context))
     }
 
     private toCIR(context: Context): cir.Declaration & cir.Statement {

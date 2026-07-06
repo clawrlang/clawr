@@ -10,7 +10,11 @@ import { DataLiteral } from '../../../src/model/data-literal'
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('x', { semantics: 'mut', type: 'integer' })
+        context.scope.variables.set('x', {
+            semantics: 'mut',
+            allowedValues: { type: 'integer' },
+            currentValue: { type: 'integer' },
+        })
 
         const assignment = Assignment.create({
             target: VariableReference.create({ name: 'x', span: someCodeSpan }),
@@ -60,11 +64,29 @@ describe('Assignment', () => {
             )
             context.scope.variables.set('bar', {
                 semantics: 'const',
-                type: 'OuterType',
+                allowedValues: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'OuterType',
+                },
+                currentValue: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'OuterType',
+                },
             })
             context.scope.variables.set('foo', {
                 semantics: 'mut',
-                type: 'InnerType',
+                allowedValues: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'InnerType',
+                },
+                currentValue: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'InnerType',
+                },
             })
 
             const assignment = Assignment.create({
@@ -139,11 +161,29 @@ describe('Assignment', () => {
             )
             context.scope.variables.set('bar', {
                 semantics: 'const',
-                type: 'MyType',
+                allowedValues: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
+                currentValue: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
             })
             context.scope.variables.set('foo', {
                 semantics: 'mut',
-                type: 'MyType',
+                allowedValues: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
+                currentValue: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
             })
 
             const assignment = Assignment.create({
@@ -212,7 +252,16 @@ describe('Assignment', () => {
         )
         context.scope.variables.set('foo', {
             semantics: 'mut',
-            type: 'MyType',
+            allowedValues: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
+            currentValue: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
         })
 
         const assignment = Assignment.create({
@@ -271,7 +320,10 @@ describe('Assignment', () => {
     })
 
     describe('throws if the target variable is immutable/non-assignable', () => {
-        for (const kind of ['const', 'ref'] as const) {
+        for (const [kind, semantics] of [
+            ['const', 'COW'],
+            ['ref', 'REF'],
+        ] as const) {
             test(kind, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.declarations.set(
@@ -289,11 +341,29 @@ describe('Assignment', () => {
                 )
                 context.scope.variables.set('target', {
                     semantics: kind,
-                    type: 'MyType',
+                    allowedValues: {
+                        type: 'rc-type',
+                        semantics: semantics,
+                        typeName: 'MyType',
+                    },
+                    currentValue: {
+                        type: 'rc-type',
+                        semantics: semantics,
+                        typeName: 'MyType',
+                    },
                 })
                 context.scope.variables.set('value', {
                     semantics: kind,
-                    type: 'MyType',
+                    allowedValues: {
+                        type: 'rc-type',
+                        semantics: semantics,
+                        typeName: 'MyType',
+                    },
+                    currentValue: {
+                        type: 'rc-type',
+                        semantics: semantics,
+                        typeName: 'MyType',
+                    },
                 })
 
                 const assignment = Assignment.create({
@@ -339,7 +409,16 @@ describe('Assignment', () => {
         )
         context.scope.variables.set('x', {
             semantics: 'const',
-            type: 'MyType',
+            allowedValues: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
+            currentValue: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
         })
 
         const assignment = Assignment.create({
@@ -401,11 +480,29 @@ describe('Assignment', () => {
                 )
                 context.scope.variables.set('target', {
                     semantics: targetSemantics[0],
-                    type: 'MyType',
+                    allowedValues: {
+                        type: 'rc-type',
+                        semantics: targetSemantics[1],
+                        typeName: 'MyType',
+                    },
+                    currentValue: {
+                        type: 'rc-type',
+                        semantics: targetSemantics[1],
+                        typeName: 'MyType',
+                    },
                 })
                 context.scope.variables.set('value', {
                     semantics: valueSemantics[0],
-                    type: 'MyType',
+                    allowedValues: {
+                        type: 'rc-type',
+                        semantics: valueSemantics[1],
+                        typeName: 'MyType',
+                    },
+                    currentValue: {
+                        type: 'rc-type',
+                        semantics: valueSemantics[1],
+                        typeName: 'MyType',
+                    },
                 })
 
                 const assignment = Assignment.create({
@@ -455,7 +552,16 @@ describe('Assignment', () => {
             )
             context.scope.variables.set('target', {
                 semantics: 'mut',
-                type: 'MyType',
+                allowedValues: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
+                currentValue: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
             })
 
             const assignment = Assignment.create({

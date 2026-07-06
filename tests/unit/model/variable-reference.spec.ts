@@ -8,7 +8,8 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             semantics: 'const',
-            type: 'integer',
+            allowedValues: { type: 'integer', min: '10', max: '10' },
+            currentValue: { type: 'integer', min: '10', max: '10' },
         })
 
         const variableRef = VariableReference.create({
@@ -18,7 +19,7 @@ describe('Variable Reference', () => {
         expect(variableRef.toCIRExpression(context)).toEqual({
             kind: 'VARIABLE_REF',
             name: 'myVar',
-            valueSet: { type: 'integer' },
+            valueSet: { type: 'integer', min: '10', max: '10' },
         })
     })
 
@@ -50,14 +51,19 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             semantics: 'const',
-            type: 'integer',
+            allowedValues: { type: 'integer', min: '10', max: '10' },
+            currentValue: { type: 'integer', min: '10', max: '10' },
         })
 
         const variableRef = VariableReference.create({
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.valueSet(context).type).toBe('integer')
+        expect(variableRef.valueSet(context)).toEqual({
+            type: 'integer',
+            min: '10',
+            max: '10',
+        })
     })
 
     describe('infers isolation level from the context', () => {
@@ -87,7 +93,16 @@ describe('Variable Reference', () => {
             it(`returns ${expected} for ${kind} variable`, () => {
                 context.scope.variables.set('myVar', {
                     semantics: kind,
-                    type: 'MyType',
+                    allowedValues: {
+                        type: 'rc-type',
+                        semantics: expected,
+                        typeName: 'MyType',
+                    },
+                    currentValue: {
+                        type: 'rc-type',
+                        semantics: expected,
+                        typeName: 'MyType',
+                    },
                 })
 
                 const variableRef = VariableReference.create({

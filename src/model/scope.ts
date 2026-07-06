@@ -55,5 +55,6 @@ export class Scope {
 
 type Variable = {
     semantics: VariableSemantics
-    type: string
+    allowedValues: cir.ValueSet
+    currentValue: cir.ValueSet
 }

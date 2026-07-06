@@ -63,7 +63,16 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('bar', {
                 semantics: 'const',
-                type: 'OuterType',
+                allowedValues: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'OuterType',
+                },
+                currentValue: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'OuterType',
+                },
             })
 
             const decl = VariableDeclaration.create({
@@ -114,7 +123,16 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('bar', {
                 semantics: 'const',
-                type: 'MyType',
+                allowedValues: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
+                currentValue: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
             })
 
             const decl = VariableDeclaration.create({
@@ -151,9 +169,10 @@ describe('VariableDeclaration', () => {
         })
         const context = newSemanticContext()
         decl.emitStatement(context)
-        expect(context.scope.variables.get('x')).toEqual({
+        expect(context.scope.variableDeclaration('x')).toEqual({
             semantics: 'const',
-            type: 'integer',
+            allowedValues: { type: 'integer', min: '42', max: '42' },
+            currentValue: { type: 'integer', min: '42', max: '42' },
         })
     })
 
@@ -184,7 +203,16 @@ describe('VariableDeclaration', () => {
                 )
                 context.scope.variables.set('value', {
                     semantics: valueSemantics[0],
-                    type: 'MyType',
+                    allowedValues: {
+                        type: 'rc-type',
+                        semantics: valueSemantics[1],
+                        typeName: 'MyType',
+                    },
+                    currentValue: {
+                        type: 'rc-type',
+                        semantics: valueSemantics[1],
+                        typeName: 'MyType',
+                    },
                 })
 
                 const declaration = VariableDeclaration.create({

@@ -9,7 +9,16 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             semantics: 'mut',
-            type: 'MyType',
+            allowedValues: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
+            currentValue: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
         })
         context.scope.rootScope.declarations.set(
             'MyType',
@@ -38,7 +47,16 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             semantics: 'mut',
-            type: 'MyType',
+            allowedValues: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
+            currentValue: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
         })
         context.scope.rootScope.declarations.set(
             'MyType',
@@ -74,7 +92,16 @@ describe('Field Reference', () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     semantics,
-                    type: 'MyType',
+                    allowedValues: {
+                        type: 'rc-type',
+                        semantics: expectedSemantics,
+                        typeName: 'MyType',
+                    },
+                    currentValue: {
+                        type: 'rc-type',
+                        semantics: expectedSemantics,
+                        typeName: 'MyType',
+                    },
                 })
                 context.scope.rootScope.declarations.set(
                     'MyType',
@@ -112,7 +139,16 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             semantics: 'mut',
-            type: 'MyType',
+            allowedValues: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
+            currentValue: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
         })
         context.scope.rootScope.declarations.set(
             'MyType',
@@ -152,7 +188,16 @@ describe('Field Reference', () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     semantics: semantics[0],
-                    type: 'MyType',
+                    allowedValues: {
+                        type: 'rc-type',
+                        semantics: semantics[1],
+                        typeName: 'MyType',
+                    },
+                    currentValue: {
+                        type: 'rc-type',
+                        semantics: semantics[1],
+                        typeName: 'MyType',
+                    },
                 })
                 context.scope.rootScope.declarations.set(
                     'MyType',
@@ -199,25 +244,38 @@ describe('Field Reference', () => {
 
     describe('effectively const', () => {
         const cases = [
-            { semantics: 'const', expected: true },
-            { semantics: 'mut', expected: false },
-            { semantics: 'ref', expected: false },
-            { semantics: 'mutref', expected: false },
+            { semantics: ['const', 'COW'], expected: true },
+            { semantics: ['mut', 'COW'], expected: false },
+            { semantics: ['ref', 'REF'], expected: false },
+            { semantics: ['mutref', 'REF'], expected: false },
         ] as const
 
         for (const { semantics, expected } of cases) {
             it(`returns ${expected} if the object is ${semantics}`, () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
-                    semantics,
-                    type: 'MyType',
+                    semantics: semantics[0],
+                    allowedValues: {
+                        type: 'rc-type',
+                        semantics: semantics[1],
+                        typeName: 'MyType',
+                    },
+                    currentValue: {
+                        type: 'rc-type',
+                        semantics: semantics[1],
+                        typeName: 'MyType',
+                    },
                 })
                 context.scope.rootScope.declarations.set(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
                         fields: [
-                            { name: 'myField', type: 'integer', semantics },
+                            {
+                                name: 'myField',
+                                type: 'integer',
+                                semantics: semantics[0],
+                            },
                         ],
                     }),
                 )
@@ -240,7 +298,16 @@ describe('Field Reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 semantics: 'const',
-                type: 'MyType',
+                allowedValues: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
+                currentValue: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
             })
             context.scope.rootScope.declarations.set(
                 'MyType',
@@ -273,7 +340,16 @@ describe('Field Reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 semantics: 'mut',
-                type: 'MyType',
+                allowedValues: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
+                currentValue: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'MyType',
+                },
             })
             context.scope.rootScope.declarations.set(
                 'MyType',

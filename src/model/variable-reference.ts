@@ -44,23 +44,11 @@ export class VariableReference implements Expression {
     }
 
     valueSet(context: Context): cir.ValueSet {
-        const variable = this.lookupInScope(context)
-        switch (variable.type) {
-            case 'integer':
-            case 'truthvalue':
-            case 'string':
-                return { type: variable.type }
-            default:
-                return {
-                    type: 'rc-type',
-                    typeName: variable.type,
-                    semantics: convertSemantics(variable.semantics),
-                }
-        }
+        return this.lookupInScope(context).currentValue
     }
 
     lookupInScope(context: Context) {
-        const variable = context.scope.variables.get(this.name)
+        const variable = context.scope.variableDeclaration(this.name)
         if (!variable) {
             context.errorReporter.reportFatalError(
                 `Variable ${this.name} is not defined in the current context`,

@@ -92,9 +92,10 @@ describe('Module', () => {
         })
         const context = newSemanticContext()
         module.toCIR(context)
-        expect(context.scope.variables.get('x')).toEqual({
+        expect(context.scope.variableDeclaration('x')).toEqual({
             semantics: 'const',
-            type: 'integer',
+            allowedValues: { type: 'integer', min: '42', max: '42' },
+            currentValue: { type: 'integer', min: '42', max: '42' },
         })
     })
 

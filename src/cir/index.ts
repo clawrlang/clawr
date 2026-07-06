@@ -78,10 +78,6 @@ export type Expression =
           name: string
       }
     | {
-          kind: 'VARIABLE_REF'
-          name: string
-      }
-    | {
           kind: 'FIELD_REF'
           object: Expression
           field: string

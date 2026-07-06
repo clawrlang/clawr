@@ -1,4 +1,4 @@
-import { Statement, Expression, Context, isReferenceCounted } from '.'
+import { Statement, Expression, Context } from '.'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
@@ -51,7 +51,7 @@ export class Assignment implements Statement {
 
         if (
             (value.kind === 'FIELD_REF' || value.kind === 'VARIABLE_REF') &&
-            isReferenceCounted(targetValueSet.type)
+            target.valueSet.type === 'rc-type'
         ) {
             const tempVar = context.scope.nextTempVar()
 

@@ -20,7 +20,7 @@ describe('Assignment', () => {
 
         assignment.emitStatement(context)
 
-        expect(context.scope.emitted.statements).toMatchObject([
+        expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'ASSIGN',
                 target: { kind: 'VARIABLE_REF', name: 'x' },
@@ -32,7 +32,7 @@ describe('Assignment', () => {
     describe('injects RELEASE/RETAIN statements', () => {
         test('for a FieldReference', () => {
             const context = newSemanticContext()
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'InnerType',
                 DataDeclaration.create({
                     name: 'InnerType',
@@ -45,7 +45,7 @@ describe('Assignment', () => {
                     ],
                 }),
             )
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'OuterType',
                 DataDeclaration.create({
                     name: 'OuterType',
@@ -86,7 +86,7 @@ describe('Assignment', () => {
             })
 
             assignment.emitStatement(context)
-            expect(context.scope.emitted.statements).toMatchObject([
+            expect(context.scope.emitted).toMatchObject([
                 {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
@@ -124,7 +124,7 @@ describe('Assignment', () => {
 
         test('for a VariableReference', () => {
             const context = newSemanticContext()
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',
@@ -159,7 +159,7 @@ describe('Assignment', () => {
             })
 
             assignment.emitStatement(context)
-            expect(context.scope.emitted.statements).toMatchObject([
+            expect(context.scope.emitted).toMatchObject([
                 {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
@@ -197,7 +197,7 @@ describe('Assignment', () => {
 
     it('injects ENSURE_UNIQUE for COW target before assignment', () => {
         const context = newSemanticContext()
-        context.scope.declarations.set(
+        context.scope.rootScope.declarations.set(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
@@ -231,7 +231,7 @@ describe('Assignment', () => {
         })
 
         assignment.emitStatement(context)
-        expect(context.scope.emitted.statements).toMatchObject([
+        expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'ENSURE_UNIQUE',
                 object: { kind: 'VARIABLE_REF', name: 'foo' },
@@ -274,7 +274,7 @@ describe('Assignment', () => {
         for (const kind of ['const', 'ref'] as const) {
             test(kind, () => {
                 const context = newSemanticContext()
-                context.scope.declarations.set(
+                context.scope.rootScope.declarations.set(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
@@ -328,7 +328,7 @@ describe('Assignment', () => {
 
     it('throws if the target field is effectively const', () => {
         const context = newSemanticContext()
-        context.scope.declarations.set(
+        context.scope.rootScope.declarations.set(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
@@ -386,7 +386,7 @@ describe('Assignment', () => {
         cases.forEach(({ targetSemantics, valueSemantics }) => {
             it(`${targetSemantics} target = ${valueSemantics} value`, () => {
                 const context = newSemanticContext()
-                context.scope.declarations.set(
+                context.scope.rootScope.declarations.set(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
@@ -440,7 +440,7 @@ describe('Assignment', () => {
 
         it('does not throw if the value is UNIQUE', () => {
             const context = newSemanticContext()
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',

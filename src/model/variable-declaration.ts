@@ -32,7 +32,7 @@ export class VariableDeclaration implements Statement, Declaration {
             semantics: this.semantics,
             type: this.type,
         })
-        context.scope.emitted.declarations.push(this.toCIR(context))
+        context.scope.rootScope.emitted.push(this.toCIR(context))
     }
 
     emitStatement(context: Context) {
@@ -40,7 +40,7 @@ export class VariableDeclaration implements Statement, Declaration {
             semantics: this.semantics,
             type: this.type,
         })
-        context.scope.emitted.statements.push(this.toCIR(context))
+        context.scope.emitted.push(this.toCIR(context))
     }
 
     private toCIR(context: Context): cir.Declaration & cir.Statement {

@@ -46,7 +46,7 @@ describe('Literals', () => {
     describe('data literals', () => {
         it('outputs a data literal as ALLOCATE', () => {
             const context = newSemanticContext()
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',

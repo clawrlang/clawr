@@ -20,7 +20,7 @@ describe('VariableDeclaration', () => {
         })
         const context = newSemanticContext()
         decl.emitStatement(context)
-        expect(context.scope.emitted.statements[0]).toEqual({
+        expect(context.scope.emitted[0]).toEqual({
             kind: 'VARIABLE_DECL',
             name: 'foo',
             valueSet: { type: 'integer' },
@@ -35,7 +35,7 @@ describe('VariableDeclaration', () => {
     describe('injects RETAIN statement', () => {
         test('for a FieldReference', () => {
             const context = newSemanticContext()
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'InnerType',
                 DataDeclaration.create({
                     name: 'InnerType',
@@ -48,7 +48,7 @@ describe('VariableDeclaration', () => {
                     ],
                 }),
             )
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'OuterType',
                 DataDeclaration.create({
                     name: 'OuterType',
@@ -82,7 +82,7 @@ describe('VariableDeclaration', () => {
                 }),
             })
             decl.emitStatement(context)
-            expect(context.scope.emitted.statements[0]).toMatchObject({
+            expect(context.scope.emitted[0]).toMatchObject({
                 initialValue: {
                     kind: 'RETAIN',
                     object: {
@@ -99,7 +99,7 @@ describe('VariableDeclaration', () => {
 
         test('for a VariableReference', () => {
             const context = newSemanticContext()
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',
@@ -127,7 +127,7 @@ describe('VariableDeclaration', () => {
                 }),
             })
             decl.emitStatement(context)
-            expect(context.scope.emitted.statements[0]).toMatchObject({
+            expect(context.scope.emitted[0]).toMatchObject({
                 initialValue: {
                     kind: 'RETAIN',
                     object: {
@@ -169,7 +169,7 @@ describe('VariableDeclaration', () => {
         cases.forEach(({ targetSemantics, valueSemantics }) => {
             it(`${targetSemantics} target = ${valueSemantics} value`, () => {
                 const context = newSemanticContext()
-                context.scope.declarations.set(
+                context.scope.rootScope.declarations.set(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
@@ -216,7 +216,7 @@ describe('VariableDeclaration', () => {
 
         it('does not throw if the value is UNIQUE', () => {
             const context = newSemanticContext()
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',

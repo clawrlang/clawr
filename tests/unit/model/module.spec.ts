@@ -117,7 +117,7 @@ describe('Module', () => {
         })
         const context = newSemanticContext()
         module.toCIR(context)
-        expect(context.scope.declarations.get('MyData')).toMatchObject({
+        expect(context.scope.dataDeclaration('MyData')).toMatchObject({
             name: 'MyData',
             fields: [
                 { name: 'field1', type: 'integer' },

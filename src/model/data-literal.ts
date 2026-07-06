@@ -51,7 +51,7 @@ export class DataLiteral implements Expression {
                 'DataLiteral.toCIRExpression: target valueSet must be of type rc-type',
                 this.span,
             )
-        const targetType = context.scope.declarations.get(valueSet.typeName) as
+        const targetType = context.scope.dataDeclaration(valueSet.typeName) as
             | DataDeclaration
             | undefined
         if (!targetType)

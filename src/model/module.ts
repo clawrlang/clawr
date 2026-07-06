@@ -22,8 +22,8 @@ export class Module {
         for (const stmt of this.main) stmt.emitStatement(context)
         return {
             $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
-            declarations: context.scope.emitted.declarations,
-            startBlock: context.scope.emitted.statements,
+            declarations: context.scope.rootScope.emitted,
+            startBlock: context.scope.emitted,
         }
     }
 }

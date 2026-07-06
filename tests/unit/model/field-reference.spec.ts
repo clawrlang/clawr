@@ -11,7 +11,7 @@ describe('Field Reference', () => {
             semantics: 'mut',
             type: 'MyType',
         })
-        context.scope.declarations.set(
+        context.scope.rootScope.declarations.set(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
@@ -40,7 +40,7 @@ describe('Field Reference', () => {
             semantics: 'mut',
             type: 'MyType',
         })
-        context.scope.declarations.set(
+        context.scope.rootScope.declarations.set(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
@@ -76,7 +76,7 @@ describe('Field Reference', () => {
                     semantics,
                     type: 'MyType',
                 })
-                context.scope.declarations.set(
+                context.scope.rootScope.declarations.set(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
@@ -114,7 +114,7 @@ describe('Field Reference', () => {
             semantics: 'mut',
             type: 'MyType',
         })
-        context.scope.declarations.set(
+        context.scope.rootScope.declarations.set(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
@@ -154,7 +154,7 @@ describe('Field Reference', () => {
                     semantics: semantics[0],
                     type: 'MyType',
                 })
-                context.scope.declarations.set(
+                context.scope.rootScope.declarations.set(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
@@ -212,7 +212,7 @@ describe('Field Reference', () => {
                     semantics,
                     type: 'MyType',
                 })
-                context.scope.declarations.set(
+                context.scope.rootScope.declarations.set(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
@@ -242,7 +242,7 @@ describe('Field Reference', () => {
                 semantics: 'const',
                 type: 'MyType',
             })
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',
@@ -275,7 +275,7 @@ describe('Field Reference', () => {
                 semantics: 'mut',
                 type: 'MyType',
             })
-            context.scope.declarations.set(
+            context.scope.rootScope.declarations.set(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',

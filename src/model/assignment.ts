@@ -45,7 +45,7 @@ export class Assignment implements Statement {
             )
 
         const prelude = this.target.assignmentPrelude(context)
-        context.scope.emitted.statements.push(...prelude)
+        context.scope.emitted.push(...prelude)
 
         const targetValueSet = this.target.valueSet(context)
 
@@ -55,14 +55,14 @@ export class Assignment implements Statement {
         ) {
             const tempVar = context.scope.nextTempVar()
 
-            context.scope.emitted.statements.push({
+            context.scope.emitted.push({
                 kind: 'VARIABLE_DECL' as const,
                 name: tempVar,
                 valueSet: targetValueSet,
                 initialValue: target,
             })
 
-            context.scope.emitted.statements.push(
+            context.scope.emitted.push(
                 {
                     kind: 'ASSIGN',
                     target,
@@ -82,7 +82,7 @@ export class Assignment implements Statement {
                 },
             )
         } else
-            context.scope.emitted.statements.push({
+            context.scope.emitted.push({
                 kind: 'ASSIGN',
                 target,
                 value,

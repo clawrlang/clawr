@@ -94,7 +94,7 @@ export class FieldReference implements Expression {
             objectValueSet.type === 'rc-type'
                 ? objectValueSet.typeName
                 : objectValueSet.type
-        const declaration = context.scope.declarations.get(objectType)
+        const declaration = context.scope.dataDeclaration(objectType)
         if (!declaration) {
             context.errorReporter.reportFatalError(
                 `Type ${objectType} is not defined in the current context`,

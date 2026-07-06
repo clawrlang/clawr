@@ -21,7 +21,7 @@ export class CallFunc implements Statement {
     }
 
     emitStatement(context: Context) {
-        context.scope.emitted.statements.push({
+        context.scope.emitted.push({
             kind: 'CALL_FUNC',
             signature: {
                 baseName:

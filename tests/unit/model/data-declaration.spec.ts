@@ -13,7 +13,7 @@ describe('DataDeclaration', () => {
         })
         const context = newSemanticContext()
         dataDecl.emitDeclaration(context)
-        expect(context.scope.emitted.declarations).toEqual([
+        expect(context.scope.rootScope.emitted).toEqual([
             {
                 kind: 'DATA_DECL',
                 name: 'MyData',

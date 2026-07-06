@@ -1,6 +1,7 @@
 import { describe, expect, it, test } from 'bun:test'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
+import { DataDeclaration } from '../../../src/model/data-declaration'
 
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
@@ -67,19 +68,35 @@ describe('Variable Reference', () => {
             { kind: 'mutref', expected: 'REF' },
         ] as const
 
+        const context = newSemanticContext()
+        context.scope.declarations.set(
+            'MyType',
+            DataDeclaration.create({
+                name: 'MyType',
+                fields: [
+                    {
+                        name: 'myField',
+                        type: 'integer',
+                        semantics: 'mut',
+                    },
+                ],
+            }),
+        )
+
         for (const { kind, expected } of cases) {
             it(`returns ${expected} for ${kind} variable`, () => {
-                const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     semantics: kind,
-                    type: 'integer',
+                    type: 'MyType',
                 })
 
                 const variableRef = VariableReference.create({
                     name: 'myVar',
                     span: someCodeSpan,
                 })
-                expect(variableRef.semantics(context)).toBe(expected)
+                expect(variableRef.valueSet(context)).toMatchObject({
+                    semantics: expected,
+                })
             })
         }
     })

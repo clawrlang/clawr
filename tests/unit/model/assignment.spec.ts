@@ -409,16 +409,11 @@ describe('Assignment', () => {
                 })
 
                 const assignment = Assignment.create({
-                    target: FieldReference.create({
-                        object: VariableReference.create({
-                            name: 'target',
-                            span: someCodeSpan,
-                        }),
-                        operator: '.',
-                        field: 'myField',
+                    target: VariableReference.create({
+                        name: 'target',
                         span: someCodeSpan,
-                        fieldSpan: someCodeSpan,
                     }),
+
                     span: {
                         start: { line: 1, column: 3 },
                         end: { line: 1, column: 4 },
@@ -464,20 +459,11 @@ describe('Assignment', () => {
             })
 
             const assignment = Assignment.create({
-                target: FieldReference.create({
-                    object: VariableReference.create({
-                        name: 'target',
-                        span: someCodeSpan,
-                    }),
-                    operator: '.',
-                    field: 'myField',
+                target: VariableReference.create({
+                    name: 'target',
                     span: someCodeSpan,
-                    fieldSpan: someCodeSpan,
                 }),
-                span: {
-                    start: { line: 1, column: 3 },
-                    end: { line: 1, column: 4 },
-                },
+                span: someCodeSpan,
                 value: DataLiteral.create({
                     fields: [
                         {

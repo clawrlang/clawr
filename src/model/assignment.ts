@@ -23,13 +23,24 @@ export class Assignment implements Statement {
     }
 
     emitStatement(context: Context) {
-        const valueSemantics = this.value.semantics(context)
-        const targetSemantics = this.target.semantics(context)
-        const isValueSemanticsMismatch =
-            valueSemantics !== 'UNIQUE' && targetSemantics !== valueSemantics
-        if (isValueSemanticsMismatch)
+        const target = this.target.toCIRExpression(context)
+        const value = this.value.toCIRExpression({
+            ...context,
+            ...{ targetValueSet: target.valueSet },
+        })
+
+        if (target.valueSet.type !== value.valueSet.type)
             context.errorReporter.reportFatalError(
-                `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
+                `Cannot assign value of type ${value.valueSet.type} to target of type ${target.valueSet.type}`,
+                { start: this.span.start, end: this.span.end },
+            )
+        if (
+            target.valueSet.type === 'rc-type' &&
+            value.valueSet.type === 'rc-type' &&
+            target.valueSet.semantics !== value.valueSet.semantics
+        )
+            context.errorReporter.reportFatalError(
+                `Cannot assign ${value.valueSet.semantics} value to ${target.valueSet.semantics} target`,
                 { start: this.span.start, end: this.span.end },
             )
 
@@ -37,15 +48,9 @@ export class Assignment implements Statement {
         context.scope.emitted.statements.push(...prelude)
 
         const targetValueSet = this.target.valueSet(context)
-        const valueCIR = this.value.toCIRExpression({
-            ...context,
-            ...targetValueSet,
-            ...{ semantics: targetSemantics },
-        })
 
         if (
-            (valueCIR.kind === 'FIELD_REF' ||
-                valueCIR.kind === 'VARIABLE_REF') &&
+            (value.kind === 'FIELD_REF' || value.kind === 'VARIABLE_REF') &&
             isReferenceCounted(targetValueSet.type)
         ) {
             const tempVar = context.scope.nextTempVar()
@@ -54,16 +59,16 @@ export class Assignment implements Statement {
                 kind: 'VARIABLE_DECL' as const,
                 name: tempVar,
                 valueSet: targetValueSet,
-                initialValue: this.target.toCIRExpression(context),
+                initialValue: target,
             })
 
             context.scope.emitted.statements.push(
                 {
                     kind: 'ASSIGN',
-                    target: this.target.toCIRExpression(context),
+                    target,
                     value: {
                         kind: 'RETAIN',
-                        object: valueCIR,
+                        object: value,
                         valueSet: targetValueSet as any,
                     },
                 },
@@ -79,8 +84,8 @@ export class Assignment implements Statement {
         } else
             context.scope.emitted.statements.push({
                 kind: 'ASSIGN',
-                target: this.target.toCIRExpression(context),
-                value: valueCIR,
+                target,
+                value,
             })
     }
 }

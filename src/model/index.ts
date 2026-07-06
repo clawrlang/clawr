@@ -34,9 +34,10 @@ export type Context = {
 export interface Expression {
     get span(): SourceCodeSpan
     isEffectivelyConst(context: Context): boolean
-    semantics(context: Context): 'COW' | 'REF' | 'UNIQUE'
     valueSet(context: Context): cir.ValueSet
-    toCIRExpression(context: Context): cir.Expression
+    toCIRExpression(
+        context: Context & { targetValueSet: cir.ValueSet },
+    ): cir.Expression
 }
 
 export interface Statement {

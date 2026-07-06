@@ -1,11 +1,5 @@
 import * as cir from '../cir'
-import {
-    Statement,
-    Expression,
-    Context,
-    Declaration,
-    isReferenceCounted,
-} from '.'
+import { Statement, Expression, Context, Declaration } from '.'
 import { convertSemantics } from './variable-reference'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
@@ -50,30 +44,42 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private toCIR(context: Context): cir.Declaration & cir.Statement {
-        const valueSemantics = this.initialValue.semantics(context)
-        const targetSemantics = convertSemantics(this.semantics)
-        const isValueSemanticsMismatch =
-            valueSemantics !== 'UNIQUE' && targetSemantics !== valueSemantics
-        if (isValueSemanticsMismatch)
+        const initialValue = this.initialValue.toCIRExpression({
+            ...context,
+            targetValueSet: this.buildValueSet(),
+        })
+
+        if (initialValue.valueSet.type !== this.buildValueSet().type)
             context.errorReporter.reportFatalError(
-                `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
+                `Cannot assign value of type ${initialValue.valueSet.type} to target of type ${this.buildValueSet().type}`,
                 {
                     start: this.initialValue.span.start,
                     end: this.initialValue.span.end,
                 },
             )
-
-        const valueCIR = this.initialValue.toCIRExpression({
-            ...context,
-            ...{
-                type: this.type,
-                semantics: convertSemantics(this.semantics),
-            },
-        })
         if (
-            (valueCIR.kind === 'FIELD_REF' ||
-                valueCIR.kind === 'VARIABLE_REF') &&
-            isReferenceCounted(this.type)
+            initialValue.valueSet.type === 'rc-type' &&
+            this.buildValueSet().type === 'rc-type'
+        ) {
+            const valueSemantics = initialValue.valueSet.semantics
+            const targetSemantics = convertSemantics(this.semantics)
+            const isValueSemanticsMismatch =
+                valueSemantics !== 'UNIQUE' &&
+                targetSemantics !== valueSemantics
+            if (isValueSemanticsMismatch)
+                context.errorReporter.reportFatalError(
+                    `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
+                    {
+                        start: this.initialValue.span.start,
+                        end: this.initialValue.span.end,
+                    },
+                )
+        }
+
+        if (
+            (initialValue.kind === 'FIELD_REF' ||
+                initialValue.kind === 'VARIABLE_REF') &&
+            initialValue.valueSet.type === 'rc-type'
         )
             return {
                 kind: 'VARIABLE_DECL' as const,
@@ -81,12 +87,8 @@ export class VariableDeclaration implements Statement, Declaration {
                 valueSet: this.buildValueSet(),
                 initialValue: {
                     kind: 'RETAIN',
-                    object: valueCIR,
-                    valueSet: {
-                        type: 'rc-type',
-                        typeName: this.type,
-                        semantics: convertSemantics(this.semantics),
-                    },
+                    object: initialValue,
+                    valueSet: initialValue.valueSet,
                 },
             }
         else
@@ -94,7 +96,7 @@ export class VariableDeclaration implements Statement, Declaration {
                 kind: 'VARIABLE_DECL' as const,
                 name: this.name,
                 valueSet: this.buildValueSet(),
-                initialValue: valueCIR,
+                initialValue: initialValue,
             }
     }
 

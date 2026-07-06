@@ -1,6 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
+import { DataDeclaration } from './data-declaration'
 
 export class DataLiteral implements Expression {
     private constructor(
@@ -20,10 +21,6 @@ export class DataLiteral implements Expression {
 
     isEffectivelyConst(_: Context): boolean {
         return true
-    }
-
-    semantics(_: Context) {
-        return 'UNIQUE' as const
     }
 
     valueSet(context: Context & { type: string }): cir.ValueSet {
@@ -46,31 +43,28 @@ export class DataLiteral implements Expression {
     }
 
     toCIRExpression(
-        context: Context & { type: string; semantics: 'REF' | 'COW' },
+        context: Context & { targetValueSet: cir.ValueSet },
     ): cir.Expression {
-        if (!context.type)
+        const valueSet = context.targetValueSet
+        if (!valueSet || valueSet.type !== 'rc-type')
             context.errorReporter.reportFatalError(
-                'DataLiteral.toCIRExpression: context.type is required',
+                'DataLiteral.toCIRExpression: target valueSet must be of type rc-type',
                 this.span,
             )
-        if (!context.semantics)
+        const targetType = context.scope.declarations.get(valueSet.typeName) as
+            | DataDeclaration
+            | undefined
+        if (!targetType)
             context.errorReporter.reportFatalError(
-                'DataLiteral.toCIRExpression: context.semantics is required',
+                `DataLiteral.toCIRExpression: target type ${valueSet.typeName} not found in scope`,
                 this.span,
-            )
-        if (!context.type || !context.semantics)
-            throw new Error(
-                'DataLiteral.toCIRExpression: context.type and context.semantics are required',
             )
         return {
             kind: 'ALLOCATE',
-            valueSet: {
-                type: 'rc-type',
-                typeName: context.type,
-                semantics: context.semantics,
-            },
+            valueSet,
             fields: this.fields.map((field) => ({
                 name: field.name,
+                // TODO: The fields need valueSet information, but we don't have that here. We need to look up the field type in the targetType declaration.
                 value: field.value.toCIRExpression(context),
             })),
         }

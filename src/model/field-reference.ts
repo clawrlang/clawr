@@ -36,11 +36,14 @@ export class FieldReference implements Expression {
                 this.span,
             )
 
-        if (this.object.semantics(context) === 'COW') {
+        if ((this.object.valueSet(context) as any).semantics === 'COW') {
             return [
                 {
                     kind: 'ENSURE_UNIQUE',
-                    object: this.object.toCIRExpression(context),
+                    object: this.object.toCIRExpression({
+                        ...context,
+                        targetValueSet: this.object.valueSet(context),
+                    }),
                 },
             ]
         }
@@ -48,14 +51,10 @@ export class FieldReference implements Expression {
     }
 
     isEffectivelyConst(context: Context): boolean {
-        if (this.object.semantics(context) === 'REF') return false
+        if ((this.object.valueSet(context) as any).semantics === 'REF')
+            return false
 
         return this.object.isEffectivelyConst(context)
-    }
-
-    semantics(context: Context) {
-        const field = this.getFieldFromContext(context)
-        return convertSemantics(field.semantics)
     }
 
     valueSet(context: Context): cir.ValueSet {
@@ -80,7 +79,10 @@ export class FieldReference implements Expression {
         this.checkOperatorCompatibility(context)
         return {
             kind: 'FIELD_REF',
-            object: this.object.toCIRExpression(context),
+            object: this.object.toCIRExpression({
+                ...context,
+                targetValueSet: this.object.valueSet(context),
+            }),
             field: this.field,
             valueSet: this.valueSet(context),
         }
@@ -116,7 +118,7 @@ export class FieldReference implements Expression {
     }
 
     private checkOperatorCompatibility(context: Context) {
-        const semantics = this.object.semantics(context)
+        const semantics = (this.object.valueSet(context) as any).semantics
         if ((semantics === 'REF') !== (this.operator === '->'))
             context.errorReporter.reportFatalError(
                 `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,

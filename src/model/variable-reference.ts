@@ -43,12 +43,6 @@ export class VariableReference implements Expression {
         }
     }
 
-    semantics(context: Context) {
-        const variable = this.lookupInScope(context)
-        const semantics = variable.semantics
-        return convertSemantics(semantics)
-    }
-
     valueSet(context: Context): cir.ValueSet {
         const variable = this.lookupInScope(context)
         switch (variable.type) {

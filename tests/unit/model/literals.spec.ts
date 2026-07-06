@@ -4,6 +4,7 @@ import { newSemanticContext, someCodeSpan } from '../../util'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataLiteral } from '../../../src/model/data-literal'
+import { DataDeclaration } from '../../../src/model/data-declaration'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {
@@ -44,6 +45,26 @@ describe('Literals', () => {
 
     describe('data literals', () => {
         it('outputs a data literal as ALLOCATE', () => {
+            const context = newSemanticContext()
+            context.scope.declarations.set(
+                'MyType',
+                DataDeclaration.create({
+                    name: 'MyType',
+                    fields: [
+                        {
+                            name: 'x',
+                            type: 'integer',
+                            semantics: 'mut',
+                        },
+                        {
+                            name: 'y',
+                            type: 'integer',
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+
             const dataLiteral = DataLiteral.create({
                 fields: [
                     {
@@ -66,9 +87,12 @@ describe('Literals', () => {
 
             expect(
                 dataLiteral.toCIRExpression({
-                    ...newSemanticContext(),
-                    type: 'MyType',
-                    semantics: 'REF',
+                    ...context,
+                    targetValueSet: {
+                        type: 'rc-type',
+                        typeName: 'MyType',
+                        semantics: 'REF',
+                    },
                 }),
             ).toMatchObject({
                 kind: 'ALLOCATE',

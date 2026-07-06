@@ -29,14 +29,15 @@ export class Query implements Expression {
         return true
     }
 
-    semantics(_: Context) {
-        return 'UNIQUE' as const
-    }
-
-    valueSet(_: Context): cir.ValueSet {
+    valueSet(context: Context): cir.ValueSet {
         // TODO: Register function in scope and get return type from there
         // For now, just return truthvalue for all queries
-        return { type: 'truthvalue' }
+        return this.arguments.length === 1
+            ? {
+                  ...this.arguments[0].value.valueSet(context),
+                  ...{ semantics: 'UNIQUE' },
+              }
+            : { type: 'truthvalue' }
     }
 
     toCIRExpression(context: Context): cir.Expression {
@@ -50,7 +51,10 @@ export class Query implements Expression {
                 })),
             },
             arguments: this.arguments.map((arg) =>
-                arg.value.toCIRExpression(context),
+                arg.value.toCIRExpression({
+                    ...context,
+                    targetValueSet: arg.value.valueSet(context),
+                }),
             ),
             valueSet: this.valueSet(context),
         }

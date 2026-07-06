@@ -44,9 +44,7 @@ describe('Field Reference', () => {
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
-                fields: [
-                    { name: 'myField', type: 'integer', semantics: 'mut' },
-                ],
+                fields: [{ name: 'myField', type: 'MyType', semantics: 'mut' }],
             }),
         )
 
@@ -60,7 +58,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.semantics(context)).toBe('COW')
+        expect(fieldRef.valueSet(context)).toMatchObject({ semantics: 'COW' })
     })
 
     describe('infers its type and isolation level from the context', () => {
@@ -85,7 +83,7 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                type: 'integer',
+                                type: 'MyType',
                                 semantics,
                             },
                         ],
@@ -102,8 +100,11 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                expect(fieldRef.valueSet(context).type).toBe('integer')
-                expect(fieldRef.semantics(context)).toBe(expectedSemantics)
+                expect(fieldRef.valueSet(context)).toMatchObject({
+                    type: 'rc-type',
+                    typeName: 'MyType',
+                    semantics: expectedSemantics,
+                })
             })
     })
 

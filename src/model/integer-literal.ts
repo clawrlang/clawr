@@ -30,10 +30,6 @@ export class IntegerLiteral implements Expression {
         }
     }
 
-    semantics(_: Context) {
-        return 'COW' as const
-    }
-
     valueSet(_: Context): Extract<cir.ValueSet, { type: 'integer' }> {
         return {
             type: 'integer',

@@ -55,14 +55,15 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private toCIR(context: Context): cir.Declaration & cir.Statement {
+        const targetValueSet = this.buildValueSet()
         const initialValue = this.initialValue.toCIRExpression({
             ...context,
-            targetValueSet: this.buildValueSet(),
+            targetValueSet,
         })
 
-        if (initialValue.valueSet.type !== this.buildValueSet().type)
+        if (initialValue.valueSet.type !== targetValueSet.type)
             context.errorReporter.reportFatalError(
-                `Cannot assign value of type ${initialValue.valueSet.type} to target of type ${this.buildValueSet().type}`,
+                `Cannot assign value of type ${initialValue.valueSet.type} to target of type ${targetValueSet.type}`,
                 {
                     start: this.initialValue.span.start,
                     end: this.initialValue.span.end,
@@ -70,7 +71,7 @@ export class VariableDeclaration implements Statement, Declaration {
             )
         if (
             initialValue.valueSet.type === 'rc-type' &&
-            this.buildValueSet().type === 'rc-type'
+            targetValueSet.type === 'rc-type'
         ) {
             const valueSemantics = initialValue.valueSet.semantics
             const targetSemantics = convertSemantics(this.semantics)
@@ -95,7 +96,7 @@ export class VariableDeclaration implements Statement, Declaration {
             return {
                 kind: 'VARIABLE_DECL' as const,
                 name: this.name,
-                valueSet: this.buildValueSet(),
+                valueSet: targetValueSet,
                 initialValue: {
                     kind: 'RETAIN',
                     object: initialValue,
@@ -106,7 +107,7 @@ export class VariableDeclaration implements Statement, Declaration {
             return {
                 kind: 'VARIABLE_DECL' as const,
                 name: this.name,
-                valueSet: this.buildValueSet(),
+                valueSet: targetValueSet,
                 initialValue: initialValue,
             }
     }

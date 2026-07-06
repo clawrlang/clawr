@@ -15,6 +15,7 @@
   "scripts": {
     "test:unit": "tsc --noEmit && bun test ./tests/unit/",
     "build": "tsc --noEmit && npm run build:runtime && npm run build:rwrc",
+    "build:schema": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && node .typia-temp/tools/generate-cir-schema.js",
     "build:rwrc": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && bun build .typia-temp/rwrc/index.js --compile --outfile dist/rwrc",
     "test:backend": "npm run build && bun test ./tests/backend/*.test.ts",
     "test:e2e": "npm run build && bun test ./tests/e2e/*.test.ts",

@@ -1,5 +1,5 @@
 {
-    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
+    "$schema": "cir.schema.json",
     "declarations": [
         {
             "kind": "DATA_DECL",
@@ -59,9 +59,7 @@
                 "baseName": "printInt64",
                 "parameters": [
                     {
-                        "valueSet": {
-                            "type": "integer"
-                        }
+                        "type": "integer"
                     }
                 ]
             },

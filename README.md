@@ -57,6 +57,8 @@ npm run test:unit     # Quick unit tests only
 npm run test:backend  # Run backend tests
 npm run test:e2e      # Run end-to-end tests
 
+npm run build:schema  # Add a JSON schema file to tests/backend/cases to help editing test cases
+
 npx bun test ./tests/unit/parser/module-parser.spec.ts # Run a single test module
 ```
 

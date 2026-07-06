@@ -1,5 +1,5 @@
 {
-    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
+    "$schema": "cir.schema.json",
     "declarations": [
         {
             "kind": "VARIABLE_DECL",
@@ -20,9 +20,7 @@
                 "baseName": "printTruthvalue",
                 "parameters": [
                     {
-                        "valueSet": {
-                            "type": "truthvalue"
-                        }
+                        "type": "truthvalue"
                     }
                 ]
             },

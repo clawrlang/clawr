@@ -32,17 +32,11 @@ This repository includes a backend for creating Mac binaries. This exists for tw
 
 Clawr is designed to be hardware agnostic. A backend that e.g. lowers to ternary can probably not emit C code. For that reason, the backend is _not_ considered an integral part of the main Clawr project. Instead, the Clawr Semantic Library is a frontend (lexer, parser and semantic/static analysis). There could be many backends — all named Clawr — that reuse the frontend but employ very different strategies to lower to machine code.
 
-### Ternary Support
+### Support for Ternary Chipsets
 
-In the 1950s, the USSR created the SETUN computer. It used ternary logic with ternary gates. It was cancelled after only a few years, but it did manage to prove that ternary computing is feasible. The idea of ternary chipsets has been reawaken in later years and should not be dismissed out of hand. Clawr supports both ternary _and_ binary (Boolean) logic. It's syntax and semantics are designed to be agnostic to the numeric base, allowing applications that run on a plethora of different hardware foundations.
+In the 1950s, the USSR constructed the SETUN computer. It used ternary logic with ternary gates. It was cancelled after only a few years, but it did manage to prove that ternary computing is feasible. The idea of ternary chipsets has reawakened in later years and should not be dismissed out of hand.
 
-Clawr tries to be open to future ternary hardware (though the specifics are still very fluid). For that reason, Clawr is designed to be **fully agnostic** to both the hardware and the backend lowering strategy. Numeric values in Clawr do not have sized types, and they do not assume any numeric base. Instead they use ranges to hint to the backend when it can make optimizations.
-
-Instead of a Boolean type, Clawr has `truthvalue`, which can be `true`, `false` or `ambiguous` (ternary truth). The `ambiguous` state is neither `true` nor `false`. You can use `truthvalue` as a Boolean value by simply never utilizing `ambiguous` at all. The standard operators, `!`, `&&` and `||` apply in the traditional way expected from binary languages, and they extend naturally when `ambiguous` is introduced.
-
-Raw data in Clawr comes in two varieties: binary and ternary streams. Both are available for any hardware. The idea is that it should be possible to communicate between binary and ternary systems. A ternary system will likely prefer ternary file system and might transmit such files to a binary computer, so both types must be available in both hardware contexts.
-
-Binary and ternary data both support lanewise operations (a.k.a. “bitwise” on binary and “tritwise” on ternary). The traditional binary lanewise operations `~`, `&` and `|` work on both variations, similarly to how `!`, `&&` and `||` work on scalar truth-values.
+The Clawr language is designed to be agnostic to hardware bases and layout. Numeric variables in Clawr do not have sizes (such as `uint32`, `int64`, `double` etc), but ranges of allowed values. Hardware support and size optimization are concerns left to the backend's lowering strategy.
 
 ## Getting started as a contributor
 

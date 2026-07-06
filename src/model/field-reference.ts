@@ -40,10 +40,7 @@ export class FieldReference implements Expression {
             return [
                 {
                     kind: 'ENSURE_UNIQUE',
-                    object: this.object.toCIRExpression({
-                        ...context,
-                        targetValueSet: this.object.valueSet(context),
-                    }),
+                    object: this.object.toCIRExpression(context),
                 },
             ]
         }
@@ -81,10 +78,7 @@ export class FieldReference implements Expression {
         this.checkOperatorCompatibility(context)
         return {
             kind: 'FIELD_REF',
-            object: this.object.toCIRExpression({
-                ...context,
-                targetValueSet: this.object.valueSet(context),
-            }),
+            object: this.object.toCIRExpression(context),
             field: this.field,
             valueSet: this.valueSet(context),
         }

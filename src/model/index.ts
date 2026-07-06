@@ -12,7 +12,7 @@ export interface Expression {
     isEffectivelyConst(context: Context): boolean
     valueSet(context: Context): cir.ValueSet
     toCIRExpression(
-        context: Context & { targetValueSet: cir.ValueSet },
+        context: Context & { targetValueSet?: cir.ValueSet },
     ): cir.Expression
 }
 

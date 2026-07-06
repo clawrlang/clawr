@@ -34,10 +34,7 @@ export class CallFunc implements Statement {
                 })),
             },
             arguments: this.arguments.map((arg) =>
-                arg.value.toCIRExpression({
-                    ...context,
-                    targetValueSet: arg.value.valueSet(context),
-                }),
+                arg.value.toCIRExpression(context),
             ),
         })
     }

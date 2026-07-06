@@ -73,6 +73,8 @@ export class FieldReference implements Expression {
         }
     }
 
+    updateCurrentValue() {}
+
     toCIRExpression(
         context: Context,
     ): Extract<cir.Expression, { kind: 'FIELD_REF' }> {

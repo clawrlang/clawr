@@ -586,4 +586,42 @@ describe('Assignment', () => {
             expect(() => assignment.emitStatement(context)).not.toThrow()
         })
     })
+
+    describe('updates the currentValue of the target variable in context', () => {
+        it('for a VariableReference', () => {
+            const context = newSemanticContext()
+            context.scope.variables.set('target', {
+                semantics: 'mut',
+                allowedValues: {
+                    type: 'integer',
+                },
+                currentValue: {
+                    type: 'integer',
+                    min: '0',
+                    max: '100',
+                },
+            })
+
+            const assignment = Assignment.create({
+                target: VariableReference.create({
+                    name: 'target',
+                    span: someCodeSpan,
+                }),
+                value: IntegerLiteral.create({
+                    value: 42n,
+                    span: someCodeSpan,
+                }),
+                span: someCodeSpan,
+            })
+
+            assignment.emitStatement(context)
+            expect(
+                context.scope.variables.get('target')?.currentValue,
+            ).toMatchObject({
+                type: 'integer',
+                min: '42',
+                max: '42',
+            })
+        })
+    })
 })

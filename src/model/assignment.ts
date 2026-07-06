@@ -81,11 +81,13 @@ export class Assignment implements Statement {
                     },
                 },
             )
-        } else
+        } else {
+            this.target.updateCurrentValue(context, value.valueSet)
             context.scope.emitted.push({
                 kind: 'ASSIGN',
                 target,
                 value,
             })
+        }
     }
 }

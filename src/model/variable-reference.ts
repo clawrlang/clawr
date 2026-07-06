@@ -47,6 +47,11 @@ export class VariableReference implements Expression {
         return this.lookupInScope(context).currentValue
     }
 
+    updateCurrentValue(context: Context, newValueSet: cir.ValueSet) {
+        const variable = this.lookupInScope(context)
+        variable.currentValue = newValueSet
+    }
+
     lookupInScope(context: Context) {
         const variable = context.scope.variableDeclaration(this.name)
         if (!variable) {

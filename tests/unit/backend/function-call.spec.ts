@@ -29,7 +29,7 @@ describe('Function Calls', () => {
                 valueSet: { type: 'truthvalue' },
             }
             const result = lowerExpr(expr)
-            expect(result).toBe('myFunction_param1_param2(42, "Hello")')
+            expect(result).toBe('myFunction˛param1˛param2(42, "Hello")')
         })
 
         test('statement', () => {
@@ -56,7 +56,7 @@ describe('Function Calls', () => {
                 ],
             }
             const result = lowerStmt(stmt)
-            expect(result).toBe('myFunction_param1_param2(42, "Hello");')
+            expect(result).toBe('myFunction˛param1˛param2(42, "Hello");')
         })
     })
 
@@ -86,7 +86,7 @@ describe('Function Calls', () => {
                 valueSet: { type: 'truthvalue' },
             }
             const result = lowerExpr(expr)
-            expect(result).toBe('myFunction_param1(42, "Hello")')
+            expect(result).toBe('myFunction˛param1(42, "Hello")')
         })
 
         test('statement', () => {
@@ -113,7 +113,7 @@ describe('Function Calls', () => {
                 ],
             }
             const result = lowerStmt(stmt)
-            expect(result).toBe('myFunction_param1(42, "Hello");')
+            expect(result).toBe('myFunction˛param1(42, "Hello");')
         })
     })
 

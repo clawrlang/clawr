@@ -1,5 +1,5 @@
-import { Context, Expression } from '.'
 import * as cir from '../cir'
+import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { convertSemantics } from './variable-reference'
@@ -62,15 +62,40 @@ export class FieldReference implements Expression {
             case 'string':
                 return { type: field.type }
             default:
-                return {
-                    type: 'rc-type',
-                    typeName: field.type,
-                    semantics: convertSemantics(field.semantics),
-                }
+                return (
+                    getRcTypeFieldValueSet(
+                        this.object.valueSet(context),
+                        this.field,
+                    ) ?? {
+                        type: 'rc-type',
+                        typeName: field.type,
+                        semantics: convertSemantics(field.semantics),
+                    }
+                )
         }
     }
 
-    updateCurrentValue() {}
+    updateCurrentValue(context: Context, newValueSet: cir.ValueSet) {
+        const field = this.getFieldFromContext(context)
+        const updatedObjectValueSet = setRcTypeFieldValueSet(
+            this.object.valueSet(context),
+            this.field,
+            newValueSet.type === 'rc-type'
+                ? {
+                      ...newValueSet,
+                      semantics: convertSemantics(field.semantics),
+                  }
+                : newValueSet,
+        )
+        const updater = (this.object as any).updateCurrentValue
+        if (typeof updater !== 'function') {
+            context.errorReporter.reportFatalError(
+                `Cannot update field ${this.field} without a mutable object reference`,
+                this.span,
+            )
+        }
+        updater.call(this.object, context, updatedObjectValueSet)
+    }
 
     toCIRExpression(
         context: Context,
@@ -120,5 +145,44 @@ export class FieldReference implements Expression {
                 `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
                 this.span,
             )
+    }
+}
+
+function getRcTypeFieldValueSet(
+    valueSet: cir.ValueSet,
+    fieldName: string,
+): cir.ValueSet | undefined {
+    if (valueSet.type !== 'rc-type' || !valueSet.fields) return undefined
+    const field = valueSet.fields.find(
+        (candidate) => candidate.name === fieldName,
+    )
+    if (!field) return undefined
+    return structuredClone(field.valueSet) as cir.ValueSet
+}
+
+function setRcTypeFieldValueSet(
+    valueSet: cir.ValueSet,
+    fieldName: string,
+    fieldValueSet: cir.ValueSet,
+): cir.ValueSet {
+    if (valueSet.type !== 'rc-type') return valueSet
+
+    const fields =
+        valueSet.fields?.map((field) => ({
+            name: field.name,
+            valueSet: structuredClone(field.valueSet) as cir.ValueSet,
+        })) ?? []
+    const nextField = {
+        name: fieldName,
+        valueSet: structuredClone(fieldValueSet) as cir.ValueSet,
+    }
+
+    const fieldIndex = fields.findIndex((field) => field.name === fieldName)
+    if (fieldIndex === -1) fields.push(nextField)
+    else fields[fieldIndex] = nextField
+
+    return {
+        ...valueSet,
+        fields,
     }
 }

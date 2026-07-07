@@ -2,8 +2,6 @@
 
 ## In Progress
 
-- Add `currentValue` to `fields`
-  - `DataLiteral.fields.toCIRExpression`
 - Declare Function/method in scope
   - Create child scope and add statements
   - Emit `RELEASE` on scope exit

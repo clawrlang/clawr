@@ -623,5 +623,200 @@ describe('Assignment', () => {
                 max: '42',
             })
         })
+
+        it('for a nested FieldReference', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.declarations.set(
+                'InnerType',
+                DataDeclaration.create({
+                    name: 'InnerType',
+                    fields: [
+                        {
+                            name: 'innerField1',
+                            type: 'integer',
+                            semantics: 'mut',
+                        },
+                        {
+                            name: 'innerField2',
+                            type: 'integer',
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+            context.scope.rootScope.declarations.set(
+                'OuterType',
+                DataDeclaration.create({
+                    name: 'OuterType',
+                    fields: [
+                        {
+                            name: 'field1',
+                            type: 'InnerType',
+                            semantics: 'mut',
+                        },
+                        {
+                            name: 'field2',
+                            type: 'InnerType',
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+            context.scope.variables.set('target', {
+                semantics: 'mut',
+                allowedValues: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'OuterType',
+                },
+                currentValue: {
+                    type: 'rc-type',
+                    semantics: 'COW',
+                    typeName: 'OuterType',
+                    fields: [
+                        {
+                            name: 'field1',
+                            valueSet: {
+                                type: 'rc-type',
+                                semantics: 'COW',
+                                typeName: 'InnerType',
+                                fields: [
+                                    {
+                                        name: 'innerField1',
+                                        valueSet: {
+                                            type: 'integer',
+                                            min: '1',
+                                            max: '1',
+                                        },
+                                    },
+                                    {
+                                        name: 'innerField2',
+                                        valueSet: {
+                                            type: 'integer',
+                                            min: '1',
+                                            max: '1',
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                        {
+                            name: 'field2',
+                            valueSet: {
+                                type: 'rc-type',
+                                semantics: 'COW',
+                                typeName: 'InnerType',
+                                fields: [
+                                    {
+                                        name: 'innerField1',
+                                        valueSet: {
+                                            type: 'integer',
+                                            min: '1',
+                                            max: '1',
+                                        },
+                                    },
+                                    {
+                                        name: 'innerField2',
+                                        valueSet: {
+                                            type: 'integer',
+                                            min: '1',
+                                            max: '1',
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            })
+
+            const assignment = Assignment.create({
+                target: FieldReference.create({
+                    object: FieldReference.create({
+                        object: VariableReference.create({
+                            name: 'target',
+                            span: someCodeSpan,
+                        }),
+                        operator: '.',
+                        field: 'field1',
+                        span: someCodeSpan,
+                        fieldSpan: someCodeSpan,
+                    }),
+                    operator: '.',
+                    field: 'innerField1',
+                    span: someCodeSpan,
+                    fieldSpan: someCodeSpan,
+                }),
+                value: IntegerLiteral.create({
+                    value: 42n,
+                    span: someCodeSpan,
+                }),
+                span: someCodeSpan,
+            })
+
+            assignment.emitStatement(context)
+
+            expect(
+                context.scope.variables.get('target')?.currentValue,
+            ).toMatchObject({
+                type: 'rc-type',
+                typeName: 'OuterType',
+                semantics: 'COW',
+                fields: [
+                    {
+                        name: 'field1',
+                        valueSet: {
+                            type: 'rc-type',
+                            typeName: 'InnerType',
+                            semantics: 'COW',
+                            fields: [
+                                {
+                                    name: 'innerField1',
+                                    valueSet: {
+                                        type: 'integer',
+                                        min: '42',
+                                        max: '42',
+                                    },
+                                },
+                                {
+                                    name: 'innerField2',
+                                    valueSet: {
+                                        type: 'integer',
+                                        min: '1',
+                                        max: '1',
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        name: 'field2',
+                        valueSet: {
+                            type: 'rc-type',
+                            typeName: 'InnerType',
+                            semantics: 'COW',
+                            fields: [
+                                {
+                                    name: 'innerField1',
+                                    valueSet: {
+                                        type: 'integer',
+                                        min: '1',
+                                        max: '1',
+                                    },
+                                },
+                                {
+                                    name: 'innerField2',
+                                    valueSet: {
+                                        type: 'integer',
+                                        min: '1',
+                                        max: '1',
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            })
+        })
     })
 })

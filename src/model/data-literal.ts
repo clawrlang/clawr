@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { DataDeclaration } from './data-declaration'
+import { DataDeclaration, buildValueSet } from './data-declaration'
 
 export class DataLiteral implements Expression {
     private constructor(
@@ -59,14 +59,31 @@ export class DataLiteral implements Expression {
                 `DataLiteral.toCIRExpression: target type ${valueSet.typeName} not found in scope`,
                 this.span,
             )
+        const fieldDeclarations = new Map(
+            targetType.fields.map((field) => [field.name, field]),
+        )
         return {
             kind: 'ALLOCATE',
             valueSet,
-            fields: this.fields.map((field) => ({
-                name: field.name,
-                // TODO: The fields need valueSet information, but we don't have that here. We need to look up the field type in the targetType declaration.
-                value: field.value.toCIRExpression(context),
-            })),
+            fields: this.fields.map((field) => {
+                const fieldDeclaration = fieldDeclarations.get(field.name)
+                if (!fieldDeclaration)
+                    // Nested literals need the declared field type as their target.
+                    // Missing fields are rejected here so we do not propagate undefined types.
+                    context.errorReporter.reportFatalError(
+                        `DataLiteral.toCIRExpression: field ${field.name} not found on type ${valueSet.typeName}`,
+                        this.span,
+                    )
+                const nestedContext = {
+                    ...context,
+                    type: fieldDeclaration.type,
+                    targetValueSet: buildValueSet(fieldDeclaration),
+                }
+                return {
+                    name: field.name,
+                    value: field.value.toCIRExpression(nestedContext),
+                }
+            }),
         }
     }
 }

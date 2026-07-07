@@ -109,4 +109,8 @@ export type ValueSet =
           type: 'rc-type'
           typeName: string
           semantics: 'REF' | 'COW' | 'UNIQUE'
+          fields?: {
+              name: string
+              valueSet: ValueSet
+          }[]
       }

@@ -38,7 +38,7 @@ export class DataDeclaration implements Declaration {
     }
 }
 
-function buildValueSet(field: DataField): cir.ValueSet {
+export function buildValueSet(field: DataField): cir.ValueSet {
     switch (field.type) {
         case 'integer':
             return { type: 'integer' }

@@ -38,24 +38,6 @@ export class VariableDeclaration implements Statement, Declaration {
 
     private emit(scope: Scope | Scope['rootScope'], context: Context) {
         const targetValueSet = this.buildValueSet(context)
-        const currentValue = {
-            ...this.initialValue.toCIRExpression({
-                ...context,
-                targetValueSet,
-            }).valueSet,
-            ...{ semantics: (targetValueSet as any).semantics },
-        }
-        scope.variables.set(this.name, {
-            semantics: this.semantics,
-            allowedValues:
-                this.semantics === 'const' ? currentValue : targetValueSet,
-            currentValue,
-        })
-        scope.emitted.push(this.toCIR(context))
-    }
-
-    private toCIR(context: Context): cir.Declaration & cir.Statement {
-        const targetValueSet = this.buildValueSet(context)
         const initialValue = this.initialValue.toCIRExpression({
             ...context,
             targetValueSet,
@@ -74,7 +56,7 @@ export class VariableDeclaration implements Statement, Declaration {
             targetValueSet.type === 'rc-type'
         ) {
             const valueSemantics = initialValue.valueSet.semantics
-            const targetSemantics = convertSemantics(this.semantics)
+            const targetSemantics = targetValueSet.semantics
             const isValueSemanticsMismatch =
                 valueSemantics !== 'UNIQUE' &&
                 targetSemantics !== valueSemantics
@@ -88,59 +70,54 @@ export class VariableDeclaration implements Statement, Declaration {
                 )
         }
 
+        const currentValue = {
+            ...initialValue.valueSet,
+            // UNIQUE semantics are not preserved in the current value, as they are only relevant for the initial assignment.
+            ...{ semantics: (targetValueSet as any).semantics },
+        }
+        scope.variables.set(this.name, {
+            semantics: this.semantics,
+            allowedValues:
+                this.semantics === 'const' ? currentValue : targetValueSet,
+            currentValue,
+        })
+
+        scope.emitted.push({
+            kind: 'VARIABLE_DECL' as const,
+            name: this.name,
+            ...this.initialValueForCIR(initialValue, targetValueSet),
+        })
+    }
+
+    private initialValueForCIR(
+        initialValue: cir.Expression,
+        valueSet: cir.ValueSet,
+    ): { initialValue: cir.Expression; valueSet: cir.ValueSet } {
         if (
             (initialValue.kind === 'FIELD_REF' ||
                 initialValue.kind === 'VARIABLE_REF') &&
             initialValue.valueSet.type === 'rc-type'
         )
             return {
-                kind: 'VARIABLE_DECL' as const,
-                name: this.name,
-                valueSet: targetValueSet,
                 initialValue: {
                     kind: 'RETAIN',
                     object: initialValue,
                     valueSet: initialValue.valueSet,
                 },
+                valueSet,
             }
-        else if (this.semantics === 'mut') {
-            switch (targetValueSet.type) {
+        else if (this.semantics === 'mut')
+            switch (valueSet.type) {
                 case 'integer':
-                    return {
-                        kind: 'VARIABLE_DECL' as const,
-                        name: this.name,
-                        valueSet: { type: 'integer' },
-                        initialValue,
-                    }
                 case 'truthvalue':
-                    return {
-                        kind: 'VARIABLE_DECL' as const,
-                        name: this.name,
-                        valueSet: { type: 'truthvalue' },
-                        initialValue,
-                    }
                 case 'string':
                     return {
-                        kind: 'VARIABLE_DECL' as const,
-                        name: this.name,
-                        valueSet: { type: 'string' },
                         initialValue,
-                    }
-                default:
-                    return {
-                        kind: 'VARIABLE_DECL' as const,
-                        name: this.name,
-                        valueSet: targetValueSet,
-                        initialValue: initialValue,
+                        valueSet: { type: valueSet.type },
                     }
             }
-        } else
-            return {
-                kind: 'VARIABLE_DECL' as const,
-                name: this.name,
-                valueSet: targetValueSet,
-                initialValue: initialValue,
-            }
+
+        return { initialValue, valueSet }
     }
 
     private buildValueSet(context: Context): cir.ValueSet {
@@ -148,11 +125,9 @@ export class VariableDeclaration implements Statement, Declaration {
             case undefined:
                 return this.initialValue.valueSet(context)
             case 'integer':
-                return { type: 'integer' }
             case 'truthvalue':
-                return { type: 'truthvalue' }
             case 'string':
-                return { type: 'string' }
+                return { type: this.type }
             default:
                 return {
                     type: 'rc-type',

@@ -2,6 +2,7 @@ import * as cir from '../cir'
 import { Statement, Expression, Context, Declaration } from '.'
 import { convertSemantics } from './variable-reference'
 import { Scope } from './scope'
+import { ErrorReporter } from '../diagnostics'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -43,32 +44,11 @@ export class VariableDeclaration implements Statement, Declaration {
             targetValueSet,
         })
 
-        if (initialValue.valueSet.type !== targetValueSet.type)
-            context.errorReporter.reportFatalError(
-                `Cannot assign value of type ${initialValue.valueSet.type} to target of type ${targetValueSet.type}`,
-                {
-                    start: this.initialValue.span.start,
-                    end: this.initialValue.span.end,
-                },
-            )
-        if (
-            initialValue.valueSet.type === 'rc-type' &&
-            targetValueSet.type === 'rc-type'
-        ) {
-            const valueSemantics = initialValue.valueSet.semantics
-            const targetSemantics = targetValueSet.semantics
-            const isValueSemanticsMismatch =
-                valueSemantics !== 'UNIQUE' &&
-                targetSemantics !== valueSemantics
-            if (isValueSemanticsMismatch)
-                context.errorReporter.reportFatalError(
-                    `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
-                    {
-                        start: this.initialValue.span.start,
-                        end: this.initialValue.span.end,
-                    },
-                )
-        }
+        this.validateTypeAndSemantics(
+            initialValue,
+            targetValueSet,
+            context.errorReporter,
+        )
 
         const currentValue = {
             ...initialValue.valueSet,
@@ -87,6 +67,39 @@ export class VariableDeclaration implements Statement, Declaration {
             name: this.name,
             ...this.initialValueForCIR(initialValue, targetValueSet),
         })
+    }
+
+    private validateTypeAndSemantics(
+        initialValue: cir.Expression,
+        targetValueSet: cir.ValueSet,
+        errorReporter: ErrorReporter,
+    ) {
+        if (initialValue.valueSet.type !== targetValueSet.type)
+            errorReporter.reportFatalError(
+                `Cannot assign value of type ${initialValue.valueSet.type} to target of type ${targetValueSet.type}`,
+                {
+                    start: this.initialValue.span.start,
+                    end: this.initialValue.span.end,
+                },
+            )
+        if (
+            initialValue.valueSet.type === 'rc-type' &&
+            targetValueSet.type === 'rc-type'
+        ) {
+            const valueSemantics = initialValue.valueSet.semantics
+            const targetSemantics = targetValueSet.semantics
+            const isValueSemanticsMismatch =
+                valueSemantics !== 'UNIQUE' &&
+                targetSemantics !== valueSemantics
+            if (isValueSemanticsMismatch)
+                errorReporter.reportFatalError(
+                    `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
+                    {
+                        start: this.initialValue.span.start,
+                        end: this.initialValue.span.end,
+                    },
+                )
+        }
     }
 
     private initialValueForCIR(

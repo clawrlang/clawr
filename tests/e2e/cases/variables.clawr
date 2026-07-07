@@ -1,10 +1,10 @@
-@main {
-const truest: truthvalue = true
-const falsest: truthvalue = false
-const ambiguity: truthvalue = ambiguous
-const fourtyTwo: integer = 42
-const sixDigits: integer = 123_456_789
+const truest = true
+const falsest = false
+const ambiguity = ambiguous
+const fourtyTwo = 42
+const sixDigits = 123_456_789
 
+@main {
     print(truest)
     print(falsest)
     print(ambiguity)

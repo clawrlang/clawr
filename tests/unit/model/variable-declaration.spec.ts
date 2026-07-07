@@ -6,6 +6,7 @@ import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { FieldReference } from '../../../src/model/field-reference'
+import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -29,6 +30,105 @@ describe('VariableDeclaration', () => {
                 value: '1',
                 valueSet: { type: 'integer', min: '1', max: '1' },
             },
+        })
+    })
+
+    describe('inferred type', () => {
+        it('infers narrowest value set for constant integer', () => {
+            const decl = VariableDeclaration.create({
+                semantics: 'const',
+                name: 'foo',
+                type: undefined,
+                initialValue: IntegerLiteral.create({
+                    value: 1n,
+                    span: someCodeSpan,
+                }),
+            })
+            const context = newSemanticContext()
+            decl.emitStatement(context)
+            expect((context.scope.emitted[0] as any).valueSet).toEqual({
+                type: 'integer',
+                min: '1',
+                max: '1',
+            })
+        })
+
+        it('infers widest value set for mutable integer', () => {
+            const decl = VariableDeclaration.create({
+                semantics: 'mut',
+                name: 'foo',
+                type: undefined,
+                initialValue: IntegerLiteral.create({
+                    value: 1n,
+                    span: someCodeSpan,
+                }),
+            })
+            const context = newSemanticContext()
+            context.scope.rootScope.declarations.set(
+                'MyType',
+                DataDeclaration.create({
+                    name: 'MyType',
+                    fields: [
+                        {
+                            name: 'field',
+                            type: 'integer',
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+            decl.emitStatement(context)
+            expect((context.scope.emitted[0] as any).valueSet).toEqual({
+                type: 'integer',
+            })
+        })
+
+        it('infers narrowest value set for constant truthvalue', () => {
+            const decl = VariableDeclaration.create({
+                semantics: 'const',
+                name: 'foo',
+                type: undefined,
+                initialValue: TruthValueLiteral.create({
+                    value: 'true',
+                    span: someCodeSpan,
+                }),
+            })
+            const context = newSemanticContext()
+            decl.emitStatement(context)
+            expect((context.scope.emitted[0] as any).valueSet).toEqual({
+                type: 'truthvalue',
+                values: ['true'],
+            })
+        })
+
+        it('infers widest value set for mutable truthvalue', () => {
+            const decl = VariableDeclaration.create({
+                semantics: 'mut',
+                name: 'foo',
+                type: undefined,
+                initialValue: TruthValueLiteral.create({
+                    value: 'true',
+                    span: someCodeSpan,
+                }),
+            })
+            const context = newSemanticContext()
+            context.scope.rootScope.declarations.set(
+                'MyType',
+                DataDeclaration.create({
+                    name: 'MyType',
+                    fields: [
+                        {
+                            name: 'field',
+                            type: 'truthvalue',
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+            decl.emitStatement(context)
+            expect((context.scope.emitted[0] as any).valueSet).toEqual({
+                type: 'truthvalue',
+            })
         })
     })
 

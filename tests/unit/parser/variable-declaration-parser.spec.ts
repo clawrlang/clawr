@@ -53,6 +53,16 @@ describe('VariableDeclarationParser', () => {
             },
         })
     })
+
+    it('parses variable declaration with inferred type', () => {
+        const source = `const foo = 1;`
+        expect(parseVariableDeclaration(source)).toMatchObject({
+            semantics: 'const',
+            name: 'foo',
+            type: undefined,
+            initialValue: { value: 1n },
+        })
+    })
 })
 
 function parseVariableDeclaration(source: string) {

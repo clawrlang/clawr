@@ -10,7 +10,7 @@ export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private semantics: VariableSemantics,
         private name: string,
-        private type: string,
+        private type: string | undefined,
         private initialValue: Expression,
     ) {}
 
@@ -22,7 +22,7 @@ export class VariableDeclaration implements Statement, Declaration {
     }: {
         semantics: VariableSemantics
         name: string
-        type: string
+        type?: string
         initialValue: Expression
     }): VariableDeclaration {
         return new VariableDeclaration(semantics, name, type, initialValue)
@@ -37,25 +37,25 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private emit(scope: Scope | Scope['rootScope'], context: Context) {
-        const myValueSet = this.buildValueSet()
+        const targetValueSet = this.buildValueSet(context)
         const currentValue = {
             ...this.initialValue.toCIRExpression({
                 ...context,
-                targetValueSet: myValueSet,
+                targetValueSet,
             }).valueSet,
-            ...{ semantics: (myValueSet as any).semantics },
+            ...{ semantics: (targetValueSet as any).semantics },
         }
         scope.variables.set(this.name, {
             semantics: this.semantics,
             allowedValues:
-                this.semantics === 'const' ? currentValue : myValueSet,
+                this.semantics === 'const' ? currentValue : targetValueSet,
             currentValue,
         })
         scope.emitted.push(this.toCIR(context))
     }
 
     private toCIR(context: Context): cir.Declaration & cir.Statement {
-        const targetValueSet = this.buildValueSet()
+        const targetValueSet = this.buildValueSet(context)
         const initialValue = this.initialValue.toCIRExpression({
             ...context,
             targetValueSet,
@@ -103,7 +103,38 @@ export class VariableDeclaration implements Statement, Declaration {
                     valueSet: initialValue.valueSet,
                 },
             }
-        else
+        else if (this.semantics === 'mut') {
+            switch (targetValueSet.type) {
+                case 'integer':
+                    return {
+                        kind: 'VARIABLE_DECL' as const,
+                        name: this.name,
+                        valueSet: { type: 'integer' },
+                        initialValue,
+                    }
+                case 'truthvalue':
+                    return {
+                        kind: 'VARIABLE_DECL' as const,
+                        name: this.name,
+                        valueSet: { type: 'truthvalue' },
+                        initialValue,
+                    }
+                case 'string':
+                    return {
+                        kind: 'VARIABLE_DECL' as const,
+                        name: this.name,
+                        valueSet: { type: 'string' },
+                        initialValue,
+                    }
+                default:
+                    return {
+                        kind: 'VARIABLE_DECL' as const,
+                        name: this.name,
+                        valueSet: targetValueSet,
+                        initialValue: initialValue,
+                    }
+            }
+        } else
             return {
                 kind: 'VARIABLE_DECL' as const,
                 name: this.name,
@@ -112,8 +143,10 @@ export class VariableDeclaration implements Statement, Declaration {
             }
     }
 
-    private buildValueSet(): cir.ValueSet {
+    private buildValueSet(context: Context): cir.ValueSet {
         switch (this.type) {
+            case undefined:
+                return this.initialValue.valueSet(context)
             case 'integer':
                 return { type: 'integer' }
             case 'truthvalue':

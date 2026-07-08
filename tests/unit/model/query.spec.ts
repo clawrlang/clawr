@@ -13,9 +13,9 @@ describe('Query', () => {
         const context = newSemanticContext()
         expect(query.toCIRExpression(context)).toMatchObject({
             kind: 'CALL_FUNC',
-            signature: {
+            name: {
                 baseName: 'foo',
-                parameters: [],
+                labels: [],
             },
             arguments: [],
         })
@@ -38,9 +38,9 @@ describe('Query', () => {
         const context = newSemanticContext()
         expect(query.toCIRExpression(context)).toMatchObject({
             kind: 'CALL_FUNC',
-            signature: {
+            name: {
                 baseName: 'foo',
-                parameters: [{ label: 'x', type: 'integer' }],
+                labels: ['x'],
             },
             arguments: [
                 {

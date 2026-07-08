@@ -29,9 +29,9 @@ describe('CallFunc', () => {
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'foo',
-                    parameters: [{ type: 'integer' }, { type: 'truthvalue' }],
+                    labels: [],
                 },
                 arguments: [
                     { kind: 'INTEGER_LITERAL', value: '42' },
@@ -59,9 +59,9 @@ describe('CallFunc', () => {
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'foo',
-                    parameters: [{ label: 'x', type: 'truthvalue' }],
+                    labels: ['x'],
                 },
                 arguments: [{ kind: 'TRUTHVALUE_LITERAL', value: 'ambiguous' }],
             },
@@ -85,9 +85,9 @@ describe('CallFunc', () => {
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'printInt64',
-                    parameters: [{ type: 'integer' }],
+                    labels: [],
                 },
                 arguments: [{ kind: 'INTEGER_LITERAL', value: '1' }],
             },
@@ -111,9 +111,9 @@ describe('CallFunc', () => {
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'printTruthvalue',
-                    parameters: [{ type: 'truthvalue' }],
+                    labels: [],
                 },
                 arguments: [{ kind: 'TRUTHVALUE_LITERAL', value: 'true' }],
             },
@@ -143,9 +143,9 @@ describe('CallFunc', () => {
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'printInt64',
-                    parameters: [{ type: 'integer' }],
+                    labels: [],
                 },
                 arguments: [{ kind: 'VARIABLE_REF', name: 'x' }],
             },

@@ -141,7 +141,7 @@ export function lowerExpr(expr: cir.Expression): string {
 function lowerCallFuncName(
     signature: (cir.Expression | cir.Statement) & { kind: 'CALL_FUNC' },
 ): string {
-    return mangleFunctionName(signature.signature)
+    return mangleFunctionName(signature.name)
 }
 
 export function lowerTruthvalueLiteral(
@@ -150,14 +150,12 @@ export function lowerTruthvalueLiteral(
     return `c_${expr.value}`
 }
 
-function mangleFunctionName(signature: {
+function mangleFunctionName({
+    baseName,
+    labels,
+}: {
     baseName: string
-    parameters: { label?: string; type: string }[]
+    labels: string[]
 }): string {
-    return [
-        signature.baseName,
-        ...signature.parameters
-            .filter((param) => param.label)
-            .map((param) => param.label),
-    ].join('˛')
+    return [baseName, ...labels].join('˛')
 }

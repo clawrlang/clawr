@@ -34,9 +34,9 @@ describe('Module', () => {
             startBlock: [
                 {
                     kind: 'CALL_FUNC',
-                    signature: {
+                    name: {
                         baseName: 'add',
-                        parameters: [{ type: 'integer' }, { type: 'integer' }],
+                        labels: [],
                     },
                     arguments: [
                         { kind: 'INTEGER_LITERAL', value: '1' },

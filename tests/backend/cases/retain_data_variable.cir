@@ -116,13 +116,9 @@
         },
         {
             "kind": "CALL_FUNC",
-            "signature": {
+            "name": {
                 "baseName": "printInt64",
-                "parameters": [
-                    {
-                        "type": "integer"
-                    }
-                ]
+                "labels": []
             },
             "arguments": [
                 {
@@ -147,13 +143,9 @@
         },
         {
             "kind": "CALL_FUNC",
-            "signature": {
+            "name": {
                 "baseName": "printInt64",
-                "parameters": [
-                    {
-                        "type": "integer"
-                    }
-                ]
+                "labels": []
             },
             "arguments": [
                 {

@@ -43,12 +43,11 @@ export class Query implements Expression {
     toCIRExpression(context: Context): cir.Expression {
         return {
             kind: 'CALL_FUNC',
-            signature: {
+            name: {
                 baseName: this.baseName,
-                parameters: this.arguments.map((arg, index) => ({
-                    label: this.arguments[index].label,
-                    type: arg.value.valueSet(context).type,
-                })),
+                labels: this.arguments
+                    .filter((arg) => arg.label)
+                    .map((arg) => arg.label!!),
             },
             arguments: this.arguments.map((arg) =>
                 arg.value.toCIRExpression(context),

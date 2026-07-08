@@ -7,12 +7,9 @@ describe('Function Calls', () => {
         test('expression', () => {
             const expr: Expression = {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'myFunction',
-                    parameters: [
-                        { label: 'param1', type: 'integer' },
-                        { label: 'param2', type: 'string' },
-                    ],
+                    labels: ['param1', 'param2'],
                 },
                 arguments: [
                     {
@@ -35,12 +32,9 @@ describe('Function Calls', () => {
         test('statement', () => {
             const stmt: Statement = {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'myFunction',
-                    parameters: [
-                        { label: 'param1', type: 'integer' },
-                        { label: 'param2', type: 'string' },
-                    ],
+                    labels: ['param1', 'param2'],
                 },
                 arguments: [
                     {
@@ -64,12 +58,9 @@ describe('Function Calls', () => {
         test('expression', () => {
             const expr: Expression = {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'myFunction',
-                    parameters: [
-                        { label: 'param1', type: 'integer' },
-                        { type: 'string' },
-                    ],
+                    labels: ['param1'],
                 },
                 arguments: [
                     {
@@ -92,12 +83,9 @@ describe('Function Calls', () => {
         test('statement', () => {
             const stmt: Statement = {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'myFunction',
-                    parameters: [
-                        { label: 'param1', type: 'integer' },
-                        { type: 'string' },
-                    ],
+                    labels: ['param1'],
                 },
                 arguments: [
                     {
@@ -121,9 +109,9 @@ describe('Function Calls', () => {
         test('expression', () => {
             const expr: Expression = {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'noParamFunction',
-                    parameters: [],
+                    labels: [],
                 },
                 arguments: [],
                 valueSet: { type: 'truthvalue' },
@@ -135,9 +123,9 @@ describe('Function Calls', () => {
         test('statement', () => {
             const stmt: Statement = {
                 kind: 'CALL_FUNC',
-                signature: {
+                name: {
                     baseName: 'noParamFunction',
-                    parameters: [],
+                    labels: [],
                 },
                 arguments: [],
             }

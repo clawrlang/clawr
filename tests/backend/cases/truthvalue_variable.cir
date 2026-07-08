@@ -22,13 +22,9 @@
     "startBlock": [
         {
             "kind": "CALL_FUNC",
-            "signature": {
+            "name": {
                 "baseName": "printTruthvalue",
-                "parameters": [
-                    {
-                        "type": "truthvalue"
-                    }
-                ]
+                "labels": []
             },
             "arguments": [
                 {

@@ -12,6 +12,16 @@ export type Declaration =
           initialValue: Expression
       }
     | {
+          kind: 'FUNCTION_DECL'
+          name: string
+          parameters: {
+              label?: string
+              name: string
+              valueSet: ValueSet
+          }[]
+          body: Statement[]
+      }
+    | {
           kind: 'DATA_DECL'
           name: string
           fields: {
@@ -34,12 +44,9 @@ export type Statement =
       }
     | {
           kind: 'CALL_FUNC'
-          signature: {
+          name: {
               baseName: string
-              parameters: {
-                  label?: string
-                  type: string
-              }[]
+              labels: string[]
           }
           arguments: Expression[]
       }

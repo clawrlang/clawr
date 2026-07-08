@@ -3,18 +3,19 @@
     "startBlock": [
         {
             "kind": "CALL_FUNC",
-            "signature": {
+            "name": {
                 "baseName": "printInt64",
-                "parameters": [
-                    {
-                        "type": "integer"
-                    }
-                ]
+                "labels": []
             },
             "arguments": [
                 {
                     "kind": "INTEGER_LITERAL",
-                    "value": "1"
+                    "value": "1",
+                    "valueSet": {
+                        "type": "integer",
+                        "min": "1",
+                        "max": "1"
+                    }
                 }
             ]
         }

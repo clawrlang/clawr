@@ -23,15 +23,14 @@ export class CallFunc implements Statement {
     emitStatement(context: Context) {
         context.scope.emitted.push({
             kind: 'CALL_FUNC',
-            signature: {
+            name: {
                 baseName:
                     this.baseName === 'print'
                         ? `print${this.arguments[0].value.valueSet(context).type === 'integer' ? 'Int64' : 'Truthvalue'}`
                         : this.baseName,
-                parameters: this.arguments.map((arg, index) => ({
-                    label: this.arguments[index].label,
-                    type: arg.value.valueSet(context).type,
-                })),
+                labels: this.arguments
+                    .filter((arg) => arg.label)
+                    .map((arg) => arg.label!!),
             },
             arguments: this.arguments.map((arg) =>
                 arg.value.toCIRExpression(context),

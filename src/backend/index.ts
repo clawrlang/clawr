@@ -37,6 +37,23 @@ export function lowerDecl(decl: cir.Declaration): string {
         case 'VARIABLE_DECL': {
             return `${lowerType(decl.valueSet)} ${decl.name};`
         }
+        case 'FUNCTION_DECL': {
+            const params = decl.parameters
+                .map((param) => `${lowerType(param.valueSet)} ${param.name}`)
+                .join(', ')
+            const returnType = decl.returnValueSet
+                ? lowerType(decl.returnValueSet)
+                : 'void'
+
+            return `${returnType} ${mangleFunctionName({
+                baseName: decl.name,
+                labels: decl.parameters
+                    .map((param) => param.label)
+                    .filter((label) => label !== undefined) as string[],
+            })}(${params}) {
+                    ${decl.body.map(lowerStmt).join('\n')}
+                }`
+        }
         default: {
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
         }
@@ -67,7 +84,7 @@ function lowerType(valueSet: cir.ValueSet): string {
 export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
         case 'CALL_FUNC': {
-            const name = lowerCallFuncName(stmt)
+            const name = mangleFunctionName(stmt.name)
             return `${name}(${stmt.arguments.map(lowerExpr).join(', ')});`
         }
         case 'VARIABLE_DECL': {
@@ -84,6 +101,9 @@ export function lowerStmt(stmt: cir.Statement): string {
         }
         case 'RELEASE': {
             return `releaseRC(${lowerExpr(stmt.object)});`
+        }
+        case 'RETURN': {
+            return `return ${lowerExpr(stmt.value)};`
         }
         default: {
             throw new Error(`Unknown statement kind: ${(stmt as any).kind}`)
@@ -123,7 +143,8 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
         case 'CALL_FUNC': {
-            const name = lowerCallFuncName(expr)
+            //            return JSON.stringify(expr)
+            const name = mangleFunctionName(expr.name)
             return `${name}(${expr.arguments.map(lowerExpr).join(', ')})`
         }
         case 'VARIABLE_REF': {
@@ -136,12 +157,6 @@ export function lowerExpr(expr: cir.Expression): string {
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
         }
     }
-}
-
-function lowerCallFuncName(
-    signature: (cir.Expression | cir.Statement) & { kind: 'CALL_FUNC' },
-): string {
-    return mangleFunctionName(signature.name)
 }
 
 export function lowerTruthvalueLiteral(

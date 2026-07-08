@@ -1,0 +1,73 @@
+{
+    "$schema": "cir.schema.json",
+    "declarations": [
+        {
+            "kind": "FUNCTION_DECL",
+            "name": "f",
+            "parameters": [
+                {
+                    "label": "l",
+                    "name": "var",
+                    "valueSet": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "body": [
+                {
+                    "kind": "RETURN",
+                    "value": {
+                        "kind": "INTEGER_LITERAL",
+                        "value": "42",
+                        "valueSet": {
+                            "type": "integer",
+                            "max": "42",
+                            "min": "42"
+                        }
+                    }
+                }
+            ],
+            "returnValueSet": {
+                "type": "integer",
+                "max": "42",
+                "min": "42"
+            }
+        }
+    ],
+    "startBlock": [
+        {
+            "kind": "CALL_FUNC",
+            "name": {
+                "baseName": "printInt64",
+                "labels": []
+            },
+            "arguments": [
+                {
+                    "kind": "CALL_FUNC",
+                    "name": {
+                        "baseName": "f",
+                        "labels": [
+                            "l"
+                        ]
+                    },
+                    "arguments": [
+                        {
+                            "kind": "INTEGER_LITERAL",
+                            "value": "1",
+                            "valueSet": {
+                                "type": "integer",
+                                "min": "1",
+                                "max": "1"
+                            }
+                        }
+                    ],
+                    "valueSet": {
+                        "type": "integer",
+                        "max": "42",
+                        "min": "42"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -20,6 +20,7 @@ export type Declaration =
               valueSet: ValueSet
           }[]
           body: Statement[]
+          returnValueSet?: ValueSet
       }
     | {
           kind: 'DATA_DECL'
@@ -49,6 +50,10 @@ export type Statement =
               labels: string[]
           }
           arguments: Expression[]
+      }
+    | {
+          kind: 'RETURN'
+          value: Expression
       }
     | Extract<Declaration, { kind: 'VARIABLE_DECL' }>
     | {

@@ -1,14 +1,15 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
+import { FunctionName } from './function-name'
 
 export class Query implements Expression {
-    private arguments: { label?: string; value: Expression }[] = []
+    private arguments: Expression[]
 
     private constructor(
+        private name: FunctionName,
+        args: Expression[],
         public span: SourceCodeSpan,
-        private baseName: string,
-        args: { label?: string; value: Expression }[],
     ) {
         this.arguments = args
     }
@@ -22,7 +23,17 @@ export class Query implements Expression {
         arguments: { label?: string; value: Expression }[]
         span: SourceCodeSpan
     }): Query {
-        return new Query(span, baseName, args)
+        return new Query(
+            FunctionName.create({
+                baseName,
+                labels: args
+                    .filter((arg) => arg.label)
+                    .map((arg) => arg.label!),
+                arity: args.length,
+            }),
+            args.map((arg) => arg.value),
+            span,
+        )
     }
 
     isEffectivelyConst(_: Context): boolean {
@@ -34,7 +45,7 @@ export class Query implements Expression {
         // For now, just return truthvalue for all queries
         return this.arguments.length === 1
             ? {
-                  ...this.arguments[0].value.valueSet(context),
+                  ...this.arguments[0].valueSet(context),
                   ...{ semantics: 'UNIQUE' },
               }
             : { type: 'truthvalue' }
@@ -43,14 +54,9 @@ export class Query implements Expression {
     toCIRExpression(context: Context): cir.Expression {
         return {
             kind: 'CALL_FUNC',
-            name: {
-                baseName: this.baseName,
-                labels: this.arguments
-                    .filter((arg) => arg.label)
-                    .map((arg) => arg.label!!),
-            },
+            name: this.name.toCIR(),
             arguments: this.arguments.map((arg) =>
-                arg.value.toCIRExpression(context),
+                arg.toCIRExpression(context),
             ),
             valueSet: this.valueSet(context),
         }

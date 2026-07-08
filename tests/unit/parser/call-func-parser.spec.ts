@@ -11,11 +11,8 @@ describe('CallFunc Parser', () => {
         const parser = CallFuncParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
-            baseName: 'foo',
-            arguments: [
-                { value: { value: 42n } },
-                { value: { value: 'ambiguous' } },
-            ],
+            name: { baseName: 'foo', labels: [] },
+            arguments: [{ value: 42n }, { value: 'ambiguous' }],
         })
     })
 
@@ -26,11 +23,8 @@ describe('CallFunc Parser', () => {
         const parser = CallFuncParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
-            baseName: 'foo',
-            arguments: [
-                { label: 'x', value: { value: 42n } },
-                { label: 'y', value: { value: 'ambiguous' } },
-            ],
+            name: { baseName: 'foo', labels: ['x', 'y'] },
+            arguments: [{ value: 42n }, { value: 'ambiguous' }],
         })
     })
 })

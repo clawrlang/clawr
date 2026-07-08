@@ -80,8 +80,8 @@ describe('Expression Parser', () => {
         const result = parseExpression(code)
         expect(result).toBeInstanceOf(Query)
         expect(result).toMatchObject({
-            baseName: 'add',
-            arguments: [{ value: { value: 1n } }, { value: { value: 2n } }],
+            name: { baseName: 'add', labels: [] },
+            arguments: [{ value: 1n }, { value: 2n }],
         })
     })
 })

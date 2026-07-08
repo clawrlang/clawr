@@ -17,8 +17,8 @@ describe('Module Parser', () => {
         expect(result).toMatchObject({
             main: [
                 {
-                    baseName: 'print',
-                    arguments: [{ value: { value: 42n } }],
+                    name: { baseName: 'print', arity: 1, labels: [] },
+                    arguments: [{ value: 42n }],
                 },
             ],
         })
@@ -52,12 +52,12 @@ describe('Module Parser', () => {
                     initialValue: { value: 20n },
                 },
                 {
-                    baseName: 'print',
-                    arguments: [{ value: { name: 'x' } }],
+                    name: { baseName: 'print', arity: 1, labels: [] },
+                    arguments: [{ name: 'x' }],
                 },
                 {
-                    baseName: 'print',
-                    arguments: [{ value: { name: 'y' } }],
+                    name: { baseName: 'print', arity: 1, labels: [] },
+                    arguments: [{ name: 'y' }],
                 },
             ],
         })
@@ -88,8 +88,8 @@ describe('Module Parser', () => {
                     value: { value: 30n },
                 },
                 {
-                    baseName: 'print',
-                    arguments: [{ value: { name: 'y' } }],
+                    name: { baseName: 'print', arity: 1, labels: [] },
+                    arguments: [{ name: 'y' }],
                 },
             ],
         })
@@ -131,7 +131,10 @@ describe('Module Parser', () => {
         expect(result).toMatchObject({
             declarations: [{ name: 'MyData' }],
             main: [
-                { baseName: 'print', arguments: [{ value: { value: 42n } }] },
+                {
+                    name: { baseName: 'print', arity: 1, labels: [] },
+                    arguments: [{ value: 42n }],
+                },
             ],
         })
     })

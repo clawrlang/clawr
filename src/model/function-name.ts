@@ -1,4 +1,4 @@
-import { SourceCodeSpan } from '../diagnostics'
+import * as cir from '../cir'
 
 export class FunctionName {
     private constructor(
@@ -17,6 +17,13 @@ export class FunctionName {
         labels: string[]
     }): FunctionName {
         return new FunctionName(baseName, arity, labels)
+    }
+
+    toCIR(): (cir.Statement & { kind: 'CALL_FUNC' })['name'] {
+        return {
+            baseName: this.baseName,
+            labels: this.labels,
+        }
     }
 
     toString(): string {

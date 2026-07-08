@@ -4,11 +4,11 @@
 
 - Declare Function/method in scope
   - Create child scope and add statements
+  - Fix the TODO in `Query.valueSet()`
   - Emit `RELEASE` on scope exit
 
 ## Later
 
-- Nested scopes (global/local vars)
 - Generate IDE diagnostics for syntax coloring
   - errors
   - did-you-mean suggestions

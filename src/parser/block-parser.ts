@@ -3,6 +3,7 @@ import { TokenStream } from '../lexer'
 import { Statement } from '../model'
 import { AssignmentParser } from './assignment-parser'
 import { CallFuncParser } from './call-func-parser'
+import { ReturnStatementParser } from './return-statement-parser'
 import { StatementParser } from './statement-parser'
 import { VariableDeclarationParser } from './variable-declaration-parser'
 
@@ -16,6 +17,7 @@ export class BlockParser {
             CallFuncParser.create(context),
             VariableDeclarationParser.create(context),
             AssignmentParser.create(context),
+            ReturnStatementParser.create(context),
         ]
     }
 

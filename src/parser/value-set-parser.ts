@@ -2,7 +2,13 @@ import { Context } from '.'
 import { Token, TokenStream } from '../lexer'
 import { IdentifierToken } from '../lexer/token'
 import { IntegerLiteral } from '../model/integer-literal'
-import { ValueSet } from '../model/value-set'
+import {
+    IntegerValueSet,
+    RCTypeValueSet,
+    StringValueSet,
+    TruthValueSet,
+    ValueSet,
+} from '../model/value-set'
 import { ExpressionParser } from './expression-parser'
 
 export class ValueSetParser {
@@ -22,25 +28,22 @@ export class ValueSetParser {
             case 'truthvalue':
                 return this.parseTruthvalueValueSet(stream, typeToken)
             case 'string':
-                return {
-                    type,
+                return StringValueSet.create({
                     span: { start: typeToken.start, end: typeToken.end },
-                }
+                })
             default:
-                return {
-                    type: 'rc-type',
+                return RCTypeValueSet.create({
                     typeName: type,
                     span: { start: typeToken.start, end: typeToken.end },
-                }
+                })
         }
     }
 
     parseIntegerValueSet(stream: TokenStream, typeToken: Token): ValueSet {
         if (!stream.isNext('PUNCTUATION', '('))
-            return {
-                type: 'integer',
+            return IntegerValueSet.create({
                 span: { start: typeToken.start, end: typeToken.end },
-            }
+            })
 
         let max: bigint | undefined
         let min: bigint | undefined
@@ -84,12 +87,11 @@ export class ValueSetParser {
 
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return {
-            type: 'integer',
+        return IntegerValueSet.create({
             min,
             max,
             span: { start: typeToken.start, end: endToken.end },
-        }
+        })
     }
 
     parseTruthvalueValueSet(
@@ -97,10 +99,9 @@ export class ValueSetParser {
         typeToken: IdentifierToken,
     ): ValueSet {
         if (!stream.isNext('PUNCTUATION', '('))
-            return {
-                type: 'truthvalue',
+            return TruthValueSet.create({
                 span: { start: typeToken.start, end: typeToken.end },
-            }
+            })
 
         const values: ('false' | 'ambiguous' | 'true')[] = []
 
@@ -113,10 +114,9 @@ export class ValueSetParser {
         }
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return {
-            type: 'truthvalue',
+        return TruthValueSet.create({
             values: values.length > 0 ? values : undefined,
             span: { start: typeToken.start, end: endToken.end },
-        }
+        })
     }
 }

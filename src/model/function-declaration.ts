@@ -2,6 +2,7 @@ import * as cir from '../cir'
 import { Context, Declaration, Expression, Statement } from '.'
 import { ValueSet } from './value-set'
 import { ReturnStatement } from './return-statement'
+import { FunctionName } from './function-name'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -30,7 +31,14 @@ export class FunctionDeclaration implements Declaration {
     }
 
     emitDeclaration(context: Context) {
-        context.scope.rootScope.declarations.set(this.name, this)
+        const name = FunctionName.create({
+            baseName: this.name,
+            arity: this.parameters.length,
+            labels: this.parameters
+                .filter((param) => param.label)
+                .map((param) => param.label!),
+        })
+        context.scope.rootScope.declarations.set(name.toString(), this)
 
         const parameters = this.parameters.map((param) => ({
             label: param.label,

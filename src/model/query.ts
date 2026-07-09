@@ -41,14 +41,14 @@ export class Query implements Expression {
     }
 
     valueSet(context: Context): cir.ValueSet {
-        // TODO: Register function in scope and get return type from there
-        // For now, just return truthvalue for all queries
-        return this.arguments.length === 1
-            ? {
-                  ...this.arguments[0].valueSet(context),
-                  ...{ semantics: 'UNIQUE' },
-              }
-            : { type: 'truthvalue' }
+        const name = this.name.toString()
+        if (name === 'copy(of:)')
+            return {
+                ...this.arguments[0].valueSet(context),
+                ...{ semantics: 'UNIQUE' },
+            }
+        const funcDecl = context.scope.functionDeclaration(name)
+        return funcDecl?.result?.toCIR({ ...context, semantics: 'COW' })!
     }
 
     toCIRExpression(context: Context): cir.Expression {

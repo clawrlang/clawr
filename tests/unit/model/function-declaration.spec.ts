@@ -86,11 +86,11 @@ describe('FunctionDeclaration', () => {
         const context = newSemanticContext()
         funcDecl.emitDeclaration(context)
 
-        expect(context.scope.rootScope.declarations.has('myFunction')).toBe(
+        expect(context.scope.rootScope.declarations.has('myFunction()')).toBe(
             true,
         )
         const decl = context.scope.rootScope.declarations.get(
-            'myFunction',
+            'myFunction()',
         ) as FunctionDeclaration
         expect(decl).toBeInstanceOf(FunctionDeclaration)
         expect(decl.name).toBe('myFunction')

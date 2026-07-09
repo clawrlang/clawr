@@ -2,6 +2,7 @@ import * as cir from '../cir'
 import { Declaration } from '.'
 import { DataDeclaration } from './data-declaration'
 import { VariableSemantics } from './variable-declaration'
+import { FunctionDeclaration } from './function-declaration'
 
 class RootScope {
     public variables: Map<string, Variable> = new Map()
@@ -11,6 +12,12 @@ class RootScope {
     dataDeclaration(name: string): DataDeclaration | undefined {
         const decl = this.declarations.get(name)
         if (decl instanceof DataDeclaration) return decl
+        return undefined
+    }
+
+    functionDeclaration(name: string): FunctionDeclaration | undefined {
+        const decl = this.declarations.get(name)
+        if (decl instanceof FunctionDeclaration) return decl
         return undefined
     }
 
@@ -43,6 +50,10 @@ export class Scope {
 
     dataDeclaration(name: string): DataDeclaration | undefined {
         return this.rootScope.dataDeclaration(name)
+    }
+
+    functionDeclaration(name: string): FunctionDeclaration | undefined {
+        return this.rootScope.functionDeclaration(name)
     }
 
     variableDeclaration(name: string): Variable | undefined {

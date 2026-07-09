@@ -2,7 +2,6 @@ import { describe, expect, it } from 'bun:test'
 import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
 import { ModuleParser } from '../../../src/parser/module-parser'
-import { IntegerValueSet } from '../../../src/model/value-set'
 
 describe('Module Parser', () => {
     it('parses a simple main body module', () => {
@@ -124,6 +123,25 @@ describe('Module Parser', () => {
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             declarations: [{ name: 'x' }],
+        })
+    })
+
+    it('parses function declarations in global scope', () => {
+        const code = `
+            func add(a: integer) -> integer {
+                return a
+            }
+            `
+        const errorReporter = new TestErrorReporter()
+        const tokenStream = TokenStream.read(code, errorReporter)
+        const parser = ModuleParser.create({ errorReporter })
+        const result = parser.parse(tokenStream)
+        expect(result).toMatchObject({
+            declarations: [
+                {
+                    name: 'add',
+                },
+            ],
         })
     })
 

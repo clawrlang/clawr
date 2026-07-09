@@ -65,9 +65,7 @@ export class StringValueSet implements ValueSet {
     }
 
     toCIR(_: any): cir.ValueSet {
-        return {
-            type: 'string',
-        }
+        return { type: 'string' }
     }
 }
 

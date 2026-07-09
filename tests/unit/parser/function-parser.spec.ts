@@ -91,7 +91,7 @@ function parseFunction(code: string) {
     const errorReporter = new TestErrorReporter()
     const stream = TokenStream.read(code, errorReporter)
     const parser = FunctionParser.create({
-        errorReporter: errorReporter,
+        errorReporter,
     })
     const result = parser.parse(stream)
     return result

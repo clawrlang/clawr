@@ -6,17 +6,20 @@ import { Module } from '../model/module'
 import { Context } from '.'
 import { VariableDeclarationParser } from './variable-declaration-parser'
 import { VARIABLE_SEMANTICS } from '../model/variable-declaration'
+import { FunctionParser } from './function-parser'
 
 export class ModuleParser {
     private blockParser: BlockParser
     private dataDeclarationParser: DataDeclarationParser
     private variableDeclarationParser: VariableDeclarationParser
+    private functionParser: FunctionParser
 
     private constructor(private context: Context) {
         this.blockParser = BlockParser.create(context)
         this.dataDeclarationParser = DataDeclarationParser.create(context)
         this.variableDeclarationParser =
             VariableDeclarationParser.create(context)
+        this.functionParser = FunctionParser.create(context)
     }
 
     static create(context: Context): ModuleParser {
@@ -43,6 +46,8 @@ export class ModuleParser {
                 declarations.push(this.dataDeclarationParser.parse(stream))
             } else if (stream.isNext('KEYWORD', ...VARIABLE_SEMANTICS)) {
                 declarations.push(this.variableDeclarationParser.parse(stream))
+            } else if (stream.isNext('KEYWORD', 'func')) {
+                declarations.push(this.functionParser.parse(stream))
             } else {
                 const { start, end } = stream.peek()!!
                 this.context.errorReporter.reportFatalError(

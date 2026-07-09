@@ -2,10 +2,8 @@
 
 ## In Progress
 
-- Declare Function/method in scope
-  - Create child scope and add statements
-  - Fix the TODO in `Query.valueSet()`
-  - Emit `RELEASE` on scope exit
+- Fix the TODO in `Query.valueSet()`
+- Emit `RELEASE` on scope exit
 
 ## Later
 

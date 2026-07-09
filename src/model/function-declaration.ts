@@ -1,7 +1,8 @@
-import { Statement } from '.'
+import * as cir from '../cir'
+import { Context, Declaration, Statement } from '.'
 import { ValueSet } from './value-set'
 
-export class FunctionDeclaration {
+export class FunctionDeclaration implements Declaration {
     private constructor(
         public name: string,
         public parameters: Parameter[],
@@ -21,6 +22,40 @@ export class FunctionDeclaration {
         body: Statement[]
     }): FunctionDeclaration {
         return new FunctionDeclaration(name, parameters, result, body)
+    }
+
+    emitDeclaration(context: Context) {
+        context.scope.rootScope.declarations.set(this.name, this)
+
+        const parameters = this.parameters.map((param) => ({
+            label: param.label,
+            name: param.varName,
+            valueSet: param.valueSet.toCIR({
+                ...context,
+                semantics: 'COW',
+            }),
+        }))
+
+        const returnValueSet = this.result?.toCIR({
+            ...context,
+            semantics: 'COW',
+        })
+
+        const bodyContext = {
+            ...context,
+            scope: context.scope.createChildScope(),
+        }
+
+        for (const stmt of this.body) stmt.emitStatement(bodyContext)
+
+        const cirFuncDecl: cir.Declaration = {
+            kind: 'FUNCTION_DECL',
+            name: this.name,
+            parameters,
+            returnValueSet,
+            body: bodyContext.scope.emitted,
+        }
+        context.scope.rootScope.emitted.push(cirFuncDecl)
     }
 }
 

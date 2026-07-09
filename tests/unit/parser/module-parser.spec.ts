@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
 import { ModuleParser } from '../../../src/parser/module-parser'
+import { IntegerValueSet } from '../../../src/model/value-set'
 
 describe('Module Parser', () => {
     it('parses a simple main body module', () => {
@@ -42,13 +43,19 @@ describe('Module Parser', () => {
                 {
                     semantics: 'const',
                     name: 'x',
-                    type: 'integer',
+                    valueSet: {
+                        min: undefined,
+                        max: undefined,
+                    },
                     initialValue: { value: 10n },
                 },
                 {
                     semantics: 'mut',
                     name: 'y',
-                    type: 'integer',
+                    valueSet: {
+                        min: undefined,
+                        max: undefined,
+                    },
                     initialValue: { value: 20n },
                 },
                 {
@@ -80,7 +87,10 @@ describe('Module Parser', () => {
                 {
                     semantics: 'mut',
                     name: 'y',
-                    type: 'integer',
+                    valueSet: {
+                        min: undefined,
+                        max: undefined,
+                    },
                     initialValue: { value: 20n },
                 },
                 {

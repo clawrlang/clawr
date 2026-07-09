@@ -9,7 +9,10 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             semantics: 'const',
             name: 'foo',
-            type: 'integer',
+            valueSet: {
+                min: undefined,
+                max: undefined,
+            },
             initialValue: { value: 1n },
         })
     })
@@ -19,7 +22,10 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             semantics: 'mut',
             name: 'foo',
-            type: 'integer',
+            valueSet: {
+                min: undefined,
+                max: undefined,
+            },
             initialValue: { value: 1n },
         })
     })
@@ -29,7 +35,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             semantics: 'mutref',
             name: 'foo',
-            type: 'Type',
+            valueSet: { typeName: 'Type' },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: 1n } },
@@ -44,7 +50,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             semantics: 'ref',
             name: 'foo',
-            type: 'Type',
+            valueSet: { typeName: 'Type' },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: 1n } },
@@ -59,7 +65,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             semantics: 'const',
             name: 'foo',
-            type: undefined,
+            valueSet: undefined,
             initialValue: { value: 1n },
         })
     })

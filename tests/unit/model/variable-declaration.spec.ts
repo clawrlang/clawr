@@ -1,6 +1,7 @@
 import { describe, expect, it, test } from 'bun:test'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
+import { IntegerValueSet, RCTypeValueSet } from '../../../src/model/value-set'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableReference } from '../../../src/model/variable-reference'
@@ -13,7 +14,9 @@ describe('VariableDeclaration', () => {
         const decl = VariableDeclaration.create({
             semantics: 'const',
             name: 'foo',
-            type: 'integer',
+            valueSet: IntegerValueSet.create({
+                span: someCodeSpan,
+            }),
             initialValue: IntegerLiteral.create({
                 value: 1n,
                 span: someCodeSpan,
@@ -38,7 +41,7 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 semantics: 'const',
                 name: 'foo',
-                type: undefined,
+                valueSet: undefined,
                 initialValue: IntegerLiteral.create({
                     value: 1n,
                     span: someCodeSpan,
@@ -57,7 +60,7 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 semantics: 'mut',
                 name: 'foo',
-                type: undefined,
+                valueSet: undefined,
                 initialValue: IntegerLiteral.create({
                     value: 1n,
                     span: someCodeSpan,
@@ -87,7 +90,7 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 semantics: 'const',
                 name: 'foo',
-                type: undefined,
+                valueSet: undefined,
                 initialValue: TruthValueLiteral.create({
                     value: 'true',
                     span: someCodeSpan,
@@ -105,7 +108,7 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 semantics: 'mut',
                 name: 'foo',
-                type: undefined,
+                valueSet: undefined,
                 initialValue: TruthValueLiteral.create({
                     value: 'true',
                     span: someCodeSpan,
@@ -178,7 +181,10 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 semantics: 'mut',
                 name: 'foo',
-                type: 'InnerType',
+                valueSet: RCTypeValueSet.create({
+                    typeName: 'InnerType',
+                    span: someCodeSpan,
+                }),
                 initialValue: FieldReference.create({
                     object: VariableReference.create({
                         name: 'bar',
@@ -238,7 +244,10 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 semantics: 'mut',
                 name: 'foo',
-                type: 'MyType',
+                valueSet: RCTypeValueSet.create({
+                    typeName: 'MyType',
+                    span: someCodeSpan,
+                }),
                 initialValue: VariableReference.create({
                     name: 'bar',
                     span: someCodeSpan,
@@ -262,7 +271,9 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 semantics: 'const',
                 name: 'x',
-                type: 'integer',
+                valueSet: IntegerValueSet.create({
+                    span: someCodeSpan,
+                }),
                 initialValue: IntegerLiteral.create({
                     value: 42n,
                     span: someCodeSpan,
@@ -309,7 +320,10 @@ describe('VariableDeclaration', () => {
             const declaration = VariableDeclaration.create({
                 semantics: 'const',
                 name: 'target',
-                type: 'OuterType',
+                valueSet: RCTypeValueSet.create({
+                    typeName: 'OuterType',
+                    span: someCodeSpan,
+                }),
                 initialValue: DataLiteral.create({
                     fields: [
                         {
@@ -406,7 +420,10 @@ describe('VariableDeclaration', () => {
                 const declaration = VariableDeclaration.create({
                     semantics: targetSemantics[0],
                     name: 'target',
-                    type: 'MyType',
+                    valueSet: RCTypeValueSet.create({
+                        typeName: 'MyType',
+                        span: someCodeSpan,
+                    }),
                     initialValue: VariableReference.create({
                         name: 'value',
                         span: {
@@ -449,7 +466,10 @@ describe('VariableDeclaration', () => {
             const declaration = VariableDeclaration.create({
                 semantics: 'const',
                 name: 'target',
-                type: 'MyType',
+                valueSet: RCTypeValueSet.create({
+                    typeName: 'MyType',
+                    span: someCodeSpan,
+                }),
                 initialValue: DataLiteral.create({
                     fields: [
                         {

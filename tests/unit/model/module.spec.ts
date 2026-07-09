@@ -5,6 +5,7 @@ import { CallFunc } from '../../../src/model/call-func'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
+import { IntegerValueSet } from '../../../src/model/value-set'
 
 describe('Module', () => {
     it('outputs the main block in CIR', () => {
@@ -82,7 +83,9 @@ describe('Module', () => {
                 VariableDeclaration.create({
                     semantics: 'const',
                     name: 'x',
-                    type: 'integer',
+                    valueSet: IntegerValueSet.create({
+                        span: someCodeSpan,
+                    }),
                     initialValue: IntegerLiteral.create({
                         value: 42n,
                         span: someCodeSpan,

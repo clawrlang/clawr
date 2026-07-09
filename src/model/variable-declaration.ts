@@ -3,6 +3,7 @@ import { Statement, Expression, Context, Declaration } from '.'
 import { convertSemantics } from './variable-reference'
 import { Scope } from './scope'
 import { ErrorReporter } from '../diagnostics'
+import { ValueSet } from './value-set'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -11,22 +12,22 @@ export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private semantics: VariableSemantics,
         private name: string,
-        private type: string | undefined,
+        private valueSet: ValueSet | undefined,
         private initialValue: Expression,
     ) {}
 
     static create({
         semantics,
         name,
-        type,
+        valueSet,
         initialValue,
     }: {
         semantics: VariableSemantics
         name: string
-        type?: string
+        valueSet?: ValueSet
         initialValue: Expression
     }): VariableDeclaration {
-        return new VariableDeclaration(semantics, name, type, initialValue)
+        return new VariableDeclaration(semantics, name, valueSet, initialValue)
     }
 
     emitDeclaration(context: Context): void {
@@ -134,20 +135,10 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private buildValueSet(context: Context): cir.ValueSet {
-        switch (this.type) {
-            case undefined:
-                return this.initialValue.valueSet(context)
-            case 'integer':
-            case 'truthvalue':
-            case 'string':
-                return { type: this.type }
-            default:
-                return {
-                    type: 'rc-type',
-                    typeName: this.type,
-                    semantics: convertSemantics(this.semantics),
-                }
-        }
+        if (!this.valueSet) return this.initialValue.valueSet(context)
+        return this.valueSet.toCIR({
+            semantics: convertSemantics(this.semantics),
+        })
     }
 }
 

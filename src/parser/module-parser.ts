@@ -13,9 +13,7 @@ export class ModuleParser {
     private variableDeclarationParser: VariableDeclarationParser
 
     private constructor(private context: Context) {
-        this.blockParser = BlockParser.create({
-            errorReporter: context.errorReporter,
-        })
+        this.blockParser = BlockParser.create(context)
         this.dataDeclarationParser = DataDeclarationParser.create(context)
         this.variableDeclarationParser =
             VariableDeclarationParser.create(context)

@@ -1,15 +1,14 @@
 import { Context } from '.'
-import { ErrorReporter } from '../diagnostics'
 import { TokenStream } from '../lexer'
 import { ReturnStatement } from '../model/return-statement'
 import { ExpressionParser } from './expression-parser'
 import { StatementParser } from './statement-parser'
 
 export class ReturnStatementParser implements StatementParser<ReturnStatement> {
-    private constructor(private errorReporter: ErrorReporter) {}
+    private constructor(private context: Context) {}
 
     static create(context: Context): ReturnStatementParser {
-        return new ReturnStatementParser(context.errorReporter)
+        return new ReturnStatementParser(context)
     }
 
     isNext(stream: TokenStream): boolean {
@@ -24,8 +23,6 @@ export class ReturnStatementParser implements StatementParser<ReturnStatement> {
     }
 
     private parseExpression(stream: TokenStream) {
-        return ExpressionParser.create({
-            errorReporter: this.errorReporter,
-        }).parse(stream)
+        return ExpressionParser.create(this.context).parse(stream)
     }
 }

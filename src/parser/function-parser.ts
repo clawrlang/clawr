@@ -1,4 +1,4 @@
-import { TestErrorReporter } from '../../tests/util'
+import { Context } from '.'
 import { TokenStream, Token } from '../lexer'
 import { FunctionDeclaration, Parameter } from '../model/function-declaration'
 import { ReturnStatement } from '../model/return-statement'
@@ -10,16 +10,12 @@ import { ValueSetParser } from './value-set-parser'
 export class FunctionParser {
     private readonly valueSetParser: ValueSetParser
 
-    private constructor(private errorReporter: TestErrorReporter) {
-        this.valueSetParser = ValueSetParser.create({ errorReporter })
+    private constructor(private context: Context) {
+        this.valueSetParser = ValueSetParser.create(context)
     }
 
-    static create({
-        errorReporter,
-    }: {
-        errorReporter: TestErrorReporter
-    }): FunctionParser {
-        return new FunctionParser(errorReporter)
+    static create(context: Context): FunctionParser {
+        return new FunctionParser(context)
     }
 
     parse(stream: TokenStream): FunctionDeclaration {
@@ -37,9 +33,9 @@ export class FunctionParser {
 
         if (stream.isNext('PUNCTUATION', '=>')) {
             stream.expect('PUNCTUATION', '=>')
-            const returnExpression = ExpressionParser.create({
-                errorReporter: this.errorReporter,
-            }).parse(stream)
+            const returnExpression = ExpressionParser.create(
+                this.context,
+            ).parse(stream)
 
             return FunctionDeclaration.create({
                 name,
@@ -49,9 +45,7 @@ export class FunctionParser {
             })
         }
 
-        const body = BlockParser.create({
-            errorReporter: this.errorReporter,
-        }).parse(stream)
+        const body = BlockParser.create(this.context).parse(stream)
 
         return FunctionDeclaration.create({
             name,

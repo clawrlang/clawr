@@ -8,8 +8,8 @@ export class IntegerLiteral implements Expression {
     }
 
     private constructor(
-        private value: bigint,
-        public span: SourceCodeSpan,
+        public readonly value: bigint,
+        public readonly span: SourceCodeSpan,
     ) {}
 
     static create({

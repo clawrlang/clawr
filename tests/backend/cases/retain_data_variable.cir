@@ -1,5 +1,5 @@
 {
-    "$schema": "cir.schema.json",
+    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
     "declarations": [
         {
             "kind": "DATA_DECL",

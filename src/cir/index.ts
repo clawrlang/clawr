@@ -1,5 +1,5 @@
 export type ClawrModule = {
-    $schema: 'http://clawr.lang/schema/cir/DRAFT-0' | 'cir.schema.json'
+    $schema: 'http://clawr.lang/schema/cir/DRAFT-0'
     startBlock?: Statement[]
     declarations?: Declaration[]
 }

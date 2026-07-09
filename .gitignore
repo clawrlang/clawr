@@ -3,4 +3,3 @@ node_modules/
 dist/
 .out/
 .typia-temp/
-tests/backend/cases/cir.schema.json

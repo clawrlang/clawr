@@ -2,5 +2,12 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "files.associations": { "*.cir": "json" },
+  "json.schemas": [
+    {
+      "schema": true,
+      "fileMatch": ["dist/cir.schema.json"],
+      "url": "http://clawr.lang/schema/cir/DRAFT-0"
+    }
+  ],
   "C_Cpp.default.includePath": ["src/runtime/include"]
 }

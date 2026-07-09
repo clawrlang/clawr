@@ -43,9 +43,7 @@ async function main() {
         __dirname,
         '..',
         '..',
-        'tests',
-        'backend',
-        'cases',
+        'dist',
         'cir.schema.json',
     )
 

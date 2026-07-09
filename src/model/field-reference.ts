@@ -55,24 +55,16 @@ export class FieldReference implements Expression {
     }
 
     valueSet(context: Context): cir.ValueSet {
+        const runtimeFieldValueSet = getRcTypeFieldValueSet(
+            this.object.valueSet(context),
+            this.field,
+        )
+        if (runtimeFieldValueSet) return runtimeFieldValueSet
+
         const field = this.getFieldFromContext(context)
-        switch (field.type) {
-            case 'integer':
-            case 'truthvalue':
-            case 'string':
-                return { type: field.type }
-            default:
-                return (
-                    getRcTypeFieldValueSet(
-                        this.object.valueSet(context),
-                        this.field,
-                    ) ?? {
-                        type: 'rc-type',
-                        typeName: field.type,
-                        semantics: convertSemantics(field.semantics),
-                    }
-                )
-        }
+        return field.valueSet.toCIR({
+            semantics: convertSemantics(field.semantics),
+        })
     }
 
     updateCurrentValue(context: Context, newValueSet: cir.ValueSet) {

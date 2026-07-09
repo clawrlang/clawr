@@ -2,6 +2,7 @@ import { describe, expect, it, test } from 'bun:test'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
+import { IntegerValueSet } from '../../../src/model/value-set'
 
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
@@ -82,7 +83,9 @@ describe('Variable Reference', () => {
                 fields: [
                     {
                         name: 'myField',
-                        type: 'integer',
+                        valueSet: IntegerValueSet.create({
+                            span: someCodeSpan,
+                        }),
                         semantics: 'mut',
                     },
                 ],

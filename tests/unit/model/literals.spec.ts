@@ -5,6 +5,7 @@ import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
+import { IntegerValueSet } from '../../../src/model/value-set'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {
@@ -53,12 +54,16 @@ describe('Literals', () => {
                     fields: [
                         {
                             name: 'x',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                         {
                             name: 'y',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],

@@ -1,13 +1,15 @@
 import { Context } from '.'
 import { TokenStream } from '../lexer'
 import { DataDeclaration } from '../model/data-declaration'
+import { ValueSet } from '../model/value-set'
 import {
     VARIABLE_SEMANTICS,
     VariableSemantics,
 } from '../model/variable-declaration'
+import { ValueSetParser } from './value-set-parser'
 
 export class DataDeclarationParser {
-    private constructor(_: Context) {}
+    private constructor(private context: Context) {}
 
     static create(context: Context): DataDeclarationParser {
         return new DataDeclarationParser(context)
@@ -20,7 +22,7 @@ export class DataDeclarationParser {
         stream.expect('PUNCTUATION', '{')
         const fields: {
             name: string
-            type: string
+            valueSet: ValueSet
             semantics: VariableSemantics
         }[] = []
         while (!stream.isNext('PUNCTUATION', '}')) {
@@ -28,9 +30,12 @@ export class DataDeclarationParser {
             const fieldNameToken = stream.expect('IDENTIFIER')
             const fieldName = fieldNameToken.identifier
             stream.expect('PUNCTUATION', ':')
-            const fieldTypeToken = stream.expect('IDENTIFIER')
-            const fieldType = fieldTypeToken.identifier
-            fields.push({ name: fieldName, type: fieldType, semantics })
+            const valueSet = ValueSetParser.create(this.context).parse(stream)
+            fields.push({
+                name: fieldName,
+                valueSet,
+                semantics,
+            })
         }
         stream.expect('PUNCTUATION', '}')
         return DataDeclaration.create({ name, fields })

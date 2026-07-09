@@ -3,6 +3,7 @@ import { FieldReference } from '../../../src/model/field-reference'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
+import { IntegerValueSet, RCTypeValueSet } from '../../../src/model/value-set'
 
 describe('Field Reference', () => {
     it('infers its type from the context', () => {
@@ -25,7 +26,13 @@ describe('Field Reference', () => {
             DataDeclaration.create({
                 name: 'MyType',
                 fields: [
-                    { name: 'myField', type: 'integer', semantics: 'mut' },
+                    {
+                        name: 'myField',
+                        valueSet: IntegerValueSet.create({
+                            span: someCodeSpan,
+                        }),
+                        semantics: 'mut',
+                    },
                 ],
             }),
         )
@@ -62,7 +69,16 @@ describe('Field Reference', () => {
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
-                fields: [{ name: 'myField', type: 'MyType', semantics: 'mut' }],
+                fields: [
+                    {
+                        name: 'myField',
+                        valueSet: RCTypeValueSet.create({
+                            typeName: 'MyType',
+                            span: someCodeSpan,
+                        }),
+                        semantics: 'mut',
+                    },
+                ],
             }),
         )
 
@@ -110,7 +126,10 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                type: 'MyType',
+                                valueSet: RCTypeValueSet.create({
+                                    typeName: 'MyType',
+                                    span: someCodeSpan,
+                                }),
                                 semantics,
                             },
                         ],
@@ -155,7 +174,13 @@ describe('Field Reference', () => {
             DataDeclaration.create({
                 name: 'MyType',
                 fields: [
-                    { name: 'myField', type: 'integer', semantics: 'mut' },
+                    {
+                        name: 'myField',
+                        valueSet: IntegerValueSet.create({
+                            span: someCodeSpan,
+                        }),
+                        semantics: 'mut',
+                    },
                 ],
             }),
         )
@@ -206,7 +231,9 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                type: 'integer',
+                                valueSet: IntegerValueSet.create({
+                                    span: someCodeSpan,
+                                }),
                                 semantics: 'mut',
                             },
                         ],
@@ -273,7 +300,9 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                type: 'integer',
+                                valueSet: IntegerValueSet.create({
+                                    span: someCodeSpan,
+                                }),
                                 semantics: semantics[0],
                             },
                         ],
@@ -316,7 +345,9 @@ describe('Field Reference', () => {
                     fields: [
                         {
                             name: 'myField',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -356,7 +387,13 @@ describe('Field Reference', () => {
                 DataDeclaration.create({
                     name: 'MyType',
                     fields: [
-                        { name: 'myField', type: 'integer', semantics: 'mut' },
+                        {
+                            name: 'myField',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
+                            semantics: 'mut',
+                        },
                     ],
                 }),
             )

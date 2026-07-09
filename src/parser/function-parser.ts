@@ -1,13 +1,18 @@
 import { TestErrorReporter } from '../../tests/util'
-import { ValueSet } from '../cir'
 import { TokenStream, Token } from '../lexer'
 import { FunctionDeclaration, Parameter } from '../model/function-declaration'
 import { ReturnStatement } from '../model/return-statement'
+import { ValueSet } from '../model/value-set'
 import { BlockParser } from './block-parser'
 import { ExpressionParser } from './expression-parser'
+import { ValueSetParser } from './value-set-parser'
 
 export class FunctionParser {
-    private constructor(private errorReporter: TestErrorReporter) {}
+    private readonly valueSetParser: ValueSetParser
+
+    private constructor(private errorReporter: TestErrorReporter) {
+        this.valueSetParser = ValueSetParser.create({ errorReporter })
+    }
 
     static create({
         errorReporter,
@@ -24,11 +29,10 @@ export class FunctionParser {
 
         const parameters = this.parseParameters(stream)
 
-        let returnValueSet: ValueSet | undefined = undefined
+        let result: ValueSet | undefined = undefined
         if (stream.isNext('OPERATOR', '->')) {
             stream.expect('OPERATOR', '->')
-            stream.expect('IDENTIFIER')
-            returnValueSet = { type: 'integer' }
+            result = this.valueSetParser.parse(stream)
         }
 
         if (stream.isNext('PUNCTUATION', '=>')) {
@@ -40,7 +44,7 @@ export class FunctionParser {
             return FunctionDeclaration.create({
                 name,
                 parameters,
-                returnValueSet: undefined,
+                result,
                 body: [ReturnStatement.create(returnExpression)],
             })
         }
@@ -52,7 +56,7 @@ export class FunctionParser {
         return FunctionDeclaration.create({
             name,
             parameters,
-            returnValueSet,
+            result,
             body,
         })
     }
@@ -69,8 +73,6 @@ export class FunctionParser {
             else varNameToken = labelToken
 
             stream.expect('PUNCTUATION', ':')
-            const typeToken = stream.expect('IDENTIFIER')
-            const type = typeToken.identifier
 
             parameters.push(
                 Parameter.create({
@@ -79,7 +81,7 @@ export class FunctionParser {
                             ? undefined
                             : labelToken.identifier,
                     varName: varNameToken.identifier,
-                    type,
+                    valueSet: this.valueSetParser.parse(stream),
                 }),
             )
 

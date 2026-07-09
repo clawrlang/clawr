@@ -1,26 +1,26 @@
 import { Statement } from '.'
-import { ValueSet } from '../cir'
+import { ValueSet } from './value-set'
 
 export class FunctionDeclaration {
     private constructor(
         public name: string,
         public parameters: Parameter[],
-        public returnValueSet: ValueSet | undefined,
+        public result: ValueSet | undefined,
         public body: Statement[],
     ) {}
 
     static create({
         name,
         parameters,
-        returnValueSet,
+        result,
         body,
     }: {
         name: string
         parameters: Parameter[]
-        returnValueSet: ValueSet | undefined
+        result: ValueSet | undefined
         body: Statement[]
     }): FunctionDeclaration {
-        return new FunctionDeclaration(name, parameters, returnValueSet, body)
+        return new FunctionDeclaration(name, parameters, result, body)
     }
 }
 
@@ -28,18 +28,18 @@ export class Parameter {
     private constructor(
         public label: string | undefined,
         public varName: string,
-        public type: string,
+        public valueSet: ValueSet,
     ) {}
 
     static create({
         label,
         varName,
-        type,
+        valueSet,
     }: {
         label: string | undefined
         varName: string
-        type: string
+        valueSet: ValueSet
     }): Parameter {
-        return new Parameter(label, varName, type)
+        return new Parameter(label, varName, valueSet)
     }
 }

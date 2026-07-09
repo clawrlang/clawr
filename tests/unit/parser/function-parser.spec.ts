@@ -11,7 +11,7 @@ describe('Function Parser', () => {
         expect(result).toMatchObject({
             name: 'myFunction',
             parameters: [],
-            returnValueSet: undefined,
+            result: undefined,
             body: [],
         })
     })
@@ -23,10 +23,18 @@ describe('Function Parser', () => {
         expect(result).toMatchObject({
             name: 'myFunction',
             parameters: [
-                { varName: 'x', type: 'integer', label: 'x' },
-                { varName: 'y', type: 'truthvalue', label: 'y' },
+                {
+                    varName: 'x',
+                    valueSet: { max: undefined, min: undefined },
+                    label: 'x',
+                },
+                {
+                    varName: 'y',
+                    valueSet: { values: ['false', 'ambiguous', 'true'] },
+                    label: 'y',
+                },
             ],
-            returnValueSet: undefined,
+            result: undefined,
             body: [],
         })
     })
@@ -38,10 +46,18 @@ describe('Function Parser', () => {
         expect(result).toMatchObject({
             name: 'myFunction',
             parameters: [
-                { varName: 'x', type: 'integer', label: undefined },
-                { varName: 'y', type: 'truthvalue', label: 'label' },
+                {
+                    varName: 'x',
+                    valueSet: { max: undefined, min: undefined },
+                    label: undefined,
+                },
+                {
+                    varName: 'y',
+                    valueSet: { values: ['false', 'ambiguous', 'true'] },
+                    label: 'label',
+                },
             ],
-            returnValueSet: undefined,
+            result: undefined,
             body: [],
         })
     })
@@ -53,7 +69,7 @@ describe('Function Parser', () => {
         expect(result).toMatchObject({
             name: 'myFunction',
             parameters: [],
-            returnValueSet: { type: 'integer' },
+            result: { max: undefined, min: undefined },
             body: [{ value: { value: 42n } }],
         })
     })
@@ -65,7 +81,7 @@ describe('Function Parser', () => {
         expect(result).toMatchObject({
             name: 'myFunction',
             parameters: [],
-            returnValueSet: undefined,
+            result: undefined,
             body: [{ value: { value: 42n } }],
         })
     })

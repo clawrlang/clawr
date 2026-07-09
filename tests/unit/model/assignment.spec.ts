@@ -6,6 +6,7 @@ import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { FieldReference } from '../../../src/model/field-reference'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
+import { IntegerValueSet, RCTypeValueSet } from '../../../src/model/value-set'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -43,7 +44,9 @@ describe('Assignment', () => {
                     fields: [
                         {
                             name: 'innerField',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -56,7 +59,10 @@ describe('Assignment', () => {
                     fields: [
                         {
                             name: 'field',
-                            type: 'InnerType',
+                            valueSet: RCTypeValueSet.create({
+                                typeName: 'InnerType',
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -153,7 +159,9 @@ describe('Assignment', () => {
                     fields: [
                         {
                             name: 'field',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -244,7 +252,9 @@ describe('Assignment', () => {
                 fields: [
                     {
                         name: 'field',
-                        type: 'integer',
+                        valueSet: IntegerValueSet.create({
+                            span: someCodeSpan,
+                        }),
                         semantics: 'mut',
                     },
                 ],
@@ -333,7 +343,9 @@ describe('Assignment', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                type: 'integer',
+                                valueSet: IntegerValueSet.create({
+                                    span: someCodeSpan,
+                                }),
                                 semantics: 'mut',
                             },
                         ],
@@ -403,7 +415,13 @@ describe('Assignment', () => {
             DataDeclaration.create({
                 name: 'MyType',
                 fields: [
-                    { name: 'myField', type: 'integer', semantics: 'mut' },
+                    {
+                        name: 'myField',
+                        valueSet: IntegerValueSet.create({
+                            span: someCodeSpan,
+                        }),
+                        semantics: 'mut',
+                    },
                 ],
             }),
         )
@@ -472,7 +490,9 @@ describe('Assignment', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                type: 'integer',
+                                valueSet: IntegerValueSet.create({
+                                    span: someCodeSpan,
+                                }),
                                 semantics: 'mut',
                             },
                         ],
@@ -544,7 +564,9 @@ describe('Assignment', () => {
                     fields: [
                         {
                             name: 'myField',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -633,12 +655,16 @@ describe('Assignment', () => {
                     fields: [
                         {
                             name: 'innerField1',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                         {
                             name: 'innerField2',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -651,12 +677,18 @@ describe('Assignment', () => {
                     fields: [
                         {
                             name: 'field1',
-                            type: 'InnerType',
+                            valueSet: RCTypeValueSet.create({
+                                typeName: 'InnerType',
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                         {
                             name: 'field2',
-                            type: 'InnerType',
+                            valueSet: RCTypeValueSet.create({
+                                typeName: 'InnerType',
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],

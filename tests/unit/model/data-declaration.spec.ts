@@ -1,14 +1,23 @@
 import { describe, expect, it } from 'bun:test'
-import { newSemanticContext } from '../../util'
+import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
+import { IntegerValueSet, TruthValueSet } from '../../../src/model/value-set'
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {
         const dataDecl = DataDeclaration.create({
             name: 'MyData',
             fields: [
-                { name: 'field1', type: 'integer', semantics: 'mut' },
-                { name: 'field2', type: 'truthvalue', semantics: 'mut' },
+                {
+                    name: 'field1',
+                    valueSet: IntegerValueSet.create({ span: someCodeSpan }),
+                    semantics: 'mut',
+                },
+                {
+                    name: 'field2',
+                    valueSet: TruthValueSet.create({ span: someCodeSpan }),
+                    semantics: 'mut',
+                },
             ],
         })
         const context = newSemanticContext()
@@ -18,8 +27,21 @@ describe('DataDeclaration', () => {
                 kind: 'DATA_DECL',
                 name: 'MyData',
                 fields: [
-                    { name: 'field1', valueSet: { type: 'integer' } },
-                    { name: 'field2', valueSet: { type: 'truthvalue' } },
+                    {
+                        name: 'field1',
+                        valueSet: {
+                            type: 'integer',
+                            min: undefined,
+                            max: undefined,
+                        },
+                    },
+                    {
+                        name: 'field2',
+                        valueSet: {
+                            type: 'truthvalue',
+                            values: ['false', 'ambiguous', 'true'],
+                        },
+                    },
                 ],
             },
         ])

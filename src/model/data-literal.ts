@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { DataDeclaration, buildValueSet } from './data-declaration'
+import { DataDeclaration } from './data-declaration'
 
 export class DataLiteral implements Expression {
     private constructor(
@@ -26,19 +26,10 @@ export class DataLiteral implements Expression {
     valueSet(context: Context & { type: string }): cir.ValueSet {
         if (!context.type)
             throw new Error('DataLiteral.valueSet: context.type is required')
-        switch (context.type) {
-            case 'integer':
-                return { type: 'integer' }
-            case 'truthvalue':
-                return { type: 'truthvalue' }
-            case 'string':
-                return { type: 'string' }
-            default:
-                return {
-                    type: 'rc-type',
-                    typeName: context.type,
-                    semantics: 'UNIQUE',
-                }
+        return {
+            type: 'rc-type',
+            typeName: context.type,
+            semantics: 'UNIQUE',
         }
     }
 
@@ -76,8 +67,9 @@ export class DataLiteral implements Expression {
                     )
                 const nestedContext = {
                     ...context,
-                    type: fieldDeclaration.type,
-                    targetValueSet: buildValueSet(fieldDeclaration),
+                    targetValueSet: fieldDeclaration.valueSet.toCIR({
+                        semantics: 'COW',
+                    }),
                 }
                 return {
                     name: field.name,

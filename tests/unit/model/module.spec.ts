@@ -5,7 +5,7 @@ import { CallFunc } from '../../../src/model/call-func'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
-import { IntegerValueSet } from '../../../src/model/value-set'
+import { IntegerValueSet, TruthValueSet } from '../../../src/model/value-set'
 
 describe('Module', () => {
     it('outputs the main block in CIR', () => {
@@ -55,10 +55,18 @@ describe('Module', () => {
                 DataDeclaration.create({
                     name: 'MyData',
                     fields: [
-                        { name: 'field1', type: 'integer', semantics: 'mut' },
+                        {
+                            name: 'field1',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
+                            semantics: 'mut',
+                        },
                         {
                             name: 'field2',
-                            type: 'truthvalue',
+                            valueSet: TruthValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -109,10 +117,18 @@ describe('Module', () => {
                 DataDeclaration.create({
                     name: 'MyData',
                     fields: [
-                        { name: 'field1', type: 'integer', semantics: 'mut' },
+                        {
+                            name: 'field1',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
+                            semantics: 'mut',
+                        },
                         {
                             name: 'field2',
-                            type: 'truthvalue',
+                            valueSet: TruthValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -121,12 +137,19 @@ describe('Module', () => {
         })
         const context = newSemanticContext()
         module.toCIR(context)
-        expect(context.scope.dataDeclaration('MyData')).toMatchObject({
+        const myDataDeclaration = context.scope.dataDeclaration('MyData')
+        expect(myDataDeclaration).toMatchObject({
             name: 'MyData',
             fields: [
-                { name: 'field1', type: 'integer' },
-                { name: 'field2', type: 'truthvalue' },
+                { name: 'field1', semantics: 'mut' },
+                { name: 'field2', semantics: 'mut' },
             ],
         })
+        expect(myDataDeclaration?.fields[0].valueSet).toBeInstanceOf(
+            IntegerValueSet,
+        )
+        expect(myDataDeclaration?.fields[1].valueSet).toBeInstanceOf(
+            TruthValueSet,
+        )
     })
 })

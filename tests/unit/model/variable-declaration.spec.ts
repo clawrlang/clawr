@@ -1,7 +1,11 @@
 import { describe, expect, it, test } from 'bun:test'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
-import { IntegerValueSet, RCTypeValueSet } from '../../../src/model/value-set'
+import {
+    IntegerValueSet,
+    RCTypeValueSet,
+    TruthValueSet,
+} from '../../../src/model/value-set'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableReference } from '../../../src/model/variable-reference'
@@ -74,7 +78,9 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'field',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -122,7 +128,9 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'field',
-                            type: 'truthvalue',
+                            valueSet: TruthValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -145,7 +153,9 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'innerField',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -158,7 +168,10 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'field',
-                            type: 'InnerType',
+                            valueSet: RCTypeValueSet.create({
+                                typeName: 'InnerType',
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -221,7 +234,9 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'field',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -297,7 +312,9 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'innerField',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -310,7 +327,10 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'field',
-                            type: 'InnerType',
+                            valueSet: RCTypeValueSet.create({
+                                typeName: 'InnerType',
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],
@@ -397,7 +417,9 @@ describe('VariableDeclaration', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                type: 'integer',
+                                valueSet: IntegerValueSet.create({
+                                    span: someCodeSpan,
+                                }),
                                 semantics: 'mut',
                             },
                         ],
@@ -456,7 +478,9 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'myField',
-                            type: 'integer',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
                             semantics: 'mut',
                         },
                     ],

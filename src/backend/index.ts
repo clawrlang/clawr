@@ -103,7 +103,7 @@ export function lowerStmt(stmt: cir.Statement): string {
             return `releaseRC(${lowerExpr(stmt.object)});`
         }
         case 'RETURN': {
-            return `return ${lowerExpr(stmt.value)};`
+            return stmt.value ? `return ${lowerExpr(stmt.value)};` : 'return;'
         }
         default: {
             throw new Error(`Unknown statement kind: ${(stmt as any).kind}`)

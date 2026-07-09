@@ -53,7 +53,7 @@ export type Statement =
       }
     | {
           kind: 'RETURN'
-          value: Expression
+          value?: Expression
       }
     | Extract<Declaration, { kind: 'VARIABLE_DECL' }>
     | {

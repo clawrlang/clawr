@@ -1,5 +1,5 @@
 import { Statement, Expression } from '.'
-import { Context } from '../parser'
+import { Context } from '.'
 
 export class ReturnStatement implements Statement {
     private constructor(public value: Expression | undefined) {}
@@ -9,6 +9,9 @@ export class ReturnStatement implements Statement {
     }
 
     emitStatement(context: Context): void {
-        throw new Error('Method not implemented.')
+        context.scope.emitted.push({
+            kind: 'RETURN',
+            value: this.value?.toCIRExpression(context),
+        })
     }
 }

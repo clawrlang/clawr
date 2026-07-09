@@ -41,17 +41,20 @@ export class FunctionParser {
                 name,
                 parameters,
                 result,
-                body: [ReturnStatement.create(returnExpression)],
+                implementation: {
+                    kind: 'implicit-return',
+                    expression: returnExpression,
+                },
             })
         }
 
-        const body = BlockParser.create(this.context).parse(stream)
+        const statements = BlockParser.create(this.context).parse(stream)
 
         return FunctionDeclaration.create({
             name,
             parameters,
             result,
-            body,
+            implementation: { kind: 'body', statements },
         })
     }
 

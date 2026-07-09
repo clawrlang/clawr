@@ -1,27 +1,32 @@
 import * as cir from '../cir'
-import { Context, Declaration, Statement } from '.'
+import { Context, Declaration, Expression, Statement } from '.'
 import { ValueSet } from './value-set'
+import { ReturnStatement } from './return-statement'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
         public name: string,
         public parameters: Parameter[],
         public result: ValueSet | undefined,
-        public body: Statement[],
+        public implementation:
+            | { kind: 'implicit-return'; expression: Expression }
+            | { kind: 'body'; statements: Statement[] },
     ) {}
 
     static create({
         name,
         parameters,
         result,
-        body,
+        implementation,
     }: {
         name: string
         parameters: Parameter[]
         result: ValueSet | undefined
-        body: Statement[]
+        implementation:
+            | { kind: 'implicit-return'; expression: Expression }
+            | { kind: 'body'; statements: Statement[] }
     }): FunctionDeclaration {
-        return new FunctionDeclaration(name, parameters, result, body)
+        return new FunctionDeclaration(name, parameters, result, implementation)
     }
 
     emitDeclaration(context: Context) {
@@ -36,17 +41,25 @@ export class FunctionDeclaration implements Declaration {
             }),
         }))
 
-        const returnValueSet = this.result?.toCIR({
-            ...context,
-            semantics: 'COW',
-        })
-
         const bodyContext = {
             ...context,
             scope: context.scope.createChildScope(),
         }
 
-        for (const stmt of this.body) stmt.emitStatement(bodyContext)
+        const body =
+            this.implementation.kind === 'body'
+                ? this.implementation.statements
+                : [ReturnStatement.create(this.implementation.expression)]
+
+        for (const stmt of body) stmt.emitStatement(bodyContext)
+
+        let returnValueSet = this.result?.toCIR({
+            ...context,
+            semantics: 'COW',
+        })
+        if (!returnValueSet && this.implementation.kind === 'implicit-return')
+            returnValueSet =
+                this.implementation.expression.valueSet(bodyContext)
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',

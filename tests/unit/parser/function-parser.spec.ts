@@ -12,7 +12,7 @@ describe('Function Parser', () => {
             name: 'myFunction',
             parameters: [],
             result: undefined,
-            body: [],
+            implementation: { kind: 'body', statements: [] },
         })
     })
 
@@ -35,7 +35,7 @@ describe('Function Parser', () => {
                 },
             ],
             result: undefined,
-            body: [],
+            implementation: { kind: 'body', statements: [] },
         })
     })
 
@@ -58,7 +58,7 @@ describe('Function Parser', () => {
                 },
             ],
             result: undefined,
-            body: [],
+            implementation: { kind: 'body', statements: [] },
         })
     })
 
@@ -70,7 +70,10 @@ describe('Function Parser', () => {
             name: 'myFunction',
             parameters: [],
             result: { max: undefined, min: undefined },
-            body: [{ value: { value: 42n } }],
+            implementation: {
+                kind: 'body',
+                statements: [{ value: { value: 42n } }],
+            },
         })
     })
 
@@ -82,7 +85,10 @@ describe('Function Parser', () => {
             name: 'myFunction',
             parameters: [],
             result: undefined,
-            body: [{ value: { value: 42n } }],
+            implementation: {
+                kind: 'implicit-return',
+                expression: { value: 42n },
+            },
         })
     })
 })

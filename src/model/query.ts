@@ -64,7 +64,7 @@ export class Query implements Expression {
 
     toCIRExpression(context: Context): cir.Expression {
         return {
-            kind: 'CALL_FUNC',
+            kind: 'QUERY',
             name: this.name.toCIR(),
             arguments: this.arguments.map((arg) =>
                 arg.toCIRExpression(context),

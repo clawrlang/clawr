@@ -83,7 +83,7 @@ function lowerType(valueSet: cir.ValueSet): string {
 
 export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
-        case 'CALL_FUNC': {
+        case 'EXEC': {
             const name = mangleFunctionName(stmt.name)
             return `${name}(${stmt.arguments.map(lowerExpr).join(', ')});`
         }
@@ -142,7 +142,7 @@ export function lowerExpr(expr: cir.Expression): string {
         }
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
-        case 'CALL_FUNC': {
+        case 'QUERY': {
             //            return JSON.stringify(expr)
             const name = mangleFunctionName(expr.name)
             return `${name}(${expr.arguments.map(lowerExpr).join(', ')})`

@@ -163,7 +163,7 @@ function snapshotValueSetFromExpression(
         case 'RETAIN':
         case 'VARIABLE_REF':
         case 'FIELD_REF':
-        case 'CALL_FUNC':
+        case 'QUERY':
             return structuredClone(expression.valueSet) as cir.ValueSet
     }
 }

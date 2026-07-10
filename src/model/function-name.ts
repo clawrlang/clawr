@@ -19,7 +19,7 @@ export class FunctionName {
         return new FunctionName(baseName, arity, labels)
     }
 
-    toCIR(): (cir.Statement & { kind: 'CALL_FUNC' })['name'] {
+    toCIR(): (cir.Statement & { kind: 'EXEC' })['name'] {
         return {
             baseName: this.baseName,
             labels: this.labels,

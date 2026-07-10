@@ -21,14 +21,10 @@
 - nested functions/closures
 - Infer variable types/value-sets
 - Infer expression value-sets
-- Split `call_func`
-  - `MESSAGE` (no return value) - statement
-  - `QUERY` (has return value) - expression
-  - Should support both free functions and methods (when `object`/`service` exist)
-  - Convert `QUERY` into a statement by assigning to `_`
+- Convert `QUERY` into a statement by assigning to `_`
   - Make `_` a keyword? handle like `self`/`super`
 - `object`/`service`
-  - Same thing to the backend/CIR - Both are defined by their methods, not their fields
+  - Make `CALL`/`QUERY` support methods
   - Enforce on frontend:
     - `object` may not reach outside itself (its fields)
     - Fields are private (only accessible via `self`)

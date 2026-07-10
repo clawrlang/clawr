@@ -115,7 +115,7 @@
             }
         },
         {
-            "kind": "CALL_FUNC",
+            "kind": "EXEC",
             "name": {
                 "baseName": "printInt64",
                 "labels": []
@@ -142,7 +142,7 @@
             ]
         },
         {
-            "kind": "CALL_FUNC",
+            "kind": "EXEC",
             "name": {
                 "baseName": "printInt64",
                 "labels": []

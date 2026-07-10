@@ -44,7 +44,7 @@ export type Statement =
           >
       }
     | {
-          kind: 'CALL_FUNC'
+          kind: 'EXEC'
           name: {
               baseName: string
               labels: string[]
@@ -102,7 +102,15 @@ export type Expression =
           field: string
           valueSet: ValueSet
       }
-    | (Extract<Statement, { kind: 'CALL_FUNC' }> & { valueSet: ValueSet })
+    | {
+          kind: 'QUERY'
+          name: {
+              baseName: string
+              labels: string[]
+          }
+          arguments: Expression[]
+          valueSet: ValueSet
+      }
 
 export type ValueSet =
     | {

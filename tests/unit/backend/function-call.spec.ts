@@ -6,7 +6,7 @@ describe('Function Calls', () => {
     describe('includes parameter labels in the function name', () => {
         test('expression', () => {
             const expr: Expression = {
-                kind: 'CALL_FUNC',
+                kind: 'QUERY',
                 name: {
                     baseName: 'myFunction',
                     labels: ['param1', 'param2'],
@@ -31,7 +31,7 @@ describe('Function Calls', () => {
 
         test('statement', () => {
             const stmt: Statement = {
-                kind: 'CALL_FUNC',
+                kind: 'EXEC',
                 name: {
                     baseName: 'myFunction',
                     labels: ['param1', 'param2'],
@@ -57,7 +57,7 @@ describe('Function Calls', () => {
     describe('skips parameters without labels', () => {
         test('expression', () => {
             const expr: Expression = {
-                kind: 'CALL_FUNC',
+                kind: 'QUERY',
                 name: {
                     baseName: 'myFunction',
                     labels: ['param1'],
@@ -82,7 +82,7 @@ describe('Function Calls', () => {
 
         test('statement', () => {
             const stmt: Statement = {
-                kind: 'CALL_FUNC',
+                kind: 'EXEC',
                 name: {
                     baseName: 'myFunction',
                     labels: ['param1'],
@@ -108,7 +108,7 @@ describe('Function Calls', () => {
     describe('handles function calls with no parameters', () => {
         test('expression', () => {
             const expr: Expression = {
-                kind: 'CALL_FUNC',
+                kind: 'QUERY',
                 name: {
                     baseName: 'noParamFunction',
                     labels: [],
@@ -122,7 +122,7 @@ describe('Function Calls', () => {
 
         test('statement', () => {
             const stmt: Statement = {
-                kind: 'CALL_FUNC',
+                kind: 'EXEC',
                 name: {
                     baseName: 'noParamFunction',
                     labels: [],

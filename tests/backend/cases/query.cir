@@ -36,14 +36,14 @@
     ],
     "startBlock": [
         {
-            "kind": "CALL_FUNC",
+            "kind": "EXEC",
             "name": {
                 "baseName": "printInt64",
                 "labels": []
             },
             "arguments": [
                 {
-                    "kind": "CALL_FUNC",
+                    "kind": "QUERY",
                     "name": {
                         "baseName": "f",
                         "labels": [

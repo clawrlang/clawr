@@ -34,7 +34,7 @@ describe('Module', () => {
         expect(result).toMatchObject({
             startBlock: [
                 {
-                    kind: 'CALL_FUNC',
+                    kind: 'EXEC',
                     name: {
                         baseName: 'add',
                         labels: [],

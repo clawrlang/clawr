@@ -29,7 +29,7 @@ describe('Query', () => {
             }),
         )
         expect(query.toCIRExpression(context)).toMatchObject({
-            kind: 'CALL_FUNC',
+            kind: 'QUERY',
             name: {
                 baseName: 'foo',
                 labels: [],
@@ -79,7 +79,7 @@ describe('Query', () => {
             }),
         )
         expect(query.toCIRExpression(context)).toMatchObject({
-            kind: 'CALL_FUNC',
+            kind: 'QUERY',
             name: {
                 baseName: 'foo',
                 labels: ['x'],

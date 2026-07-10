@@ -3,6 +3,7 @@
 ## In Progress
 
 - Emit `RELEASE` on scope exit
+- Add parameters to `bodyContext.scope`
 
 ## Later
 
@@ -19,8 +20,6 @@
   - `data` only?
   - Can it also be a `union`/`enum` type?
 - nested functions/closures
-- Infer variable types/value-sets
-- Infer expression value-sets
 - Convert `QUERY` into a statement by assigning to `_`
   - Make `_` a keyword? handle like `self`/`super`
 - `object`/`service`

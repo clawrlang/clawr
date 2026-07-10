@@ -2,7 +2,6 @@
 
 ## In Progress
 
-- Fix the TODO in `Query.valueSet()`
 - Emit `RELEASE` on scope exit
 
 ## Later

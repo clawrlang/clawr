@@ -2,6 +2,8 @@ import { describe, expect, it } from 'bun:test'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { Query } from '../../../src/model/query'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
+import { FunctionDeclaration } from '../../../src/model/function-declaration'
+import { IntegerValueSet } from '../../../src/model/value-set'
 
 describe('Query', () => {
     it('converts to CIR', () => {
@@ -11,6 +13,21 @@ describe('Query', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
+        context.scope.rootScope.declarations.set(
+            'foo()',
+            FunctionDeclaration.create({
+                name: 'foo',
+                parameters: [],
+                result: undefined,
+                implementation: {
+                    kind: 'implicit-return',
+                    expression: IntegerLiteral.create({
+                        value: 42n,
+                        span: someCodeSpan,
+                    }),
+                },
+            }),
+        )
         expect(query.toCIRExpression(context)).toMatchObject({
             kind: 'CALL_FUNC',
             name: {
@@ -36,6 +53,31 @@ describe('Query', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
+        context.scope.rootScope.declarations.set(
+            'foo(x:)',
+            FunctionDeclaration.create({
+                name: 'foo',
+                parameters: [
+                    {
+                        label: 'x',
+                        varName: 'x',
+                        valueSet: IntegerValueSet.create({
+                            min: 0n,
+                            max: 100n,
+                            span: someCodeSpan,
+                        }),
+                    },
+                ],
+                result: undefined,
+                implementation: {
+                    kind: 'implicit-return',
+                    expression: IntegerLiteral.create({
+                        value: 42n,
+                        span: someCodeSpan,
+                    }),
+                },
+            }),
+        )
         expect(query.toCIRExpression(context)).toMatchObject({
             kind: 'CALL_FUNC',
             name: {

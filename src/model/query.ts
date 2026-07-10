@@ -48,7 +48,18 @@ export class Query implements Expression {
                 ...{ semantics: 'UNIQUE' },
             }
         const funcDecl = context.scope.functionDeclaration(name)
-        return funcDecl?.result?.toCIR({ ...context, semantics: 'COW' })!
+        if (!funcDecl)
+            context.errorReporter.reportFatalError(
+                `Function declaration not found: ${name}`,
+                this.span,
+            )
+        const resultSet = funcDecl.resultSet(context)
+        if (!resultSet)
+            context.errorReporter.reportFatalError(
+                `Function declaration has no result set: ${name}`,
+                this.span,
+            )
+        return resultSet
     }
 
     toCIRExpression(context: Context): cir.Expression {

@@ -1,0 +1,5 @@
+func f() => 42
+
+@main {
+    print(f())
+}

@@ -3,6 +3,8 @@ import { Context, Declaration, Expression, Statement } from '.'
 import { ValueSet } from './value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
+import { ErrorReporter } from '../diagnostics'
+import { Scope } from './scope'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -49,10 +51,7 @@ export class FunctionDeclaration implements Declaration {
             }),
         }))
 
-        const bodyContext = {
-            ...context,
-            scope: context.scope.createChildScope(),
-        }
+        const bodyContext = this.bodyContext(context)
 
         const body =
             this.implementation.kind === 'body'
@@ -61,13 +60,7 @@ export class FunctionDeclaration implements Declaration {
 
         for (const stmt of body) stmt.emitStatement(bodyContext)
 
-        let returnValueSet = this.result?.toCIR({
-            ...context,
-            semantics: 'COW',
-        })
-        if (!returnValueSet && this.implementation.kind === 'implicit-return')
-            returnValueSet =
-                this.implementation.expression.valueSet(bodyContext)
+        let returnValueSet = this.resultSet(context)
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -77,6 +70,25 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
+    }
+
+    resultSet(context: Context) {
+        let returnValueSet = this.result?.toCIR({
+            ...context,
+            semantics: 'COW',
+        })
+        if (returnValueSet) return returnValueSet
+        if (this.implementation.kind === 'implicit-return')
+            return this.implementation.expression.valueSet(
+                this.bodyContext(context),
+            )
+    }
+
+    private bodyContext(context: Context): Context {
+        return {
+            ...context,
+            scope: context.scope.createChildScope(),
+        }
     }
 }
 

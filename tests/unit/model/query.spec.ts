@@ -16,7 +16,7 @@ describe('Query', () => {
         context.scope.rootScope.declarations.set(
             'foo()',
             FunctionDeclaration.create({
-                name: 'foo',
+                baseName: 'foo',
                 parameters: [],
                 result: undefined,
                 implementation: {
@@ -56,7 +56,7 @@ describe('Query', () => {
         context.scope.rootScope.declarations.set(
             'foo(x:)',
             FunctionDeclaration.create({
-                name: 'foo',
+                baseName: 'foo',
                 parameters: [
                     {
                         label: 'x',

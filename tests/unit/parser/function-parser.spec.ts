@@ -9,7 +9,7 @@ describe('Function Parser', () => {
 
         const result = parseFunction(code)
         expect(result).toMatchObject({
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [],
             result: undefined,
             implementation: { kind: 'body', statements: [] },
@@ -21,7 +21,7 @@ describe('Function Parser', () => {
 
         const result = parseFunction(code)
         expect(result).toMatchObject({
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [
                 {
                     varName: 'x',
@@ -44,7 +44,7 @@ describe('Function Parser', () => {
 
         const result = parseFunction(code)
         expect(result).toMatchObject({
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [
                 {
                     varName: 'x',
@@ -67,7 +67,7 @@ describe('Function Parser', () => {
 
         const result = parseFunction(code)
         expect(result).toMatchObject({
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [],
             result: { max: undefined, min: undefined },
             implementation: {
@@ -82,7 +82,7 @@ describe('Function Parser', () => {
 
         const result = parseFunction(code)
         expect(result).toMatchObject({
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [],
             result: undefined,
             implementation: {

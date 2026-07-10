@@ -139,7 +139,7 @@ describe('Module Parser', () => {
         expect(result).toMatchObject({
             declarations: [
                 {
-                    name: 'add',
+                    baseName: 'add',
                 },
             ],
         })

@@ -3,7 +3,7 @@
     "declarations": [
         {
             "kind": "FUNCTION_DECL",
-            "name": "f",
+            "baseName": "f",
             "parameters": [
                 {
                     "label": "l",

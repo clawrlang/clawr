@@ -21,7 +21,7 @@ export class FunctionParser {
     parse(stream: TokenStream): FunctionDeclaration {
         stream.expect('KEYWORD', 'func')
         const nameToken = stream.expect('IDENTIFIER')
-        const name = nameToken.identifier
+        const baseName = nameToken.identifier
 
         const parameters = this.parseParameters(stream)
 
@@ -38,7 +38,7 @@ export class FunctionParser {
             ).parse(stream)
 
             return FunctionDeclaration.create({
-                name,
+                baseName,
                 parameters,
                 result,
                 implementation: {
@@ -51,7 +51,7 @@ export class FunctionParser {
         const statements = BlockParser.create(this.context).parse(stream)
 
         return FunctionDeclaration.create({
-            name,
+            baseName,
             parameters,
             result,
             implementation: { kind: 'body', statements },

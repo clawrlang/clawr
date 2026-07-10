@@ -13,7 +13,7 @@ export type Declaration =
       }
     | {
           kind: 'FUNCTION_DECL'
-          name: string
+          baseName: string
           parameters: {
               label?: string
               name: string

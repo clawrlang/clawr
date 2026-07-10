@@ -15,11 +15,12 @@ import { ReturnStatement } from '../../../src/model/return-statement'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
+import { basename } from 'node:path'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
         const funcDecl = FunctionDeclaration.create({
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [
                 Parameter.create({
                     label: 'param1',
@@ -38,7 +39,7 @@ describe('FunctionDeclaration', () => {
 
         expect(decl).toMatchObject({
             kind: 'FUNCTION_DECL',
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [
                 {
                     label: 'param1',
@@ -53,7 +54,7 @@ describe('FunctionDeclaration', () => {
 
     it('converts to CIR with implicit return', () => {
         const funcDecl = FunctionDeclaration.create({
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [],
             result: undefined,
             implementation: {
@@ -72,7 +73,7 @@ describe('FunctionDeclaration', () => {
 
         expect(decl).toMatchObject({
             kind: 'FUNCTION_DECL',
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [],
             returnValueSet: { type: 'integer', min: '42', max: '42' },
             body: [
@@ -86,7 +87,7 @@ describe('FunctionDeclaration', () => {
 
     it('converts to CIR with explicit result value-set', () => {
         const funcDecl = FunctionDeclaration.create({
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [],
             result: IntegerValueSet.create({
                 span: someCodeSpan,
@@ -111,7 +112,7 @@ describe('FunctionDeclaration', () => {
 
         expect(decl).toMatchObject({
             kind: 'FUNCTION_DECL',
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [],
             returnValueSet: { type: 'integer', min: undefined, max: undefined },
             body: [
@@ -125,7 +126,7 @@ describe('FunctionDeclaration', () => {
 
     it('registers the function declaration in the root scope', () => {
         const funcDecl = FunctionDeclaration.create({
-            name: 'myFunction',
+            baseName: 'myFunction',
             parameters: [],
             result: undefined,
             implementation: { kind: 'body', statements: [] },
@@ -141,7 +142,7 @@ describe('FunctionDeclaration', () => {
             'myFunction()',
         ) as FunctionDeclaration
         expect(decl).toBeInstanceOf(FunctionDeclaration)
-        expect(decl.name).toBe('myFunction')
+        expect(decl.baseName).toBe('myFunction')
         expect(decl.parameters).toEqual([])
         expect(decl.result).toBeUndefined()
         expect(decl.implementation).toEqual({ kind: 'body', statements: [] })
@@ -168,7 +169,7 @@ describe('FunctionDeclaration', () => {
             )
 
             const funcDecl = FunctionDeclaration.create({
-                name: 'myFunction',
+                baseName: 'myFunction',
                 parameters: [],
                 result: undefined,
                 implementation: {
@@ -235,7 +236,7 @@ describe('FunctionDeclaration', () => {
             )
 
             const funcDecl = FunctionDeclaration.create({
-                name: 'myFunction',
+                baseName: 'myFunction',
                 parameters: [],
                 result: IntegerValueSet.create({ span: someCodeSpan }),
                 implementation: {

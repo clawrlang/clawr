@@ -3,12 +3,10 @@ import { Context, Declaration, Expression, Statement } from '.'
 import { ValueSet } from './value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
-import { ErrorReporter } from '../diagnostics'
-import { Scope } from './scope'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
-        public name: string,
+        public baseName: string,
         public parameters: Parameter[],
         public result: ValueSet | undefined,
         public implementation:
@@ -17,24 +15,29 @@ export class FunctionDeclaration implements Declaration {
     ) {}
 
     static create({
-        name,
+        baseName,
         parameters,
         result,
         implementation,
     }: {
-        name: string
+        baseName: string
         parameters: Parameter[]
         result: ValueSet | undefined
         implementation:
             | { kind: 'implicit-return'; expression: Expression }
             | { kind: 'body'; statements: Statement[] }
     }): FunctionDeclaration {
-        return new FunctionDeclaration(name, parameters, result, implementation)
+        return new FunctionDeclaration(
+            baseName,
+            parameters,
+            result,
+            implementation,
+        )
     }
 
     emitDeclaration(context: Context) {
         const name = FunctionName.create({
-            baseName: this.name,
+            baseName: this.baseName,
             arity: this.parameters.length,
             labels: this.parameters
                 .filter((param) => param.label)
@@ -70,7 +73,7 @@ export class FunctionDeclaration implements Declaration {
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
-            name: this.name,
+            baseName: this.baseName,
             parameters,
             returnValueSet,
             body: bodyContext.scope.emitted,

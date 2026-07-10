@@ -713,6 +713,9 @@
               {
                 "type": "object",
                 "properties": {
+                  "baseName": {
+                    "type": "string"
+                  },
                   "body": {
                     "type": "array",
                     "items": {
@@ -721,9 +724,6 @@
                   },
                   "kind": {
                     "const": "FUNCTION_DECL"
-                  },
-                  "name": {
-                    "type": "string"
                   },
                   "parameters": {
                     "type": "array",
@@ -804,7 +804,7 @@
                     ]
                   }
                 },
-                "required": ["kind", "name", "parameters", "body"],
+                "required": ["kind", "baseName", "parameters", "body"],
                 "additionalProperties": false
               },
               {

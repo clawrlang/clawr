@@ -46,7 +46,7 @@ export function lowerDecl(decl: cir.Declaration): string {
                 : 'void'
 
             return `${returnType} ${mangleFunctionName({
-                baseName: decl.name,
+                baseName: decl.baseName,
                 labels: decl.parameters
                     .map((param) => param.label)
                     .filter((label) => label !== undefined) as string[],

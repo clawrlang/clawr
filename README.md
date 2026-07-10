@@ -52,6 +52,8 @@ npm run test:backend  # Run backend tests
 npm run test:e2e      # Run end-to-end tests
 
 npm run build:schema  # Add a JSON schema file to tests/backend/cases to help editing test cases
+# NOTE: Actually using the updated schema requires manually pasting the dist/cir.schema.json
+# file content into .vscode/settings.json
 
 npx bun test ./tests/unit/parser/module-parser.spec.ts # Run a single test module
 ```

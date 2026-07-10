@@ -3,9 +3,10 @@ import {
     FunctionDeclaration,
     Parameter,
 } from '../../../src/model/function-declaration'
-import { StringValueSet } from '../../../src/model/value-set'
+import { IntegerValueSet, StringValueSet } from '../../../src/model/value-set'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
+import { ReturnStatement } from '../../../src/model/return-statement'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
@@ -18,7 +19,7 @@ describe('FunctionDeclaration', () => {
                     valueSet: StringValueSet.create({ span: someCodeSpan }),
                 }),
             ],
-            result: StringValueSet.create({ span: someCodeSpan }),
+            result: undefined,
             implementation: { kind: 'body', statements: [] },
         })
 
@@ -37,7 +38,7 @@ describe('FunctionDeclaration', () => {
                     valueSet: { type: 'string' },
                 },
             ],
-            returnValueSet: { type: 'string' },
+            returnValueSet: undefined,
             body: [],
         })
     })
@@ -66,6 +67,45 @@ describe('FunctionDeclaration', () => {
             name: 'myFunction',
             parameters: [],
             returnValueSet: { type: 'integer', min: '42', max: '42' },
+            body: [
+                {
+                    kind: 'RETURN',
+                    value: { value: '42' },
+                },
+            ],
+        })
+    })
+
+    it('converts to CIR with explicit result value-set', () => {
+        const funcDecl = FunctionDeclaration.create({
+            name: 'myFunction',
+            parameters: [],
+            result: IntegerValueSet.create({
+                span: someCodeSpan,
+            }),
+            implementation: {
+                kind: 'body',
+                statements: [
+                    ReturnStatement.create(
+                        IntegerLiteral.create({
+                            value: 42n,
+                            span: someCodeSpan,
+                        }),
+                    ),
+                ],
+            },
+        })
+
+        const context = newSemanticContext()
+        funcDecl.emitDeclaration(context)
+
+        const decl = context.scope.rootScope.emitted[0]
+
+        expect(decl).toMatchObject({
+            kind: 'FUNCTION_DECL',
+            name: 'myFunction',
+            parameters: [],
+            returnValueSet: { type: 'integer', min: undefined, max: undefined },
             body: [
                 {
                     kind: 'RETURN',

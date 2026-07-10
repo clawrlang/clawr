@@ -60,7 +60,7 @@ export class FunctionDeclaration implements Declaration {
 
         for (const stmt of body) stmt.emitStatement(bodyContext)
 
-        let returnValueSet = this.resultSet(context)
+        const returnValueSet = this.resultSet(context)
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',

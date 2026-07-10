@@ -1,12 +1,20 @@
-import { describe, it, expect } from 'bun:test'
+import * as cir from '../../../src/cir'
+import { describe, it, expect, test } from 'bun:test'
 import {
     FunctionDeclaration,
     Parameter,
 } from '../../../src/model/function-declaration'
-import { IntegerValueSet, StringValueSet } from '../../../src/model/value-set'
+import {
+    IntegerValueSet,
+    RCTypeValueSet,
+    StringValueSet,
+} from '../../../src/model/value-set'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { ReturnStatement } from '../../../src/model/return-statement'
+import { DataDeclaration } from '../../../src/model/data-declaration'
+import { VariableDeclaration } from '../../../src/model/variable-declaration'
+import { DataLiteral } from '../../../src/model/data-literal'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
@@ -137,5 +145,74 @@ describe('FunctionDeclaration', () => {
         expect(decl.parameters).toEqual([])
         expect(decl.result).toBeUndefined()
         expect(decl.implementation).toEqual({ kind: 'body', statements: [] })
+    })
+
+    describe('releases rc-type variables before returning from the function', () => {
+        test('with no return', () => {
+            const context = newSemanticContext()
+
+            context.scope.rootScope.declarations.set(
+                'MyData',
+                DataDeclaration.create({
+                    name: 'MyData',
+                    fields: [
+                        {
+                            name: 'field1',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+
+            const funcDecl = FunctionDeclaration.create({
+                name: 'myFunction',
+                parameters: [],
+                result: undefined,
+                implementation: {
+                    kind: 'body',
+                    statements: [
+                        VariableDeclaration.create({
+                            semantics: 'const',
+                            name: 'myVar',
+                            valueSet: RCTypeValueSet.create({
+                                typeName: 'MyData',
+                                span: someCodeSpan,
+                            }),
+                            initialValue: DataLiteral.create({
+                                fields: [
+                                    {
+                                        name: 'field1',
+                                        value: IntegerLiteral.create({
+                                            value: 42n,
+                                            span: someCodeSpan,
+                                        }),
+                                    },
+                                ],
+                                span: someCodeSpan,
+                            }),
+                        }),
+                    ],
+                },
+            })
+
+            funcDecl.emitDeclaration(context)
+
+            const decl = context.scope.rootScope
+                .emitted[0] as cir.Declaration & {
+                kind: 'FUNCTION_DECL'
+            }
+
+            expect(decl.body[decl.body.length - 1]).toMatchObject({
+                kind: 'RELEASE',
+                object: {
+                    kind: 'VARIABLE_REF',
+                    name: 'myVar',
+                    valueSet: { type: 'rc-type', typeName: 'MyData' },
+                },
+            })
+        })
     })
 })

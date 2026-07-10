@@ -60,6 +60,8 @@ export class FunctionDeclaration implements Declaration {
 
         for (const stmt of body) stmt.emitStatement(bodyContext)
 
+        this.releaseVariables(bodyContext)
+
         const returnValueSet = this.resultSet(context)
 
         const cirFuncDecl: cir.Declaration = {
@@ -70,6 +72,23 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
+    }
+
+    private releaseVariables(bodyContext: Context) {
+        const vars = [...bodyContext.scope.variables.entries()]
+            .filter((v) => v[1].allowedValues.type === 'rc-type')
+            .map((v) => [v[0], v[1].allowedValues] as [string, cir.ValueSet])
+
+        for (const v of vars) {
+            bodyContext.scope.emitted.push({
+                kind: 'RELEASE',
+                object: {
+                    kind: 'VARIABLE_REF',
+                    name: v[0],
+                    valueSet: v[1],
+                },
+            })
+        }
     }
 
     resultSet(context: Context) {

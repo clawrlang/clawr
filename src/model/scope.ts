@@ -62,6 +62,23 @@ export class Scope {
         if (this.parentScope) return this.parentScope.variableDeclaration(name)
         return this.rootScope.variableDeclaration(name)
     }
+
+    releaseVariables() {
+        const vars = [...this.variables.entries()]
+            .filter((v) => v[1].allowedValues.type === 'rc-type')
+            .map((v) => [v[0], v[1].allowedValues] as [string, cir.ValueSet])
+
+        for (const v of vars) {
+            this.emitted.push({
+                kind: 'RELEASE',
+                object: {
+                    kind: 'VARIABLE_REF',
+                    name: v[0],
+                    valueSet: v[1],
+                },
+            })
+        }
+    }
 }
 
 type Variable = {

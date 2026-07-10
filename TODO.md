@@ -2,7 +2,6 @@
 
 ## In Progress
 
-- Emit `RELEASE` on scope exit
 - Add parameters to `bodyContext.scope`
 
 ## Later

@@ -214,5 +214,78 @@ describe('FunctionDeclaration', () => {
                 },
             })
         })
+
+        test('ending with return', () => {
+            const context = newSemanticContext()
+
+            context.scope.rootScope.declarations.set(
+                'MyData',
+                DataDeclaration.create({
+                    name: 'MyData',
+                    fields: [
+                        {
+                            name: 'field1',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+
+            const funcDecl = FunctionDeclaration.create({
+                name: 'myFunction',
+                parameters: [],
+                result: IntegerValueSet.create({ span: someCodeSpan }),
+                implementation: {
+                    kind: 'body',
+                    statements: [
+                        VariableDeclaration.create({
+                            semantics: 'const',
+                            name: 'myVar',
+                            valueSet: RCTypeValueSet.create({
+                                typeName: 'MyData',
+                                span: someCodeSpan,
+                            }),
+                            initialValue: DataLiteral.create({
+                                fields: [
+                                    {
+                                        name: 'field1',
+                                        value: IntegerLiteral.create({
+                                            value: 42n,
+                                            span: someCodeSpan,
+                                        }),
+                                    },
+                                ],
+                                span: someCodeSpan,
+                            }),
+                        }),
+                        ReturnStatement.create(
+                            IntegerLiteral.create({
+                                value: 42n,
+                                span: someCodeSpan,
+                            }),
+                        ),
+                    ],
+                },
+            })
+
+            funcDecl.emitDeclaration(context)
+
+            const decl = context.scope.rootScope
+                .emitted[0] as cir.Declaration & {
+                kind: 'FUNCTION_DECL'
+            }
+
+            expect(decl.body[decl.body.length - 2]).toMatchObject({
+                kind: 'RELEASE',
+                object: {
+                    kind: 'VARIABLE_REF',
+                    name: 'myVar',
+                    valueSet: { type: 'rc-type', typeName: 'MyData' },
+                },
+            })
+        })
     })
 })

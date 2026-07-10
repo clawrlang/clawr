@@ -8,7 +8,8 @@ export class ReturnStatement implements Statement {
         return new ReturnStatement(value)
     }
 
-    emitStatement(context: Context): void {
+    emitStatement(context: Context) {
+        context.scope.releaseVariables()
         context.scope.emitted.push({
             kind: 'RETURN',
             value: this.value?.toCIRExpression(context),

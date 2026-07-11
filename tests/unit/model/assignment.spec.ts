@@ -14,7 +14,6 @@ describe('Assignment', () => {
         context.scope.variables.set('x', {
             semantics: 'mut',
             allowedValues: { type: 'integer' },
-            currentValue: { type: 'integer' },
         })
 
         const assignment = Assignment.create({
@@ -75,20 +74,10 @@ describe('Assignment', () => {
                     semantics: 'COW',
                     typeName: 'OuterType',
                 },
-                currentValue: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'OuterType',
-                },
             })
             context.scope.variables.set('foo', {
                 semantics: 'mut',
                 allowedValues: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'InnerType',
-                },
-                currentValue: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'InnerType',
@@ -174,20 +163,10 @@ describe('Assignment', () => {
                     semantics: 'COW',
                     typeName: 'MyType',
                 },
-                currentValue: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'MyType',
-                },
             })
             context.scope.variables.set('foo', {
                 semantics: 'mut',
                 allowedValues: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'MyType',
-                },
-                currentValue: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'MyType',
@@ -263,11 +242,6 @@ describe('Assignment', () => {
         context.scope.variables.set('foo', {
             semantics: 'mut',
             allowedValues: {
-                type: 'rc-type',
-                semantics: 'COW',
-                typeName: 'MyType',
-            },
-            currentValue: {
                 type: 'rc-type',
                 semantics: 'COW',
                 typeName: 'MyType',
@@ -358,20 +332,10 @@ describe('Assignment', () => {
                         semantics: semantics,
                         typeName: 'MyType',
                     },
-                    currentValue: {
-                        type: 'rc-type',
-                        semantics: semantics,
-                        typeName: 'MyType',
-                    },
                 })
                 context.scope.variables.set('value', {
                     semantics: kind,
                     allowedValues: {
-                        type: 'rc-type',
-                        semantics: semantics,
-                        typeName: 'MyType',
-                    },
-                    currentValue: {
                         type: 'rc-type',
                         semantics: semantics,
                         typeName: 'MyType',
@@ -428,11 +392,6 @@ describe('Assignment', () => {
         context.scope.variables.set('x', {
             semantics: 'const',
             allowedValues: {
-                type: 'rc-type',
-                semantics: 'COW',
-                typeName: 'MyType',
-            },
-            currentValue: {
                 type: 'rc-type',
                 semantics: 'COW',
                 typeName: 'MyType',
@@ -505,20 +464,10 @@ describe('Assignment', () => {
                         semantics: targetSemantics[1],
                         typeName: 'MyType',
                     },
-                    currentValue: {
-                        type: 'rc-type',
-                        semantics: targetSemantics[1],
-                        typeName: 'MyType',
-                    },
                 })
                 context.scope.variables.set('value', {
                     semantics: valueSemantics[0],
                     allowedValues: {
-                        type: 'rc-type',
-                        semantics: valueSemantics[1],
-                        typeName: 'MyType',
-                    },
-                    currentValue: {
                         type: 'rc-type',
                         semantics: valueSemantics[1],
                         typeName: 'MyType',
@@ -579,11 +528,6 @@ describe('Assignment', () => {
                     semantics: 'COW',
                     typeName: 'MyType',
                 },
-                currentValue: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'MyType',
-                },
             })
 
             const assignment = Assignment.create({
@@ -606,249 +550,6 @@ describe('Assignment', () => {
                 }),
             })
             expect(() => assignment.emitStatement(context)).not.toThrow()
-        })
-    })
-
-    describe('updates the currentValue of the target variable in context', () => {
-        it('for a VariableReference', () => {
-            const context = newSemanticContext()
-            context.scope.variables.set('target', {
-                semantics: 'mut',
-                allowedValues: {
-                    type: 'integer',
-                },
-                currentValue: {
-                    type: 'integer',
-                    min: '0',
-                    max: '100',
-                },
-            })
-
-            const assignment = Assignment.create({
-                target: VariableReference.create({
-                    name: 'target',
-                    span: someCodeSpan,
-                }),
-                value: IntegerLiteral.create({
-                    value: 42n,
-                    span: someCodeSpan,
-                }),
-                span: someCodeSpan,
-            })
-
-            assignment.emitStatement(context)
-            expect(
-                context.scope.variables.get('target')?.currentValue,
-            ).toMatchObject({
-                type: 'integer',
-                min: '42',
-                max: '42',
-            })
-        })
-
-        it('for a nested FieldReference', () => {
-            const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
-                'InnerType',
-                DataDeclaration.create({
-                    name: 'InnerType',
-                    fields: [
-                        {
-                            name: 'innerField1',
-                            valueSet: IntegerValueSet.create({
-                                span: someCodeSpan,
-                            }),
-                            semantics: 'mut',
-                        },
-                        {
-                            name: 'innerField2',
-                            valueSet: IntegerValueSet.create({
-                                span: someCodeSpan,
-                            }),
-                            semantics: 'mut',
-                        },
-                    ],
-                }),
-            )
-            context.scope.rootScope.declarations.set(
-                'OuterType',
-                DataDeclaration.create({
-                    name: 'OuterType',
-                    fields: [
-                        {
-                            name: 'field1',
-                            valueSet: RCTypeValueSet.create({
-                                typeName: 'InnerType',
-                                span: someCodeSpan,
-                            }),
-                            semantics: 'mut',
-                        },
-                        {
-                            name: 'field2',
-                            valueSet: RCTypeValueSet.create({
-                                typeName: 'InnerType',
-                                span: someCodeSpan,
-                            }),
-                            semantics: 'mut',
-                        },
-                    ],
-                }),
-            )
-            context.scope.variables.set('target', {
-                semantics: 'mut',
-                allowedValues: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'OuterType',
-                },
-                currentValue: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'OuterType',
-                    fields: [
-                        {
-                            name: 'field1',
-                            valueSet: {
-                                type: 'rc-type',
-                                semantics: 'COW',
-                                typeName: 'InnerType',
-                                fields: [
-                                    {
-                                        name: 'innerField1',
-                                        valueSet: {
-                                            type: 'integer',
-                                            min: '1',
-                                            max: '1',
-                                        },
-                                    },
-                                    {
-                                        name: 'innerField2',
-                                        valueSet: {
-                                            type: 'integer',
-                                            min: '1',
-                                            max: '1',
-                                        },
-                                    },
-                                ],
-                            },
-                        },
-                        {
-                            name: 'field2',
-                            valueSet: {
-                                type: 'rc-type',
-                                semantics: 'COW',
-                                typeName: 'InnerType',
-                                fields: [
-                                    {
-                                        name: 'innerField1',
-                                        valueSet: {
-                                            type: 'integer',
-                                            min: '1',
-                                            max: '1',
-                                        },
-                                    },
-                                    {
-                                        name: 'innerField2',
-                                        valueSet: {
-                                            type: 'integer',
-                                            min: '1',
-                                            max: '1',
-                                        },
-                                    },
-                                ],
-                            },
-                        },
-                    ],
-                },
-            })
-
-            const assignment = Assignment.create({
-                target: FieldReference.create({
-                    object: FieldReference.create({
-                        object: VariableReference.create({
-                            name: 'target',
-                            span: someCodeSpan,
-                        }),
-                        operator: '.',
-                        field: 'field1',
-                        span: someCodeSpan,
-                        fieldSpan: someCodeSpan,
-                    }),
-                    operator: '.',
-                    field: 'innerField1',
-                    span: someCodeSpan,
-                    fieldSpan: someCodeSpan,
-                }),
-                value: IntegerLiteral.create({
-                    value: 42n,
-                    span: someCodeSpan,
-                }),
-                span: someCodeSpan,
-            })
-
-            assignment.emitStatement(context)
-
-            expect(
-                context.scope.variables.get('target')?.currentValue,
-            ).toMatchObject({
-                type: 'rc-type',
-                typeName: 'OuterType',
-                semantics: 'COW',
-                fields: [
-                    {
-                        name: 'field1',
-                        valueSet: {
-                            type: 'rc-type',
-                            typeName: 'InnerType',
-                            semantics: 'COW',
-                            fields: [
-                                {
-                                    name: 'innerField1',
-                                    valueSet: {
-                                        type: 'integer',
-                                        min: '42',
-                                        max: '42',
-                                    },
-                                },
-                                {
-                                    name: 'innerField2',
-                                    valueSet: {
-                                        type: 'integer',
-                                        min: '1',
-                                        max: '1',
-                                    },
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        name: 'field2',
-                        valueSet: {
-                            type: 'rc-type',
-                            typeName: 'InnerType',
-                            semantics: 'COW',
-                            fields: [
-                                {
-                                    name: 'innerField1',
-                                    valueSet: {
-                                        type: 'integer',
-                                        min: '1',
-                                        max: '1',
-                                    },
-                                },
-                                {
-                                    name: 'innerField2',
-                                    valueSet: {
-                                        type: 'integer',
-                                        min: '1',
-                                        max: '1',
-                                    },
-                                },
-                            ],
-                        },
-                    },
-                ],
-            })
         })
     })
 })

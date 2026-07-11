@@ -125,7 +125,6 @@ describe('CallFunc', () => {
         context.scope.variables.set('x', {
             semantics: 'const',
             allowedValues: { type: 'integer', min: '42', max: '42' },
-            currentValue: { type: 'integer', min: '42', max: '42' },
         })
 
         const statement = CallFunc.create({

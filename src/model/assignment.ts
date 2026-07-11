@@ -44,7 +44,6 @@ export class Assignment implements Statement {
                 { start: this.span.start, end: this.span.end },
             )
 
-        this.target.updateCurrentValue(context, value.valueSet)
 
         const prelude = this.target.assignmentPrelude(context)
         context.scope.emitted.push(...prelude)

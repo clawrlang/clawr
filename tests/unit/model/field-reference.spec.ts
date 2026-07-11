@@ -15,11 +15,6 @@ describe('Field Reference', () => {
                 semantics: 'COW',
                 typeName: 'MyType',
             },
-            currentValue: {
-                type: 'rc-type',
-                semantics: 'COW',
-                typeName: 'MyType',
-            },
         })
         context.scope.rootScope.declarations.set(
             'MyType',
@@ -55,11 +50,6 @@ describe('Field Reference', () => {
         context.scope.variables.set('myVar', {
             semantics: 'mut',
             allowedValues: {
-                type: 'rc-type',
-                semantics: 'COW',
-                typeName: 'MyType',
-            },
-            currentValue: {
                 type: 'rc-type',
                 semantics: 'COW',
                 typeName: 'MyType',
@@ -113,11 +103,6 @@ describe('Field Reference', () => {
                         semantics: expectedSemantics,
                         typeName: 'MyType',
                     },
-                    currentValue: {
-                        type: 'rc-type',
-                        semantics: expectedSemantics,
-                        typeName: 'MyType',
-                    },
                 })
                 context.scope.rootScope.declarations.set(
                     'MyType',
@@ -159,11 +144,6 @@ describe('Field Reference', () => {
         context.scope.variables.set('myVar', {
             semantics: 'mut',
             allowedValues: {
-                type: 'rc-type',
-                semantics: 'COW',
-                typeName: 'MyType',
-            },
-            currentValue: {
                 type: 'rc-type',
                 semantics: 'COW',
                 typeName: 'MyType',
@@ -214,11 +194,6 @@ describe('Field Reference', () => {
                 context.scope.variables.set('myVar', {
                     semantics: semantics[0],
                     allowedValues: {
-                        type: 'rc-type',
-                        semantics: semantics[1],
-                        typeName: 'MyType',
-                    },
-                    currentValue: {
                         type: 'rc-type',
                         semantics: semantics[1],
                         typeName: 'MyType',
@@ -287,11 +262,6 @@ describe('Field Reference', () => {
                         semantics: semantics[1],
                         typeName: 'MyType',
                     },
-                    currentValue: {
-                        type: 'rc-type',
-                        semantics: semantics[1],
-                        typeName: 'MyType',
-                    },
                 })
                 context.scope.rootScope.declarations.set(
                     'MyType',
@@ -332,11 +302,6 @@ describe('Field Reference', () => {
                     semantics: 'COW',
                     typeName: 'MyType',
                 },
-                currentValue: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'MyType',
-                },
             })
             context.scope.rootScope.declarations.set(
                 'MyType',
@@ -372,11 +337,6 @@ describe('Field Reference', () => {
             context.scope.variables.set('myVar', {
                 semantics: 'mut',
                 allowedValues: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'MyType',
-                },
-                currentValue: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'MyType',

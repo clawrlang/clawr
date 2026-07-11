@@ -51,16 +51,12 @@ export class VariableDeclaration implements Statement, Declaration {
             context.errorReporter,
         )
 
-        const snapshot = snapshotValueSetFromExpression(initialValue)
-        const currentValue =
-            targetValueSet.type === 'rc-type'
-                ? { ...snapshot, semantics: targetValueSet.semantics }
-                : snapshot
         scope.variables.set(this.name, {
             semantics: this.semantics,
             allowedValues:
-                this.semantics === 'const' ? currentValue : targetValueSet,
-            currentValue,
+                this.semantics === 'const'
+                    ? initialValue.valueSet
+                    : targetValueSet,
         })
 
         scope.emitted.push({
@@ -139,31 +135,5 @@ export class VariableDeclaration implements Statement, Declaration {
         return this.valueSet.toCIR({
             semantics: convertSemantics(this.semantics),
         })
-    }
-}
-
-function snapshotValueSetFromExpression(
-    expression: cir.Expression,
-): cir.ValueSet {
-    switch (expression.kind) {
-        case 'ALLOCATE':
-            return {
-                ...(structuredClone(expression.valueSet) as Extract<
-                    cir.ValueSet,
-                    { type: 'rc-type' }
-                >),
-                fields: expression.fields.map((field) => ({
-                    name: field.name,
-                    valueSet: snapshotValueSetFromExpression(field.value),
-                })),
-            }
-        case 'STRING_LITERAL':
-        case 'INTEGER_LITERAL':
-        case 'TRUTHVALUE_LITERAL':
-        case 'RETAIN':
-        case 'VARIABLE_REF':
-        case 'FIELD_REF':
-        case 'QUERY':
-            return structuredClone(expression.valueSet) as cir.ValueSet
     }
 }

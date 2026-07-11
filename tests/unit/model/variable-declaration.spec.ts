@@ -184,11 +184,6 @@ describe('VariableDeclaration', () => {
                     semantics: 'COW',
                     typeName: 'OuterType',
                 },
-                currentValue: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'OuterType',
-                },
             })
 
             const decl = VariableDeclaration.create({
@@ -249,11 +244,6 @@ describe('VariableDeclaration', () => {
                     semantics: 'COW',
                     typeName: 'MyType',
                 },
-                currentValue: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'MyType',
-                },
             })
 
             const decl = VariableDeclaration.create({
@@ -276,123 +266,6 @@ describe('VariableDeclaration', () => {
                         kind: 'VARIABLE_REF',
                         name: 'bar',
                     },
-                },
-            })
-        })
-    })
-
-    describe('registers its value in the context', () => {
-        test('for a simple integer variable', () => {
-            const decl = VariableDeclaration.create({
-                semantics: 'const',
-                name: 'x',
-                valueSet: IntegerValueSet.create({
-                    span: someCodeSpan,
-                }),
-                initialValue: IntegerLiteral.create({
-                    value: 42n,
-                    span: someCodeSpan,
-                }),
-            })
-            const context = newSemanticContext()
-            decl.emitStatement(context)
-            expect(context.scope.variableDeclaration('x')).toEqual({
-                semantics: 'const',
-                allowedValues: { type: 'integer', min: '42', max: '42' },
-                currentValue: { type: 'integer', min: '42', max: '42' },
-            })
-        })
-
-        test('for a nested rc-type variable', () => {
-            const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
-                'InnerType',
-                DataDeclaration.create({
-                    name: 'InnerType',
-                    fields: [
-                        {
-                            name: 'innerField',
-                            valueSet: IntegerValueSet.create({
-                                span: someCodeSpan,
-                            }),
-                            semantics: 'mut',
-                        },
-                    ],
-                }),
-            )
-            context.scope.rootScope.declarations.set(
-                'OuterType',
-                DataDeclaration.create({
-                    name: 'OuterType',
-                    fields: [
-                        {
-                            name: 'field',
-                            valueSet: RCTypeValueSet.create({
-                                typeName: 'InnerType',
-                                span: someCodeSpan,
-                            }),
-                            semantics: 'mut',
-                        },
-                    ],
-                }),
-            )
-
-            const declaration = VariableDeclaration.create({
-                semantics: 'const',
-                name: 'target',
-                valueSet: RCTypeValueSet.create({
-                    typeName: 'OuterType',
-                    span: someCodeSpan,
-                }),
-                initialValue: DataLiteral.create({
-                    fields: [
-                        {
-                            name: 'field',
-                            value: DataLiteral.create({
-                                fields: [
-                                    {
-                                        name: 'innerField',
-                                        value: IntegerLiteral.create({
-                                            value: 42n,
-                                            span: someCodeSpan,
-                                        }),
-                                    },
-                                ],
-                                span: someCodeSpan,
-                            }),
-                        },
-                    ],
-                    span: someCodeSpan,
-                }),
-            })
-
-            declaration.emitStatement(context)
-
-            expect(context.scope.variableDeclaration('target')).toMatchObject({
-                currentValue: {
-                    type: 'rc-type',
-                    typeName: 'OuterType',
-                    semantics: 'COW',
-                    fields: [
-                        {
-                            name: 'field',
-                            valueSet: {
-                                type: 'rc-type',
-                                typeName: 'InnerType',
-                                semantics: 'COW',
-                                fields: [
-                                    {
-                                        name: 'innerField',
-                                        valueSet: {
-                                            type: 'integer',
-                                            min: '42',
-                                            max: '42',
-                                        },
-                                    },
-                                ],
-                            },
-                        },
-                    ],
                 },
             })
         })
@@ -428,11 +301,6 @@ describe('VariableDeclaration', () => {
                 context.scope.variables.set('value', {
                     semantics: valueSemantics[0],
                     allowedValues: {
-                        type: 'rc-type',
-                        semantics: valueSemantics[1],
-                        typeName: 'MyType',
-                    },
-                    currentValue: {
                         type: 'rc-type',
                         semantics: valueSemantics[1],
                         typeName: 'MyType',

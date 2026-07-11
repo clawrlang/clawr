@@ -44,22 +44,9 @@ export class VariableReference implements Expression {
     }
 
     valueSet(context: Context): cir.ValueSet {
-        return this.lookupInScope(context).currentValue
+        return this.lookupInScope(context).allowedValues
     }
 
-    updateCurrentValue(context: Context, newValueSet: cir.ValueSet) {
-        const variable = this.lookupInScope(context)
-        variable.currentValue =
-            newValueSet.type === 'rc-type'
-                ? {
-                      ...newValueSet,
-                      semantics:
-                          variable.allowedValues.type === 'rc-type'
-                              ? variable.allowedValues.semantics
-                              : newValueSet.semantics,
-                  }
-                : newValueSet
-    }
 
     lookupInScope(context: Context) {
         const variable = context.scope.variableDeclaration(this.name)

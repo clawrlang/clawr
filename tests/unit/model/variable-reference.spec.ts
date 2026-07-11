@@ -10,7 +10,6 @@ describe('Variable Reference', () => {
         context.scope.variables.set('myVar', {
             semantics: 'const',
             allowedValues: { type: 'integer', min: '10', max: '10' },
-            currentValue: { type: 'integer', min: '10', max: '10' },
         })
 
         const variableRef = VariableReference.create({
@@ -53,7 +52,6 @@ describe('Variable Reference', () => {
         context.scope.variables.set('myVar', {
             semantics: 'const',
             allowedValues: { type: 'integer', min: '10', max: '10' },
-            currentValue: { type: 'integer', min: '10', max: '10' },
         })
 
         const variableRef = VariableReference.create({
@@ -97,11 +95,6 @@ describe('Variable Reference', () => {
                 context.scope.variables.set('myVar', {
                     semantics: kind,
                     allowedValues: {
-                        type: 'rc-type',
-                        semantics: expected,
-                        typeName: 'MyType',
-                    },
-                    currentValue: {
                         type: 'rc-type',
                         semantics: expected,
                         typeName: 'MyType',

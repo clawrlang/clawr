@@ -67,27 +67,6 @@ export class FieldReference implements Expression {
         })
     }
 
-    updateCurrentValue(context: Context, newValueSet: cir.ValueSet) {
-        const field = this.getFieldFromContext(context)
-        const updatedObjectValueSet = setRcTypeFieldValueSet(
-            this.object.valueSet(context),
-            this.field,
-            newValueSet.type === 'rc-type'
-                ? {
-                      ...newValueSet,
-                      semantics: convertSemantics(field.semantics),
-                  }
-                : newValueSet,
-        )
-        const updater = (this.object as any).updateCurrentValue
-        if (typeof updater !== 'function') {
-            context.errorReporter.reportFatalError(
-                `Cannot update field ${this.field} without a mutable object reference`,
-                this.span,
-            )
-        }
-        updater.call(this.object, context, updatedObjectValueSet)
-    }
 
     toCIRExpression(
         context: Context,

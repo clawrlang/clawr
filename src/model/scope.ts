@@ -3,6 +3,7 @@ import { Declaration } from '.'
 import { DataDeclaration } from './data-declaration'
 import { VariableSemantics } from './variable-declaration'
 import { FunctionDeclaration } from './function-declaration'
+import { Lattice } from './lattice'
 
 class RootScope {
     public variables: Map<string, Variable> = new Map()
@@ -28,6 +29,7 @@ class RootScope {
 
 export class Scope {
     public variables: Map<string, Variable> = new Map()
+    private currentValues: Map<string, Lattice> = new Map()
     public emitted: cir.Statement[] = []
     private nextTempVarCounter = 0
 
@@ -78,6 +80,17 @@ export class Scope {
                 },
             })
         }
+    }
+
+    currentValue(name: string): Lattice | undefined {
+        const value = this.currentValues.get(name)
+        if (value) return value
+        if (this.parentScope) return this.parentScope.currentValue(name)
+        return undefined
+    }
+
+    setCurrentValue(name: string, valueSet: Lattice) {
+        this.currentValues.set(name, valueSet)
     }
 }
 

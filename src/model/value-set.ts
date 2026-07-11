@@ -3,6 +3,7 @@ import { SourceCodeSpan } from '../diagnostics'
 
 export interface ValueSet {
     toCIR(context: { semantics: 'REF' | 'COW' }): cir.ValueSet
+    unconstrained(): ValueSet
 }
 
 export class IntegerValueSet implements ValueSet {
@@ -31,6 +32,14 @@ export class IntegerValueSet implements ValueSet {
             max: this.max?.toString(),
         }
     }
+
+    unconstrained(): ValueSet {
+        return IntegerValueSet.create({
+            min: undefined,
+            max: undefined,
+            span: this.span,
+        })
+    }
 }
 
 export class TruthValueSet implements ValueSet {
@@ -55,6 +64,13 @@ export class TruthValueSet implements ValueSet {
             values: this.values,
         }
     }
+
+    unconstrained(): ValueSet {
+        return TruthValueSet.create({
+            values: ['false', 'ambiguous', 'true'],
+            span: this.span,
+        })
+    }
 }
 
 export class StringValueSet implements ValueSet {
@@ -66,6 +82,10 @@ export class StringValueSet implements ValueSet {
 
     toCIR(_: any): cir.ValueSet {
         return { type: 'string' }
+    }
+
+    unconstrained(): ValueSet {
+        return this
     }
 }
 
@@ -91,5 +111,9 @@ export class RCTypeValueSet implements ValueSet {
             typeName: this.typeName,
             semantics: context.semantics,
         }
+    }
+
+    unconstrained(): ValueSet {
+        return this
     }
 }

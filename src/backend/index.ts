@@ -39,7 +39,7 @@ export function lowerDecl(decl: cir.Declaration): string {
         }
         case 'FUNCTION_DECL': {
             const params = decl.parameters
-                .map((param) => `${lowerType(param.valueSet)} ${param.name}`)
+                .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
                 .join(', ')
             const returnType = decl.returnValueSet
                 ? lowerType(decl.returnValueSet)

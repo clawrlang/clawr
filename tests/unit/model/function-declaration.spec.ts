@@ -43,7 +43,7 @@ describe('FunctionDeclaration', () => {
             parameters: [
                 {
                     label: 'param1',
-                    name: 'x',
+                    varName: 'x',
                     valueSet: { type: 'string' },
                 },
             ],

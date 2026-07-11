@@ -47,7 +47,7 @@ export class FunctionDeclaration implements Declaration {
 
         const parameters = this.parameters.map((param) => ({
             label: param.label,
-            name: param.varName,
+            varName: param.varName,
             valueSet: param.valueSet.toCIR({
                 ...context,
                 semantics: 'COW',

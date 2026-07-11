@@ -9,13 +9,13 @@
         "type": "object",
         "properties": {
           "$schema": { "const": "http://clawr.lang/schema/cir/DRAFT-0" },
-          "declarations": {
-            "type": "array",
-            "items": { "$ref": "#/$defs/Declaration" }
-          },
           "startBlock": {
             "type": "array",
             "items": { "$ref": "#/$defs/Statement" }
+          },
+          "declarations": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/Declaration" }
           }
         },
         "required": ["$schema"],
@@ -26,13 +26,13 @@
             "type": "object",
             "properties": {
               "$schema": { "const": "http://clawr.lang/schema/cir/DRAFT-0" },
-              "declarations": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/Declaration" }
-              },
               "startBlock": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/Statement" }
+              },
+              "declarations": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/Declaration" }
               }
             },
             "required": ["$schema"],
@@ -43,10 +43,10 @@
               {
                 "type": "object",
                 "properties": {
-                  "initialValue": { "$ref": "#/$defs/Expression" },
                   "kind": { "const": "VARIABLE_DECL" },
                   "name": { "type": "string" },
-                  "valueSet": { "$ref": "#/$defs/ValueSet" }
+                  "valueSet": { "$ref": "#/$defs/ValueSet" },
+                  "initialValue": { "$ref": "#/$defs/Expression" }
                 },
                 "required": ["kind", "name", "valueSet", "initialValue"],
                 "additionalProperties": false
@@ -86,10 +86,6 @@
               {
                 "type": "object",
                 "properties": {
-                  "arguments": {
-                    "type": "array",
-                    "items": { "$ref": "#/$defs/Expression" }
-                  },
                   "kind": { "const": "EXEC" },
                   "name": {
                     "type": "object",
@@ -102,6 +98,10 @@
                     },
                     "required": ["baseName", "labels"],
                     "additionalProperties": false
+                  },
+                  "arguments": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/Expression" }
                   }
                 },
                 "required": ["kind", "name", "arguments"],
@@ -155,8 +155,8 @@
                             "type": "object",
                             "properties": {
                               "type": { "const": "integer" },
-                              "max": { "type": "string" },
-                              "min": { "type": "string" }
+                              "min": { "type": "string" },
+                              "max": { "type": "string" }
                             },
                             "required": ["type"],
                             "additionalProperties": false
@@ -232,8 +232,8 @@
                 "type": "object",
                 "properties": {
                   "type": { "const": "integer" },
-                  "max": { "type": "string" },
-                  "min": { "type": "string" }
+                  "min": { "type": "string" },
+                  "max": { "type": "string" }
                 },
                 "required": ["type"],
                 "additionalProperties": false
@@ -269,10 +269,7 @@
             "type": "object",
             "properties": {
               "type": { "const": "rc-type" },
-              "fields": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/__type.o5" }
-              },
+              "typeName": { "type": "string" },
               "semantics": {
                 "oneOf": [
                   { "const": "COW" },
@@ -280,7 +277,10 @@
                   { "const": "UNIQUE" }
                 ]
               },
-              "typeName": { "type": "string" }
+              "fields": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/__type.o5" }
+              }
             },
             "required": ["type", "typeName", "semantics"],
             "additionalProperties": false
@@ -320,8 +320,8 @@
                     "type": "object",
                     "properties": {
                       "type": { "const": "integer" },
-                      "max": { "type": "string" },
-                      "min": { "type": "string" }
+                      "min": { "type": "string" },
+                      "max": { "type": "string" }
                     },
                     "required": ["type"],
                     "additionalProperties": false
@@ -382,12 +382,12 @@
           "__type.o9": {
             "type": "object",
             "properties": {
+              "kind": { "const": "ALLOCATE" },
+              "valueSet": { "$ref": "#/$defs/__type.o4" },
               "fields": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type.o10" }
-              },
-              "kind": { "const": "ALLOCATE" },
-              "valueSet": { "$ref": "#/$defs/__type.o4" }
+              }
             },
             "required": ["kind", "valueSet", "fields"],
             "additionalProperties": false
@@ -428,9 +428,9 @@
           "__type.o13": {
             "type": "object",
             "properties": {
-              "field": { "type": "string" },
               "kind": { "const": "FIELD_REF" },
               "object": { "$ref": "#/$defs/Expression" },
+              "field": { "type": "string" },
               "valueSet": { "$ref": "#/$defs/ValueSet" }
             },
             "required": ["kind", "object", "field", "valueSet"],
@@ -439,10 +439,6 @@
           "__type.o14": {
             "type": "object",
             "properties": {
-              "arguments": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/Expression" }
-              },
               "kind": { "const": "QUERY" },
               "name": {
                 "type": "object",
@@ -452,6 +448,10 @@
                 },
                 "required": ["baseName", "labels"],
                 "additionalProperties": false
+              },
+              "arguments": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/Expression" }
               },
               "valueSet": { "$ref": "#/$defs/ValueSet" }
             },
@@ -463,10 +463,10 @@
               {
                 "type": "object",
                 "properties": {
-                  "initialValue": { "$ref": "#/$defs/Expression" },
                   "kind": { "const": "VARIABLE_DECL" },
                   "name": { "type": "string" },
-                  "valueSet": { "$ref": "#/$defs/ValueSet" }
+                  "valueSet": { "$ref": "#/$defs/ValueSet" },
+                  "initialValue": { "$ref": "#/$defs/Expression" }
                 },
                 "required": ["kind", "name", "valueSet", "initialValue"],
                 "additionalProperties": false
@@ -474,24 +474,24 @@
               {
                 "type": "object",
                 "properties": {
-                  "baseName": { "type": "string" },
-                  "body": {
-                    "type": "array",
-                    "items": { "$ref": "#/$defs/Statement" }
-                  },
                   "kind": { "const": "FUNCTION_DECL" },
+                  "baseName": { "type": "string" },
                   "parameters": {
                     "type": "array",
                     "items": {
                       "type": "object",
                       "properties": {
                         "label": { "type": "string" },
-                        "name": { "type": "string" },
+                        "varName": { "type": "string" },
                         "valueSet": { "$ref": "#/$defs/ValueSet" }
                       },
-                      "required": ["name", "valueSet"],
+                      "required": ["varName", "valueSet"],
                       "additionalProperties": false
                     }
+                  },
+                  "body": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/Statement" }
                   },
                   "returnValueSet": {
                     "oneOf": [
@@ -499,8 +499,8 @@
                         "type": "object",
                         "properties": {
                           "type": { "const": "integer" },
-                          "max": { "type": "string" },
-                          "min": { "type": "string" }
+                          "min": { "type": "string" },
+                          "max": { "type": "string" }
                         },
                         "required": ["type"],
                         "additionalProperties": false
@@ -539,6 +539,8 @@
               {
                 "type": "object",
                 "properties": {
+                  "kind": { "const": "DATA_DECL" },
+                  "name": { "type": "string" },
                   "fields": {
                     "type": "array",
                     "items": {
@@ -550,9 +552,7 @@
                       "required": ["name", "valueSet"],
                       "additionalProperties": false
                     }
-                  },
-                  "kind": { "const": "DATA_DECL" },
-                  "name": { "type": "string" }
+                  }
                 },
                 "required": ["kind", "name", "fields"],
                 "additionalProperties": false

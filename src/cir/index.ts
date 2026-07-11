@@ -16,7 +16,7 @@ export type Declaration =
           baseName: string
           parameters: {
               label?: string
-              name: string
+              varName: string
               valueSet: ValueSet
           }[]
           body: Statement[]

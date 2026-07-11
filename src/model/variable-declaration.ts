@@ -131,7 +131,8 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private buildValueSet(context: Context): cir.ValueSet {
-        if (!this.valueSet) return this.initialValue.valueSet(context)
+        if (!this.valueSet)
+            return this.initialValue.toCIRExpression(context).valueSet
         return this.valueSet.toCIR({
             semantics: convertSemantics(this.semantics),
         })

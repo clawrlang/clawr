@@ -39,12 +39,8 @@ export class VariableReference implements Expression {
         return {
             kind: 'VARIABLE_REF',
             name: this.name,
-            valueSet: this.valueSet(context),
+            valueSet: this.lookupInScope(context).valueSet,
         }
-    }
-
-    valueSet(context: Context): cir.ValueSet {
-        return this.lookupInScope(context).valueSet
     }
 
     lookupInScope(context: Context) {

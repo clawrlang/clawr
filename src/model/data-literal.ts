@@ -23,16 +23,6 @@ export class DataLiteral implements Expression {
         return true
     }
 
-    valueSet(context: Context & { type: string }): cir.ValueSet {
-        if (!context.type)
-            throw new Error('DataLiteral.valueSet: context.type is required')
-        return {
-            type: 'rc-type',
-            typeName: context.type,
-            semantics: 'UNIQUE',
-        }
-    }
-
     toCIRExpression(
         context: Context & { targetValueSet: cir.ValueSet },
     ): cir.Expression {
@@ -43,8 +33,7 @@ export class DataLiteral implements Expression {
                 this.span,
             )
         const targetType = context.scope.dataDeclaration(valueSet.typeName) as
-            | DataDeclaration
-            | undefined
+            DataDeclaration | undefined
         if (!targetType)
             context.errorReporter.reportFatalError(
                 `DataLiteral.toCIRExpression: target type ${valueSet.typeName} not found in scope`,

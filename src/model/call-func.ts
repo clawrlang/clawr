@@ -37,7 +37,7 @@ export class CallFunc implements Statement {
         const name = {
             baseName:
                 _name.baseName === 'print'
-                    ? `print${this.arguments[0].valueSet(context).type === 'integer' ? 'Int64' : 'Truthvalue'}`
+                    ? `print${this.arguments[0].toCIRExpression(context).valueSet.type === 'integer' ? 'Int64' : 'Truthvalue'}`
                     : _name.baseName,
             labels: _name.labels,
         }

@@ -10,7 +10,6 @@ export type Context = {
 export interface Expression {
     get span(): SourceCodeSpan
     isEffectivelyConst(context: Context): boolean
-    valueSet(context: Context): cir.ValueSet
     toCIRExpression(
         context: Context & { targetValueSet?: cir.ValueSet },
     ): cir.Expression

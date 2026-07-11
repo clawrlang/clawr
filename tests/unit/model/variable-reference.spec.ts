@@ -29,7 +29,7 @@ describe('Variable Reference', () => {
             end: { line: 1, column: 6 },
         }
         const variableRef = VariableReference.create({ name: 'myVar', span })
-        const cases = ['toCIRExpression', 'valueSet'] as const
+        const cases = ['toCIRExpression'] as const
         for (const method of cases) {
             test(method, () => {
                 const context = newSemanticContext()
@@ -58,7 +58,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.valueSet(context)).toEqual({
+        expect(variableRef.toCIRExpression(context).valueSet).toEqual({
             type: 'integer',
             min: '10',
             max: '10',
@@ -105,7 +105,9 @@ describe('Variable Reference', () => {
                     name: 'myVar',
                     span: someCodeSpan,
                 })
-                expect(variableRef.valueSet(context)).toMatchObject({
+                expect(
+                    variableRef.toCIRExpression(context).valueSet,
+                ).toMatchObject({
                     semantics: expected,
                 })
             })

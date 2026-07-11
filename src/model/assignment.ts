@@ -44,11 +44,10 @@ export class Assignment implements Statement {
                 { start: this.span.start, end: this.span.end },
             )
 
-
         const prelude = this.target.assignmentPrelude(context)
         context.scope.emitted.push(...prelude)
 
-        const targetValueSet = this.target.valueSet(context)
+        const targetValueSet = this.target.toCIRExpression(context).valueSet
 
         if (
             (value.kind === 'FIELD_REF' || value.kind === 'VARIABLE_REF') &&

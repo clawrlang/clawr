@@ -42,7 +42,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.valueSet(context).type).toBe('integer')
+        expect(fieldRef.toCIRExpression(context).valueSet.type).toBe('integer')
     })
 
     it('infers its isolation level from the context', () => {
@@ -82,7 +82,9 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.valueSet(context)).toMatchObject({ semantics: 'COW' })
+        expect(fieldRef.toCIRExpression(context).valueSet).toMatchObject({
+            semantics: 'COW',
+        })
     })
 
     describe('infers its type and isolation level from the context', () => {
@@ -126,12 +128,14 @@ describe('Field Reference', () => {
                         name: 'myVar',
                         span: someCodeSpan,
                     }),
-                    operator: '.',
+                    operator: expectedSemantics === 'REF' ? '->' : '.',
                     field: 'myField',
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                expect(fieldRef.valueSet(context)).toMatchObject({
+                expect(
+                    fieldRef.toCIRExpression(context).valueSet,
+                ).toMatchObject({
                     type: 'rc-type',
                     typeName: 'MyType',
                     semantics: expectedSemantics,
@@ -175,7 +179,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(() => fieldRef.valueSet(context)).toThrowError(
+        expect(() => fieldRef.toCIRExpression(context)).toThrowError(
             /Field nonExistentField does not exist on type MyType/,
         )
     })

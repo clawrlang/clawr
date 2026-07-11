@@ -36,7 +36,10 @@ export class FieldReference implements Expression {
                 this.span,
             )
 
-        if ((this.object.valueSet(context) as any).semantics === 'COW') {
+        if (
+            (this.object.toCIRExpression(context).valueSet as any).semantics ===
+            'COW'
+        ) {
             return [
                 {
                     kind: 'ENSURE_UNIQUE',
@@ -48,25 +51,14 @@ export class FieldReference implements Expression {
     }
 
     isEffectivelyConst(context: Context): boolean {
-        if ((this.object.valueSet(context) as any).semantics === 'REF')
+        if (
+            (this.object.toCIRExpression(context).valueSet as any).semantics ===
+            'REF'
+        )
             return false
 
         return this.object.isEffectivelyConst(context)
     }
-
-    valueSet(context: Context): cir.ValueSet {
-        const runtimeFieldValueSet = getRcTypeFieldValueSet(
-            this.object.valueSet(context),
-            this.field,
-        )
-        if (runtimeFieldValueSet) return runtimeFieldValueSet
-
-        const field = this.getFieldFromContext(context)
-        return field.valueSet.toCIR({
-            semantics: convertSemantics(field.semantics),
-        })
-    }
-
 
     toCIRExpression(
         context: Context,
@@ -76,12 +68,16 @@ export class FieldReference implements Expression {
             kind: 'FIELD_REF',
             object: this.object.toCIRExpression(context),
             field: this.field,
-            valueSet: this.valueSet(context),
+            valueSet: this.getFieldFromContext(context).valueSet.toCIR({
+                semantics: convertSemantics(
+                    this.getFieldFromContext(context).semantics,
+                ),
+            }),
         }
     }
 
     private getFieldFromContext(context: Context) {
-        const objectValueSet = this.object.valueSet(context)
+        const objectValueSet = this.object.toCIRExpression(context).valueSet
         const objectType =
             objectValueSet.type === 'rc-type'
                 ? objectValueSet.typeName
@@ -110,50 +106,12 @@ export class FieldReference implements Expression {
     }
 
     private checkOperatorCompatibility(context: Context) {
-        const semantics = (this.object.valueSet(context) as any).semantics
+        const semantics = (this.object.toCIRExpression(context).valueSet as any)
+            .semantics
         if ((semantics === 'REF') !== (this.operator === '->'))
             context.errorReporter.reportFatalError(
                 `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
                 this.span,
             )
-    }
-}
-
-function getRcTypeFieldValueSet(
-    valueSet: cir.ValueSet,
-    fieldName: string,
-): cir.ValueSet | undefined {
-    if (valueSet.type !== 'rc-type' || !valueSet.fields) return undefined
-    const field = valueSet.fields.find(
-        (candidate) => candidate.name === fieldName,
-    )
-    if (!field) return undefined
-    return structuredClone(field.valueSet) as cir.ValueSet
-}
-
-function setRcTypeFieldValueSet(
-    valueSet: cir.ValueSet,
-    fieldName: string,
-    fieldValueSet: cir.ValueSet,
-): cir.ValueSet {
-    if (valueSet.type !== 'rc-type') return valueSet
-
-    const fields =
-        valueSet.fields?.map((field) => ({
-            name: field.name,
-            valueSet: structuredClone(field.valueSet) as cir.ValueSet,
-        })) ?? []
-    const nextField = {
-        name: fieldName,
-        valueSet: structuredClone(fieldValueSet) as cir.ValueSet,
-    }
-
-    const fieldIndex = fields.findIndex((field) => field.name === fieldName)
-    if (fieldIndex === -1) fields.push(nextField)
-    else fields[fieldIndex] = nextField
-
-    return {
-        ...valueSet,
-        fields,
     }
 }

@@ -22,19 +22,15 @@ export class IntegerLiteral implements Expression {
         return new IntegerLiteral(value, span)
     }
 
-    toCIRExpression(context: Context): cir.Expression {
+    toCIRExpression(_: Context): cir.Expression {
         return {
             kind: 'INTEGER_LITERAL',
             value: this.value.toString(),
-            valueSet: this.valueSet(context),
-        }
-    }
-
-    valueSet(_: Context): Extract<cir.ValueSet, { type: 'integer' }> {
-        return {
-            type: 'integer',
-            min: this.value.toString(),
-            max: this.value.toString(),
+            valueSet: {
+                type: 'integer',
+                min: this.value.toString(),
+                max: this.value.toString(),
+            },
         }
     }
 

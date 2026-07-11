@@ -40,11 +40,22 @@ export class Query implements Expression {
         return true
     }
 
-    valueSet(context: Context): cir.ValueSet {
+    toCIRExpression(context: Context): cir.Expression {
+        return {
+            kind: 'QUERY',
+            name: this.name.toCIR(),
+            arguments: this.arguments.map((arg) =>
+                arg.toCIRExpression(context),
+            ),
+            valueSet: this.cirValueSet(context),
+        }
+    }
+
+    private cirValueSet(context: Context): cir.ValueSet {
         const name = this.name.toString()
         if (name === 'copy(of:)')
             return {
-                ...this.arguments[0].valueSet(context),
+                ...this.arguments[0].toCIRExpression(context).valueSet,
                 ...{ semantics: 'UNIQUE' },
             }
         const funcDecl = context.scope.functionDeclaration(name)
@@ -60,16 +71,5 @@ export class Query implements Expression {
                 this.span,
             )
         return resultSet
-    }
-
-    toCIRExpression(context: Context): cir.Expression {
-        return {
-            kind: 'QUERY',
-            name: this.name.toCIR(),
-            arguments: this.arguments.map((arg) =>
-                arg.toCIRExpression(context),
-            ),
-            valueSet: this.valueSet(context),
-        }
     }
 }

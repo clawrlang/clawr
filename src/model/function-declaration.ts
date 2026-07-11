@@ -88,9 +88,9 @@ export class FunctionDeclaration implements Declaration {
         })
         if (returnValueSet) return returnValueSet
         if (this.implementation.kind === 'implicit-return')
-            return this.implementation.expression.valueSet(
+            return this.implementation.expression.toCIRExpression(
                 this.bodyContext(context),
-            )
+            ).valueSet
     }
 
     private bodyContext(context: Context): Context {

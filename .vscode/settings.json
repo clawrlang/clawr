@@ -8,20 +8,14 @@
       "schema": {
         "type": "object",
         "properties": {
-          "$schema": {
-            "const": "http://clawr.lang/schema/cir/DRAFT-0"
-          },
+          "$schema": { "const": "http://clawr.lang/schema/cir/DRAFT-0" },
           "declarations": {
             "type": "array",
-            "items": {
-              "$ref": "#/$defs/Declaration"
-            }
+            "items": { "$ref": "#/$defs/Declaration" }
           },
           "startBlock": {
             "type": "array",
-            "items": {
-              "$ref": "#/$defs/Statement"
-            }
+            "items": { "$ref": "#/$defs/Statement" }
           }
         },
         "required": ["$schema"],
@@ -31,20 +25,14 @@
           "ClawrModule": {
             "type": "object",
             "properties": {
-              "$schema": {
-                "const": "http://clawr.lang/schema/cir/DRAFT-0"
-              },
+              "$schema": { "const": "http://clawr.lang/schema/cir/DRAFT-0" },
               "declarations": {
                 "type": "array",
-                "items": {
-                  "$ref": "#/$defs/Declaration"
-                }
+                "items": { "$ref": "#/$defs/Declaration" }
               },
               "startBlock": {
                 "type": "array",
-                "items": {
-                  "$ref": "#/$defs/Statement"
-                }
+                "items": { "$ref": "#/$defs/Statement" }
               }
             },
             "required": ["$schema"],
@@ -55,18 +43,10 @@
               {
                 "type": "object",
                 "properties": {
-                  "initialValue": {
-                    "$ref": "#/$defs/Expression"
-                  },
-                  "kind": {
-                    "const": "VARIABLE_DECL"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "valueSet": {
-                    "$ref": "#/$defs/ValueSet"
-                  }
+                  "initialValue": { "$ref": "#/$defs/Expression" },
+                  "kind": { "const": "VARIABLE_DECL" },
+                  "name": { "type": "string" },
+                  "valueSet": { "$ref": "#/$defs/ValueSet" }
                 },
                 "required": ["kind", "name", "valueSet", "initialValue"],
                 "additionalProperties": false
@@ -74,12 +54,8 @@
               {
                 "type": "object",
                 "properties": {
-                  "kind": {
-                    "const": "ENSURE_UNIQUE"
-                  },
-                  "object": {
-                    "$ref": "#/$defs/Expression"
-                  }
+                  "kind": { "const": "ENSURE_UNIQUE" },
+                  "object": { "$ref": "#/$defs/Expression" }
                 },
                 "required": ["kind", "object"],
                 "additionalProperties": false
@@ -87,30 +63,20 @@
               {
                 "type": "object",
                 "properties": {
-                  "kind": {
-                    "const": "RELEASE"
-                  },
+                  "kind": { "const": "RELEASE" },
                   "object": {
                     "oneOf": [
                       {
                         "type": "object",
                         "properties": {
-                          "kind": {
-                            "const": "VARIABLE_REF"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "valueSet": {
-                            "$ref": "#/$defs/ValueSet"
-                          }
+                          "kind": { "const": "VARIABLE_REF" },
+                          "name": { "type": "string" },
+                          "valueSet": { "$ref": "#/$defs/ValueSet" }
                         },
                         "required": ["kind", "name", "valueSet"],
                         "additionalProperties": false
                       },
-                      {
-                        "$ref": "#/$defs/__type.o13"
-                      }
+                      { "$ref": "#/$defs/__type.o13" }
                     ]
                   }
                 },
@@ -122,24 +88,16 @@
                 "properties": {
                   "arguments": {
                     "type": "array",
-                    "items": {
-                      "$ref": "#/$defs/Expression"
-                    }
+                    "items": { "$ref": "#/$defs/Expression" }
                   },
-                  "kind": {
-                    "const": "EXEC"
-                  },
+                  "kind": { "const": "EXEC" },
                   "name": {
                     "type": "object",
                     "properties": {
-                      "baseName": {
-                        "type": "string"
-                      },
+                      "baseName": { "type": "string" },
                       "labels": {
                         "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
+                        "items": { "type": "string" }
                       }
                     },
                     "required": ["baseName", "labels"],
@@ -152,49 +110,31 @@
               {
                 "type": "object",
                 "properties": {
-                  "kind": {
-                    "const": "RETURN"
-                  },
+                  "kind": { "const": "RETURN" },
                   "value": {
                     "oneOf": [
                       {
                         "type": "object",
                         "properties": {
-                          "kind": {
-                            "const": "TRUTHVALUE_LITERAL"
-                          },
+                          "kind": { "const": "TRUTHVALUE_LITERAL" },
                           "value": {
                             "oneOf": [
-                              {
-                                "const": "ambiguous"
-                              },
-                              {
-                                "const": "false"
-                              },
-                              {
-                                "const": "true"
-                              }
+                              { "const": "ambiguous" },
+                              { "const": "false" },
+                              { "const": "true" }
                             ]
                           },
                           "valueSet": {
                             "type": "object",
                             "properties": {
-                              "type": {
-                                "const": "truthvalue"
-                              },
+                              "type": { "const": "truthvalue" },
                               "values": {
                                 "type": "array",
                                 "items": {
                                   "oneOf": [
-                                    {
-                                      "const": "ambiguous"
-                                    },
-                                    {
-                                      "const": "false"
-                                    },
-                                    {
-                                      "const": "true"
-                                    }
+                                    { "const": "ambiguous" },
+                                    { "const": "false" },
+                                    { "const": "true" }
                                   ]
                                 }
                               }
@@ -209,24 +149,14 @@
                       {
                         "type": "object",
                         "properties": {
-                          "kind": {
-                            "const": "INTEGER_LITERAL"
-                          },
-                          "value": {
-                            "type": "string"
-                          },
+                          "kind": { "const": "INTEGER_LITERAL" },
+                          "value": { "type": "string" },
                           "valueSet": {
                             "type": "object",
                             "properties": {
-                              "type": {
-                                "const": "integer"
-                              },
-                              "max": {
-                                "type": "string"
-                              },
-                              "min": {
-                                "type": "string"
-                              }
+                              "type": { "const": "integer" },
+                              "max": { "type": "string" },
+                              "min": { "type": "string" }
                             },
                             "required": ["type"],
                             "additionalProperties": false
@@ -238,19 +168,11 @@
                       {
                         "type": "object",
                         "properties": {
-                          "kind": {
-                            "const": "STRING_LITERAL"
-                          },
-                          "value": {
-                            "type": "string"
-                          },
+                          "kind": { "const": "STRING_LITERAL" },
+                          "value": { "type": "string" },
                           "valueSet": {
                             "type": "object",
-                            "properties": {
-                              "type": {
-                                "const": "string"
-                              }
-                            },
+                            "properties": { "type": { "const": "string" } },
                             "required": ["type"],
                             "additionalProperties": false
                           }
@@ -258,34 +180,20 @@
                         "required": ["kind", "value", "valueSet"],
                         "additionalProperties": false
                       },
-                      {
-                        "$ref": "#/$defs/__type.o9"
-                      },
-                      {
-                        "$ref": "#/$defs/__type.o11"
-                      },
+                      { "$ref": "#/$defs/__type.o9" },
+                      { "$ref": "#/$defs/__type.o11" },
                       {
                         "type": "object",
                         "properties": {
-                          "kind": {
-                            "const": "VARIABLE_REF"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "valueSet": {
-                            "$ref": "#/$defs/ValueSet"
-                          }
+                          "kind": { "const": "VARIABLE_REF" },
+                          "name": { "type": "string" },
+                          "valueSet": { "$ref": "#/$defs/ValueSet" }
                         },
                         "required": ["kind", "name", "valueSet"],
                         "additionalProperties": false
                       },
-                      {
-                        "$ref": "#/$defs/__type.o13"
-                      },
-                      {
-                        "$ref": "#/$defs/__type.o14"
-                      }
+                      { "$ref": "#/$defs/__type.o13" },
+                      { "$ref": "#/$defs/__type.o14" }
                     ]
                   }
                 },
@@ -295,35 +203,23 @@
               {
                 "type": "object",
                 "properties": {
-                  "kind": {
-                    "const": "ASSIGN"
-                  },
+                  "kind": { "const": "ASSIGN" },
                   "target": {
                     "oneOf": [
                       {
                         "type": "object",
                         "properties": {
-                          "kind": {
-                            "const": "VARIABLE_REF"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "valueSet": {
-                            "$ref": "#/$defs/ValueSet"
-                          }
+                          "kind": { "const": "VARIABLE_REF" },
+                          "name": { "type": "string" },
+                          "valueSet": { "$ref": "#/$defs/ValueSet" }
                         },
                         "required": ["kind", "name", "valueSet"],
                         "additionalProperties": false
                       },
-                      {
-                        "$ref": "#/$defs/__type.o13"
-                      }
+                      { "$ref": "#/$defs/__type.o13" }
                     ]
                   },
-                  "value": {
-                    "$ref": "#/$defs/Expression"
-                  }
+                  "value": { "$ref": "#/$defs/Expression" }
                 },
                 "required": ["kind", "target", "value"],
                 "additionalProperties": false
@@ -335,15 +231,9 @@
               {
                 "type": "object",
                 "properties": {
-                  "type": {
-                    "const": "integer"
-                  },
-                  "max": {
-                    "type": "string"
-                  },
-                  "min": {
-                    "type": "string"
-                  }
+                  "type": { "const": "integer" },
+                  "max": { "type": "string" },
+                  "min": { "type": "string" }
                 },
                 "required": ["type"],
                 "additionalProperties": false
@@ -351,22 +241,14 @@
               {
                 "type": "object",
                 "properties": {
-                  "type": {
-                    "const": "truthvalue"
-                  },
+                  "type": { "const": "truthvalue" },
                   "values": {
                     "type": "array",
                     "items": {
                       "oneOf": [
-                        {
-                          "const": "ambiguous"
-                        },
-                        {
-                          "const": "false"
-                        },
-                        {
-                          "const": "true"
-                        }
+                        { "const": "ambiguous" },
+                        { "const": "false" },
+                        { "const": "true" }
                       ]
                     }
                   }
@@ -376,47 +258,29 @@
               },
               {
                 "type": "object",
-                "properties": {
-                  "type": {
-                    "const": "string"
-                  }
-                },
+                "properties": { "type": { "const": "string" } },
                 "required": ["type"],
                 "additionalProperties": false
               },
-              {
-                "$ref": "#/$defs/__type.o4"
-              }
+              { "$ref": "#/$defs/__type.o4" }
             ]
           },
           "__type.o4": {
             "type": "object",
             "properties": {
-              "type": {
-                "const": "rc-type"
-              },
+              "type": { "const": "rc-type" },
               "fields": {
                 "type": "array",
-                "items": {
-                  "$ref": "#/$defs/__type.o5"
-                }
+                "items": { "$ref": "#/$defs/__type.o5" }
               },
               "semantics": {
                 "oneOf": [
-                  {
-                    "const": "COW"
-                  },
-                  {
-                    "const": "REF"
-                  },
-                  {
-                    "const": "UNIQUE"
-                  }
+                  { "const": "COW" },
+                  { "const": "REF" },
+                  { "const": "UNIQUE" }
                 ]
               },
-              "typeName": {
-                "type": "string"
-              }
+              "typeName": { "type": "string" }
             },
             "required": ["type", "typeName", "semantics"],
             "additionalProperties": false
@@ -424,12 +288,8 @@
           "__type.o5": {
             "type": "object",
             "properties": {
-              "name": {
-                "type": "string"
-              },
-              "valueSet": {
-                "$ref": "#/$defs/ValueSet"
-              }
+              "name": { "type": "string" },
+              "valueSet": { "$ref": "#/$defs/ValueSet" }
             },
             "required": ["name", "valueSet"],
             "additionalProperties": false
@@ -439,18 +299,29 @@
               {
                 "type": "object",
                 "properties": {
-                  "kind": {
-                    "const": "STRING_LITERAL"
-                  },
-                  "value": {
-                    "type": "string"
-                  },
+                  "kind": { "const": "STRING_LITERAL" },
+                  "value": { "type": "string" },
+                  "valueSet": {
+                    "type": "object",
+                    "properties": { "type": { "const": "string" } },
+                    "required": ["type"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["kind", "value", "valueSet"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": { "const": "INTEGER_LITERAL" },
+                  "value": { "type": "string" },
                   "valueSet": {
                     "type": "object",
                     "properties": {
-                      "type": {
-                        "const": "string"
-                      }
+                      "type": { "const": "integer" },
+                      "max": { "type": "string" },
+                      "min": { "type": "string" }
                     },
                     "required": ["type"],
                     "additionalProperties": false
@@ -462,70 +333,25 @@
               {
                 "type": "object",
                 "properties": {
-                  "kind": {
-                    "const": "INTEGER_LITERAL"
-                  },
-                  "value": {
-                    "type": "string"
-                  },
-                  "valueSet": {
-                    "type": "object",
-                    "properties": {
-                      "type": {
-                        "const": "integer"
-                      },
-                      "max": {
-                        "type": "string"
-                      },
-                      "min": {
-                        "type": "string"
-                      }
-                    },
-                    "required": ["type"],
-                    "additionalProperties": false
-                  }
-                },
-                "required": ["kind", "value", "valueSet"],
-                "additionalProperties": false
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "kind": {
-                    "const": "TRUTHVALUE_LITERAL"
-                  },
+                  "kind": { "const": "TRUTHVALUE_LITERAL" },
                   "value": {
                     "oneOf": [
-                      {
-                        "const": "ambiguous"
-                      },
-                      {
-                        "const": "false"
-                      },
-                      {
-                        "const": "true"
-                      }
+                      { "const": "ambiguous" },
+                      { "const": "false" },
+                      { "const": "true" }
                     ]
                   },
                   "valueSet": {
                     "type": "object",
                     "properties": {
-                      "type": {
-                        "const": "truthvalue"
-                      },
+                      "type": { "const": "truthvalue" },
                       "values": {
                         "type": "array",
                         "items": {
                           "oneOf": [
-                            {
-                              "const": "ambiguous"
-                            },
-                            {
-                              "const": "false"
-                            },
-                            {
-                              "const": "true"
-                            }
+                            { "const": "ambiguous" },
+                            { "const": "false" },
+                            { "const": "true" }
                           ]
                         }
                       }
@@ -537,34 +363,20 @@
                 "required": ["kind", "value", "valueSet"],
                 "additionalProperties": false
               },
-              {
-                "$ref": "#/$defs/__type.o9"
-              },
-              {
-                "$ref": "#/$defs/__type.o11"
-              },
+              { "$ref": "#/$defs/__type.o9" },
+              { "$ref": "#/$defs/__type.o11" },
               {
                 "type": "object",
                 "properties": {
-                  "kind": {
-                    "const": "VARIABLE_REF"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "valueSet": {
-                    "$ref": "#/$defs/ValueSet"
-                  }
+                  "kind": { "const": "VARIABLE_REF" },
+                  "name": { "type": "string" },
+                  "valueSet": { "$ref": "#/$defs/ValueSet" }
                 },
                 "required": ["kind", "name", "valueSet"],
                 "additionalProperties": false
               },
-              {
-                "$ref": "#/$defs/__type.o13"
-              },
-              {
-                "$ref": "#/$defs/__type.o14"
-              }
+              { "$ref": "#/$defs/__type.o13" },
+              { "$ref": "#/$defs/__type.o14" }
             ]
           },
           "__type.o9": {
@@ -572,16 +384,10 @@
             "properties": {
               "fields": {
                 "type": "array",
-                "items": {
-                  "$ref": "#/$defs/__type.o10"
-                }
+                "items": { "$ref": "#/$defs/__type.o10" }
               },
-              "kind": {
-                "const": "ALLOCATE"
-              },
-              "valueSet": {
-                "$ref": "#/$defs/__type.o4"
-              }
+              "kind": { "const": "ALLOCATE" },
+              "valueSet": { "$ref": "#/$defs/__type.o4" }
             },
             "required": ["kind", "valueSet", "fields"],
             "additionalProperties": false
@@ -589,12 +395,8 @@
           "__type.o10": {
             "type": "object",
             "properties": {
-              "name": {
-                "type": "string"
-              },
-              "value": {
-                "$ref": "#/$defs/Expression"
-              }
+              "name": { "type": "string" },
+              "value": { "$ref": "#/$defs/Expression" }
             },
             "required": ["name", "value"],
             "additionalProperties": false
@@ -602,35 +404,23 @@
           "__type.o11": {
             "type": "object",
             "properties": {
-              "kind": {
-                "const": "RETAIN"
-              },
+              "kind": { "const": "RETAIN" },
               "object": {
                 "oneOf": [
                   {
                     "type": "object",
                     "properties": {
-                      "kind": {
-                        "const": "VARIABLE_REF"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "valueSet": {
-                        "$ref": "#/$defs/ValueSet"
-                      }
+                      "kind": { "const": "VARIABLE_REF" },
+                      "name": { "type": "string" },
+                      "valueSet": { "$ref": "#/$defs/ValueSet" }
                     },
                     "required": ["kind", "name", "valueSet"],
                     "additionalProperties": false
                   },
-                  {
-                    "$ref": "#/$defs/__type.o13"
-                  }
+                  { "$ref": "#/$defs/__type.o13" }
                 ]
               },
-              "valueSet": {
-                "$ref": "#/$defs/__type.o4"
-              }
+              "valueSet": { "$ref": "#/$defs/__type.o4" }
             },
             "required": ["kind", "object", "valueSet"],
             "additionalProperties": false
@@ -638,18 +428,10 @@
           "__type.o13": {
             "type": "object",
             "properties": {
-              "field": {
-                "type": "string"
-              },
-              "kind": {
-                "const": "FIELD_REF"
-              },
-              "object": {
-                "$ref": "#/$defs/Expression"
-              },
-              "valueSet": {
-                "$ref": "#/$defs/ValueSet"
-              }
+              "field": { "type": "string" },
+              "kind": { "const": "FIELD_REF" },
+              "object": { "$ref": "#/$defs/Expression" },
+              "valueSet": { "$ref": "#/$defs/ValueSet" }
             },
             "required": ["kind", "object", "field", "valueSet"],
             "additionalProperties": false
@@ -659,32 +441,19 @@
             "properties": {
               "arguments": {
                 "type": "array",
-                "items": {
-                  "$ref": "#/$defs/Expression"
-                }
+                "items": { "$ref": "#/$defs/Expression" }
               },
-              "kind": {
-                "const": "QUERY"
-              },
+              "kind": { "const": "QUERY" },
               "name": {
                 "type": "object",
                 "properties": {
-                  "baseName": {
-                    "type": "string"
-                  },
-                  "labels": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
+                  "baseName": { "type": "string" },
+                  "labels": { "type": "array", "items": { "type": "string" } }
                 },
                 "required": ["baseName", "labels"],
                 "additionalProperties": false
               },
-              "valueSet": {
-                "$ref": "#/$defs/ValueSet"
-              }
+              "valueSet": { "$ref": "#/$defs/ValueSet" }
             },
             "required": ["kind", "name", "arguments", "valueSet"],
             "additionalProperties": false
@@ -694,18 +463,10 @@
               {
                 "type": "object",
                 "properties": {
-                  "initialValue": {
-                    "$ref": "#/$defs/Expression"
-                  },
-                  "kind": {
-                    "const": "VARIABLE_DECL"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "valueSet": {
-                    "$ref": "#/$defs/ValueSet"
-                  }
+                  "initialValue": { "$ref": "#/$defs/Expression" },
+                  "kind": { "const": "VARIABLE_DECL" },
+                  "name": { "type": "string" },
+                  "valueSet": { "$ref": "#/$defs/ValueSet" }
                 },
                 "required": ["kind", "name", "valueSet", "initialValue"],
                 "additionalProperties": false
@@ -713,32 +474,20 @@
               {
                 "type": "object",
                 "properties": {
-                  "baseName": {
-                    "type": "string"
-                  },
+                  "baseName": { "type": "string" },
                   "body": {
                     "type": "array",
-                    "items": {
-                      "$ref": "#/$defs/Statement"
-                    }
+                    "items": { "$ref": "#/$defs/Statement" }
                   },
-                  "kind": {
-                    "const": "FUNCTION_DECL"
-                  },
+                  "kind": { "const": "FUNCTION_DECL" },
                   "parameters": {
                     "type": "array",
                     "items": {
                       "type": "object",
                       "properties": {
-                        "label": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "valueSet": {
-                          "$ref": "#/$defs/ValueSet"
-                        }
+                        "label": { "type": "string" },
+                        "name": { "type": "string" },
+                        "valueSet": { "$ref": "#/$defs/ValueSet" }
                       },
                       "required": ["name", "valueSet"],
                       "additionalProperties": false
@@ -749,15 +498,9 @@
                       {
                         "type": "object",
                         "properties": {
-                          "type": {
-                            "const": "integer"
-                          },
-                          "max": {
-                            "type": "string"
-                          },
-                          "min": {
-                            "type": "string"
-                          }
+                          "type": { "const": "integer" },
+                          "max": { "type": "string" },
+                          "min": { "type": "string" }
                         },
                         "required": ["type"],
                         "additionalProperties": false
@@ -765,22 +508,14 @@
                       {
                         "type": "object",
                         "properties": {
-                          "type": {
-                            "const": "truthvalue"
-                          },
+                          "type": { "const": "truthvalue" },
                           "values": {
                             "type": "array",
                             "items": {
                               "oneOf": [
-                                {
-                                  "const": "ambiguous"
-                                },
-                                {
-                                  "const": "false"
-                                },
-                                {
-                                  "const": "true"
-                                }
+                                { "const": "ambiguous" },
+                                { "const": "false" },
+                                { "const": "true" }
                               ]
                             }
                           }
@@ -790,17 +525,11 @@
                       },
                       {
                         "type": "object",
-                        "properties": {
-                          "type": {
-                            "const": "string"
-                          }
-                        },
+                        "properties": { "type": { "const": "string" } },
                         "required": ["type"],
                         "additionalProperties": false
                       },
-                      {
-                        "$ref": "#/$defs/__type.o4"
-                      }
+                      { "$ref": "#/$defs/__type.o4" }
                     ]
                   }
                 },
@@ -815,23 +544,15 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "name": {
-                          "type": "string"
-                        },
-                        "valueSet": {
-                          "$ref": "#/$defs/ValueSet"
-                        }
+                        "name": { "type": "string" },
+                        "valueSet": { "$ref": "#/$defs/ValueSet" }
                       },
                       "required": ["name", "valueSet"],
                       "additionalProperties": false
                     }
                   },
-                  "kind": {
-                    "const": "DATA_DECL"
-                  },
-                  "name": {
-                    "type": "string"
-                  }
+                  "kind": { "const": "DATA_DECL" },
+                  "name": { "type": "string" }
                 },
                 "required": ["kind", "name", "fields"],
                 "additionalProperties": false

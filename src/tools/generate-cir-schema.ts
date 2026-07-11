@@ -49,9 +49,32 @@ async function main() {
 
     await fs.mkdir(path.dirname(outPath), { recursive: true })
     await fs.writeFile(outPath, JSON.stringify(schema, null, 2) + '\n')
+
+    await updateVSCodeSchemaSettings(schema)
 }
 
 main().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exit(1)
 })
+
+async function updateVSCodeSchemaSettings(schema: JsonSchema) {
+    const settingsPath = path.resolve(__dirname, '../../.vscode/settings.json')
+    const settings = await loadVSCodeSettings()
+    settings['json.schemas'] = [
+        {
+            url: 'http://clawr.lang/schema/cir/DRAFT-0',
+            schema,
+        },
+    ]
+
+    await fs.writeFile(settingsPath, JSON.stringify(settings), 'utf-8')
+
+    async function loadVSCodeSettings() {
+        try {
+            return JSON.parse(await fs.readFile(settingsPath, 'utf-8'))
+        } catch (error) {
+            return {}
+        }
+    }
+}

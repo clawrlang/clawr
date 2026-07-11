@@ -105,7 +105,7 @@ describe('Module', () => {
         module.toCIR(context)
         expect(context.scope.variableDeclaration('x')).toEqual({
             semantics: 'const',
-            allowedValues: { type: 'integer', min: '42', max: '42' },
+            valueSet: { type: 'integer', min: '42', max: '42' },
         })
     })
 

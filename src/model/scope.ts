@@ -67,8 +67,8 @@ export class Scope {
 
     releaseVariables() {
         const vars = [...this.variables.entries()]
-            .filter((v) => v[1].allowedValues.type === 'rc-type')
-            .map((v) => [v[0], v[1].allowedValues] as [string, cir.ValueSet])
+            .filter((v) => v[1].valueSet.type === 'rc-type')
+            .map((v) => [v[0], v[1].valueSet] as [string, cir.ValueSet])
 
         for (const v of vars) {
             this.emitted.push({
@@ -96,5 +96,5 @@ export class Scope {
 
 type Variable = {
     semantics: VariableSemantics
-    allowedValues: cir.ValueSet
+    valueSet: cir.ValueSet
 }

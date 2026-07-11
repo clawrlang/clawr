@@ -53,7 +53,7 @@ export class VariableDeclaration implements Statement, Declaration {
 
         scope.variables.set(this.name, {
             semantics: this.semantics,
-            allowedValues:
+            valueSet:
                 this.semantics === 'const'
                     ? initialValue.valueSet
                     : targetValueSet,

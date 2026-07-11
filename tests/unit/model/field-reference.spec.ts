@@ -10,7 +10,7 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             semantics: 'mut',
-            allowedValues: {
+            valueSet: {
                 type: 'rc-type',
                 semantics: 'COW',
                 typeName: 'MyType',
@@ -49,7 +49,7 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             semantics: 'mut',
-            allowedValues: {
+            valueSet: {
                 type: 'rc-type',
                 semantics: 'COW',
                 typeName: 'MyType',
@@ -98,7 +98,7 @@ describe('Field Reference', () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     semantics,
-                    allowedValues: {
+                    valueSet: {
                         type: 'rc-type',
                         semantics: expectedSemantics,
                         typeName: 'MyType',
@@ -143,7 +143,7 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             semantics: 'mut',
-            allowedValues: {
+            valueSet: {
                 type: 'rc-type',
                 semantics: 'COW',
                 typeName: 'MyType',
@@ -193,7 +193,7 @@ describe('Field Reference', () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     semantics: semantics[0],
-                    allowedValues: {
+                    valueSet: {
                         type: 'rc-type',
                         semantics: semantics[1],
                         typeName: 'MyType',
@@ -257,7 +257,7 @@ describe('Field Reference', () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     semantics: semantics[0],
-                    allowedValues: {
+                    valueSet: {
                         type: 'rc-type',
                         semantics: semantics[1],
                         typeName: 'MyType',
@@ -297,7 +297,7 @@ describe('Field Reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 semantics: 'const',
-                allowedValues: {
+                valueSet: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'MyType',
@@ -336,7 +336,7 @@ describe('Field Reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 semantics: 'mut',
-                allowedValues: {
+                valueSet: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'MyType',

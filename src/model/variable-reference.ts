@@ -44,9 +44,8 @@ export class VariableReference implements Expression {
     }
 
     valueSet(context: Context): cir.ValueSet {
-        return this.lookupInScope(context).allowedValues
+        return this.lookupInScope(context).valueSet
     }
-
 
     lookupInScope(context: Context) {
         const variable = context.scope.variableDeclaration(this.name)

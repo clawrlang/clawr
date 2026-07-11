@@ -9,7 +9,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             semantics: 'const',
-            allowedValues: { type: 'integer', min: '10', max: '10' },
+            valueSet: { type: 'integer', min: '10', max: '10' },
         })
 
         const variableRef = VariableReference.create({
@@ -51,7 +51,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             semantics: 'const',
-            allowedValues: { type: 'integer', min: '10', max: '10' },
+            valueSet: { type: 'integer', min: '10', max: '10' },
         })
 
         const variableRef = VariableReference.create({
@@ -94,7 +94,7 @@ describe('Variable Reference', () => {
             it(`returns ${expected} for ${kind} variable`, () => {
                 context.scope.variables.set('myVar', {
                     semantics: kind,
-                    allowedValues: {
+                    valueSet: {
                         type: 'rc-type',
                         semantics: expected,
                         typeName: 'MyType',

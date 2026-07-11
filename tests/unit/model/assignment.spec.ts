@@ -13,7 +13,7 @@ describe('Assignment', () => {
         const context = newSemanticContext()
         context.scope.variables.set('x', {
             semantics: 'mut',
-            allowedValues: { type: 'integer' },
+            valueSet: { type: 'integer' },
         })
 
         const assignment = Assignment.create({
@@ -69,7 +69,7 @@ describe('Assignment', () => {
             )
             context.scope.variables.set('bar', {
                 semantics: 'const',
-                allowedValues: {
+                valueSet: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'OuterType',
@@ -77,7 +77,7 @@ describe('Assignment', () => {
             })
             context.scope.variables.set('foo', {
                 semantics: 'mut',
-                allowedValues: {
+                valueSet: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'InnerType',
@@ -158,7 +158,7 @@ describe('Assignment', () => {
             )
             context.scope.variables.set('bar', {
                 semantics: 'const',
-                allowedValues: {
+                valueSet: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'MyType',
@@ -166,7 +166,7 @@ describe('Assignment', () => {
             })
             context.scope.variables.set('foo', {
                 semantics: 'mut',
-                allowedValues: {
+                valueSet: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'MyType',
@@ -241,7 +241,7 @@ describe('Assignment', () => {
         )
         context.scope.variables.set('foo', {
             semantics: 'mut',
-            allowedValues: {
+            valueSet: {
                 type: 'rc-type',
                 semantics: 'COW',
                 typeName: 'MyType',
@@ -327,7 +327,7 @@ describe('Assignment', () => {
                 )
                 context.scope.variables.set('target', {
                     semantics: kind,
-                    allowedValues: {
+                    valueSet: {
                         type: 'rc-type',
                         semantics: semantics,
                         typeName: 'MyType',
@@ -335,7 +335,7 @@ describe('Assignment', () => {
                 })
                 context.scope.variables.set('value', {
                     semantics: kind,
-                    allowedValues: {
+                    valueSet: {
                         type: 'rc-type',
                         semantics: semantics,
                         typeName: 'MyType',
@@ -391,7 +391,7 @@ describe('Assignment', () => {
         )
         context.scope.variables.set('x', {
             semantics: 'const',
-            allowedValues: {
+            valueSet: {
                 type: 'rc-type',
                 semantics: 'COW',
                 typeName: 'MyType',
@@ -459,7 +459,7 @@ describe('Assignment', () => {
                 )
                 context.scope.variables.set('target', {
                     semantics: targetSemantics[0],
-                    allowedValues: {
+                    valueSet: {
                         type: 'rc-type',
                         semantics: targetSemantics[1],
                         typeName: 'MyType',
@@ -467,7 +467,7 @@ describe('Assignment', () => {
                 })
                 context.scope.variables.set('value', {
                     semantics: valueSemantics[0],
-                    allowedValues: {
+                    valueSet: {
                         type: 'rc-type',
                         semantics: valueSemantics[1],
                         typeName: 'MyType',
@@ -523,7 +523,7 @@ describe('Assignment', () => {
             )
             context.scope.variables.set('target', {
                 semantics: 'mut',
-                allowedValues: {
+                valueSet: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'MyType',

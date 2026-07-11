@@ -179,7 +179,7 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('bar', {
                 semantics: 'const',
-                allowedValues: {
+                valueSet: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'OuterType',
@@ -239,7 +239,7 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('bar', {
                 semantics: 'const',
-                allowedValues: {
+                valueSet: {
                     type: 'rc-type',
                     semantics: 'COW',
                     typeName: 'MyType',
@@ -300,7 +300,7 @@ describe('VariableDeclaration', () => {
                 )
                 context.scope.variables.set('value', {
                     semantics: valueSemantics[0],
-                    allowedValues: {
+                    valueSet: {
                         type: 'rc-type',
                         semantics: valueSemantics[1],
                         typeName: 'MyType',

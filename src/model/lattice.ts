@@ -2,6 +2,7 @@ import * as cir from '../cir'
 import { SourceCodeSpan } from '../diagnostics'
 
 export interface Lattice {
+    unconstrained(): Lattice
     toCIR(): cir.ValueSet
 }
 
@@ -19,6 +20,10 @@ export class IntegerLattice implements Lattice {
         max?: bigint
     }): IntegerLattice {
         return new IntegerLattice(min, max)
+    }
+
+    unconstrained(): Lattice {
+        return IntegerLattice.create({ min: undefined, max: undefined })
     }
 
     toCIR(): cir.ValueSet {
@@ -41,6 +46,10 @@ export class TruthvalueLattice implements Lattice {
         return new TruthvalueLattice(values ?? ['false', 'ambiguous', 'true'])
     }
 
+    unconstrained(): Lattice {
+        return TruthvalueLattice.create(['false', 'ambiguous', 'true'])
+    }
+
     toCIR(): cir.ValueSet {
         return {
             type: 'truthvalue',
@@ -56,6 +65,10 @@ export class StringLattice implements Lattice {
         return new StringLattice()
     }
 
+    unconstrained(): Lattice {
+        return this
+    }
+
     toCIR(): cir.ValueSet {
         return { type: 'string' }
     }
@@ -66,6 +79,10 @@ export class RefTypeLattice implements Lattice {
 
     static create({ typeName }: { typeName: string }): RefTypeLattice {
         return new RefTypeLattice(typeName)
+    }
+
+    unconstrained(): Lattice {
+        return this
     }
 
     toCIR(): cir.ValueSet {
@@ -93,6 +110,18 @@ export class CowTypeLattice implements Lattice {
         return new CowTypeLattice(typeName, fields)
     }
 
+    unconstrained(): Lattice {
+        return CowTypeLattice.create({
+            typeName: this.typeName,
+            fields: Object.fromEntries(
+                Object.entries(this.fields).map(([name, field]) => [
+                    name,
+                    field.unconstrained(),
+                ]),
+            ),
+        })
+    }
+
     toCIR(): cir.ValueSet {
         return {
             type: 'rc-type',
@@ -116,6 +145,18 @@ export class UniqueTypeLattice implements Lattice {
         fields: Record<string, Lattice>
     }): UniqueTypeLattice {
         return new UniqueTypeLattice(typeName, fields)
+    }
+
+    unconstrained(): Lattice {
+        return UniqueTypeLattice.create({
+            typeName: this.typeName,
+            fields: Object.fromEntries(
+                Object.entries(this.fields).map(([name, field]) => [
+                    name,
+                    field.unconstrained(),
+                ]),
+            ),
+        })
     }
 
     toCIR(): cir.ValueSet {

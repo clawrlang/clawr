@@ -1,6 +1,6 @@
-import { Context } from '.'
 import * as cir from '../cir'
 import { SourceCodeSpan } from '../diagnostics'
+import { Context } from '.'
 import {
     Lattice,
     IntegerLattice,
@@ -12,7 +12,6 @@ import {
 
 export interface ValueSet {
     toCIR(context: { semantics: 'REF' | 'COW' }): cir.ValueSet
-    unconstrained(): ValueSet
     toLattice(context: Context & { semantics: 'REF' | 'COW' }): Lattice
 }
 
@@ -49,14 +48,6 @@ export class IntegerValueSet implements ValueSet {
             max: this.max,
         })
     }
-
-    unconstrained(): ValueSet {
-        return IntegerValueSet.create({
-            min: undefined,
-            max: undefined,
-            span: this.span,
-        })
-    }
 }
 
 export class TruthValueSet implements ValueSet {
@@ -85,13 +76,6 @@ export class TruthValueSet implements ValueSet {
     toLattice(_: Context): Lattice {
         return TruthvalueLattice.create(this.values)
     }
-
-    unconstrained(): ValueSet {
-        return TruthValueSet.create({
-            values: ['false', 'ambiguous', 'true'],
-            span: this.span,
-        })
-    }
 }
 
 export class StringValueSet implements ValueSet {
@@ -107,10 +91,6 @@ export class StringValueSet implements ValueSet {
 
     toLattice(_: Context): Lattice {
         return StringLattice.create()
-    }
-
-    unconstrained(): ValueSet {
-        return this
     }
 }
 
@@ -160,9 +140,5 @@ export class RCTypeValueSet implements ValueSet {
                     ),
                 })
         }
-    }
-
-    unconstrained(): ValueSet {
-        return this
     }
 }

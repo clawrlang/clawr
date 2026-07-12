@@ -2,7 +2,15 @@
 
 ## In Progress
 
+- Support `UNIQUE` (`COW`) and `REF` return values
+  - `UNIQUE` values are `COW` in the CIR
+  - Rewrite semantics to `REF` as needed
+  - Returning a `REF` value as `UNIQUE` incurs `copy(of:)`
 - Add parameters to `bodyContext.scope`
+  - Support `ref`/`-mut` and `const`/`mut` parameters
+  - Disallow changes to non-keyword parameters
+    - In body, they are `const`
+    - To caller, they are `UNIQUE` (but reversed)
 
 ## Later
 

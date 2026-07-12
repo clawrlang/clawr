@@ -37,7 +37,7 @@ export class VariableReference implements Expression {
         return (
             context.scope.currentValue(this.name) ??
             context.errorReporter.reportFatalError(
-                `Variable ${this.name} is not defined in the current context`,
+                `Variable ${this.name} has no value in the current context`,
                 this.span,
             )
         )

@@ -1,9 +1,19 @@
+import { Context } from '.'
 import * as cir from '../cir'
 import { SourceCodeSpan } from '../diagnostics'
+import {
+    Lattice,
+    IntegerLattice,
+    TruthvalueLattice,
+    StringLattice,
+    RefTypeLattice,
+    CowTypeLattice,
+} from './lattice'
 
 export interface ValueSet {
     toCIR(context: { semantics: 'REF' | 'COW' }): cir.ValueSet
     unconstrained(): ValueSet
+    toLattice(context: Context & { semantics: 'REF' | 'COW' }): Lattice
 }
 
 export class IntegerValueSet implements ValueSet {
@@ -31,6 +41,13 @@ export class IntegerValueSet implements ValueSet {
             min: this.min?.toString(),
             max: this.max?.toString(),
         }
+    }
+
+    toLattice(_: Context): Lattice {
+        return IntegerLattice.create({
+            min: this.min,
+            max: this.max,
+        })
     }
 
     unconstrained(): ValueSet {
@@ -65,6 +82,10 @@ export class TruthValueSet implements ValueSet {
         }
     }
 
+    toLattice(_: Context): Lattice {
+        return TruthvalueLattice.create(this.values)
+    }
+
     unconstrained(): ValueSet {
         return TruthValueSet.create({
             values: ['false', 'ambiguous', 'true'],
@@ -82,6 +103,10 @@ export class StringValueSet implements ValueSet {
 
     toCIR(_: any): cir.ValueSet {
         return { type: 'string' }
+    }
+
+    toLattice(_: Context): Lattice {
+        return StringLattice.create()
     }
 
     unconstrained(): ValueSet {
@@ -110,6 +135,30 @@ export class RCTypeValueSet implements ValueSet {
             type: 'rc-type',
             typeName: this.typeName,
             semantics: context.semantics,
+        }
+    }
+
+    toLattice(context: Context & { semantics: 'REF' | 'COW' }): Lattice {
+        switch (context.semantics) {
+            case 'REF':
+                return RefTypeLattice.create({
+                    typeName: this.typeName,
+                })
+            case 'COW':
+                return CowTypeLattice.create({
+                    typeName: this.typeName,
+                    fields: Object.fromEntries(
+                        context.scope
+                            .dataDeclaration(this.typeName)
+                            ?.fields.map((field) => [
+                                field.name,
+                                field.valueSet.toLattice({
+                                    ...context,
+                                    semantics: 'COW',
+                                }),
+                            ]) ?? [],
+                    ),
+                })
         }
     }
 

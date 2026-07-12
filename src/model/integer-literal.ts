@@ -1,6 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
+import { IntegerLattice, Lattice } from './lattice'
 
 export class IntegerLiteral implements Expression {
     get negated(): IntegerLiteral {
@@ -20,6 +21,10 @@ export class IntegerLiteral implements Expression {
         span: SourceCodeSpan
     }): IntegerLiteral {
         return new IntegerLiteral(value, span)
+    }
+
+    currentValue(_: Context): Lattice {
+        return IntegerLattice.create({ min: this.value, max: this.value })
     }
 
     toCIRExpression(_: Context): cir.Expression {

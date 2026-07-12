@@ -1,6 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
+import { IntegerLattice, Lattice } from './lattice'
 
 export class VariableReference implements Expression {
     private constructor(
@@ -30,6 +31,16 @@ export class VariableReference implements Expression {
     isEffectivelyConst(context: Context): boolean {
         const variable = this.lookupInScope(context)
         return variable.semantics === 'const' || variable.semantics === 'ref'
+    }
+
+    currentValue(context: Context): Lattice {
+        return (
+            context.scope.currentValue(this.name) ??
+            context.errorReporter.reportFatalError(
+                `Variable ${this.name} is not defined in the current context`,
+                this.span,
+            )
+        )
     }
 
     toCIRExpression(

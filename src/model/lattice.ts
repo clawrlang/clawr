@@ -101,3 +101,28 @@ export class CowTypeLattice implements Lattice {
         }
     }
 }
+
+export class UniqueTypeLattice implements Lattice {
+    private constructor(
+        public readonly typeName: string,
+        public readonly fields: Record<string, Lattice>,
+    ) {}
+
+    static create({
+        typeName,
+        fields,
+    }: {
+        typeName: string
+        fields: Record<string, Lattice>
+    }): UniqueTypeLattice {
+        return new UniqueTypeLattice(typeName, fields)
+    }
+
+    toCIR(): cir.ValueSet {
+        return {
+            type: 'rc-type',
+            typeName: this.typeName,
+            semantics: 'UNIQUE',
+        }
+    }
+}

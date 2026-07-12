@@ -12,6 +12,7 @@ import { VariableReference } from '../../../src/model/variable-reference'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { FieldReference } from '../../../src/model/field-reference'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
+import { CowTypeLattice, IntegerLattice } from '../../../src/model/lattice'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -185,6 +186,23 @@ describe('VariableDeclaration', () => {
                     typeName: 'OuterType',
                 },
             })
+            context.scope.setCurrentValue(
+                'bar',
+                CowTypeLattice.create({
+                    typeName: 'OuterType',
+                    fields: {
+                        field: CowTypeLattice.create({
+                            typeName: 'InnerType',
+                            fields: {
+                                innerField: IntegerLattice.create({
+                                    min: 42n,
+                                    max: 42n,
+                                }),
+                            },
+                        }),
+                    },
+                }),
+            )
 
             const decl = VariableDeclaration.create({
                 semantics: 'mut',
@@ -245,6 +263,18 @@ describe('VariableDeclaration', () => {
                     typeName: 'MyType',
                 },
             })
+            context.scope.setCurrentValue(
+                'bar',
+                CowTypeLattice.create({
+                    typeName: 'MyType',
+                    fields: {
+                        field: IntegerLattice.create({
+                            min: 42n,
+                            max: 42n,
+                        }),
+                    },
+                }),
+            )
 
             const decl = VariableDeclaration.create({
                 semantics: 'mut',
@@ -265,6 +295,109 @@ describe('VariableDeclaration', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'bar',
+                    },
+                },
+            })
+        })
+    })
+
+    describe('registers its value in the context', () => {
+        test('for a simple integer variable', () => {
+            const decl = VariableDeclaration.create({
+                semantics: 'const',
+                name: 'x',
+                valueSet: IntegerValueSet.create({
+                    span: someCodeSpan,
+                }),
+                initialValue: IntegerLiteral.create({
+                    value: 42n,
+                    span: someCodeSpan,
+                }),
+            })
+            const context = newSemanticContext()
+            decl.emitStatement(context)
+            expect(context.scope.variableDeclaration('x')).toEqual({
+                semantics: 'const',
+                valueSet: { type: 'integer', min: '42', max: '42' },
+            })
+        })
+
+        test('for a nested rc-type variable', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.declarations.set(
+                'InnerType',
+                DataDeclaration.create({
+                    name: 'InnerType',
+                    fields: [
+                        {
+                            name: 'innerField',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+            context.scope.rootScope.declarations.set(
+                'OuterType',
+                DataDeclaration.create({
+                    name: 'OuterType',
+                    fields: [
+                        {
+                            name: 'field',
+                            valueSet: RCTypeValueSet.create({
+                                typeName: 'InnerType',
+                                span: someCodeSpan,
+                            }),
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+
+            const declaration = VariableDeclaration.create({
+                semantics: 'const',
+                name: 'target',
+                valueSet: RCTypeValueSet.create({
+                    typeName: 'OuterType',
+                    span: someCodeSpan,
+                }),
+                initialValue: DataLiteral.create({
+                    fields: [
+                        {
+                            name: 'field',
+                            value: DataLiteral.create({
+                                fields: [
+                                    {
+                                        name: 'innerField',
+                                        value: IntegerLiteral.create({
+                                            value: 42n,
+                                            span: someCodeSpan,
+                                        }),
+                                    },
+                                ],
+                                span: someCodeSpan,
+                            }),
+                        },
+                    ],
+                    span: someCodeSpan,
+                }),
+            })
+
+            declaration.emitStatement(context)
+
+            expect(context.scope.currentValue('target')).toMatchObject({
+                typeName: 'OuterType',
+                fields: {
+                    field: {
+                        typeName: 'InnerType',
+                        fields: {
+                            innerField: {
+                                min: 42n,
+                                max: 42n,
+                            },
+                        },
                     },
                 },
             })

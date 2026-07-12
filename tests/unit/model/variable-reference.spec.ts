@@ -3,6 +3,7 @@ import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { IntegerValueSet } from '../../../src/model/value-set'
+import { IntegerLattice } from '../../../src/model/lattice'
 
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
@@ -62,6 +63,27 @@ describe('Variable Reference', () => {
             type: 'integer',
             min: '10',
             max: '10',
+        })
+    })
+
+    it('has the same current value as the referenced variable', () => {
+        const context = newSemanticContext()
+        context.scope.variables.set('myVar', {
+            semantics: 'const',
+            valueSet: { type: 'integer', min: '10', max: '10' },
+        })
+        context.scope.setCurrentValue(
+            'myVar',
+            IntegerLattice.create({ min: 10n, max: 10n }),
+        )
+
+        const variableRef = VariableReference.create({
+            name: 'myVar',
+            span: someCodeSpan,
+        })
+        expect(variableRef.currentValue(context)).toMatchObject({
+            min: 10n,
+            max: 10n,
         })
     })
 

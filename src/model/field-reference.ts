@@ -2,6 +2,7 @@ import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
+import { CowTypeLattice, Lattice } from './lattice'
 import { convertSemantics } from './variable-reference'
 
 export class FieldReference implements Expression {
@@ -58,6 +59,26 @@ export class FieldReference implements Expression {
             return false
 
         return this.object.isEffectivelyConst(context)
+    }
+
+    currentValue(context: Context): Lattice {
+        const objectValue = this.object.currentValue(context)
+        if (objectValue instanceof CowTypeLattice)
+            return objectValue.fields[this.field]
+
+        const field = this.getFieldFromContext(context)
+        return field.valueSet.toLattice({
+            ...context,
+            semantics: convertSemantics(field.semantics),
+        })
+    }
+
+    setCurrentValue(context: Context, value: Lattice) {
+        const objectValue = this.object.currentValue(context)
+        if (objectValue instanceof CowTypeLattice) {
+            objectValue.fields[this.field] = value
+            this.object.setCurrentValue?.(context, objectValue)
+        }
     }
 
     toCIRExpression(

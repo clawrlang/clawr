@@ -2,6 +2,7 @@ import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
+import { Lattice, UniqueTypeLattice } from './lattice'
 
 export class DataLiteral implements Expression {
     private constructor(
@@ -21,6 +22,29 @@ export class DataLiteral implements Expression {
 
     isEffectivelyConst(_: Context): boolean {
         return true
+    }
+
+    currentValue(context: Context & { typeName: string }): Lattice {
+        const typeDeclaration = context.scope.dataDeclaration(context.typeName)
+        if (!typeDeclaration)
+            context.errorReporter.reportFatalError(
+                `DataLiteral.currentValue: type ${context.typeName} not found in scope`,
+                this.span,
+            )
+        return UniqueTypeLattice.create({
+            typeName: typeDeclaration.name,
+            fields: Object.fromEntries(
+                this.fields.map((field) => [
+                    field.name,
+                    field.value.currentValue({
+                        ...context,
+                        ...typeDeclaration.fields.find(
+                            (f) => f.name === field.name,
+                        )?.valueSet,
+                    }),
+                ]),
+            ),
+        })
     }
 
     toCIRExpression(

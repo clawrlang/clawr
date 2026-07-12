@@ -23,6 +23,18 @@ describe('Literals', () => {
                     value: input,
                 })
             })
+
+            it('has a current value set of the literal value', () => {
+                const literal = TruthValueLiteral.create({
+                    value: input,
+                    span: someCodeSpan,
+                })
+                expect(
+                    literal.currentValue(newSemanticContext()),
+                ).toMatchObject({
+                    values: [input],
+                })
+            })
         }
     })
 
@@ -39,6 +51,19 @@ describe('Literals', () => {
                 ).toMatchObject({
                     kind: 'INTEGER_LITERAL',
                     value: input,
+                })
+            })
+
+            it('has a current value set of the literal value', () => {
+                const literal = IntegerLiteral.create({
+                    value: BigInt(input),
+                    span: someCodeSpan,
+                })
+                expect(
+                    literal.currentValue(newSemanticContext()),
+                ).toMatchObject({
+                    min: BigInt(input),
+                    max: BigInt(input),
                 })
             })
         }
@@ -116,6 +141,65 @@ describe('Literals', () => {
                         value: { kind: 'INTEGER_LITERAL', value: '17' },
                     },
                 ],
+            })
+        })
+
+        it('has a current value set of the literal value', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.declarations.set(
+                'MyType',
+                DataDeclaration.create({
+                    name: 'MyType',
+                    fields: [
+                        {
+                            name: 'x',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
+                            semantics: 'mut',
+                        },
+                        {
+                            name: 'y',
+                            valueSet: IntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+
+            const dataLiteral = DataLiteral.create({
+                fields: [
+                    {
+                        name: 'x',
+                        value: IntegerLiteral.create({
+                            value: 42n,
+                            span: someCodeSpan,
+                        }),
+                    },
+                    {
+                        name: 'y',
+                        value: IntegerLiteral.create({
+                            value: 17n,
+                            span: someCodeSpan,
+                        }),
+                    },
+                ],
+                span: someCodeSpan,
+            })
+
+            expect(
+                dataLiteral.currentValue({
+                    ...context,
+                    ...{ typeName: 'MyType' },
+                }),
+            ).toMatchObject({
+                typeName: 'MyType',
+                fields: {
+                    x: { min: 42n, max: 42n },
+                    y: { min: 17n, max: 17n },
+                },
             })
         })
     })

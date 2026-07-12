@@ -3,6 +3,7 @@ import { Context, Declaration, Expression, Statement } from '.'
 import { ValueSet } from './value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
+import { Lattice } from './lattice'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -33,6 +34,15 @@ export class FunctionDeclaration implements Declaration {
             result,
             implementation,
         )
+    }
+
+    resultLattice(context: Context): Lattice | undefined {
+        if (this.result)
+            return this.result.toLattice({ ...context, semantics: 'COW' })
+        if (this.implementation.kind === 'implicit-return')
+            return this.implementation.expression.currentValue(
+                this.bodyContext(context),
+            )
     }
 
     emitDeclaration(context: Context) {

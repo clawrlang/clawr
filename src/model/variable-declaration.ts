@@ -4,6 +4,7 @@ import { convertSemantics } from './variable-reference'
 import { Scope } from './scope'
 import { ErrorReporter } from '../diagnostics'
 import { ValueSet } from './value-set'
+import { IntegerLattice } from './lattice'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -58,6 +59,14 @@ export class VariableDeclaration implements Statement, Declaration {
                     ? initialValue.valueSet
                     : targetValueSet,
         })
+
+        context.scope.setCurrentValue(
+            this.name,
+            this.initialValue.currentValue({
+                ...context,
+                ...{ typeName: (this.valueSet as any)?.typeName },
+            }),
+        )
 
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,

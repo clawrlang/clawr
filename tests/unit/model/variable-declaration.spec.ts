@@ -140,6 +140,7 @@ describe('VariableDeclaration', () => {
             decl.emitStatement(context)
             expect((context.scope.emitted[0] as any).valueSet).toEqual({
                 type: 'truthvalue',
+                values: ['true', 'false', 'ambiguous'],
             })
         })
     })

@@ -128,11 +128,18 @@ export class VariableDeclaration implements Statement, Declaration {
         else if (this.semantics === 'mut')
             switch (valueSet.type) {
                 case 'integer':
-                case 'truthvalue':
                 case 'string':
                     return {
                         initialValue,
                         valueSet: { type: valueSet.type },
+                    }
+                case 'truthvalue':
+                    return {
+                        initialValue,
+                        valueSet: {
+                            type: 'truthvalue',
+                            values: ['true', 'false', 'ambiguous'],
+                        },
                     }
             }
 

@@ -117,7 +117,7 @@ export type ValueSet =
       }
     | {
           type: 'truthvalue'
-          values?: ('false' | 'ambiguous' | 'true')[]
+          values: ('false' | 'ambiguous' | 'true')[]
       }
     | {
           type: 'string'

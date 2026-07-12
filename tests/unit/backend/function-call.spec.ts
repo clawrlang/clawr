@@ -23,7 +23,7 @@ describe('Function Calls', () => {
                         valueSet: { type: 'string' },
                     },
                 ],
-                valueSet: { type: 'truthvalue' },
+                valueSet: { type: 'truthvalue', values: [] },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myFunction˛param1˛param2(42, "Hello")')
@@ -74,7 +74,7 @@ describe('Function Calls', () => {
                         valueSet: { type: 'string' },
                     },
                 ],
-                valueSet: { type: 'truthvalue' },
+                valueSet: { type: 'truthvalue', values: [] },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myFunction˛param1(42, "Hello")')
@@ -114,7 +114,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                valueSet: { type: 'truthvalue' },
+                valueSet: { type: 'truthvalue', values: [] },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('noParamFunction()')

@@ -1,8 +1,17 @@
 import * as cir from '../cir'
 import { SourceCodeSpan } from '../diagnostics'
+import {
+    IntegerValueSet,
+    RCTypeValueSet,
+    StringValueSet,
+    TruthValueSet,
+    ValueSet,
+} from './value-set'
+import { VariableSemantics } from './variable-declaration'
 
 export interface Lattice {
     unconstrained(): Lattice
+    toValueSet(semantics: VariableSemantics, span: SourceCodeSpan): ValueSet
     toCIR(): cir.ValueSet
 }
 
@@ -24,6 +33,10 @@ export class IntegerLattice implements Lattice {
 
     unconstrained(): Lattice {
         return IntegerLattice.create({ min: undefined, max: undefined })
+    }
+
+    toValueSet(_: VariableSemantics, span: SourceCodeSpan): ValueSet {
+        return IntegerValueSet.create({ ...this, span })
     }
 
     toCIR(): cir.ValueSet {
@@ -50,6 +63,10 @@ export class TruthvalueLattice implements Lattice {
         return TruthvalueLattice.create(['false', 'ambiguous', 'true'])
     }
 
+    toValueSet(_: VariableSemantics, span: SourceCodeSpan): ValueSet {
+        return TruthValueSet.create({ ...this, span })
+    }
+
     toCIR(): cir.ValueSet {
         return {
             type: 'truthvalue',
@@ -69,6 +86,10 @@ export class StringLattice implements Lattice {
         return this
     }
 
+    toValueSet(_: VariableSemantics, span: SourceCodeSpan): ValueSet {
+        return StringValueSet.create({ span })
+    }
+
     toCIR(): cir.ValueSet {
         return { type: 'string' }
     }
@@ -83,6 +104,10 @@ export class RefTypeLattice implements Lattice {
 
     unconstrained(): Lattice {
         return this
+    }
+
+    toValueSet(_: VariableSemantics, span: SourceCodeSpan): ValueSet {
+        return RCTypeValueSet.create({ ...this, span })
     }
 
     toCIR(): cir.ValueSet {
@@ -122,6 +147,10 @@ export class CowTypeLattice implements Lattice {
         })
     }
 
+    toValueSet(_: VariableSemantics, span: SourceCodeSpan): ValueSet {
+        return RCTypeValueSet.create({ ...this, span })
+    }
+
     toCIR(): cir.ValueSet {
         return {
             type: 'rc-type',
@@ -157,6 +186,10 @@ export class UniqueTypeLattice implements Lattice {
                 ]),
             ),
         })
+    }
+
+    toValueSet(_: VariableSemantics, span: SourceCodeSpan): ValueSet {
+        return RCTypeValueSet.create({ ...this, span })
     }
 
     toCIR(): cir.ValueSet {

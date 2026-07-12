@@ -32,7 +32,7 @@ describe('VariableDeclaration', () => {
         expect(context.scope.emitted[0]).toEqual({
             kind: 'VARIABLE_DECL',
             name: 'foo',
-            valueSet: { type: 'integer' },
+            valueSet: { type: 'integer', min: '1', max: '1' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
                 value: '1',
@@ -140,7 +140,7 @@ describe('VariableDeclaration', () => {
             decl.emitStatement(context)
             expect((context.scope.emitted[0] as any).valueSet).toEqual({
                 type: 'truthvalue',
-                values: ['true', 'false', 'ambiguous'],
+                values: ['false', 'ambiguous', 'true'],
             })
         })
     })
@@ -440,6 +440,18 @@ describe('VariableDeclaration', () => {
                         typeName: 'MyType',
                     },
                 })
+                context.scope.setCurrentValue(
+                    'value',
+                    CowTypeLattice.create({
+                        typeName: 'MyType',
+                        fields: {
+                            myField: IntegerLattice.create({
+                                min: 42n,
+                                max: 42n,
+                            }),
+                        },
+                    }),
+                )
 
                 const declaration = VariableDeclaration.create({
                     semantics: targetSemantics[0],

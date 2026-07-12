@@ -3,7 +3,7 @@ import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { CowTypeLattice, Lattice } from './lattice'
-import { convertSemantics } from './variable-reference'
+import { convertSemantics, VariableReference } from './variable-reference'
 
 export class FieldReference implements Expression {
     private constructor(
@@ -38,15 +38,13 @@ export class FieldReference implements Expression {
             )
 
         if (
-            (this.object.toCIRExpression(context).valueSet as any).semantics ===
-            'COW'
+            this.object instanceof VariableReference ||
+            this.object instanceof FieldReference
         ) {
-            return [
-                {
-                    kind: 'ENSURE_UNIQUE',
-                    object: this.object.toCIRExpression(context),
-                },
-            ]
+            const object = this.object.toCIRExpression(context)
+            if ((object.valueSet as any).semantics === 'COW') {
+                return [{ kind: 'ENSURE_UNIQUE', object }]
+            }
         }
         return []
     }
@@ -77,7 +75,9 @@ export class FieldReference implements Expression {
         const objectValue = this.object.currentValue(context)
         if (objectValue instanceof CowTypeLattice) {
             objectValue.fields[this.field] = value
-            this.object.setCurrentValue?.(context, objectValue)
+
+            const object: Expression = this.object
+            object.setCurrentValue?.(context, objectValue)
         }
     }
 

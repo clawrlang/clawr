@@ -34,14 +34,11 @@ export type Declaration =
 export type Statement =
     | {
           kind: 'ENSURE_UNIQUE'
-          object: Expression
+          object: Extract<Expression, { kind: 'VARIABLE_REF' | 'FIELD_REF' }>
       }
     | {
           kind: 'RELEASE'
-          object: Extract<
-              Expression,
-              { kind: 'VARIABLE_REF' | 'FIELD_REF'; valueSet?: ValueSet }
-          >
+          object: Extract<Expression, { kind: 'VARIABLE_REF' | 'FIELD_REF' }>
       }
     | {
           kind: 'EXEC'

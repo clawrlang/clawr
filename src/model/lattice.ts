@@ -196,7 +196,7 @@ export class UniqueTypeLattice implements Lattice {
         return {
             type: 'rc-type',
             typeName: this.typeName,
-            semantics: 'UNIQUE',
+            semantics: 'COW',
         }
     }
 }

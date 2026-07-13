@@ -482,46 +482,5 @@ describe('VariableDeclaration', () => {
                 })
             })
         })
-
-        it('does not throw if the value is UNIQUE', () => {
-            const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
-                'MyType',
-                DataDeclaration.create({
-                    name: 'MyType',
-                    fields: [
-                        {
-                            name: 'myField',
-                            valueSet: IntegerValueSet.create({
-                                span: someCodeSpan,
-                            }),
-                            semantics: 'mut',
-                        },
-                    ],
-                }),
-            )
-
-            const declaration = VariableDeclaration.create({
-                semantics: 'const',
-                name: 'target',
-                valueSet: RCTypeValueSet.create({
-                    typeName: 'MyType',
-                    span: someCodeSpan,
-                }),
-                initialValue: DataLiteral.create({
-                    fields: [
-                        {
-                            name: 'myField',
-                            value: IntegerLiteral.create({
-                                value: 42n,
-                                span: someCodeSpan,
-                            }),
-                        },
-                    ],
-                    span: someCodeSpan,
-                }),
-            })
-            expect(() => declaration.emitStatement(context)).not.toThrow()
-        })
     })
 })

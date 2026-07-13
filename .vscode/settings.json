@@ -125,13 +125,7 @@
             "properties": {
               "type": { "const": "rc-type" },
               "typeName": { "type": "string" },
-              "semantics": {
-                "oneOf": [
-                  { "const": "COW" },
-                  { "const": "REF" },
-                  { "const": "UNIQUE" }
-                ]
-              }
+              "semantics": { "oneOf": [{ "const": "COW" }, { "const": "REF" }] }
             },
             "required": ["type", "typeName", "semantics"],
             "additionalProperties": false

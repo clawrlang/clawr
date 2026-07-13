@@ -37,7 +37,6 @@ export class Assignment implements Statement {
         if (
             target.valueSet.type === 'rc-type' &&
             value.valueSet.type === 'rc-type' &&
-            value.valueSet.semantics !== 'UNIQUE' &&
             target.valueSet.semantics !== value.valueSet.semantics
         )
             context.errorReporter.reportFatalError(

@@ -61,7 +61,6 @@ export class VariableDeclaration implements Statement, Declaration {
         if (
             valueSet.type === 'rc-type' &&
             initialValue.valueSet.type === 'rc-type' &&
-            initialValue.valueSet.semantics !== 'UNIQUE' &&
             valueSet.semantics !== initialValue.valueSet.semantics
         )
             context.errorReporter.reportFatalError(

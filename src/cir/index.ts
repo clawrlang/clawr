@@ -158,7 +158,7 @@ type StringValueSet = { type: 'string' }
 type RcTypeValueSet = {
     type: 'rc-type'
     typeName: string
-    semantics: 'REF' | 'COW' | 'UNIQUE'
+    semantics: 'REF' | 'COW'
 }
 
 export type ValueSet =

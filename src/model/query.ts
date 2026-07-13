@@ -74,10 +74,7 @@ export class Query implements Expression {
     private cirValueSet(context: Context): cir.ValueSet {
         const name = this.name.toString()
         if (name === 'copy(of:)')
-            return {
-                ...this.arguments[0].toCIRExpression(context).valueSet,
-                ...{ semantics: 'UNIQUE' },
-            }
+            return this.arguments[0].toCIRExpression(context).valueSet
         const funcDecl = context.scope.functionDeclaration(name)
         if (!funcDecl)
             context.errorReporter.reportFatalError(

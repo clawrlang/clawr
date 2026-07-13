@@ -503,53 +503,5 @@ describe('Assignment', () => {
                 })
             })
         })
-
-        it('does not throw if the value is UNIQUE', () => {
-            const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
-                'MyType',
-                DataDeclaration.create({
-                    name: 'MyType',
-                    fields: [
-                        {
-                            name: 'myField',
-                            valueSet: IntegerValueSet.create({
-                                span: someCodeSpan,
-                            }),
-                            semantics: 'mut',
-                        },
-                    ],
-                }),
-            )
-            context.scope.variables.set('target', {
-                semantics: 'mut',
-                valueSet: {
-                    type: 'rc-type',
-                    semantics: 'COW',
-                    typeName: 'MyType',
-                },
-            })
-
-            const assignment = Assignment.create({
-                target: VariableReference.create({
-                    name: 'target',
-                    span: someCodeSpan,
-                }),
-                span: someCodeSpan,
-                value: DataLiteral.create({
-                    fields: [
-                        {
-                            name: 'myField',
-                            value: IntegerLiteral.create({
-                                value: 42n,
-                                span: someCodeSpan,
-                            }),
-                        },
-                    ],
-                    span: someCodeSpan,
-                }),
-            })
-            expect(() => assignment.emitStatement(context)).not.toThrow()
-        })
     })
 })

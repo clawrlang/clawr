@@ -11,7 +11,6 @@ import { TokenStream } from '../lexer'
 import { ClawrModule } from '../cir'
 import { ErrorReporter } from './error-reporter'
 import { Scope } from '../model/scope'
-import typia from 'typia'
 
 const exeDir = path.dirname(process.execPath)
 const program = new Command()
@@ -64,7 +63,6 @@ async function compileCIR(cirFilePath: string) {
     const cir = JSON.parse(
         await fs.readFile(cirFilePath, 'utf-8'),
     ) as ClawrModule
-    await validateCIR(cir)
     const cCode = backend.lower(cir)
 
     await fs.writeFile(cFilePath, cCode)
@@ -85,16 +83,6 @@ async function compileCIR(cirFilePath: string) {
         },
     )
     await proc.exited
-}
-
-async function validateCIR(cir: ClawrModule) {
-    const result = typia.validate<ClawrModule>(cir)
-    if (!result.success) {
-        const details = result.errors
-            .map((error) => `${error.path} expected ${error.expected}`)
-            .join('; ')
-        throw new Error(`Invalid CIR: ${details}`)
-    }
 }
 
 async function ensureDirectoryExists(outputDir: string) {

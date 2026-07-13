@@ -3,3 +3,4 @@ node_modules/
 dist/
 .out/
 .typia-temp/
+src/backend/generated/

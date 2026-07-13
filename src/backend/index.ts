@@ -1,6 +1,15 @@
 import * as cir from '../cir'
+import { validateCIR } from './generated/validate-cir.typia'
 
 export function lower(cir: cir.ClawrModule): string {
+    const result = validateCIR(cir)
+    if (!result.success) {
+        const details = result.errors
+            .map((error) => `${error.path} expected ${error.expected}`)
+            .join('; ')
+        throw new Error(`Invalid CIR: ${details}`)
+    }
+
     const variableDecls =
         cir.declarations?.filter((decl) => decl.kind === 'VARIABLE_DECL') ?? []
     return `#include <stdio.h>

@@ -57,6 +57,17 @@ void* _release_rc_structure(void* const structure) {
     return NULL;
 }
 
+// --------
+// SHARE
+// --------
+
+__attribute__((visibility("default")))
+void* shareRC(void* const structure) {
+    __rc_header* const header = RC_HEADER(structure);
+    atomic_fetch_or_explicit(&header->refs, __rc_SHARED, memory_order_acquire);
+    return structure;
+}
+
 // ---------------
 // MUTATE AND COPY
 // ---------------

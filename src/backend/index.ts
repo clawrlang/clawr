@@ -162,6 +162,9 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'FIELD_REF': {
             return `${lowerExpr(expr.object)}->fields.${expr.field}`
         }
+        case 'AS_SHARED': {
+            return `shareRC(${lowerExpr(expr.object)})`
+        }
         default: {
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
         }

@@ -114,6 +114,11 @@ void* _mutateRC(void* const structure);
 /// and the variable requires isolation, the memory is copied.
 #define mutateRC(__var__) __var__ = _mutateRC(__var__)
 
+/// @brief Convert a uniquely referenced allocation to a shared allocation
+/// @param structure the variable to share
+/// @return a shared reference to the allocation
+void* shareRC(void* const structure);
+
 /// @brief Explicit semantic-conversion copy
 /// Creates a new uniquely referenced allocation with specified semantics.
 /// Used when crossing between isolated and shared memory models.

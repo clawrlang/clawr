@@ -1,0 +1,132 @@
+{
+    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
+    "declarations": [
+        {
+            "kind": "DATA_DECL",
+            "name": "MyData",
+            "fields": [
+                {
+                    "name": "field",
+                    "valueSet": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "FUNCTION_DECL",
+            "baseName": "f",
+            "parameters": [],
+            "body": [
+                {
+                    "kind": "VARIABLE_DECL",
+                    "name": "var",
+                    "valueSet": {
+                        "type": "rc-type",
+                        "typeName": "MyData",
+                        "semantics": "COW"
+                    },
+                    "initialValue": {
+                        "kind": "ALLOCATE",
+                        "fields": [
+                            {
+                                "name": "field",
+                                "value": {
+                                    "kind": "INTEGER_LITERAL",
+                                    "value": "42",
+                                    "valueSet": {
+                                        "type": "integer",
+                                        "max": "42",
+                                        "min": "42"
+                                    }
+                                }
+                            }
+                        ],
+                        "valueSet": {
+                            "type": "rc-type",
+                            "typeName": "MyData",
+                            "semantics": "COW"
+                        }
+                    }
+                },
+                {
+                    "kind": "RETURN",
+                    "value": {
+                        "kind": "VARIABLE_REF",
+                        "name": "var",
+                        "valueSet": {
+                            "type": "rc-type",
+                            "typeName": "MyData",
+                            "semantics": "COW"
+                        }
+                    }
+                }
+            ],
+            "returnValueSet": {
+                "type": "rc-type",
+                "typeName": "MyData",
+                "semantics": "COW"
+            }
+        }
+    ],
+    "startBlock": [
+        {
+            "kind": "VARIABLE_DECL",
+            "name": "var",
+            "valueSet": {
+                "type": "rc-type",
+                "typeName": "MyData",
+                "semantics": "REF"
+            },
+            "initialValue": {
+                "kind": "AS_SHARED",
+                "object": {
+                    "kind": "QUERY",
+                    "name": {
+                        "baseName": "f",
+                        "labels": []
+                    },
+                    "arguments": [],
+                    "valueSet": {
+                        "type": "rc-type",
+                        "typeName": "MyData",
+                        "semantics": "REF"
+                    }
+                },
+                "targetSemantics": "REF",
+                "valueSet": {
+                    "type": "rc-type",
+                    "semantics": "REF",
+                    "typeName": "MyData"
+                }
+            }
+        },
+        {
+            "kind": "EXEC",
+            "name": {
+                "baseName": "printInt64",
+                "labels": []
+            },
+            "arguments": [
+                {
+                    "kind": "FIELD_REF",
+                    "object": {
+                        "kind": "VARIABLE_REF",
+                        "name": "var",
+                        "valueSet": {
+                            "type": "rc-type",
+                            "typeName": "MyData",
+                            "semantics": "REF"
+                        }
+                    },
+                    "field": "field",
+                    "valueSet": {
+                        "type": "integer",
+                        "max": "42",
+                        "min": "42"
+                    }
+                }
+            ]
+        }
+    ]
+}

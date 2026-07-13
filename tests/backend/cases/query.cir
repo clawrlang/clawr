@@ -7,7 +7,7 @@
             "parameters": [
                 {
                     "label": "l",
-                    "name": "var",
+                    "varName": "var",
                     "valueSet": {
                         "type": "integer"
                     }

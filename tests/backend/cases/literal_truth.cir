@@ -12,7 +12,12 @@
                     "kind": "TRUTHVALUE_LITERAL",
                     "value": "ambiguous",
                     "valueSet": {
-                        "type": "truthvalue"
+                        "type": "truthvalue",
+                        "values": [
+                            "true",
+                            "false",
+                            "ambiguous"
+                        ]
                     }
                 }
             ]

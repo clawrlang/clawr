@@ -5,7 +5,10 @@
             "kind": "VARIABLE_DECL",
             "name": "foo",
             "valueSet": {
-                "type": "truthvalue"
+                "type": "truthvalue",
+                "values": [
+                    "ambiguous"
+                ]
             },
             "initialValue": {
                 "kind": "TRUTHVALUE_LITERAL",

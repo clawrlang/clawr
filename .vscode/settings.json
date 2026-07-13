@@ -77,6 +77,7 @@
           },
           "Expression": {
             "oneOf": [
+              { "$ref": "#/$defs/AsShared" },
               { "$ref": "#/$defs/FieldReference" },
               { "$ref": "#/$defs/IntegerLiteral" },
               { "$ref": "#/$defs/MemoryAllocation" },
@@ -87,66 +88,17 @@
               { "$ref": "#/$defs/VariableReference" }
             ]
           },
-          "IntegerLiteral": {
+          "AsShared": {
             "type": "object",
             "properties": {
-              "kind": { "const": "INTEGER_LITERAL" },
-              "value": { "type": "string" },
-              "valueSet": { "$ref": "#/$defs/IntegerValueSet" }
-            },
-            "required": ["kind", "value", "valueSet"],
-            "additionalProperties": false
-          },
-          "IntegerValueSet": {
-            "type": "object",
-            "properties": {
-              "type": { "const": "integer" },
-              "min": { "type": "string" },
-              "max": { "type": "string" }
-            },
-            "required": ["type"],
-            "additionalProperties": false
-          },
-          "MemoryAllocation": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "ALLOCATE" },
-              "valueSet": { "$ref": "#/$defs/RcTypeValueSet" },
-              "fields": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/__type" }
-              }
-            },
-            "required": ["kind", "valueSet", "fields"],
-            "additionalProperties": false
-          },
-          "RcTypeValueSet": {
-            "type": "object",
-            "properties": {
-              "type": { "const": "rc-type" },
-              "typeName": { "type": "string" },
-              "semantics": { "oneOf": [{ "const": "COW" }, { "const": "REF" }] }
-            },
-            "required": ["type", "typeName", "semantics"],
-            "additionalProperties": false
-          },
-          "__type": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string" },
-              "value": { "$ref": "#/$defs/Expression" }
-            },
-            "required": ["name", "value"],
-            "additionalProperties": false
-          },
-          "MemoryRetention": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "RETAIN" },
-              "object": { "$ref": "#/$defs/Storage" },
+              "kind": { "const": "AS_SHARED" },
+              "object": { "$ref": "#/$defs/QueryFunctionCall" },
+              "targetSemantics": {
+                "oneOf": [{ "const": "COW" }, { "const": "REF" }]
+              },
               "valueSet": { "$ref": "#/$defs/RcTypeValueSet" }
             },
-            "required": ["kind", "object", "valueSet"],
+            "required": ["kind", "object", "targetSemantics", "valueSet"],
             "additionalProperties": false
           },
           "QueryFunctionCall": {
@@ -180,6 +132,26 @@
               { "$ref": "#/$defs/TruthValueSet" }
             ]
           },
+          "IntegerValueSet": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "integer" },
+              "min": { "type": "string" },
+              "max": { "type": "string" }
+            },
+            "required": ["type"],
+            "additionalProperties": false
+          },
+          "RcTypeValueSet": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "rc-type" },
+              "typeName": { "type": "string" },
+              "semantics": { "oneOf": [{ "const": "COW" }, { "const": "REF" }] }
+            },
+            "required": ["type", "typeName", "semantics"],
+            "additionalProperties": false
+          },
           "RealValueSet": {
             "type": "object",
             "properties": {
@@ -212,6 +184,48 @@
               }
             },
             "required": ["type", "values"],
+            "additionalProperties": false
+          },
+          "IntegerLiteral": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "INTEGER_LITERAL" },
+              "value": { "type": "string" },
+              "valueSet": { "$ref": "#/$defs/IntegerValueSet" }
+            },
+            "required": ["kind", "value", "valueSet"],
+            "additionalProperties": false
+          },
+          "MemoryAllocation": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "ALLOCATE" },
+              "valueSet": { "$ref": "#/$defs/RcTypeValueSet" },
+              "fields": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/__type.o1" }
+              }
+            },
+            "required": ["kind", "valueSet", "fields"],
+            "additionalProperties": false
+          },
+          "__type.o1": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "value": { "$ref": "#/$defs/Expression" }
+            },
+            "required": ["name", "value"],
+            "additionalProperties": false
+          },
+          "MemoryRetention": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "RETAIN" },
+              "object": { "$ref": "#/$defs/Storage" },
+              "valueSet": { "$ref": "#/$defs/RcTypeValueSet" }
+            },
+            "required": ["kind", "object", "valueSet"],
             "additionalProperties": false
           },
           "StringLiteral": {
@@ -295,6 +309,7 @@
               "kind": { "const": "RETURN" },
               "value": {
                 "oneOf": [
+                  { "$ref": "#/$defs/AsShared" },
                   { "$ref": "#/$defs/FieldReference" },
                   { "$ref": "#/$defs/IntegerLiteral" },
                   { "$ref": "#/$defs/MemoryAllocation" },

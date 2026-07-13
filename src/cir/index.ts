@@ -103,6 +103,13 @@ type MemoryRetention = {
     valueSet: RcTypeValueSet
 }
 
+type AsShared = {
+    kind: 'AS_SHARED'
+    object: QueryFunctionCall
+    targetSemantics: 'REF' | 'COW'
+    valueSet: RcTypeValueSet
+}
+
 type VariableReference = {
     kind: 'VARIABLE_REF'
     name: string
@@ -132,6 +139,7 @@ export type Expression =
     | TruthLiteral
     | MemoryAllocation
     | MemoryRetention
+    | AsShared
     | VariableReference
     | FieldReference
     | QueryFunctionCall

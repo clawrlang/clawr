@@ -206,12 +206,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(
-                valueSet.toLattice({
-                    ...newSemanticContext(),
-                    semantics: 'COW',
-                }),
-            ).toMatchObject({
+            expect(valueSet.toLattice(newSemanticContext())).toMatchObject({
                 typeName: 'MyType',
                 fields: {},
             })
@@ -227,12 +222,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(
-                valueSet.toLattice({
-                    ...newSemanticContext(),
-                    semantics: 'REF',
-                }),
-            ).toMatchObject({
+            expect(valueSet.toLattice(newSemanticContext())).toMatchObject({
                 typeName: 'MyType',
             })
         })

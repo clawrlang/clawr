@@ -37,8 +37,7 @@ export class FunctionDeclaration implements Declaration {
     }
 
     resultLattice(context: Context): Lattice | undefined {
-        if (this.result)
-            return this.result.toLattice({ ...context, semantics: 'COW' })
+        if (this.result) return this.result.toLattice(context)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.currentValue(
                 this.bodyContext(context),

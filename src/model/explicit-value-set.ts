@@ -8,13 +8,14 @@ import {
     StringLattice,
     RefTypeLattice,
     CowTypeLattice,
+    UniqueTypeLattice,
 } from './lattice'
 import { VariableSemantics } from './variable-declaration'
 import { convertSemantics } from './variable-reference'
 
 export interface ExplicitValueSet {
     toCIR(): cir.ValueSet
-    toLattice(context: Context & { semantics: 'REF' | 'COW' }): Lattice
+    toLattice(context: Context): Lattice
 }
 
 export class ExplicitIntegerValueSet implements ExplicitValueSet {
@@ -126,28 +127,21 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
         }
     }
 
-    toLattice(context: Context & { semantics: 'REF' | 'COW' }): Lattice {
-        switch (context.semantics) {
-            case 'REF':
-                return RefTypeLattice.create({
-                    typeName: this.typeName,
-                })
-            case 'COW':
-                return CowTypeLattice.create({
-                    typeName: this.typeName,
-                    fields: Object.fromEntries(
-                        context.scope
-                            .dataDeclaration(this.typeName)
-                            ?.fields.map((field) => [
-                                field.name,
-                                field.valueSet.toLattice({
-                                    ...context,
-                                    semantics: 'COW',
-                                }),
-                            ]) ?? [],
-                    ),
-                })
-        }
+    toLattice(context: Context): Lattice {
+        if (this.semantics === 'ref' || this.semantics === 'mutref')
+            return RefTypeLattice.create({ typeName: this.typeName })
+
+        return CowTypeLattice.create({
+            typeName: this.typeName,
+            fields: Object.fromEntries(
+                context.scope
+                    .dataDeclaration(this.typeName)
+                    ?.fields.map((field) => [
+                        field.name,
+                        field.valueSet.toLattice(context),
+                    ]) ?? [],
+            ),
+        })
     }
 }
 
@@ -176,17 +170,14 @@ export class ExplicitUniqueValueSet implements ExplicitValueSet {
     }
 
     toLattice(context: Context): Lattice {
-        return CowTypeLattice.create({
+        return UniqueTypeLattice.create({
             typeName: this.typeName,
             fields: Object.fromEntries(
                 context.scope
                     .dataDeclaration(this.typeName)
                     ?.fields.map((field) => [
                         field.name,
-                        field.valueSet.toLattice({
-                            ...context,
-                            semantics: 'COW',
-                        }),
+                        field.valueSet.toLattice(context),
                     ]) ?? [],
             ),
         })

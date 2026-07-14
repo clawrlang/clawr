@@ -65,10 +65,7 @@ export class FieldReference implements Expression {
             return objectValue.fields[this.field]
 
         const field = this.getFieldFromContext(context)
-        return field.valueSet.toLattice({
-            ...context,
-            semantics: convertSemantics(field.semantics),
-        })
+        return field.valueSet.toLattice(context)
     }
 
     setCurrentValue(context: Context, value: Lattice) {

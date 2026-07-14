@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'bun:test'
 import { TokenStream } from '../../../src/lexer'
 import { VariableDeclarationParser } from '../../../src/parser/variable-declaration-parser'
-import { TestErrorReporter } from '../../util'
+import { newSemanticContext, TestErrorReporter } from '../../util'
+import { DataDeclaration } from '../../../src/model/data-declaration'
+import { RCTypeValueSet } from '../../../src/model/value-set'
 
 describe('VariableDeclarationParser', () => {
     it('parses const integer variable declaration', () => {
@@ -68,6 +70,31 @@ describe('VariableDeclarationParser', () => {
             valueSet: undefined,
             initialValue: { value: 1n },
         })
+    })
+
+    it('sets the semantics of data literal', () => {
+        const context = newSemanticContext()
+        context.scope.rootScope.declarations.set(
+            'MyData',
+            DataDeclaration.create({
+                name: 'MyData',
+                fields: [],
+            }),
+        )
+
+        const source = 'ref r: MyData = {}'
+        const decl = parseVariableDeclaration(source)
+
+        expect(decl).toMatchObject({
+            semantics: 'ref',
+            name: 'r',
+            valueSet: {
+                typeName: 'MyData',
+            },
+            initialValue: { fields: [] },
+        })
+        expect((decl as any).valueSet).toBeInstanceOf(RCTypeValueSet)
+        expect((decl as any).valueSet.semantics).toBe('ref')
     })
 })
 

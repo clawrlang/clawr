@@ -118,13 +118,14 @@ describe('ValueSet', () => {
         it('converts COW rc-type to CIR correctly', () => {
             const valueSet = RCTypeValueSet.create({
                 typeName: 'MyType',
+                semantics: 'mut',
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 7 },
                 },
             })
 
-            expect(valueSet.toCIR({ semantics: 'COW' })).toEqual({
+            expect(valueSet.toCIR(null!)).toEqual({
                 type: 'rc-type',
                 typeName: 'MyType',
                 semantics: 'COW',
@@ -134,6 +135,7 @@ describe('ValueSet', () => {
         it('converts REF rc-type to CIR correctly', () => {
             const valueSet = RCTypeValueSet.create({
                 typeName: 'MyType',
+                semantics: 'ref',
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 7 },
@@ -199,6 +201,7 @@ describe('ValueSet', () => {
         it('converts COW rc-type to lattice correctly', () => {
             const valueSet = RCTypeValueSet.create({
                 typeName: 'MyType',
+                semantics: 'mut',
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 7 },
@@ -219,6 +222,7 @@ describe('ValueSet', () => {
         it('converts REF rc-type to lattice correctly', () => {
             const valueSet = RCTypeValueSet.create({
                 typeName: 'MyType',
+                semantics: 'ref',
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 7 },

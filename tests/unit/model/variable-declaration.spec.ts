@@ -172,6 +172,7 @@ describe('VariableDeclaration', () => {
                             name: 'field',
                             valueSet: RCTypeValueSet.create({
                                 typeName: 'InnerType',
+                                semantics: 'mut',
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
@@ -210,6 +211,7 @@ describe('VariableDeclaration', () => {
                 name: 'foo',
                 valueSet: RCTypeValueSet.create({
                     typeName: 'InnerType',
+                    semantics: 'mut',
                     span: someCodeSpan,
                 }),
                 initialValue: FieldReference.create({
@@ -282,6 +284,7 @@ describe('VariableDeclaration', () => {
                 name: 'foo',
                 valueSet: RCTypeValueSet.create({
                     typeName: 'MyType',
+                    semantics: 'mut',
                     span: someCodeSpan,
                 }),
                 initialValue: VariableReference.create({
@@ -349,6 +352,7 @@ describe('VariableDeclaration', () => {
                             name: 'field',
                             valueSet: RCTypeValueSet.create({
                                 typeName: 'InnerType',
+                                semantics: 'mut',
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
@@ -362,6 +366,7 @@ describe('VariableDeclaration', () => {
                 name: 'target',
                 valueSet: RCTypeValueSet.create({
                     typeName: 'OuterType',
+                    semantics: 'mut',
                     span: someCodeSpan,
                 }),
                 initialValue: DataLiteral.create({
@@ -458,6 +463,7 @@ describe('VariableDeclaration', () => {
                     name: 'target',
                     valueSet: RCTypeValueSet.create({
                         typeName: 'MyType',
+                        semantics: targetSemantics[0],
                         span: someCodeSpan,
                     }),
                     initialValue: VariableReference.create({

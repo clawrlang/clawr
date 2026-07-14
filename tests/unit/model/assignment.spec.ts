@@ -60,6 +60,7 @@ describe('Assignment', () => {
                             name: 'field',
                             valueSet: RCTypeValueSet.create({
                                 typeName: 'InnerType',
+                                semantics: 'mut',
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',

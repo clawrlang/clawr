@@ -64,6 +64,7 @@ describe('Field Reference', () => {
                         name: 'myField',
                         valueSet: RCTypeValueSet.create({
                             typeName: 'MyType',
+                            semantics: 'mut',
                             span: someCodeSpan,
                         }),
                         semantics: 'mut',
@@ -115,6 +116,7 @@ describe('Field Reference', () => {
                                 name: 'myField',
                                 valueSet: RCTypeValueSet.create({
                                     typeName: 'MyType',
+                                    semantics,
                                     span: someCodeSpan,
                                 }),
                                 semantics,

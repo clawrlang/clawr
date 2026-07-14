@@ -7,8 +7,10 @@ import {
     RCTypeValueSet,
     StringValueSet,
     TruthValueSet,
+    UniqueValueSet,
     ValueSet,
 } from '../model/value-set'
+import { VariableSemantics } from '../model/variable-declaration'
 import { ExpressionParser } from './expression-parser'
 
 export class ValueSetParser {
@@ -18,7 +20,7 @@ export class ValueSetParser {
         return new ValueSetParser(context)
     }
 
-    parse(stream: TokenStream, semantics?: 'const' | 'ref'): ValueSet {
+    parse(stream: TokenStream, semantics?: VariableSemantics): ValueSet {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
 
@@ -32,11 +34,17 @@ export class ValueSetParser {
                     span: { start: typeToken.start, end: typeToken.end },
                 })
             default:
-                return RCTypeValueSet.create({
-                    typeName: type,
-                    semantics,
-                    span: { start: typeToken.start, end: typeToken.end },
-                })
+                if (semantics)
+                    return RCTypeValueSet.create({
+                        typeName: type,
+                        semantics,
+                        span: { start: typeToken.start, end: typeToken.end },
+                    })
+                else
+                    return UniqueValueSet.create({
+                        typeName: type,
+                        span: { start: typeToken.start, end: typeToken.end },
+                    })
         }
     }
 

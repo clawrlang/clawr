@@ -29,7 +29,7 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
         const semantics = semanticsToken.keyword as VariableSemantics
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
-        const valueSet = this.parseTypeIdentifier(stream)
+        const valueSet = this.parseTypeIdentifier(stream, semantics)
         stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse(stream)
         return VariableDeclaration.create({
@@ -40,10 +40,13 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
         })
     }
 
-    private parseTypeIdentifier(stream: TokenStream) {
+    private parseTypeIdentifier(
+        stream: TokenStream,
+        semantics: VariableSemantics,
+    ) {
         if (!stream.isNext('PUNCTUATION', ':')) return undefined
 
         stream.expect('PUNCTUATION', ':')
-        return ValueSetParser.create(this.context).parse(stream)
+        return ValueSetParser.create(this.context).parse(stream, semantics)
     }
 }

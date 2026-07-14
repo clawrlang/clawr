@@ -9,6 +9,8 @@ import {
     RefTypeLattice,
     CowTypeLattice,
 } from './lattice'
+import { VariableSemantics } from './variable-declaration'
+import { convertSemantics } from './variable-reference'
 
 export interface ValueSet {
     toCIR(context: { semantics: 'REF' | 'COW' }): cir.ValueSet
@@ -97,7 +99,7 @@ export class StringValueSet implements ValueSet {
 export class RCTypeValueSet implements ValueSet {
     private constructor(
         public readonly typeName: string,
-        public readonly semantics: 'ref' | 'const' | undefined,
+        public readonly semantics: VariableSemantics,
         public readonly span: SourceCodeSpan,
     ) {}
 
@@ -107,17 +109,17 @@ export class RCTypeValueSet implements ValueSet {
         span,
     }: {
         typeName: string
-        semantics?: 'ref' | 'const'
+        semantics: VariableSemantics
         span: SourceCodeSpan
     }): RCTypeValueSet {
         return new RCTypeValueSet(typeName, semantics, span)
     }
 
-    toCIR(context: { semantics: 'REF' | 'COW' }): cir.ValueSet {
+    toCIR(_: any): cir.ValueSet {
         return {
             type: 'rc-type',
             typeName: this.typeName,
-            semantics: context.semantics,
+            semantics: convertSemantics(this.semantics),
         }
     }
 
@@ -143,5 +145,47 @@ export class RCTypeValueSet implements ValueSet {
                     ),
                 })
         }
+    }
+}
+
+export class UniqueValueSet implements ValueSet {
+    private constructor(
+        public readonly typeName: string,
+        public readonly span: SourceCodeSpan,
+    ) {}
+
+    static create({
+        typeName,
+        span,
+    }: {
+        typeName: string
+        span: SourceCodeSpan
+    }): UniqueValueSet {
+        return new UniqueValueSet(typeName, span)
+    }
+
+    toCIR(): cir.ValueSet {
+        return {
+            type: 'rc-type',
+            typeName: this.typeName,
+            semantics: 'COW',
+        }
+    }
+
+    toLattice(context: Context): Lattice {
+        return CowTypeLattice.create({
+            typeName: this.typeName,
+            fields: Object.fromEntries(
+                context.scope
+                    .dataDeclaration(this.typeName)
+                    ?.fields.map((field) => [
+                        field.name,
+                        field.valueSet.toLattice({
+                            ...context,
+                            semantics: 'COW',
+                        }),
+                    ]) ?? [],
+            ),
+        })
     }
 }

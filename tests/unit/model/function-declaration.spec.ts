@@ -8,6 +8,7 @@ import {
     IntegerValueSet,
     RCTypeValueSet,
     StringValueSet,
+    UniqueValueSet,
 } from '../../../src/model/value-set'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
@@ -152,7 +153,7 @@ describe('FunctionDeclaration', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
-            result: RCTypeValueSet.create({
+            result: UniqueValueSet.create({
                 typeName: 'MyData',
                 span: someCodeSpan,
             }),
@@ -462,6 +463,7 @@ describe('FunctionDeclaration', () => {
                             name: 'myVar',
                             valueSet: RCTypeValueSet.create({
                                 typeName: 'MyData',
+                                semantics: 'mut',
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({
@@ -529,6 +531,7 @@ describe('FunctionDeclaration', () => {
                             name: 'myVar',
                             valueSet: RCTypeValueSet.create({
                                 typeName: 'MyData',
+                                semantics: 'const',
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({

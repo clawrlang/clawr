@@ -4,6 +4,7 @@ import {
     TruthValueSet,
     StringValueSet,
     RCTypeValueSet,
+    UniqueValueSet,
 } from '../../../src/model/value-set'
 import { TokenStream } from '../../../src/lexer'
 import { ValueSetParser } from '../../../src/parser/value-set-parser'
@@ -119,7 +120,7 @@ describe('ValueSetParser', () => {
 
     it('parses rc-types', () => {
         const valueSet = parseValueSet('MyType')
-        expect(valueSet).toBeInstanceOf(RCTypeValueSet)
+        expect(valueSet).toBeInstanceOf(UniqueValueSet)
         expect(valueSet).toMatchObject({
             typeName: 'MyType',
             span: {

@@ -4,7 +4,6 @@
 
 ### Implement semantic analysis
 
-- `UNIQUE` must provably have `refs = 1`
 - Inject `AS_SHARED` when the target is `REF`
   - assigning to variable
   - assigning to field

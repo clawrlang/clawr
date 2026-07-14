@@ -35,11 +35,50 @@ export class ReturnStatement implements Statement {
                     `Cannot return a REF variable as ${context.semantics ?? 'UNIQUE'}`,
                     this.value.span,
                 )
+            const object = this.value.toCIRExpression(context)
+            if (
+                (object.kind === 'VARIABLE_REF' ||
+                    object.kind === 'FIELD_REF') &&
+                !context.semantics &&
+                (valueLattice instanceof RefTypeLattice ||
+                    valueLattice instanceof CowTypeLattice)
+            ) {
+                context.scope.emitted.push({
+                    kind: 'ENSURE_UNIQUE',
+                    object,
+                })
+                const temp = context.scope.nextTempVar()
+                context.scope.emitted.push({
+                    kind: 'VARIABLE_DECL',
+                    name: temp,
+                    valueSet: valueLattice.toCIR(),
+                    initialValue: {
+                        kind: 'RETAIN',
+                        object,
+                        valueSet: valueLattice.toCIR() as any,
+                    },
+                })
+                context.scope.releaseVariables()
+                context.scope.emitted.push({
+                    kind: 'RETURN',
+                    value: {
+                        kind: 'VARIABLE_REF',
+                        name: temp,
+                        valueSet: valueLattice.toCIR(),
+                    },
+                })
+            } else {
+                context.scope.releaseVariables()
+                context.scope.emitted.push({
+                    kind: 'RETURN',
+                    value: object,
+                })
+            }
+        } else {
+            context.scope.releaseVariables()
+            context.scope.emitted.push({
+                kind: 'RETURN',
+            })
         }
-        context.scope.releaseVariables()
-        context.scope.emitted.push({
-            kind: 'RETURN',
-            value: this.value?.toCIRExpression(context),
-        })
     }
 }

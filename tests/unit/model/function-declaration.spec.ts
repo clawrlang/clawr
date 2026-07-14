@@ -575,5 +575,84 @@ describe('FunctionDeclaration', () => {
                 },
             })
         })
+
+        test('ensures uniqueness of UNIQUE return values', () => {
+            const context = newSemanticContext()
+
+            context.scope.rootScope.declarations.set(
+                'MyData',
+                DataDeclaration.create({
+                    name: 'MyData',
+                    fields: [],
+                }),
+            )
+
+            const funcDecl = FunctionDeclaration.create({
+                baseName: 'myFunction',
+                parameters: [],
+                result: ExplicitUniqueValueSet.create({
+                    typeName: 'MyData',
+                    span: someCodeSpan,
+                }),
+                implementation: {
+                    kind: 'body',
+                    statements: [
+                        VariableDeclaration.create({
+                            semantics: 'const',
+                            name: 'myVar',
+                            valueSet: ExplicitRCTypeValueSet.create({
+                                typeName: 'MyData',
+                                semantics: 'mut',
+                                span: someCodeSpan,
+                            }),
+                            initialValue: DataLiteral.create({
+                                fields: [],
+                                span: someCodeSpan,
+                            }),
+                        }),
+                        ReturnStatement.create(
+                            VariableReference.create({
+                                name: 'myVar',
+                                span: someCodeSpan,
+                            }),
+                        ),
+                    ],
+                },
+            })
+
+            funcDecl.emitDeclaration(context)
+
+            const decl = context.scope.rootScope
+                .emitted[0] as cir.Declaration & {
+                kind: 'FUNCTION_DECL'
+            }
+
+            expect(decl.body).toMatchObject([
+                { kind: 'VARIABLE_DECL' },
+                {
+                    kind: 'ENSURE_UNIQUE',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'myVar',
+                    },
+                },
+                {
+                    kind: 'VARIABLE_DECL',
+                    initialValue: {
+                        kind: 'RETAIN',
+                        object: { kind: 'VARIABLE_REF', name: 'myVar' },
+                        valueSet: { type: 'rc-type', typeName: 'MyData' },
+                    },
+                },
+                { kind: 'RELEASE' },
+                {
+                    kind: 'RETURN',
+                    value: {
+                        kind: 'VARIABLE_REF',
+                        name: expect.stringMatching(/^__tempˇ\d+$/),
+                    },
+                },
+            ])
+        })
     })
 })

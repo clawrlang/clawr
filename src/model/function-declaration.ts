@@ -1,9 +1,9 @@
 import * as cir from '../cir'
 import { Context, Declaration, Expression, Statement } from '.'
-import { ValueSet } from './value-set'
+import { RCTypeValueSet, ValueSet } from './value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
-import { Lattice } from './lattice'
+import { CowTypeLattice, Lattice, RefTypeLattice } from './lattice'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -104,8 +104,32 @@ export class FunctionDeclaration implements Declaration {
     }
 
     private bodyContext(context: Context): Context {
+        if (!this.result && this.implementation.kind === 'implicit-return') {
+            const inferredLattice =
+                this.implementation.expression.currentValue(context)
+            return {
+                ...context,
+                ...{
+                    semantics:
+                        inferredLattice instanceof CowTypeLattice
+                            ? 'const'
+                            : inferredLattice instanceof RefTypeLattice
+                              ? 'ref'
+                              : undefined,
+                },
+                scope: context.scope.createChildScope(),
+            }
+        }
+
+        if (!(this.result instanceof RCTypeValueSet))
+            return {
+                ...context,
+                scope: context.scope.createChildScope(),
+            }
+
         return {
             ...context,
+            ...{ semantics: this.result.semantics },
             scope: context.scope.createChildScope(),
         }
     }

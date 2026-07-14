@@ -16,6 +16,7 @@ import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
+import { CowTypeLattice, RefTypeLattice } from '../../../src/model/lattice'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
@@ -124,6 +125,145 @@ describe('FunctionDeclaration', () => {
         })
     })
 
+    it('throws if returning REF as UNIQUE', () => {
+        const context = newSemanticContext()
+        context.scope.rootScope.declarations.set(
+            'MyData',
+            DataDeclaration.create({
+                name: 'MyData',
+                fields: [],
+            }),
+        )
+        context.scope.variables.set('myVar', {
+            semantics: 'const',
+            valueSet: {
+                type: 'rc-type',
+                typeName: 'MyData',
+                semantics: 'REF',
+            },
+        })
+        context.scope.setCurrentValue(
+            'myVar',
+            RefTypeLattice.create({
+                typeName: 'MyData',
+            }),
+        )
+
+        const funcDecl = FunctionDeclaration.create({
+            baseName: 'myFunction',
+            parameters: [],
+            result: RCTypeValueSet.create({
+                typeName: 'MyData',
+                span: someCodeSpan,
+            }),
+            implementation: {
+                kind: 'implicit-return',
+                expression: VariableReference.create({
+                    name: 'myVar',
+                    span: someCodeSpan,
+                }),
+            },
+        })
+
+        expect(() => funcDecl.emitDeclaration(context)).toThrow(
+            /Cannot return a REF variable as UNIQUE/,
+        )
+    })
+
+    it('throws if returning COW as REF', () => {
+        const context = newSemanticContext()
+        context.scope.rootScope.declarations.set(
+            'MyData',
+            DataDeclaration.create({
+                name: 'MyData',
+                fields: [],
+            }),
+        )
+        context.scope.variables.set('myVar', {
+            semantics: 'const',
+            valueSet: {
+                type: 'rc-type',
+                typeName: 'MyData',
+                semantics: 'COW',
+            },
+        })
+        context.scope.setCurrentValue(
+            'myVar',
+            CowTypeLattice.create({
+                typeName: 'MyData',
+                fields: {},
+            }),
+        )
+
+        const funcDecl = FunctionDeclaration.create({
+            baseName: 'myFunction',
+            parameters: [],
+            result: RCTypeValueSet.create({
+                typeName: 'MyData',
+                semantics: 'ref',
+                span: someCodeSpan,
+            }),
+            implementation: {
+                kind: 'implicit-return',
+                expression: VariableReference.create({
+                    name: 'myVar',
+                    span: someCodeSpan,
+                }),
+            },
+        })
+
+        expect(() => funcDecl.emitDeclaration(context)).toThrow(
+            /Cannot return a COW variable as ref/,
+        )
+    })
+
+    it('throws if returning COW as REF', () => {
+        const context = newSemanticContext()
+        context.scope.rootScope.declarations.set(
+            'MyData',
+            DataDeclaration.create({
+                name: 'MyData',
+                fields: [],
+            }),
+        )
+        context.scope.variables.set('myVar', {
+            semantics: 'const',
+            valueSet: {
+                type: 'rc-type',
+                typeName: 'MyData',
+                semantics: 'COW',
+            },
+        })
+        context.scope.setCurrentValue(
+            'myVar',
+            CowTypeLattice.create({
+                typeName: 'MyData',
+                fields: {},
+            }),
+        )
+
+        const funcDecl = FunctionDeclaration.create({
+            baseName: 'myFunction',
+            parameters: [],
+            result: RCTypeValueSet.create({
+                typeName: 'MyData',
+                semantics: 'ref',
+                span: someCodeSpan,
+            }),
+            implementation: {
+                kind: 'implicit-return',
+                expression: VariableReference.create({
+                    name: 'myVar',
+                    span: someCodeSpan,
+                }),
+            },
+        })
+
+        expect(() => funcDecl.emitDeclaration(context)).toThrow(
+            /Cannot return a COW variable as ref/,
+        )
+    })
+
     describe('infers return value-set from implicit-return expression', () => {
         it('infers integer return value-set', () => {
             const funcDecl = FunctionDeclaration.create({
@@ -179,6 +319,13 @@ describe('FunctionDeclaration', () => {
                     semantics: 'COW',
                 },
             })
+            context.scope.setCurrentValue(
+                'myVar',
+                CowTypeLattice.create({
+                    typeName: 'MyData',
+                    fields: {},
+                }),
+            )
 
             const funcDecl = FunctionDeclaration.create({
                 baseName: 'myFunction',
@@ -224,6 +371,12 @@ describe('FunctionDeclaration', () => {
                     semantics: 'REF',
                 },
             })
+            context.scope.setCurrentValue(
+                'myVar',
+                RefTypeLattice.create({
+                    typeName: 'MyData',
+                }),
+            )
 
             const funcDecl = FunctionDeclaration.create({
                 baseName: 'myFunction',

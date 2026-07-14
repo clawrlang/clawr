@@ -12,12 +12,12 @@ import {
 import { VariableSemantics } from './variable-declaration'
 import { convertSemantics } from './variable-reference'
 
-export interface ValueSet {
+export interface ExplicitValueSet {
     toCIR(context: { semantics: 'REF' | 'COW' }): cir.ValueSet
     toLattice(context: Context & { semantics: 'REF' | 'COW' }): Lattice
 }
 
-export class IntegerValueSet implements ValueSet {
+export class ExplicitIntegerValueSet implements ExplicitValueSet {
     private constructor(
         public readonly min: bigint | undefined,
         public readonly max: bigint | undefined,
@@ -32,8 +32,8 @@ export class IntegerValueSet implements ValueSet {
         min?: bigint
         max?: bigint
         span: SourceCodeSpan
-    }): IntegerValueSet {
-        return new IntegerValueSet(min, max, span)
+    }): ExplicitIntegerValueSet {
+        return new ExplicitIntegerValueSet(min, max, span)
     }
 
     toCIR(_: any): cir.ValueSet {
@@ -52,7 +52,7 @@ export class IntegerValueSet implements ValueSet {
     }
 }
 
-export class TruthValueSet implements ValueSet {
+export class ExplicitTruthValueSet implements ExplicitValueSet {
     private constructor(
         public readonly values: ('false' | 'ambiguous' | 'true')[],
         public readonly span: SourceCodeSpan,
@@ -64,8 +64,11 @@ export class TruthValueSet implements ValueSet {
     }: {
         values?: ('false' | 'ambiguous' | 'true')[]
         span: SourceCodeSpan
-    }): TruthValueSet {
-        return new TruthValueSet(values ?? ['false', 'ambiguous', 'true'], span)
+    }): ExplicitTruthValueSet {
+        return new ExplicitTruthValueSet(
+            values ?? ['false', 'ambiguous', 'true'],
+            span,
+        )
     }
 
     toCIR(_: any): cir.ValueSet {
@@ -80,11 +83,11 @@ export class TruthValueSet implements ValueSet {
     }
 }
 
-export class StringValueSet implements ValueSet {
+export class ExplicitStringValueSet implements ExplicitValueSet {
     private constructor(public readonly span: SourceCodeSpan) {}
 
-    static create({ span }: { span: SourceCodeSpan }): StringValueSet {
-        return new StringValueSet(span)
+    static create({ span }: { span: SourceCodeSpan }): ExplicitStringValueSet {
+        return new ExplicitStringValueSet(span)
     }
 
     toCIR(_: any): cir.ValueSet {
@@ -96,7 +99,7 @@ export class StringValueSet implements ValueSet {
     }
 }
 
-export class RCTypeValueSet implements ValueSet {
+export class ExplicitRCTypeValueSet implements ExplicitValueSet {
     private constructor(
         public readonly typeName: string,
         public readonly semantics: VariableSemantics,
@@ -111,8 +114,8 @@ export class RCTypeValueSet implements ValueSet {
         typeName: string
         semantics: VariableSemantics
         span: SourceCodeSpan
-    }): RCTypeValueSet {
-        return new RCTypeValueSet(typeName, semantics, span)
+    }): ExplicitRCTypeValueSet {
+        return new ExplicitRCTypeValueSet(typeName, semantics, span)
     }
 
     toCIR(_: any): cir.ValueSet {
@@ -148,7 +151,7 @@ export class RCTypeValueSet implements ValueSet {
     }
 }
 
-export class UniqueValueSet implements ValueSet {
+export class ExplicitUniqueValueSet implements ExplicitValueSet {
     private constructor(
         public readonly typeName: string,
         public readonly span: SourceCodeSpan,
@@ -160,8 +163,8 @@ export class UniqueValueSet implements ValueSet {
     }: {
         typeName: string
         span: SourceCodeSpan
-    }): UniqueValueSet {
-        return new UniqueValueSet(typeName, span)
+    }): ExplicitUniqueValueSet {
+        return new ExplicitUniqueValueSet(typeName, span)
     }
 
     toCIR(): cir.ValueSet {

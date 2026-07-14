@@ -1,7 +1,7 @@
 import { Statement, Expression, Context, Declaration } from '.'
 import { convertSemantics } from './variable-reference'
 import { Scope } from './scope'
-import { ValueSet } from './value-set'
+import { ExplicitValueSet } from './explicit-value-set'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -10,7 +10,7 @@ export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private semantics: VariableSemantics,
         private name: string,
-        private valueSet: ValueSet | undefined,
+        private valueSet: ExplicitValueSet | undefined,
         private initialValue: Expression,
     ) {}
 
@@ -22,7 +22,7 @@ export class VariableDeclaration implements Statement, Declaration {
     }: {
         semantics: VariableSemantics
         name: string
-        valueSet?: ValueSet
+        valueSet?: ExplicitValueSet
         initialValue: Expression
     }): VariableDeclaration {
         return new VariableDeclaration(semantics, name, valueSet, initialValue)

@@ -5,11 +5,11 @@ import {
     Parameter,
 } from '../../../src/model/function-declaration'
 import {
-    IntegerValueSet,
-    RCTypeValueSet,
-    StringValueSet,
-    UniqueValueSet,
-} from '../../../src/model/value-set'
+    ExplicitIntegerValueSet,
+    ExplicitRCTypeValueSet,
+    ExplicitStringValueSet,
+    ExplicitUniqueValueSet,
+} from '../../../src/model/explicit-value-set'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { ReturnStatement } from '../../../src/model/return-statement'
@@ -27,7 +27,9 @@ describe('FunctionDeclaration', () => {
                 Parameter.create({
                     label: 'param1',
                     varName: 'x',
-                    valueSet: StringValueSet.create({ span: someCodeSpan }),
+                    valueSet: ExplicitStringValueSet.create({
+                        span: someCodeSpan,
+                    }),
                 }),
             ],
             result: undefined,
@@ -91,7 +93,7 @@ describe('FunctionDeclaration', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
-            result: IntegerValueSet.create({
+            result: ExplicitIntegerValueSet.create({
                 span: someCodeSpan,
             }),
             implementation: {
@@ -153,7 +155,7 @@ describe('FunctionDeclaration', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
-            result: UniqueValueSet.create({
+            result: ExplicitUniqueValueSet.create({
                 typeName: 'MyData',
                 span: someCodeSpan,
             }),
@@ -199,7 +201,7 @@ describe('FunctionDeclaration', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
-            result: RCTypeValueSet.create({
+            result: ExplicitRCTypeValueSet.create({
                 typeName: 'MyData',
                 semantics: 'ref',
                 span: someCodeSpan,
@@ -246,7 +248,7 @@ describe('FunctionDeclaration', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
-            result: RCTypeValueSet.create({
+            result: ExplicitRCTypeValueSet.create({
                 typeName: 'MyData',
                 semantics: 'ref',
                 span: someCodeSpan,
@@ -442,7 +444,7 @@ describe('FunctionDeclaration', () => {
                     fields: [
                         {
                             name: 'field1',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
@@ -461,7 +463,7 @@ describe('FunctionDeclaration', () => {
                         VariableDeclaration.create({
                             semantics: 'const',
                             name: 'myVar',
-                            valueSet: RCTypeValueSet.create({
+                            valueSet: ExplicitRCTypeValueSet.create({
                                 typeName: 'MyData',
                                 semantics: 'mut',
                                 span: someCodeSpan,
@@ -510,7 +512,7 @@ describe('FunctionDeclaration', () => {
                     fields: [
                         {
                             name: 'field1',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
@@ -522,14 +524,14 @@ describe('FunctionDeclaration', () => {
             const funcDecl = FunctionDeclaration.create({
                 baseName: 'myFunction',
                 parameters: [],
-                result: IntegerValueSet.create({ span: someCodeSpan }),
+                result: ExplicitIntegerValueSet.create({ span: someCodeSpan }),
                 implementation: {
                     kind: 'body',
                     statements: [
                         VariableDeclaration.create({
                             semantics: 'const',
                             name: 'myVar',
-                            valueSet: RCTypeValueSet.create({
+                            valueSet: ExplicitRCTypeValueSet.create({
                                 typeName: 'MyData',
                                 semantics: 'const',
                                 span: someCodeSpan,

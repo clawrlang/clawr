@@ -5,7 +5,10 @@ import { CallFunc } from '../../../src/model/call-func'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
-import { IntegerValueSet, TruthValueSet } from '../../../src/model/value-set'
+import {
+    ExplicitIntegerValueSet,
+    ExplicitTruthValueSet,
+} from '../../../src/model/explicit-value-set'
 
 describe('Module', () => {
     it('outputs the main block in CIR', () => {
@@ -57,14 +60,14 @@ describe('Module', () => {
                     fields: [
                         {
                             name: 'field1',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
                         },
                         {
                             name: 'field2',
-                            valueSet: TruthValueSet.create({
+                            valueSet: ExplicitTruthValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
@@ -91,7 +94,7 @@ describe('Module', () => {
                 VariableDeclaration.create({
                     semantics: 'const',
                     name: 'x',
-                    valueSet: IntegerValueSet.create({
+                    valueSet: ExplicitIntegerValueSet.create({
                         span: someCodeSpan,
                     }),
                     initialValue: IntegerLiteral.create({
@@ -118,14 +121,14 @@ describe('Module', () => {
                     fields: [
                         {
                             name: 'field1',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
                         },
                         {
                             name: 'field2',
-                            valueSet: TruthValueSet.create({
+                            valueSet: ExplicitTruthValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
@@ -145,10 +148,10 @@ describe('Module', () => {
             ],
         })
         expect(myDataDeclaration?.fields[0].valueSet).toBeInstanceOf(
-            IntegerValueSet,
+            ExplicitIntegerValueSet,
         )
         expect(myDataDeclaration?.fields[1].valueSet).toBeInstanceOf(
-            TruthValueSet,
+            ExplicitTruthValueSet,
         )
     })
 })

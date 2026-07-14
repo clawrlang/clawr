@@ -2,11 +2,11 @@ import * as cir from '../cir'
 import { Context, Declaration } from '.'
 import { VariableSemantics } from './variable-declaration'
 import { convertSemantics } from './variable-reference'
-import { ValueSet } from './value-set'
+import { ExplicitValueSet } from './explicit-value-set'
 
 type DataField = {
     name: string
-    valueSet: ValueSet
+    valueSet: ExplicitValueSet
     semantics: VariableSemantics
 }
 

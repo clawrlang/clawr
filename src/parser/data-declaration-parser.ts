@@ -1,7 +1,7 @@
 import { Context } from '.'
 import { TokenStream } from '../lexer'
 import { DataDeclaration } from '../model/data-declaration'
-import { ValueSet } from '../model/value-set'
+import { ExplicitValueSet } from '../model/explicit-value-set'
 import {
     VARIABLE_SEMANTICS,
     VariableSemantics,
@@ -22,7 +22,7 @@ export class DataDeclarationParser {
         stream.expect('PUNCTUATION', '{')
         const fields: {
             name: string
-            valueSet: ValueSet
+            valueSet: ExplicitValueSet
             semantics: VariableSemantics
         }[] = []
         while (!stream.isNext('PUNCTUATION', '}')) {

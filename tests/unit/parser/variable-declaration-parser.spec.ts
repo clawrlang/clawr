@@ -3,7 +3,7 @@ import { TokenStream } from '../../../src/lexer'
 import { VariableDeclarationParser } from '../../../src/parser/variable-declaration-parser'
 import { newSemanticContext, TestErrorReporter } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import { RCTypeValueSet } from '../../../src/model/value-set'
+import { ExplicitRCTypeValueSet } from '../../../src/model/explicit-value-set'
 
 describe('VariableDeclarationParser', () => {
     it('parses const integer variable declaration', () => {
@@ -93,7 +93,7 @@ describe('VariableDeclarationParser', () => {
             },
             initialValue: { fields: [] },
         })
-        expect((decl as any).valueSet).toBeInstanceOf(RCTypeValueSet)
+        expect((decl as any).valueSet).toBeInstanceOf(ExplicitRCTypeValueSet)
         expect((decl as any).valueSet.semantics).toBe('ref')
     })
 })

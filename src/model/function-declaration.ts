@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 import { Context, Declaration, Expression, Statement } from '.'
-import { RCTypeValueSet, ValueSet } from './value-set'
+import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { CowTypeLattice, Lattice, RefTypeLattice } from './lattice'
@@ -9,7 +9,7 @@ export class FunctionDeclaration implements Declaration {
     private constructor(
         public baseName: string,
         public parameters: Parameter[],
-        public result: ValueSet | undefined,
+        public result: ExplicitValueSet | undefined,
         public implementation:
             | { kind: 'implicit-return'; expression: Expression }
             | { kind: 'body'; statements: Statement[] },
@@ -23,7 +23,7 @@ export class FunctionDeclaration implements Declaration {
     }: {
         baseName: string
         parameters: Parameter[]
-        result: ValueSet | undefined
+        result: ExplicitValueSet | undefined
         implementation:
             | { kind: 'implicit-return'; expression: Expression }
             | { kind: 'body'; statements: Statement[] }
@@ -121,7 +121,7 @@ export class FunctionDeclaration implements Declaration {
             }
         }
 
-        if (!(this.result instanceof RCTypeValueSet))
+        if (!(this.result instanceof ExplicitRCTypeValueSet))
             return {
                 ...context,
                 scope: context.scope.createChildScope(),
@@ -139,7 +139,7 @@ export class Parameter {
     private constructor(
         public label: string | undefined,
         public varName: string,
-        public valueSet: ValueSet,
+        public valueSet: ExplicitValueSet,
     ) {}
 
     static create({
@@ -149,7 +149,7 @@ export class Parameter {
     }: {
         label: string | undefined
         varName: string
-        valueSet: ValueSet
+        valueSet: ExplicitValueSet
     }): Parameter {
         return new Parameter(label, varName, valueSet)
     }

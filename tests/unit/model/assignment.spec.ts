@@ -6,7 +6,10 @@ import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { FieldReference } from '../../../src/model/field-reference'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
-import { IntegerValueSet, RCTypeValueSet } from '../../../src/model/value-set'
+import {
+    ExplicitIntegerValueSet,
+    ExplicitRCTypeValueSet,
+} from '../../../src/model/explicit-value-set'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -43,7 +46,7 @@ describe('Assignment', () => {
                     fields: [
                         {
                             name: 'innerField',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
@@ -58,7 +61,7 @@ describe('Assignment', () => {
                     fields: [
                         {
                             name: 'field',
-                            valueSet: RCTypeValueSet.create({
+                            valueSet: ExplicitRCTypeValueSet.create({
                                 typeName: 'InnerType',
                                 semantics: 'mut',
                                 span: someCodeSpan,
@@ -149,7 +152,7 @@ describe('Assignment', () => {
                     fields: [
                         {
                             name: 'field',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
@@ -232,7 +235,7 @@ describe('Assignment', () => {
                 fields: [
                     {
                         name: 'field',
-                        valueSet: IntegerValueSet.create({
+                        valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
                         semantics: 'mut',
@@ -318,7 +321,7 @@ describe('Assignment', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                valueSet: IntegerValueSet.create({
+                                valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
                                 semantics: 'mut',
@@ -382,7 +385,7 @@ describe('Assignment', () => {
                 fields: [
                     {
                         name: 'myField',
-                        valueSet: IntegerValueSet.create({
+                        valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
                         semantics: 'mut',
@@ -450,7 +453,7 @@ describe('Assignment', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                valueSet: IntegerValueSet.create({
+                                valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
                                 semantics: 'mut',

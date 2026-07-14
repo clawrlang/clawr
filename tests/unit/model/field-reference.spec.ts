@@ -3,7 +3,10 @@ import { FieldReference } from '../../../src/model/field-reference'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import { IntegerValueSet, RCTypeValueSet } from '../../../src/model/value-set'
+import {
+    ExplicitIntegerValueSet,
+    ExplicitRCTypeValueSet,
+} from '../../../src/model/explicit-value-set'
 
 describe('Field Reference', () => {
     it('infers its type from the context', () => {
@@ -23,7 +26,7 @@ describe('Field Reference', () => {
                 fields: [
                     {
                         name: 'myField',
-                        valueSet: IntegerValueSet.create({
+                        valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
                         semantics: 'mut',
@@ -62,7 +65,7 @@ describe('Field Reference', () => {
                 fields: [
                     {
                         name: 'myField',
-                        valueSet: RCTypeValueSet.create({
+                        valueSet: ExplicitRCTypeValueSet.create({
                             typeName: 'MyType',
                             semantics: 'mut',
                             span: someCodeSpan,
@@ -114,7 +117,7 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                valueSet: RCTypeValueSet.create({
+                                valueSet: ExplicitRCTypeValueSet.create({
                                     typeName: 'MyType',
                                     semantics,
                                     span: someCodeSpan,
@@ -162,7 +165,7 @@ describe('Field Reference', () => {
                 fields: [
                     {
                         name: 'myField',
-                        valueSet: IntegerValueSet.create({
+                        valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
                         semantics: 'mut',
@@ -212,7 +215,7 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                valueSet: IntegerValueSet.create({
+                                valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
                                 semantics: 'mut',
@@ -276,7 +279,7 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 name: 'myField',
-                                valueSet: IntegerValueSet.create({
+                                valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
                                 semantics: semantics[0],
@@ -316,7 +319,7 @@ describe('Field Reference', () => {
                     fields: [
                         {
                             name: 'myField',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
@@ -355,7 +358,7 @@ describe('Field Reference', () => {
                     fields: [
                         {
                             name: 'myField',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',

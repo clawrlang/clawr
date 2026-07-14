@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'bun:test'
 import {
-    IntegerValueSet,
-    RCTypeValueSet,
-    StringValueSet,
-    TruthValueSet,
-} from '../../../src/model/value-set'
+    ExplicitIntegerValueSet,
+    ExplicitRCTypeValueSet,
+    ExplicitStringValueSet,
+    ExplicitTruthValueSet,
+} from '../../../src/model/explicit-value-set'
 import { newSemanticContext } from '../../util'
 
-describe('ValueSet', () => {
+describe('ExplicitValueSet', () => {
     describe('toCIR', () => {
         it('converts constrained integer to CIR correctly', () => {
-            const valueSet = IntegerValueSet.create({
+            const valueSet = ExplicitIntegerValueSet.create({
                 min: 1n,
                 max: 10n,
                 span: {
@@ -27,7 +27,7 @@ describe('ValueSet', () => {
         })
 
         it('converts unconstrained integer to CIR correctly', () => {
-            const valueSet = IntegerValueSet.create({
+            const valueSet = ExplicitIntegerValueSet.create({
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 8 },
@@ -42,7 +42,7 @@ describe('ValueSet', () => {
         })
 
         it('converts integer with min constraint only to CIR correctly', () => {
-            const valueSet = IntegerValueSet.create({
+            const valueSet = ExplicitIntegerValueSet.create({
                 min: 1n,
                 span: {
                     start: { line: 1, column: 1 },
@@ -58,7 +58,7 @@ describe('ValueSet', () => {
         })
 
         it('converts integer with max constraint only to CIR correctly', () => {
-            const valueSet = IntegerValueSet.create({
+            const valueSet = ExplicitIntegerValueSet.create({
                 max: 10n,
                 span: {
                     start: { line: 1, column: 1 },
@@ -74,7 +74,7 @@ describe('ValueSet', () => {
         })
 
         it('converts truthvalue to CIR correctly', () => {
-            const valueSet = TruthValueSet.create({
+            const valueSet = ExplicitTruthValueSet.create({
                 values: ['true', 'false'],
                 span: {
                     start: { line: 1, column: 1 },
@@ -89,7 +89,7 @@ describe('ValueSet', () => {
         })
 
         it('converts unconstrained truthvalue to CIR correctly', () => {
-            const valueSet = TruthValueSet.create({
+            const valueSet = ExplicitTruthValueSet.create({
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 11 },
@@ -103,7 +103,7 @@ describe('ValueSet', () => {
         })
 
         it('converts string to CIR correctly', () => {
-            const valueSet = StringValueSet.create({
+            const valueSet = ExplicitStringValueSet.create({
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 7 },
@@ -116,7 +116,7 @@ describe('ValueSet', () => {
         })
 
         it('converts COW rc-type to CIR correctly', () => {
-            const valueSet = RCTypeValueSet.create({
+            const valueSet = ExplicitRCTypeValueSet.create({
                 typeName: 'MyType',
                 semantics: 'mut',
                 span: {
@@ -133,7 +133,7 @@ describe('ValueSet', () => {
         })
 
         it('converts REF rc-type to CIR correctly', () => {
-            const valueSet = RCTypeValueSet.create({
+            const valueSet = ExplicitRCTypeValueSet.create({
                 typeName: 'MyType',
                 semantics: 'ref',
                 span: {
@@ -152,7 +152,7 @@ describe('ValueSet', () => {
 
     describe('toLattice', () => {
         it('converts integer to lattice correctly', () => {
-            const valueSet = IntegerValueSet.create({
+            const valueSet = ExplicitIntegerValueSet.create({
                 min: 1n,
                 max: 10n,
                 span: {
@@ -170,7 +170,7 @@ describe('ValueSet', () => {
         })
 
         it('converts truthvalue to lattice correctly', () => {
-            const valueSet = TruthValueSet.create({
+            const valueSet = ExplicitTruthValueSet.create({
                 values: ['true', 'false'],
                 span: {
                     start: { line: 1, column: 1 },
@@ -186,7 +186,7 @@ describe('ValueSet', () => {
         })
 
         it('converts string to lattice correctly', () => {
-            const valueSet = StringValueSet.create({
+            const valueSet = ExplicitStringValueSet.create({
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 7 },
@@ -199,7 +199,7 @@ describe('ValueSet', () => {
         })
 
         it('converts COW rc-type to lattice correctly', () => {
-            const valueSet = RCTypeValueSet.create({
+            const valueSet = ExplicitRCTypeValueSet.create({
                 typeName: 'MyType',
                 semantics: 'mut',
                 span: {
@@ -220,7 +220,7 @@ describe('ValueSet', () => {
         })
 
         it('converts REF rc-type to lattice correctly', () => {
-            const valueSet = RCTypeValueSet.create({
+            const valueSet = ExplicitRCTypeValueSet.create({
                 typeName: 'MyType',
                 semantics: 'ref',
                 span: {

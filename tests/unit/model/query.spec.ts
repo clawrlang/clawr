@@ -3,7 +3,10 @@ import { newSemanticContext, someCodeSpan } from '../../util'
 import { Query } from '../../../src/model/query'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { FunctionDeclaration } from '../../../src/model/function-declaration'
-import { IntegerValueSet, UniqueValueSet } from '../../../src/model/value-set'
+import {
+    ExplicitIntegerValueSet,
+    ExplicitUniqueValueSet,
+} from '../../../src/model/explicit-value-set'
 import { DataLiteral } from '../../../src/model/data-literal'
 
 describe('Query', () => {
@@ -62,7 +65,7 @@ describe('Query', () => {
                     {
                         label: 'x',
                         varName: 'x',
-                        valueSet: IntegerValueSet.create({
+                        valueSet: ExplicitIntegerValueSet.create({
                             min: 0n,
                             max: 100n,
                             span: someCodeSpan,
@@ -101,7 +104,7 @@ describe('Query', () => {
             FunctionDeclaration.create({
                 baseName: 'foo',
                 parameters: [],
-                result: UniqueValueSet.create({
+                result: ExplicitUniqueValueSet.create({
                     typeName: 'MyData',
                     span: someCodeSpan,
                 }),

@@ -3,13 +3,13 @@ import { Token, TokenStream } from '../lexer'
 import { IdentifierToken } from '../lexer/token'
 import { IntegerLiteral } from '../model/integer-literal'
 import {
-    IntegerValueSet,
-    RCTypeValueSet,
-    StringValueSet,
-    TruthValueSet,
-    UniqueValueSet,
-    ValueSet,
-} from '../model/value-set'
+    ExplicitIntegerValueSet,
+    ExplicitRCTypeValueSet,
+    ExplicitStringValueSet,
+    ExplicitTruthValueSet,
+    ExplicitUniqueValueSet,
+    ExplicitValueSet,
+} from '../model/explicit-value-set'
 import { VariableSemantics } from '../model/variable-declaration'
 import { ExpressionParser } from './expression-parser'
 
@@ -20,7 +20,10 @@ export class ValueSetParser {
         return new ValueSetParser(context)
     }
 
-    parse(stream: TokenStream, semantics?: VariableSemantics): ValueSet {
+    parse(
+        stream: TokenStream,
+        semantics?: VariableSemantics,
+    ): ExplicitValueSet {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
 
@@ -30,27 +33,30 @@ export class ValueSetParser {
             case 'truthvalue':
                 return this.parseTruthvalueValueSet(stream, typeToken)
             case 'string':
-                return StringValueSet.create({
+                return ExplicitStringValueSet.create({
                     span: { start: typeToken.start, end: typeToken.end },
                 })
             default:
                 if (semantics)
-                    return RCTypeValueSet.create({
+                    return ExplicitRCTypeValueSet.create({
                         typeName: type,
                         semantics,
                         span: { start: typeToken.start, end: typeToken.end },
                     })
                 else
-                    return UniqueValueSet.create({
+                    return ExplicitUniqueValueSet.create({
                         typeName: type,
                         span: { start: typeToken.start, end: typeToken.end },
                     })
         }
     }
 
-    parseIntegerValueSet(stream: TokenStream, typeToken: Token): ValueSet {
+    parseIntegerValueSet(
+        stream: TokenStream,
+        typeToken: Token,
+    ): ExplicitValueSet {
         if (!stream.isNext('PUNCTUATION', '('))
-            return IntegerValueSet.create({
+            return ExplicitIntegerValueSet.create({
                 span: { start: typeToken.start, end: typeToken.end },
             })
 
@@ -96,7 +102,7 @@ export class ValueSetParser {
 
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return IntegerValueSet.create({
+        return ExplicitIntegerValueSet.create({
             min,
             max,
             span: { start: typeToken.start, end: endToken.end },
@@ -106,9 +112,9 @@ export class ValueSetParser {
     parseTruthvalueValueSet(
         stream: TokenStream,
         typeToken: IdentifierToken,
-    ): ValueSet {
+    ): ExplicitValueSet {
         if (!stream.isNext('PUNCTUATION', '('))
-            return TruthValueSet.create({
+            return ExplicitTruthValueSet.create({
                 span: { start: typeToken.start, end: typeToken.end },
             })
 
@@ -123,7 +129,7 @@ export class ValueSetParser {
         }
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return TruthValueSet.create({
+        return ExplicitTruthValueSet.create({
             values: values.length > 0 ? values : undefined,
             span: { start: typeToken.start, end: endToken.end },
         })

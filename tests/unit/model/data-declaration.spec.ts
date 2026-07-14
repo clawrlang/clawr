@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import { IntegerValueSet, TruthValueSet } from '../../../src/model/value-set'
+import {
+    ExplicitIntegerValueSet,
+    ExplicitTruthValueSet,
+} from '../../../src/model/explicit-value-set'
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {
@@ -10,12 +13,16 @@ describe('DataDeclaration', () => {
             fields: [
                 {
                     name: 'field1',
-                    valueSet: IntegerValueSet.create({ span: someCodeSpan }),
+                    valueSet: ExplicitIntegerValueSet.create({
+                        span: someCodeSpan,
+                    }),
                     semantics: 'mut',
                 },
                 {
                     name: 'field2',
-                    valueSet: TruthValueSet.create({ span: someCodeSpan }),
+                    valueSet: ExplicitTruthValueSet.create({
+                        span: someCodeSpan,
+                    }),
                     semantics: 'mut',
                 },
             ],

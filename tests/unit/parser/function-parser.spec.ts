@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
 import { FunctionParser } from '../../../src/parser/function-parser'
-import { UniqueValueSet } from '../../../src/model/value-set'
+import { ExplicitUniqueValueSet } from '../../../src/model/explicit-value-set'
 
 describe('Function Parser', () => {
     it('parses a function with no parameters and no return type', () => {
@@ -103,7 +103,7 @@ describe('Function Parser', () => {
             result: { typeName: 'MyData' },
         })
 
-        expect(result.result).toBeInstanceOf(UniqueValueSet)
+        expect(result.result).toBeInstanceOf(ExplicitUniqueValueSet)
     })
 
     it('parses a function with a COW return type', () => {

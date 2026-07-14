@@ -5,7 +5,7 @@ import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import { IntegerValueSet } from '../../../src/model/value-set'
+import { ExplicitIntegerValueSet } from '../../../src/model/explicit-value-set'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {
@@ -79,14 +79,14 @@ describe('Literals', () => {
                     fields: [
                         {
                             name: 'x',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
                         },
                         {
                             name: 'y',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
@@ -153,14 +153,14 @@ describe('Literals', () => {
                     fields: [
                         {
                             name: 'x',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',
                         },
                         {
                             name: 'y',
-                            valueSet: IntegerValueSet.create({
+                            valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
                             semantics: 'mut',

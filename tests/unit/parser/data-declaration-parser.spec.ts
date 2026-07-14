@@ -2,7 +2,10 @@ import { describe, expect, it } from 'bun:test'
 import { TokenStream } from '../../../src/lexer'
 import { TestErrorReporter } from '../../util'
 import { DataDeclarationParser } from '../../../src/parser/data-declaration-parser'
-import { IntegerValueSet, TruthValueSet } from '../../../src/model/value-set'
+import {
+    ExplicitIntegerValueSet,
+    ExplicitTruthValueSet,
+} from '../../../src/model/explicit-value-set'
 
 describe('DataDeclarationParser', () => {
     it('parses a data declaration with default-mutability', () => {
@@ -22,8 +25,10 @@ describe('DataDeclarationParser', () => {
                 { name: 'field2', semantics: 'mut' },
             ],
         })
-        expect(result.fields[0].valueSet).toBeInstanceOf(IntegerValueSet)
-        expect(result.fields[1].valueSet).toBeInstanceOf(TruthValueSet)
+        expect(result.fields[0].valueSet).toBeInstanceOf(
+            ExplicitIntegerValueSet,
+        )
+        expect(result.fields[1].valueSet).toBeInstanceOf(ExplicitTruthValueSet)
     })
 
     it('parses a data declaration with mixed semantics', () => {
@@ -43,7 +48,9 @@ describe('DataDeclarationParser', () => {
                 { name: 'field2', semantics: 'const' },
             ],
         })
-        expect(result.fields[0].valueSet).toBeInstanceOf(IntegerValueSet)
-        expect(result.fields[1].valueSet).toBeInstanceOf(TruthValueSet)
+        expect(result.fields[0].valueSet).toBeInstanceOf(
+            ExplicitIntegerValueSet,
+        )
+        expect(result.fields[1].valueSet).toBeInstanceOf(ExplicitTruthValueSet)
     })
 })

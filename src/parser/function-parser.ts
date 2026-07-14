@@ -2,7 +2,7 @@ import { Context } from '.'
 import { TokenStream, Token } from '../lexer'
 import { FunctionDeclaration, Parameter } from '../model/function-declaration'
 import { ReturnStatement } from '../model/return-statement'
-import { ValueSet } from '../model/value-set'
+import { ExplicitValueSet } from '../model/explicit-value-set'
 import { BlockParser } from './block-parser'
 import { ExpressionParser } from './expression-parser'
 import { ValueSetParser } from './value-set-parser'
@@ -25,7 +25,7 @@ export class FunctionParser {
 
         const parameters = this.parseParameters(stream)
 
-        let result: ValueSet | undefined = undefined
+        let result: ExplicitValueSet | undefined = undefined
         if (stream.isNext('OPERATOR', '->')) {
             stream.expect('OPERATOR', '->')
             const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')

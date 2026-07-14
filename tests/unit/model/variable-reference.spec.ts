@@ -2,7 +2,7 @@ import { describe, expect, it, test } from 'bun:test'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import { IntegerValueSet } from '../../../src/model/value-set'
+import { ExplicitIntegerValueSet } from '../../../src/model/explicit-value-set'
 import { IntegerLattice } from '../../../src/model/lattice'
 
 describe('Variable Reference', () => {
@@ -103,7 +103,7 @@ describe('Variable Reference', () => {
                 fields: [
                     {
                         name: 'myField',
-                        valueSet: IntegerValueSet.create({
+                        valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
                         semantics: 'mut',

@@ -385,7 +385,7 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/Statement" }
               },
-              "returnValueSet": {
+              "resultValueSet": {
                 "oneOf": [
                   { "$ref": "#/$defs/IntegerValueSet" },
                   { "$ref": "#/$defs/RcTypeValueSet" },

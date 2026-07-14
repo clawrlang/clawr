@@ -20,7 +20,7 @@ type FunctionDeclaration = {
         valueSet: ValueSet
     }[]
     body: Statement[]
-    returnValueSet?: ValueSet
+    resultValueSet?: ValueSet
 }
 
 type DataDeclaration = {

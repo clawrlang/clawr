@@ -62,7 +62,7 @@
                     }
                 }
             ],
-            "returnValueSet": {
+            "resultValueSet": {
                 "type": "rc-type",
                 "typeName": "MyData",
                 "semantics": "COW"

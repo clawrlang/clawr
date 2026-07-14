@@ -27,7 +27,7 @@
                     }
                 }
             ],
-            "returnValueSet": {
+            "resultValueSet": {
                 "type": "integer",
                 "max": "42",
                 "min": "42"

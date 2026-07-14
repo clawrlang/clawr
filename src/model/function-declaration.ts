@@ -79,24 +79,24 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const returnValueSet = this.resultSet(context)
+        const resultValueSet = this.resultSet(context)
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
             baseName: this.baseName,
             parameters,
-            returnValueSet,
+            resultValueSet,
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
     }
 
     resultSet(context: Context) {
-        let returnValueSet = this.result?.toCIR({
+        let resultValueSet = this.result?.toCIR({
             ...context,
             semantics: 'COW',
         })
-        if (returnValueSet) return returnValueSet
+        if (resultValueSet) return resultValueSet
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.toCIRExpression(
                 this.bodyContext(context),

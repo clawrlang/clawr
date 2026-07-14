@@ -47,7 +47,7 @@ describe('FunctionDeclaration', () => {
                     valueSet: { type: 'string' },
                 },
             ],
-            returnValueSet: undefined,
+            resultValueSet: undefined,
             body: [],
         })
     })
@@ -75,7 +75,7 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            returnValueSet: { type: 'integer', min: '42', max: '42' },
+            resultValueSet: { type: 'integer', min: '42', max: '42' },
             body: [
                 {
                     kind: 'RETURN',
@@ -114,7 +114,7 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            returnValueSet: { type: 'integer', min: undefined, max: undefined },
+            resultValueSet: { type: 'integer', min: undefined, max: undefined },
             body: [
                 {
                     kind: 'RETURN',
@@ -148,7 +148,7 @@ describe('FunctionDeclaration', () => {
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 parameters: [],
-                returnValueSet: {
+                resultValueSet: {
                     type: 'integer',
                     min: '42',
                     max: '42',
@@ -199,7 +199,7 @@ describe('FunctionDeclaration', () => {
             expect(decl).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                returnValueSet: {
+                resultValueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
                     semantics: 'COW',
@@ -244,7 +244,7 @@ describe('FunctionDeclaration', () => {
             expect(decl).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                returnValueSet: {
+                resultValueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
                     semantics: 'REF',

@@ -50,8 +50,8 @@ export function lowerDecl(decl: cir.Declaration): string {
             const params = decl.parameters
                 .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
                 .join(', ')
-            const returnType = decl.returnValueSet
-                ? lowerType(decl.returnValueSet)
+            const returnType = decl.resultValueSet
+                ? lowerType(decl.resultValueSet)
                 : 'void'
 
             return `${returnType} ${mangleFunctionName({

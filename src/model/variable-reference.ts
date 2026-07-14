@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { IntegerLattice, Lattice } from './lattice'
+import { Lattice, UniqueTypeLattice } from './lattice'
 
 export class VariableReference implements Expression {
     private constructor(
@@ -41,6 +41,14 @@ export class VariableReference implements Expression {
                 this.span,
             )
         )
+    }
+
+    setCurrentValue(context: Context, value: Lattice): void {
+        if (value instanceof UniqueTypeLattice)
+            throw new Error(
+                `Cannot set current value of ${this.name} to a UniqueTypeLattice`,
+            )
+        context.scope.setCurrentValue(this.name, value)
     }
 
     toCIRExpression(

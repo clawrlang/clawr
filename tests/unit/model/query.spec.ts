@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it, test } from 'bun:test'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { Query } from '../../../src/model/query'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
@@ -8,6 +8,8 @@ import {
     ExplicitUniqueValueSet,
 } from '../../../src/model/explicit-value-set'
 import { DataLiteral } from '../../../src/model/data-literal'
+import { RefTypeLattice } from '../../../src/model/lattice'
+import { VariableReference } from '../../../src/model/variable-reference'
 
 describe('Query', () => {
     it('converts to CIR', () => {
@@ -97,44 +99,94 @@ describe('Query', () => {
         })
     })
 
-    it('converts UNIQUE semantics to COW in CIR', () => {
-        const context = newSemanticContext()
-        context.scope.rootScope.declarations.set(
-            'foo()',
-            FunctionDeclaration.create({
-                baseName: 'foo',
-                parameters: [],
-                result: ExplicitUniqueValueSet.create({
-                    typeName: 'MyData',
-                    span: someCodeSpan,
-                }),
-                implementation: {
-                    kind: 'implicit-return',
-                    expression: DataLiteral.create({
-                        fields: [],
+    describe('converts UNIQUE semantics to COW in CIR', () => {
+        test('for custom function', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.declarations.set(
+                'foo()',
+                FunctionDeclaration.create({
+                    baseName: 'foo',
+                    parameters: [],
+                    result: ExplicitUniqueValueSet.create({
+                        typeName: 'MyData',
                         span: someCodeSpan,
                     }),
-                },
-            }),
-        )
+                    implementation: {
+                        kind: 'implicit-return',
+                        expression: DataLiteral.create({
+                            fields: [],
+                            span: someCodeSpan,
+                        }),
+                    },
+                }),
+            )
 
-        const query = Query.create({
-            baseName: 'foo',
-            arguments: [],
-            span: someCodeSpan,
-        })
-        expect(query.toCIRExpression(context)).toMatchObject({
-            kind: 'QUERY',
-            name: {
+            const query = Query.create({
                 baseName: 'foo',
-                labels: [],
-            },
-            arguments: [],
-            valueSet: {
-                type: 'rc-type',
-                typeName: 'MyData',
-                semantics: 'COW',
-            },
+                arguments: [],
+                span: someCodeSpan,
+            })
+            expect(query.toCIRExpression(context)).toMatchObject({
+                kind: 'QUERY',
+                name: {
+                    baseName: 'foo',
+                    labels: [],
+                },
+                arguments: [],
+                valueSet: {
+                    type: 'rc-type',
+                    typeName: 'MyData',
+                    semantics: 'COW',
+                },
+            })
+        })
+
+        test('for copy(of:) function', () => {
+            const context = newSemanticContext()
+            context.scope.variables.set('value', {
+                semantics: 'ref',
+                valueSet: {
+                    type: 'rc-type',
+                    typeName: 'MyData',
+                    semantics: 'REF',
+                },
+            })
+            context.scope.setCurrentValue(
+                'value',
+                RefTypeLattice.create({ typeName: 'MyData' }),
+            )
+
+            const query = Query.create({
+                baseName: 'copy',
+                arguments: [
+                    {
+                        label: 'of',
+                        value: VariableReference.create({
+                            name: 'value',
+                            span: someCodeSpan,
+                        }),
+                    },
+                ],
+                span: someCodeSpan,
+            })
+            expect(query.toCIRExpression(context)).toMatchObject({
+                kind: 'QUERY',
+                name: {
+                    baseName: 'copy',
+                    labels: ['of'],
+                },
+                arguments: [
+                    {
+                        kind: 'VARIABLE_REF',
+                        name: 'value',
+                    },
+                ],
+                valueSet: {
+                    type: 'rc-type',
+                    typeName: 'MyData',
+                    semantics: 'COW',
+                },
+            })
         })
     })
 })

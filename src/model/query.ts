@@ -43,7 +43,7 @@ export class Query implements Expression {
 
     currentValue(context: Context): Lattice {
         if (this.name.toString() === 'copy(of:)')
-            return this.arguments[0].currentValue(context)
+            return this.arguments[0].currentValue(context).asUNIQUE()
 
         const decl = context.scope.functionDeclaration(this.name.toString())
         if (!decl)
@@ -67,26 +67,7 @@ export class Query implements Expression {
             arguments: this.arguments.map((arg) =>
                 arg.toCIRExpression(context),
             ),
-            valueSet: this.cirValueSet(context),
+            valueSet: this.currentValue(context).toCIR(),
         }
-    }
-
-    private cirValueSet(context: Context): cir.ValueSet {
-        const name = this.name.toString()
-        if (name === 'copy(of:)')
-            return this.arguments[0].toCIRExpression(context).valueSet
-        const funcDecl = context.scope.functionDeclaration(name)
-        if (!funcDecl)
-            context.errorReporter.reportFatalError(
-                `Function declaration not found: ${name}`,
-                this.span,
-            )
-        const resultSet = funcDecl.resultSet(context)
-        if (!resultSet)
-            context.errorReporter.reportFatalError(
-                `Function declaration has no result set: ${name}`,
-                this.span,
-            )
-        return resultSet
     }
 }

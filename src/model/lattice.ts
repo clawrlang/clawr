@@ -2,6 +2,7 @@ import * as cir from '../cir'
 
 export interface Lattice {
     unconstrained(): Lattice
+    asUNIQUE(): Lattice
     toCIR(): cir.ValueSet
 }
 
@@ -25,6 +26,10 @@ export class IntegerLattice implements Lattice {
         return IntegerLattice.create({ min: undefined, max: undefined })
     }
 
+    asUNIQUE(): Lattice {
+        return this
+    }
+
     toCIR(): cir.ValueSet {
         return {
             type: 'integer',
@@ -43,6 +48,10 @@ export class TruthvalueLattice implements Lattice {
         values?: ('false' | 'ambiguous' | 'true')[],
     ): TruthvalueLattice {
         return new TruthvalueLattice(values ?? ['false', 'ambiguous', 'true'])
+    }
+
+    asUNIQUE(): Lattice {
+        return this
     }
 
     unconstrained(): Lattice {
@@ -64,6 +73,10 @@ export class StringLattice implements Lattice {
         return new StringLattice()
     }
 
+    asUNIQUE(): Lattice {
+        return this
+    }
+
     unconstrained(): Lattice {
         return this
     }
@@ -82,6 +95,13 @@ export class RefTypeLattice implements Lattice {
 
     unconstrained(): Lattice {
         return this
+    }
+
+    asUNIQUE(): UniqueTypeLattice {
+        return UniqueTypeLattice.create({
+            typeName: this.typeName,
+            fields: {},
+        })
     }
 
     toCIR(): cir.ValueSet {
@@ -118,6 +138,13 @@ export class CowTypeLattice implements Lattice {
                     field.unconstrained(),
                 ]),
             ),
+        })
+    }
+
+    asUNIQUE(): UniqueTypeLattice {
+        return UniqueTypeLattice.create({
+            typeName: this.typeName,
+            fields: this.fields,
         })
     }
 
@@ -169,6 +196,10 @@ export class UniqueTypeLattice implements Lattice {
         return RefTypeLattice.create({
             typeName: this.typeName,
         })
+    }
+
+    asUNIQUE(): Lattice {
+        return this
     }
 
     toCIR(): cir.ValueSet {

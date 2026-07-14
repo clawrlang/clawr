@@ -2,13 +2,6 @@
 
 ## In Progress
 
-### Implement semantic analysis
-
-- Inject `AS_SHARED` when the target is `REF`
-  - assigning to variable
-  - assigning to field
-  - passing as argument
-
 ### Next
 
 - Add parameters to `bodyContext.scope`

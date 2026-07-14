@@ -52,7 +52,11 @@ export class VariableDeclaration implements Statement, Declaration {
         if (
             valueSet.type === 'rc-type' &&
             initialValue.valueSet.type === 'rc-type' &&
-            valueSet.semantics !== initialValue.valueSet.semantics
+            valueSet.semantics !== initialValue.valueSet.semantics &&
+            !(
+                this.initialValue.currentValue(context) instanceof
+                UniqueTypeLattice
+            )
         )
             context.errorReporter.reportFatalError(
                 `Cannot assign ${initialValue.valueSet.semantics} value to ${valueSet.semantics} target`,

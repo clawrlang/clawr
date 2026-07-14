@@ -3,7 +3,7 @@ data MyData {
 }
 
 const c: MyData = { field: 1 }
-ref r: MyData = { field: 1 } // copy(of: c)
+ref r: MyData = copy(of: c)
 
 @main {
     mut m: MyData = c

@@ -2,6 +2,7 @@ import { Statement, Expression, Context } from '.'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
+import { UniqueTypeLattice } from './lattice'
 
 export class Assignment implements Statement {
     private constructor(
@@ -34,10 +35,12 @@ export class Assignment implements Statement {
                 `Cannot assign value of type ${value.valueSet.type} to target of type ${target.valueSet.type}`,
                 { start: this.span.start, end: this.span.end },
             )
+        const currentValue = this.value.currentValue(context)
         if (
             target.valueSet.type === 'rc-type' &&
             value.valueSet.type === 'rc-type' &&
-            target.valueSet.semantics !== value.valueSet.semantics
+            target.valueSet.semantics !== value.valueSet.semantics &&
+            !(currentValue instanceof UniqueTypeLattice)
         )
             context.errorReporter.reportFatalError(
                 `Cannot assign ${value.valueSet.semantics} value to ${target.valueSet.semantics} target`,
@@ -81,6 +84,22 @@ export class Assignment implements Statement {
                     },
                 },
             )
+        } else if (
+            target.valueSet.type === 'rc-type' &&
+            value.valueSet.type === 'rc-type' &&
+            value.kind === 'QUERY' &&
+            currentValue instanceof UniqueTypeLattice
+        ) {
+            context.scope.emitted.push({
+                kind: 'ASSIGN',
+                target,
+                value: {
+                    kind: 'AS_SHARED',
+                    object: value,
+                    targetSemantics: target.valueSet.semantics,
+                    valueSet: targetValueSet as any,
+                },
+            })
         } else {
             context.scope.emitted.push({
                 kind: 'ASSIGN',

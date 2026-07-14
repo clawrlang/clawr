@@ -5,11 +5,14 @@ import { VariableReference } from '../../../src/model/variable-reference'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { FieldReference } from '../../../src/model/field-reference'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import { DataLiteral } from '../../../src/model/data-literal'
 import {
     ExplicitIntegerValueSet,
     ExplicitRCTypeValueSet,
+    ExplicitUniqueValueSet,
 } from '../../../src/model/explicit-value-set'
+import { FunctionDeclaration } from '../../../src/model/function-declaration'
+import { Query } from '../../../src/model/query'
+import { CowTypeLattice, RefTypeLattice } from '../../../src/model/lattice'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -87,6 +90,18 @@ describe('Assignment', () => {
                     typeName: 'InnerType',
                 },
             })
+            context.scope.setCurrentValue(
+                'bar',
+                CowTypeLattice.create({
+                    typeName: 'OuterType',
+                    fields: {
+                        field: CowTypeLattice.create({
+                            typeName: 'InnerType',
+                            fields: {},
+                        }),
+                    },
+                }),
+            )
 
             const assignment = Assignment.create({
                 target: VariableReference.create({
@@ -149,15 +164,7 @@ describe('Assignment', () => {
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',
-                    fields: [
-                        {
-                            name: 'field',
-                            valueSet: ExplicitIntegerValueSet.create({
-                                span: someCodeSpan,
-                            }),
-                            semantics: 'mut',
-                        },
-                    ],
+                    fields: [],
                 }),
             )
             context.scope.variables.set('bar', {
@@ -176,6 +183,13 @@ describe('Assignment', () => {
                     typeName: 'MyType',
                 },
             })
+            context.scope.setCurrentValue(
+                'bar',
+                CowTypeLattice.create({
+                    typeName: 'MyType',
+                    fields: {},
+                }),
+            )
 
             const assignment = Assignment.create({
                 target: VariableReference.create({
@@ -280,6 +294,94 @@ describe('Assignment', () => {
         ])
     })
 
+    it('injects AS_SHARED for UNIQUE value before assignment to REF target', () => {
+        const context = newSemanticContext()
+        context.scope.rootScope.declarations.set(
+            'MyType',
+            DataDeclaration.create({
+                name: 'MyType',
+                fields: [],
+            }),
+        )
+        context.scope.rootScope.declarations.set(
+            'myFunction()',
+            FunctionDeclaration.create({
+                baseName: 'myFunction',
+                result: ExplicitUniqueValueSet.create({
+                    typeName: 'MyType',
+                    span: someCodeSpan,
+                }),
+                parameters: [],
+                implementation: {
+                    kind: 'implicit-return',
+                    expression: VariableReference.create({
+                        name: 'mutVar',
+                        span: someCodeSpan,
+                    }),
+                },
+            }),
+        )
+        context.scope.rootScope.variables.set('refVar', {
+            semantics: 'mutref',
+            valueSet: {
+                type: 'rc-type',
+                semantics: 'REF',
+                typeName: 'MyType',
+            },
+        })
+        context.scope.rootScope.variables.set('mutVar', {
+            semantics: 'mut',
+            valueSet: {
+                type: 'rc-type',
+                semantics: 'COW',
+                typeName: 'MyType',
+            },
+        })
+
+        const assignment = Assignment.create({
+            target: VariableReference.create({
+                name: 'refVar',
+                span: someCodeSpan,
+            }),
+            value: Query.create({
+                baseName: 'myFunction',
+                arguments: [],
+                span: someCodeSpan,
+            }),
+            span: someCodeSpan,
+        })
+
+        assignment.emitStatement(context)
+        expect(context.scope.emitted).toMatchObject([
+            {
+                kind: 'ASSIGN',
+                target: { name: 'refVar' },
+                value: {
+                    kind: 'AS_SHARED',
+                    targetSemantics: 'REF',
+                    object: {
+                        kind: 'QUERY',
+                        name: {
+                            baseName: 'myFunction',
+                            labels: [],
+                        },
+                        arguments: [],
+                        valueSet: {
+                            type: 'rc-type',
+                            semantics: 'COW',
+                            typeName: 'MyType',
+                        },
+                    },
+                    valueSet: {
+                        type: 'rc-type',
+                        semantics: 'REF',
+                        typeName: 'MyType',
+                    },
+                },
+            },
+        ])
+    })
+
     it('throws if the target variable is not in context', () => {
         const assignment = Assignment.create({
             target: VariableReference.create({
@@ -318,15 +420,7 @@ describe('Assignment', () => {
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
-                        fields: [
-                            {
-                                name: 'myField',
-                                valueSet: ExplicitIntegerValueSet.create({
-                                    span: someCodeSpan,
-                                }),
-                                semantics: 'mut',
-                            },
-                        ],
+                        fields: [],
                     }),
                 )
                 context.scope.variables.set('target', {
@@ -345,6 +439,17 @@ describe('Assignment', () => {
                         typeName: 'MyType',
                     },
                 })
+                context.scope.setCurrentValue(
+                    'value',
+                    semantics[1] === 'COW'
+                        ? CowTypeLattice.create({
+                              typeName: 'MyType',
+                              fields: {},
+                          })
+                        : RefTypeLattice.create({
+                              typeName: 'MyType',
+                          }),
+                )
 
                 const assignment = Assignment.create({
                     target: VariableReference.create({
@@ -477,7 +582,10 @@ describe('Assignment', () => {
                         typeName: 'MyType',
                     },
                 })
-
+                context.scope.setCurrentValue(
+                    'value',
+                    RefTypeLattice.create({ typeName: 'MyType' }),
+                )
                 const assignment = Assignment.create({
                     target: VariableReference.create({
                         name: 'target',

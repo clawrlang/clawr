@@ -19,7 +19,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toCIR({ semantics: 'COW' })).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'integer',
                 min: '1',
                 max: '10',
@@ -34,7 +34,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toCIR({ semantics: 'COW' })).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'integer',
                 min: undefined,
                 max: undefined,
@@ -50,7 +50,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toCIR({ semantics: 'COW' })).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'integer',
                 min: '1',
                 max: undefined,
@@ -66,7 +66,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toCIR({ semantics: 'COW' })).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'integer',
                 min: undefined,
                 max: '10',
@@ -82,7 +82,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toCIR({ semantics: 'COW' })).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'truthvalue',
                 values: ['true', 'false'],
             })
@@ -96,7 +96,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toCIR({ semantics: 'COW' })).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'truthvalue',
                 values: ['false', 'ambiguous', 'true'],
             })
@@ -110,7 +110,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toCIR({ semantics: 'COW' })).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'string',
             })
         })
@@ -125,7 +125,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toCIR(null!)).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'rc-type',
                 typeName: 'MyType',
                 semantics: 'COW',
@@ -142,7 +142,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toCIR({ semantics: 'REF' })).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'rc-type',
                 typeName: 'MyType',
                 semantics: 'REF',
@@ -161,7 +161,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toLattice({} as any)).toEqual(
+            expect(valueSet.toLattice()).toEqual(
                 expect.objectContaining({
                     min: 1n,
                     max: 10n,
@@ -178,7 +178,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toLattice({} as any)).toEqual(
+            expect(valueSet.toLattice()).toEqual(
                 expect.objectContaining({
                     values: ['true', 'false'],
                 }),
@@ -193,9 +193,7 @@ describe('ExplicitValueSet', () => {
                 },
             })
 
-            expect(valueSet.toLattice({} as any)).toEqual(
-                expect.objectContaining({}),
-            )
+            expect(valueSet.toLattice()).toEqual(expect.objectContaining({}))
         })
 
         it('converts COW rc-type to lattice correctly', () => {

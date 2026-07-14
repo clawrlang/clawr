@@ -58,10 +58,7 @@ export class FunctionDeclaration implements Declaration {
         const parameters = this.parameters.map((param) => ({
             label: param.label,
             varName: param.varName,
-            valueSet: param.valueSet.toCIR({
-                ...context,
-                semantics: 'COW',
-            }),
+            valueSet: param.valueSet.toCIR(),
         }))
 
         const bodyContext = this.bodyContext(context)
@@ -92,10 +89,7 @@ export class FunctionDeclaration implements Declaration {
     }
 
     resultSet(context: Context) {
-        let resultValueSet = this.result?.toCIR({
-            ...context,
-            semantics: 'COW',
-        })
+        let resultValueSet = this.result?.toCIR()
         if (resultValueSet) return resultValueSet
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.toCIRExpression(

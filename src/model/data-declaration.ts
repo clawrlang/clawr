@@ -33,9 +33,7 @@ export class DataDeclaration implements Declaration {
             name: this.name,
             fields: this.fields.map((field) => ({
                 name: field.name,
-                valueSet: field.valueSet.toCIR({
-                    semantics: convertSemantics(field.semantics),
-                }),
+                valueSet: field.valueSet.toCIR(),
             })),
         })
     }

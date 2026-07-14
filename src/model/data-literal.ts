@@ -80,9 +80,7 @@ export class DataLiteral implements Expression {
                     )
                 const nestedContext = {
                     ...context,
-                    targetValueSet: fieldDeclaration.valueSet.toCIR({
-                        semantics: 'COW',
-                    }),
+                    targetValueSet: fieldDeclaration.valueSet.toCIR(),
                 }
                 return {
                     name: field.name,

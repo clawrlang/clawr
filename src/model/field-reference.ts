@@ -89,11 +89,7 @@ export class FieldReference implements Expression {
             kind: 'FIELD_REF',
             object: this.object.toCIRExpression(context),
             field: this.field,
-            valueSet: this.getFieldFromContext(context).valueSet.toCIR({
-                semantics: convertSemantics(
-                    this.getFieldFromContext(context).semantics,
-                ),
-            }),
+            valueSet: this.getFieldFromContext(context).valueSet.toCIR(),
         }
     }
 

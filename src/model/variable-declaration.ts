@@ -1,5 +1,4 @@
 import { Statement, Expression, Context, Declaration } from '.'
-import { convertSemantics } from './variable-reference'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
 
@@ -41,11 +40,10 @@ export class VariableDeclaration implements Statement, Declaration {
             ...context,
             ...this.valueSet,
         })
-        const semantics = convertSemantics(this.semantics)
         const valueSet =
             this.semantics === 'const'
                 ? currentValue.toCIR()
-                : (this.valueSet?.toCIR({ semantics }) ??
+                : (this.valueSet?.toCIR() ??
                   currentValue.unconstrained().toCIR())
 
         const initialValue = this.initialValue.toCIRExpression({

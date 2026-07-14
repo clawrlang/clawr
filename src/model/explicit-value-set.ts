@@ -13,7 +13,7 @@ import { VariableSemantics } from './variable-declaration'
 import { convertSemantics } from './variable-reference'
 
 export interface ExplicitValueSet {
-    toCIR(context: { semantics: 'REF' | 'COW' }): cir.ValueSet
+    toCIR(): cir.ValueSet
     toLattice(context: Context & { semantics: 'REF' | 'COW' }): Lattice
 }
 
@@ -36,7 +36,7 @@ export class ExplicitIntegerValueSet implements ExplicitValueSet {
         return new ExplicitIntegerValueSet(min, max, span)
     }
 
-    toCIR(_: any): cir.ValueSet {
+    toCIR(): Extract<cir.ValueSet, { type: 'integer' }> {
         return {
             type: 'integer',
             min: this.min?.toString(),
@@ -44,7 +44,7 @@ export class ExplicitIntegerValueSet implements ExplicitValueSet {
         }
     }
 
-    toLattice(_: Context): Lattice {
+    toLattice(): Lattice {
         return IntegerLattice.create({
             min: this.min,
             max: this.max,
@@ -71,14 +71,14 @@ export class ExplicitTruthValueSet implements ExplicitValueSet {
         )
     }
 
-    toCIR(_: any): cir.ValueSet {
+    toCIR(): Extract<cir.ValueSet, { type: 'truthvalue' }> {
         return {
             type: 'truthvalue',
             values: this.values,
         }
     }
 
-    toLattice(_: Context): Lattice {
+    toLattice(): Lattice {
         return TruthvalueLattice.create(this.values)
     }
 }
@@ -90,11 +90,11 @@ export class ExplicitStringValueSet implements ExplicitValueSet {
         return new ExplicitStringValueSet(span)
     }
 
-    toCIR(_: any): cir.ValueSet {
+    toCIR(): Extract<cir.ValueSet, { type: 'string' }> {
         return { type: 'string' }
     }
 
-    toLattice(_: Context): Lattice {
+    toLattice(): Lattice {
         return StringLattice.create()
     }
 }
@@ -118,7 +118,7 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
         return new ExplicitRCTypeValueSet(typeName, semantics, span)
     }
 
-    toCIR(_: any): cir.ValueSet {
+    toCIR(): Extract<cir.ValueSet, { type: 'rc-type' }> {
         return {
             type: 'rc-type',
             typeName: this.typeName,
@@ -167,7 +167,7 @@ export class ExplicitUniqueValueSet implements ExplicitValueSet {
         return new ExplicitUniqueValueSet(typeName, span)
     }
 
-    toCIR(): cir.ValueSet {
+    toCIR(): Extract<cir.ValueSet, { type: 'rc-type' }> {
         return {
             type: 'rc-type',
             typeName: this.typeName,

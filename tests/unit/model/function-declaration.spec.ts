@@ -15,6 +15,7 @@ import { ReturnStatement } from '../../../src/model/return-statement'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
+import { VariableReference } from '../../../src/model/variable-reference'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
@@ -120,6 +121,135 @@ describe('FunctionDeclaration', () => {
                     value: { value: '42' },
                 },
             ],
+        })
+    })
+
+    describe('infers return value-set from implicit-return expression', () => {
+        it('infers integer return value-set', () => {
+            const funcDecl = FunctionDeclaration.create({
+                baseName: 'myFunction',
+                parameters: [],
+                result: undefined,
+                implementation: {
+                    kind: 'implicit-return',
+                    expression: IntegerLiteral.create({
+                        value: 42n,
+                        span: someCodeSpan,
+                    }),
+                },
+            })
+
+            const context = newSemanticContext()
+            funcDecl.emitDeclaration(context)
+
+            const decl = context.scope.rootScope.emitted[0]
+
+            expect(decl).toMatchObject({
+                kind: 'FUNCTION_DECL',
+                baseName: 'myFunction',
+                parameters: [],
+                returnValueSet: {
+                    type: 'integer',
+                    min: '42',
+                    max: '42',
+                },
+                body: [
+                    {
+                        kind: 'RETURN',
+                        value: { value: '42' },
+                    },
+                ],
+            })
+        })
+
+        it('infers COW return value-set from COW variable expression', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.declarations.set(
+                'MyData',
+                DataDeclaration.create({
+                    name: 'MyData',
+                    fields: [],
+                }),
+            )
+            context.scope.variables.set('myVar', {
+                semantics: 'const',
+                valueSet: {
+                    type: 'rc-type',
+                    typeName: 'MyData',
+                    semantics: 'COW',
+                },
+            })
+
+            const funcDecl = FunctionDeclaration.create({
+                baseName: 'myFunction',
+                parameters: [],
+                result: undefined,
+                implementation: {
+                    kind: 'implicit-return',
+                    expression: VariableReference.create({
+                        name: 'myVar',
+                        span: someCodeSpan,
+                    }),
+                },
+            })
+
+            funcDecl.emitDeclaration(context)
+
+            const decl = context.scope.rootScope.emitted[0]
+            expect(decl).toMatchObject({
+                kind: 'FUNCTION_DECL',
+                baseName: 'myFunction',
+                returnValueSet: {
+                    type: 'rc-type',
+                    typeName: 'MyData',
+                    semantics: 'COW',
+                },
+            })
+        })
+
+        it('infers REF return value-set from REF variable expression', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.declarations.set(
+                'MyData',
+                DataDeclaration.create({
+                    name: 'MyData',
+                    fields: [],
+                }),
+            )
+            context.scope.variables.set('myVar', {
+                semantics: 'const',
+                valueSet: {
+                    type: 'rc-type',
+                    typeName: 'MyData',
+                    semantics: 'REF',
+                },
+            })
+
+            const funcDecl = FunctionDeclaration.create({
+                baseName: 'myFunction',
+                parameters: [],
+                result: undefined,
+                implementation: {
+                    kind: 'implicit-return',
+                    expression: VariableReference.create({
+                        name: 'myVar',
+                        span: someCodeSpan,
+                    }),
+                },
+            })
+
+            funcDecl.emitDeclaration(context)
+
+            const decl = context.scope.rootScope.emitted[0]
+            expect(decl).toMatchObject({
+                kind: 'FUNCTION_DECL',
+                baseName: 'myFunction',
+                returnValueSet: {
+                    type: 'rc-type',
+                    typeName: 'MyData',
+                    semantics: 'REF',
+                },
+            })
         })
     })
 

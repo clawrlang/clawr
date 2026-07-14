@@ -44,14 +44,9 @@ export class VariableDeclaration implements Statement, Declaration {
         const semantics = convertSemantics(this.semantics)
         const valueSet =
             this.semantics === 'const'
-                ? currentValue
-                      .toValueSet(this.semantics, this.initialValue.span)
-                      .toCIR({ semantics })
+                ? currentValue.toCIR()
                 : (this.valueSet?.toCIR({ semantics }) ??
-                  currentValue
-                      .unconstrained()
-                      .toValueSet(this.semantics, this.initialValue.span)
-                      .toCIR({ semantics }))
+                  currentValue.unconstrained().toCIR())
 
         const initialValue = this.initialValue.toCIRExpression({
             ...context,

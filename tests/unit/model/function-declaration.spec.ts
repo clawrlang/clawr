@@ -15,7 +15,6 @@ import { ReturnStatement } from '../../../src/model/return-statement'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
-import { basename } from 'node:path'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {

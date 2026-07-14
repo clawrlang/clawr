@@ -1,6 +1,7 @@
 import { Statement, Expression, Context, Declaration } from '.'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
+import { UniqueTypeLattice } from './lattice'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -36,10 +37,7 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private emit(scope: Scope | Scope['rootScope'], context: Context) {
-        const currentValue = this.initialValue.currentValue({
-            ...context,
-            ...this.valueSet,
-        })
+        const currentValue = this.currentValueFromInitial(context)
         const valueSet =
             this.semantics === 'const'
                 ? currentValue.toCIR()
@@ -83,5 +81,17 @@ export class VariableDeclaration implements Statement, Declaration {
         })
 
         context.scope.setCurrentValue(this.name, currentValue)
+    }
+
+    private currentValueFromInitial(context: Context) {
+        const currentValue = this.initialValue.currentValue({
+            ...context,
+            ...this.valueSet,
+        })
+        if (!(currentValue instanceof UniqueTypeLattice)) return currentValue
+
+        return this.semantics === 'const' || this.semantics === 'mut'
+            ? currentValue.asCOW()
+            : currentValue.asREF()
     }
 }

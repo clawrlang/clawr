@@ -158,6 +158,19 @@ export class UniqueTypeLattice implements Lattice {
         })
     }
 
+    asCOW() {
+        return CowTypeLattice.create({
+            typeName: this.typeName,
+            fields: this.fields,
+        })
+    }
+
+    asREF() {
+        return RefTypeLattice.create({
+            typeName: this.typeName,
+        })
+    }
+
     toCIR(): cir.ValueSet {
         return {
             type: 'rc-type',

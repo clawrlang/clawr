@@ -408,6 +408,35 @@ describe('VariableDeclaration', () => {
                 },
             })
         })
+
+        it('converts UNIQUE expression to CowTypeLattice', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.declarations.set(
+                'MyType',
+                DataDeclaration.create({
+                    name: 'MyType',
+                    fields: [],
+                }),
+            )
+
+            const decl = VariableDeclaration.create({
+                semantics: 'const',
+                name: 'foo',
+                valueSet: ExplicitRCTypeValueSet.create({
+                    semantics: 'const',
+                    typeName: 'MyType',
+                    span: someCodeSpan,
+                }),
+                initialValue: DataLiteral.create({
+                    fields: [],
+                    span: someCodeSpan,
+                }),
+            })
+            decl.emitStatement(context)
+            expect(context.scope.currentValue('foo')).toBeInstanceOf(
+                CowTypeLattice,
+            )
+        })
     })
 
     describe('throws if the value has incompatible semantics', () => {

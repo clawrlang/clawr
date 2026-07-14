@@ -62,7 +62,7 @@ describe('Function Parser', () => {
         })
     })
 
-    it('parses a function with a return type', () => {
+    it('parses a function with an integer return type', () => {
         const code = 'func myFunction() -> integer { return 42 }'
 
         const result = parseFunction(code)
@@ -91,6 +91,39 @@ describe('Function Parser', () => {
             },
         })
     })
+
+    it('parses a function with a UNIQUE return type', () => {
+        const code = 'func myFunction() -> MyData { return {} }'
+
+        const result = parseFunction(code)
+        expect(result).toMatchObject({
+            baseName: 'myFunction',
+            parameters: [],
+            result: { typeName: 'MyData', semantics: undefined },
+        })
+    })
+
+    it('parses a function with a COW return type', () => {
+        const code = 'func myFunction() -> const MyData { return {} }'
+
+        const result = parseFunction(code)
+        expect(result).toMatchObject({
+            baseName: 'myFunction',
+            parameters: [],
+            result: { typeName: 'MyData', semantics: 'const' },
+        })
+    })
+
+    it('parses a function with a REF return type', () => {
+        const code = 'func myFunction() -> ref MyData { return {} }'
+
+        const result = parseFunction(code)
+        expect(result).toMatchObject({
+            baseName: 'myFunction',
+            parameters: [],
+            result: { typeName: 'MyData', semantics: 'ref' },
+        })
+    })
 })
 
 function parseFunction(code: string) {
@@ -99,6 +132,5 @@ function parseFunction(code: string) {
     const parser = FunctionParser.create({
         errorReporter,
     })
-    const result = parser.parse(stream)
-    return result
+    return parser.parse(stream)
 }

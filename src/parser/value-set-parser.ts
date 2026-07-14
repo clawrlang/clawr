@@ -18,7 +18,7 @@ export class ValueSetParser {
         return new ValueSetParser(context)
     }
 
-    parse(stream: TokenStream): ValueSet {
+    parse(stream: TokenStream, semantics?: 'const' | 'ref'): ValueSet {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
 
@@ -34,6 +34,7 @@ export class ValueSetParser {
             default:
                 return RCTypeValueSet.create({
                     typeName: type,
+                    semantics,
                     span: { start: typeToken.start, end: typeToken.end },
                 })
         }

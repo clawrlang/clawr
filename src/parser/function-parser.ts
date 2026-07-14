@@ -28,7 +28,13 @@ export class FunctionParser {
         let result: ValueSet | undefined = undefined
         if (stream.isNext('OPERATOR', '->')) {
             stream.expect('OPERATOR', '->')
-            result = this.valueSetParser.parse(stream)
+            const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')
+                ? stream.expect('KEYWORD', 'ref', 'const')
+                : undefined
+            result = this.valueSetParser.parse(
+                stream,
+                semanticsToken?.keyword as 'const' | 'ref',
+            )
         }
 
         if (stream.isNext('PUNCTUATION', '=>')) {

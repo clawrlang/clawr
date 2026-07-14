@@ -97,17 +97,20 @@ export class StringValueSet implements ValueSet {
 export class RCTypeValueSet implements ValueSet {
     private constructor(
         public readonly typeName: string,
+        public readonly semantics: 'ref' | 'const' | undefined,
         public readonly span: SourceCodeSpan,
     ) {}
 
     static create({
         typeName,
+        semantics,
         span,
     }: {
         typeName: string
+        semantics?: 'ref' | 'const'
         span: SourceCodeSpan
     }): RCTypeValueSet {
-        return new RCTypeValueSet(typeName, span)
+        return new RCTypeValueSet(typeName, semantics, span)
     }
 
     toCIR(context: { semantics: 'REF' | 'COW' }): cir.ValueSet {

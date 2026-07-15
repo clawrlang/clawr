@@ -63,6 +63,30 @@ describe('Function Parser', () => {
         })
     })
 
+    it('parses parameters with semantics', () => {
+        const code =
+            'func myFunction(ref _ x: MyData, const label y: truthvalue) {}'
+
+        const result = parseFunction(code)
+        expect(result).toMatchObject({
+            baseName: 'myFunction',
+            parameters: [
+                {
+                    varName: 'x',
+                    semantics: 'ref',
+                },
+                {
+                    varName: 'y',
+                    valueSet: { values: ['false', 'ambiguous', 'true'] },
+                    semantics: 'const',
+                },
+            ],
+            result: undefined,
+            implementation: { kind: 'body', statements: [] },
+        })
+    })
+
+
     it('parses a function with an integer return type', () => {
         const code = 'func myFunction() -> integer { return 42 }'
 

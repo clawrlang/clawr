@@ -4,6 +4,7 @@ import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { CowTypeLattice, Lattice, RefTypeLattice } from './lattice'
+import { VariableSemantics } from './variable-declaration'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -133,17 +134,20 @@ export class Parameter {
         public label: string | undefined,
         public varName: string,
         public valueSet: ExplicitValueSet,
+        public semantics?: VariableSemantics,
     ) {}
 
     static create({
         label,
         varName,
         valueSet,
+        semantics,
     }: {
         label: string | undefined
         varName: string
         valueSet: ExplicitValueSet
+        semantics?: VariableSemantics
     }): Parameter {
-        return new Parameter(label, varName, valueSet)
+        return new Parameter(label, varName, valueSet, semantics)
     }
 }

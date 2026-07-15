@@ -1,11 +1,14 @@
 import { Context } from '.'
 import { TokenStream, Token } from '../lexer'
 import { FunctionDeclaration, Parameter } from '../model/function-declaration'
-import { ReturnStatement } from '../model/return-statement'
 import { ExplicitValueSet } from '../model/explicit-value-set'
 import { BlockParser } from './block-parser'
 import { ExpressionParser } from './expression-parser'
 import { ValueSetParser } from './value-set-parser'
+import {
+    VARIABLE_SEMANTICS,
+    VariableSemantics,
+} from '../model/variable-declaration'
 
 export class FunctionParser {
     private readonly valueSetParser: ValueSetParser
@@ -68,6 +71,14 @@ export class FunctionParser {
         stream.expect('PUNCTUATION', '(')
         const parameters: Parameter[] = []
         while (!stream.isNext('PUNCTUATION', ')')) {
+            let semantics: VariableSemantics | undefined
+            if (stream.isNext('KEYWORD', ...VARIABLE_SEMANTICS)) {
+                const semanticsToken = stream.expect(
+                    'KEYWORD',
+                    ...VARIABLE_SEMANTICS,
+                )
+                semantics = semanticsToken.keyword as VariableSemantics
+            }
             const labelToken = stream.expect('IDENTIFIER')
             let varNameToken: (Token & { kind: 'IDENTIFIER' }) | undefined
 
@@ -85,6 +96,7 @@ export class FunctionParser {
                             : labelToken.identifier,
                     varName: varNameToken.identifier,
                     valueSet: this.valueSetParser.parse(stream),
+                    semantics,
                 }),
             )
 

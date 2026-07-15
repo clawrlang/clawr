@@ -58,7 +58,7 @@ export class FunctionDeclaration implements Declaration {
         const parameters = this.parameters.map((param) => ({
             label: param.label,
             varName: param.varName,
-            valueSet: param.valueSet.toCIR(),
+            valueSet: param.valueSet!.toCIR(),
         }))
 
         const bodyContext = this.bodyContext(context)
@@ -131,23 +131,26 @@ export class FunctionDeclaration implements Declaration {
 
 export class Parameter {
     private constructor(
+        public semantics: VariableSemantics | undefined,
         public label: string | undefined,
         public varName: string,
-        public valueSet: ExplicitValueSet,
-        public semantics?: VariableSemantics,
+        public valueSet?: ExplicitValueSet,
+        public defaultValue?: Expression,
     ) {}
 
     static create({
+        semantics,
         label,
         varName,
         valueSet,
-        semantics,
+        defaultValue,
     }: {
         label: string | undefined
         varName: string
-        valueSet: ExplicitValueSet
+        valueSet?: ExplicitValueSet
         semantics?: VariableSemantics
+        defaultValue?: Expression
     }): Parameter {
-        return new Parameter(label, varName, valueSet, semantics)
+        return new Parameter(semantics, label, varName, valueSet, defaultValue)
     }
 }

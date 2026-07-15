@@ -2,7 +2,10 @@ import { describe, expect, it, test } from 'bun:test'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { Query } from '../../../src/model/query'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
-import { FunctionDeclaration } from '../../../src/model/function-declaration'
+import {
+    FunctionDeclaration,
+    Parameter,
+} from '../../../src/model/function-declaration'
 import {
     ExplicitIntegerValueSet,
     ExplicitUniqueValueSet,
@@ -64,7 +67,7 @@ describe('Query', () => {
             FunctionDeclaration.create({
                 baseName: 'foo',
                 parameters: [
-                    {
+                    Parameter.create({
                         label: 'x',
                         varName: 'x',
                         valueSet: ExplicitIntegerValueSet.create({
@@ -72,7 +75,7 @@ describe('Query', () => {
                             max: 100n,
                             span: someCodeSpan,
                         }),
-                    },
+                    }),
                 ],
                 result: undefined,
                 implementation: {

@@ -9,6 +9,7 @@ import {
     VARIABLE_SEMANTICS,
     VariableSemantics,
 } from '../model/variable-declaration'
+import { Expression } from '../model'
 
 export class FunctionParser {
     private readonly valueSetParser: ValueSetParser
@@ -86,7 +87,19 @@ export class FunctionParser {
                 varNameToken = stream.expect('IDENTIFIER')
             else varNameToken = labelToken
 
-            stream.expect('PUNCTUATION', ':')
+            let valueSet: ExplicitValueSet | undefined
+            if (stream.isNext('PUNCTUATION', ':')) {
+                stream.expect('PUNCTUATION', ':')
+                valueSet = this.valueSetParser.parse(stream)
+            }
+
+            let defaultValue: Expression | undefined
+            if (stream.isNext('PUNCTUATION', '=')) {
+                stream.expect('PUNCTUATION', '=')
+                defaultValue = ExpressionParser.create(this.context).parse(
+                    stream,
+                )
+            }
 
             parameters.push(
                 Parameter.create({
@@ -95,8 +108,9 @@ export class FunctionParser {
                             ? undefined
                             : labelToken.identifier,
                     varName: varNameToken.identifier,
-                    valueSet: this.valueSetParser.parse(stream),
+                    valueSet,
                     semantics,
+                    defaultValue,
                 }),
             )
 

@@ -86,6 +86,24 @@ describe('Function Parser', () => {
         })
     })
 
+    it('parses a function with inferred-type default-valued parameters', () => {
+        const code = 'func myFunction(const _ x = 42) {}'
+
+        const result = parseFunction(code)
+        expect(result).toMatchObject({
+            baseName: 'myFunction',
+            parameters: [
+                {
+                    varName: 'x',
+                    valueSet: undefined,
+                    label: undefined,
+                    defaultValue: { value: 42n },
+                },
+            ],
+            result: undefined,
+            implementation: { kind: 'body', statements: [] },
+        })
+    })
 
     it('parses a function with an integer return type', () => {
         const code = 'func myFunction() -> integer { return 42 }'

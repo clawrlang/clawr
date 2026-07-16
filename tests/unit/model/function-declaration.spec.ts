@@ -434,6 +434,44 @@ describe('FunctionDeclaration', () => {
         expect(decl.implementation).toEqual({ kind: 'body', statements: [] })
     })
 
+    it('registers parameters in the function body scope', () => {
+        const decl = FunctionDeclaration.create({
+            baseName: 'myFunction',
+            parameters: [
+                Parameter.create({
+                    label: 'param1',
+                    varName: 'x',
+                    valueSet: ExplicitStringValueSet.create({
+                        span: someCodeSpan,
+                    }),
+                    span: someCodeSpan,
+                }),
+            ],
+            result: undefined,
+            implementation: {
+                kind: 'implicit-return',
+                expression: VariableReference.create({
+                    name: 'x',
+                    span: someCodeSpan,
+                }),
+            },
+        })
+
+        const context = newSemanticContext()
+        decl.emitDeclaration(context)
+
+        expect((context.scope.rootScope.emitted as any)[0].body).toMatchObject([
+            {
+                kind: 'RETURN',
+                value: {
+                    kind: 'VARIABLE_REF',
+                    name: 'x',
+                    valueSet: { type: 'string' },
+                },
+            },
+        ])
+    })
+
     describe('releases rc-type variables before returning from the function', () => {
         test('with no return', () => {
             const context = newSemanticContext()
@@ -577,7 +615,7 @@ describe('FunctionDeclaration', () => {
             })
         })
 
-        test('ensures uniqueness of UNIQUE return values', () => {
+        test('returns UNIQUE return values with a ref-count of 1', () => {
             const context = newSemanticContext()
 
             context.scope.rootScope.declarations.set(
@@ -624,9 +662,7 @@ describe('FunctionDeclaration', () => {
             funcDecl.emitDeclaration(context)
 
             const decl = context.scope.rootScope
-                .emitted[0] as cir.Declaration & {
-                kind: 'FUNCTION_DECL'
-            }
+                .emitted[0] as CIRFunctionDeclaration
 
             expect(decl.body).toMatchObject([
                 { kind: 'VARIABLE_DECL' },
@@ -657,3 +693,5 @@ describe('FunctionDeclaration', () => {
         })
     })
 })
+
+type CIRFunctionDeclaration = cir.Declaration & { kind: 'FUNCTION_DECL' }

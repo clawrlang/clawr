@@ -62,7 +62,33 @@ export class FunctionDeclaration implements Declaration {
             valueSet: param.valueSet!.toCIR(),
         }))
 
-        const bodyContext = this.bodyContext(context)
+        const parameterScope = context.scope.createChildScope()
+        for (const param of this.parameters) {
+            parameterScope.variables.set(param.varName, {
+                semantics: param.semantics ?? 'const',
+                valueSet:
+                    param.defaultValue?.currentValue(context).toCIR() ??
+                    param.valueSet?.toCIR() ??
+                    context.errorReporter.reportFatalError(
+                        `Parameter ${param.varName} must have either an explicit value set or a default value.`,
+                        param.span,
+                    ),
+            })
+            parameterScope.setCurrentValue(
+                param.varName,
+                param.defaultValue?.currentValue(context) ??
+                    param.valueSet?.toLattice(context) ??
+                    context.errorReporter.reportFatalError(
+                        `Parameter ${param.varName} must have either a default value or an explicit value set.`,
+                        param.span,
+                    ),
+            )
+        }
+
+        const bodyContext = this.bodyContext({
+            ...context,
+            scope: parameterScope,
+        })
 
         const body =
             this.implementation.kind === 'body'
@@ -77,7 +103,7 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const resultValueSet = this.resultSet(context)
+        const resultValueSet = this.resultSet(bodyContext)
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',

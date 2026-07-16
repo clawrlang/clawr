@@ -4,19 +4,12 @@
 
 Function Parameters — Semantic Model, `toCIR()`
 
-- Add parameters to `bodyContext.scope`
-  - Just add as normal variables (ignore `label`, but use `varName` as name)
-  - `undefined` semantics => `const` - (Will `service` affect this? `ref`?)
-  - Assigning `undefined` parameter to a variable? Passing it to another function?
-    - Require `copy(of:)`?
-- `bodyContext()` currently needs the bodyContext to create itself
-  - `const inferredLattice = this.implementation.expression.currentValue(context)`
-  - If the `expression` references a parameter, that parameter is not added until the `bodyContext` is created
-  - Two layers? Add parameters to the child, the `expression` (or `body` statements) to the grandchild?
-- Support `ref`/`-mut` and `const`/`mut` parameters
-- Support non-keyword parameters as `UNIQUE` (but reversed)
-  - To caller, they accept both `COW` and `REF` values
-  - In body, they are `const`. Mutation is not allowed except to copies.
+- Ensure that `valueSet` and `defaultValue` are compatible
+- Ensure that `undefined` variables are not modified
+- Ensure that `undefined` variables are not assigned without `copy(of:)`
+
+- QUERY/EXEC: Ensure that parameters are passed using compatible semantics
+- Allow both `COW` and `REF` values for `undefined` parameters
 - Support default parameter values
   - Inject at call site? (only simple values?)
   - Inject as `NULL` and create in body? expressions depending on current state

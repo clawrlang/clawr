@@ -2,17 +2,29 @@
 
 ## In Progress
 
-### Next
+Function Parameters — Semantic Model, `toCIR()`
 
 - Add parameters to `bodyContext.scope`
-  - `bodyContext()` needs the bodyContext to create itself
-  - Support `ref`/`-mut` and `const`/`mut` parameters
-  - Support non-keyword parameters as `UNIQUE` (but reversed)
-    - To caller, they accept both `COW` and `REF` values
-    - In body, they are `const`. Mutation is not allowed except to copies.
+  - Just add as normal variables (ignore `label`, but use `varName` as name)
+  - `undefined` semantics => `const` - (Will `service` affect this? `ref`?)
+  - Assigning `undefined` parameter to a variable? Passing it to another function?
+    - Require `copy(of:)`?
+- `bodyContext()` currently needs the bodyContext to create itself
+  - `const inferredLattice = this.implementation.expression.currentValue(context)`
+  - If the `expression` references a parameter, that parameter is not added until the `bodyContext` is created
+  - Two layers? Add parameters to the child, the `expression` (or `body` statements) to the grandchild?
+- Support `ref`/`-mut` and `const`/`mut` parameters
+- Support non-keyword parameters as `UNIQUE` (but reversed)
+  - To caller, they accept both `COW` and `REF` values
+  - In body, they are `const`. Mutation is not allowed except to copies.
+- Support default parameter values
+  - Inject at call site? (only simple values?)
+  - Inject as `NULL` and create in body? expressions depending on current state
+  - Reference other parameters? Populate in referential order? Expand expressions?
 
 ## Later
 
+- Do the tests perform too much setup?
 - Generate IDE diagnostics for syntax coloring
   - errors
   - did-you-mean suggestions
@@ -31,8 +43,12 @@
 - `object`/`service`
   - Make `CALL`/`QUERY` support methods
   - Enforce on frontend:
-    - `object` may not reach outside itself (its fields)
+    - `object` may not reach outside itself (its fields) except for calling `service` through a parameter
+    - `service` can create background threads and even `fork()` the process
+    - Can `object` store a service in a field?
     - Fields are private (only accessible via `self`)
+    - `self` is an implicit `ref` variable - mutable but not reassignable
+    - Fields may have initial values and be `const`
 - Replace `copy(of:)` with `{...value}`
   - CIR: `ALLOCATE(fields = {name: FieldReference[]})`
 

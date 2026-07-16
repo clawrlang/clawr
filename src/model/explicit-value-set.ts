@@ -14,6 +14,7 @@ import { VariableSemantics } from './variable-declaration'
 import { convertSemantics } from './variable-reference'
 
 export interface ExplicitValueSet {
+    get span(): SourceCodeSpan
     toCIR(): cir.ValueSet
     toLattice(context: Context): Lattice
 }

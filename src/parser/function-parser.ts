@@ -72,12 +72,10 @@ export class FunctionParser {
         stream.expect('PUNCTUATION', '(')
         const parameters: Parameter[] = []
         while (!stream.isNext('PUNCTUATION', ')')) {
+            let semanticsToken: Token | undefined
             let semantics: VariableSemantics | undefined
             if (stream.isNext('KEYWORD', ...VARIABLE_SEMANTICS)) {
-                const semanticsToken = stream.expect(
-                    'KEYWORD',
-                    ...VARIABLE_SEMANTICS,
-                )
+                semanticsToken = stream.expect('KEYWORD', ...VARIABLE_SEMANTICS)
                 semantics = semanticsToken.keyword as VariableSemantics
             }
             const labelToken = stream.expect('IDENTIFIER')
@@ -111,6 +109,13 @@ export class FunctionParser {
                     valueSet,
                     semantics,
                     defaultValue,
+                    span: {
+                        start: semanticsToken?.start ?? labelToken.start,
+                        end:
+                            defaultValue?.span.end ??
+                            valueSet?.span.end ??
+                            varNameToken.end,
+                    },
                 }),
             )
 

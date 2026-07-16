@@ -30,6 +30,7 @@ describe('FunctionDeclaration', () => {
                     valueSet: ExplicitStringValueSet.create({
                         span: someCodeSpan,
                     }),
+                    span: someCodeSpan,
                 }),
             ],
             result: undefined,

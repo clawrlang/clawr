@@ -5,6 +5,7 @@ import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { CowTypeLattice, Lattice, RefTypeLattice } from './lattice'
 import { VariableSemantics } from './variable-declaration'
+import { SourceCodeSpan } from '../diagnostics'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -134,6 +135,7 @@ export class Parameter {
         public semantics: VariableSemantics | undefined,
         public label: string | undefined,
         public varName: string,
+        public span: SourceCodeSpan,
         public valueSet?: ExplicitValueSet,
         public defaultValue?: Expression,
     ) {}
@@ -144,13 +146,22 @@ export class Parameter {
         varName,
         valueSet,
         defaultValue,
+        span,
     }: {
         label: string | undefined
         varName: string
         valueSet?: ExplicitValueSet
         semantics?: VariableSemantics
         defaultValue?: Expression
+        span: SourceCodeSpan
     }): Parameter {
-        return new Parameter(semantics, label, varName, valueSet, defaultValue)
+        return new Parameter(
+            semantics,
+            label,
+            varName,
+            span,
+            valueSet,
+            defaultValue,
+        )
     }
 }

@@ -28,11 +28,19 @@ describe('Function Parser', () => {
                     varName: 'x',
                     valueSet: { max: undefined, min: undefined },
                     label: 'x',
+                    span: {
+                        start: { line: 1, column: 17 },
+                        end: { line: 1, column: 27 },
+                    },
                 },
                 {
                     varName: 'y',
                     valueSet: { values: ['false', 'ambiguous', 'true'] },
                     label: 'y',
+                    span: {
+                        start: { line: 1, column: 29 },
+                        end: { line: 1, column: 42 },
+                    },
                 },
             ],
             result: undefined,
@@ -51,11 +59,19 @@ describe('Function Parser', () => {
                     varName: 'x',
                     valueSet: { max: undefined, min: undefined },
                     label: undefined,
+                    span: {
+                        start: { line: 1, column: 17 },
+                        end: { line: 1, column: 29 },
+                    },
                 },
                 {
                     varName: 'y',
                     valueSet: { values: ['false', 'ambiguous', 'true'] },
                     label: 'label',
+                    span: {
+                        start: { line: 1, column: 31 },
+                        end: { line: 1, column: 50 },
+                    },
                 },
             ],
             result: undefined,
@@ -74,11 +90,19 @@ describe('Function Parser', () => {
                 {
                     varName: 'x',
                     semantics: 'ref',
+                    span: {
+                        start: { line: 1, column: 17 },
+                        end: { line: 1, column: 32 },
+                    },
                 },
                 {
                     varName: 'y',
                     valueSet: { values: ['false', 'ambiguous', 'true'] },
                     semantics: 'const',
+                    span: {
+                        start: { line: 1, column: 34 },
+                        end: { line: 1, column: 59 },
+                    },
                 },
             ],
             result: undefined,
@@ -98,6 +122,10 @@ describe('Function Parser', () => {
                     valueSet: undefined,
                     label: undefined,
                     defaultValue: { value: 42n },
+                    span: {
+                        start: { line: 1, column: 17 },
+                        end: { line: 1, column: 31 },
+                    },
                 },
             ],
             result: undefined,

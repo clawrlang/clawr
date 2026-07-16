@@ -75,6 +75,7 @@ describe('Query', () => {
                             max: 100n,
                             span: someCodeSpan,
                         }),
+                        span: someCodeSpan,
                     }),
                 ],
                 result: undefined,

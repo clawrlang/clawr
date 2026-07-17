@@ -1,6 +1,6 @@
 import { Statement, Expression } from '.'
 import { Context } from '.'
-import { CowTypeLattice, RefTypeLattice } from './lattice'
+import { IsolatedTypeLattice, SharedTypeLattice } from './lattice'
 
 export class ReturnStatement implements Statement {
     private constructor(public value: Expression | undefined) {}
@@ -20,7 +20,7 @@ export class ReturnStatement implements Statement {
                 )
             }
             if (
-                valueLattice instanceof CowTypeLattice &&
+                valueLattice instanceof IsolatedTypeLattice &&
                 context.semantics === 'ref'
             )
                 context.errorReporter.reportFatalError(
@@ -28,7 +28,7 @@ export class ReturnStatement implements Statement {
                     this.value.span,
                 )
             if (
-                valueLattice instanceof RefTypeLattice &&
+                valueLattice instanceof SharedTypeLattice &&
                 context.semantics !== 'ref'
             )
                 context.errorReporter.reportFatalError(
@@ -40,8 +40,8 @@ export class ReturnStatement implements Statement {
                 (object.kind === 'VARIABLE_REF' ||
                     object.kind === 'FIELD_REF') &&
                 !context.semantics &&
-                (valueLattice instanceof RefTypeLattice ||
-                    valueLattice instanceof CowTypeLattice)
+                (valueLattice instanceof SharedTypeLattice ||
+                    valueLattice instanceof IsolatedTypeLattice)
             ) {
                 context.scope.emitted.push({
                     kind: 'ENSURE_UNIQUE',

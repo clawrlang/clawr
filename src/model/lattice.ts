@@ -86,11 +86,11 @@ export class StringLattice implements Lattice {
     }
 }
 
-export class RefTypeLattice implements Lattice {
+export class SharedTypeLattice implements Lattice {
     private constructor(public readonly typeName: string) {}
 
-    static create({ typeName }: { typeName: string }): RefTypeLattice {
-        return new RefTypeLattice(typeName)
+    static create({ typeName }: { typeName: string }): SharedTypeLattice {
+        return new SharedTypeLattice(typeName)
     }
 
     unconstrained(): Lattice {
@@ -113,7 +113,7 @@ export class RefTypeLattice implements Lattice {
     }
 }
 
-export class CowTypeLattice implements Lattice {
+export class IsolatedTypeLattice implements Lattice {
     private constructor(
         public readonly typeName: string,
         public readonly fields: Record<string, Lattice>,
@@ -125,12 +125,12 @@ export class CowTypeLattice implements Lattice {
     }: {
         typeName: string
         fields: Record<string, Lattice>
-    }): CowTypeLattice {
-        return new CowTypeLattice(typeName, fields)
+    }): IsolatedTypeLattice {
+        return new IsolatedTypeLattice(typeName, fields)
     }
 
     unconstrained(): Lattice {
-        return CowTypeLattice.create({
+        return IsolatedTypeLattice.create({
             typeName: this.typeName,
             fields: Object.fromEntries(
                 Object.entries(this.fields).map(([name, field]) => [
@@ -186,14 +186,14 @@ export class UniqueTypeLattice implements Lattice {
     }
 
     asCOW() {
-        return CowTypeLattice.create({
+        return IsolatedTypeLattice.create({
             typeName: this.typeName,
             fields: this.fields,
         })
     }
 
     asREF() {
-        return RefTypeLattice.create({
+        return SharedTypeLattice.create({
             typeName: this.typeName,
         })
     }

@@ -17,7 +17,10 @@ import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
-import { CowTypeLattice, RefTypeLattice } from '../../../src/model/lattice'
+import {
+    IsolatedTypeLattice,
+    SharedTypeLattice,
+} from '../../../src/model/lattice'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
@@ -148,7 +151,7 @@ describe('FunctionDeclaration', () => {
         })
         context.scope.setCurrentValue(
             'myVar',
-            RefTypeLattice.create({
+            SharedTypeLattice.create({
                 typeName: 'MyData',
             }),
         )
@@ -193,7 +196,7 @@ describe('FunctionDeclaration', () => {
         })
         context.scope.setCurrentValue(
             'myVar',
-            CowTypeLattice.create({
+            IsolatedTypeLattice.create({
                 typeName: 'MyData',
                 fields: {},
             }),
@@ -240,7 +243,7 @@ describe('FunctionDeclaration', () => {
         })
         context.scope.setCurrentValue(
             'myVar',
-            CowTypeLattice.create({
+            IsolatedTypeLattice.create({
                 typeName: 'MyData',
                 fields: {},
             }),
@@ -325,7 +328,7 @@ describe('FunctionDeclaration', () => {
             })
             context.scope.setCurrentValue(
                 'myVar',
-                CowTypeLattice.create({
+                IsolatedTypeLattice.create({
                     typeName: 'MyData',
                     fields: {},
                 }),
@@ -377,7 +380,7 @@ describe('FunctionDeclaration', () => {
             })
             context.scope.setCurrentValue(
                 'myVar',
-                RefTypeLattice.create({
+                SharedTypeLattice.create({
                     typeName: 'MyData',
                 }),
             )

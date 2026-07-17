@@ -2,7 +2,7 @@ import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
-import { CowTypeLattice, Lattice, UniqueTypeLattice } from './lattice'
+import { IsolatedTypeLattice, Lattice, UniqueTypeLattice } from './lattice'
 import { convertSemantics, VariableReference } from './variable-reference'
 
 export class FieldReference implements Expression {
@@ -61,7 +61,7 @@ export class FieldReference implements Expression {
 
     currentValue(context: Context): Lattice {
         const objectValue = this.object.currentValue(context)
-        if (objectValue instanceof CowTypeLattice)
+        if (objectValue instanceof IsolatedTypeLattice)
             return objectValue.fields[this.field]
 
         const field = this.getFieldFromContext(context)
@@ -74,7 +74,7 @@ export class FieldReference implements Expression {
                 `Cannot set current value of field ${this.field} to a UniqueTypeLattice`,
             )
         const objectValue = this.object.currentValue(context)
-        if (objectValue instanceof CowTypeLattice) {
+        if (objectValue instanceof IsolatedTypeLattice) {
             objectValue.fields[this.field] = value
 
             const object: Expression = this.object

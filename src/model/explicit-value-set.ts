@@ -6,8 +6,8 @@ import {
     IntegerLattice,
     TruthvalueLattice,
     StringLattice,
-    RefTypeLattice,
-    CowTypeLattice,
+    SharedTypeLattice,
+    IsolatedTypeLattice,
     UniqueTypeLattice,
 } from './lattice'
 import { VariableSemantics } from './variable-declaration'
@@ -130,9 +130,9 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
 
     toLattice(context: Context): Lattice {
         if (this.semantics === 'ref' || this.semantics === 'mutref')
-            return RefTypeLattice.create({ typeName: this.typeName })
+            return SharedTypeLattice.create({ typeName: this.typeName })
 
-        return CowTypeLattice.create({
+        return IsolatedTypeLattice.create({
             typeName: this.typeName,
             fields: Object.fromEntries(
                 context.scope

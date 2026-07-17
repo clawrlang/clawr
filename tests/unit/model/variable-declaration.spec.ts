@@ -12,7 +12,7 @@ import { VariableReference } from '../../../src/model/variable-reference'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { FieldReference } from '../../../src/model/field-reference'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
-import { CowTypeLattice, IntegerLattice } from '../../../src/model/lattice'
+import { IsolatedTypeLattice, IntegerLattice } from '../../../src/model/lattice'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -190,10 +190,10 @@ describe('VariableDeclaration', () => {
             })
             context.scope.setCurrentValue(
                 'bar',
-                CowTypeLattice.create({
+                IsolatedTypeLattice.create({
                     typeName: 'OuterType',
                     fields: {
-                        field: CowTypeLattice.create({
+                        field: IsolatedTypeLattice.create({
                             typeName: 'InnerType',
                             fields: {
                                 innerField: IntegerLattice.create({
@@ -268,7 +268,7 @@ describe('VariableDeclaration', () => {
             })
             context.scope.setCurrentValue(
                 'bar',
-                CowTypeLattice.create({
+                IsolatedTypeLattice.create({
                     typeName: 'MyType',
                     fields: {
                         field: IntegerLattice.create({
@@ -434,7 +434,7 @@ describe('VariableDeclaration', () => {
             })
             decl.emitStatement(context)
             expect(context.scope.currentValue('foo')).toBeInstanceOf(
-                CowTypeLattice,
+                IsolatedTypeLattice,
             )
         })
     })
@@ -479,7 +479,7 @@ describe('VariableDeclaration', () => {
                 })
                 context.scope.setCurrentValue(
                     'value',
-                    CowTypeLattice.create({
+                    IsolatedTypeLattice.create({
                         typeName: 'MyType',
                         fields: {
                             myField: IntegerLattice.create({

@@ -12,7 +12,10 @@ import {
 } from '../../../src/model/explicit-value-set'
 import { FunctionDeclaration } from '../../../src/model/function-declaration'
 import { Query } from '../../../src/model/query'
-import { CowTypeLattice, RefTypeLattice } from '../../../src/model/lattice'
+import {
+    IsolatedTypeLattice,
+    SharedTypeLattice,
+} from '../../../src/model/lattice'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -92,10 +95,10 @@ describe('Assignment', () => {
             })
             context.scope.setCurrentValue(
                 'bar',
-                CowTypeLattice.create({
+                IsolatedTypeLattice.create({
                     typeName: 'OuterType',
                     fields: {
-                        field: CowTypeLattice.create({
+                        field: IsolatedTypeLattice.create({
                             typeName: 'InnerType',
                             fields: {},
                         }),
@@ -185,7 +188,7 @@ describe('Assignment', () => {
             })
             context.scope.setCurrentValue(
                 'bar',
-                CowTypeLattice.create({
+                IsolatedTypeLattice.create({
                     typeName: 'MyType',
                     fields: {},
                 }),
@@ -442,11 +445,11 @@ describe('Assignment', () => {
                 context.scope.setCurrentValue(
                     'value',
                     semantics[1] === 'ISOLATED'
-                        ? CowTypeLattice.create({
+                        ? IsolatedTypeLattice.create({
                               typeName: 'MyType',
                               fields: {},
                           })
-                        : RefTypeLattice.create({
+                        : SharedTypeLattice.create({
                               typeName: 'MyType',
                           }),
                 )
@@ -587,7 +590,7 @@ describe('Assignment', () => {
                 })
                 context.scope.setCurrentValue(
                     'value',
-                    RefTypeLattice.create({ typeName: 'MyType' }),
+                    SharedTypeLattice.create({ typeName: 'MyType' }),
                 )
                 const assignment = Assignment.create({
                     target: VariableReference.create({

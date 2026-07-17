@@ -115,7 +115,7 @@ describe('ExplicitValueSet', () => {
             })
         })
 
-        it('converts COW rc-type to CIR correctly', () => {
+        it('converts ISOLATED rc-type to CIR correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
                 typeName: 'MyType',
                 semantics: 'mut',
@@ -128,11 +128,11 @@ describe('ExplicitValueSet', () => {
             expect(valueSet.toCIR()).toEqual({
                 type: 'rc-type',
                 typeName: 'MyType',
-                semantics: 'COW',
+                semantics: 'ISOLATED',
             })
         })
 
-        it('converts REF rc-type to CIR correctly', () => {
+        it('converts SHARED rc-type to CIR correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
                 typeName: 'MyType',
                 semantics: 'ref',
@@ -145,7 +145,7 @@ describe('ExplicitValueSet', () => {
             expect(valueSet.toCIR()).toEqual({
                 type: 'rc-type',
                 typeName: 'MyType',
-                semantics: 'REF',
+                semantics: 'SHARED',
             })
         })
     })
@@ -196,7 +196,7 @@ describe('ExplicitValueSet', () => {
             expect(valueSet.toLattice()).toEqual(expect.objectContaining({}))
         })
 
-        it('converts COW rc-type to lattice correctly', () => {
+        it('converts ISOLATED rc-type to lattice correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
                 typeName: 'MyType',
                 semantics: 'mut',
@@ -212,7 +212,7 @@ describe('ExplicitValueSet', () => {
             })
         })
 
-        it('converts REF rc-type to lattice correctly', () => {
+        it('converts SHARED rc-type to lattice correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
                 typeName: 'MyType',
                 semantics: 'ref',

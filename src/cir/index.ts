@@ -106,7 +106,7 @@ type MemoryRetention = {
 type AsShared = {
     kind: 'AS_SHARED'
     object: QueryFunctionCall
-    targetSemantics: 'REF' | 'COW'
+    targetSemantics: 'SHARED' | 'ISOLATED'
     valueSet: RcTypeValueSet
 }
 
@@ -166,7 +166,7 @@ type StringValueSet = { type: 'string' }
 type RcTypeValueSet = {
     type: 'rc-type'
     typeName: string
-    semantics: 'REF' | 'COW'
+    semantics: 'SHARED' | 'ISOLATED'
 }
 
 export type ValueSet =

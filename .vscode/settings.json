@@ -94,7 +94,7 @@
               "kind": { "const": "AS_SHARED" },
               "object": { "$ref": "#/$defs/QueryFunctionCall" },
               "targetSemantics": {
-                "oneOf": [{ "const": "COW" }, { "const": "REF" }]
+                "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
               },
               "valueSet": { "$ref": "#/$defs/RcTypeValueSet" }
             },
@@ -147,7 +147,9 @@
             "properties": {
               "type": { "const": "rc-type" },
               "typeName": { "type": "string" },
-              "semantics": { "oneOf": [{ "const": "COW" }, { "const": "REF" }] }
+              "semantics": {
+                "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
+              }
             },
             "required": ["type", "typeName", "semantics"],
             "additionalProperties": false

@@ -19,14 +19,14 @@
             "valueSet": {
                 "type": "rc-type",
                 "typeName": "FooData",
-                "semantics": "COW"
+                "semantics": "ISOLATED"
             },
             "initialValue": {
                 "kind": "ALLOCATE",
                 "valueSet": {
                     "type": "rc-type",
                     "typeName": "FooData",
-                    "semantics": "COW"
+                    "semantics": "ISOLATED"
                 },
                 "fields": [
                     {
@@ -52,7 +52,7 @@
             "valueSet": {
                 "type": "rc-type",
                 "typeName": "FooData",
-                "semantics": "COW"
+                "semantics": "ISOLATED"
             },
             "initialValue": {
                 "kind": "RETAIN",
@@ -62,13 +62,13 @@
                     "valueSet": {
                         "type": "rc-type",
                         "typeName": "FooData",
-                        "semantics": "COW"
+                        "semantics": "ISOLATED"
                     }
                 },
                 "valueSet": {
                     "type": "rc-type",
                     "typeName": "FooData",
-                    "semantics": "COW"
+                    "semantics": "ISOLATED"
                 }
             }
         },
@@ -80,7 +80,7 @@
                 "valueSet": {
                     "type": "rc-type",
                     "typeName": "FooData",
-                    "semantics": "COW"
+                    "semantics": "ISOLATED"
                 }
             }
         },
@@ -94,14 +94,14 @@
                     "valueSet": {
                         "type": "rc-type",
                         "typeName": "FooData",
-                        "semantics": "COW"
+                        "semantics": "ISOLATED"
                     }
                 },
                 "field": "bar",
                 "valueSet": {
                     "type": "rc-type",
                     "typeName": "FooData",
-                    "semantics": "COW"
+                    "semantics": "ISOLATED"
                 }
             },
             "value": {
@@ -129,7 +129,7 @@
                         "valueSet": {
                             "type": "rc-type",
                             "typeName": "FooData",
-                            "semantics": "COW"
+                            "semantics": "ISOLATED"
                         }
                     },
                     "field": "bar",
@@ -156,7 +156,7 @@
                         "valueSet": {
                             "type": "rc-type",
                             "typeName": "FooData",
-                            "semantics": "COW"
+                            "semantics": "ISOLATED"
                         }
                     },
                     "field": "bar",
@@ -176,7 +176,7 @@
                 "valueSet": {
                     "type": "rc-type",
                     "typeName": "FooData",
-                    "semantics": "COW"
+                    "semantics": "ISOLATED"
                 }
             }
         },
@@ -188,7 +188,7 @@
                 "valueSet": {
                     "type": "rc-type",
                     "typeName": "FooData",
-                    "semantics": "COW"
+                    "semantics": "ISOLATED"
                 }
             }
         }

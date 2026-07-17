@@ -129,7 +129,7 @@ describe('FunctionDeclaration', () => {
         })
     })
 
-    it('throws if returning REF as UNIQUE', () => {
+    it('throws if returning SHARED as UNIQUE', () => {
         const context = newSemanticContext()
         context.scope.rootScope.declarations.set(
             'MyData',
@@ -143,7 +143,7 @@ describe('FunctionDeclaration', () => {
             valueSet: {
                 type: 'rc-type',
                 typeName: 'MyData',
-                semantics: 'REF',
+                semantics: 'SHARED',
             },
         })
         context.scope.setCurrentValue(
@@ -170,11 +170,11 @@ describe('FunctionDeclaration', () => {
         })
 
         expect(() => funcDecl.emitDeclaration(context)).toThrow(
-            /Cannot return a REF variable as UNIQUE/,
+            /Cannot return a SHARED variable as UNIQUE/,
         )
     })
 
-    it('throws if returning COW as REF', () => {
+    it('throws if returning ISOLATED as SHARED', () => {
         const context = newSemanticContext()
         context.scope.rootScope.declarations.set(
             'MyData',
@@ -188,7 +188,7 @@ describe('FunctionDeclaration', () => {
             valueSet: {
                 type: 'rc-type',
                 typeName: 'MyData',
-                semantics: 'COW',
+                semantics: 'ISOLATED',
             },
         })
         context.scope.setCurrentValue(
@@ -217,11 +217,11 @@ describe('FunctionDeclaration', () => {
         })
 
         expect(() => funcDecl.emitDeclaration(context)).toThrow(
-            /Cannot return a COW variable as ref/,
+            /Cannot return an ISOLATED variable as ref/,
         )
     })
 
-    it('throws if returning COW as REF', () => {
+    it('throws if returning ISOLATED as SHARED', () => {
         const context = newSemanticContext()
         context.scope.rootScope.declarations.set(
             'MyData',
@@ -235,7 +235,7 @@ describe('FunctionDeclaration', () => {
             valueSet: {
                 type: 'rc-type',
                 typeName: 'MyData',
-                semantics: 'COW',
+                semantics: 'ISOLATED',
             },
         })
         context.scope.setCurrentValue(
@@ -264,7 +264,7 @@ describe('FunctionDeclaration', () => {
         })
 
         expect(() => funcDecl.emitDeclaration(context)).toThrow(
-            /Cannot return a COW variable as ref/,
+            /Cannot return an ISOLATED variable as ref/,
         )
     })
 
@@ -306,7 +306,7 @@ describe('FunctionDeclaration', () => {
             })
         })
 
-        it('infers COW return value-set from COW variable expression', () => {
+        it('infers ISOLATED return value-set from ISOLATED variable expression', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'MyData',
@@ -320,7 +320,7 @@ describe('FunctionDeclaration', () => {
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                 },
             })
             context.scope.setCurrentValue(
@@ -353,12 +353,12 @@ describe('FunctionDeclaration', () => {
                 resultValueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                 },
             })
         })
 
-        it('infers REF return value-set from REF variable expression', () => {
+        it('infers SHARED return value-set from SHARED variable expression', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'MyData',
@@ -372,7 +372,7 @@ describe('FunctionDeclaration', () => {
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'REF',
+                    semantics: 'SHARED',
                 },
             })
             context.scope.setCurrentValue(
@@ -404,7 +404,7 @@ describe('FunctionDeclaration', () => {
                 resultValueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'REF',
+                    semantics: 'SHARED',
                 },
             })
         })

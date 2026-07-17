@@ -15,7 +15,7 @@ describe('Field Reference', () => {
             semantics: 'mut',
             valueSet: {
                 type: 'rc-type',
-                semantics: 'COW',
+                semantics: 'ISOLATED',
                 typeName: 'MyType',
             },
         })
@@ -54,7 +54,7 @@ describe('Field Reference', () => {
             semantics: 'mut',
             valueSet: {
                 type: 'rc-type',
-                semantics: 'COW',
+                semantics: 'ISOLATED',
                 typeName: 'MyType',
             },
         })
@@ -87,16 +87,16 @@ describe('Field Reference', () => {
             fieldSpan: someCodeSpan,
         })
         expect(fieldRef.toCIRExpression(context).valueSet).toMatchObject({
-            semantics: 'COW',
+            semantics: 'ISOLATED',
         })
     })
 
     describe('infers its type and isolation level from the context', () => {
         const cases = [
-            { semantics: 'const', expectedSemantics: 'COW' },
-            { semantics: 'mut', expectedSemantics: 'COW' },
-            { semantics: 'ref', expectedSemantics: 'REF' },
-            { semantics: 'mutref', expectedSemantics: 'REF' },
+            { semantics: 'const', expectedSemantics: 'ISOLATED' },
+            { semantics: 'mut', expectedSemantics: 'ISOLATED' },
+            { semantics: 'ref', expectedSemantics: 'SHARED' },
+            { semantics: 'mutref', expectedSemantics: 'SHARED' },
         ] as const
 
         for (const { semantics, expectedSemantics } of cases)
@@ -133,7 +133,7 @@ describe('Field Reference', () => {
                         name: 'myVar',
                         span: someCodeSpan,
                     }),
-                    operator: expectedSemantics === 'REF' ? '->' : '.',
+                    operator: expectedSemantics === 'SHARED' ? '->' : '.',
                     field: 'myField',
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
@@ -154,7 +154,7 @@ describe('Field Reference', () => {
             semantics: 'mut',
             valueSet: {
                 type: 'rc-type',
-                semantics: 'COW',
+                semantics: 'ISOLATED',
                 typeName: 'MyType',
             },
         })
@@ -191,10 +191,10 @@ describe('Field Reference', () => {
 
     describe('throws if the object semantics are not compatible with the operator', () => {
         const cases = [
-            { operator: '->', semantics: ['const', 'COW'] },
-            { operator: '->', semantics: ['mut', 'COW'] },
-            { operator: '.', semantics: ['ref', 'REF'] },
-            { operator: '.', semantics: ['mutref', 'REF'] },
+            { operator: '->', semantics: ['const', 'ISOLATED'] },
+            { operator: '->', semantics: ['mut', 'ISOLATED'] },
+            { operator: '.', semantics: ['ref', 'SHARED'] },
+            { operator: '.', semantics: ['mutref', 'SHARED'] },
         ] as const
 
         for (const { operator, semantics } of cases) {
@@ -255,10 +255,10 @@ describe('Field Reference', () => {
 
     describe('effectively const', () => {
         const cases = [
-            { semantics: ['const', 'COW'], expected: true },
-            { semantics: ['mut', 'COW'], expected: false },
-            { semantics: ['ref', 'REF'], expected: false },
-            { semantics: ['mutref', 'REF'], expected: false },
+            { semantics: ['const', 'ISOLATED'], expected: true },
+            { semantics: ['mut', 'ISOLATED'], expected: false },
+            { semantics: ['ref', 'SHARED'], expected: false },
+            { semantics: ['mutref', 'SHARED'], expected: false },
         ] as const
 
         for (const { semantics, expected } of cases) {
@@ -308,7 +308,7 @@ describe('Field Reference', () => {
                 semantics: 'const',
                 valueSet: {
                     type: 'rc-type',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                     typeName: 'MyType',
                 },
             })
@@ -347,7 +347,7 @@ describe('Field Reference', () => {
                 semantics: 'mut',
                 valueSet: {
                     type: 'rc-type',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                     typeName: 'MyType',
                 },
             })

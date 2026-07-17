@@ -42,7 +42,7 @@ export class FieldReference implements Expression {
             this.object instanceof FieldReference
         ) {
             const object = this.object.toCIRExpression(context)
-            if ((object.valueSet as any).semantics === 'COW') {
+            if ((object.valueSet as any).semantics === 'ISOLATED') {
                 return [{ kind: 'ENSURE_UNIQUE', object }]
             }
         }
@@ -52,7 +52,7 @@ export class FieldReference implements Expression {
     isEffectivelyConst(context: Context): boolean {
         if (
             (this.object.toCIRExpression(context).valueSet as any).semantics ===
-            'REF'
+            'SHARED'
         )
             return false
 
@@ -126,7 +126,7 @@ export class FieldReference implements Expression {
     private checkOperatorCompatibility(context: Context) {
         const semantics = (this.object.toCIRExpression(context).valueSet as any)
             .semantics
-        if ((semantics === 'REF') !== (this.operator === '->'))
+        if ((semantics === 'SHARED') !== (this.operator === '->'))
             context.errorReporter.reportFatalError(
                 `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
                 this.span,

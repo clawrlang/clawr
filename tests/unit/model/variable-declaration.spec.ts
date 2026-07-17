@@ -184,7 +184,7 @@ describe('VariableDeclaration', () => {
                 semantics: 'const',
                 valueSet: {
                     type: 'rc-type',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                     typeName: 'OuterType',
                 },
             })
@@ -262,7 +262,7 @@ describe('VariableDeclaration', () => {
                 semantics: 'const',
                 valueSet: {
                     type: 'rc-type',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                     typeName: 'MyType',
                 },
             })
@@ -441,10 +441,13 @@ describe('VariableDeclaration', () => {
 
     describe('throws if the value has incompatible semantics', () => {
         const cases = [
-            { targetSemantics: ['mut', 'COW'], valueSemantics: ['ref', 'REF'] },
             {
-                targetSemantics: ['mut', 'COW'],
-                valueSemantics: ['mutref', 'REF'],
+                targetSemantics: ['mut', 'ISOLATED'],
+                valueSemantics: ['ref', 'SHARED'],
+            },
+            {
+                targetSemantics: ['mut', 'ISOLATED'],
+                valueSemantics: ['mutref', 'SHARED'],
             },
         ] as const
 

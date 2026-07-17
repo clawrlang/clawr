@@ -121,7 +121,7 @@ describe('Literals', () => {
                     targetValueSet: {
                         type: 'rc-type',
                         typeName: 'MyType',
-                        semantics: 'REF',
+                        semantics: 'SHARED',
                     },
                 }),
             ).toMatchObject({
@@ -129,7 +129,7 @@ describe('Literals', () => {
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyType',
-                    semantics: 'REF',
+                    semantics: 'SHARED',
                 },
                 fields: [
                     {

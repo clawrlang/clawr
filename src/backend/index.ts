@@ -125,7 +125,7 @@ export function lowerInitStmt(stmt: cir.Statement): string {
         case 'VARIABLE_DECL': {
             if (stmt.initialValue.kind === 'ALLOCATE')
                 return `
-                    ${stmt.name} = allocRC(${stmt.initialValue.valueSet.typeName}, ${stmt.initialValue.valueSet.semantics === 'COW' ? '__rc_ISOLATED' : '__rc_SHARED'});
+                    ${stmt.name} = allocRC(${stmt.initialValue.valueSet.typeName}, ${stmt.initialValue.valueSet.semantics === 'ISOLATED' ? '__rc_ISOLATED' : '__rc_SHARED'});
                     memcpy(((__rc_header*)${stmt.name}) + 1, &(${stmt.initialValue.valueSet.typeName}ˇfields) {
                         ${stmt.initialValue.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')}
                     }, sizeof(${stmt.initialValue.valueSet.typeName}ˇfields));

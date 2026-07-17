@@ -108,7 +108,7 @@ export class RefTypeLattice implements Lattice {
         return {
             type: 'rc-type',
             typeName: this.typeName,
-            semantics: 'REF',
+            semantics: 'SHARED',
         }
     }
 }
@@ -152,7 +152,7 @@ export class CowTypeLattice implements Lattice {
         return {
             type: 'rc-type',
             typeName: this.typeName,
-            semantics: 'COW',
+            semantics: 'ISOLATED',
         }
     }
 }
@@ -206,7 +206,7 @@ export class UniqueTypeLattice implements Lattice {
         return {
             type: 'rc-type',
             typeName: this.typeName,
-            semantics: 'COW',
+            semantics: 'ISOLATED',
         }
     }
 }

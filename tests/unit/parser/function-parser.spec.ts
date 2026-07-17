@@ -176,7 +176,7 @@ describe('Function Parser', () => {
         expect(result.result).toBeInstanceOf(ExplicitUniqueValueSet)
     })
 
-    it('parses a function with a COW return type', () => {
+    it('parses a function with an ISOLATED return type', () => {
         const code = 'func myFunction() -> const MyData { return {} }'
 
         const result = parseFunction(code)
@@ -187,7 +187,7 @@ describe('Function Parser', () => {
         })
     })
 
-    it('parses a function with a REF return type', () => {
+    it('parses a function with a SHARED return type', () => {
         const code = 'func myFunction() -> ref MyData { return {} }'
 
         const result = parseFunction(code)

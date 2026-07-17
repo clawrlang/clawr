@@ -75,5 +75,5 @@ export class VariableReference implements Expression {
 }
 
 export function convertSemantics(semantics: string) {
-    return semantics === 'mut' || semantics === 'const' ? 'COW' : 'REF'
+    return semantics === 'mut' || semantics === 'const' ? 'ISOLATED' : 'SHARED'
 }

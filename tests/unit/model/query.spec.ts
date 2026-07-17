@@ -103,7 +103,7 @@ describe('Query', () => {
         })
     })
 
-    describe('converts UNIQUE semantics to COW in CIR', () => {
+    describe('converts UNIQUE semantics to ISOLATED in CIR', () => {
         test('for custom function', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
@@ -140,7 +140,7 @@ describe('Query', () => {
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                 },
             })
         })
@@ -152,7 +152,7 @@ describe('Query', () => {
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'REF',
+                    semantics: 'SHARED',
                 },
             })
             context.scope.setCurrentValue(
@@ -188,7 +188,7 @@ describe('Query', () => {
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                 },
             })
         })

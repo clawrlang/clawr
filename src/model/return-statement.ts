@@ -24,7 +24,7 @@ export class ReturnStatement implements Statement {
                 context.semantics === 'ref'
             )
                 context.errorReporter.reportFatalError(
-                    `Cannot return a COW variable as ${context.semantics}`,
+                    `Cannot return an ISOLATED variable as ${context.semantics}`,
                     this.value.span,
                 )
             if (
@@ -32,7 +32,7 @@ export class ReturnStatement implements Statement {
                 context.semantics !== 'ref'
             )
                 context.errorReporter.reportFatalError(
-                    `Cannot return a REF variable as ${context.semantics ?? 'UNIQUE'}`,
+                    `Cannot return a SHARED variable as ${context.semantics ?? 'UNIQUE'}`,
                     this.value.span,
                 )
             const object = this.value.toCIRExpression(context)

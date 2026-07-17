@@ -166,7 +166,7 @@ export class ExplicitUniqueValueSet implements ExplicitValueSet {
         return {
             type: 'rc-type',
             typeName: this.typeName,
-            semantics: 'COW',
+            semantics: 'ISOLATED',
         }
     }
 

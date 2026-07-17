@@ -89,10 +89,10 @@ describe('Variable Reference', () => {
 
     describe('infers isolation level from the context', () => {
         const cases = [
-            { kind: 'const', expected: 'COW' },
-            { kind: 'mut', expected: 'COW' },
-            { kind: 'ref', expected: 'REF' },
-            { kind: 'mutref', expected: 'REF' },
+            { kind: 'const', expected: 'ISOLATED' },
+            { kind: 'mut', expected: 'ISOLATED' },
+            { kind: 'ref', expected: 'SHARED' },
+            { kind: 'mutref', expected: 'SHARED' },
         ] as const
 
         const context = newSemanticContext()

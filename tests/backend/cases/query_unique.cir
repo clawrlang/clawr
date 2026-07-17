@@ -24,7 +24,7 @@
                     "valueSet": {
                         "type": "rc-type",
                         "typeName": "MyData",
-                        "semantics": "COW"
+                        "semantics": "ISOLATED"
                     },
                     "initialValue": {
                         "kind": "ALLOCATE",
@@ -45,7 +45,7 @@
                         "valueSet": {
                             "type": "rc-type",
                             "typeName": "MyData",
-                            "semantics": "COW"
+                            "semantics": "ISOLATED"
                         }
                     }
                 },
@@ -57,7 +57,7 @@
                         "valueSet": {
                             "type": "rc-type",
                             "typeName": "MyData",
-                            "semantics": "COW"
+                            "semantics": "ISOLATED"
                         }
                     }
                 }
@@ -65,7 +65,7 @@
             "resultValueSet": {
                 "type": "rc-type",
                 "typeName": "MyData",
-                "semantics": "COW"
+                "semantics": "ISOLATED"
             }
         }
     ],
@@ -76,7 +76,7 @@
             "valueSet": {
                 "type": "rc-type",
                 "typeName": "MyData",
-                "semantics": "REF"
+                "semantics": "SHARED"
             },
             "initialValue": {
                 "kind": "AS_SHARED",
@@ -90,13 +90,13 @@
                     "valueSet": {
                         "type": "rc-type",
                         "typeName": "MyData",
-                        "semantics": "REF"
+                        "semantics": "SHARED"
                     }
                 },
-                "targetSemantics": "REF",
+                "targetSemantics": "SHARED",
                 "valueSet": {
                     "type": "rc-type",
-                    "semantics": "REF",
+                    "semantics": "SHARED",
                     "typeName": "MyData"
                 }
             }
@@ -116,7 +116,7 @@
                         "valueSet": {
                             "type": "rc-type",
                             "typeName": "MyData",
-                            "semantics": "REF"
+                            "semantics": "SHARED"
                         }
                     },
                     "field": "field",

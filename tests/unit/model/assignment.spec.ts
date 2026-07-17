@@ -78,7 +78,7 @@ describe('Assignment', () => {
                 semantics: 'const',
                 valueSet: {
                     type: 'rc-type',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                     typeName: 'OuterType',
                 },
             })
@@ -86,7 +86,7 @@ describe('Assignment', () => {
                 semantics: 'mut',
                 valueSet: {
                     type: 'rc-type',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                     typeName: 'InnerType',
                 },
             })
@@ -129,7 +129,7 @@ describe('Assignment', () => {
                     valueSet: {
                         type: 'rc-type',
                         typeName: 'InnerType',
-                        semantics: 'COW',
+                        semantics: 'ISOLATED',
                     },
                     initialValue: {
                         kind: 'VARIABLE_REF',
@@ -171,7 +171,7 @@ describe('Assignment', () => {
                 semantics: 'const',
                 valueSet: {
                     type: 'rc-type',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                     typeName: 'MyType',
                 },
             })
@@ -179,7 +179,7 @@ describe('Assignment', () => {
                 semantics: 'mut',
                 valueSet: {
                     type: 'rc-type',
-                    semantics: 'COW',
+                    semantics: 'ISOLATED',
                     typeName: 'MyType',
                 },
             })
@@ -211,7 +211,7 @@ describe('Assignment', () => {
                     valueSet: {
                         type: 'rc-type',
                         typeName: 'MyType',
-                        semantics: 'COW',
+                        semantics: 'ISOLATED',
                     },
                     initialValue: {
                         kind: 'VARIABLE_REF',
@@ -240,7 +240,7 @@ describe('Assignment', () => {
         })
     })
 
-    it('injects ENSURE_UNIQUE for COW target before assignment', () => {
+    it('injects ENSURE_UNIQUE for ISOLATED target before assignment', () => {
         const context = newSemanticContext()
         context.scope.rootScope.declarations.set(
             'MyType',
@@ -261,7 +261,7 @@ describe('Assignment', () => {
             semantics: 'mut',
             valueSet: {
                 type: 'rc-type',
-                semantics: 'COW',
+                semantics: 'ISOLATED',
                 typeName: 'MyType',
             },
         })
@@ -294,7 +294,7 @@ describe('Assignment', () => {
         ])
     })
 
-    it('injects AS_SHARED for UNIQUE value before assignment to REF target', () => {
+    it('injects AS_SHARED for UNIQUE value before assignment to SHARED target', () => {
         const context = newSemanticContext()
         context.scope.rootScope.declarations.set(
             'MyType',
@@ -325,7 +325,7 @@ describe('Assignment', () => {
             semantics: 'mutref',
             valueSet: {
                 type: 'rc-type',
-                semantics: 'REF',
+                semantics: 'SHARED',
                 typeName: 'MyType',
             },
         })
@@ -333,7 +333,7 @@ describe('Assignment', () => {
             semantics: 'mut',
             valueSet: {
                 type: 'rc-type',
-                semantics: 'COW',
+                semantics: 'ISOLATED',
                 typeName: 'MyType',
             },
         })
@@ -358,7 +358,7 @@ describe('Assignment', () => {
                 target: { name: 'refVar' },
                 value: {
                     kind: 'AS_SHARED',
-                    targetSemantics: 'REF',
+                    targetSemantics: 'SHARED',
                     object: {
                         kind: 'QUERY',
                         name: {
@@ -368,13 +368,13 @@ describe('Assignment', () => {
                         arguments: [],
                         valueSet: {
                             type: 'rc-type',
-                            semantics: 'COW',
+                            semantics: 'ISOLATED',
                             typeName: 'MyType',
                         },
                     },
                     valueSet: {
                         type: 'rc-type',
-                        semantics: 'REF',
+                        semantics: 'SHARED',
                         typeName: 'MyType',
                     },
                 },
@@ -411,8 +411,8 @@ describe('Assignment', () => {
 
     describe('throws if the target variable is immutable/non-assignable', () => {
         for (const [kind, semantics] of [
-            ['const', 'COW'],
-            ['ref', 'REF'],
+            ['const', 'ISOLATED'],
+            ['ref', 'SHARED'],
         ] as const) {
             test(kind, () => {
                 const context = newSemanticContext()
@@ -441,7 +441,7 @@ describe('Assignment', () => {
                 })
                 context.scope.setCurrentValue(
                     'value',
-                    semantics[1] === 'COW'
+                    semantics[1] === 'ISOLATED'
                         ? CowTypeLattice.create({
                               typeName: 'MyType',
                               fields: {},
@@ -502,7 +502,7 @@ describe('Assignment', () => {
             semantics: 'const',
             valueSet: {
                 type: 'rc-type',
-                semantics: 'COW',
+                semantics: 'ISOLATED',
                 typeName: 'MyType',
             },
         })
@@ -541,10 +541,13 @@ describe('Assignment', () => {
 
     describe('throws if the value and target have incompatible semantics', () => {
         const cases = [
-            { targetSemantics: ['mut', 'COW'], valueSemantics: ['ref', 'REF'] },
             {
-                targetSemantics: ['mut', 'COW'],
-                valueSemantics: ['mutref', 'REF'],
+                targetSemantics: ['mut', 'ISOLATED'],
+                valueSemantics: ['ref', 'SHARED'],
+            },
+            {
+                targetSemantics: ['mut', 'ISOLATED'],
+                valueSemantics: ['mutref', 'SHARED'],
             },
         ] as const
 

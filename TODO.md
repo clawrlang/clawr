@@ -2,18 +2,14 @@
 
 ## In Progress
 
-Function Parameters — Semantic Model, `toCIR()`
+- Recoverable errors
 
-- Ensure that `valueSet` and `defaultValue` are compatible
-- Ensure that `undefined` variables are not modified
-- Ensure that `undefined` variables are not assigned without `copy(of:)`
+## Incomplete/Postponed Functionality
 
-- QUERY/EXEC: Ensure that parameters are passed using compatible semantics
-- Allow both `COW` and `REF` values for `undefined` parameters
-- Support default parameter values
-  - Inject at call site? (only simple values?)
-  - Inject as `NULL` and create in body? expressions depending on current state
-  - Reference other parameters? Populate in referential order? Expand expressions?
+- [Function Parameters](./todo/params.md)
+  - `toCIR()`
+- `VariableDeclaration` `initialValue` type mismatch
+- `DataLiteral` field type mismatch
 
 ## Later
 

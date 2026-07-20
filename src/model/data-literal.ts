@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Context, Expression } from '.'
+import { Context, Expression, logSemanticError } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { Lattice, UniqueTypeLattice } from './lattice'
@@ -27,9 +27,9 @@ export class DataLiteral implements Expression {
     currentValue(context: Context & { typeName: string }): Lattice {
         const typeDeclaration = context.scope.dataDeclaration(context.typeName)
         if (!typeDeclaration)
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `DataLiteral.currentValue: type ${context.typeName} not found in scope`,
-                this.span,
+                { ...context, span: this.span, fatal: true },
             )
         return UniqueTypeLattice.create({
             typeName: typeDeclaration.name,
@@ -52,16 +52,17 @@ export class DataLiteral implements Expression {
     ): cir.Expression {
         const valueSet = context.targetValueSet
         if (!valueSet || valueSet.type !== 'rc-type')
-            context.errorReporter.reportFatalError(
-                'DataLiteral.toCIRExpression: target valueSet must be of type rc-type',
-                this.span,
+            logSemanticError(
+                `DataLiteral.toCIRExpression: target valueSet must be of type rc-type`,
+                { ...context, span: this.span, fatal: true },
             )
+
         const targetType = context.scope.dataDeclaration(valueSet.typeName) as
             DataDeclaration | undefined
         if (!targetType)
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `DataLiteral.toCIRExpression: target type ${valueSet.typeName} not found in scope`,
-                this.span,
+                { ...context, span: this.span, fatal: true },
             )
         const fieldDeclarations = new Map(
             targetType.fields.map((field) => [field.name, field]),
@@ -74,9 +75,9 @@ export class DataLiteral implements Expression {
                 if (!fieldDeclaration)
                     // Nested literals need the declared field type as their target.
                     // Missing fields are rejected here so we do not propagate undefined types.
-                    context.errorReporter.reportFatalError(
+                    logSemanticError(
                         `DataLiteral.toCIRExpression: field ${field.name} not found on type ${valueSet.typeName}`,
-                        this.span,
+                        { ...context, span: this.span, fatal: true },
                     )
                 const nestedContext = {
                     ...context,

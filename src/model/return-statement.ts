@@ -1,4 +1,4 @@
-import { Statement, Expression } from '.'
+import { Statement, Expression, logSemanticError } from '.'
 import { Context } from '.'
 import { IsolatedTypeLattice, SharedTypeLattice } from './lattice'
 
@@ -23,18 +23,19 @@ export class ReturnStatement implements Statement {
                 valueLattice instanceof IsolatedTypeLattice &&
                 context.semantics === 'ref'
             )
-                context.errorReporter.reportFatalError(
+                logSemanticError(
                     `Cannot return an ISOLATED variable as ${context.semantics}`,
-                    this.value.span,
+                    { ...context, span: this.value.span, fatal: true },
                 )
             if (
                 valueLattice instanceof SharedTypeLattice &&
                 context.semantics !== 'ref'
             )
-                context.errorReporter.reportFatalError(
+                logSemanticError(
                     `Cannot return a SHARED variable as ${context.semantics ?? 'UNIQUE'}`,
-                    this.value.span,
+                    { ...context, span: this.value.span, fatal: true },
                 )
+
             const object = this.value.toCIRExpression(context)
             if (
                 (object.kind === 'VARIABLE_REF' ||

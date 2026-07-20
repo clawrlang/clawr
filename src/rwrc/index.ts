@@ -9,7 +9,7 @@ import * as backend from '../backend'
 import { ModuleParser } from '../parser'
 import { TokenStream } from '../lexer'
 import { ClawrModule } from '../cir'
-import { ErrorReporter } from './error-reporter'
+import { RWRCErrorReporter } from './error-reporter'
 import { Scope } from '../model/scope'
 
 const exeDir = path.dirname(process.execPath)
@@ -44,7 +44,7 @@ async function parseToCIR({
     outputFilePath: string
 }) {
     const context = {
-        errorReporter: new ErrorReporter(file),
+        errorReporter: new RWRCErrorReporter(file),
         scope: Scope.createRoot(),
     }
 

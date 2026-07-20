@@ -1,5 +1,5 @@
 import { ErrorReporter, SourceCodeSpan } from '../src/diagnostics'
-import { Context } from '../src/model'
+import { Context, SemanticError } from '../src/model'
 import { Scope } from '../src/model/scope'
 
 export class TestErrorReporter implements ErrorReporter {

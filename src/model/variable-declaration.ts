@@ -1,4 +1,10 @@
-import { Statement, Expression, Context, Declaration } from '.'
+import {
+    Context,
+    Declaration,
+    Expression,
+    logSemanticError,
+    Statement,
+} from '.'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
 import { UniqueTypeLattice } from './lattice'
@@ -58,9 +64,9 @@ export class VariableDeclaration implements Statement, Declaration {
                 UniqueTypeLattice
             )
         )
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Cannot assign ${initialValue.valueSet.semantics} value to ${valueSet.semantics} target`,
-                this.initialValue.span,
+                { ...context, span: this.initialValue.span, fatal: true },
             )
 
         scope.emitted.push({

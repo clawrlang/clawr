@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Context, Expression } from '.'
+import { Context, Expression, logSemanticError } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice } from './lattice'
@@ -47,15 +47,15 @@ export class Query implements Expression {
 
         const decl = context.scope.functionDeclaration(this.name.toString())
         if (!decl)
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Function declaration not found: ${this.name.toString()}`,
-                this.span,
+                { ...context, span: this.span, fatal: true },
             )
         return (
             decl.resultLattice(context) ??
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Function declaration has no result lattice: ${this.name.toString()}`,
-                this.span,
+                { ...context, span: this.span, fatal: true },
             )
         )
     }

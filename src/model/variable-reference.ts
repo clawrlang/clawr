@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Context, Expression } from '.'
+import { Context, Expression, logSemanticError } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice, UniqueTypeLattice } from './lattice'
 
@@ -21,10 +21,11 @@ export class VariableReference implements Expression {
 
     assignmentPrelude(context: Context): cir.Statement[] {
         if (this.isEffectivelyConst(context))
-            context.errorReporter.reportFatalError(
-                `Variable ${this.name} is not mutable`,
-                this.span,
-            )
+            logSemanticError(`Variable ${this.name} is not mutable`, {
+                ...context,
+                span: this.span,
+                fatal: true,
+            })
         return []
     }
 
@@ -36,9 +37,9 @@ export class VariableReference implements Expression {
     currentValue(context: Context): Lattice {
         return (
             context.scope.currentValue(this.name) ??
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Variable ${this.name} has no value in the current context`,
-                this.span,
+                { ...context, span: this.span, fatal: true },
             )
         )
     }
@@ -65,9 +66,9 @@ export class VariableReference implements Expression {
     lookupInScope(context: Context) {
         const variable = context.scope.variableDeclaration(this.name)
         if (!variable) {
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Variable ${this.name} is not defined in the current context`,
-                this.span,
+                { ...context, span: this.span, fatal: true },
             )
         }
         return variable

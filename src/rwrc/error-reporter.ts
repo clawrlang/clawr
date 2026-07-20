@@ -1,6 +1,7 @@
-import { SourceCodeSpan } from '../diagnostics'
+import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
+import { SemanticError } from '../model'
 
-export class ErrorReporter {
+export class RWRCErrorReporter implements ErrorReporter {
     constructor(private file: string) {}
 
     reportFatalError(message: string, location: SourceCodeSpan): never {

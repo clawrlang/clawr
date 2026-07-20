@@ -1,4 +1,4 @@
-import { Statement, Expression, Context } from '.'
+import { Statement, Expression, Context, logSemanticError } from '.'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
@@ -31,9 +31,13 @@ export class Assignment implements Statement {
         })
 
         if (target.valueSet.type !== value.valueSet.type)
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Cannot assign value of type ${value.valueSet.type} to target of type ${target.valueSet.type}`,
-                { start: this.span.start, end: this.span.end },
+                {
+                    ...context,
+                    span: { start: this.span.start, end: this.span.end },
+                    fatal: true,
+                },
             )
         const currentValue = this.value.currentValue(context)
         if (
@@ -42,9 +46,13 @@ export class Assignment implements Statement {
             target.valueSet.semantics !== value.valueSet.semantics &&
             !(currentValue instanceof UniqueTypeLattice)
         )
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Cannot assign ${value.valueSet.semantics} value to ${target.valueSet.semantics} target`,
-                { start: this.span.start, end: this.span.end },
+                {
+                    ...context,
+                    span: { start: this.span.start, end: this.span.end },
+                    fatal: true,
+                },
             )
 
         const prelude = this.target.assignmentPrelude(context)

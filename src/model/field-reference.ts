@@ -1,9 +1,9 @@
 import * as cir from '../cir'
-import { Context, Expression } from '.'
+import { Context, Expression, logSemanticError } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { IsolatedTypeLattice, Lattice, UniqueTypeLattice } from './lattice'
-import { convertSemantics, VariableReference } from './variable-reference'
+import { VariableReference } from './variable-reference'
 
 export class FieldReference implements Expression {
     private constructor(
@@ -32,9 +32,9 @@ export class FieldReference implements Expression {
 
     assignmentPrelude(context: Context): cir.Statement[] {
         if (this.isEffectivelyConst(context))
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Cannot mutate field ${this.field} of a reference type object`,
-                this.span,
+                { ...context, span: this.span, fatal: true },
             )
 
         if (
@@ -102,22 +102,22 @@ export class FieldReference implements Expression {
                 : objectValueSet.type
         const declaration = context.scope.dataDeclaration(objectType)
         if (!declaration) {
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Type ${objectType} is not defined in the current context`,
-                this.span,
+                { ...context, span: this.span, fatal: true },
             )
         }
         if (!(declaration instanceof DataDeclaration)) {
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Type ${objectType} is not a data type, cannot access fields`,
-                this.span,
+                { ...context, span: this.span, fatal: true },
             )
         }
         const field = declaration.fields.find((f) => f.name === this.field)
         if (!field) {
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Field ${this.field} does not exist on type ${objectType}`,
-                this.fieldSpan,
+                { ...context, span: this.fieldSpan, fatal: true },
             )
         }
         return field
@@ -127,9 +127,9 @@ export class FieldReference implements Expression {
         const semantics = (this.object.toCIRExpression(context).valueSet as any)
             .semantics
         if ((semantics === 'SHARED') !== (this.operator === '->'))
-            context.errorReporter.reportFatalError(
+            logSemanticError(
                 `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
-                this.span,
+                { ...context, span: this.span, fatal: true },
             )
     }
 }

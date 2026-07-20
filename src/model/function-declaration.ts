@@ -1,5 +1,11 @@
 import * as cir from '../cir'
-import { Context, Declaration, Expression, Statement } from '.'
+import {
+    Context,
+    Declaration,
+    Expression,
+    logSemanticError,
+    Statement,
+} from '.'
 import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
@@ -69,18 +75,18 @@ export class FunctionDeclaration implements Declaration {
                 valueSet:
                     param.defaultValue?.currentValue(context).toCIR() ??
                     param.valueSet?.toCIR() ??
-                    context.errorReporter.reportFatalError(
+                    logSemanticError(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
-                        param.span,
+                        { ...context, span: param.span, fatal: true },
                     ),
             })
             parameterScope.setCurrentValue(
                 param.varName,
                 param.defaultValue?.currentValue(context) ??
                     param.valueSet?.toLattice(context) ??
-                    context.errorReporter.reportFatalError(
+                    logSemanticError(
                         `Parameter ${param.varName} must have either a default value or an explicit value set.`,
-                        param.span,
+                        { ...context, span: param.span, fatal: true },
                     ),
             )
         }

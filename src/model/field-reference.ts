@@ -1,5 +1,6 @@
 import * as cir from '../cir'
-import { Context, Expression, logSemanticError } from '.'
+import { Context, Expression } from '.'
+import { Failable, SemanticError, logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { IsolatedTypeLattice, Lattice, UniqueTypeLattice } from './lattice'
@@ -108,17 +109,21 @@ export class FieldReference implements Expression {
             )
         }
         if (!(declaration instanceof DataDeclaration)) {
-            logSemanticError(
-                `Type ${objectType} is not a data type, cannot access fields`,
-                { ...context, span: this.span, fatal: true },
-            )
+            throw Failable.failure(
+                SemanticError.create({
+                    message: `Type ${objectType} is not a data type, cannot access fields`,
+                    span: this.span,
+                }),
+            ).getError()
         }
         const field = declaration.fields.find((f) => f.name === this.field)
         if (!field) {
-            logSemanticError(
-                `Field ${this.field} does not exist on type ${objectType}`,
-                { ...context, span: this.fieldSpan, fatal: true },
-            )
+            throw Failable.failure(
+                SemanticError.create({
+                    message: `Field ${this.field} does not exist on type ${objectType}`,
+                    span: this.fieldSpan,
+                }),
+            ).getError()
         }
         return field
     }
@@ -126,10 +131,13 @@ export class FieldReference implements Expression {
     private checkOperatorCompatibility(context: Context) {
         const semantics = (this.object.toCIRExpression(context).valueSet as any)
             .semantics
-        if ((semantics === 'SHARED') !== (this.operator === '->'))
-            logSemanticError(
-                `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
-                { ...context, span: this.span, fatal: true },
-            )
+        if ((semantics === 'SHARED') !== (this.operator === '->')) {
+            const error = SemanticError.create({
+                message: `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
+                span: this.span,
+            })
+            context.errorReporter.reportError(error.message, error.span)
+            throw Failable.failure(error).getError()
+        }
     }
 }

@@ -1,5 +1,6 @@
 import * as cir from '../cir'
-import { Context, Expression, logSemanticError } from '.'
+import { Context, Expression } from '.'
+import { Failable, SemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice } from './lattice'
@@ -47,17 +48,22 @@ export class Query implements Expression {
 
         const decl = context.scope.functionDeclaration(this.name.toString())
         if (!decl)
-            logSemanticError(
-                `Function declaration not found: ${this.name.toString()}`,
-                { ...context, span: this.span, fatal: true },
-            )
-        return (
-            decl.resultLattice(context) ??
-            logSemanticError(
-                `Function declaration has no result lattice: ${this.name.toString()}`,
-                { ...context, span: this.span, fatal: true },
-            )
-        )
+            throw Failable.failure(
+                SemanticError.create({
+                    message: `Function declaration not found: ${this.name.toString()}`,
+                    span: this.span,
+                }),
+            ).getError()
+
+        const result = decl.resultLattice(context)
+        if (!result)
+            throw Failable.failure(
+                SemanticError.create({
+                    message: `Function declaration has no result lattice: ${this.name.toString()}`,
+                    span: this.span,
+                }),
+            ).getError()
+        return result
     }
 
     toCIRExpression(context: Context): cir.Expression {

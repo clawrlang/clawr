@@ -1,5 +1,6 @@
 import * as cir from '../cir'
-import { Context, Expression, logSemanticError } from '.'
+import { Context, Expression } from '.'
+import { Failable, logSemanticError, SemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice, UniqueTypeLattice } from './lattice'
 
@@ -29,18 +30,27 @@ export class VariableReference implements Expression {
     }
 
     isEffectivelyConst(context: Context): boolean {
-        const variable = this.lookupInScope(context)
+        const variableResult = this.lookupInScope(context)
+        if (variableResult.isFailure())
+            context.errorReporter.reportError(
+                variableResult.getError().message,
+                variableResult.getError().span,
+            )
+        const variable = variableResult.value()
         return variable.semantics === 'const' || variable.semantics === 'ref'
     }
 
     currentValue(context: Context): Lattice {
-        return (
-            context.scope.currentValue(this.name) ??
-            logSemanticError(
-                `Variable ${this.name} has no value in the current context`,
-                { ...context, span: this.span, fatal: true },
-            )
-        )
+        const result = context.scope.currentValue(this.name)
+        if (!result) {
+            throw Failable.failure(
+                SemanticError.create({
+                    message: `Variable ${this.name} has no value in the current context`,
+                    span: this.span,
+                }),
+            ).getError()
+        }
+        return result
     }
 
     setCurrentValue(context: Context, value: Lattice): void {
@@ -54,23 +64,29 @@ export class VariableReference implements Expression {
     toCIRExpression(
         context: Context,
     ): Extract<cir.Expression, { kind: 'VARIABLE_REF' }> {
-        this.lookupInScope(context)
+        const variableResult = this.lookupInScope(context)
+        if (variableResult.isFailure())
+            context.errorReporter.reportError(
+                variableResult.getError().message,
+                variableResult.getError().span,
+            )
         return {
             kind: 'VARIABLE_REF',
             name: this.name,
-            valueSet: this.lookupInScope(context).valueSet,
+            valueSet: variableResult.value().valueSet,
         }
     }
 
     lookupInScope(context: Context) {
         const variable = context.scope.variableDeclaration(this.name)
-        if (!variable) {
-            logSemanticError(
-                `Variable ${this.name} is not defined in the current context`,
-                { ...context, span: this.span, fatal: true },
+        if (!variable)
+            return Failable.failure(
+                SemanticError.create({
+                    message: `Variable ${this.name} is not defined in the current context`,
+                    span: this.span,
+                }),
             )
-        }
-        return variable
+        return Failable.success(variable)
     }
 }
 

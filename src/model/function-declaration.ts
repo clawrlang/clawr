@@ -1,17 +1,12 @@
 import * as cir from '../cir'
-import {
-    Context,
-    Declaration,
-    Expression,
-    logSemanticError,
-    Statement,
-} from '.'
+import { Context, Declaration, Expression, Statement } from '.'
 import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { IsolatedTypeLattice, Lattice, SharedTypeLattice } from './lattice'
 import { VariableSemantics } from './variable-declaration'
 import { SourceCodeSpan } from '../diagnostics'
+import { logSemanticError } from './failable'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(

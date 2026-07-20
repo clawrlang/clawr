@@ -1,8 +1,9 @@
-import { Statement, Expression, Context, logSemanticError } from '.'
+import { Statement, Expression, Context } from '.'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
 import { UniqueTypeLattice } from './lattice'
+import { logSemanticError } from './failable'
 
 export class Assignment implements Statement {
     private constructor(

@@ -1,8 +1,9 @@
 import * as cir from '../cir'
-import { Context, Expression, logSemanticError } from '.'
+import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { Lattice, UniqueTypeLattice } from './lattice'
+import { Failable, SemanticError } from './failable'
 
 export class DataLiteral implements Expression {
     private constructor(
@@ -27,10 +28,12 @@ export class DataLiteral implements Expression {
     currentValue(context: Context & { typeName: string }): Lattice {
         const typeDeclaration = context.scope.dataDeclaration(context.typeName)
         if (!typeDeclaration)
-            logSemanticError(
-                `DataLiteral.currentValue: type ${context.typeName} not found in scope`,
-                { ...context, span: this.span, fatal: true },
-            )
+            throw Failable.failure(
+                SemanticError.create({
+                    message: `DataLiteral.currentValue: type ${context.typeName} not found in scope`,
+                    span: this.span,
+                }),
+            ).getError()
         return UniqueTypeLattice.create({
             typeName: typeDeclaration.name,
             fields: Object.fromEntries(
@@ -52,22 +55,26 @@ export class DataLiteral implements Expression {
     ): cir.Expression {
         const valueSet = context.targetValueSet
         if (!valueSet || valueSet.type !== 'rc-type')
-            logSemanticError(
-                `DataLiteral.toCIRExpression: target valueSet must be of type rc-type`,
-                { ...context, span: this.span, fatal: true },
-            )
+            throw Failable.failure(
+                SemanticError.create({
+                    message: `DataLiteral.toCIRExpression: target valueSet must be of type rc-type`,
+                    span: this.span,
+                }),
+            ).getError()
 
         const targetType = context.scope.dataDeclaration(valueSet.typeName) as
             DataDeclaration | undefined
         if (!targetType)
-            logSemanticError(
-                `DataLiteral.toCIRExpression: target type ${valueSet.typeName} not found in scope`,
-                { ...context, span: this.span, fatal: true },
-            )
+            throw Failable.failure(
+                SemanticError.create({
+                    message: `DataLiteral.toCIRExpression: target type ${valueSet.typeName} not found in scope`,
+                    span: this.span,
+                }),
+            ).getError()
         const fieldDeclarations = new Map(
             targetType.fields.map((field) => [field.name, field]),
         )
-        return {
+        const expr: cir.Expression = {
             kind: 'ALLOCATE',
             valueSet,
             fields: this.fields.map((field) => {
@@ -75,10 +82,12 @@ export class DataLiteral implements Expression {
                 if (!fieldDeclaration)
                     // Nested literals need the declared field type as their target.
                     // Missing fields are rejected here so we do not propagate undefined types.
-                    logSemanticError(
-                        `DataLiteral.toCIRExpression: field ${field.name} not found on type ${valueSet.typeName}`,
-                        { ...context, span: this.span, fatal: true },
-                    )
+                    throw Failable.failure(
+                        SemanticError.create({
+                            message: `DataLiteral.toCIRExpression: field ${field.name} not found on type ${valueSet.typeName}`,
+                            span: this.span,
+                        }),
+                    ).getError()
                 const nestedContext = {
                     ...context,
                     targetValueSet: fieldDeclaration.valueSet.toCIR(),
@@ -89,6 +98,7 @@ export class DataLiteral implements Expression {
                 }
             }),
         }
+        return Failable.success(expr).value()
     }
 }
 

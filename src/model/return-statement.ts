@@ -1,6 +1,6 @@
-import { Statement, Expression, logSemanticError } from '.'
-import { Context } from '.'
+import { Context, Expression, Statement } from '.'
 import { IsolatedTypeLattice, SharedTypeLattice } from './lattice'
+import { logSemanticError } from './failable'
 
 export class ReturnStatement implements Statement {
     private constructor(public value: Expression | undefined) {}

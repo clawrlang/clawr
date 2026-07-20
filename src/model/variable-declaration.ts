@@ -1,10 +1,5 @@
-import {
-    Context,
-    Declaration,
-    Expression,
-    logSemanticError,
-    Statement,
-} from '.'
+import { Context, Declaration, Expression, Statement } from '.'
+import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
 import { UniqueTypeLattice } from './lattice'

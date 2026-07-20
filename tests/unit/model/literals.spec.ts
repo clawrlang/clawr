@@ -5,7 +5,10 @@ import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import { ExplicitIntegerValueSet } from '../../../src/model/explicit-value-set'
+import {
+    ExplicitIntegerValueSet,
+    ExplicitRCTypeValueSet,
+} from '../../../src/model/explicit-value-set'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {
@@ -203,6 +206,57 @@ describe('Literals', () => {
                     y: { min: 17n, max: 17n },
                 },
             })
+        })
+
+        it('returns a failure from a nested field value', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.declarations.set(
+                'OuterType',
+                DataDeclaration.create({
+                    name: 'OuterType',
+                    fields: [
+                        {
+                            name: 'inner',
+                            valueSet: ExplicitRCTypeValueSet.create({
+                                typeName: 'MissingInnerType',
+                                semantics: 'mut',
+                                span: someCodeSpan,
+                            }),
+                            semantics: 'mut',
+                        },
+                    ],
+                }),
+            )
+
+            const dataLiteral = DataLiteral.create({
+                fields: [
+                    {
+                        name: 'inner',
+                        value: DataLiteral.create({
+                            fields: [
+                                {
+                                    name: 'value',
+                                    value: IntegerLiteral.create({
+                                        value: 7n,
+                                        span: someCodeSpan,
+                                    }),
+                                },
+                            ],
+                            span: someCodeSpan,
+                        }),
+                    },
+                ],
+                span: someCodeSpan,
+            })
+
+            expect(
+                dataLiteral
+                    .currentValue({
+                        ...context,
+                        typeName: 'OuterType',
+                    })
+                    .isFailure(),
+            ).toBe(true)
         })
     })
 })

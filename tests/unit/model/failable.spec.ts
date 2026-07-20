@@ -74,6 +74,32 @@ describe('Failable', () => {
             expect(result.value()).toBe(43)
         })
     })
+
+    describe('collect', () => {
+        it('returns the first failure', () => {
+            const error = SemanticError.create({
+                message: 'This is an error',
+                span: someCodeSpan,
+            })
+            const result = Failable.collect([
+                Failable.success(1),
+                Failable.failure(error),
+                Failable.success(3),
+            ])
+            expect(result.isFailure()).toBe(true)
+            expect(result.getError()).toBe(error)
+        })
+
+        it('collects all successful values', () => {
+            const result = Failable.collect([
+                Failable.success(1),
+                Failable.success(2),
+                Failable.success(3),
+            ])
+            expect(result.isSuccess()).toBe(true)
+            expect(result.value()).toEqual([1, 2, 3])
+        })
+    })
 })
 
 const someError = SemanticError.create({

@@ -34,23 +34,35 @@ export class DataLiteral implements Expression {
                     span: this.span,
                 }),
             )
-        return Failable.success(
-            UniqueTypeLattice.create({
-                typeName: typeDeclaration.name,
-                fields: Object.fromEntries(
-                    this.fields.map((field) => [
-                        field.name,
-                        field.value
-                            .currentValue({
-                                ...context,
-                                ...typeDeclaration.fields.find(
-                                    (f) => f.name === field.name,
-                                )?.valueSet,
-                            })
-                            .value(),
-                    ]),
-                ),
+        return Failable.collect(
+            this.fields.map((field) => {
+                const fieldDeclaration = typeDeclaration.fields.find(
+                    (declaredField) => declaredField.name === field.name,
+                )
+                if (!fieldDeclaration)
+                    return Failable.failure(
+                        SemanticError.create({
+                            message: `DataLiteral.currentValue: field ${field.name} not found on type ${context.typeName}`,
+                            span: this.span,
+                        }),
+                    )
+                return field.value.currentValue({
+                    ...context,
+                    ...fieldDeclaration.valueSet,
+                })
             }),
+        ).map((fieldValues) =>
+            Failable.success(
+                UniqueTypeLattice.create({
+                    typeName: typeDeclaration.name,
+                    fields: Object.fromEntries(
+                        fieldValues.map((value, index) => [
+                            this.fields[index].name,
+                            value,
+                        ]),
+                    ),
+                }),
+            ),
         )
     }
 

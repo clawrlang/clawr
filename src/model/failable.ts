@@ -41,6 +41,17 @@ export class Failable<T> {
         return fn(this.value())
     }
 
+    static collect<T>(values: Failable<T>[]): Failable<T[]> {
+        return values.reduce(
+            (acc, value) => {
+                if (acc.isFailure()) return acc
+                if (value.isFailure()) return value as any
+                return Failable.success([...acc.value(), value.value()])
+            },
+            Failable.success([]) as Failable<T[]>,
+        )
+    }
+
     throwIfFailure() {
         if (this.result instanceof SemanticError) throw this.result
     }

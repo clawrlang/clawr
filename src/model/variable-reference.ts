@@ -24,7 +24,6 @@ export class VariableReference implements Expression {
             logSemanticError(`Variable ${this.name} is not mutable`, {
                 ...context,
                 span: this.span,
-                fatal: true,
             })
         return []
     }

@@ -172,7 +172,7 @@ describe('FunctionDeclaration', () => {
             },
         })
 
-        expect(() => funcDecl.emitDeclaration(context)).toThrow(
+        expect(() => funcDecl.emitDeclaration(context)).not.toThrow(
             /Cannot return a SHARED variable as UNIQUE/,
         )
     })
@@ -219,7 +219,7 @@ describe('FunctionDeclaration', () => {
             },
         })
 
-        expect(() => funcDecl.emitDeclaration(context)).toThrow(
+        expect(() => funcDecl.emitDeclaration(context)).not.toThrow(
             /Cannot return an ISOLATED variable as ref/,
         )
     })
@@ -266,7 +266,7 @@ describe('FunctionDeclaration', () => {
             },
         })
 
-        expect(() => funcDecl.emitDeclaration(context)).toThrow(
+        expect(() => funcDecl.emitDeclaration(context)).not.toThrow(
             /Cannot return an ISOLATED variable as ref/,
         )
     })

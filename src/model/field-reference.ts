@@ -34,7 +34,7 @@ export class FieldReference implements Expression {
         if (this.isEffectivelyConst(context))
             logSemanticError(
                 `Cannot mutate field ${this.field} of a reference type object`,
-                { ...context, span: this.span, fatal: true },
+                { ...context, span: this.span },
             )
 
         if (
@@ -104,7 +104,7 @@ export class FieldReference implements Expression {
         if (!declaration) {
             logSemanticError(
                 `Type ${objectType} is not defined in the current context`,
-                { ...context, span: this.span, fatal: true },
+                { ...context, span: this.span },
             )
         }
         if (!(declaration instanceof DataDeclaration)) {

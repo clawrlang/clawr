@@ -25,7 +25,7 @@ export class ReturnStatement implements Statement {
             )
                 logSemanticError(
                     `Cannot return an ISOLATED variable as ${context.semantics}`,
-                    { ...context, span: this.value.span, fatal: true },
+                    { ...context, span: this.value.span },
                 )
             if (
                 valueLattice instanceof SharedTypeLattice &&
@@ -33,7 +33,7 @@ export class ReturnStatement implements Statement {
             )
                 logSemanticError(
                     `Cannot return a SHARED variable as ${context.semantics ?? 'UNIQUE'}`,
-                    { ...context, span: this.value.span, fatal: true },
+                    { ...context, span: this.value.span },
                 )
 
             const object = this.value.toCIRExpression(context)

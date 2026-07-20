@@ -66,7 +66,7 @@ export class VariableDeclaration implements Statement, Declaration {
         )
             logSemanticError(
                 `Cannot assign ${initialValue.valueSet.semantics} value to ${valueSet.semantics} target`,
-                { ...context, span: this.initialValue.span, fatal: true },
+                { ...context, span: this.initialValue.span },
             )
 
         scope.emitted.push({

@@ -36,7 +36,6 @@ export class Assignment implements Statement {
                 {
                     ...context,
                     span: { start: this.span.start, end: this.span.end },
-                    fatal: true,
                 },
             )
         const currentValue = this.value.currentValue(context)
@@ -51,7 +50,6 @@ export class Assignment implements Statement {
                 {
                     ...context,
                     span: { start: this.span.start, end: this.span.end },
-                    fatal: true,
                 },
             )
 

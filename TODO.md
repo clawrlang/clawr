@@ -2,8 +2,6 @@
 
 ## In Progress
 
-- Recoverable errors
-
 ## Incomplete/Postponed Functionality
 
 - [Function Parameters](./todo/params.md)

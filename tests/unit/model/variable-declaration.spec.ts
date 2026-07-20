@@ -506,7 +506,7 @@ describe('VariableDeclaration', () => {
                         },
                     }),
                 })
-                expect(() => declaration.emitStatement(context)).toThrow()
+                expect(() => declaration.emitStatement(context)).not.toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {

@@ -468,7 +468,7 @@ describe('Assignment', () => {
                     }),
                     span: someCodeSpan,
                 })
-                expect(() => assignment.emitStatement(context)).toThrow()
+                expect(() => assignment.emitStatement(context)).not.toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
@@ -527,7 +527,7 @@ describe('Assignment', () => {
             value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
-        expect(() => assignment.emitStatement(context)).toThrow()
+        expect(() => assignment.emitStatement(context)).not.toThrow()
         expect(context.errorReporter).toMatchObject({
             errors: [
                 {
@@ -607,7 +607,7 @@ describe('Assignment', () => {
                         span: someCodeSpan,
                     }),
                 })
-                expect(() => assignment.emitStatement(context)).toThrow()
+                expect(() => assignment.emitStatement(context)).not.toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {

@@ -42,28 +42,30 @@ export class Query implements Expression {
         return true
     }
 
-    currentValue(context: Context): Lattice {
+    currentValue(context: Context): Failable<Lattice> {
         if (this.name.toString() === 'copy(of:)')
-            return this.arguments[0].currentValue(context).asUNIQUE()
+            return Failable.success(
+                this.arguments[0].currentValue(context).value().asUNIQUE(),
+            )
 
         const decl = context.scope.functionDeclaration(this.name.toString())
         if (!decl)
-            throw Failable.failure(
+            return Failable.failure(
                 SemanticError.create({
                     message: `Function declaration not found: ${this.name.toString()}`,
                     span: this.span,
                 }),
-            ).getError()
+            )
 
         const result = decl.resultLattice(context)
         if (!result)
-            throw Failable.failure(
+            return Failable.failure(
                 SemanticError.create({
                     message: `Function declaration has no result lattice: ${this.name.toString()}`,
                     span: this.span,
                 }),
-            ).getError()
-        return result
+            )
+        return Failable.success(result)
     }
 
     toCIRExpression(context: Context): cir.Expression {
@@ -73,7 +75,7 @@ export class Query implements Expression {
             arguments: this.arguments.map((arg) =>
                 arg.toCIRExpression(context),
             ),
-            valueSet: this.currentValue(context).toCIR(),
+            valueSet: this.currentValue(context).value().toCIR(),
         }
     }
 }

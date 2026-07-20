@@ -60,13 +60,13 @@ export class FieldReference implements Expression {
         return this.object.isEffectivelyConst(context)
     }
 
-    currentValue(context: Context): Lattice {
-        const objectValue = this.object.currentValue(context)
+    currentValue(context: Context): Failable<Lattice> {
+        const objectValue = this.object.currentValue(context).value()
         if (objectValue instanceof IsolatedTypeLattice)
-            return objectValue.fields[this.field]
+            return Failable.success(objectValue.fields[this.field])
 
         const field = this.getFieldFromContext(context)
-        return field.valueSet.toLattice(context)
+        return Failable.success(field.valueSet.toLattice(context))
     }
 
     setCurrentValue(context: Context, value: Lattice) {
@@ -74,7 +74,7 @@ export class FieldReference implements Expression {
             throw new Error(
                 `Cannot set current value of field ${this.field} to a UniqueTypeLattice`,
             )
-        const objectValue = this.object.currentValue(context)
+        const objectValue = this.object.currentValue(context).value()
         if (objectValue instanceof IsolatedTypeLattice) {
             objectValue.fields[this.field] = value
 

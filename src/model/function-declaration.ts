@@ -42,9 +42,9 @@ export class FunctionDeclaration implements Declaration {
     resultLattice(context: Context): Lattice | undefined {
         if (this.result) return this.result.toLattice(context)
         if (this.implementation.kind === 'implicit-return')
-            return this.implementation.expression.currentValue(
-                this.bodyContext(context),
-            )
+            return this.implementation.expression
+                .currentValue(this.bodyContext(context))
+                .value()
     }
 
     emitDeclaration(context: Context) {
@@ -68,7 +68,7 @@ export class FunctionDeclaration implements Declaration {
             parameterScope.variables.set(param.varName, {
                 semantics: param.semantics ?? 'const',
                 valueSet:
-                    param.defaultValue?.currentValue(context).toCIR() ??
+                    param.defaultValue?.currentValue(context).value().toCIR() ??
                     param.valueSet?.toCIR() ??
                     logSemanticError(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
@@ -77,7 +77,7 @@ export class FunctionDeclaration implements Declaration {
             })
             parameterScope.setCurrentValue(
                 param.varName,
-                param.defaultValue?.currentValue(context) ??
+                param.defaultValue?.currentValue(context).value() ??
                     param.valueSet?.toLattice(context) ??
                     logSemanticError(
                         `Parameter ${param.varName} must have either a default value or an explicit value set.`,
@@ -127,8 +127,9 @@ export class FunctionDeclaration implements Declaration {
 
     private bodyContext(context: Context): Context {
         if (!this.result && this.implementation.kind === 'implicit-return') {
-            const inferredLattice =
-                this.implementation.expression.currentValue(context)
+            const inferredLattice = this.implementation.expression
+                .currentValue(context)
+                .value()
             return {
                 ...context,
                 ...{

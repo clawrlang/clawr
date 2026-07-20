@@ -30,7 +30,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 expect(
-                    literal.currentValue(newSemanticContext()),
+                    literal.currentValue(newSemanticContext()).value(),
                 ).toMatchObject({
                     values: [input],
                 })
@@ -60,7 +60,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 expect(
-                    literal.currentValue(newSemanticContext()),
+                    literal.currentValue(newSemanticContext()).value(),
                 ).toMatchObject({
                     min: BigInt(input),
                     max: BigInt(input),
@@ -190,10 +190,12 @@ describe('Literals', () => {
             })
 
             expect(
-                dataLiteral.currentValue({
-                    ...context,
-                    ...{ typeName: 'MyType' },
-                }),
+                dataLiteral
+                    .currentValue({
+                        ...context,
+                        ...{ typeName: 'MyType' },
+                    })
+                    .value(),
             ).toMatchObject({
                 typeName: 'MyType',
                 fields: {

@@ -39,7 +39,7 @@ export class Assignment implements Statement {
                     span: { start: this.span.start, end: this.span.end },
                 },
             )
-        const currentValue = this.value.currentValue(context)
+        const currentValue = this.value.currentValue(context).value()
         if (
             target.valueSet.type === 'rc-type' &&
             value.valueSet.type === 'rc-type' &&

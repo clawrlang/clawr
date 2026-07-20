@@ -81,7 +81,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.currentValue(context)).toMatchObject({
+        expect(variableRef.currentValue(context).value()).toMatchObject({
             min: 10n,
             max: 10n,
         })

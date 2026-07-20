@@ -40,17 +40,17 @@ export class VariableReference implements Expression {
         return variable.semantics === 'const' || variable.semantics === 'ref'
     }
 
-    currentValue(context: Context): Lattice {
+    currentValue(context: Context): Failable<Lattice> {
         const result = context.scope.currentValue(this.name)
         if (!result) {
-            throw Failable.failure(
+            return Failable.failure(
                 SemanticError.create({
                     message: `Variable ${this.name} has no value in the current context`,
                     span: this.span,
                 }),
-            ).getError()
+            )
         }
-        return result
+        return Failable.success(result)
     }
 
     setCurrentValue(context: Context, value: Lattice): void {

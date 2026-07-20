@@ -1,5 +1,6 @@
 import * as cir from '../cir'
 import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
+import { Failable } from './failable'
 import { Lattice } from './lattice'
 import { Scope } from './scope'
 
@@ -11,7 +12,7 @@ export type Context = {
 export interface Expression {
     get span(): SourceCodeSpan
     isEffectivelyConst(context: Context): boolean
-    currentValue(context: Context): Lattice
+    currentValue(context: Context): Failable<Lattice>
     setCurrentValue?(context: Context, value: Lattice): void
     toCIRExpression(
         context: Context & { targetValueSet?: cir.ValueSet },

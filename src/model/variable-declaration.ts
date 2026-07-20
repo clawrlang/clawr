@@ -55,7 +55,7 @@ export class VariableDeclaration implements Statement, Declaration {
             initialValue.valueSet.type === 'rc-type' &&
             valueSet.semantics !== initialValue.valueSet.semantics &&
             !(
-                this.initialValue.currentValue(context) instanceof
+                this.initialValue.currentValue(context).value() instanceof
                 UniqueTypeLattice
             )
         )
@@ -89,10 +89,12 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private currentValueFromInitial(context: Context) {
-        const currentValue = this.initialValue.currentValue({
-            ...context,
-            ...this.valueSet,
-        })
+        const currentValue = this.initialValue
+            .currentValue({
+                ...context,
+                ...this.valueSet,
+            })
+            .value()
         if (!(currentValue instanceof UniqueTypeLattice)) return currentValue
 
         return this.semantics === 'const' || this.semantics === 'mut'

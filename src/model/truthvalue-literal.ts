@@ -2,6 +2,7 @@ import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice, TruthvalueLattice } from './lattice'
+import { Failable } from './failable'
 
 export class TruthValueLiteral implements Expression {
     private constructor(
@@ -19,8 +20,8 @@ export class TruthValueLiteral implements Expression {
         return new TruthValueLiteral(value, span)
     }
 
-    currentValue(_: Context): Lattice {
-        return TruthvalueLattice.create([this.value])
+    currentValue(_: Context): Failable<Lattice> {
+        return Failable.success(TruthvalueLattice.create([this.value]))
     }
 
     toCIRExpression(_: Context): cir.Expression {

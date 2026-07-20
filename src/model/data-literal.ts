@@ -25,29 +25,33 @@ export class DataLiteral implements Expression {
         return true
     }
 
-    currentValue(context: Context & { typeName: string }): Lattice {
+    currentValue(context: Context & { typeName: string }): Failable<Lattice> {
         const typeDeclaration = context.scope.dataDeclaration(context.typeName)
         if (!typeDeclaration)
-            throw Failable.failure(
+            return Failable.failure(
                 SemanticError.create({
                     message: `DataLiteral.currentValue: type ${context.typeName} not found in scope`,
                     span: this.span,
                 }),
-            ).getError()
-        return UniqueTypeLattice.create({
-            typeName: typeDeclaration.name,
-            fields: Object.fromEntries(
-                this.fields.map((field) => [
-                    field.name,
-                    field.value.currentValue({
-                        ...context,
-                        ...typeDeclaration.fields.find(
-                            (f) => f.name === field.name,
-                        )?.valueSet,
-                    }),
-                ]),
-            ),
-        })
+            )
+        return Failable.success(
+            UniqueTypeLattice.create({
+                typeName: typeDeclaration.name,
+                fields: Object.fromEntries(
+                    this.fields.map((field) => [
+                        field.name,
+                        field.value
+                            .currentValue({
+                                ...context,
+                                ...typeDeclaration.fields.find(
+                                    (f) => f.name === field.name,
+                                )?.valueSet,
+                            })
+                            .value(),
+                    ]),
+                ),
+            }),
+        )
     }
 
     toCIRExpression(

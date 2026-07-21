@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'bun:test'
-import { SemanticError } from '../../../src/model/failable'
+import {
+    SemanticError,
+    SemanticErrorCollection,
+} from '../../../src/model/failable'
 import { someCodeSpan } from '../../util'
 import { Failable } from '../../../src/model/failable'
 
@@ -31,10 +34,12 @@ describe('Failable', () => {
         })
 
         it('throws when accessing value', () => {
-            const error = SemanticError.create({
-                message: 'This is an error',
-                span: someCodeSpan,
-            })
+            const error = SemanticErrorCollection.create([
+                SemanticError.create({
+                    message: 'This is an error',
+                    span: someCodeSpan,
+                }),
+            ])
             expect(() => Failable.failure(error).value()).toThrow(
                 'This is an error',
             )
@@ -43,10 +48,12 @@ describe('Failable', () => {
 
     describe('chaining', () => {
         it('can chain success with failure', () => {
-            const error = SemanticError.create({
-                message: 'This is an error',
-                span: someCodeSpan,
-            })
+            const error = SemanticErrorCollection.create([
+                SemanticError.create({
+                    message: 'This is an error',
+                    span: someCodeSpan,
+                }),
+            ])
             const result = Failable.success(42).map((_) =>
                 Failable.failure(error),
             )
@@ -55,10 +62,12 @@ describe('Failable', () => {
         })
 
         it('can chain failure with success', () => {
-            const error = SemanticError.create({
-                message: 'This is an error',
-                span: someCodeSpan,
-            })
+            const error = SemanticErrorCollection.create([
+                SemanticError.create({
+                    message: 'This is an error',
+                    span: someCodeSpan,
+                }),
+            ])
             const result = Failable.failure(error).map((_) =>
                 Failable.success(42),
             )
@@ -77,10 +86,12 @@ describe('Failable', () => {
 
     describe('collect', () => {
         it('returns the first failure', () => {
-            const error = SemanticError.create({
-                message: 'This is an error',
-                span: someCodeSpan,
-            })
+            const error = SemanticErrorCollection.create([
+                SemanticError.create({
+                    message: 'This is an error',
+                    span: someCodeSpan,
+                }),
+            ])
             const result = Failable.collect([
                 Failable.success(1),
                 Failable.failure(error),
@@ -102,10 +113,12 @@ describe('Failable', () => {
     })
 })
 
-const someError = SemanticError.create({
-    message: 'error',
-    span: {
-        start: { line: 0, column: 0 },
-        end: { line: 0, column: 0 },
-    },
-})
+const someError = SemanticErrorCollection.create([
+    SemanticError.create({
+        message: 'error',
+        span: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+        },
+    }),
+])

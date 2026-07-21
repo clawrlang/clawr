@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
-import { Failable, logSemanticError, SemanticError } from './failable'
+import { Failable, logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice, UniqueTypeLattice } from './lattice'
 
@@ -33,8 +33,8 @@ export class VariableReference implements Expression {
         const variableResult = this.lookupInScope(context)
         if (variableResult.isFailure())
             context.errorReporter.reportError(
-                variableResult.getError().message,
-                variableResult.getError().span,
+                variableResult.getError().errors[0].message,
+                variableResult.getError().errors[0].span,
             )
         const variable = variableResult.value()
         return variable.semantics === 'const' || variable.semantics === 'ref'
@@ -44,10 +44,8 @@ export class VariableReference implements Expression {
         const result = context.scope.currentValue(this.name)
         if (!result) {
             return Failable.failure(
-                SemanticError.create({
-                    message: `Variable ${this.name} has no value in the current context`,
-                    span: this.span,
-                }),
+                `Variable ${this.name} has no value in the current context`,
+                this.span,
             )
         }
         return Failable.success(result)
@@ -67,8 +65,8 @@ export class VariableReference implements Expression {
         const variableResult = this.lookupInScope(context)
         if (variableResult.isFailure())
             context.errorReporter.reportError(
-                variableResult.getError().message,
-                variableResult.getError().span,
+                variableResult.getError().errors[0].message,
+                variableResult.getError().errors[0].span,
             )
         return {
             kind: 'VARIABLE_REF',
@@ -81,10 +79,8 @@ export class VariableReference implements Expression {
         const variable = context.scope.variableDeclaration(this.name)
         if (!variable)
             return Failable.failure(
-                SemanticError.create({
-                    message: `Variable ${this.name} is not defined in the current context`,
-                    span: this.span,
-                }),
+                `Variable ${this.name} is not defined in the current context`,
+                this.span,
             )
         return Failable.success(variable)
     }

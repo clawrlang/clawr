@@ -25,7 +25,12 @@ export class Assignment implements Statement {
     }
 
     emitStatement(context: Context) {
-        const target = this.target.toCIRExpression(context).value()
+        const targetResult = this.target.toCIRExpression(context)
+        if (targetResult.isFailure()) {
+            for (const error of targetResult.getError().errors)
+                context.errorReporter.reportError(error.message, error.span)
+        }
+        const target = targetResult.value()
         const value = this.value
             .toCIRExpression({
                 ...context,

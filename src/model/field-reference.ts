@@ -177,7 +177,6 @@ export class FieldReference implements Expression {
                     message: `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
                     span: this.span,
                 })
-                context.errorReporter.reportError(error.message, error.span)
                 return Failable.failure(SemanticErrorCollection.create([error]))
             } else return Failable.success(undefined)
         })

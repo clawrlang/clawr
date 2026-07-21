@@ -241,17 +241,14 @@ describe('Field Reference', () => {
                     },
                     fieldSpan: someCodeSpan,
                 })
-                expect(fieldRef.toCIRExpression(context).isFailure()).toBeTrue()
-                expect(context.errorReporter).toMatchObject({
-                    errors: [
-                        {
-                            message: `Cannot access field myField of a ${semantics[1]} type object with "${operator}" operator`,
-                            location: {
-                                start: { line: 1, column: 1 },
-                                end: { line: 1, column: 10 },
-                            },
-                        },
-                    ],
+                const result = fieldRef.toCIRExpression(context)
+                expect(result.isFailure()).toBeTrue()
+                expect(result.getError().errors[0]).toMatchObject({
+                    message: `Cannot access field myField of a ${semantics[1]} type object with "${operator}" operator`,
+                    span: {
+                        start: { line: 1, column: 1 },
+                        end: { line: 1, column: 10 },
+                    },
                 })
             })
         }

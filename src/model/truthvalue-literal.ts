@@ -35,7 +35,7 @@ export class TruthValueLiteral implements Expression {
         })
     }
 
-    isEffectivelyConst(_: Context): boolean {
-        return true
+    isEffectivelyConst(_: Context): Failable<boolean> {
+        return Failable.success(true)
     }
 }

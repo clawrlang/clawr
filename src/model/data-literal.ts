@@ -21,8 +21,8 @@ export class DataLiteral implements Expression {
         return new DataLiteral(fields, span)
     }
 
-    isEffectivelyConst(_: Context): boolean {
-        return true
+    isEffectivelyConst(context: Context): Failable<boolean> {
+        return Failable.success(true)
     }
 
     currentValue(context: Context & { typeName: string }): Failable<Lattice> {

@@ -37,7 +37,7 @@ export class FieldReference implements Expression {
     }
 
     assignmentPrelude(context: Context): cir.Statement[] {
-        if (this.isEffectivelyConst(context))
+        if (this.isEffectivelyConst(context).value())
             logSemanticError(
                 `Cannot mutate field ${this.field} of a reference type object`,
                 { ...context, span: this.span },
@@ -55,14 +55,14 @@ export class FieldReference implements Expression {
         return []
     }
 
-    isEffectivelyConst(context: Context): boolean {
-        if (
-            (this.object.toCIRExpression(context).value().valueSet as any)
-                .semantics === 'SHARED'
-        )
-            return false
-
-        return this.object.isEffectivelyConst(context)
+    isEffectivelyConst(context: Context): Failable<boolean> {
+        return this.object.toCIRExpression(context).map((object) => {
+            if ((object.valueSet as any).semantics === 'SHARED')
+                return Failable.success(false)
+            return Failable.success(
+                this.object.isEffectivelyConst(context).value(),
+            )
+        })
     }
 
     currentValue(context: Context): Failable<Lattice> {

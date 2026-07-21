@@ -11,7 +11,7 @@ export type Context = {
 
 export interface Expression {
     get span(): SourceCodeSpan
-    isEffectivelyConst(context: Context): boolean
+    isEffectivelyConst(context: Context): Failable<boolean>
     currentValue(context: Context): Failable<Lattice>
     setCurrentValue?(context: Context, value: Lattice): void
     toCIRExpression(

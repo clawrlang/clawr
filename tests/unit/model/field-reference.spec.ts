@@ -302,7 +302,9 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                expect(fieldRef.isEffectivelyConst(context)).toBe(expected)
+                expect(fieldRef.isEffectivelyConst(context).value()).toBe(
+                    expected,
+                )
             })
         }
 
@@ -342,7 +344,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            expect(fieldRef.isEffectivelyConst(context)).toBe(true)
+            expect(fieldRef.isEffectivelyConst(context).value()).toBe(true)
         })
 
         it('returns false if the object is mutable', () => {
@@ -381,7 +383,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            expect(fieldRef.isEffectivelyConst(context)).toBe(false)
+            expect(fieldRef.isEffectivelyConst(context).value()).toBe(false)
         })
     })
 })

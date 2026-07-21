@@ -21,7 +21,7 @@ export class VariableReference implements Expression {
     }
 
     assignmentPrelude(context: Context): cir.Statement[] {
-        if (this.isEffectivelyConst(context))
+        if (this.isEffectivelyConst(context).value())
             logSemanticError(`Variable ${this.name} is not mutable`, {
                 ...context,
                 span: this.span,
@@ -29,15 +29,18 @@ export class VariableReference implements Expression {
         return []
     }
 
-    isEffectivelyConst(context: Context): boolean {
+    isEffectivelyConst(context: Context): Failable<boolean> {
         const variableResult = this.lookupInScope(context)
         if (variableResult.isFailure())
             context.errorReporter.reportError(
                 variableResult.getError().errors[0].message,
                 variableResult.getError().errors[0].span,
             )
-        const variable = variableResult.value()
-        return variable.semantics === 'const' || variable.semantics === 'ref'
+        return variableResult.map((variable) =>
+            Failable.success(
+                variable.semantics === 'const' || variable.semantics === 'ref',
+            ),
+        )
     }
 
     currentValue(context: Context): Failable<Lattice> {

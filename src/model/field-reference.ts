@@ -169,9 +169,7 @@ export class FieldReference implements Expression {
         })
     }
 
-    private checkOperatorCompatibility_failable(
-        context: Context,
-    ): Failable<void> {
+    private checkOperatorCompatibility_failable(context: Context): Failable {
         return this.object.toCIRExpression(context).map((object) => {
             const semantics = (object.valueSet as any).semantics
             if ((semantics === 'SHARED') !== (this.operator === '->')) {

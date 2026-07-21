@@ -1,6 +1,6 @@
 import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
 
-export class Failable<T> {
+export class Failable<T = void> {
     private constructor(private result: T | SemanticErrorCollection) {}
 
     static success<T>(value: T): Failable<T> {

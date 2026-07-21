@@ -45,10 +45,12 @@ export class VariableDeclaration implements Statement, Declaration {
                 : (this.valueSet?.toCIR() ??
                   currentValue.unconstrained().toCIR())
 
-        const initialValue = this.initialValue.toCIRExpression({
-            ...context,
-            targetValueSet: valueSet,
-        })
+        const initialValue = this.initialValue
+            .toCIRExpression({
+                ...context,
+                targetValueSet: valueSet,
+            })
+            .value()
 
         if (
             valueSet.type === 'rc-type' &&

@@ -45,7 +45,9 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.toCIRExpression(context).valueSet.type).toBe('integer')
+        expect(fieldRef.toCIRExpression(context).value().valueSet.type).toBe(
+            'integer',
+        )
     })
 
     it('infers its isolation level from the context', () => {
@@ -86,7 +88,9 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.toCIRExpression(context).valueSet).toMatchObject({
+        expect(
+            fieldRef.toCIRExpression(context).value().valueSet,
+        ).toMatchObject({
             semantics: 'ISOLATED',
         })
     })
@@ -139,7 +143,7 @@ describe('Field Reference', () => {
                     fieldSpan: someCodeSpan,
                 })
                 expect(
-                    fieldRef.toCIRExpression(context).valueSet,
+                    fieldRef.toCIRExpression(context).value().valueSet,
                 ).toMatchObject({
                     type: 'rc-type',
                     typeName: 'MyType',
@@ -184,7 +188,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(() => fieldRef.toCIRExpression(context)).toThrowError(
+        expect(fieldRef.toCIRExpression(context).getError().message).toMatch(
             /Field nonExistentField does not exist on type MyType/,
         )
     })
@@ -237,7 +241,7 @@ describe('Field Reference', () => {
                     },
                     fieldSpan: someCodeSpan,
                 })
-                expect(() => fieldRef.toCIRExpression(context)).toThrow()
+                expect(fieldRef.toCIRExpression(context).isFailure()).toBeTrue()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {

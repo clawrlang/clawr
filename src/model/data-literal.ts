@@ -64,7 +64,7 @@ export class DataLiteral implements Expression {
 
     toCIRExpression(
         context: Context & { targetValueSet: cir.ValueSet },
-    ): cir.Expression {
+    ): Failable<cir.Expression> {
         const valueSet = context.targetValueSet
         if (!valueSet || valueSet.type !== 'rc-type')
             throw Failable.failure(
@@ -75,36 +75,40 @@ export class DataLiteral implements Expression {
         const targetType = context.scope.dataDeclaration(valueSet.typeName) as
             DataDeclaration | undefined
         if (!targetType)
-            throw Failable.failure(
+            return Failable.failure(
                 `DataLiteral.toCIRExpression: target type ${valueSet.typeName} not found in scope`,
                 this.span,
-            ).getError()
+            )
         const fieldDeclarations = new Map(
             targetType.fields.map((field) => [field.name, field]),
         )
-        const expr: cir.Expression = {
-            kind: 'ALLOCATE',
-            valueSet,
-            fields: this.fields.map((field) => {
-                const fieldDeclaration = fieldDeclarations.get(field.name)
-                if (!fieldDeclaration)
-                    // Nested literals need the declared field type as their target.
-                    // Missing fields are rejected here so we do not propagate undefined types.
-                    throw Failable.failure(
-                        `DataLiteral.toCIRExpression: field ${field.name} not found on type ${valueSet.typeName}`,
-                        this.span,
-                    ).getError()
-                const nestedContext = {
-                    ...context,
-                    targetValueSet: fieldDeclaration.valueSet.toCIR(),
-                }
-                return {
+        const fieldResults = this.fields.map((field) => {
+            const fieldDeclaration = fieldDeclarations.get(field.name)
+            if (!fieldDeclaration)
+                // Nested literals need the declared field type as their target.
+                // Missing fields are rejected here so we do not propagate undefined types.
+                return Failable.failure(
+                    `DataLiteral.toCIRExpression: field ${field.name} not found on type ${valueSet.typeName}`,
+                    this.span,
+                )
+            const nestedContext = {
+                ...context,
+                targetValueSet: fieldDeclaration.valueSet.toCIR(),
+            }
+            return field.value.toCIRExpression(nestedContext).map((value) =>
+                Failable.success({
                     name: field.name,
-                    value: field.value.toCIRExpression(nestedContext),
-                }
+                    value,
+                }),
+            )
+        })
+        return Failable.collect(fieldResults).map((fields) =>
+            Failable.success({
+                kind: 'ALLOCATE',
+                valueSet,
+                fields,
             }),
-        }
-        return Failable.success(expr).value()
+        )
     }
 }
 

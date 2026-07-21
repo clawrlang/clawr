@@ -17,7 +17,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.toCIRExpression(context)).toEqual({
+        expect(variableRef.toCIRExpression(context).value()).toEqual({
             kind: 'VARIABLE_REF',
             name: 'myVar',
             valueSet: { type: 'integer', min: '10', max: '10' },
@@ -35,7 +35,7 @@ describe('Variable Reference', () => {
             test(method, () => {
                 const context = newSemanticContext()
                 const call = () => variableRef[method](context)
-                expect(call).toThrow()
+                expect(call().isFailure()).toBeTrue()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
@@ -59,7 +59,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.toCIRExpression(context).valueSet).toEqual({
+        expect(variableRef.toCIRExpression(context).value().valueSet).toEqual({
             type: 'integer',
             min: '10',
             max: '10',
@@ -128,7 +128,7 @@ describe('Variable Reference', () => {
                     span: someCodeSpan,
                 })
                 expect(
-                    variableRef.toCIRExpression(context).valueSet,
+                    variableRef.toCIRExpression(context).value().valueSet,
                 ).toMatchObject({
                     semantics: expected,
                 })

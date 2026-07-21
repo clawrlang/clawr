@@ -120,9 +120,9 @@ export class FunctionDeclaration implements Declaration {
         let resultValueSet = this.result?.toCIR()
         if (resultValueSet) return resultValueSet
         if (this.implementation.kind === 'implicit-return')
-            return this.implementation.expression.toCIRExpression(
-                this.bodyContext(context),
-            ).valueSet
+            return this.implementation.expression
+                .toCIRExpression(this.bodyContext(context))
+                .value().valueSet
     }
 
     private bodyContext(context: Context): Context {

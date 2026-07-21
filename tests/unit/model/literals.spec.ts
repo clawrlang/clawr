@@ -20,7 +20,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 expect(
-                    literal.toCIRExpression(newSemanticContext()),
+                    literal.toCIRExpression(newSemanticContext()).value(),
                 ).toMatchObject({
                     kind: 'TRUTHVALUE_LITERAL',
                     value: input,
@@ -50,7 +50,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 expect(
-                    literal.toCIRExpression(newSemanticContext()),
+                    literal.toCIRExpression(newSemanticContext()).value(),
                 ).toMatchObject({
                     kind: 'INTEGER_LITERAL',
                     value: input,
@@ -119,14 +119,16 @@ describe('Literals', () => {
             })
 
             expect(
-                dataLiteral.toCIRExpression({
-                    ...context,
-                    targetValueSet: {
-                        type: 'rc-type',
-                        typeName: 'MyType',
-                        semantics: 'SHARED',
-                    },
-                }),
+                dataLiteral
+                    .toCIRExpression({
+                        ...context,
+                        targetValueSet: {
+                            type: 'rc-type',
+                            typeName: 'MyType',
+                            semantics: 'SHARED',
+                        },
+                    })
+                    .value(),
             ).toMatchObject({
                 kind: 'ALLOCATE',
                 valueSet: {

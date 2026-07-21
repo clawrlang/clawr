@@ -36,7 +36,7 @@ export class ReturnStatement implements Statement {
                     { ...context, span: this.value.span },
                 )
 
-            const object = this.value.toCIRExpression(context)
+            const object = this.value.toCIRExpression(context).value()
             if (
                 (object.kind === 'VARIABLE_REF' ||
                     object.kind === 'FIELD_REF') &&

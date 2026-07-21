@@ -25,11 +25,13 @@ export class Assignment implements Statement {
     }
 
     emitStatement(context: Context) {
-        const target = this.target.toCIRExpression(context)
-        const value = this.value.toCIRExpression({
-            ...context,
-            ...{ targetValueSet: target.valueSet },
-        })
+        const target = this.target.toCIRExpression(context).value()
+        const value = this.value
+            .toCIRExpression({
+                ...context,
+                ...{ targetValueSet: target.valueSet },
+            })
+            .value()
 
         if (target.valueSet.type !== value.valueSet.type)
             logSemanticError(
@@ -57,7 +59,9 @@ export class Assignment implements Statement {
         const prelude = this.target.assignmentPrelude(context)
         context.scope.emitted.push(...prelude)
 
-        const targetValueSet = this.target.toCIRExpression(context).valueSet
+        const targetValueSet = this.target
+            .toCIRExpression(context)
+            .value().valueSet
 
         if (
             (value.kind === 'FIELD_REF' || value.kind === 'VARIABLE_REF') &&

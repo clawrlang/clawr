@@ -61,18 +61,20 @@ export class VariableReference implements Expression {
 
     toCIRExpression(
         context: Context,
-    ): Extract<cir.Expression, { kind: 'VARIABLE_REF' }> {
-        const variableResult = this.lookupInScope(context)
-        if (variableResult.isFailure())
+    ): Failable<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
+        const result = this.lookupInScope(context).map((variable) =>
+            Failable.success({
+                kind: 'VARIABLE_REF' as const,
+                name: this.name,
+                valueSet: variable.valueSet,
+            }),
+        )
+        if (result.isFailure())
             context.errorReporter.reportError(
-                variableResult.getError().errors[0].message,
-                variableResult.getError().errors[0].span,
+                result.getError().errors[0].message,
+                result.getError().errors[0].span,
             )
-        return {
-            kind: 'VARIABLE_REF',
-            name: this.name,
-            valueSet: variableResult.value().valueSet,
-        }
+        return result
     }
 
     lookupInScope(context: Context) {

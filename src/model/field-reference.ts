@@ -47,7 +47,7 @@ export class FieldReference implements Expression {
             this.object instanceof VariableReference ||
             this.object instanceof FieldReference
         ) {
-            const object = this.object.toCIRExpression(context)
+            const object = this.object.toCIRExpression(context).value()
             if ((object.valueSet as any).semantics === 'ISOLATED') {
                 return [{ kind: 'ENSURE_UNIQUE', object }]
             }
@@ -57,8 +57,8 @@ export class FieldReference implements Expression {
 
     isEffectivelyConst(context: Context): boolean {
         if (
-            (this.object.toCIRExpression(context).valueSet as any).semantics ===
-            'SHARED'
+            (this.object.toCIRExpression(context).value().valueSet as any)
+                .semantics === 'SHARED'
         )
             return false
 
@@ -90,18 +90,25 @@ export class FieldReference implements Expression {
 
     toCIRExpression(
         context: Context,
-    ): Extract<cir.Expression, { kind: 'FIELD_REF' }> {
-        this.checkOperatorCompatibility(context)
-        return {
-            kind: 'FIELD_REF',
-            object: this.object.toCIRExpression(context),
-            field: this.field,
-            valueSet: this.getFieldFromContext(context).valueSet.toCIR(),
-        }
+    ): Failable<Extract<cir.Expression, { kind: 'FIELD_REF' }>> {
+        return this.checkOperatorCompatibility_failable(context).map((_) =>
+            this.object.toCIRExpression(context).map((object) =>
+                this.getFieldFromContext_failable(context).map((field) =>
+                    Failable.success({
+                        kind: 'FIELD_REF',
+                        object,
+                        field: this.field,
+                        valueSet: field.valueSet.toCIR(),
+                    }),
+                ),
+            ),
+        )
     }
 
     private getFieldFromContext(context: Context) {
-        const objectValueSet = this.object.toCIRExpression(context).valueSet
+        const objectValueSet = this.object
+            .toCIRExpression(context)
+            .value().valueSet
         const objectType =
             objectValueSet.type === 'rc-type'
                 ? objectValueSet.typeName
@@ -129,18 +136,52 @@ export class FieldReference implements Expression {
         return field
     }
 
-    private checkOperatorCompatibility(context: Context) {
-        const semantics = (this.object.toCIRExpression(context).valueSet as any)
-            .semantics
-        if ((semantics === 'SHARED') !== (this.operator === '->')) {
-            const error = SemanticError.create({
-                message: `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
-                span: this.span,
-            })
-            context.errorReporter.reportError(error.message, error.span)
-            throw Failable.failure(
-                SemanticErrorCollection.create([error]),
-            ).getError()
-        }
+    private getFieldFromContext_failable(
+        context: Context,
+    ): Failable<DataDeclaration['fields'][number]> {
+        return this.object.toCIRExpression(context).map((object) => {
+            const objectValueSet = object.valueSet
+            const objectType =
+                objectValueSet.type === 'rc-type'
+                    ? objectValueSet.typeName
+                    : objectValueSet.type
+            const declaration = context.scope.dataDeclaration(objectType)
+            if (!declaration) {
+                logSemanticError(
+                    `Type ${objectType} is not defined in the current context`,
+                    { ...context, span: this.span },
+                )
+            }
+            if (!(declaration instanceof DataDeclaration)) {
+                return Failable.failure(
+                    `Type ${objectType} is not a data type, cannot access fields`,
+                    this.span,
+                )
+            }
+            const field = declaration.fields.find((f) => f.name === this.field)
+            if (!field) {
+                return Failable.failure(
+                    `Field ${this.field} does not exist on type ${objectType}`,
+                    this.fieldSpan,
+                )
+            }
+            return Failable.success(field)
+        })
+    }
+
+    private checkOperatorCompatibility_failable(
+        context: Context,
+    ): Failable<void> {
+        return this.object.toCIRExpression(context).map((object) => {
+            const semantics = (object.valueSet as any).semantics
+            if ((semantics === 'SHARED') !== (this.operator === '->')) {
+                const error = SemanticError.create({
+                    message: `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
+                    span: this.span,
+                })
+                context.errorReporter.reportError(error.message, error.span)
+                return Failable.failure(SemanticErrorCollection.create([error]))
+            } else return Failable.success(undefined)
+        })
     }
 }

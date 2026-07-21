@@ -30,8 +30,8 @@ export class IntegerLiteral implements Expression {
         )
     }
 
-    toCIRExpression(_: Context): cir.Expression {
-        return {
+    toCIRExpression(_: Context): Failable<cir.Expression> {
+        return Failable.success({
             kind: 'INTEGER_LITERAL',
             value: this.value.toString(),
             valueSet: {
@@ -39,7 +39,7 @@ export class IntegerLiteral implements Expression {
                 min: this.value.toString(),
                 max: this.value.toString(),
             },
-        }
+        })
     }
 
     isEffectivelyConst(_: Context): boolean {

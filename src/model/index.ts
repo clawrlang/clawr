@@ -16,7 +16,7 @@ export interface Expression {
     setCurrentValue?(context: Context, value: Lattice): void
     toCIRExpression(
         context: Context & { targetValueSet?: cir.ValueSet },
-    ): cir.Expression
+    ): Failable<cir.Expression>
 }
 
 export interface Statement {

@@ -64,14 +64,18 @@ export class Query implements Expression {
         return Failable.success(result)
     }
 
-    toCIRExpression(context: Context): cir.Expression {
-        return {
-            kind: 'QUERY',
-            name: this.name.toCIR(),
-            arguments: this.arguments.map((arg) =>
-                arg.toCIRExpression(context),
+    toCIRExpression(context: Context): Failable<cir.Expression> {
+        return this.currentValue(context).map((valueSet) =>
+            Failable.collect(
+                this.arguments.map((arg) => arg.toCIRExpression(context)),
+            ).map((args) =>
+                Failable.success({
+                    kind: 'QUERY',
+                    name: this.name.toCIR(),
+                    arguments: args,
+                    valueSet: valueSet.toCIR(),
+                }),
             ),
-            valueSet: this.currentValue(context).value().toCIR(),
-        }
+        )
     }
 }

@@ -24,15 +24,15 @@ export class TruthValueLiteral implements Expression {
         return Failable.success(TruthvalueLattice.create([this.value]))
     }
 
-    toCIRExpression(_: Context): cir.Expression {
-        return {
+    toCIRExpression(_: Context): Failable<cir.Expression> {
+        return Failable.success({
             kind: 'TRUTHVALUE_LITERAL',
             value: this.value,
             valueSet: {
                 type: 'truthvalue',
                 values: [this.value],
             },
-        }
+        })
     }
 
     isEffectivelyConst(_: Context): boolean {

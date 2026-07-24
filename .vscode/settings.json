@@ -396,6 +396,14 @@
                   "additionalProperties": false
                 }
               },
+              "methods": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/FunctionDeclaration" }
+              },
+              "companionMethods": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/FunctionDeclaration" }
+              }
             },
             "required": ["kind", "name", "fields"],
             "additionalProperties": false

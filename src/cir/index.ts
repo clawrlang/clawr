@@ -30,6 +30,8 @@ type TypeDeclaration = {
         name: string
         valueSet: ValueSet
     }[]
+    methods?: FunctionDeclaration[]
+    companionMethods?: FunctionDeclaration[]
 }
 
 export type Declaration =

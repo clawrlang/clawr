@@ -55,10 +55,12 @@ export function lowerDecl(decl: cir.Declaration): string {
                 : 'void'
 
             return `${returnType} ${mangleFunctionName({
+                namespace: undefined,
                 baseName: decl.baseName,
                 labels: decl.parameters
                     .map((param) => param.label)
                     .filter((label) => label !== undefined) as string[],
+                typeName: undefined,
             })}(${params}) {
                     ${decl.body.map(lowerStmt).join('\n')}
                 }`
@@ -93,8 +95,19 @@ function lowerType(valueSet: cir.ValueSet): string {
 export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
         case 'EXEC': {
-            const name = mangleFunctionName(stmt.name)
-            return `${name}(${stmt.arguments.map(lowerExpr).join(', ')});`
+            const args = stmt.receiver
+                ? [lowerExpr(stmt.receiver), ...stmt.arguments.map(lowerExpr)]
+                : stmt.arguments.map(lowerExpr)
+            const name = mangleFunctionName({
+                namespace: stmt.name.namespace,
+                baseName: stmt.name.baseName,
+                labels: stmt.name.labels,
+                typeName:
+                    stmt.receiver?.valueSet.type === 'rc-type'
+                        ? stmt.receiver.valueSet.typeName
+                        : undefined,
+            })
+            return `${name}(${args.join(', ')});`
         }
         case 'VARIABLE_DECL': {
             if (stmt.initialValue.kind === 'ALLOCATE')
@@ -152,9 +165,19 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
         case 'QUERY': {
-            //            return JSON.stringify(expr)
-            const name = mangleFunctionName(expr.name)
-            return `${name}(${expr.arguments.map(lowerExpr).join(', ')})`
+            const args = expr.receiver
+                ? [lowerExpr(expr.receiver), ...expr.arguments.map(lowerExpr)]
+                : expr.arguments.map(lowerExpr)
+            const name = mangleFunctionName({
+                namespace: expr.name.namespace,
+                baseName: expr.name.baseName,
+                labels: expr.name.labels,
+                typeName:
+                    expr.receiver?.valueSet.type === 'rc-type'
+                        ? expr.receiver.valueSet.typeName
+                        : undefined,
+            })
+            return `${name}(${args.join(', ')})`
         }
         case 'VARIABLE_REF': {
             return expr.name
@@ -178,11 +201,18 @@ export function lowerTruthvalueLiteral(
 }
 
 function mangleFunctionName({
+    namespace,
+    typeName,
     baseName,
     labels,
 }: {
+    namespace: string | undefined
+    typeName: string | undefined
     baseName: string
     labels: string[]
 }): string {
-    return [baseName, ...labels].join('˛')
+    const freeFunctionName = [baseName, ...labels].filter(Boolean).join('˛')
+    if (typeName) return `${typeName}·${freeFunctionName}`
+
+    return namespace ? `${namespace}¸${freeFunctionName}` : freeFunctionName
 }

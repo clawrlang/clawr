@@ -133,4 +133,82 @@ describe('Function Calls', () => {
             expect(result).toBe('noParamFunction();')
         })
     })
+
+    describe('adds namespace to function call when present', () => {
+        test('expression', () => {
+            const expr: Expression = {
+                kind: 'QUERY',
+                name: {
+                    namespace: 'myNamespace',
+                    baseName: 'myFunction',
+                    labels: [],
+                },
+                arguments: [],
+                valueSet: { type: 'truthvalue', values: [] },
+            }
+            const result = lowerExpr(expr)
+            expect(result).toBe('myNamespace¸myFunction()')
+        })
+
+        test('statement', () => {
+            const stmt: Statement = {
+                kind: 'EXEC',
+                name: {
+                    namespace: 'myNamespace',
+                    baseName: 'myFunction',
+                    labels: [],
+                },
+                arguments: [],
+            }
+            const result = lowerStmt(stmt)
+            expect(result).toBe('myNamespace¸myFunction();')
+        })
+    })
+
+    describe('adds receiver to function call when present', () => {
+        test('expression', () => {
+            const expr: Expression = {
+                kind: 'QUERY',
+                receiver: {
+                    kind: 'VARIABLE_REF',
+                    name: 'myObject',
+                    valueSet: {
+                        type: 'rc-type',
+                        typeName: 'Object',
+                        semantics: 'ISOLATED',
+                    },
+                },
+                name: {
+                    baseName: 'myMethod',
+                    labels: [],
+                },
+                arguments: [],
+                valueSet: { type: 'truthvalue', values: [] },
+            }
+            const result = lowerExpr(expr)
+            expect(result).toBe('Object·myMethod(myObject)')
+        })
+
+        test('statement', () => {
+            const stmt: Statement = {
+                kind: 'EXEC',
+                receiver: {
+                    kind: 'VARIABLE_REF',
+                    name: 'myObject',
+                    valueSet: {
+                        type: 'rc-type',
+                        typeName: 'Object',
+                        semantics: 'ISOLATED',
+                    },
+                },
+                name: {
+                    baseName: 'myMethod',
+                    labels: [],
+                },
+                arguments: [],
+            }
+            const result = lowerStmt(stmt)
+            expect(result).toBe('Object·myMethod(myObject);')
+        })
+    })
 })

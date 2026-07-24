@@ -49,7 +49,9 @@ type Release = {
 
 type Exec = {
     kind: 'EXEC'
+    receiver?: Expression
     name: {
+        namespace?: string
         baseName: string
         labels: string[]
     }
@@ -127,7 +129,9 @@ type FieldReference = {
 
 type QueryFunctionCall = {
     kind: 'QUERY'
+    receiver?: Expression
     name: {
+        namespace?: string
         baseName: string
         labels: string[]
     }

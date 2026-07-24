@@ -2,7 +2,7 @@ import { describe, expect, it, test } from 'bun:test'
 import { FieldReference } from '../../../src/model/field-reference'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
-import { DataDeclaration } from '../../../src/model/data-declaration'
+import { TypeDeclaration } from '../../../src/model/type-declaration'
 import {
     ExplicitIntegerValueSet,
     ExplicitRCTypeValueSet,
@@ -21,7 +21,7 @@ describe('Field Reference', () => {
         })
         context.scope.rootScope.declarations.set(
             'MyType',
-            DataDeclaration.create({
+            TypeDeclaration.create({
                 name: 'MyType',
                 fields: [
                     {
@@ -62,7 +62,7 @@ describe('Field Reference', () => {
         })
         context.scope.rootScope.declarations.set(
             'MyType',
-            DataDeclaration.create({
+            TypeDeclaration.create({
                 name: 'MyType',
                 fields: [
                     {
@@ -116,7 +116,7 @@ describe('Field Reference', () => {
                 })
                 context.scope.rootScope.declarations.set(
                     'MyType',
-                    DataDeclaration.create({
+                    TypeDeclaration.create({
                         name: 'MyType',
                         fields: [
                             {
@@ -164,7 +164,7 @@ describe('Field Reference', () => {
         })
         context.scope.rootScope.declarations.set(
             'MyType',
-            DataDeclaration.create({
+            TypeDeclaration.create({
                 name: 'MyType',
                 fields: [
                     {
@@ -214,7 +214,7 @@ describe('Field Reference', () => {
                 })
                 context.scope.rootScope.declarations.set(
                     'MyType',
-                    DataDeclaration.create({
+                    TypeDeclaration.create({
                         name: 'MyType',
                         fields: [
                             {
@@ -275,7 +275,7 @@ describe('Field Reference', () => {
                 })
                 context.scope.rootScope.declarations.set(
                     'MyType',
-                    DataDeclaration.create({
+                    TypeDeclaration.create({
                         name: 'MyType',
                         fields: [
                             {
@@ -317,7 +317,7 @@ describe('Field Reference', () => {
             })
             context.scope.rootScope.declarations.set(
                 'MyType',
-                DataDeclaration.create({
+                TypeDeclaration.create({
                     name: 'MyType',
                     fields: [
                         {
@@ -356,7 +356,7 @@ describe('Field Reference', () => {
             })
             context.scope.rootScope.declarations.set(
                 'MyType',
-                DataDeclaration.create({
+                TypeDeclaration.create({
                     name: 'MyType',
                     fields: [
                         {

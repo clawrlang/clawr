@@ -2,7 +2,7 @@
     "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
     "declarations": [
         {
-            "kind": "DATA_DECL",
+            "kind": "TYPE_DECL",
             "name": "FooData",
             "fields": [
                 {

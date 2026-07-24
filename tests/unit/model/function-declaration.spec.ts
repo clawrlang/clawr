@@ -13,7 +13,7 @@ import {
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { ReturnStatement } from '../../../src/model/return-statement'
-import { DataDeclaration } from '../../../src/model/data-declaration'
+import { TypeDeclaration } from '../../../src/model/type-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
@@ -136,7 +136,7 @@ describe('FunctionDeclaration', () => {
         const context = newSemanticContext()
         context.scope.rootScope.declarations.set(
             'MyData',
-            DataDeclaration.create({
+            TypeDeclaration.create({
                 name: 'MyData',
                 fields: [],
             }),
@@ -181,7 +181,7 @@ describe('FunctionDeclaration', () => {
         const context = newSemanticContext()
         context.scope.rootScope.declarations.set(
             'MyData',
-            DataDeclaration.create({
+            TypeDeclaration.create({
                 name: 'MyData',
                 fields: [],
             }),
@@ -228,7 +228,7 @@ describe('FunctionDeclaration', () => {
         const context = newSemanticContext()
         context.scope.rootScope.declarations.set(
             'MyData',
-            DataDeclaration.create({
+            TypeDeclaration.create({
                 name: 'MyData',
                 fields: [],
             }),
@@ -313,7 +313,7 @@ describe('FunctionDeclaration', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'MyData',
-                DataDeclaration.create({
+                TypeDeclaration.create({
                     name: 'MyData',
                     fields: [],
                 }),
@@ -365,7 +365,7 @@ describe('FunctionDeclaration', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'MyData',
-                DataDeclaration.create({
+                TypeDeclaration.create({
                     name: 'MyData',
                     fields: [],
                 }),
@@ -481,7 +481,7 @@ describe('FunctionDeclaration', () => {
 
             context.scope.rootScope.declarations.set(
                 'MyData',
-                DataDeclaration.create({
+                TypeDeclaration.create({
                     name: 'MyData',
                     fields: [
                         {
@@ -549,7 +549,7 @@ describe('FunctionDeclaration', () => {
 
             context.scope.rootScope.declarations.set(
                 'MyData',
-                DataDeclaration.create({
+                TypeDeclaration.create({
                     name: 'MyData',
                     fields: [
                         {
@@ -623,7 +623,7 @@ describe('FunctionDeclaration', () => {
 
             context.scope.rootScope.declarations.set(
                 'MyData',
-                DataDeclaration.create({
+                TypeDeclaration.create({
                     name: 'MyData',
                     fields: [],
                 }),

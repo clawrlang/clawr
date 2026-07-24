@@ -4,7 +4,7 @@ import { newSemanticContext, someCodeSpan } from '../../util'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataLiteral } from '../../../src/model/data-literal'
-import { DataDeclaration } from '../../../src/model/data-declaration'
+import { TypeDeclaration } from '../../../src/model/type-declaration'
 import {
     ExplicitIntegerValueSet,
     ExplicitRCTypeValueSet,
@@ -77,7 +77,7 @@ describe('Literals', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'MyType',
-                DataDeclaration.create({
+                TypeDeclaration.create({
                     name: 'MyType',
                     fields: [
                         {
@@ -153,7 +153,7 @@ describe('Literals', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'MyType',
-                DataDeclaration.create({
+                TypeDeclaration.create({
                     name: 'MyType',
                     fields: [
                         {
@@ -214,7 +214,7 @@ describe('Literals', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'OuterType',
-                DataDeclaration.create({
+                TypeDeclaration.create({
                     name: 'OuterType',
                     fields: [
                         {

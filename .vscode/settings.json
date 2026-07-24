@@ -339,31 +339,10 @@
           },
           "Declaration": {
             "oneOf": [
-              { "$ref": "#/$defs/DataDeclaration" },
               { "$ref": "#/$defs/FunctionDeclaration" },
+              { "$ref": "#/$defs/TypeDeclaration" },
               { "$ref": "#/$defs/VariableDeclaration" }
             ]
-          },
-          "DataDeclaration": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "DATA_DECL" },
-              "name": { "type": "string" },
-              "fields": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "valueSet": { "$ref": "#/$defs/ValueSet" }
-                  },
-                  "required": ["name", "valueSet"],
-                  "additionalProperties": false
-                }
-              }
-            },
-            "required": ["kind", "name", "fields"],
-            "additionalProperties": false
           },
           "FunctionDeclaration": {
             "type": "object",
@@ -398,6 +377,27 @@
               }
             },
             "required": ["kind", "baseName", "parameters", "body"],
+            "additionalProperties": false
+          },
+          "TypeDeclaration": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "TYPE_DECL" },
+              "name": { "type": "string" },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                  },
+                  "required": ["name", "valueSet"],
+                  "additionalProperties": false
+                }
+              },
+            },
+            "required": ["kind", "name", "fields"],
             "additionalProperties": false
           }
         }

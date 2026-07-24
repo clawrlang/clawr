@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { newSemanticContext, someCodeSpan } from '../../util'
-import { DataDeclaration } from '../../../src/model/data-declaration'
+import { TypeDeclaration } from '../../../src/model/type-declaration'
 import {
     ExplicitIntegerValueSet,
     ExplicitTruthValueSet,
@@ -8,7 +8,7 @@ import {
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {
-        const dataDecl = DataDeclaration.create({
+        const dataDecl = TypeDeclaration.create({
             name: 'MyData',
             fields: [
                 {
@@ -31,7 +31,7 @@ describe('DataDeclaration', () => {
         dataDecl.emitDeclaration(context)
         expect(context.scope.rootScope.emitted).toEqual([
             {
-                kind: 'DATA_DECL',
+                kind: 'TYPE_DECL',
                 name: 'MyData',
                 fields: [
                     {

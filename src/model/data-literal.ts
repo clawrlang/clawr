@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { DataDeclaration } from './data-declaration'
+import { TypeDeclaration } from './type-declaration'
 import { Lattice, UniqueTypeLattice } from './lattice'
 import { Failable } from './failable'
 
@@ -73,7 +73,7 @@ export class DataLiteral implements Expression {
             ).getError()
 
         const targetType = context.scope.dataDeclaration(valueSet.typeName) as
-            DataDeclaration | undefined
+            TypeDeclaration | undefined
         if (!targetType)
             return Failable.failure(
                 `DataLiteral.toCIRExpression: target type ${valueSet.typeName} not found in scope`,

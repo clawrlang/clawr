@@ -1,7 +1,5 @@
-import * as cir from '../cir'
 import { Context, Declaration } from '.'
 import { VariableSemantics } from './variable-declaration'
-import { convertSemantics } from './variable-reference'
 import { ExplicitValueSet } from './explicit-value-set'
 
 type DataField = {
@@ -10,7 +8,7 @@ type DataField = {
     semantics: VariableSemantics
 }
 
-export class DataDeclaration implements Declaration {
+export class TypeDeclaration implements Declaration {
     private constructor(
         public name: string,
         public fields: DataField[],
@@ -22,14 +20,14 @@ export class DataDeclaration implements Declaration {
     }: {
         name: string
         fields: DataField[]
-    }): DataDeclaration {
-        return new DataDeclaration(name, fields)
+    }): TypeDeclaration {
+        return new TypeDeclaration(name, fields)
     }
 
     emitDeclaration(context: Context) {
         context.scope.rootScope.declarations.set(this.name, this)
         context.scope.rootScope.emitted.push({
-            kind: 'DATA_DECL',
+            kind: 'TYPE_DECL',
             name: this.name,
             fields: this.fields.map((field) => ({
                 name: field.name,

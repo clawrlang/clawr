@@ -25,7 +25,7 @@ export function lower(cir: cir.ClawrModule): string {
 
 export function lowerDecl(decl: cir.Declaration): string {
     switch (decl.kind) {
-        case 'DATA_DECL': {
+        case 'TYPE_DECL': {
             const fields = decl.fields
                 .map((field) => `${lowerType(field.valueSet)} ${field.name};`)
                 .join('\n')

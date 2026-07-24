@@ -7,7 +7,7 @@ import {
     logSemanticError,
 } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
-import { DataDeclaration } from './data-declaration'
+import { TypeDeclaration } from './type-declaration'
 import { IsolatedTypeLattice, Lattice, UniqueTypeLattice } from './lattice'
 import { VariableReference } from './variable-reference'
 
@@ -120,7 +120,7 @@ export class FieldReference implements Expression {
                 { ...context, span: this.span },
             )
         }
-        if (!(declaration instanceof DataDeclaration)) {
+        if (!(declaration instanceof TypeDeclaration)) {
             throw Failable.failure(
                 `Type ${objectType} is not a data type, cannot access fields`,
                 this.span,
@@ -138,7 +138,7 @@ export class FieldReference implements Expression {
 
     private getFieldFromContext_failable(
         context: Context,
-    ): Failable<DataDeclaration['fields'][number]> {
+    ): Failable<TypeDeclaration['fields'][number]> {
         return this.object.toCIRExpression(context).map((object) => {
             const objectValueSet = object.valueSet
             const objectType =
@@ -152,7 +152,7 @@ export class FieldReference implements Expression {
                     { ...context, span: this.span },
                 )
             }
-            if (!(declaration instanceof DataDeclaration)) {
+            if (!(declaration instanceof TypeDeclaration)) {
                 return Failable.failure(
                     `Type ${objectType} is not a data type, cannot access fields`,
                     this.span,

@@ -23,8 +23,8 @@ type FunctionDeclaration = {
     resultValueSet?: ValueSet
 }
 
-type DataDeclaration = {
-    kind: 'DATA_DECL'
+type TypeDeclaration = {
+    kind: 'TYPE_DECL'
     name: string
     fields: {
         name: string
@@ -33,7 +33,7 @@ type DataDeclaration = {
 }
 
 export type Declaration =
-    VariableDeclaration | FunctionDeclaration | DataDeclaration
+    VariableDeclaration | FunctionDeclaration | TypeDeclaration
 
 type EnsureUnique = {
     kind: 'ENSURE_UNIQUE'

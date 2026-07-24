@@ -1,6 +1,6 @@
 import { Context } from '.'
 import { TokenStream } from '../lexer'
-import { DataDeclaration } from '../model/data-declaration'
+import { TypeDeclaration } from '../model/type-declaration'
 import { ExplicitValueSet } from '../model/explicit-value-set'
 import {
     VARIABLE_SEMANTICS,
@@ -15,7 +15,7 @@ export class DataDeclarationParser {
         return new DataDeclarationParser(context)
     }
 
-    parse(stream: TokenStream): DataDeclaration {
+    parse(stream: TokenStream): TypeDeclaration {
         stream.expect('KEYWORD', 'data')
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
@@ -38,7 +38,7 @@ export class DataDeclarationParser {
             })
         }
         stream.expect('PUNCTUATION', '}')
-        return DataDeclaration.create({ name, fields })
+        return TypeDeclaration.create({ name, fields })
     }
 
     private parseFieldSemantics(stream: TokenStream) {

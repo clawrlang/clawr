@@ -36,6 +36,9 @@ data:
   - Mangle method base names as `Type¸staticMethod`
   - Mangle field names as `Type‚field`
 - Make `CALL`/`QUERY` support methods
+- Allow polymorphic inheritance and `trait` conformance/`role` embodiment
+  - inheritance constructor
+- companion “static” fields
 
 ## Enforce on Frontend
 

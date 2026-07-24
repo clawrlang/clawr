@@ -1,0 +1,167 @@
+{
+    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
+    "declarations": [
+        {
+            "kind": "TYPE_DECL",
+            "name": "Object",
+            "fields": [
+                {
+                    "name": "field",
+                    "valueSet": {
+                        "type": "integer",
+                        "min": "42",
+                        "max": "42"
+                    }
+                }
+            ],
+            "methods": [
+                {
+                    "kind": "FUNCTION_DECL",
+                    "baseName": "field",
+                    "parameters": [],
+                    "resultValueSet": {
+                        "type": "integer",
+                        "min": "42",
+                        "max": "42"
+                    },
+                    "body": [
+                        {
+                            "kind": "RETURN",
+                            "value": {
+                                "kind": "FIELD_REF",
+                                "object": {
+                                    "kind": "VARIABLE_REF",
+                                    "name": "self",
+                                    "valueSet": {
+                                        "type": "rc-type",
+                                        "typeName": "Object",
+                                        "semantics": "ISOLATED"
+                                    }
+                                },
+                                "field": "field",
+                                "valueSet": {
+                                    "type": "integer",
+                                    "min": "42",
+                                    "max": "42"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ],
+            "companionMethods": [
+                {
+                    "kind": "FUNCTION_DECL",
+                    "baseName": "new",
+                    "parameters": [],
+                    "body": [
+                        {
+                            "kind": "VARIABLE_DECL",
+                            "name": "obj",
+                            "initialValue": {
+                                "kind": "ALLOCATE",
+                                "fields": [
+                                    {
+                                        "name": "field",
+                                        "value": {
+                                            "kind": "INTEGER_LITERAL",
+                                            "value": "42",
+                                            "valueSet": {
+                                                "type": "integer",
+                                                "min": "42",
+                                                "max": "42"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "valueSet": {
+                                    "type": "rc-type",
+                                    "typeName": "Object",
+                                    "semantics": "ISOLATED"
+                                }
+                            },
+                            "valueSet": {
+                                "type": "rc-type",
+                                "typeName": "Object",
+                                "semantics": "ISOLATED"
+                            }
+                        },
+                        {
+                            "kind": "RETURN",
+                            "value": {
+                                "kind": "VARIABLE_REF",
+                                "name": "obj",
+                                "valueSet": {
+                                    "type": "rc-type",
+                                    "typeName": "Object",
+                                    "semantics": "ISOLATED"
+                                }
+                            }
+                        }
+                    ],
+                    "resultValueSet": {
+                        "type": "rc-type",
+                        "typeName": "Object",
+                        "semantics": "ISOLATED"
+                    }
+                }
+            ]
+        }
+    ],
+    "startBlock": [
+        {
+            "kind": "VARIABLE_DECL",
+            "name": "obj",
+            "valueSet": {
+                "type": "rc-type",
+                "typeName": "Object",
+                "semantics": "ISOLATED"
+            },
+            "initialValue": {
+                "kind": "QUERY",
+                "name": {
+                    "namespace": "Object",
+                    "baseName": "new",
+                    "labels": []
+                },
+                "arguments": [],
+                "valueSet": {
+                    "type": "rc-type",
+                    "typeName": "Object",
+                    "semantics": "ISOLATED"
+                }
+            }
+        },
+        {
+            "kind": "EXEC",
+            "name": {
+                "baseName": "printInt64",
+                "labels": []
+            },
+            "arguments": [
+                {
+                    "kind": "QUERY",
+                    "receiver": {
+                        "kind": "VARIABLE_REF",
+                        "name": "obj",
+                        "valueSet": {
+                            "type": "rc-type",
+                            "typeName": "Object",
+                            "semantics": "ISOLATED"
+                        }
+                    },
+                    "name": {
+                        "baseName": "field",
+                        "labels": []
+                    },
+                    "arguments": [],
+                    "valueSet": {
+                        "type": "integer",
+                        "min": "42",
+                        "max": "42"
+                    }
+                }
+            ]
+        }
+    ]
+}

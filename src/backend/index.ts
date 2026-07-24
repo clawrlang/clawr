@@ -41,34 +41,97 @@ export function lowerDecl(decl: cir.Declaration): string {
             static const __type_info ${decl.name}ˇtype = {
                 .data_type = { .size = sizeof(${decl.name}) }
             };
+
+            ${decl.methods?.map((m) => lowerMethod({ ...m, typeName: decl.name })).join('\n') ?? ''}
+            ${decl.companionMethods?.map((m) => lowerStaticMethod({ ...m, namespace: decl.name })).join('\n') ?? ''}
             `
         }
-        case 'VARIABLE_DECL': {
+        case 'VARIABLE_DECL':
             return `${lowerType(decl.valueSet)} ${decl.name};`
-        }
-        case 'FUNCTION_DECL': {
-            const params = decl.parameters
-                .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
-                .join(', ')
-            const returnType = decl.resultValueSet
-                ? lowerType(decl.resultValueSet)
-                : 'void'
 
-            return `${returnType} ${mangleFunctionName({
-                namespace: undefined,
-                baseName: decl.baseName,
-                labels: decl.parameters
-                    .map((param) => param.label)
-                    .filter((label) => label !== undefined) as string[],
-                typeName: undefined,
-            })}(${params}) {
-                    ${decl.body.map(lowerStmt).join('\n')}
-                }`
-        }
-        default: {
+        case 'FUNCTION_DECL':
+            return lowerFunction(decl)
+
+        default:
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
-        }
     }
+}
+
+function lowerMethod(
+    decl: cir.Declaration & { kind: 'FUNCTION_DECL'; typeName: string },
+): string {
+    const mangledFunctionName = mangleFunctionName({
+        namespace: undefined,
+        baseName: decl.baseName,
+        labels: decl.parameters
+            .map((param) => param.label)
+            .filter((label) => label !== undefined) as string[],
+        typeName: decl.typeName,
+    })
+    const params = [
+        `${decl.typeName}* self`,
+        ...decl.parameters.map(
+            (param) => `${lowerType(param.valueSet)} ${param.varName}`,
+        ),
+    ].join(', ')
+    const returnType = decl.resultValueSet
+        ? lowerType(decl.resultValueSet)
+        : 'void'
+
+    return `${returnType} ${mangledFunctionName}(${params}) {
+        ${decl.body.map(lowerStmt).join('\n')}
+    }`
+}
+
+function lowerStaticMethod(
+    decl: cir.Declaration & { kind: 'FUNCTION_DECL'; namespace: string },
+): string {
+    const mangledFunctionName = mangleFunctionName({
+        namespace: decl.namespace,
+        baseName: decl.baseName,
+        labels: decl.parameters
+            .map((param) => param.label)
+            .filter((label) => label !== undefined) as string[],
+        typeName: undefined,
+    })
+    const params = decl.parameters
+        .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
+        .join(', ')
+    const returnType = decl.resultValueSet
+        ? lowerType(decl.resultValueSet)
+        : 'void'
+
+    return `${returnType} ${mangledFunctionName}(${params}) {
+        ${decl.body.map(lowerStmt).join('\n')}
+    }`
+}
+
+function lowerFunction(decl: {
+    kind: 'FUNCTION_DECL'
+    baseName: string
+    parameters: { label?: string; varName: string; valueSet: cir.ValueSet }[]
+    body: cir.Statement[]
+    resultValueSet?: cir.ValueSet
+}) {
+    const mangledFunctionName = mangleFunctionName({
+        namespace: undefined,
+        baseName: decl.baseName,
+        labels: decl.parameters
+            .map((param) => param.label)
+            .filter((label) => label !== undefined) as string[],
+        typeName: undefined,
+    })
+
+    const params = decl.parameters
+        .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
+        .join(', ')
+    const returnType = decl.resultValueSet
+        ? lowerType(decl.resultValueSet)
+        : 'void'
+
+    return `${returnType} ${mangledFunctionName}(${params}) {
+        ${decl.body.map(lowerStmt).join('\n')}
+    }`
 }
 
 function lowerInit(

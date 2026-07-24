@@ -43,7 +43,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             };
 
             ${decl.methods?.map((m) => lowerMethod({ ...m, typeName: decl.name })).join('\n') ?? ''}
-            ${decl.companionMethods?.map((m) => lowerStaticMethod({ ...m, namespace: decl.name })).join('\n') ?? ''}
+            ${decl.companionMethods?.map((m) => lowerFunction({ ...m, namespace: decl.name })).join('\n') ?? ''}
             `
         }
         case 'VARIABLE_DECL':
@@ -60,66 +60,36 @@ export function lowerDecl(decl: cir.Declaration): string {
 function lowerMethod(
     decl: cir.Declaration & { kind: 'FUNCTION_DECL'; typeName: string },
 ): string {
-    const mangledFunctionName = mangleFunctionName({
-        namespace: undefined,
-        baseName: decl.baseName,
-        labels: decl.parameters
-            .map((param) => param.label)
-            .filter((label) => label !== undefined) as string[],
-        typeName: decl.typeName,
+    return lowerFunction({
+        ...decl,
+        parameters: [
+            {
+                varName: 'self',
+                valueSet: {
+                    type: 'rc-type',
+                    typeName: decl.typeName,
+                    semantics: 'SHARED',
+                },
+            },
+            ...decl.parameters,
+        ],
     })
-    const params = [
-        `${decl.typeName}* self`,
-        ...decl.parameters.map(
-            (param) => `${lowerType(param.valueSet)} ${param.varName}`,
-        ),
-    ].join(', ')
-    const returnType = decl.resultValueSet
-        ? lowerType(decl.resultValueSet)
-        : 'void'
-
-    return `${returnType} ${mangledFunctionName}(${params}) {
-        ${decl.body.map(lowerStmt).join('\n')}
-    }`
 }
 
-function lowerStaticMethod(
-    decl: cir.Declaration & { kind: 'FUNCTION_DECL'; namespace: string },
-): string {
+function lowerFunction(
+    decl: cir.Declaration & {
+        kind: 'FUNCTION_DECL'
+        namespace?: string
+        typeName?: string
+    },
+) {
     const mangledFunctionName = mangleFunctionName({
         namespace: decl.namespace,
         baseName: decl.baseName,
         labels: decl.parameters
             .map((param) => param.label)
             .filter((label) => label !== undefined) as string[],
-        typeName: undefined,
-    })
-    const params = decl.parameters
-        .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
-        .join(', ')
-    const returnType = decl.resultValueSet
-        ? lowerType(decl.resultValueSet)
-        : 'void'
-
-    return `${returnType} ${mangledFunctionName}(${params}) {
-        ${decl.body.map(lowerStmt).join('\n')}
-    }`
-}
-
-function lowerFunction(decl: {
-    kind: 'FUNCTION_DECL'
-    baseName: string
-    parameters: { label?: string; varName: string; valueSet: cir.ValueSet }[]
-    body: cir.Statement[]
-    resultValueSet?: cir.ValueSet
-}) {
-    const mangledFunctionName = mangleFunctionName({
-        namespace: undefined,
-        baseName: decl.baseName,
-        labels: decl.parameters
-            .map((param) => param.label)
-            .filter((label) => label !== undefined) as string[],
-        typeName: undefined,
+        typeName: decl.typeName,
     })
 
     const params = decl.parameters

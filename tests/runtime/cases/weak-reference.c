@@ -11,8 +11,9 @@ void printReference(__rc_proxy* proxy) {
 
 int main() {
     // Clawr: `ref original = DataStructure { x: 47 }`
-    DataStructure* original = allocRC(DataStructure, __rc_SHARED);
-    original->fields.x = 47;
+    DataStructure* original = allocInitRC(DataStructure, __rc_SHARED,
+        .x = 47
+    );
 
     // Clawr: `weak ref isolated = original`
     void* proxy = retainWeakly(original);

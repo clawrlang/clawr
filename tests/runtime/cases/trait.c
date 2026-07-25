@@ -50,9 +50,10 @@ static __type_info DataStructureˇtype = {
 };
 
 int main() {
-    DataStructure* ds = (DataStructure*)allocRC(DataStructure, __rc_ISOLATED);
-    ds->x = 42;
-    ds->y = 255;
+    DataStructure* ds = (DataStructure*)allocInitRC(DataStructure, __rc_ISOLATED,
+        .x = 42,
+        .y = 255
+    );
 
     const Describableˇwitness* describableWitness = CONFORMANCE_ENTRY(DataStructure, Describable);
     String* description = describableWitness->describe(ds);

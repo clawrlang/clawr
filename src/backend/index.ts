@@ -143,7 +143,7 @@ export function lowerStmt(stmt: cir.Statement): string {
             return `${name}(${args.join(', ')});`
         }
         case 'VARIABLE_DECL': {
-            if (stmt.initialValue.kind === 'ALLOCATE')
+            if (stmt.initialValue.kind === 'ALLOCATION')
                 return `${lowerType(stmt.initialValue.valueSet)} ${lowerInitStmt(stmt)};`
             else
                 return `${lowerType(stmt.valueSet)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
@@ -169,7 +169,7 @@ export function lowerStmt(stmt: cir.Statement): string {
 export function lowerInitStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
         case 'VARIABLE_DECL': {
-            if (stmt.initialValue.kind === 'ALLOCATE')
+            if (stmt.initialValue.kind === 'ALLOCATION')
                 return `
                     ${stmt.name} = allocRC(${stmt.initialValue.valueSet.typeName}, ${stmt.initialValue.valueSet.semantics === 'ISOLATED' ? '__rc_ISOLATED' : '__rc_SHARED'});
                     memcpy(((__rc_header*)${stmt.name}) + 1, &(${stmt.initialValue.valueSet.typeName}ˇfields) {
@@ -221,7 +221,7 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'AS_SHARED': {
             return `shareRC(${lowerExpr(expr.object)})`
         }
-        case 'ALLOCATE': {
+        case 'ALLOCATION': {
             return `allocInitRC(${expr.valueSet.typeName}, ${expr.valueSet.semantics === 'ISOLATED' ? '__rc_ISOLATED' : '__rc_SHARED'},
                 ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
         }

@@ -17,7 +17,7 @@
 - Convert `QUERY` into a statement by assigning to `_`
   - Make `_` a keyword? handle like `self`/`super`
 - Replace `copy(of:)` with `{...value}`
-  - CIR: `ALLOCATE(fields = {name: FieldReference[]})`
+  - CIR: `ALLOCATION(fields = {name: FieldReference[]})`
 - Publish the JSON schema to <http://clawr.lang/schema/cir/DRAFT-0> (preliminary URL)
 - uniquely referenced ret value
   - `VARIABLE_DECLARATION(temp = RETAIN(result))`

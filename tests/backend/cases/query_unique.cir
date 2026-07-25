@@ -27,7 +27,7 @@
                         "semantics": "ISOLATED"
                     },
                     "initialValue": {
-                        "kind": "ALLOCATE",
+                        "kind": "ALLOCATION",
                         "fields": [
                             {
                                 "name": "field",

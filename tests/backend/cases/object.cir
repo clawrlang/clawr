@@ -58,7 +58,7 @@
                         {
                             "kind": "RETURN",
                             "value": {
-                                "kind": "ALLOCATE",
+                                "kind": "ALLOCATION",
                                 "fields": [
                                     {
                                         "name": "field",

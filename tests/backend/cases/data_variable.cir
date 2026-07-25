@@ -22,7 +22,7 @@
                 "semantics": "SHARED"
             },
             "initialValue": {
-                "kind": "ALLOCATE",
+                "kind": "ALLOCATION",
                 "valueSet": {
                     "type": "rc-type",
                     "typeName": "FooData",

@@ -93,7 +93,7 @@ type TruthLiteral = {
 }
 
 type MemoryAllocation = {
-    kind: 'ALLOCATE'
+    kind: 'ALLOCATION'
     valueSet: RcTypeValueSet
     fields: {
         name: string

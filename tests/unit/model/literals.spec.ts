@@ -130,7 +130,7 @@ describe('Literals', () => {
                     })
                     .value(),
             ).toMatchObject({
-                kind: 'ALLOCATE',
+                kind: 'ALLOCATION',
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyType',

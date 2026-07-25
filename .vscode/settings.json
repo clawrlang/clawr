@@ -160,7 +160,7 @@
           "MemoryAllocation": {
             "type": "object",
             "properties": {
-              "kind": { "const": "ALLOCATE" },
+              "kind": { "const": "ALLOCATION" },
               "valueSet": { "$ref": "#/$defs/RcTypeValueSet" },
               "fields": {
                 "type": "array",

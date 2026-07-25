@@ -3,9 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 
-// --------
-// ALLOCATE
-// --------
+// ----------
+// ALLOCATION
+// ----------
 
 __attribute__((visibility("default")))
 void* _alloc_rc_structure(const __type_info* const type, size_t extendedSize, refs_t const semantics) {

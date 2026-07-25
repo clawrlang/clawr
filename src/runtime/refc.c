@@ -21,6 +21,13 @@ void* _alloc_rc_structure(const __type_info* const type, size_t extendedSize, re
     return structure;
 }
 
+__attribute__((visibility("default")))
+void* _alloc_init_rc_structure(const __type_info* const type, size_t extendedSize, refs_t semantics, const void* initData, size_t initSize) {
+    void* obj = _alloc_rc_structure(type, extendedSize, semantics);
+    memcpy(((__rc_header*)obj) + 1, initData, initSize);
+    return obj;
+}
+
 // ------
 // RETAIN
 // ------

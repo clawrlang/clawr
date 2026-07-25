@@ -56,9 +56,8 @@
                     "parameters": [],
                     "body": [
                         {
-                            "kind": "VARIABLE_DECL",
-                            "name": "obj",
-                            "initialValue": {
+                            "kind": "RETURN",
+                            "value": {
                                 "kind": "ALLOCATE",
                                 "fields": [
                                     {
@@ -74,23 +73,6 @@
                                         }
                                     }
                                 ],
-                                "valueSet": {
-                                    "type": "rc-type",
-                                    "typeName": "Object",
-                                    "semantics": "ISOLATED"
-                                }
-                            },
-                            "valueSet": {
-                                "type": "rc-type",
-                                "typeName": "Object",
-                                "semantics": "ISOLATED"
-                            }
-                        },
-                        {
-                            "kind": "RETURN",
-                            "value": {
-                                "kind": "VARIABLE_REF",
-                                "name": "obj",
                                 "valueSet": {
                                     "type": "rc-type",
                                     "typeName": "Object",

@@ -79,7 +79,7 @@ int RectBlock·area(void* self) {
 
 // Clawr: `func new(width: integer, depth: integer, height: integer) -> RectBlock`
 RectBlock* RectBlock¸new_width_depth_height(int width, int depth, int height) {
-    allocInitInheritedRC(self, RectBlock, Prism, __rc_ISOLATED,
+    allocInitInheritedRC(self, RectBlock, 0, Prism, __rc_ISOLATED,
         Prism˛new_height(self, height),
         .width = width,
         .depth = depth);

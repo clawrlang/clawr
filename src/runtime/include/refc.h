@@ -88,17 +88,20 @@ typedef struct __side_table_entry {
 static __side_table_entry* __conformance_side_table[SIDE_TABLE_BUCKETS] = {0};
 
 
-void* _alloc_rc_structure(const __type_info* const type, size_t extendedSize, refs_t const semantics);
-void* _alloc_init_rc_structure(const __type_info* const type, size_t extendedSize, refs_t semantics, const void* initData, size_t initSize);
+void* _alloc_init_rc_structure(const __type_info* const type, size_t extendedSize, refs_t semantics, const void* initData, size_t initSize, size_t initOffset);
+#define _alloc_init_with_offset(__structure__, __ext_size__, __semantics__, __offset_struct__, ...) \
+    (__structure__*)_alloc_init_rc_structure( \
+        &__structure__##ˇtype, __ext_size__, (__semantics__), \
+        &(__structure__##ˇfields){ __VA_ARGS__ }, \
+        sizeof(__structure__##ˇfields), \
+        sizeof(__offset_struct__));
 
 /// @brief Allocate a new reference-counted structure in memory
 /// @param __structure__ an RC_DATA type
 /// @param __ext_size__ additional size to allocate after the structure for flexible array members
 /// @param __semantics__ either __rc_ISOLATED or __rc_SHARED
 #define allocInitRC(__structure__, __ext_size__, __semantics__, ...) \
-    ((__structure__*)_alloc_init_rc_structure(&__structure__##ˇtype, __ext_size__, __semantics__, \
-        &(__structure__##ˇfields){ __VA_ARGS__ }, \
-        sizeof(__structure__##ˇfields)))
+    _alloc_init_with_offset(__structure__, __ext_size__, __semantics__, __rc_header, __VA_ARGS__)
 
 /// @brief Allocate a new inherited reference-counted structure in memory
 /// @param __self__ the variable to assign the new structure to
@@ -106,12 +109,8 @@ void* _alloc_init_rc_structure(const __type_info* const type, size_t extendedSiz
 /// @param __super__ the super type of the structure
 /// @param __semantics__ either __rc_ISOLATED or __rc_SHARED
 /// @param __super_init__ the initialization function for the super type
-#define allocInitInheritedRC(__self__, __structure__, __super__, __semantics__, __super_init__, ...) \
-    void* __self__ = (__structure__*)_alloc_rc_structure( \
-        &__structure__##ˇtype, 0, (__semantics__)); \
-    memcpy(((__super__*)__self__) + 1, \
-        &(__structure__##ˇfields){ __VA_ARGS__ }, \
-        sizeof(__structure__) - sizeof(__super__)); \
+#define allocInitInheritedRC(__self__, __structure__, __ext_size__, __super__, __semantics__, __super_init__, ...) \
+    void* __self__ = _alloc_init_with_offset(__structure__, __ext_size__, __semantics__, __super__, __VA_ARGS__); \
     __super_init__;
 
 /// @brief Retain a memory allocation (assign to a new variable)

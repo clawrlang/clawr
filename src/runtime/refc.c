@@ -8,7 +8,7 @@
 // ----------
 
 __attribute__((visibility("default")))
-void* _alloc_rc_structure(const __type_info* const type, size_t extendedSize, refs_t const semantics) {
+void* _alloc_init_rc_structure(const __type_info* const type, size_t extendedSize, refs_t semantics, const void* initData, size_t initSize, size_t initOffset) {
     __rc_header* const structure = malloc(type->data_type.size + extendedSize);
     if (!structure) panic("Error: Out Of Memory");
 
@@ -18,14 +18,8 @@ void* _alloc_rc_structure(const __type_info* const type, size_t extendedSize, re
         .refs = semantics | 1,
         .proxy = NULL,
     }, sizeof(__rc_header));
+    memcpy((char*)structure + initOffset, initData, initSize);
     return structure;
-}
-
-__attribute__((visibility("default")))
-void* _alloc_init_rc_structure(const __type_info* const type, size_t extendedSize, refs_t semantics, const void* initData, size_t initSize, size_t initOffset) {
-    void* obj = _alloc_rc_structure(type, extendedSize, semantics);
-    memcpy((char*)obj + initOffset, initData, initSize);
-    return obj;
 }
 
 // ------

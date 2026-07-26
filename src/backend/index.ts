@@ -127,7 +127,7 @@ function lowerType(valueSet: cir.ValueSet): string {
 
 export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
-        case 'EXEC': {
+        case 'EXEC':
             const args = stmt.receiver
                 ? [lowerExpr(stmt.receiver), ...stmt.arguments.map(lowerExpr)]
                 : stmt.arguments.map(lowerExpr)
@@ -141,28 +141,21 @@ export function lowerStmt(stmt: cir.Statement): string {
                         : undefined,
             })
             return `${name}(${args.join(', ')});`
-        }
-        case 'VARIABLE_DECL': {
+        case 'VARIABLE_DECL':
             if (stmt.initialValue.kind === 'ALLOCATION')
                 return `${lowerType(stmt.initialValue.valueSet)} ${lowerInitStmt(stmt)};`
             else
                 return `${lowerType(stmt.valueSet)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
-        }
-        case 'ASSIGN': {
+        case 'ASSIGN':
             return `${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};`
-        }
-        case 'ENSURE_UNIQUE': {
+        case 'ENSURE_UNIQUE':
             return `mutateRC(${lowerExpr(stmt.object)});`
-        }
-        case 'RELEASE': {
+        case 'RELEASE':
             return `releaseRC(${lowerExpr(stmt.object)});`
-        }
-        case 'RETURN': {
+        case 'RETURN':
             return stmt.value ? `return ${lowerExpr(stmt.value)};` : 'return;'
-        }
-        default: {
+        default:
             throw new Error(`Unknown statement kind: ${(stmt as any).kind}`)
-        }
     }
 }
 
@@ -177,18 +170,15 @@ export function lowerInitStmt(stmt: cir.Statement): string {
 
 export function lowerExpr(expr: cir.Expression): string {
     switch (expr.kind) {
-        case 'RETAIN': {
+        case 'RETAIN':
             return `retainRC(${lowerExpr(expr.object)})`
-        }
-        case 'STRING_LITERAL': {
+        case 'STRING_LITERAL':
             return `"${expr.value}"`
-        }
-        case 'INTEGER_LITERAL': {
+        case 'INTEGER_LITERAL':
             return expr.value
-        }
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
-        case 'QUERY': {
+        case 'QUERY':
             const args = expr.receiver
                 ? [lowerExpr(expr.receiver), ...expr.arguments.map(lowerExpr)]
                 : expr.arguments.map(lowerExpr)
@@ -202,23 +192,17 @@ export function lowerExpr(expr: cir.Expression): string {
                         : undefined,
             })
             return `${name}(${args.join(', ')})`
-        }
-        case 'VARIABLE_REF': {
+        case 'VARIABLE_REF':
             return expr.name
-        }
-        case 'FIELD_REF': {
+        case 'FIELD_REF':
             return `${lowerExpr(expr.object)}->fields.${expr.field}`
-        }
-        case 'AS_SHARED': {
+        case 'AS_SHARED':
             return `shareRC(${lowerExpr(expr.object)})`
-        }
-        case 'ALLOCATION': {
+        case 'ALLOCATION':
             return `allocInitRC(${expr.valueSet.typeName}, ${expr.valueSet.semantics === 'ISOLATED' ? '__rc_ISOLATED' : '__rc_SHARED'},
                 ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
-        }
-        default: {
+        default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
-        }
     }
 }
 

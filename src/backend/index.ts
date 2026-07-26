@@ -168,17 +168,10 @@ export function lowerStmt(stmt: cir.Statement): string {
 
 export function lowerInitStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
-        case 'VARIABLE_DECL': {
-            if (stmt.initialValue.kind === 'ALLOCATION')
-                return `
-                    ${stmt.name} = allocInitRC(${stmt.initialValue.valueSet.typeName}, ${stmt.initialValue.valueSet.semantics === 'ISOLATED' ? '__rc_ISOLATED' : '__rc_SHARED'},
-                    ${stmt.initialValue.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')});
-                    `
-            else return `${stmt.name} = ${lowerExpr(stmt.initialValue)};`
-        }
-        default: {
+        case 'VARIABLE_DECL':
+            return `${stmt.name} = ${lowerExpr(stmt.initialValue)};`
+        default:
             return lowerStmt(stmt)
-        }
     }
 }
 

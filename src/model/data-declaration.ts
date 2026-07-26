@@ -2,7 +2,7 @@ import { Context, Declaration } from '.'
 import { VariableSemantics } from './variable-declaration'
 import { ExplicitValueSet } from './explicit-value-set'
 
-type DataField = {
+export type DataField = {
     name: string
     valueSet: ExplicitValueSet
     semantics: VariableSemantics

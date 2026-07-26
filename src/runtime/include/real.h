@@ -18,6 +18,13 @@ typedef struct Real {
     String*  string_cache;  // nullable; lazy-built by toStringRC
     bool     cache_valid;
 } Real;
+typedef struct Realˇfields {
+    Integer* significand;
+    int32_t  exponent10;
+    uint32_t context_precision;
+    String*  string_cache;  // nullable; lazy-built by toStringRC
+    bool     cache_valid;
+} Realˇfields;
 extern const __type_info Realˇtype;
 
 /// Default number of significant decimal digits for division results.

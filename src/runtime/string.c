@@ -36,10 +36,10 @@ String* String¸fromCString(const char* value) {
     if (!data) panic("Out of memory in String¸fromCString");
     memcpy(data, value, len + 1);
 
-    String* s = allocRC(String, __rc_ISOLATED);
-    s->length = len;
-    s->data = data;
-    return s;
+    return allocInitRC(String, __rc_ISOLATED,
+        .length = len,
+        .data = data
+    );
 }
 
 __attribute__((visibility("default")))
@@ -54,10 +54,10 @@ String* String¸concat(String* left, String* right) {
     memcpy(data + left->length, right->data, right->length);
     data[len] = '\0';
 
-    String* s = allocRC(String, __rc_ISOLATED);
-    s->length = len;
-    s->data = data;
-    return s;
+    return allocInitRC(String, __rc_ISOLATED,
+        .length = len,
+        .data = data
+    );
 }
 
 __attribute__((visibility("default")))
@@ -104,10 +104,10 @@ String* String¸readTextFile(String* path) {
     data[readCount] = '\0';
     fclose(file);
 
-    String* s = allocRC(String, __rc_ISOLATED);
-    s->length = readCount;
-    s->data = data;
-    return s;
+    return allocInitRC(String, __rc_ISOLATED,
+        .length = readCount,
+        .data = data
+    );
 }
 
 __attribute__((visibility("default")))

@@ -88,8 +88,8 @@ RectBlock* RectBlock¸new_width_depth_height(int width, int depth, int height) {
 
 int main() {
     // Clawr: `const x = RectBlock.new(width: 3, depth: 4, height: 5)`
-    RectBlock *x = RectBlock¸new_width_depth_height(3, 4, 5);
+    void *x = RectBlock¸new_width_depth_height(3, 4, 5);
 
     printf("%d\n", VTABLE(x, Prism)->area(x));
-    printf("%d\n", Prism·volume((Prism*) x));
+    printf("%d\n", Prism·volume(x));
 }

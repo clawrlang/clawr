@@ -234,8 +234,9 @@ void Integer·toggleSign(Integer* const self) {
 
 __attribute__((visibility("default")))
 Integer* Integer¸withDigits(Array* const digits) {
-    Integer* integer = allocRC(Integer, __rc_ISOLATED);
-    integer->digits = Array¸new(digits->count, sizeof(digit_t));
+    Integer* integer = allocInitRC(Integer, __rc_ISOLATED,
+        .digits = Array¸new(digits->count, sizeof(digit_t))
+    );
 
     for (size_t i = 0; i < digits->count; i++) {
         ARRAY_ELEMENT_AT(digits->count - 1 - i, integer->digits, digit_t) = ARRAY_ELEMENT_AT(i, digits, digit_t);
@@ -372,19 +373,19 @@ static int8_t integerSign(Integer* self) {
     return 0;
 }
 
-static Integer* copyInteger(Integer* src) {
-    Integer* copy = allocRC(Integer, __rc_ISOLATED);
-    size_t n = src->digits->count;
-    copy->digits = Array¸new(n, sizeof(digit_t));   // zero-initialised by Array¸new
-    for (size_t i = 0; i < n; i++)
-        ARRAY_ELEMENT_AT(i, copy->digits, digit_t) = ARRAY_ELEMENT_AT(i, src->digits, digit_t);
+static Integer* zeroOfSize(size_t count) {
+    Integer* copy = allocInitRC(Integer, __rc_ISOLATED,
+        .digits = Array¸new(count, sizeof(digit_t))   // zero-initialised by Array¸new
+    );
     return copy;
 }
 
-static Integer* zeroOfSize(size_t count) {
-    Integer* result = allocRC(Integer, __rc_ISOLATED);
-    result->digits = Array¸new(count, sizeof(digit_t));  // zero-initialised
-    return result;
+static Integer* copyInteger(Integer* src) {
+    size_t n = src->digits->count;
+    Integer* copy = zeroOfSize(n);
+    for (size_t i = 0; i < n; i++)
+        ARRAY_ELEMENT_AT(i, copy->digits, digit_t) = ARRAY_ELEMENT_AT(i, src->digits, digit_t);
+    return copy;
 }
 
 static void trimLeadingZeros(Integer* self) {
@@ -407,16 +408,18 @@ static void trimLeadingZeros(Integer* self) {
 static Integer* integerFromSingleDigit(digit_t value) {
     if (value == 0) return retainRC(&Integer¸zero);
 
-    Integer* integer = allocRC(Integer, __rc_ISOLATED);
+    Array* digits;
     if (value == INVALID_DIGIT) {
-        integer->digits = Array¸new(2, sizeof(digit_t));
-        ARRAY_ELEMENT_AT(0, integer->digits, digit_t) = DIGIT_MAX;
-        ARRAY_ELEMENT_AT(1, integer->digits, digit_t) = -1;
+        digits = Array¸new(2, sizeof(digit_t));
+        ARRAY_ELEMENT_AT(0, digits, digit_t) = DIGIT_MAX;
+        ARRAY_ELEMENT_AT(1, digits, digit_t) = -1;
     } else {
-        integer->digits = Array¸new(1, sizeof(digit_t));
-        ARRAY_ELEMENT_AT(0, integer->digits, digit_t) = value;
+        digits = Array¸new(1, sizeof(digit_t));
+        ARRAY_ELEMENT_AT(0, digits, digit_t) = value;
     }
-    return integer;
+    return allocInitRC(Integer, __rc_ISOLATED,
+        .digits = digits
+    );
 }
 
 static const char* skipDecimalLeadingZeros(const char* value) {

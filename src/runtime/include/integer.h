@@ -28,6 +28,9 @@ typedef struct Integer {
     __rc_header header;
     Array* digits;
 } Integer;
+typedef struct Integerˇfields {
+    Array* digits;
+} Integerˇfields;
 extern const __type_info Integerˇtype;
 
 /// @brief The value 0

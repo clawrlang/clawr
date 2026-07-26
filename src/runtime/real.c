@@ -37,10 +37,11 @@ const __type_info Realˇtype = {
 // Create an Integer whose value equals one balanced digit.
 static Integer* integerFromDigit(digit_t v) {
     if (v == 0) return retainRC(&Integer¸zero);
-    Integer* i = allocRC(Integer, __rc_ISOLATED);
-    i->digits = Array¸new(1, sizeof(digit_t));
-    ARRAY_ELEMENT_AT(0, i->digits, digit_t) = v;
-    return i;
+    Array* digits = Array¸new(1, sizeof(digit_t));
+    ARRAY_ELEMENT_AT(0, digits, digit_t) = v;
+    return allocInitRC(Integer, __rc_ISOLATED,
+        .digits = digits
+    );
 }
 
 // Create an Integer representing 10^n (n >= 0).
@@ -273,12 +274,13 @@ Real* Real¸fromString(const char* value) {
 
     if (negative) Integer·toggleSign(sig);
 
-    Real* real = allocRC(Real, __rc_ISOLATED);
-    real->significand       = sig;
-    real->exponent10        = exp;
-    real->context_precision = CLAWR_REAL_DEFAULT_PRECISION;
-    real->string_cache      = String¸fromCString(stripped);  // pre-populate from source
-    real->cache_valid       = true;
+    Real* real = allocInitRC(Real, __rc_ISOLATED,
+        .significand       = sig,
+        .exponent10        = exp,
+        .context_precision = CLAWR_REAL_DEFAULT_PRECISION,
+        .string_cache      = String¸fromCString(stripped),  // pre-populate from source
+        .cache_valid       = true
+    );
 
     free(digits_buf);
     free(stripped);
@@ -342,13 +344,13 @@ static void alignExponents(Real* left, Real* right,
 
 static Real* realWithSigExp(Integer* sig, int32_t exp, uint32_t precision) {
     normalize(&sig, &exp);
-    Real* r = allocRC(Real, __rc_ISOLATED);
-    r->significand       = sig;
-    r->exponent10        = exp;
-    r->context_precision = precision;
-    r->string_cache      = NULL;
-    r->cache_valid       = false;
-    return r;
+    return allocInitRC(Real, __rc_ISOLATED,
+        .significand       = sig,
+        .exponent10        = exp,
+        .context_precision = precision,
+        .string_cache      = NULL,
+        .cache_valid       = false
+    );
 }
 
 // ---------------------------------------------------------------------------

@@ -50,12 +50,16 @@ typedef struct RectBlock {
     int width;
     int depth;
 } RectBlock;
+typedef struct RectBlockˇfields {
+    int width;
+    int depth;
+} RectBlockˇfields;
 typedef struct RectBlockˇvtable {
     int (*area)(void* self);
     int (*offset)(void* self);
 } RectBlockˇvtable;
 
-// Clqwr: `virtual func offset() => 0`
+// Clawr: `virtual func offset() => 0`
 int RectBlock·offset(void* self) { return 0; }
 
 // Clawr: `func area() => self.width * self.depth`
@@ -82,8 +86,10 @@ static __type_info RectBlockˇtype = {
 // Clawr: `func new(width: integer, depth: integer, height: integer) -> RectBlock`
 void RectBlock˛new_width_depth_height(RectBlock *self, int width, int depth, int height) {
     // Clawr: `const self = RectBlock { Prism.new(height: height), width, depth }`
-    self->width = width;
-    self->depth = depth;
+    memcpy(((Prism*)self) + 1, &(RectBlockˇfields) {
+        .width = width,
+        .depth = depth,
+    }, sizeof(RectBlockˇfields));
     Prism˛new_height((Prism*)self, height);
 }
 
@@ -98,6 +104,9 @@ void RectBlock˛new_width_depth_height(RectBlock *self, int width, int depth, in
 typedef struct SquareBlock {
     RectBlock super;
 } SquareBlock;
+typedef struct SquareBlockˇfields {
+
+} SquareBlockˇfields;
 
 // Clawr: `func offset() => 1`
 int SquareBlock·offset(void* self) {
@@ -119,7 +128,7 @@ static __type_info SquareBlockˇtype = {
 // Clawr: `func new(side: integer, height: integer) -> SquareBlock`
 SquareBlock* SquareBlock¸new_side_height(int side, int height) {
     // Clawr `const self = SquareBlock { RectBlock.new(width: side, depth: side, height: height) }`
-    SquareBlock* self = allocRC(SquareBlock, __rc_ISOLATED);
+    SquareBlock* self = allocInitRC(SquareBlock, __rc_ISOLATED);
     RectBlock˛new_width_depth_height((RectBlock*)self, side, side, height);
     return self;
 }

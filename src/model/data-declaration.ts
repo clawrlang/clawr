@@ -8,7 +8,7 @@ type DataField = {
     semantics: VariableSemantics
 }
 
-export class TypeDeclaration implements Declaration {
+export class DataDeclaration implements Declaration {
     private constructor(
         public name: string,
         public fields: DataField[],
@@ -20,8 +20,8 @@ export class TypeDeclaration implements Declaration {
     }: {
         name: string
         fields: DataField[]
-    }): TypeDeclaration {
-        return new TypeDeclaration(name, fields)
+    }): DataDeclaration {
+        return new DataDeclaration(name, fields)
     }
 
     emitDeclaration(context: Context) {

@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { TypeDeclaration } from './type-declaration'
+import { DataDeclaration } from './data-declaration'
 import { Lattice, UniqueTypeLattice } from './lattice'
 import { Failable } from './failable'
 
@@ -26,15 +26,15 @@ export class DataLiteral implements Expression {
     }
 
     currentValue(context: Context & { typeName: string }): Failable<Lattice> {
-        const typeDeclaration = context.scope.dataDeclaration(context.typeName)
-        if (!typeDeclaration)
+        const DataDeclaration = context.scope.dataDeclaration(context.typeName)
+        if (!DataDeclaration)
             return Failable.failure(
                 `DataLiteral.currentValue: type ${context.typeName} not found in scope`,
                 this.span,
             )
         return Failable.collect(
             this.fields.map((field) => {
-                const fieldDeclaration = typeDeclaration.fields.find(
+                const fieldDeclaration = DataDeclaration.fields.find(
                     (declaredField) => declaredField.name === field.name,
                 )
                 if (!fieldDeclaration)
@@ -50,7 +50,7 @@ export class DataLiteral implements Expression {
         ).map((fieldValues) =>
             Failable.success(
                 UniqueTypeLattice.create({
-                    typeName: typeDeclaration.name,
+                    typeName: DataDeclaration.name,
                     fields: Object.fromEntries(
                         fieldValues.map((value, index) => [
                             this.fields[index].name,
@@ -73,7 +73,7 @@ export class DataLiteral implements Expression {
             ).getError()
 
         const targetType = context.scope.dataDeclaration(valueSet.typeName) as
-            TypeDeclaration | undefined
+            DataDeclaration | undefined
         if (!targetType)
             return Failable.failure(
                 `DataLiteral.toCIRExpression: target type ${valueSet.typeName} not found in scope`,

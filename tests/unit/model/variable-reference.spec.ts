@@ -1,7 +1,7 @@
 import { describe, expect, it, test } from 'bun:test'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
-import { TypeDeclaration } from '../../../src/model/type-declaration'
+import { DataDeclaration } from '../../../src/model/data-declaration'
 import { ExplicitIntegerValueSet } from '../../../src/model/explicit-value-set'
 import { IntegerLattice } from '../../../src/model/lattice'
 
@@ -90,7 +90,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.rootScope.declarations.set(
             'MyType',
-            TypeDeclaration.create({
+            DataDeclaration.create({
                 name: 'MyType',
                 fields: [
                     {

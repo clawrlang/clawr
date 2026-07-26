@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { newSemanticContext, someCodeSpan } from '../../util'
-import { TypeDeclaration } from '../../../src/model/type-declaration'
+import { DataDeclaration } from '../../../src/model/data-declaration'
 import {
     ExplicitIntegerValueSet,
     ExplicitTruthValueSet,
@@ -8,7 +8,7 @@ import {
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {
-        const dataDecl = TypeDeclaration.create({
+        const dataDecl = DataDeclaration.create({
             name: 'MyData',
             fields: [
                 {

@@ -7,7 +7,7 @@ import {
     ExplicitTruthValueSet,
 } from '../../../src/model/explicit-value-set'
 import { newSemanticContext, someCodeSpan } from '../../util'
-import { TypeDeclaration } from '../../../src/model/type-declaration'
+import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { FieldReference } from '../../../src/model/field-reference'
@@ -74,7 +74,7 @@ describe('VariableDeclaration', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'MyType',
-                TypeDeclaration.create({
+                DataDeclaration.create({
                     name: 'MyType',
                     fields: [
                         {
@@ -124,7 +124,7 @@ describe('VariableDeclaration', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'MyType',
-                TypeDeclaration.create({
+                DataDeclaration.create({
                     name: 'MyType',
                     fields: [
                         {
@@ -150,7 +150,7 @@ describe('VariableDeclaration', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'InnerType',
-                TypeDeclaration.create({
+                DataDeclaration.create({
                     name: 'InnerType',
                     fields: [
                         {
@@ -165,7 +165,7 @@ describe('VariableDeclaration', () => {
             )
             context.scope.rootScope.declarations.set(
                 'OuterType',
-                TypeDeclaration.create({
+                DataDeclaration.create({
                     name: 'OuterType',
                     fields: [
                         {
@@ -245,7 +245,7 @@ describe('VariableDeclaration', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'MyType',
-                TypeDeclaration.create({
+                DataDeclaration.create({
                     name: 'MyType',
                     fields: [
                         {
@@ -330,7 +330,7 @@ describe('VariableDeclaration', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'InnerType',
-                TypeDeclaration.create({
+                DataDeclaration.create({
                     name: 'InnerType',
                     fields: [
                         {
@@ -345,7 +345,7 @@ describe('VariableDeclaration', () => {
             )
             context.scope.rootScope.declarations.set(
                 'OuterType',
-                TypeDeclaration.create({
+                DataDeclaration.create({
                     name: 'OuterType',
                     fields: [
                         {
@@ -413,7 +413,7 @@ describe('VariableDeclaration', () => {
             const context = newSemanticContext()
             context.scope.rootScope.declarations.set(
                 'MyType',
-                TypeDeclaration.create({
+                DataDeclaration.create({
                     name: 'MyType',
                     fields: [],
                 }),
@@ -456,7 +456,7 @@ describe('VariableDeclaration', () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.declarations.set(
                     'MyType',
-                    TypeDeclaration.create({
+                    DataDeclaration.create({
                         name: 'MyType',
                         fields: [
                             {

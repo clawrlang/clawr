@@ -3,7 +3,7 @@ import { newSemanticContext, someCodeSpan } from '../../util'
 import { Module } from '../../../src/model/module'
 import { CallFunc } from '../../../src/model/call-func'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
-import { TypeDeclaration } from '../../../src/model/type-declaration'
+import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import {
     ExplicitIntegerValueSet,
@@ -55,7 +55,7 @@ describe('Module', () => {
         const module = Module.create({
             main: [],
             declarations: [
-                TypeDeclaration.create({
+                DataDeclaration.create({
                     name: 'MyData',
                     fields: [
                         {
@@ -116,7 +116,7 @@ describe('Module', () => {
         const module = Module.create({
             main: [],
             declarations: [
-                TypeDeclaration.create({
+                DataDeclaration.create({
                     name: 'MyData',
                     fields: [
                         {

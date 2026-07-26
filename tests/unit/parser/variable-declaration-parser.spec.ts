@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { TokenStream } from '../../../src/lexer'
 import { VariableDeclarationParser } from '../../../src/parser/variable-declaration-parser'
 import { newSemanticContext, TestErrorReporter } from '../../util'
-import { TypeDeclaration } from '../../../src/model/type-declaration'
+import { DataDeclaration } from '../../../src/model/data-declaration'
 import { ExplicitRCTypeValueSet } from '../../../src/model/explicit-value-set'
 
 describe('VariableDeclarationParser', () => {
@@ -76,7 +76,7 @@ describe('VariableDeclarationParser', () => {
         const context = newSemanticContext()
         context.scope.rootScope.declarations.set(
             'MyData',
-            TypeDeclaration.create({
+            DataDeclaration.create({
                 name: 'MyData',
                 fields: [],
             }),

@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 import { Declaration } from '.'
-import { TypeDeclaration } from './type-declaration'
+import { DataDeclaration } from './data-declaration'
 import { VariableSemantics } from './variable-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { Lattice, UniqueTypeLattice } from './lattice'
@@ -10,9 +10,9 @@ class RootScope {
     public declarations: Map<string, Declaration> = new Map()
     public emitted: cir.Declaration[] = []
 
-    dataDeclaration(name: string): TypeDeclaration | undefined {
+    dataDeclaration(name: string): DataDeclaration | undefined {
         const decl = this.declarations.get(name)
-        if (decl instanceof TypeDeclaration) return decl
+        if (decl instanceof DataDeclaration) return decl
         return undefined
     }
 
@@ -50,7 +50,7 @@ export class Scope {
         return `__tempˇ${this.nextTempVarCounter++}`
     }
 
-    dataDeclaration(name: string): TypeDeclaration | undefined {
+    dataDeclaration(name: string): DataDeclaration | undefined {
         return this.rootScope.dataDeclaration(name)
     }
 

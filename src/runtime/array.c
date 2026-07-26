@@ -17,10 +17,10 @@ Array Array¸empty = {
 
 __attribute__((visibility("default")))
 Array* Array¸new(size_t count, size_t elem_size) {
-    Array* array = _alloc_rc_structure(&Arrayˇtype, count * elem_size, __rc_ISOLATED);
-
-    array->count = count;
-    array->elem_size = elem_size;
+    Array* array = allocInitRC(Array, count * elem_size, __rc_ISOLATED,
+        .count = count,
+        .elem_size = elem_size
+    );
     memset(array->elements, 0, count * elem_size);
 
     return array;

@@ -39,7 +39,7 @@ static Integer* integerFromDigit(digit_t v) {
     if (v == 0) return retainRC(&Integer¸zero);
     Array* digits = Array¸new(1, sizeof(digit_t));
     ARRAY_ELEMENT_AT(0, digits, digit_t) = v;
-    return allocInitRC(Integer, __rc_ISOLATED,
+    return allocInitRC(Integer, 0, __rc_ISOLATED,
         .digits = digits
     );
 }
@@ -274,7 +274,7 @@ Real* Real¸fromString(const char* value) {
 
     if (negative) Integer·toggleSign(sig);
 
-    Real* real = allocInitRC(Real, __rc_ISOLATED,
+    Real* real = allocInitRC(Real, 0, __rc_ISOLATED,
         .significand       = sig,
         .exponent10        = exp,
         .context_precision = CLAWR_REAL_DEFAULT_PRECISION,
@@ -344,7 +344,7 @@ static void alignExponents(Real* left, Real* right,
 
 static Real* realWithSigExp(Integer* sig, int32_t exp, uint32_t precision) {
     normalize(&sig, &exp);
-    return allocInitRC(Real, __rc_ISOLATED,
+    return allocInitRC(Real, 0, __rc_ISOLATED,
         .significand       = sig,
         .exponent10        = exp,
         .context_precision = precision,

@@ -234,7 +234,7 @@ void Integer·toggleSign(Integer* const self) {
 
 __attribute__((visibility("default")))
 Integer* Integer¸withDigits(Array* const digits) {
-    Integer* integer = allocInitRC(Integer, __rc_ISOLATED,
+    Integer* integer = allocInitRC(Integer, 0, __rc_ISOLATED,
         .digits = Array¸new(digits->count, sizeof(digit_t))
     );
 
@@ -374,7 +374,7 @@ static int8_t integerSign(Integer* self) {
 }
 
 static Integer* zeroOfSize(size_t count) {
-    Integer* copy = allocInitRC(Integer, __rc_ISOLATED,
+    Integer* copy = allocInitRC(Integer, 0, __rc_ISOLATED,
         .digits = Array¸new(count, sizeof(digit_t))   // zero-initialised by Array¸new
     );
     return copy;
@@ -417,7 +417,7 @@ static Integer* integerFromSingleDigit(digit_t value) {
         digits = Array¸new(1, sizeof(digit_t));
         ARRAY_ELEMENT_AT(0, digits, digit_t) = value;
     }
-    return allocInitRC(Integer, __rc_ISOLATED,
+    return allocInitRC(Integer, 0, __rc_ISOLATED,
         .digits = digits
     );
 }

@@ -3,7 +3,7 @@
 
 int main() {
     // Clawr: `ref original = Struct { x: 47, y: 42 }`
-    DataStructure* original = allocInitRC(DataStructure, __rc_SHARED,
+    DataStructure* original = allocInitRC(DataStructure, 0, __rc_SHARED,
         .x = 47,
         .y = 42
     );

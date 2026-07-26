@@ -51,7 +51,7 @@ static void DataStructureˇregisterConformances(void) {
 }
 
 int main() {
-    DataStructure* ds = (DataStructure*)allocInitRC(DataStructure, __rc_ISOLATED,
+    DataStructure* ds = (DataStructure*)allocInitRC(DataStructure, 0, __rc_ISOLATED,
         .x = 42,
         .y = 255
     );

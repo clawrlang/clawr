@@ -128,7 +128,7 @@ static __type_info SquareBlockˇtype = {
 // Clawr: `func new(side: integer, height: integer) -> SquareBlock`
 SquareBlock* SquareBlock¸new_side_height(int side, int height) {
     // Clawr `const self = SquareBlock { RectBlock.new(width: side, depth: side, height: height) }`
-    SquareBlock* self = allocInitRC(SquareBlock, __rc_ISOLATED);
+    SquareBlock* self = allocInitRC(SquareBlock, 0, __rc_ISOLATED);
     RectBlock˛new_width_depth_height((RectBlock*)self, side, side, height);
     return self;
 }

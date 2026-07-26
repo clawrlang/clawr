@@ -12,6 +12,11 @@ typedef struct Array {
     size_t elem_size;
     unsigned char elements[];
 } Array;
+typedef struct Arrayˇfields {
+    size_t count;
+    size_t elem_size;
+    unsigned char elements[];
+} Arrayˇfields;
 extern const __type_info Arrayˇtype;
 
 /// @brief An array with zero elements

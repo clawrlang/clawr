@@ -11,7 +11,7 @@ void printReference(__rc_proxy* proxy) {
 
 int main() {
     // Clawr: `ref original = DataStructure { x: 47 }`
-    DataStructure* original = allocInitRC(DataStructure, __rc_SHARED,
+    DataStructure* original = allocInitRC(DataStructure, 0, __rc_SHARED,
         .x = 47
     );
 

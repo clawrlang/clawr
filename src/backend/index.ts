@@ -199,7 +199,7 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'AS_SHARED':
             return `shareRC(${lowerExpr(expr.object)})`
         case 'ALLOCATION':
-            return `allocInitRC(${expr.valueSet.typeName}, ${expr.valueSet.semantics === 'ISOLATED' ? '__rc_ISOLATED' : '__rc_SHARED'},
+            return `allocInitRC(${expr.valueSet.typeName}, 0, ${expr.valueSet.semantics === 'ISOLATED' ? '__rc_ISOLATED' : '__rc_SHARED'},
                 ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)

@@ -6,8 +6,8 @@ import { Module } from '../model/module'
 import { Context, DeclarationParser } from '.'
 import { VariableDeclarationParser } from './variable-declaration-parser'
 import { VARIABLE_SEMANTICS } from '../model/variable-declaration'
-import { FunctionParser } from './function-parser'
-import { ObjectParser } from './object-parser'
+import { FunctionDeclarationParser } from './function-declaration-parser'
+import { ObjectDeclarationParser } from './object-declaration-parser'
 
 export class ModuleParser {
     private blockParser: BlockParser
@@ -18,8 +18,8 @@ export class ModuleParser {
         this.declarationParsers = [
             DataDeclarationParser.create(context),
             VariableDeclarationParser.create(context),
-            FunctionParser.create(context),
-            ObjectParser.create(context),
+            FunctionDeclarationParser.create(context),
+            ObjectDeclarationParser.create(context),
         ]
     }
 

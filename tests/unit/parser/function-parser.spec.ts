@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
-import { FunctionParser } from '../../../src/parser/function-parser'
+import { FunctionDeclarationParser } from '../../../src/parser/function-declaration-parser'
 import { ExplicitUniqueValueSet } from '../../../src/model/explicit-value-set'
 
 describe('Function Parser', () => {
@@ -202,7 +202,7 @@ describe('Function Parser', () => {
 function parseFunction(code: string) {
     const errorReporter = new TestErrorReporter()
     const stream = TokenStream.read(code, errorReporter)
-    const parser = FunctionParser.create({
+    const parser = FunctionDeclarationParser.create({
         errorReporter,
     })
     return parser.parse(stream)

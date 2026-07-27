@@ -11,15 +11,15 @@ import {
 } from '../model/variable-declaration'
 import { Expression } from '../model'
 
-export class FunctionParser implements DeclarationParser<FunctionDeclaration> {
+export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
     private readonly valueSetParser: ValueSetParser
 
     private constructor(private context: Context) {
         this.valueSetParser = ValueSetParser.create(context)
     }
 
-    static create(context: Context): FunctionParser {
-        return new FunctionParser(context)
+    static create(context: Context): FunctionDeclarationParser {
+        return new FunctionDeclarationParser(context)
     }
 
     isNext(stream: TokenStream): boolean {

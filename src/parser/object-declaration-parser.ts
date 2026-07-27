@@ -4,17 +4,17 @@ import { DataField } from '../model/data-declaration'
 import { FunctionDeclaration } from '../model/function-declaration'
 import { ObjectDeclaration } from '../model/object-declaration'
 import { DataFieldParser } from './data-field-parser'
-import { FunctionParser } from './function-parser'
+import { FunctionDeclarationParser } from './function-declaration-parser'
 
-export class ObjectParser {
-    private readonly functionParser: FunctionParser
+export class ObjectDeclarationParser {
+    private readonly functionParser: FunctionDeclarationParser
 
     private constructor(private context: Context) {
-        this.functionParser = FunctionParser.create(context)
+        this.functionParser = FunctionDeclarationParser.create(context)
     }
 
-    static create(context: Context): ObjectParser {
-        return new ObjectParser(context)
+    static create(context: Context): ObjectDeclarationParser {
+        return new ObjectDeclarationParser(context)
     }
 
     isNext(stream: TokenStream): boolean {

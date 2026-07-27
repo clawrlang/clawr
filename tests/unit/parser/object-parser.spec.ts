@@ -1,7 +1,7 @@
 import { describe, it, expect, test } from 'bun:test'
 import { TokenStream } from '../../../src/lexer'
 import { TestErrorReporter } from '../../util'
-import { ObjectParser } from '../../../src/parser/object-parser'
+import { ObjectDeclarationParser } from '../../../src/parser/object-declaration-parser'
 import { Scope } from '../../../src/model/scope'
 
 describe('Object Parser', () => {
@@ -155,6 +155,6 @@ describe('Object Parser', () => {
 function parseObject(input: string) {
     const errorReporter = new TestErrorReporter()
     const stream = TokenStream.read(input, errorReporter)
-    const parser = ObjectParser.create({ errorReporter })
+    const parser = ObjectDeclarationParser.create({ errorReporter })
     return parser.parse(stream)
 }

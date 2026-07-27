@@ -9,6 +9,7 @@ describe('Object Parser', () => {
 
         expect(parseObject(code)).toMatchObject({
             name: 'O',
+            kind: 'object',
             readonly: [],
             mutating: [],
             inheritance: [],
@@ -16,6 +17,22 @@ describe('Object Parser', () => {
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 12 },
+            },
+        })
+    })
+
+    it('parses service', () => {
+        const code = 'service S {}'
+        expect(parseObject(code)).toMatchObject({
+            name: 'S',
+            kind: 'service',
+            readonly: [],
+            mutating: [],
+            inheritance: [],
+            fields: [],
+            span: {
+                start: { line: 1, column: 1 },
+                end: { line: 1, column: 13 },
             },
         })
     })

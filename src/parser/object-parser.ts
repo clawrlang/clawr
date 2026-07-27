@@ -20,7 +20,7 @@ export class ObjectParser {
     }
 
     parse(stream: TokenStream) {
-        const startToken = stream.expect('KEYWORD', 'object')
+        const startToken = stream.expect('KEYWORD', 'object', 'service')
         const nameToken = stream.expect('IDENTIFIER')
         stream.expect('PUNCTUATION', '{')
 
@@ -64,6 +64,7 @@ export class ObjectParser {
 
         const endToken = stream.expect('PUNCTUATION', '}')
         return ObjectDeclaration.create({
+            kind: startToken.keyword as 'object' | 'service',
             name: nameToken.identifier,
             readonly,
             mutating: mutating ?? [],

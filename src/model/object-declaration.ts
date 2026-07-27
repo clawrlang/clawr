@@ -4,6 +4,7 @@ import { DataField } from './data-declaration'
 
 export class ObjectDeclaration {
     private constructor(
+        private kind: 'object' | 'service',
         private name: string,
         private readonly: FunctionDeclaration[],
         private mutating: FunctionDeclaration[],
@@ -13,6 +14,7 @@ export class ObjectDeclaration {
     ) {}
 
     static create({
+        kind,
         name,
         readonly,
         mutating,
@@ -20,6 +22,7 @@ export class ObjectDeclaration {
         fields,
         span,
     }: {
+        kind: 'object' | 'service'
         name: string
         readonly: FunctionDeclaration[]
         mutating: FunctionDeclaration[]
@@ -28,6 +31,7 @@ export class ObjectDeclaration {
         span: SourceCodeSpan
     }) {
         return new ObjectDeclaration(
+            kind,
             name,
             readonly,
             mutating,

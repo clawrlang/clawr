@@ -1,11 +1,12 @@
-import { Context, Declaration } from '.'
+import { Context, Declaration, Expression } from '.'
 import { VariableSemantics } from './variable-declaration'
 import { ExplicitValueSet } from './explicit-value-set'
 
 export type DataField = {
+    semantics: VariableSemantics
     name: string
     valueSet: ExplicitValueSet
-    semantics: VariableSemantics
+    defaultValue?: Expression
 }
 
 export class DataDeclaration implements Declaration {

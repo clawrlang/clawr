@@ -42,7 +42,6 @@ data:
 - Can `object` store a service in a field? Let's “no” for now.
 - Fields are private (only accessible via `self`)
 - `self` is an implicit `ref` variable - mutable but not reassignable
-- `object`/`service` fields may have initial values and be `const`
 - `data` fields `MUST NOT` have initial values nor be `const`
 - `companion` with same name as `object`/`service` is added as `companionMethods` in CIR
 - `companion` with no matching type is an error

@@ -105,6 +105,34 @@ describe('Object Parser', () => {
         })
     })
 
+    it('parses default field values', () => {
+        const code = `
+            object O {
+            data:
+                const field1: integer = 10
+                const field2: truthvalue = true
+            }`
+
+        expect(parseObject(code)).toMatchObject({
+            fields: [
+                {
+                    name: 'field1',
+                    semantics: 'const',
+                    defaultValue: { value: 10n },
+                },
+                {
+                    name: 'field2',
+                    semantics: 'const',
+                    defaultValue: { value: 'true' },
+                },
+            ],
+            span: {
+                start: { line: 2, column: 13 },
+                end: { line: 6, column: 14 },
+            },
+        })
+    })
+
     it('parses all sections together', () => {
         const code = `
             object O {

@@ -1,12 +1,7 @@
 import { Context } from '.'
 import { TokenStream } from '../lexer'
-import { DataDeclaration } from '../model/data-declaration'
-import { ExplicitValueSet } from '../model/explicit-value-set'
-import {
-    VARIABLE_SEMANTICS,
-    VariableSemantics,
-} from '../model/variable-declaration'
-import { ValueSetParser } from './value-set-parser'
+import { DataDeclaration, DataField } from '../model/data-declaration'
+import { DataFieldParser } from './data-field-parser'
 
 export class DataDeclarationParser {
     private constructor(private context: Context) {}
@@ -16,39 +11,17 @@ export class DataDeclarationParser {
     }
 
     parse(stream: TokenStream): DataDeclaration {
+        const fieldParser = DataFieldParser.create(this.context)
+
         stream.expect('KEYWORD', 'data')
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
         stream.expect('PUNCTUATION', '{')
-        const fields: {
-            name: string
-            valueSet: ExplicitValueSet
-            semantics: VariableSemantics
-        }[] = []
+        const fields: DataField[] = []
         while (!stream.isNext('PUNCTUATION', '}')) {
-            let semantics = this.parseFieldSemantics(stream)
-            const fieldNameToken = stream.expect('IDENTIFIER')
-            const fieldName = fieldNameToken.identifier
-            stream.expect('PUNCTUATION', ':')
-            const valueSet = ValueSetParser.create(this.context).parse(stream)
-            fields.push({
-                name: fieldName,
-                valueSet,
-                semantics,
-            })
+            fields.push(fieldParser.parse(stream))
         }
         stream.expect('PUNCTUATION', '}')
         return DataDeclaration.create({ name, fields })
-    }
-
-    private parseFieldSemantics(stream: TokenStream) {
-        if (stream.isNext('KEYWORD', ...VARIABLE_SEMANTICS)) {
-            const semanticsToken = stream.expect(
-                'KEYWORD',
-                ...VARIABLE_SEMANTICS,
-            )
-            return semanticsToken.keyword as VariableSemantics
-        }
-        return 'mut'
     }
 }

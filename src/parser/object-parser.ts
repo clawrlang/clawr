@@ -3,8 +3,8 @@ import { TokenStream } from '../lexer'
 import { DataField } from '../model/data-declaration'
 import { FunctionDeclaration } from '../model/function-declaration'
 import { ObjectDeclaration } from '../model/object-declaration'
+import { DataFieldParser } from './data-field-parser'
 import { FunctionParser } from './function-parser'
-import { ValueSetParser } from './value-set-parser'
 
 export class ObjectParser {
     private readonly functionParser: FunctionParser
@@ -88,19 +88,13 @@ export class ObjectParser {
 
     private parseFields(stream: TokenStream) {
         const fields: DataField[] = []
+        const fieldParser = DataFieldParser.create({
+            errorReporter: this.errorReporter,
+        })
 
-        while (!this.isSectionEnd(stream)) {
-            const fieldNameToken = stream.expect('IDENTIFIER')
-            stream.expect('PUNCTUATION', ':')
+        while (!this.isSectionEnd(stream))
+            fields.push(fieldParser.parse(stream))
 
-            fields.push({
-                name: fieldNameToken.identifier,
-                valueSet: ValueSetParser.create({
-                    errorReporter: this.errorReporter,
-                }).parse(stream),
-                semantics: 'mut',
-            })
-        }
         return fields
     }
 

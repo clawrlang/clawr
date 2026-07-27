@@ -7,6 +7,7 @@ export class ObjectDeclaration {
         private name: string,
         private readonly: FunctionDeclaration[],
         private mutating: FunctionDeclaration[],
+        private inheritance: FunctionDeclaration[],
         private fields: DataField[],
         private span: SourceCodeSpan,
     ) {}
@@ -15,15 +16,24 @@ export class ObjectDeclaration {
         name,
         readonly,
         mutating,
+        inheritance,
         fields,
         span,
     }: {
         name: string
         readonly: FunctionDeclaration[]
         mutating: FunctionDeclaration[]
+        inheritance: FunctionDeclaration[]
         fields: DataField[]
         span: SourceCodeSpan
     }) {
-        return new ObjectDeclaration(name, readonly, mutating, fields, span)
+        return new ObjectDeclaration(
+            name,
+            readonly,
+            mutating,
+            inheritance,
+            fields,
+            span,
+        )
     }
 }

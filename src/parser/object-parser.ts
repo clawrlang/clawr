@@ -1,8 +1,10 @@
 import { TestErrorReporter } from '../../tests/util'
 import { TokenStream } from '../lexer'
+import { DataField } from '../model/data-declaration'
 import { FunctionDeclaration } from '../model/function-declaration'
 import { ObjectDeclaration } from '../model/object-declaration'
 import { FunctionParser } from './function-parser'
+import { ValueSetParser } from './value-set-parser'
 
 export class ObjectParser {
     private readonly functionParser: FunctionParser
@@ -22,22 +24,50 @@ export class ObjectParser {
         const nameToken = stream.expect('IDENTIFIER')
         stream.expect('PUNCTUATION', '{')
 
-        const readonly: any[] = this.parseMethods(stream)
-        const mutating: any[] = []
+        const readonly = this.parseMethods(stream)
+        let mutating: FunctionDeclaration[] | undefined
+        let inheritance: FunctionDeclaration[] | undefined
+        let fields: DataField[] | undefined
 
-        let fields: any[] | undefined
-        if (stream.isNext('KEYWORD', 'data')) fields = this.parseFields(stream)
-        if (stream.isNext('KEYWORD', 'mutating')) {
-            stream.expect('KEYWORD', 'mutating')
-            stream.expect('PUNCTUATION', ':')
-            mutating.push(...this.parseMethods(stream))
+        while (!stream.isNext('PUNCTUATION', '}')) {
+            if (stream.isNext('KEYWORD', 'data')) {
+                const dataToken = stream.expect('KEYWORD', 'data')
+                stream.expect('PUNCTUATION', ':')
+                if (fields)
+                    this.errorReporter.reportFatalError(
+                        `Repeated data section`,
+                        { ...dataToken },
+                    )
+                fields = this.parseFields(stream)
+            }
+            if (stream.isNext('KEYWORD', 'inheritance')) {
+                const inheritanceToken = stream.expect('KEYWORD', 'inheritance')
+                stream.expect('PUNCTUATION', ':')
+                if (inheritance)
+                    this.errorReporter.reportFatalError(
+                        `Repeated inheritance section`,
+                        { ...inheritanceToken },
+                    )
+                inheritance = this.parseMethods(stream)
+            }
+            if (stream.isNext('KEYWORD', 'mutating')) {
+                const mutatingToken = stream.expect('KEYWORD', 'mutating')
+                stream.expect('PUNCTUATION', ':')
+                if (mutating)
+                    this.errorReporter.reportFatalError(
+                        `Repeated mutating section`,
+                        { ...mutatingToken },
+                    )
+                mutating = this.parseMethods(stream)
+            }
         }
 
         const endToken = stream.expect('PUNCTUATION', '}')
         return ObjectDeclaration.create({
             name: nameToken.identifier,
             readonly,
-            mutating,
+            mutating: mutating ?? [],
+            inheritance: inheritance ?? [],
             fields: fields ?? [],
             span: {
                 start: startToken.start,
@@ -56,18 +86,18 @@ export class ObjectParser {
     }
 
     private parseFields(stream: TokenStream) {
-        stream.expect('KEYWORD', 'data')
-        stream.expect('PUNCTUATION', ':')
-        const fields: any[] = []
+        const fields: DataField[] = []
 
         while (!this.isSectionEnd(stream)) {
             const fieldNameToken = stream.expect('IDENTIFIER')
             stream.expect('PUNCTUATION', ':')
-            const fieldTypeToken = stream.expect('IDENTIFIER')
 
             fields.push({
                 name: fieldNameToken.identifier,
-                type: fieldTypeToken.identifier,
+                valueSet: ValueSetParser.create({
+                    errorReporter: this.errorReporter,
+                }).parse(stream),
+                semantics: 'mut',
             })
         }
         return fields
@@ -77,7 +107,8 @@ export class ObjectParser {
         return (
             stream.isNext('PUNCTUATION', '}') ||
             stream.isNext('KEYWORD', 'data') ||
-            stream.isNext('KEYWORD', 'mutating')
+            stream.isNext('KEYWORD', 'mutating') ||
+            stream.isNext('KEYWORD', 'inheritance')
         )
     }
 }

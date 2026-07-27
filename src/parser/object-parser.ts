@@ -17,6 +17,10 @@ export class ObjectParser {
         return new ObjectParser(context)
     }
 
+    isNext(stream: TokenStream): boolean {
+        return stream.isNext('KEYWORD', 'object', 'service')
+    }
+
     parse(stream: TokenStream): ObjectDeclaration {
         const startToken = stream.expect('KEYWORD', 'object', 'service')
         const nameToken = stream.expect('IDENTIFIER')

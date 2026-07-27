@@ -1,4 +1,4 @@
-import { Context } from '.'
+import { Context, DeclarationParser } from '.'
 import { TokenStream, Token } from '../lexer'
 import { FunctionDeclaration, Parameter } from '../model/function-declaration'
 import { ExplicitValueSet } from '../model/explicit-value-set'
@@ -11,7 +11,7 @@ import {
 } from '../model/variable-declaration'
 import { Expression } from '../model'
 
-export class FunctionParser {
+export class FunctionParser implements DeclarationParser<FunctionDeclaration> {
     private readonly valueSetParser: ValueSetParser
 
     private constructor(private context: Context) {
@@ -20,6 +20,10 @@ export class FunctionParser {
 
     static create(context: Context): FunctionParser {
         return new FunctionParser(context)
+    }
+
+    isNext(stream: TokenStream): boolean {
+        return stream.isNext('KEYWORD', 'func')
     }
 
     parse(stream: TokenStream): FunctionDeclaration {

@@ -10,6 +10,10 @@ export class DataDeclarationParser {
         return new DataDeclarationParser(context)
     }
 
+    isNext(stream: TokenStream): boolean {
+        return stream.isNext('KEYWORD', 'data')
+    }
+
     parse(stream: TokenStream): DataDeclaration {
         const fieldParser = DataFieldParser.create(this.context)
 

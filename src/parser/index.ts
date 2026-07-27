@@ -1,4 +1,6 @@
 import { ErrorReporter } from '../diagnostics'
+import { TokenStream } from '../lexer'
+import { Declaration } from '../model'
 
 export type Context = {
     errorReporter: ErrorReporter
@@ -7,3 +9,8 @@ export type Context = {
 }
 
 export { ModuleParser } from './module-parser'
+
+export interface DeclarationParser<Decl extends Declaration> {
+    isNext(stream: TokenStream): boolean
+    parse(stream: TokenStream): Decl
+}

@@ -5,6 +5,7 @@
   - errors
   - did-you-mean suggestions
   - fixits
+- `real`
 - Handle `Integer*` when lowering
   - Add types and ranges to CIR expressions
 - Support multi-module programs

@@ -1,8 +1,9 @@
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionDeclaration } from './function-declaration'
 import { DataField } from './data-declaration'
+import { Context, Declaration } from '.'
 
-export class ObjectDeclaration {
+export class ObjectDeclaration implements Declaration {
     private constructor(
         private kind: 'object' | 'service',
         private name: string,
@@ -40,4 +41,6 @@ export class ObjectDeclaration {
             span,
         )
     }
+
+    emitDeclaration(context: Context) {}
 }

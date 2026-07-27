@@ -2,6 +2,7 @@ import { describe, it, expect, test } from 'bun:test'
 import { TokenStream } from '../../../src/lexer'
 import { TestErrorReporter } from '../../util'
 import { ObjectParser } from '../../../src/parser/object-parser'
+import { Scope } from '../../../src/model/scope'
 
 describe('Object Parser', () => {
     it('parses an empty object', () => {

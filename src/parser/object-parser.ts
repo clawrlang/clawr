@@ -1,5 +1,5 @@
-import { TestErrorReporter } from '../../tests/util'
 import { TokenStream } from '../lexer'
+import { Context } from '.'
 import { DataField } from '../model/data-declaration'
 import { FunctionDeclaration } from '../model/function-declaration'
 import { ObjectDeclaration } from '../model/object-declaration'
@@ -9,17 +9,15 @@ import { FunctionParser } from './function-parser'
 export class ObjectParser {
     private readonly functionParser: FunctionParser
 
-    private constructor(private errorReporter: TestErrorReporter) {
-        this.functionParser = FunctionParser.create({
-            errorReporter: this.errorReporter,
-        })
+    private constructor(private context: Context) {
+        this.functionParser = FunctionParser.create(context)
     }
 
-    static create({ errorReporter }: { errorReporter: TestErrorReporter }) {
-        return new ObjectParser(errorReporter)
+    static create(context: Context): ObjectParser {
+        return new ObjectParser(context)
     }
 
-    parse(stream: TokenStream) {
+    parse(stream: TokenStream): ObjectDeclaration {
         const startToken = stream.expect('KEYWORD', 'object', 'service')
         const nameToken = stream.expect('IDENTIFIER')
         stream.expect('PUNCTUATION', '{')
@@ -34,7 +32,7 @@ export class ObjectParser {
                 const dataToken = stream.expect('KEYWORD', 'data')
                 stream.expect('PUNCTUATION', ':')
                 if (fields)
-                    this.errorReporter.reportFatalError(
+                    this.context.errorReporter.reportFatalError(
                         `Repeated data section`,
                         { ...dataToken },
                     )
@@ -44,7 +42,7 @@ export class ObjectParser {
                 const inheritanceToken = stream.expect('KEYWORD', 'inheritance')
                 stream.expect('PUNCTUATION', ':')
                 if (inheritance)
-                    this.errorReporter.reportFatalError(
+                    this.context.errorReporter.reportFatalError(
                         `Repeated inheritance section`,
                         { ...inheritanceToken },
                     )
@@ -54,7 +52,7 @@ export class ObjectParser {
                 const mutatingToken = stream.expect('KEYWORD', 'mutating')
                 stream.expect('PUNCTUATION', ':')
                 if (mutating)
-                    this.errorReporter.reportFatalError(
+                    this.context.errorReporter.reportFatalError(
                         `Repeated mutating section`,
                         { ...mutatingToken },
                     )
@@ -89,7 +87,7 @@ export class ObjectParser {
     private parseFields(stream: TokenStream) {
         const fields: DataField[] = []
         const fieldParser = DataFieldParser.create({
-            errorReporter: this.errorReporter,
+            errorReporter: this.context.errorReporter,
         })
 
         while (!this.isSectionEnd(stream))

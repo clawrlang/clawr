@@ -7,10 +7,12 @@ import { Context } from '.'
 import { VariableDeclarationParser } from './variable-declaration-parser'
 import { VARIABLE_SEMANTICS } from '../model/variable-declaration'
 import { FunctionParser } from './function-parser'
+import { ObjectParser } from './object-parser'
 
 export class ModuleParser {
     private blockParser: BlockParser
     private dataDeclarationParser: DataDeclarationParser
+    private objectDeclarationParser: ObjectParser
     private variableDeclarationParser: VariableDeclarationParser
     private functionParser: FunctionParser
 
@@ -20,6 +22,7 @@ export class ModuleParser {
         this.variableDeclarationParser =
             VariableDeclarationParser.create(context)
         this.functionParser = FunctionParser.create(context)
+        this.objectDeclarationParser = ObjectParser.create(context)
     }
 
     static create(context: Context): ModuleParser {
@@ -48,6 +51,8 @@ export class ModuleParser {
                 declarations.push(this.variableDeclarationParser.parse(stream))
             } else if (stream.isNext('KEYWORD', 'func')) {
                 declarations.push(this.functionParser.parse(stream))
+            } else if (stream.isNext('KEYWORD', 'object', 'service')) {
+                declarations.push(this.objectDeclarationParser.parse(stream))
             } else {
                 const { start, end } = stream.peek()!!
                 this.context.errorReporter.reportFatalError(

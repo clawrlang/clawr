@@ -103,6 +103,22 @@ describe('Module Parser', () => {
         })
     })
 
+    it('parses object declarations in global scope', () => {
+        const code = 'object MyObject { }'
+        const result = parseModule(code)
+        expect(result).toMatchObject({
+            declarations: [{ name: 'MyObject' }],
+        })
+    })
+
+    it('parses service declarations in global scope', () => {
+        const code = 'service MyService { }'
+        const result = parseModule(code)
+        expect(result).toMatchObject({
+            declarations: [{ name: 'MyService' }],
+        })
+    })
+
     it('parses variable declarations in global scope', () => {
         const code = 'const x: integer = 10'
         const result = parseModule(code)

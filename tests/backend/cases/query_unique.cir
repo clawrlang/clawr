@@ -81,7 +81,7 @@
             "initialValue": {
                 "kind": "AS_SHARED",
                 "object": {
-                    "kind": "QUERY",
+                    "kind": "CALL",
                     "name": {
                         "baseName": "f",
                         "labels": []
@@ -102,7 +102,7 @@
             }
         },
         {
-            "kind": "EXEC",
+            "kind": "CALL",
             "name": {
                 "baseName": "printInt64",
                 "labels": []

@@ -70,7 +70,7 @@ export class Query implements Expression {
                 this.arguments.map((arg) => arg.toCIRExpression(context)),
             ).map((args) =>
                 Failable.success({
-                    kind: 'QUERY',
+                    kind: 'CALL',
                     name: this.name.toCIR(),
                     arguments: args,
                     valueSet: valueSet.toCIR(),

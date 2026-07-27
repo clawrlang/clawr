@@ -2,7 +2,7 @@
     "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
     "startBlock": [
         {
-            "kind": "EXEC",
+            "kind": "CALL",
             "name": {
                 "baseName": "printTruthvalue",
                 "labels": []

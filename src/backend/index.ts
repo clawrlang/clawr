@@ -127,7 +127,7 @@ function lowerType(valueSet: cir.ValueSet): string {
 
 export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
-        case 'EXEC':
+        case 'CALL':
             const args = stmt.receiver
                 ? [lowerExpr(stmt.receiver), ...stmt.arguments.map(lowerExpr)]
                 : stmt.arguments.map(lowerExpr)
@@ -178,7 +178,7 @@ export function lowerExpr(expr: cir.Expression): string {
             return expr.value
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
-        case 'QUERY':
+        case 'CALL':
             const args = expr.receiver
                 ? [lowerExpr(expr.receiver), ...expr.arguments.map(lowerExpr)]
                 : expr.arguments.map(lowerExpr)

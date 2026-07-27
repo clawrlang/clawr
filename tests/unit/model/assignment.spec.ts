@@ -363,7 +363,7 @@ describe('Assignment', () => {
                     kind: 'AS_SHARED',
                     targetSemantics: 'SHARED',
                     object: {
-                        kind: 'QUERY',
+                        kind: 'CALL',
                         name: {
                             baseName: 'myFunction',
                             labels: [],

@@ -6,7 +6,7 @@ describe('Function Calls', () => {
     describe('includes parameter labels in the function name', () => {
         test('expression', () => {
             const expr: Expression = {
-                kind: 'QUERY',
+                kind: 'CALL',
                 name: {
                     baseName: 'myFunction',
                     labels: ['param1', 'param2'],
@@ -31,7 +31,7 @@ describe('Function Calls', () => {
 
         test('statement', () => {
             const stmt: Statement = {
-                kind: 'EXEC',
+                kind: 'CALL',
                 name: {
                     baseName: 'myFunction',
                     labels: ['param1', 'param2'],
@@ -57,7 +57,7 @@ describe('Function Calls', () => {
     describe('skips parameters without labels', () => {
         test('expression', () => {
             const expr: Expression = {
-                kind: 'QUERY',
+                kind: 'CALL',
                 name: {
                     baseName: 'myFunction',
                     labels: ['param1'],
@@ -82,7 +82,7 @@ describe('Function Calls', () => {
 
         test('statement', () => {
             const stmt: Statement = {
-                kind: 'EXEC',
+                kind: 'CALL',
                 name: {
                     baseName: 'myFunction',
                     labels: ['param1'],
@@ -108,7 +108,7 @@ describe('Function Calls', () => {
     describe('handles function calls with no parameters', () => {
         test('expression', () => {
             const expr: Expression = {
-                kind: 'QUERY',
+                kind: 'CALL',
                 name: {
                     baseName: 'noParamFunction',
                     labels: [],
@@ -122,7 +122,7 @@ describe('Function Calls', () => {
 
         test('statement', () => {
             const stmt: Statement = {
-                kind: 'EXEC',
+                kind: 'CALL',
                 name: {
                     baseName: 'noParamFunction',
                     labels: [],
@@ -137,7 +137,7 @@ describe('Function Calls', () => {
     describe('adds namespace to function call when present', () => {
         test('expression', () => {
             const expr: Expression = {
-                kind: 'QUERY',
+                kind: 'CALL',
                 name: {
                     namespace: 'myNamespace',
                     baseName: 'myFunction',
@@ -152,7 +152,7 @@ describe('Function Calls', () => {
 
         test('statement', () => {
             const stmt: Statement = {
-                kind: 'EXEC',
+                kind: 'CALL',
                 name: {
                     namespace: 'myNamespace',
                     baseName: 'myFunction',
@@ -168,7 +168,7 @@ describe('Function Calls', () => {
     describe('adds receiver to function call when present', () => {
         test('expression', () => {
             const expr: Expression = {
-                kind: 'QUERY',
+                kind: 'CALL',
                 receiver: {
                     kind: 'VARIABLE_REF',
                     name: 'myObject',
@@ -191,7 +191,7 @@ describe('Function Calls', () => {
 
         test('statement', () => {
             const stmt: Statement = {
-                kind: 'EXEC',
+                kind: 'CALL',
                 receiver: {
                     kind: 'VARIABLE_REF',
                     name: 'myObject',

@@ -28,7 +28,7 @@ describe('CallFunc', () => {
         statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
-                kind: 'EXEC',
+                kind: 'CALL',
                 name: {
                     baseName: 'foo',
                     labels: [],
@@ -58,7 +58,7 @@ describe('CallFunc', () => {
         statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
-                kind: 'EXEC',
+                kind: 'CALL',
                 name: {
                     baseName: 'foo',
                     labels: ['x'],
@@ -84,7 +84,7 @@ describe('CallFunc', () => {
         statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
-                kind: 'EXEC',
+                kind: 'CALL',
                 name: {
                     baseName: 'printInt64',
                     labels: [],
@@ -110,7 +110,7 @@ describe('CallFunc', () => {
         statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
-                kind: 'EXEC',
+                kind: 'CALL',
                 name: {
                     baseName: 'printTruthvalue',
                     labels: [],
@@ -141,7 +141,7 @@ describe('CallFunc', () => {
         statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
-                kind: 'EXEC',
+                kind: 'CALL',
                 name: {
                     baseName: 'printInt64',
                     labels: [],

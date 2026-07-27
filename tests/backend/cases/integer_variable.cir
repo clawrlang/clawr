@@ -20,7 +20,7 @@
     ],
     "startBlock": [
         {
-            "kind": "EXEC",
+            "kind": "CALL",
             "name": {
                 "baseName": "printInt64",
                 "labels": []

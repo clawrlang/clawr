@@ -47,8 +47,8 @@ type Release = {
     object: Storage
 }
 
-type Exec = {
-    kind: 'EXEC'
+type FunctionCall = {
+    kind: 'CALL'
     receiver?: Expression
     name: {
         namespace?: string
@@ -70,7 +70,12 @@ type Assign = {
 }
 
 export type Statement =
-    EnsureUnique | Release | Exec | Return | VariableDeclaration | Assign
+    | EnsureUnique
+    | Release
+    | FunctionCall
+    | Return
+    | VariableDeclaration
+    | Assign
 
 type Storage = VariableReference | FieldReference
 
@@ -127,17 +132,7 @@ type FieldReference = {
     valueSet: ValueSet
 }
 
-type QueryFunctionCall = {
-    kind: 'QUERY'
-    receiver?: Expression
-    name: {
-        namespace?: string
-        baseName: string
-        labels: string[]
-    }
-    arguments: Expression[]
-    valueSet: ValueSet
-}
+type QueryFunctionCall = FunctionCall & { valueSet: ValueSet }
 
 export type Expression =
     | StringLiteral

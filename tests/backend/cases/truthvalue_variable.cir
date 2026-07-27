@@ -24,7 +24,7 @@
     ],
     "startBlock": [
         {
-            "kind": "EXEC",
+            "kind": "CALL",
             "name": {
                 "baseName": "printTruthvalue",
                 "labels": []

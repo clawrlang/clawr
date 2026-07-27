@@ -4,7 +4,7 @@
 - Ensure that `undefined` variables are not modified
 - Ensure that `undefined` variables are not assigned without `copy(of:)`
 
-- QUERY/EXEC: Ensure that parameters are passed using compatible semantics
+- CALL: Ensure that parameters are passed using compatible semantics
 - Allow both `ISOLATED` and `SHARED` values for `undefined` parameters
 - Support default parameter values
   - Inject at call site? (only simple values?)

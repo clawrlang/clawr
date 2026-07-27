@@ -42,7 +42,7 @@ export class CallFunc implements Statement {
             labels: _name.labels,
         }
         context.scope.emitted.push({
-            kind: 'EXEC',
+            kind: 'CALL',
             name,
             arguments: this.arguments.map((arg) =>
                 arg.toCIRExpression(context).value(),

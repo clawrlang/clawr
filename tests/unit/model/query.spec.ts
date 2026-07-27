@@ -38,7 +38,7 @@ describe('Query', () => {
             }),
         )
         expect(query.toCIRExpression(context).value()).toMatchObject({
-            kind: 'QUERY',
+            kind: 'CALL',
             name: {
                 baseName: 'foo',
                 labels: [],
@@ -89,7 +89,7 @@ describe('Query', () => {
             }),
         )
         expect(query.toCIRExpression(context).value()).toMatchObject({
-            kind: 'QUERY',
+            kind: 'CALL',
             name: {
                 baseName: 'foo',
                 labels: ['x'],
@@ -131,7 +131,7 @@ describe('Query', () => {
                 span: someCodeSpan,
             })
             expect(query.toCIRExpression(context).value()).toMatchObject({
-                kind: 'QUERY',
+                kind: 'CALL',
                 name: {
                     baseName: 'foo',
                     labels: [],
@@ -174,7 +174,7 @@ describe('Query', () => {
                 span: someCodeSpan,
             })
             expect(query.toCIRExpression(context).value()).toMatchObject({
-                kind: 'QUERY',
+                kind: 'CALL',
                 name: {
                     baseName: 'copy',
                     labels: ['of'],

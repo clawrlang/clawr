@@ -100,7 +100,7 @@
                 "semantics": "ISOLATED"
             },
             "initialValue": {
-                "kind": "QUERY",
+                "kind": "CALL",
                 "name": {
                     "namespace": "Object",
                     "baseName": "new",
@@ -115,14 +115,14 @@
             }
         },
         {
-            "kind": "EXEC",
+            "kind": "CALL",
             "name": {
                 "baseName": "printInt64",
                 "labels": []
             },
             "arguments": [
                 {
-                    "kind": "QUERY",
+                    "kind": "CALL",
                     "receiver": {
                         "kind": "VARIABLE_REF",
                         "name": "obj",

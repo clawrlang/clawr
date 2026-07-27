@@ -15,7 +15,7 @@
   - `data` only?
   - Can it also be a `union`/`enum` type?
 - nested functions/closures
-- Convert `QUERY` into a statement by assigning to `_`
+- Convert `CALL` into a statement by assigning to `_`
   - Make `_` a keyword? handle like `self`/`super`
 - Replace `copy(of:)` with `{...value}`
   - CIR: `ALLOCATION(fields = {name: FieldReference[]})`

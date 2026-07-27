@@ -103,7 +103,7 @@ export class Assignment implements Statement {
         } else if (
             target.valueSet.type === 'rc-type' &&
             value.valueSet.type === 'rc-type' &&
-            value.kind === 'QUERY' &&
+            value.kind === 'CALL' &&
             currentValue instanceof UniqueTypeLattice
         ) {
             context.scope.emitted.push({

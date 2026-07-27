@@ -24,3 +24,9 @@
   - `ENSURE_UNIQUE(temp)`
   - `RELEASE(all variables)` does not include `temp`
   - `RETURN(temp)`
+- lambdas / closures
+  - `launchAsync(_: () -> void)` background threads
+  - Launch with parameters?
+  - `concurrent` = safe to execute in `async` context
+  - `async`/`await`
+- `fork()` the process

@@ -4,8 +4,13 @@ export type ClawrModule = {
     declarations?: Declaration[]
 }
 
+// ------------
+// Declarations
+// ------------
+
 type VariableDeclaration = {
     kind: 'VARIABLE_DECL'
+    namespace?: string
     name: string
     valueSet: ValueSet
     initialValue: Expression
@@ -13,6 +18,7 @@ type VariableDeclaration = {
 
 type FunctionDeclaration = {
     kind: 'FUNCTION_DECL'
+    namespace?: string
     baseName: string
     parameters: {
         label?: string
@@ -25,17 +31,21 @@ type FunctionDeclaration = {
 
 type TypeDeclaration = {
     kind: 'TYPE_DECL'
+    namespace?: string
     name: string
     fields: {
         name: string
         valueSet: ValueSet
     }[]
     methods?: FunctionDeclaration[]
-    companionMethods?: FunctionDeclaration[]
 }
 
 export type Declaration =
     VariableDeclaration | FunctionDeclaration | TypeDeclaration
+
+// ----------
+// Statements
+// ----------
 
 type EnsureUnique = {
     kind: 'ENSURE_UNIQUE'
@@ -78,6 +88,10 @@ export type Statement =
     | Assign
 
 type Storage = VariableReference | FieldReference
+
+// -----------
+// Expressions
+// -----------
 
 type StringLiteral = {
     kind: 'STRING_LITERAL'
@@ -144,6 +158,10 @@ export type Expression =
     | VariableReference
     | FieldReference
     | QueryFunctionCall
+
+// ----------
+// Value Sets
+// ----------
 
 type IntegerValueSet = {
     type: 'integer'

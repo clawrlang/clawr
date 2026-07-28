@@ -43,7 +43,6 @@ export function lowerDecl(decl: cir.Declaration): string {
             };
 
             ${decl.methods?.map((m) => lowerMethod({ ...m, typeName: decl.name })).join('\n') ?? ''}
-            ${decl.companionMethods?.map((m) => lowerFunction({ ...m, namespace: decl.name })).join('\n') ?? ''}
             `
         }
         case 'VARIABLE_DECL':
@@ -79,7 +78,6 @@ function lowerMethod(
 function lowerFunction(
     decl: cir.Declaration & {
         kind: 'FUNCTION_DECL'
-        namespace?: string
         typeName?: string
     },
 ) {

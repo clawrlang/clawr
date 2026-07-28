@@ -358,6 +358,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "VARIABLE_DECL" },
+              "namespace": { "type": "string" },
               "name": { "type": "string" },
               "valueSet": { "$ref": "#/$defs/ValueSet" },
               "initialValue": { "$ref": "#/$defs/Expression" }
@@ -376,6 +377,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "FUNCTION_DECL" },
+              "namespace": { "type": "string" },
               "baseName": { "type": "string" },
               "parameters": {
                 "type": "array",
@@ -411,6 +413,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "TYPE_DECL" },
+              "namespace": { "type": "string" },
               "name": { "type": "string" },
               "fields": {
                 "type": "array",
@@ -425,10 +428,6 @@
                 }
               },
               "methods": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/FunctionDeclaration" }
-              },
-              "companionMethods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionDeclaration" }
               }

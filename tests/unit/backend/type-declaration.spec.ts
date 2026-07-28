@@ -23,19 +23,13 @@ describe('Type declaration', () => {
         expect(result).toContain('void MyType·myMethod(MyType* self) {')
     })
 
-    it('adds companion methods as mangled function names', () => {
+    it('adds includes namespace in function names', () => {
         const typeDecl: cir.Declaration = {
-            kind: 'TYPE_DECL',
-            name: 'MyType',
-            fields: [],
-            companionMethods: [
-                {
-                    kind: 'FUNCTION_DECL',
-                    baseName: 'myCompanionMethod',
-                    parameters: [],
-                    body: [],
-                },
-            ],
+            kind: 'FUNCTION_DECL',
+            namespace: 'MyType',
+            baseName: 'myCompanionMethod',
+            parameters: [],
+            body: [],
         }
 
         const result = lowerDecl(typeDecl)

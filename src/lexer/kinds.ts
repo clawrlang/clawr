@@ -116,11 +116,6 @@ const ALL_KW = [
     `throws`,
     `try`,
     `catch`,
-
-    // Modules
-    'import',
-    'from',
-    'as',
 ] as const
 
 const ALL_TRUTHVALUE_LITERALS = ['false', 'ambiguous', 'true'] as const

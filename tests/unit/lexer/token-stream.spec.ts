@@ -178,16 +178,7 @@ describe('TokenStream', () => {
     })
 
     describe('KEYWORD', () => {
-        const keywords = [
-            'const',
-            'mut',
-            'ref',
-            'helper',
-            'companion',
-            'import',
-            'from',
-            'as',
-        ]
+        const keywords = ['const', 'mut', 'ref', 'helper', 'companion']
         for (const keyword of keywords) {
             test(keyword, () => {
                 const tokens = [...tokenize(keyword)]
@@ -200,20 +191,6 @@ describe('TokenStream', () => {
                 })
             })
         }
-
-        it('tokenizes import syntax keyword combinations in sequence', () => {
-            const tokens = [
-                ...tokenize('import Token as Tok from "lexer/tokens"'),
-            ]
-            expect(tokens).toMatchObject([
-                { kind: 'KEYWORD', keyword: 'import' },
-                { kind: 'IDENTIFIER', identifier: 'Token' },
-                { kind: 'KEYWORD', keyword: 'as' },
-                { kind: 'IDENTIFIER', identifier: 'Tok' },
-                { kind: 'KEYWORD', keyword: 'from' },
-                { kind: 'STRING_LITERAL', value: 'lexer/tokens' },
-            ])
-        })
     })
 
     describe('PUNCTUATION', () => {

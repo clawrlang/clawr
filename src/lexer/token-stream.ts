@@ -345,12 +345,12 @@ export class TokenStream {
                     ['(', '[', '{', ','].includes(prev.symbol) ||
                     prev.symbol.endsWith('=')
                 )
-            case 'KEYWORD':
-                return (
-                    prev.keyword === 'in' ||
-                    prev.keyword === 'and' ||
-                    prev.keyword === 'or'
-                )
+            // case 'KEYWORD':
+            //     return (
+            //         prev.keyword === 'in' ||
+            //         prev.keyword === 'and' ||
+            //         prev.keyword === 'or'
+            //     )
             default:
                 return false
         }

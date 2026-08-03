@@ -84,38 +84,40 @@ const ALL_KW = [
     'role',
     'trait',
 
-    // Inheritance hierarchy
+    // Object-scoped variables
     `self`,
     `super`,
+
+    // Object sections
     'inheritance',
+    `mutating`,
 
     // Function modifiers
     'helper',
-    `mutating`,
     'atomic',
     'concurrent',
 
     // Control flow
     `return`,
-    `continue`,
-    `break`,
-    `if`,
-    `else`,
-    `guard`,
-    `switch`,
-    `when`,
-    `is`,
-    `case`,
-    `do`,
-    `while`,
-    `for`,
-    `in`,
-    `and`,
-    `or`,
-    `throw`,
-    `throws`,
-    `try`,
-    `catch`,
+    // `continue`,
+    // `break`,
+    // `if`,
+    // `else`,
+    // `guard`,
+    // `switch`,
+    // `when`,
+    // `is`,
+    // `case`,
+    // `do`,
+    // `while`,
+    // `for`,
+    // `in`,
+    // `and`,
+    // `or`,
+    // `throw`,
+    // `throws`,
+    // `try`,
+    // `catch`,
 ] as const
 
 const ALL_TRUTHVALUE_LITERALS = ['false', 'ambiguous', 'true'] as const

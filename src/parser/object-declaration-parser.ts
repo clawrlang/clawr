@@ -32,12 +32,12 @@ export class ObjectDeclarationParser {
         let fields: DataField[] | undefined
 
         while (!stream.isNext('PUNCTUATION', '}')) {
-            if (stream.isNext('KEYWORD', 'data')) {
-                const dataToken = stream.expect('KEYWORD', 'data')
+            if (stream.isNext('KEYWORD', 'state')) {
+                const dataToken = stream.expect('KEYWORD', 'state')
                 stream.expect('PUNCTUATION', ':')
                 if (fields)
                     this.context.errorReporter.reportFatalError(
-                        `Repeated data section`,
+                        `Repeated state section`,
                         { ...dataToken },
                     )
                 fields = this.parseFields(stream)
@@ -103,7 +103,7 @@ export class ObjectDeclarationParser {
     private isSectionEnd(stream: TokenStream) {
         return (
             stream.isNext('PUNCTUATION', '}') ||
-            stream.isNext('KEYWORD', 'data') ||
+            stream.isNext('KEYWORD', 'state') ||
             stream.isNext('KEYWORD', 'mutating') ||
             stream.isNext('KEYWORD', 'inheritance')
         )

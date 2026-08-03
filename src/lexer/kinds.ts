@@ -91,6 +91,7 @@ const ALL_KW = [
     // Object sections
     'inheritance',
     `mutating`,
+    `state`,
 
     // Function modifiers
     'helper',

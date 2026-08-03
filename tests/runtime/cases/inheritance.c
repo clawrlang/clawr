@@ -7,7 +7,7 @@
 //     func volume() -> integer
 // inheritance:
 //     func new(height: integer @range(0..20))
-// data:
+// state:
 //     height: integer
 // }
 // ```
@@ -45,7 +45,7 @@ int Prism·volume(Prism* self) {
 // ```clawr
 // object RectBlock: Prism {
 //     func area() => self.width * self.depth
-// data:
+// state:
 //     width: integer
 //     depth: integer
 // }

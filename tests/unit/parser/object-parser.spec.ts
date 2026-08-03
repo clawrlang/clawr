@@ -91,7 +91,7 @@ describe('Object Parser', () => {
     it('parses fields', () => {
         const code = `
             object O {
-            data:
+            state:
                 field1: integer
                 field2: truthvalue
             }`
@@ -108,7 +108,7 @@ describe('Object Parser', () => {
     it('parses default field values', () => {
         const code = `
             object O {
-            data:
+            state:
                 const field1: integer = 10
                 const field2: truthvalue = true
             }`
@@ -136,7 +136,7 @@ describe('Object Parser', () => {
     it('parses all sections together', () => {
         const code = `
             object O {
-            data:
+            state:
                 field1: integer
                 field2: truthvalue
             inheritance:
@@ -158,12 +158,12 @@ describe('Object Parser', () => {
 
     describe('parses sections in arbitrary order', () => {
         test.each([
-            ['data', 'mutating', 'inheritance'],
-            ['data', 'inheritance', 'mutating'],
-            ['mutating', 'data', 'inheritance'],
-            ['mutating', 'inheritance', 'data'],
-            ['inheritance', 'data', 'mutating'],
-            ['inheritance', 'mutating', 'data'],
+            ['state', 'mutating', 'inheritance'],
+            ['state', 'inheritance', 'mutating'],
+            ['mutating', 'state', 'inheritance'],
+            ['mutating', 'inheritance', 'state'],
+            ['inheritance', 'state', 'mutating'],
+            ['inheritance', 'mutating', 'state'],
         ])('%s:%s:%s:', (first, second, third) => {
             const code = `object O {${first}:${second}:${third}:}`
             expect(() => parseObject(code)).not.toThrow()
@@ -171,7 +171,7 @@ describe('Object Parser', () => {
     })
 
     describe('throws if section names are repeated', () => {
-        test.each(['data', 'mutating', 'inheritance'])('%s:', (section) => {
+        test.each(['state', 'mutating', 'inheritance'])('%s:', (section) => {
             const code = `object O {${section}:${section}:}`
             expect(() => parseObject(code)).toThrow(
                 `Repeated ${section} section`,

@@ -7,7 +7,7 @@
 //     func volume() -> integer
 // inheritance:
 //     func new(height: integer @range(0..20))
-// data:
+// state:
 //     height: integer
 // }
 // ```
@@ -40,7 +40,7 @@ int Prism·volume(Prism* self) {
 // object RectBlock: Prism {
 //     func area() => self.width * self.depth + self.offset()
 //     virtual func offset() => 0
-// data:
+// state:
 //     width: integer
 //     depth: integer
 // }
@@ -96,7 +96,7 @@ void RectBlock˛new_width_depth_height(RectBlock *self, int width, int depth, in
 // ```clawr
 // object SquareBlock: Prism {
 //     func area() => self.width * self.depth
-// data:
+// state:
 //     width: integer
 //     depth: integer
 // }

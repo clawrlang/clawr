@@ -48,46 +48,45 @@
                         }
                     ]
                 }
-            ],
-            "companionMethods": [
+            ]
+        },
+        {
+            "kind": "FUNCTION_DECL",
+            "namespace": "Object",
+            "baseName": "new",
+            "parameters": [],
+            "body": [
                 {
-                    "kind": "FUNCTION_DECL",
-                    "baseName": "new",
-                    "parameters": [],
-                    "body": [
-                        {
-                            "kind": "RETURN",
-                            "value": {
-                                "kind": "ALLOCATION",
-                                "fields": [
-                                    {
-                                        "name": "field",
-                                        "value": {
-                                            "kind": "INTEGER_LITERAL",
-                                            "value": "42",
-                                            "valueSet": {
-                                                "type": "integer",
-                                                "min": "42",
-                                                "max": "42"
-                                            }
-                                        }
+                    "kind": "RETURN",
+                    "value": {
+                        "kind": "ALLOCATION",
+                        "fields": [
+                            {
+                                "name": "field",
+                                "value": {
+                                    "kind": "INTEGER_LITERAL",
+                                    "value": "42",
+                                    "valueSet": {
+                                        "type": "integer",
+                                        "min": "42",
+                                        "max": "42"
                                     }
-                                ],
-                                "valueSet": {
-                                    "type": "rc-type",
-                                    "typeName": "Object",
-                                    "semantics": "ISOLATED"
                                 }
                             }
+                        ],
+                        "valueSet": {
+                            "type": "rc-type",
+                            "typeName": "Object",
+                            "semantics": "ISOLATED"
                         }
-                    ],
-                    "resultValueSet": {
-                        "type": "rc-type",
-                        "typeName": "Object",
-                        "semantics": "ISOLATED"
                     }
                 }
-            ]
+            ],
+            "resultValueSet": {
+                "type": "rc-type",
+                "typeName": "Object",
+                "semantics": "ISOLATED"
+            }
         }
     ],
     "startBlock": [

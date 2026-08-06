@@ -6,6 +6,9 @@
   - did-you-mean suggestions
   - fixits
 - `real`
+- `subset` (mentioned in the documentation)
+  - Does not propagate to the CIR
+  - Short-hand syntax for ranged
 - Handle `Integer*` when lowering
   - Add types and ranges to CIR expressions
 - Support multi-module programs
@@ -31,3 +34,4 @@
   - `concurrent` = safe to execute in `async` context
   - `async`/`await`
 - `fork()` the process
+- `trait`/`role`

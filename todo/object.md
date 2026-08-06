@@ -1,12 +1,8 @@
 # `object`/`service`
 
-- Add `object`/`service` type
-- Add `companion` namespace (static methods and fields)
-  - Same name as the `object`/`service`
-  - Mangle field names as `Type‚field`
-- Make `CALL`/`QUERY` support methods
-- Allow polymorphic inheritance and `trait` conformance/`role` embodiment
-  - inheritance constructor
+- Parse `{ Super.init() }` data literal
+- Expose polymorphism in CIR
+- Dispose `service` (e.g. close file handle) when deallocated
 
 ## Enforce on Frontend
 
@@ -15,6 +11,8 @@
 - Fields are private (only accessible via `self`)
 - `self` is an implicit `ref` variable - mutable but not reassignable
 - `data` fields `MUST NOT` have initial values nor be `const`
-- fields with initial value should be able to skip value-set
-- `companion` with same name as `object`/`service` is added as `companionMethods` in CIR
+- fields with initial value should be able to skip/infer value-set
+- `companion` with same name as `object`/`service` is allowed access to fields and data-literal
 - `companion` with no matching type is an error
+- Add `object`/`service` type
+- Make `CALL` support methods

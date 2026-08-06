@@ -50,6 +50,7 @@ describe('DataDeclaration', () => {
                         },
                     },
                 ],
+                methods: [],
             },
         ])
     })

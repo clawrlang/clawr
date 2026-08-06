@@ -11,7 +11,8 @@
                         "type": "integer"
                     }
                 }
-            ]
+            ],
+            "methods": []
         },
         {
             "kind": "VARIABLE_DECL",

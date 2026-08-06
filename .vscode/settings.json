@@ -429,7 +429,7 @@
                 "items": { "$ref": "#/$defs/FunctionDeclaration" }
               }
             },
-            "required": ["kind", "name", "fields"],
+            "required": ["kind", "name", "fields", "methods"],
             "additionalProperties": false
           }
         }

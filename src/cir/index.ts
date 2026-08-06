@@ -37,7 +37,7 @@ type TypeDeclaration = {
         name: string
         valueSet: ValueSet
     }[]
-    methods?: FunctionDeclaration[]
+    methods: FunctionDeclaration[]
 }
 
 export type Declaration =

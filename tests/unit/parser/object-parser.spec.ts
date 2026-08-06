@@ -2,7 +2,6 @@ import { describe, it, expect, test } from 'bun:test'
 import { TokenStream } from '../../../src/lexer'
 import { TestErrorReporter } from '../../util'
 import { ObjectDeclarationParser } from '../../../src/parser/object-declaration-parser'
-import { Scope } from '../../../src/model/scope'
 
 describe('Object Parser', () => {
     it('parses an empty object', () => {
@@ -18,6 +17,24 @@ describe('Object Parser', () => {
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 12 },
+            },
+        })
+    })
+
+    it('parses object with inheritance', () => {
+        const code = 'object Sub: Super {}'
+
+        expect(parseObject(code)).toMatchObject({
+            name: 'Sub',
+            kind: 'object',
+            superType: 'Super',
+            readonly: [],
+            mutating: [],
+            inheritance: [],
+            fields: [],
+            span: {
+                start: { line: 1, column: 1 },
+                end: { line: 1, column: 21 },
             },
         })
     })

@@ -24,6 +24,14 @@ export class ObjectDeclarationParser {
     parse(stream: TokenStream): ObjectDeclaration {
         const startToken = stream.expect('KEYWORD', 'object', 'service')
         const nameToken = stream.expect('IDENTIFIER')
+
+        let superType: string | undefined
+
+        if (stream.isNext('PUNCTUATION', ':')) {
+            stream.expect('PUNCTUATION', ':')
+            superType = stream.expect('IDENTIFIER').identifier
+        }
+
         stream.expect('PUNCTUATION', '{')
 
         const readonly = this.parseMethods(stream)
@@ -68,6 +76,7 @@ export class ObjectDeclarationParser {
         return ObjectDeclaration.create({
             kind: startToken.keyword as 'object' | 'service',
             name: nameToken.identifier,
+            superType,
             readonly,
             mutating: mutating ?? [],
             inheritance: inheritance ?? [],

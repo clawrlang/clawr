@@ -112,7 +112,6 @@ export class Assignment implements Statement {
                 value: {
                     kind: 'AS_SHARED',
                     object: value,
-                    targetSemantics: target.valueSet.semantics,
                     valueSet: targetValueSet as any,
                 },
             })

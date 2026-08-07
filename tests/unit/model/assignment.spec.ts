@@ -361,7 +361,6 @@ describe('Assignment', () => {
                 target: { name: 'refVar' },
                 value: {
                     kind: 'AS_SHARED',
-                    targetSemantics: 'SHARED',
                     object: {
                         kind: 'CALL',
                         name: {

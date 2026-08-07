@@ -129,7 +129,6 @@ type MemoryRetention = {
 type AsShared = {
     kind: 'AS_SHARED'
     object: QueryFunctionCall
-    targetSemantics: 'SHARED' | 'ISOLATED'
     valueSet: RcTypeValueSet
 }
 

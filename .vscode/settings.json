@@ -93,12 +93,9 @@
             "properties": {
               "kind": { "const": "AS_SHARED" },
               "object": { "$ref": "#/$defs/QueryFunctionCall" },
-              "targetSemantics": {
-                "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
-              },
               "valueSet": { "$ref": "#/$defs/RcTypeValueSet" }
             },
-            "required": ["kind", "object", "targetSemantics", "valueSet"],
+            "required": ["kind", "object", "valueSet"],
             "additionalProperties": false
           },
           "QueryFunctionCall": {

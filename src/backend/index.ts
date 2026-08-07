@@ -38,6 +38,50 @@ export function lowerDecl(decl: cir.Declaration): string {
                     ${polymorphics.map((m) => lowerVtableEntry(m, decl)).join('\n')}
                 } ${decl.name}ˇvtable;`
                 : ''
+            const vtableMethods = polymorphics
+                .map((m) => {
+                    const mangledName = mangleFunctionName({
+                        namespace: decl.namespace,
+                        typeName: decl.name,
+                        baseName: m.baseName,
+                        labels: m.parameters
+                            .map((p) => p.label)
+                            .filter((label) => label !== undefined) as string[],
+                    })
+
+                    return `.${mangleFunctionName({
+                        namespace: undefined,
+                        baseName: m.baseName,
+                        labels: m.parameters
+                            .map((param) => param.label)
+                            .filter((label) => label !== undefined) as string[],
+                        typeName: undefined,
+                    })} = (${mangledName}ˇmethod)${mangleFunctionName({
+                        namespace: decl.namespace,
+                        baseName: m.baseName,
+                        labels: m.parameters
+                            .map((param) => param.label)
+                            .filter((label) => label !== undefined) as string[],
+                        typeName: decl.name,
+                    })},`
+                })
+                .join('\n')
+            const typeInfo = polymorphics.length
+                ? `
+                    static const __type_info ${decl.name}ˇtype = {
+                        .polymorphic_type = {
+                            .data = { .size = sizeof(${decl.name}) },
+                            .vtable = &(${decl.name}ˇvtable){
+                                ${vtableMethods}
+                            }
+                        }
+                    };
+                    `
+                : `
+                    static const __type_info ${decl.name}ˇtype = {
+                        .data_type = { .size = sizeof(${decl.name}) }
+                    };
+                    `
             return `typedef struct {
                 ${fields}
             } ${decl.name}ˇfields;
@@ -49,10 +93,7 @@ export function lowerDecl(decl: cir.Declaration): string {
 
             ${vtableTypedefs.join('\n')}
             ${vtableStruct}
-
-            static const __type_info ${decl.name}ˇtype = {
-                .data_type = { .size = sizeof(${decl.name}) }
-            };
+            ${typeInfo}
 
             ${decl.methods?.map((m) => lowerMethod(m, decl)).join('\n') ?? ''}
             `

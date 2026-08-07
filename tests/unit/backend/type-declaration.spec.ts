@@ -81,5 +81,38 @@ describe('Type declaration', () => {
         )
         expect(result).toContain('MyType·fˇmethod f;')
         expect(result).toContain('MyTypeˇvtable;')
+        expect(result).toContain('.polymorphic_type')
+    })
+
+    it('adds labels to vtable method names', () => {
+        const typeDecl: cir.Declaration = {
+            kind: 'TYPE_DECL',
+            name: 'MyType',
+            fields: [],
+            methods: [
+                {
+                    kind: 'FUNCTION_DECL',
+                    polymorphic: true,
+                    baseName: 'f',
+                    parameters: [
+                        {
+                            label: 'label',
+                            varName: 'v',
+                            valueSet: { type: 'integer' },
+                        },
+                    ],
+                    body: [],
+                    resultValueSet: { type: 'integer' },
+                },
+            ],
+        }
+
+        const result = lowerDecl(typeDecl)
+        expect(result).toContain(
+            '.f˛label = (MyType·f˛labelˇmethod)MyType·f˛label',
+        )
+        expect(result).toContain(
+            'typedef int64_t (*MyType·f˛labelˇmethod)(void* self, int64_t v);',
+        )
     })
 })

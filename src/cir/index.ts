@@ -19,6 +19,7 @@ type VariableDeclaration = {
 type FunctionDeclaration = {
     kind: 'FUNCTION_DECL'
     namespace?: string
+    polymorphic?: boolean
     baseName: string
     parameters: {
         label?: string

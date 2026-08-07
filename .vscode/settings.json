@@ -376,6 +376,7 @@
             "properties": {
               "kind": { "const": "FUNCTION_DECL" },
               "namespace": { "type": "string" },
+              "polymorphic": { "type": "boolean" },
               "baseName": { "type": "string" },
               "parameters": {
                 "type": "array",

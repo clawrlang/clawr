@@ -29,6 +29,12 @@ export function lowerDecl(decl: cir.Declaration): string {
             const fields = decl.fields
                 .map((field) => `${lowerType(field.valueSet)} ${field.name};`)
                 .join('\n')
+            const polymorphics = decl.methods.filter((m) => m.polymorphic)
+            const vtableStruct = polymorphics.length
+                ? `typedef struct {
+                    ${polymorphics.map((m) => lowerVtableEntry(m, decl)).join('\n')}
+                } ${decl.name}ˇvtable;`
+                : ''
             return `typedef struct {
                 ${fields}
             } ${decl.name}ˇfields;
@@ -37,6 +43,8 @@ export function lowerDecl(decl: cir.Declaration): string {
                 __rc_header header;
                 ${decl.name}ˇfields fields;
             } ${decl.name};
+
+            ${vtableStruct}
 
             static const __type_info ${decl.name}ˇtype = {
                 .data_type = { .size = sizeof(${decl.name}) }
@@ -63,6 +71,38 @@ export function lowerDecl(decl: cir.Declaration): string {
         default:
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
     }
+}
+
+function lowerVtableEntry(
+    method: cir.Declaration & { kind: 'FUNCTION_DECL' },
+    receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
+): string {
+    const returnType = method.resultValueSet
+        ? lowerType(method.resultValueSet)
+        : 'void'
+    const mangledName = mangleFunctionName({
+        namespace: undefined,
+        typeName: undefined,
+        baseName: method.baseName,
+        labels: method.parameters
+            .map((p) => p.label)
+            .filter((label) => label !== undefined) as string[],
+    })
+    const params = [
+        {
+            varName: 'self',
+            valueSet: {
+                type: 'rc-type',
+                namespace: receiverType.namespace,
+                typeName: 'void',
+                semantics: 'SHARED',
+            } satisfies cir.ValueSet,
+        },
+        ...method.parameters,
+    ]
+    return `${returnType} (*${mangledName})(${params
+        .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
+        .join(', ')});`
 }
 
 function lowerMethod(

@@ -57,4 +57,26 @@ describe('Type declaration', () => {
         const result = lowerDecl(typeDecl)
         expect(result).toContain('void MyType¸myCompanionMethod() {')
     })
+
+    it('adds vtable for polymorphic methods', () => {
+        const typeDecl: cir.Declaration = {
+            kind: 'TYPE_DECL',
+            name: 'MyType',
+            fields: [],
+            methods: [
+                {
+                    kind: 'FUNCTION_DECL',
+                    polymorphic: true,
+                    baseName: 'f',
+                    parameters: [],
+                    body: [],
+                    resultValueSet: { type: 'integer' },
+                },
+            ],
+        }
+
+        const result = lowerDecl(typeDecl)
+        expect(result).toContain('int64_t (*f)(void* self);')
+        expect(result).toContain('MyTypeˇvtable;')
+    })
 })

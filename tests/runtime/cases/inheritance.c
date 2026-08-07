@@ -24,8 +24,10 @@ static const __type_info Prismˇtype = {
         .super = NULL,
     }
 };
+typedef int (*Prism·areaˇmethod)(void* self);
+
 typedef struct Prismˇvtable {
-    int (*area)(void* self);
+    Prism·areaˇmethod area;
 } Prismˇvtable;
 
 // Clawr: `inheritance: func new(height: integer @range(0..20))`
@@ -50,7 +52,6 @@ int Prism·volume(Prism* self) {
 //     depth: integer
 // }
 // ```
-int RectBlock·area(void* self);
 typedef struct RectBlockˇfields {
     int width;
     int depth;
@@ -60,22 +61,21 @@ typedef struct RectBlock {
     int width;
     int depth;
 } RectBlock;
+
+// Clawr: `func area() => self.width * self.depth`
+int RectBlock·area(RectBlock* self) {
+    return self->width * self->depth;
+}
+
 static __type_info RectBlockˇtype = {
     .polymorphic_type = {
         .data = { .size = sizeof(RectBlock) },
         .super = &Prismˇtype.polymorphic_type,
         .vtable = &(Prismˇvtable) {
-            .area = RectBlock·area,
+            .area = (Prism·areaˇmethod)RectBlock·area,
         },
     }
 };
-
-// Clawr: `func area() => self.width * self.depth`
-int RectBlock·area(void* self) {
-    RectBlock* rect = (RectBlock*) self;
-    return rect->width * rect->depth;
-}
-
 
 // Clawr: `func new(width: integer, depth: integer, height: integer) -> RectBlock`
 RectBlock* RectBlock¸new_width_depth_height(int width, int depth, int height) {

@@ -30,6 +30,9 @@ export function lowerDecl(decl: cir.Declaration): string {
                 .map((field) => `${lowerType(field.valueSet)} ${field.name};`)
                 .join('\n')
             const polymorphics = decl.methods.filter((m) => m.polymorphic)
+            const vtableTypedefs = polymorphics.map((m) =>
+                lowerMethodTypedef(m, decl),
+            )
             const vtableStruct = polymorphics.length
                 ? `typedef struct {
                     ${polymorphics.map((m) => lowerVtableEntry(m, decl)).join('\n')}
@@ -44,6 +47,7 @@ export function lowerDecl(decl: cir.Declaration): string {
                 ${decl.name}ˇfields fields;
             } ${decl.name};
 
+            ${vtableTypedefs.join('\n')}
             ${vtableStruct}
 
             static const __type_info ${decl.name}ˇtype = {
@@ -73,18 +77,15 @@ export function lowerDecl(decl: cir.Declaration): string {
     }
 }
 
-function lowerVtableEntry(
-    method: cir.Declaration & { kind: 'FUNCTION_DECL' },
+function lowerMethodTypedef(
+    decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
     receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
 ): string {
-    const returnType = method.resultValueSet
-        ? lowerType(method.resultValueSet)
-        : 'void'
     const mangledName = mangleFunctionName({
-        namespace: undefined,
-        typeName: undefined,
-        baseName: method.baseName,
-        labels: method.parameters
+        namespace: receiverType.namespace,
+        typeName: receiverType.name,
+        baseName: decl.baseName,
+        labels: decl.parameters
             .map((p) => p.label)
             .filter((label) => label !== undefined) as string[],
     })
@@ -98,11 +99,34 @@ function lowerVtableEntry(
                 semantics: 'SHARED',
             } satisfies cir.ValueSet,
         },
-        ...method.parameters,
+        ...decl.parameters,
     ]
-    return `${returnType} (*${mangledName})(${params
+    return `typedef ${decl.resultValueSet ? lowerType(decl.resultValueSet) : 'void'} (*${mangledName}ˇmethod)(${params
         .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
         .join(', ')});`
+}
+
+function lowerVtableEntry(
+    method: cir.Declaration & { kind: 'FUNCTION_DECL' },
+    receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
+): string {
+    const mangledName = mangleFunctionName({
+        namespace: undefined,
+        typeName: undefined,
+        baseName: method.baseName,
+        labels: method.parameters
+            .map((p) => p.label)
+            .filter((label) => label !== undefined) as string[],
+    })
+    const mangled = mangleFunctionName({
+        namespace: receiverType.namespace,
+        typeName: receiverType.name,
+        baseName: method.baseName,
+        labels: method.parameters
+            .map((p) => p.label)
+            .filter((label) => label !== undefined) as string[],
+    })
+    return `${mangled}ˇmethod ${mangledName};`
 }
 
 function lowerMethod(

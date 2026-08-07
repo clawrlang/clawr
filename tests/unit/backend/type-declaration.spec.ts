@@ -76,7 +76,10 @@ describe('Type declaration', () => {
         }
 
         const result = lowerDecl(typeDecl)
-        expect(result).toContain('int64_t (*f)(void* self);')
+        expect(result).toContain(
+            'typedef int64_t (*MyType·fˇmethod)(void* self);',
+        )
+        expect(result).toContain('MyType·fˇmethod f;')
         expect(result).toContain('MyTypeˇvtable;')
     })
 })

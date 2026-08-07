@@ -211,4 +211,53 @@ describe('Function Calls', () => {
             expect(result).toBe('Object·myMethod(myObject);')
         })
     })
+
+    describe('adds receiver namespace to function call when present', () => {
+        test('expression', () => {
+            const expr: Expression = {
+                kind: 'CALL',
+                receiver: {
+                    kind: 'VARIABLE_REF',
+                    name: 'myObject',
+                    valueSet: {
+                        type: 'rc-type',
+                        namespace: 'ns',
+                        typeName: 'Object',
+                        semantics: 'ISOLATED',
+                    },
+                },
+                name: {
+                    baseName: 'myMethod',
+                    labels: [],
+                },
+                arguments: [],
+                valueSet: { type: 'truthvalue', values: [] },
+            }
+            const result = lowerExpr(expr)
+            expect(result).toBe('ns¸Object·myMethod(myObject)')
+        })
+
+        test('statement', () => {
+            const stmt: Statement = {
+                kind: 'CALL',
+                receiver: {
+                    kind: 'VARIABLE_REF',
+                    name: 'myObject',
+                    valueSet: {
+                        type: 'rc-type',
+                        namespace: 'ns',
+                        typeName: 'Object',
+                        semantics: 'ISOLATED',
+                    },
+                },
+                name: {
+                    baseName: 'myMethod',
+                    labels: [],
+                },
+                arguments: [],
+            }
+            const result = lowerStmt(stmt)
+            expect(result).toBe('ns¸Object·myMethod(myObject);')
+        })
+    })
 })

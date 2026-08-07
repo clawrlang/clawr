@@ -183,6 +183,7 @@ type StringValueSet = { type: 'string' }
 
 type RcTypeValueSet = {
     type: 'rc-type'
+    namespace?: string
     typeName: string
     semantics: 'SHARED' | 'ISOLATED'
 }

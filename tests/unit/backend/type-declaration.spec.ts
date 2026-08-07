@@ -4,7 +4,7 @@ import type * as cir from '../../../src/cir'
 import { lowerDecl } from '../../../src/backend'
 
 describe('Type declaration', () => {
-    it('adds methods as mangled function names', () => {
+    it('adds methods as functions with mangled names', () => {
         const typeDecl: cir.Declaration = {
             kind: 'TYPE_DECL',
             name: 'MyType',
@@ -23,7 +23,29 @@ describe('Type declaration', () => {
         expect(result).toContain('void MyType·myMethod(MyType* self) {')
     })
 
-    it('adds includes namespace in function names', () => {
+    it('includes namespace in mangled method names', () => {
+        const typeDecl: cir.Declaration = {
+            kind: 'TYPE_DECL',
+            namespace: 'my_namespace',
+            name: 'MyType',
+            fields: [],
+            methods: [
+                {
+                    kind: 'FUNCTION_DECL',
+                    baseName: 'myMethod',
+                    parameters: [],
+                    body: [],
+                },
+            ],
+        }
+
+        const result = lowerDecl(typeDecl)
+        expect(result).toContain(
+            'void my_namespace¸MyType·myMethod(MyType* self) {',
+        )
+    })
+
+    it('includes namespace in mangled free-function names', () => {
         const typeDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
             namespace: 'MyType',

@@ -42,14 +42,23 @@ export function lowerDecl(decl: cir.Declaration): string {
                 .data_type = { .size = sizeof(${decl.name}) }
             };
 
-            ${decl.methods?.map((m) => lowerMethod({ ...m, typeName: decl.name })).join('\n') ?? ''}
+            ${decl.methods?.map((m) => lowerMethod(m, decl)).join('\n') ?? ''}
             `
         }
         case 'VARIABLE_DECL':
             return `${lowerType(decl.valueSet)} ${decl.name};`
 
         case 'FUNCTION_DECL':
-            return lowerFunction(decl)
+            const mangledFunctionName = mangleFunctionName({
+                namespace: decl.namespace,
+                baseName: decl.baseName,
+                labels: decl.parameters
+                    .map((param) => param.label)
+                    .filter((label) => label !== undefined) as string[],
+                typeName: undefined,
+            })
+
+            return lowerFunction(decl, mangledFunctionName)
 
         default:
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
@@ -57,39 +66,42 @@ export function lowerDecl(decl: cir.Declaration): string {
 }
 
 function lowerMethod(
-    decl: cir.Declaration & { kind: 'FUNCTION_DECL'; typeName: string },
+    decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
+    receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
 ): string {
-    return lowerFunction({
-        ...decl,
-        parameters: [
-            {
-                varName: 'self',
-                valueSet: {
-                    type: 'rc-type',
-                    typeName: decl.typeName,
-                    semantics: 'SHARED',
-                },
-            },
-            ...decl.parameters,
-        ],
-    })
-}
-
-function lowerFunction(
-    decl: cir.Declaration & {
-        kind: 'FUNCTION_DECL'
-        typeName?: string
-    },
-) {
     const mangledFunctionName = mangleFunctionName({
-        namespace: decl.namespace,
+        namespace: receiverType.namespace,
         baseName: decl.baseName,
         labels: decl.parameters
             .map((param) => param.label)
             .filter((label) => label !== undefined) as string[],
-        typeName: decl.typeName,
+        typeName: receiverType?.name,
     })
 
+    return lowerFunction(
+        {
+            ...decl,
+            parameters: [
+                {
+                    varName: 'self',
+                    valueSet: {
+                        type: 'rc-type',
+                        namespace: receiverType.namespace,
+                        typeName: receiverType.name,
+                        semantics: 'SHARED',
+                    },
+                },
+                ...decl.parameters,
+            ],
+        },
+        mangledFunctionName,
+    )
+}
+
+function lowerFunction(
+    decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
+    mangledName: string,
+) {
     const params = decl.parameters
         .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
         .join(', ')
@@ -97,7 +109,7 @@ function lowerFunction(
         ? lowerType(decl.resultValueSet)
         : 'void'
 
-    return `${returnType} ${mangledFunctionName}(${params}) {
+    return `${returnType} ${mangledName}(${params}) {
         ${decl.body.map(lowerStmt).join('\n')}
     }`
 }
@@ -130,7 +142,10 @@ export function lowerStmt(stmt: cir.Statement): string {
                 ? [lowerExpr(stmt.receiver), ...stmt.arguments.map(lowerExpr)]
                 : stmt.arguments.map(lowerExpr)
             const name = mangleFunctionName({
-                namespace: stmt.name.namespace,
+                namespace:
+                    stmt.receiver?.valueSet.type === 'rc-type'
+                        ? stmt.receiver.valueSet.namespace
+                        : stmt.name.namespace,
                 baseName: stmt.name.baseName,
                 labels: stmt.name.labels,
                 typeName:
@@ -181,7 +196,10 @@ export function lowerExpr(expr: cir.Expression): string {
                 ? [lowerExpr(expr.receiver), ...expr.arguments.map(lowerExpr)]
                 : expr.arguments.map(lowerExpr)
             const name = mangleFunctionName({
-                namespace: expr.name.namespace,
+                namespace:
+                    expr.receiver?.valueSet.type == 'rc-type'
+                        ? expr.receiver.valueSet.namespace
+                        : expr.name.namespace,
                 baseName: expr.name.baseName,
                 labels: expr.name.labels,
                 typeName:
@@ -222,7 +240,10 @@ function mangleFunctionName({
     labels: string[]
 }): string {
     const freeFunctionName = [baseName, ...labels].filter(Boolean).join('˛')
-    if (typeName) return `${typeName}·${freeFunctionName}`
-
-    return namespace ? `${namespace}¸${freeFunctionName}` : freeFunctionName
+    if (typeName)
+        return namespace
+            ? `${namespace}¸${typeName}·${freeFunctionName}`
+            : `${typeName}·${freeFunctionName}`
+    else
+        return namespace ? `${namespace}¸${freeFunctionName}` : freeFunctionName
 }

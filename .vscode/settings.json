@@ -171,6 +171,7 @@
             "type": "object",
             "properties": {
               "type": { "const": "rc-type" },
+              "namespace": { "type": "string" },
               "typeName": { "type": "string" },
               "semantics": {
                 "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]

@@ -356,7 +356,6 @@
             "type": "object",
             "properties": {
               "kind": { "const": "VARIABLE_DECL" },
-              "namespace": { "type": "string" },
               "name": { "type": "string" },
               "valueSet": { "$ref": "#/$defs/ValueSet" },
               "initialValue": { "$ref": "#/$defs/Expression" }
@@ -366,17 +365,23 @@
           },
           "Declaration": {
             "oneOf": [
-              { "$ref": "#/$defs/FunctionDeclaration" },
-              { "$ref": "#/$defs/TypeDeclaration" },
-              { "$ref": "#/$defs/VariableDeclaration" }
-            ]
+              { "$ref": "#/$defs/__typeFunctionDeclaration" },
+              { "$ref": "#/$defs/__typeTypeDeclaration" },
+              { "$ref": "#/$defs/__typeVariableDeclaration" }
+            ],
+            "discriminator": {
+              "mapping": {
+                "FUNCTION_DECL": "#/components/schemas/__typeFunctionDeclaration",
+                "TYPE_DECL": "#/components/schemas/__typeTypeDeclaration",
+                "VARIABLE_DECL": "#/components/schemas/__typeVariableDeclaration"
+              },
+              "propertyName": "kind"
+            }
           },
-          "FunctionDeclaration": {
+          "__typeFunctionDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "FUNCTION_DECL" },
-              "namespace": { "type": "string" },
-              "polymorphic": { "type": "boolean" },
               "baseName": { "type": "string" },
               "parameters": {
                 "type": "array",
@@ -403,16 +408,16 @@
                   { "$ref": "#/$defs/StringValueSet" },
                   { "$ref": "#/$defs/TruthValueSet" }
                 ]
-              }
+              },
+              "namespace": { "type": "string" }
             },
             "required": ["kind", "baseName", "parameters", "body"],
             "additionalProperties": false
           },
-          "TypeDeclaration": {
+          "__typeTypeDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "TYPE_DECL" },
-              "namespace": { "type": "string" },
               "name": { "type": "string" },
               "fields": {
                 "type": "array",
@@ -428,10 +433,59 @@
               },
               "methods": {
                 "type": "array",
-                "items": { "$ref": "#/$defs/FunctionDeclaration" }
-              }
+                "items": { "$ref": "#/$defs/FunctionDeclaration__type" }
+              },
+              "namespace": { "type": "string" }
             },
             "required": ["kind", "name", "fields", "methods"],
+            "additionalProperties": false
+          },
+          "FunctionDeclaration__type": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "FUNCTION_DECL" },
+              "baseName": { "type": "string" },
+              "parameters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": { "type": "string" },
+                    "varName": { "type": "string" },
+                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                  },
+                  "required": ["varName", "valueSet"],
+                  "additionalProperties": false
+                }
+              },
+              "body": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/Statement" }
+              },
+              "resultValueSet": {
+                "oneOf": [
+                  { "$ref": "#/$defs/IntegerValueSet" },
+                  { "$ref": "#/$defs/RcTypeValueSet" },
+                  { "$ref": "#/$defs/RealValueSet" },
+                  { "$ref": "#/$defs/StringValueSet" },
+                  { "$ref": "#/$defs/TruthValueSet" }
+                ]
+              },
+              "polymorphic": { "type": "boolean" }
+            },
+            "required": ["kind", "baseName", "parameters", "body"],
+            "additionalProperties": false
+          },
+          "__typeVariableDeclaration": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "VARIABLE_DECL" },
+              "name": { "type": "string" },
+              "valueSet": { "$ref": "#/$defs/ValueSet" },
+              "initialValue": { "$ref": "#/$defs/Expression" },
+              "namespace": { "type": "string" }
+            },
+            "required": ["kind", "name", "valueSet", "initialValue"],
             "additionalProperties": false
           }
         }

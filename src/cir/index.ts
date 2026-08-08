@@ -10,7 +10,6 @@ export type ClawrModule = {
 
 type VariableDeclaration = {
     kind: 'VARIABLE_DECL'
-    namespace?: string
     name: string
     valueSet: ValueSet
     initialValue: Expression
@@ -18,8 +17,6 @@ type VariableDeclaration = {
 
 type FunctionDeclaration = {
     kind: 'FUNCTION_DECL'
-    namespace?: string
-    polymorphic?: boolean
     baseName: string
     parameters: {
         label?: string
@@ -32,17 +29,17 @@ type FunctionDeclaration = {
 
 type TypeDeclaration = {
     kind: 'TYPE_DECL'
-    namespace?: string
     name: string
     fields: {
         name: string
         valueSet: ValueSet
     }[]
-    methods: FunctionDeclaration[]
+    methods: (FunctionDeclaration & { polymorphic?: boolean })[]
 }
 
-export type Declaration =
+export type Declaration = { namespace?: string } & (
     VariableDeclaration | FunctionDeclaration | TypeDeclaration
+)
 
 // ----------
 // Statements

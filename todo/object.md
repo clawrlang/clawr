@@ -1,7 +1,6 @@
 # `object`/`service`
 
 - Parse `{ Super.init() }` data literal
-- Expose polymorphism in CIR
 - Dispose `service` (e.g. close file handle) when deallocated
 
 ## Enforce on Frontend
@@ -16,3 +15,11 @@
 - `companion` with no matching type is an error
 - Add `object`/`service` type
 - Make `CALL` support methods
+
+## Advanced Features (Later)
+
+- Advanced Polymorphism
+  - Abstract methods & supers
+  - Add vtable low in hierarchy
+  - Multiple vtables in hierarchy
+  - Conformance witness tables

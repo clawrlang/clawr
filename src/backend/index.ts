@@ -35,53 +35,23 @@ export function lowerDecl(decl: cir.Declaration): string {
             )
             const vtableStruct = polymorphics.length
                 ? `typedef struct {
-                    ${polymorphics.map((m) => lowerVtableEntry(m, decl)).join('\n')}
+                    ${polymorphics.map((m) => `${mangleName(m, decl)}ˇmethod ${mangleName(m)};`).join('\n')}
                 } ${decl.name}ˇvtable;`
                 : ''
             const vtableMethods = polymorphics
                 .map((m) => {
-                    const mangledName = mangleFunctionName({
-                        namespace: decl.namespace,
-                        typeName: decl.name,
-                        baseName: m.baseName,
-                        labels: m.parameters
-                            .map((p) => p.label)
-                            .filter((label) => label !== undefined) as string[],
-                    })
-
-                    return `.${mangleFunctionName({
-                        namespace: undefined,
-                        baseName: m.baseName,
-                        labels: m.parameters
-                            .map((param) => param.label)
-                            .filter((label) => label !== undefined) as string[],
-                        typeName: undefined,
-                    })} = (${mangledName}ˇmethod)${mangleFunctionName({
-                        namespace: decl.namespace,
-                        baseName: m.baseName,
-                        labels: m.parameters
-                            .map((param) => param.label)
-                            .filter((label) => label !== undefined) as string[],
-                        typeName: decl.name,
-                    })},`
+                    const mangledName = mangleName(m, decl)
+                    return `.${mangleName(m)} = (${mangledName}ˇmethod)${mangledName},`
                 })
                 .join('\n')
             const typeInfo = polymorphics.length
-                ? `
-                    static const __type_info ${decl.name}ˇtype = {
-                        .polymorphic_type = {
-                            .data = { .size = sizeof(${decl.name}) },
-                            .vtable = &(${decl.name}ˇvtable){
-                                ${vtableMethods}
-                            }
+                ? `.polymorphic_type = {
+                        .data = { .size = sizeof(${decl.name}) },
+                        .vtable = &(${decl.name}ˇvtable){
+                            ${vtableMethods}
                         }
-                    };
-                    `
-                : `
-                    static const __type_info ${decl.name}ˇtype = {
-                        .data_type = { .size = sizeof(${decl.name}) }
-                    };
-                    `
+                    }`
+                : `.data_type = { .size = sizeof(${decl.name}) }`
             return `typedef struct {
                 ${fields}
             } ${decl.name}ˇfields;
@@ -93,7 +63,9 @@ export function lowerDecl(decl: cir.Declaration): string {
 
             ${vtableTypedefs.join('\n')}
             ${vtableStruct}
-            ${typeInfo}
+            static const __type_info ${decl.name}ˇtype = {
+                ${typeInfo}
+            };
 
             ${decl.methods?.map((m) => lowerMethod(m, decl)).join('\n') ?? ''}
             `
@@ -102,16 +74,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             return `${lowerType(decl.valueSet)} ${decl.name};`
 
         case 'FUNCTION_DECL':
-            const mangledFunctionName = mangleFunctionName({
-                namespace: decl.namespace,
-                baseName: decl.baseName,
-                labels: decl.parameters
-                    .map((param) => param.label)
-                    .filter((label) => label !== undefined) as string[],
-                typeName: undefined,
-            })
-
-            return lowerFunction(decl, mangledFunctionName)
+            return lowerFunction(decl, mangleName(decl))
 
         default:
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
@@ -122,14 +85,7 @@ function lowerMethodTypedef(
     decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
     receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
 ): string {
-    const mangledName = mangleFunctionName({
-        namespace: receiverType.namespace,
-        typeName: receiverType.name,
-        baseName: decl.baseName,
-        labels: decl.parameters
-            .map((p) => p.label)
-            .filter((label) => label !== undefined) as string[],
-    })
+    const mangledName = mangleName(decl, receiverType)
     const params = [
         {
             varName: 'self',
@@ -147,42 +103,11 @@ function lowerMethodTypedef(
         .join(', ')});`
 }
 
-function lowerVtableEntry(
-    method: cir.Declaration & { kind: 'FUNCTION_DECL' },
-    receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
-): string {
-    const mangledName = mangleFunctionName({
-        namespace: undefined,
-        typeName: undefined,
-        baseName: method.baseName,
-        labels: method.parameters
-            .map((p) => p.label)
-            .filter((label) => label !== undefined) as string[],
-    })
-    const mangled = mangleFunctionName({
-        namespace: receiverType.namespace,
-        typeName: receiverType.name,
-        baseName: method.baseName,
-        labels: method.parameters
-            .map((p) => p.label)
-            .filter((label) => label !== undefined) as string[],
-    })
-    return `${mangled}ˇmethod ${mangledName};`
-}
-
 function lowerMethod(
     decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
     receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
 ): string {
-    const mangledFunctionName = mangleFunctionName({
-        namespace: receiverType.namespace,
-        baseName: decl.baseName,
-        labels: decl.parameters
-            .map((param) => param.label)
-            .filter((label) => label !== undefined) as string[],
-        typeName: receiverType?.name,
-    })
-
+    const mangledFunctionName = mangleName(decl, receiverType)
     return lowerFunction(
         {
             ...decl,
@@ -331,6 +256,20 @@ export function lowerTruthvalueLiteral(
     expr: Extract<cir.Expression, { kind: 'TRUTHVALUE_LITERAL' }>,
 ): string {
     return `c_${expr.value}`
+}
+
+function mangleName(
+    decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
+    receiver?: cir.Declaration & { kind: 'TYPE_DECL' },
+): string {
+    return mangleFunctionName({
+        namespace: receiver ? receiver.namespace : decl.namespace,
+        typeName: receiver ? receiver.name : undefined,
+        baseName: decl.baseName,
+        labels: decl.parameters
+            .map((p) => p.label)
+            .filter((label) => label !== undefined) as string[],
+    })
 }
 
 function mangleFunctionName({

@@ -26,6 +26,7 @@ export function lower(cir: cir.ClawrModule): string {
 export function lowerDecl(decl: cir.Declaration): string {
     switch (decl.kind) {
         case 'TYPE_DECL': {
+            const mangledTypeName = mangleTypeName(decl)
             const fields = decl.fields
                 .map((field) => `${lowerType(field.valueSet)} ${field.name};`)
                 .join('\n')
@@ -36,7 +37,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             const vtableStruct = polymorphics.length
                 ? `typedef struct {
                     ${polymorphics.map((m) => `${mangleName(m, decl)}ˇmethod ${mangleName(m)};`).join('\n')}
-                } ${decl.name}ˇvtable;`
+                } ${mangledTypeName}ˇvtable;`
                 : ''
             const vtableMethods = polymorphics
                 .map((m) => {
@@ -46,24 +47,24 @@ export function lowerDecl(decl: cir.Declaration): string {
                 .join('\n')
             const typeInfo = polymorphics.length
                 ? `.polymorphic_type = {
-                        .data = { .size = sizeof(${decl.name}) },
-                        .vtable = &(${decl.name}ˇvtable){
+                        .data = { .size = sizeof(${mangledTypeName}) },
+                        .vtable = &(${mangledTypeName}ˇvtable){
                             ${vtableMethods}
                         }
                     }`
-                : `.data_type = { .size = sizeof(${decl.name}) }`
+                : `.data_type = { .size = sizeof(${mangledTypeName}) }`
             return `typedef struct {
                 ${fields}
-            } ${decl.name}ˇfields;
+            } ${mangledTypeName}ˇfields;
 
             typedef struct {
                 __rc_header header;
-                ${decl.name}ˇfields fields;
-            } ${decl.name};
+                ${mangledTypeName}ˇfields fields;
+            } ${mangledTypeName};
 
             ${vtableTypedefs.join('\n')}
             ${vtableStruct}
-            static const __type_info ${decl.name}ˇtype = {
+            static const __type_info ${mangledTypeName}ˇtype = {
                 ${typeInfo}
             };
 
@@ -284,10 +285,22 @@ function mangleFunctionName({
     labels: string[]
 }): string {
     const freeFunctionName = [baseName, ...labels].filter(Boolean).join('˛')
-    if (typeName)
-        return namespace
-            ? `${namespace}¸${typeName}·${freeFunctionName}`
-            : `${typeName}·${freeFunctionName}`
-    else
+    if (typeName) {
+        const mangledTypeName = mangleTypeName({
+            namespace,
+            name: typeName,
+        })
+        return `${mangledTypeName}·${freeFunctionName}`
+    } else
         return namespace ? `${namespace}¸${freeFunctionName}` : freeFunctionName
+}
+
+function mangleTypeName({
+    namespace,
+    name,
+}: {
+    namespace?: string
+    name: string
+}): string {
+    return namespace ? `${namespace}¸${name}` : `${name}`
 }

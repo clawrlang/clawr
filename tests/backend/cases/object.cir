@@ -123,13 +123,16 @@
                 {
                     "kind": "CALL",
                     "receiver": {
-                        "kind": "VARIABLE_REF",
-                        "name": "obj",
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "Object",
-                            "semantics": "ISOLATED"
-                        }
+                        "object": {
+                            "kind": "VARIABLE_REF",
+                            "name": "obj",
+                            "valueSet": {
+                                "type": "rc-type",
+                                "typeName": "Object",
+                                "semantics": "ISOLATED"
+                            }
+                        },
+                        "dispatch": "direct"
                     },
                     "name": {
                         "baseName": "field",

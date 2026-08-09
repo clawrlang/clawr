@@ -170,13 +170,16 @@ describe('Function Calls', () => {
             const expr: Expression = {
                 kind: 'CALL',
                 receiver: {
-                    kind: 'VARIABLE_REF',
-                    name: 'myObject',
-                    valueSet: {
-                        type: 'rc-type',
-                        typeName: 'Object',
-                        semantics: 'ISOLATED',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'myObject',
+                        valueSet: {
+                            type: 'rc-type',
+                            typeName: 'Object',
+                            semantics: 'ISOLATED',
+                        },
                     },
+                    dispatch: 'direct',
                 },
                 name: {
                     baseName: 'myMethod',
@@ -193,13 +196,16 @@ describe('Function Calls', () => {
             const stmt: Statement = {
                 kind: 'CALL',
                 receiver: {
-                    kind: 'VARIABLE_REF',
-                    name: 'myObject',
-                    valueSet: {
-                        type: 'rc-type',
-                        typeName: 'Object',
-                        semantics: 'ISOLATED',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'myObject',
+                        valueSet: {
+                            type: 'rc-type',
+                            typeName: 'Object',
+                            semantics: 'ISOLATED',
+                        },
                     },
+                    dispatch: 'direct',
                 },
                 name: {
                     baseName: 'myMethod',
@@ -217,14 +223,17 @@ describe('Function Calls', () => {
             const expr: Expression = {
                 kind: 'CALL',
                 receiver: {
-                    kind: 'VARIABLE_REF',
-                    name: 'myObject',
-                    valueSet: {
-                        type: 'rc-type',
-                        namespace: 'ns',
-                        typeName: 'Object',
-                        semantics: 'ISOLATED',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'myObject',
+                        valueSet: {
+                            type: 'rc-type',
+                            namespace: 'ns',
+                            typeName: 'Object',
+                            semantics: 'ISOLATED',
+                        },
                     },
+                    dispatch: 'direct',
                 },
                 name: {
                     baseName: 'myMethod',
@@ -241,14 +250,17 @@ describe('Function Calls', () => {
             const stmt: Statement = {
                 kind: 'CALL',
                 receiver: {
-                    kind: 'VARIABLE_REF',
-                    name: 'myObject',
-                    valueSet: {
-                        type: 'rc-type',
-                        namespace: 'ns',
-                        typeName: 'Object',
-                        semantics: 'ISOLATED',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'myObject',
+                        valueSet: {
+                            type: 'rc-type',
+                            namespace: 'ns',
+                            typeName: 'Object',
+                            semantics: 'ISOLATED',
+                        },
                     },
+                    dispatch: 'direct',
                 },
                 name: {
                     baseName: 'myMethod',

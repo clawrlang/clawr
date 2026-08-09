@@ -19,7 +19,4 @@
 ## Advanced Features (Later)
 
 - Advanced Polymorphism
-  - Abstract methods & supers
-  - Add vtable low in hierarchy
-  - Multiple vtables in hierarchy
   - Conformance witness tables

@@ -17,24 +17,33 @@ type VariableDeclaration = {
 
 type FunctionDeclaration = {
     kind: 'FUNCTION_DECL'
+    body: Statement[]
+} & FunctionSignature
+
+type FunctionSignature = {
     baseName: string
     parameters: {
         label?: string
         varName: string
         valueSet: ValueSet
     }[]
-    body: Statement[]
     resultValueSet?: ValueSet
 }
 
 type TypeDeclaration = {
     kind: 'TYPE_DECL'
     name: string
+    base?: { type: string; namespace?: string }
     fields: {
         name: string
         valueSet: ValueSet
     }[]
-    methods: (FunctionDeclaration & { polymorphic?: boolean })[]
+    methods: FunctionDeclaration[]
+    dispatchTable?: {
+        slot: FunctionSignature
+        declaredIn: { name: string; namespace?: string }
+        implementedBy?: { name: string; namespace?: string }
+    }[]
 }
 
 export type Declaration = { namespace?: string } & (
@@ -55,9 +64,14 @@ type Release = {
     object: Storage
 }
 
+type Receiver = {
+    object: Storage
+    dispatch: 'direct' | 'inherited'
+}
+
 type FunctionCall = {
     kind: 'CALL'
-    receiver?: Expression
+    receiver?: Receiver
     name: {
         namespace?: string
         baseName: string

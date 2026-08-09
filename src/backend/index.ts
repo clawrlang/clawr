@@ -30,22 +30,18 @@ export function lowerDecl(decl: cir.Declaration): string {
             const fields = decl.fields
                 .map((field) => `${lowerType(field.valueSet)} ${field.name};`)
                 .join('\n')
-            const polymorphics = decl.methods.filter((m) => m.polymorphic)
-            const vtableTypedefs = polymorphics.map((m) =>
-                lowerMethodTypedef(m, decl),
+            const vtableTypedefs = (decl.dispatchTable ?? [])?.map(
+                lowerMethodTypedef,
             )
-            const vtableStruct = polymorphics.length
+            const vtableStruct = decl.dispatchTable
                 ? `typedef struct {
-                    ${polymorphics.map((m) => `${mangleName(m, decl)}ˇmethod ${mangleName(m)};`).join('\n')}
-                } ${mangledTypeName}ˇvtable;`
+                        ${decl.dispatchTable.map(lowerVtableSlot).join('\n')}
+                    } ${mangledTypeName}ˇvtable;`
                 : ''
-            const vtableMethods = polymorphics
-                .map((m) => {
-                    const mangledName = mangleName(m, decl)
-                    return `.${mangleName(m)} = (${mangledName}ˇmethod)${mangledName},`
-                })
+            const vtableMethods = decl.dispatchTable
+                ?.map(lowerVtableMethod)
                 .join('\n')
-            const typeInfo = polymorphics.length
+            const typeInfo = decl.dispatchTable
                 ? `.polymorphic_type = {
                         .data = { .size = sizeof(${mangledTypeName}) },
                         .vtable = &(${mangledTypeName}ˇvtable){
@@ -64,11 +60,10 @@ export function lowerDecl(decl: cir.Declaration): string {
 
             ${vtableTypedefs.join('\n')}
             ${vtableStruct}
+            ${decl.methods?.map((m) => lowerMethod(m, decl)).join('\n') ?? ''}
             static const __type_info ${mangledTypeName}ˇtype = {
                 ${typeInfo}
             };
-
-            ${decl.methods?.map((m) => lowerMethod(m, decl)).join('\n') ?? ''}
             `
         }
         case 'VARIABLE_DECL':
@@ -82,26 +77,62 @@ export function lowerDecl(decl: cir.Declaration): string {
     }
 }
 
-function lowerMethodTypedef(
-    decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
-    receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
-): string {
-    const mangledName = mangleName(decl, receiverType)
+function lowerVtableMethod(slot: DispatchSlot) {
+    if (!slot.implementedBy) throw new Error('slot not implemented')
+
+    const slotName = getSlotFunctionName(slot.slot)
+    const declaredName = getSlotFunctionName(slot.slot, slot.declaredIn)
+    const implementedName = getSlotFunctionName(slot.slot, slot.implementedBy)
+
+    return `.${slotName} = (${declaredName}ˇmethod)${implementedName},`
+}
+
+function lowerVtableSlot(slot: DispatchSlot) {
+    const typeName = `${getSlotFunctionName(slot.slot, slot.declaredIn)}ˇmethod`
+    const memberName = getSlotFunctionName(slot.slot)
+    return `${typeName} ${memberName};`
+}
+
+function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
+    const returnType = slot.resultValueSet
+        ? lowerType(slot.resultValueSet)
+        : 'void'
+
     const params = [
         {
             varName: 'self',
             valueSet: {
                 type: 'rc-type',
-                namespace: receiverType.namespace,
                 typeName: 'void',
                 semantics: 'SHARED',
             } satisfies cir.ValueSet,
         },
-        ...decl.parameters,
+        ...slot.parameters,
     ]
-    return `typedef ${decl.resultValueSet ? lowerType(decl.resultValueSet) : 'void'} (*${mangledName}ˇmethod)(${params
+
+    const mangledName = getSlotFunctionName(slot, declaredIn)
+
+    const paramDecls = params
         .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
-        .join(', ')});`
+        .join(', ')
+    return `typedef ${returnType} (*${mangledName}ˇmethod)(${paramDecls});`
+}
+
+// New helper function to extract common slot name generation logic
+function getSlotFunctionName(
+    slot: { baseName: string; parameters: Array<{ label?: string }> },
+    type?: { namespace?: string; name: string },
+): string {
+    const labels = slot.parameters
+        .map((p) => p.label)
+        .filter((l) => l) as string[]
+
+    return mangleFunctionName({
+        namespace: type?.namespace,
+        typeName: type?.name,
+        baseName: slot.baseName,
+        labels,
+    })
 }
 
 function lowerMethod(
@@ -170,18 +201,21 @@ export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
         case 'CALL':
             const args = stmt.receiver
-                ? [lowerExpr(stmt.receiver), ...stmt.arguments.map(lowerExpr)]
+                ? [
+                      lowerExpr(stmt.receiver.object),
+                      ...stmt.arguments.map(lowerExpr),
+                  ]
                 : stmt.arguments.map(lowerExpr)
             const name = mangleFunctionName({
                 namespace:
-                    stmt.receiver?.valueSet.type === 'rc-type'
-                        ? stmt.receiver.valueSet.namespace
+                    stmt.receiver?.object.valueSet.type === 'rc-type'
+                        ? stmt.receiver.object.valueSet.namespace
                         : stmt.name.namespace,
                 baseName: stmt.name.baseName,
                 labels: stmt.name.labels,
                 typeName:
-                    stmt.receiver?.valueSet.type === 'rc-type'
-                        ? stmt.receiver.valueSet.typeName
+                    stmt.receiver?.object.valueSet.type === 'rc-type'
+                        ? stmt.receiver.object.valueSet.typeName
                         : undefined,
             })
             return `${name}(${args.join(', ')});`
@@ -224,18 +258,21 @@ export function lowerExpr(expr: cir.Expression): string {
             return lowerTruthvalueLiteral(expr)
         case 'CALL':
             const args = expr.receiver
-                ? [lowerExpr(expr.receiver), ...expr.arguments.map(lowerExpr)]
+                ? [
+                      lowerExpr(expr.receiver.object),
+                      ...expr.arguments.map(lowerExpr),
+                  ]
                 : expr.arguments.map(lowerExpr)
             const name = mangleFunctionName({
                 namespace:
-                    expr.receiver?.valueSet.type == 'rc-type'
-                        ? expr.receiver.valueSet.namespace
+                    expr.receiver?.object.valueSet.type == 'rc-type'
+                        ? expr.receiver.object.valueSet.namespace
                         : expr.name.namespace,
                 baseName: expr.name.baseName,
                 labels: expr.name.labels,
                 typeName:
-                    expr.receiver?.valueSet.type === 'rc-type'
-                        ? expr.receiver.valueSet.typeName
+                    expr.receiver?.object.valueSet.type === 'rc-type'
+                        ? expr.receiver.object.valueSet.typeName
                         : undefined,
             })
             return `${name}(${args.join(', ')})`
@@ -267,10 +304,15 @@ function mangleName(
         namespace: receiver ? receiver.namespace : decl.namespace,
         typeName: receiver ? receiver.name : undefined,
         baseName: decl.baseName,
-        labels: decl.parameters
-            .map((p) => p.label)
-            .filter((label) => label !== undefined) as string[],
+        labels: getParameterLabels(decl.parameters),
     })
+}
+
+// New helper for parameter label extraction
+function getParameterLabels(parameters: Array<{ label?: string }>): string[] {
+    return parameters
+        .map((p) => p.label)
+        .filter((label): label is string => label !== undefined)
 }
 
 function mangleFunctionName({
@@ -304,3 +346,9 @@ function mangleTypeName({
 }): string {
     return namespace ? `${namespace}¸${name}` : `${name}`
 }
+
+type DispatchSlot = NonNullable<
+    (cir.Declaration & {
+        kind: 'TYPE_DECL'
+    })['dispatchTable']
+>[number]

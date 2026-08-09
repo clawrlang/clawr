@@ -58,7 +58,7 @@ describe('Type declaration', () => {
         expect(result).toContain('void MyType¸myCompanionMethod() {')
     })
 
-    it('adds vtable for polymorphic methods', () => {
+    it('declares vtable for polymorphic methods', () => {
         const typeDecl: cir.Declaration = {
             kind: 'TYPE_DECL',
             name: 'MyType',
@@ -66,11 +66,21 @@ describe('Type declaration', () => {
             methods: [
                 {
                     kind: 'FUNCTION_DECL',
-                    polymorphic: true,
                     baseName: 'f',
                     parameters: [],
                     body: [],
                     resultValueSet: { type: 'integer' },
+                },
+            ],
+            dispatchTable: [
+                {
+                    slot: {
+                        baseName: 'f',
+                        parameters: [],
+                        resultValueSet: { type: 'integer' },
+                    },
+                    declaredIn: { name: 'MyType' },
+                    implementedBy: { name: 'MyType' },
                 },
             ],
         }
@@ -79,6 +89,7 @@ describe('Type declaration', () => {
         expect(result).toContain(
             'typedef int64_t (*MyType·fˇmethod)(void* self);',
         )
+        expect(result).toContain('(MyType·fˇmethod)MyType·f,')
         expect(result).toContain('MyType·fˇmethod f;')
         expect(result).toContain('MyTypeˇvtable;')
         expect(result).toContain('.polymorphic_type')
@@ -89,30 +100,61 @@ describe('Type declaration', () => {
             kind: 'TYPE_DECL',
             name: 'MyType',
             fields: [],
-            methods: [
+            methods: [],
+            dispatchTable: [
                 {
-                    kind: 'FUNCTION_DECL',
-                    polymorphic: true,
-                    baseName: 'f',
-                    parameters: [
-                        {
-                            label: 'label',
-                            varName: 'v',
-                            valueSet: { type: 'integer' },
-                        },
-                    ],
-                    body: [],
-                    resultValueSet: { type: 'integer' },
+                    slot: {
+                        baseName: 'f',
+                        parameters: [
+                            {
+                                label: 'label',
+                                varName: 'v',
+                                valueSet: { type: 'integer' },
+                            },
+                        ],
+                        resultValueSet: { type: 'integer' },
+                    },
+                    declaredIn: { name: 'MyType' },
+                    implementedBy: { name: 'MyType' },
                 },
             ],
         }
 
         const result = lowerDecl(typeDecl)
         expect(result).toContain(
-            '.f˛label = (MyType·f˛labelˇmethod)MyType·f˛label',
-        )
-        expect(result).toContain(
             'typedef int64_t (*MyType·f˛labelˇmethod)(void* self, int64_t v);',
         )
+        expect(result).toContain(
+            '.f˛label = (MyType·f˛labelˇmethod)MyType·f˛label',
+        )
+    })
+
+    it('adds vtable for subtypes', () => {
+        const typeDecl: cir.Declaration = {
+            kind: 'TYPE_DECL',
+            name: 'Sub',
+            base: { type: 'Super' },
+            fields: [],
+            methods: [
+                {
+                    kind: 'FUNCTION_DECL',
+                    baseName: 'f',
+                    parameters: [],
+                    body: [],
+                    resultValueSet: { type: 'integer' },
+                },
+            ],
+            dispatchTable: [
+                {
+                    slot: { baseName: 'f', parameters: [] },
+                    declaredIn: { name: 'Super' },
+                    implementedBy: { name: 'Sub' },
+                },
+            ],
+        }
+
+        const result = lowerDecl(typeDecl)
+        expect(result).toContain('(Super·fˇmethod)Sub·f,')
+        expect(result).toContain('.polymorphic_type')
     })
 })

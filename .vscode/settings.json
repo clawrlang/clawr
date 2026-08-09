@@ -102,19 +102,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "CALL" },
-              "receiver": {
-                "oneOf": [
-                  { "$ref": "#/$defs/AsShared" },
-                  { "$ref": "#/$defs/FieldReference" },
-                  { "$ref": "#/$defs/IntegerLiteral" },
-                  { "$ref": "#/$defs/MemoryAllocation" },
-                  { "$ref": "#/$defs/MemoryRetention" },
-                  { "$ref": "#/$defs/StringLiteral" },
-                  { "$ref": "#/$defs/TruthLiteral" },
-                  { "$ref": "#/$defs/VariableReference" },
-                  { "$ref": "#/$defs/QueryFunctionCall" }
-                ]
-              },
+              "receiver": { "$ref": "#/$defs/Receiver" },
               "name": {
                 "type": "object",
                 "properties": {
@@ -134,15 +122,25 @@
             "required": ["kind", "name", "arguments", "valueSet"],
             "additionalProperties": false
           },
-          "IntegerLiteral": {
+          "Receiver": {
             "type": "object",
             "properties": {
-              "kind": { "const": "INTEGER_LITERAL" },
-              "value": { "type": "string" },
-              "valueSet": { "$ref": "#/$defs/IntegerValueSet" }
+              "object": { "$ref": "#/$defs/Storage" },
+              "dispatch": {
+                "oneOf": [{ "const": "direct" }, { "const": "inherited" }]
+              }
             },
-            "required": ["kind", "value", "valueSet"],
+            "required": ["object", "dispatch"],
             "additionalProperties": false
+          },
+          "ValueSet": {
+            "oneOf": [
+              { "$ref": "#/$defs/IntegerValueSet" },
+              { "$ref": "#/$defs/RcTypeValueSet" },
+              { "$ref": "#/$defs/RealValueSet" },
+              { "$ref": "#/$defs/StringValueSet" },
+              { "$ref": "#/$defs/TruthValueSet" }
+            ]
           },
           "IntegerValueSet": {
             "type": "object",
@@ -152,19 +150,6 @@
               "max": { "type": "string" }
             },
             "required": ["type"],
-            "additionalProperties": false
-          },
-          "MemoryAllocation": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "ALLOCATION" },
-              "valueSet": { "$ref": "#/$defs/RcTypeValueSet" },
-              "fields": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/__type" }
-              }
-            },
-            "required": ["kind", "valueSet", "fields"],
             "additionalProperties": false
           },
           "RcTypeValueSet": {
@@ -180,7 +165,64 @@
             "required": ["type", "typeName", "semantics"],
             "additionalProperties": false
           },
-          "__type": {
+          "RealValueSet": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "real" },
+              "min": { "type": "string" },
+              "max": { "type": "string" }
+            },
+            "required": ["type"],
+            "additionalProperties": false
+          },
+          "StringValueSet": {
+            "type": "object",
+            "properties": { "type": { "const": "string" } },
+            "required": ["type"],
+            "additionalProperties": false
+          },
+          "TruthValueSet": {
+            "type": "object",
+            "properties": {
+              "type": { "const": "truthvalue" },
+              "values": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    { "const": "ambiguous" },
+                    { "const": "false" },
+                    { "const": "true" }
+                  ]
+                }
+              }
+            },
+            "required": ["type", "values"],
+            "additionalProperties": false
+          },
+          "IntegerLiteral": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "INTEGER_LITERAL" },
+              "value": { "type": "string" },
+              "valueSet": { "$ref": "#/$defs/IntegerValueSet" }
+            },
+            "required": ["kind", "value", "valueSet"],
+            "additionalProperties": false
+          },
+          "MemoryAllocation": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "ALLOCATION" },
+              "valueSet": { "$ref": "#/$defs/RcTypeValueSet" },
+              "fields": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/__type.o1" }
+              }
+            },
+            "required": ["kind", "valueSet", "fields"],
+            "additionalProperties": false
+          },
+          "__type.o1": {
             "type": "object",
             "properties": {
               "name": { "type": "string" },
@@ -209,12 +251,6 @@
             "required": ["kind", "value", "valueSet"],
             "additionalProperties": false
           },
-          "StringValueSet": {
-            "type": "object",
-            "properties": { "type": { "const": "string" } },
-            "required": ["type"],
-            "additionalProperties": false
-          },
           "TruthLiteral": {
             "type": "object",
             "properties": {
@@ -231,24 +267,6 @@
             "required": ["kind", "value", "valueSet"],
             "additionalProperties": false
           },
-          "TruthValueSet": {
-            "type": "object",
-            "properties": {
-              "type": { "const": "truthvalue" },
-              "values": {
-                "type": "array",
-                "items": {
-                  "oneOf": [
-                    { "const": "ambiguous" },
-                    { "const": "false" },
-                    { "const": "true" }
-                  ]
-                }
-              }
-            },
-            "required": ["type", "values"],
-            "additionalProperties": false
-          },
           "VariableReference": {
             "type": "object",
             "properties": {
@@ -257,25 +275,6 @@
               "valueSet": { "$ref": "#/$defs/ValueSet" }
             },
             "required": ["kind", "name", "valueSet"],
-            "additionalProperties": false
-          },
-          "ValueSet": {
-            "oneOf": [
-              { "$ref": "#/$defs/IntegerValueSet" },
-              { "$ref": "#/$defs/RcTypeValueSet" },
-              { "$ref": "#/$defs/RealValueSet" },
-              { "$ref": "#/$defs/StringValueSet" },
-              { "$ref": "#/$defs/TruthValueSet" }
-            ]
-          },
-          "RealValueSet": {
-            "type": "object",
-            "properties": {
-              "type": { "const": "real" },
-              "min": { "type": "string" },
-              "max": { "type": "string" }
-            },
-            "required": ["type"],
             "additionalProperties": false
           },
           "EnsureUnique": {
@@ -291,19 +290,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "CALL" },
-              "receiver": {
-                "oneOf": [
-                  { "$ref": "#/$defs/AsShared" },
-                  { "$ref": "#/$defs/FieldReference" },
-                  { "$ref": "#/$defs/IntegerLiteral" },
-                  { "$ref": "#/$defs/MemoryAllocation" },
-                  { "$ref": "#/$defs/MemoryRetention" },
-                  { "$ref": "#/$defs/StringLiteral" },
-                  { "$ref": "#/$defs/TruthLiteral" },
-                  { "$ref": "#/$defs/VariableReference" },
-                  { "$ref": "#/$defs/QueryFunctionCall" }
-                ]
-              },
+              "receiver": { "$ref": "#/$defs/Receiver" },
               "name": {
                 "type": "object",
                 "properties": {
@@ -365,60 +352,33 @@
           },
           "Declaration": {
             "oneOf": [
-              { "$ref": "#/$defs/__typeFunctionDeclaration" },
               { "$ref": "#/$defs/__typeTypeDeclaration" },
-              { "$ref": "#/$defs/__typeVariableDeclaration" }
+              { "$ref": "#/$defs/__typeVariableDeclaration" },
+              { "$ref": "#/$defs/__type__typeFunctionSignature" }
             ],
             "discriminator": {
               "mapping": {
-                "FUNCTION_DECL": "#/components/schemas/__typeFunctionDeclaration",
+                "FUNCTION_DECL": "#/components/schemas/__type__typeFunctionSignature",
                 "TYPE_DECL": "#/components/schemas/__typeTypeDeclaration",
                 "VARIABLE_DECL": "#/components/schemas/__typeVariableDeclaration"
               },
               "propertyName": "kind"
             }
           },
-          "__typeFunctionDeclaration": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "FUNCTION_DECL" },
-              "baseName": { "type": "string" },
-              "parameters": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "label": { "type": "string" },
-                    "varName": { "type": "string" },
-                    "valueSet": { "$ref": "#/$defs/ValueSet" }
-                  },
-                  "required": ["varName", "valueSet"],
-                  "additionalProperties": false
-                }
-              },
-              "body": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/Statement" }
-              },
-              "resultValueSet": {
-                "oneOf": [
-                  { "$ref": "#/$defs/IntegerValueSet" },
-                  { "$ref": "#/$defs/RcTypeValueSet" },
-                  { "$ref": "#/$defs/RealValueSet" },
-                  { "$ref": "#/$defs/StringValueSet" },
-                  { "$ref": "#/$defs/TruthValueSet" }
-                ]
-              },
-              "namespace": { "type": "string" }
-            },
-            "required": ["kind", "baseName", "parameters", "body"],
-            "additionalProperties": false
-          },
           "__typeTypeDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "TYPE_DECL" },
               "name": { "type": "string" },
+              "base": {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string" },
+                  "namespace": { "type": "string" }
+                },
+                "required": ["type"],
+                "additionalProperties": false
+              },
               "fields": {
                 "type": "array",
                 "items": {
@@ -433,17 +393,50 @@
               },
               "methods": {
                 "type": "array",
-                "items": { "$ref": "#/$defs/FunctionDeclaration__type" }
+                "items": { "$ref": "#/$defs/FunctionDeclaration" }
+              },
+              "dispatchTable": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "slot": { "$ref": "#/$defs/FunctionSignature" },
+                    "declaredIn": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "namespace": { "type": "string" }
+                      },
+                      "required": ["name"],
+                      "additionalProperties": false
+                    },
+                    "implementedBy": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "namespace": { "type": "string" }
+                      },
+                      "required": ["name"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["slot", "declaredIn"],
+                  "additionalProperties": false
+                }
               },
               "namespace": { "type": "string" }
             },
             "required": ["kind", "name", "fields", "methods"],
             "additionalProperties": false
           },
-          "FunctionDeclaration__type": {
+          "FunctionDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "FUNCTION_DECL" },
+              "body": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/Statement" }
+              },
               "baseName": { "type": "string" },
               "parameters": {
                 "type": "array",
@@ -458,9 +451,35 @@
                   "additionalProperties": false
                 }
               },
-              "body": {
+              "resultValueSet": {
+                "oneOf": [
+                  { "$ref": "#/$defs/IntegerValueSet" },
+                  { "$ref": "#/$defs/RcTypeValueSet" },
+                  { "$ref": "#/$defs/RealValueSet" },
+                  { "$ref": "#/$defs/StringValueSet" },
+                  { "$ref": "#/$defs/TruthValueSet" }
+                ]
+              }
+            },
+            "required": ["kind", "body", "baseName", "parameters"],
+            "additionalProperties": false
+          },
+          "FunctionSignature": {
+            "type": "object",
+            "properties": {
+              "baseName": { "type": "string" },
+              "parameters": {
                 "type": "array",
-                "items": { "$ref": "#/$defs/Statement" }
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": { "type": "string" },
+                    "varName": { "type": "string" },
+                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                  },
+                  "required": ["varName", "valueSet"],
+                  "additionalProperties": false
+                }
               },
               "resultValueSet": {
                 "oneOf": [
@@ -470,10 +489,9 @@
                   { "$ref": "#/$defs/StringValueSet" },
                   { "$ref": "#/$defs/TruthValueSet" }
                 ]
-              },
-              "polymorphic": { "type": "boolean" }
+              }
             },
-            "required": ["kind", "baseName", "parameters", "body"],
+            "required": ["baseName", "parameters"],
             "additionalProperties": false
           },
           "__typeVariableDeclaration": {
@@ -486,6 +504,42 @@
               "namespace": { "type": "string" }
             },
             "required": ["kind", "name", "valueSet", "initialValue"],
+            "additionalProperties": false
+          },
+          "__type__typeFunctionSignature": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "FUNCTION_DECL" },
+              "body": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/Statement" }
+              },
+              "baseName": { "type": "string" },
+              "parameters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": { "type": "string" },
+                    "varName": { "type": "string" },
+                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                  },
+                  "required": ["varName", "valueSet"],
+                  "additionalProperties": false
+                }
+              },
+              "resultValueSet": {
+                "oneOf": [
+                  { "$ref": "#/$defs/IntegerValueSet" },
+                  { "$ref": "#/$defs/RcTypeValueSet" },
+                  { "$ref": "#/$defs/RealValueSet" },
+                  { "$ref": "#/$defs/StringValueSet" },
+                  { "$ref": "#/$defs/TruthValueSet" }
+                ]
+              },
+              "namespace": { "type": "string" }
+            },
+            "required": ["kind", "body", "baseName", "parameters"],
             "additionalProperties": false
           }
         }

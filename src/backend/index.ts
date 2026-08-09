@@ -200,25 +200,58 @@ function lowerType(valueSet: cir.ValueSet): string {
 export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
         case 'CALL':
-            const args = stmt.receiver
-                ? [
-                      lowerExpr(stmt.receiver.object),
-                      ...stmt.arguments.map(lowerExpr),
-                  ]
-                : stmt.arguments.map(lowerExpr)
-            const name = mangleFunctionName({
-                namespace:
-                    stmt.receiver?.object.valueSet.type === 'rc-type'
-                        ? stmt.receiver.object.valueSet.namespace
-                        : stmt.name.namespace,
-                baseName: stmt.name.baseName,
-                labels: stmt.name.labels,
-                typeName:
-                    stmt.receiver?.object.valueSet.type === 'rc-type'
-                        ? stmt.receiver.object.valueSet.typeName
-                        : undefined,
-            })
-            return `${name}(${args.join(', ')});`
+            switch (stmt.receiver?.dispatch) {
+                case undefined: {
+                    const args = stmt.arguments.map(lowerExpr)
+                    const name = mangleFunctionName({
+                        namespace: stmt.name.namespace,
+                        baseName: stmt.name.baseName,
+                        labels: stmt.name.labels,
+                        typeName: undefined,
+                    })
+                    return `${name}(${args.join(', ')});`
+                }
+                case 'direct': {
+                    const args = stmt.receiver
+                        ? [
+                              lowerExpr(stmt.receiver.object),
+                              ...stmt.arguments.map(lowerExpr),
+                          ]
+                        : stmt.arguments.map(lowerExpr)
+                    const name = mangleFunctionName({
+                        namespace:
+                            stmt.receiver?.object.valueSet.type === 'rc-type'
+                                ? stmt.receiver.object.valueSet.namespace
+                                : stmt.name.namespace,
+                        baseName: stmt.name.baseName,
+                        labels: stmt.name.labels,
+                        typeName:
+                            stmt.receiver?.object.valueSet.type === 'rc-type'
+                                ? stmt.receiver.object.valueSet.typeName
+                                : undefined,
+                    })
+                    return `${name}(${args.join(', ')});`
+                }
+                case 'inherited': {
+                    const targetName = lowerExpr(stmt.receiver.object)
+                    const declarationType = mangleTypeName(
+                        stmt.receiver.declaredIn,
+                    )
+                    const methodName = mangleFunctionName({
+                        baseName: stmt.name.baseName,
+                        labels: stmt.name.labels,
+                        namespace: undefined,
+                        typeName: undefined,
+                    })
+                    const args = stmt.receiver
+                        ? [
+                              lowerExpr(stmt.receiver.object),
+                              ...stmt.arguments.map(lowerExpr),
+                          ]
+                        : stmt.arguments.map(lowerExpr)
+                    return `VTABLE(${targetName}, ${declarationType})->${methodName}(${args});`
+                }
+            }
         case 'VARIABLE_DECL':
             if (stmt.initialValue.kind === 'ALLOCATION')
                 return `${lowerType(stmt.initialValue.valueSet)} ${lowerInitStmt(stmt)};`
@@ -257,25 +290,58 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
         case 'CALL':
-            const args = expr.receiver
-                ? [
-                      lowerExpr(expr.receiver.object),
-                      ...expr.arguments.map(lowerExpr),
-                  ]
-                : expr.arguments.map(lowerExpr)
-            const name = mangleFunctionName({
-                namespace:
-                    expr.receiver?.object.valueSet.type == 'rc-type'
-                        ? expr.receiver.object.valueSet.namespace
-                        : expr.name.namespace,
-                baseName: expr.name.baseName,
-                labels: expr.name.labels,
-                typeName:
-                    expr.receiver?.object.valueSet.type === 'rc-type'
-                        ? expr.receiver.object.valueSet.typeName
-                        : undefined,
-            })
-            return `${name}(${args.join(', ')})`
+            switch (expr.receiver?.dispatch) {
+                case undefined: {
+                    const args = expr.arguments.map(lowerExpr)
+                    const name = mangleFunctionName({
+                        namespace: expr.name.namespace,
+                        baseName: expr.name.baseName,
+                        labels: expr.name.labels,
+                        typeName: undefined,
+                    })
+                    return `${name}(${args.join(', ')})`
+                }
+                case 'direct': {
+                    const args = expr.receiver
+                        ? [
+                              lowerExpr(expr.receiver.object),
+                              ...expr.arguments.map(lowerExpr),
+                          ]
+                        : expr.arguments.map(lowerExpr)
+                    const name = mangleFunctionName({
+                        namespace:
+                            expr.receiver?.object.valueSet.type === 'rc-type'
+                                ? expr.receiver.object.valueSet.namespace
+                                : expr.name.namespace,
+                        baseName: expr.name.baseName,
+                        labels: expr.name.labels,
+                        typeName:
+                            expr.receiver?.object.valueSet.type === 'rc-type'
+                                ? expr.receiver.object.valueSet.typeName
+                                : undefined,
+                    })
+                    return `${name}(${args.join(', ')})`
+                }
+                case 'inherited': {
+                    const targetName = lowerExpr(expr.receiver.object)
+                    const declarationType = mangleTypeName(
+                        expr.receiver.declaredIn,
+                    )
+                    const methodName = mangleFunctionName({
+                        baseName: expr.name.baseName,
+                        labels: expr.name.labels,
+                        namespace: undefined,
+                        typeName: undefined,
+                    })
+                    const args = expr.receiver
+                        ? [
+                              lowerExpr(expr.receiver.object),
+                              ...expr.arguments.map(lowerExpr),
+                          ]
+                        : expr.arguments.map(lowerExpr)
+                    return `VTABLE(${targetName}, ${declarationType})->${methodName}(${args})`
+                }
+            }
         case 'VARIABLE_REF':
             return expr.name
         case 'FIELD_REF':

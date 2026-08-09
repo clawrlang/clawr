@@ -1,0 +1,305 @@
+{
+    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
+    "declarations": [
+        {
+            "kind": "TYPE_DECL",
+            "name": "Super",
+            "fields": [],
+            "methods": [
+                {
+                    "kind": "FUNCTION_DECL",
+                    "baseName": "f",
+                    "parameters": [],
+                    "resultValueSet": {
+                        "type": "integer",
+                        "min": "0",
+                        "max": "100"
+                    },
+                    "body": [
+                        {
+                            "kind": "RETURN",
+                            "value": {
+                                "kind": "INTEGER_LITERAL",
+                                "value": "42",
+                                "valueSet": {
+                                    "type": "integer",
+                                    "min": "42",
+                                    "max": "42"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ],
+            "dispatchTable": [
+                {
+                    "slot": {
+                        "baseName": "f",
+                        "parameters": [],
+                        "resultValueSet": {
+                            "type": "integer",
+                            "min": "0",
+                            "max": "100"
+                        }
+                    },
+                    "declaredIn": {
+                        "name": "Super"
+                    },
+                    "implementedBy": {
+                        "name": "Super"
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "TYPE_DECL",
+            "name": "Sub1",
+            "base": {
+                "type": "Super"
+            },
+            "fields": [],
+            "methods": [
+                {
+                    "kind": "FUNCTION_DECL",
+                    "baseName": "f",
+                    "parameters": [],
+                    "resultValueSet": {
+                        "type": "integer",
+                        "min": "43",
+                        "max": "43"
+                    },
+                    "body": [
+                        {
+                            "kind": "RETURN",
+                            "value": {
+                                "kind": "INTEGER_LITERAL",
+                                "value": "43",
+                                "valueSet": {
+                                    "type": "integer",
+                                    "min": "43",
+                                    "max": "43"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ],
+            "dispatchTable": [
+                {
+                    "slot": {
+                        "baseName": "f",
+                        "parameters": [],
+                        "resultValueSet": {
+                            "type": "integer",
+                            "min": "0",
+                            "max": "100"
+                        }
+                    },
+                    "declaredIn": {
+                        "name": "Super"
+                    },
+                    "implementedBy": {
+                        "name": "Sub1"
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "TYPE_DECL",
+            "name": "Sub2",
+            "base": {
+                "type": "Super"
+            },
+            "fields": [],
+            "methods": [],
+            "dispatchTable": [
+                {
+                    "slot": {
+                        "baseName": "f",
+                        "parameters": [],
+                        "resultValueSet": {
+                            "type": "integer",
+                            "min": "0",
+                            "max": "100"
+                        }
+                    },
+                    "declaredIn": {
+                        "name": "Super"
+                    },
+                    "implementedBy": {
+                        "name": "Super"
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "FUNCTION_DECL",
+            "namespace": "Sub1",
+            "baseName": "new",
+            "parameters": [],
+            "body": [
+                {
+                    "kind": "RETURN",
+                    "value": {
+                        "kind": "ALLOCATION",
+                        "fields": [],
+                        "valueSet": {
+                            "type": "rc-type",
+                            "typeName": "Sub1",
+                            "semantics": "ISOLATED"
+                        }
+                    }
+                }
+            ],
+            "resultValueSet": {
+                "type": "rc-type",
+                "typeName": "Sub1",
+                "semantics": "ISOLATED"
+            }
+        },
+        {
+            "kind": "FUNCTION_DECL",
+            "namespace": "Sub2",
+            "baseName": "new",
+            "parameters": [],
+            "body": [
+                {
+                    "kind": "RETURN",
+                    "value": {
+                        "kind": "ALLOCATION",
+                        "fields": [],
+                        "valueSet": {
+                            "type": "rc-type",
+                            "typeName": "Sub2",
+                            "semantics": "ISOLATED"
+                        }
+                    }
+                }
+            ],
+            "resultValueSet": {
+                "type": "rc-type",
+                "typeName": "Sub2",
+                "semantics": "ISOLATED"
+            }
+        }
+    ],
+    "startBlock": [
+        {
+            "kind": "VARIABLE_DECL",
+            "name": "obj1",
+            "valueSet": {
+                "type": "rc-type",
+                "typeName": "Sub1",
+                "semantics": "ISOLATED"
+            },
+            "initialValue": {
+                "kind": "CALL",
+                "name": {
+                    "namespace": "Sub1",
+                    "baseName": "new",
+                    "labels": []
+                },
+                "arguments": [],
+                "valueSet": {
+                    "type": "rc-type",
+                    "typeName": "Sub1",
+                    "semantics": "ISOLATED"
+                }
+            }
+        },
+        {
+            "kind": "VARIABLE_DECL",
+            "name": "obj2",
+            "valueSet": {
+                "type": "rc-type",
+                "typeName": "Sub2",
+                "semantics": "ISOLATED"
+            },
+            "initialValue": {
+                "kind": "CALL",
+                "name": {
+                    "namespace": "Sub2",
+                    "baseName": "new",
+                    "labels": []
+                },
+                "arguments": [],
+                "valueSet": {
+                    "type": "rc-type",
+                    "typeName": "Sub2",
+                    "semantics": "ISOLATED"
+                }
+            }
+        },
+        {
+            "kind": "CALL",
+            "name": {
+                "baseName": "printInt64",
+                "labels": []
+            },
+            "arguments": [
+                {
+                    "kind": "CALL",
+                    "receiver": {
+                        "object": {
+                            "kind": "VARIABLE_REF",
+                            "name": "obj1",
+                            "valueSet": {
+                                "type": "rc-type",
+                                "typeName": "Sub1",
+                                "semantics": "ISOLATED"
+                            }
+                        },
+                        "dispatch": "direct"
+                    },
+                    "name": {
+                        "baseName": "f",
+                        "labels": []
+                    },
+                    "arguments": [],
+                    "valueSet": {
+                        "type": "integer",
+                        "min": "0",
+                        "max": "100"
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "CALL",
+            "name": {
+                "baseName": "printInt64",
+                "labels": []
+            },
+            "arguments": [
+                {
+                    "kind": "CALL",
+                    "receiver": {
+                        "object": {
+                            "kind": "VARIABLE_REF",
+                            "name": "obj2",
+                            "valueSet": {
+                                "type": "rc-type",
+                                "typeName": "Sub2",
+                                "semantics": "ISOLATED"
+                            }
+                        },
+                        "dispatch": "inherited",
+                        "declaredIn": {
+                            "name": "Super"
+                        }
+                    },
+                    "name": {
+                        "baseName": "f",
+                        "labels": []
+                    },
+                    "arguments": [],
+                    "valueSet": {
+                        "type": "integer",
+                        "min": "0",
+                        "max": "100"
+                    }
+                }
+            ]
+        }
+    ]
+}

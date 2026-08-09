@@ -2,6 +2,8 @@
 
 - Parse `{ Super.init() }` data literal
 - Dispose `service` (e.g. close file handle) when deallocated
+- Add fields when lowering
+  - Reference fields through the type name `x->ns¸Super.field`
 
 ## Enforce on Frontend
 

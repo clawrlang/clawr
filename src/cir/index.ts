@@ -66,8 +66,13 @@ type Release = {
 
 type Receiver = {
     object: Storage
-    dispatch: 'direct' | 'inherited'
-}
+} & (
+    | { dispatch: 'direct' }
+    | {
+          dispatch: 'inherited'
+          declaredIn: { name: string; namespace?: string }
+      }
+)
 
 type FunctionCall = {
     kind: 'CALL'

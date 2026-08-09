@@ -1,6 +1,6 @@
 import { describe, expect, it, test } from 'bun:test'
-import { Expression, Statement } from '../../../src/cir'
-import { lowerExpr, lowerStmt } from '../../../src/backend'
+import { Expression, ClawrModule, Statement } from '../../../src/cir'
+import { lower, lowerExpr, lowerStmt } from '../../../src/backend'
 
 describe('Function Calls', () => {
     describe('includes parameter labels in the function name', () => {
@@ -215,6 +215,71 @@ describe('Function Calls', () => {
             }
             const result = lowerStmt(stmt)
             expect(result).toBe('Object·myMethod(myObject);')
+        })
+    })
+
+    describe('calls through vtable when requested', () => {
+        test('expression', () => {
+            const expr: Expression = {
+                kind: 'CALL',
+                receiver: {
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'myObject',
+                        valueSet: {
+                            type: 'rc-type',
+                            typeName: 'Object',
+                            semantics: 'ISOLATED',
+                        },
+                    },
+                    dispatch: 'inherited',
+                    declaredIn: {
+                        namespace: 'ns',
+                        name: 'Super',
+                    },
+                },
+                name: {
+                    baseName: 'myMethod',
+                    labels: [],
+                },
+                arguments: [],
+                valueSet: { type: 'truthvalue', values: [] },
+            }
+            const result = lowerExpr(expr)
+            expect(result).toBe(
+                'VTABLE(myObject, ns¸Super)->myMethod(myObject)',
+            )
+        })
+
+        test('statement', () => {
+            const stmt: Statement = {
+                kind: 'CALL',
+                receiver: {
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'myObject',
+                        valueSet: {
+                            type: 'rc-type',
+                            typeName: 'Object',
+                            semantics: 'ISOLATED',
+                        },
+                    },
+                    dispatch: 'inherited',
+                    declaredIn: {
+                        namespace: 'ns',
+                        name: 'Super',
+                    },
+                },
+                name: {
+                    baseName: 'myMethod',
+                    labels: [],
+                },
+                arguments: [],
+            }
+            const result = lowerStmt(stmt)
+            expect(result).toBe(
+                'VTABLE(myObject, ns¸Super)->myMethod(myObject);',
+            )
         })
     })
 

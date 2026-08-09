@@ -102,7 +102,19 @@
             "type": "object",
             "properties": {
               "kind": { "const": "CALL" },
-              "receiver": { "$ref": "#/$defs/Receiver" },
+              "receiver": {
+                "oneOf": [
+                  { "$ref": "#/$defs/__type__type" },
+                  { "$ref": "#/$defs/__type__type.o1" }
+                ],
+                "discriminator": {
+                  "mapping": {
+                    "direct": "#/components/schemas/__type__type",
+                    "inherited": "#/components/schemas/__type__type.o1"
+                  },
+                  "propertyName": "dispatch"
+                }
+              },
               "name": {
                 "type": "object",
                 "properties": {
@@ -122,15 +134,31 @@
             "required": ["kind", "name", "arguments", "valueSet"],
             "additionalProperties": false
           },
-          "Receiver": {
+          "__type__type": {
             "type": "object",
             "properties": {
               "object": { "$ref": "#/$defs/Storage" },
-              "dispatch": {
-                "oneOf": [{ "const": "direct" }, { "const": "inherited" }]
-              }
+              "dispatch": { "const": "direct" }
             },
             "required": ["object", "dispatch"],
+            "additionalProperties": false
+          },
+          "__type__type.o1": {
+            "type": "object",
+            "properties": {
+              "object": { "$ref": "#/$defs/Storage" },
+              "dispatch": { "const": "inherited" },
+              "declaredIn": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "namespace": { "type": "string" }
+                },
+                "required": ["name"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["object", "dispatch", "declaredIn"],
             "additionalProperties": false
           },
           "ValueSet": {
@@ -216,13 +244,13 @@
               "valueSet": { "$ref": "#/$defs/RcTypeValueSet" },
               "fields": {
                 "type": "array",
-                "items": { "$ref": "#/$defs/__type.o1" }
+                "items": { "$ref": "#/$defs/__type.o2" }
               }
             },
             "required": ["kind", "valueSet", "fields"],
             "additionalProperties": false
           },
-          "__type.o1": {
+          "__type.o2": {
             "type": "object",
             "properties": {
               "name": { "type": "string" },
@@ -290,7 +318,19 @@
             "type": "object",
             "properties": {
               "kind": { "const": "CALL" },
-              "receiver": { "$ref": "#/$defs/Receiver" },
+              "receiver": {
+                "oneOf": [
+                  { "$ref": "#/$defs/__type__type" },
+                  { "$ref": "#/$defs/__type__type.o1" }
+                ],
+                "discriminator": {
+                  "mapping": {
+                    "direct": "#/components/schemas/__type__type",
+                    "inherited": "#/components/schemas/__type__type.o1"
+                  },
+                  "propertyName": "dispatch"
+                }
+              },
               "name": {
                 "type": "object",
                 "properties": {

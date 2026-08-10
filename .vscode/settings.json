@@ -499,6 +499,12 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionDeclaration" }
               },
+              "initializers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/OmitFunctionDeclarationresultValueSet"
+                }
+              },
               "dispatchTable": {
                 "type": "array",
                 "items": {
@@ -562,6 +568,32 @@
                   { "$ref": "#/$defs/StringValueSet" },
                   { "$ref": "#/$defs/TruthValueSet" }
                 ]
+              }
+            },
+            "required": ["kind", "body", "baseName", "parameters"],
+            "additionalProperties": false
+          },
+          "OmitFunctionDeclarationresultValueSet": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "FUNCTION_DECL" },
+              "body": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/Statement" }
+              },
+              "baseName": { "type": "string" },
+              "parameters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": { "type": "string" },
+                    "varName": { "type": "string" },
+                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                  },
+                  "required": ["varName", "valueSet"],
+                  "additionalProperties": false
+                }
               }
             },
             "required": ["kind", "body", "baseName", "parameters"],

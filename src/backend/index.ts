@@ -73,6 +73,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             ${vtableTypedefs.join('\n')}
             ${vtableStruct}
             ${decl.methods?.map((m) => lowerMethod(m, decl)).join('\n') ?? ''}
+            ${decl.initializers?.map((m) => lowerInitializer(m, decl)).join('\n') ?? ''}
             static const __type_info ${mangledTypeName}ˇtype = {
                 ${typeInfo}
             };
@@ -148,6 +149,53 @@ function lowerMethod(
                     },
                 },
                 ...decl.parameters,
+            ],
+        },
+        mangledFunctionName,
+    )
+}
+
+function lowerInitializer(
+    decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
+    receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
+): string {
+    const mangledFunctionName = mangleNameWithParameters(decl, receiverType)
+    return lowerFunction(
+        {
+            ...decl,
+            resultValueSet: {
+                type: 'rc-type',
+                typeName: 'void',
+                semantics: 'ISOLATED',
+            },
+            parameters: [
+                {
+                    varName: 'self',
+                    valueSet: {
+                        type: 'rc-type',
+                        namespace: receiverType.namespace,
+                        typeName: receiverType.name,
+                        semantics: 'SHARED',
+                    },
+                },
+                ...decl.parameters,
+            ],
+            body: [
+                ...decl.body,
+                // TODO: Can we just add `return self;` literally?
+                {
+                    kind: 'RETURN',
+                    value: {
+                        kind: 'VARIABLE_REF',
+                        name: 'self',
+                        valueSet: {
+                            type: 'rc-type',
+                            typeName: receiverType.name,
+                            namespace: receiverType.namespace,
+                            semantics: 'ISOLATED',
+                        },
+                    },
+                },
             ],
         },
         mangledFunctionName,
@@ -248,7 +296,15 @@ export function lowerStmt(stmt: cir.Statement): string {
             else
                 return `${lowerType(stmt.valueSet)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         case 'ASSIGN':
-            return `${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};`
+            if (
+                stmt.target.kind === 'VARIABLE_REF' &&
+                stmt.target.name === 'self'
+            )
+                return `memcpy(&self->fields, &(Superˇfields){
+                        .field = field,
+                    },
+                    sizeof(Superˇfields));`
+            else return `${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};`
         case 'ENSURE_UNIQUE':
             return `mutateRC(${lowerExpr(stmt.object)});`
         case 'RELEASE':

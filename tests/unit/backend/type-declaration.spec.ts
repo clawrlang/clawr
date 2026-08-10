@@ -157,4 +157,61 @@ describe('Type declaration', () => {
         expect(result).toContain('(Super·fˇmethod)Sub·f,')
         expect(result).toContain('.polymorphic_type')
     })
+
+    it('adds initializers', () => {
+        const typeDecl: cir.Declaration = {
+            kind: 'TYPE_DECL',
+            name: 'Super',
+            fields: [],
+            methods: [],
+            initializers: [
+                {
+                    kind: 'FUNCTION_DECL',
+                    baseName: 'init',
+                    parameters: [
+                        {
+                            label: 'field',
+                            varName: 'field',
+                            valueSet: {
+                                type: 'integer',
+                                min: '0',
+                                max: '100',
+                            },
+                        },
+                    ],
+                    body: [
+                        {
+                            kind: 'ASSIGN',
+                            target: {
+                                kind: 'VARIABLE_REF',
+                                name: 'self',
+                                valueSet: {
+                                    type: 'rc-type',
+                                    typeName: 'Super',
+                                    semantics: 'SHARED',
+                                },
+                            },
+                            value: {
+                                kind: 'ALLOCATION',
+                                fields: [],
+                                valueSet: {
+                                    type: 'rc-type',
+                                    typeName: 'Super',
+                                    semantics: 'SHARED',
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+        }
+
+        const result = lowerDecl(typeDecl)
+        expect(result).toContain(
+            'void* Super·init˛field(Super* self, int64_t field) {',
+        )
+        expect(result).toContain('memcpy(&self->fields, &(Superˇfields){')
+        expect(result).toContain('.field = field,')
+        expect(result).toContain('return self;')
+    })
 })

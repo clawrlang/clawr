@@ -42,6 +42,7 @@ type TypeDeclaration = {
     | {
           base?: { type: string; namespace?: string }
           methods: FunctionDeclaration[]
+          initializers?: Omit<FunctionDeclaration, 'resultValueSet'>[]
           dispatchTable?: {
               slot: FunctionSignature
               declaredIn: { name: string; namespace?: string }

@@ -391,8 +391,24 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'AS_SHARED':
             return `shareRC(${lowerExpr(expr.object)})`
         case 'ALLOCATION':
-            return `allocInitRC(${expr.valueSet.typeName}, 0, ${expr.valueSet.semantics === 'ISOLATED' ? '__rc_ISOLATED' : '__rc_SHARED'},
-                ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
+            const mangledTypeName = mangleTypeName({
+                name: expr.valueSet.typeName,
+                namespace: expr.valueSet.namespace,
+            })
+            const semanticsFlag =
+                expr.valueSet.semantics === 'ISOLATED'
+                    ? '__rc_ISOLATED'
+                    : '__rc_SHARED'
+            if (expr.initializer) {
+                const mangledSuperTypeName = mangleTypeName({
+                    name: expr.initializer.type,
+                    namespace: expr.initializer.namespace,
+                })
+                return `allocInitInheritedRC(${mangledTypeName}, 0, ${mangledSuperTypeName}, ${semanticsFlag},
+                    ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
+            } else
+                return `allocInitRC(${mangledTypeName}, 0, ${semanticsFlag},
+                    ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
     }

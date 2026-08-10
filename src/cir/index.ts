@@ -137,6 +137,13 @@ type TruthLiteral = {
 type MemoryAllocation = {
     kind: 'ALLOCATION'
     valueSet: RcTypeValueSet
+    initializer?: {
+        type: string
+        namespace?: string
+        baseName: string
+        labels: string[]
+        arguments: Expression[]
+    }
     fields: {
         name: string
         value: Expression

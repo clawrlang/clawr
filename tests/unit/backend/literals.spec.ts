@@ -44,4 +44,60 @@ describe('Lowering Literals', () => {
             })
         }
     })
+
+    describe('data literals', () => {
+        it('lowers as allocInitRC', () => {
+            const expr: Expression = {
+                kind: 'ALLOCATION',
+                fields: [
+                    {
+                        name: 'field',
+                        value: {
+                            kind: 'VARIABLE_REF',
+                            name: 'var',
+                            valueSet: { type: 'integer' },
+                        },
+                    },
+                ],
+                valueSet: {
+                    type: 'rc-type',
+                    typeName: 'MyData',
+                    semantics: 'ISOLATED',
+                },
+            }
+            const result = lowerExpr(expr)
+            expect(result).toContain('allocInitRC(MyData, 0,')
+            expect(result).toContain('.field = var')
+        })
+
+        it('lowers as allocInitInheritedRC', () => {
+            const expr: Expression = {
+                kind: 'ALLOCATION',
+                fields: [
+                    {
+                        name: 'field',
+                        value: {
+                            kind: 'VARIABLE_REF',
+                            name: 'var',
+                            valueSet: { type: 'integer' },
+                        },
+                    },
+                ],
+                initializer: {
+                    type: 'Super',
+                    baseName: 'init',
+                    labels: [],
+                    arguments: [],
+                },
+                valueSet: {
+                    type: 'rc-type',
+                    typeName: 'MyObject',
+                    semantics: 'ISOLATED',
+                },
+            }
+            const result = lowerExpr(expr)
+            expect(result).toContain('allocInitInheritedRC(MyObject, 0, Super')
+            expect(result).toContain('.field = var')
+        })
+    })
 })

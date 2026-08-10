@@ -42,9 +42,13 @@ export function lowerDecl(decl: cir.Declaration): string {
                     static const __type_info ${mangledTypeName}ˇtype = {
                         .data_type = { .size = sizeof(${mangledTypeName}) }
                     };`
-            const vtableTypedefs = (decl.dispatchTable ?? [])?.map(
-                lowerMethodTypedef,
-            )
+            const vtableTypedefs = (decl.dispatchTable ?? [])
+                ?.filter(
+                    (s) =>
+                        s.declaredIn.name == decl.name &&
+                        s.declaredIn.namespace == decl.namespace,
+                )
+                .map(lowerMethodTypedef)
             const vtableStruct = decl.dispatchTable
                 ? `typedef struct {
                         ${decl.dispatchTable.map(lowerVtableSlot).join('\n')}

@@ -11,8 +11,7 @@
                         "type": "integer"
                     }
                 }
-            ],
-            "methods": []
+            ]
         },
         {
             "kind": "FUNCTION_DECL",

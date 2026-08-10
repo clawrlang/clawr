@@ -31,20 +31,25 @@ type FunctionSignature = {
 }
 
 type TypeDeclaration = {
+    // `data` only supports these
     kind: 'TYPE_DECL'
     name: string
-    base?: { type: string; namespace?: string }
     fields: {
         name: string
         valueSet: ValueSet
     }[]
-    methods: FunctionDeclaration[]
-    dispatchTable?: {
-        slot: FunctionSignature
-        declaredIn: { name: string; namespace?: string }
-        implementedBy?: { name: string; namespace?: string }
-    }[]
-}
+} & ( // `object`/`service` add methods and optional inheritance
+    | {
+          base?: { type: string; namespace?: string }
+          methods: FunctionDeclaration[]
+          dispatchTable?: {
+              slot: FunctionSignature
+              declaredIn: { name: string; namespace?: string }
+              implementedBy?: { name: string; namespace?: string }
+          }[]
+      }
+    | {}
+)
 
 export type Declaration = { namespace?: string } & (
     VariableDeclaration | FunctionDeclaration | TypeDeclaration

@@ -34,7 +34,6 @@ export class DataDeclaration implements Declaration {
                 name: field.name,
                 valueSet: field.valueSet.toCIR(),
             })),
-            methods: [],
         })
     }
 }

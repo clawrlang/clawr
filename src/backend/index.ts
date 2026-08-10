@@ -30,6 +30,18 @@ export function lowerDecl(decl: cir.Declaration): string {
             const fields = decl.fields
                 .map((field) => `${lowerType(field.valueSet)} ${field.name};`)
                 .join('\n')
+            if (!('methods' in decl))
+                return `typedef struct {
+                        ${fields}
+                    } ${mangledTypeName}ˇfields;
+
+                    typedef struct {
+                        __rc_header header;
+                        ${mangledTypeName}ˇfields fields;
+                    } ${mangledTypeName};
+                    static const __type_info ${mangledTypeName}ˇtype = {
+                        .data_type = { .size = sizeof(${mangledTypeName}) }
+                    };`
             const vtableTypedefs = (decl.dispatchTable ?? [])?.map(
                 lowerMethodTypedef,
             )
@@ -381,7 +393,10 @@ function mangleTypeName({
 }
 
 type DispatchSlot = NonNullable<
-    (cir.Declaration & {
-        kind: 'TYPE_DECL'
-    })['dispatchTable']
+    Extract<
+        cir.Declaration & {
+            kind: 'TYPE_DECL'
+        },
+        { dispatchTable?: any }
+    >['dispatchTable']
 >[number]

@@ -4,6 +4,51 @@ import type * as cir from '../../../src/cir'
 import { lowerDecl } from '../../../src/backend'
 
 describe('Type declaration', () => {
+    describe('fields', () => {
+        it('adds fields to the type struct', () => {
+            const typeDecl: cir.Declaration = {
+                kind: 'TYPE_DECL',
+                name: 'MyData',
+                fields: [
+                    {
+                        name: 'field',
+                        valueSet: {
+                            type: 'integer',
+                            min: '0',
+                            max: '100',
+                        },
+                    },
+                ],
+            }
+            const result = lowerDecl(typeDecl)
+            expect(result).toContain('typedef struct')
+            expect(result).toContain('int64_t field;')
+        })
+
+        it('adds super fields to inherited types', () => {
+            const typeDecl: cir.Declaration = {
+                kind: 'TYPE_DECL',
+                name: 'Sub',
+                base: { type: 'Super' },
+                fields: [
+                    {
+                        name: 'field',
+                        valueSet: {
+                            type: 'integer',
+                            min: '0',
+                            max: '100',
+                        },
+                    },
+                ],
+                methods: [],
+            }
+            const result = lowerDecl(typeDecl)
+            expect(result).toContain('typedef struct')
+            expect(result).toContain('Super super;')
+            expect(result).toContain('int64_t field;')
+        })
+    })
+
     it('adds methods as functions with mangled names', () => {
         const typeDecl: cir.Declaration = {
             kind: 'TYPE_DECL',

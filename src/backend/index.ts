@@ -70,7 +70,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             } ${mangledTypeName}ˇfields;
 
             typedef struct {
-                __rc_header header;
+                ${decl.base ? `${mangleTypeName({ name: decl.base.type, namespace: decl.base.namespace })} super` : '__rc_header header'};
                 ${mangledTypeName}ˇfields fields;
             } ${mangledTypeName};
 

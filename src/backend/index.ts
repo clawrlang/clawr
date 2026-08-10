@@ -60,6 +60,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             const typeInfo = decl.dispatchTable
                 ? `.polymorphic_type = {
                         .data = { .size = sizeof(${mangledTypeName}) },
+                        ${decl.base ? `.super = &${mangleTypeName({ name: decl.base.type, namespace: decl.base.namespace })}ˇtype.polymorphic_type,` : ''}
                         .vtable = &(${mangledTypeName}ˇvtable){
                             ${vtableMethods}
                         }

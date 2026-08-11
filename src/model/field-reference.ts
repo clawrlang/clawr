@@ -73,16 +73,11 @@ export class FieldReference implements Expression {
 
     currentValue(context: Context): Failable<Lattice> {
         const objectValue = this.object.currentValue(context).value()
-        if (objectValue instanceof RCTypeLattice)
-            return objectValue.fields
-                ? Failable.success(objectValue.fields[this.field])
-                : Failable.failure(
-                      `unknown field value ${this.field}`,
-                      this.span,
-                  )
-
-        const field = this.getFieldFromContext(context)
-        return Failable.success(field.valueSet.toLattice(context))
+        if (!(objectValue instanceof RCTypeLattice))
+            return Failable.failure('unknown object value', this.span)
+        return objectValue.fields
+            ? Failable.success(objectValue.fields[this.field])
+            : Failable.failure(`unknown field value ${this.field}`, this.span)
     }
 
     setCurrentValue(context: Context, value: Lattice) {
@@ -100,7 +95,7 @@ export class FieldReference implements Expression {
     ): Failable<Extract<cir.Expression, { kind: 'FIELD_REF' }>> {
         return this.checkOperatorCompatibility_failable(context).map((_) =>
             this.object.toCIRExpression(context).map((object) =>
-                this.getFieldFromContext_failable(context).map((field) =>
+                this.getFieldFromContext(context).map((field) =>
                     Failable.success({
                         kind: 'FIELD_REF',
                         object,
@@ -112,38 +107,7 @@ export class FieldReference implements Expression {
         )
     }
 
-    private getFieldFromContext(context: Context) {
-        const objectValueSet = this.object
-            .toCIRExpression(context)
-            .value().valueSet
-        const objectType =
-            objectValueSet.type === 'rc-type'
-                ? objectValueSet.typeName
-                : objectValueSet.type
-        const declaration = context.scope.dataDeclaration(objectType)
-        if (!declaration) {
-            logSemanticError(
-                `Type ${objectType} is not defined in the current context`,
-                { ...context, span: this.span },
-            )
-        }
-        if (!(declaration instanceof DataDeclaration)) {
-            throw Failable.failure(
-                `Type ${objectType} is not a data type, cannot access fields`,
-                this.span,
-            ).getError()
-        }
-        const field = declaration.fields.find((f) => f.name === this.field)
-        if (!field) {
-            throw Failable.failure(
-                `Field ${this.field} does not exist on type ${objectType}`,
-                this.fieldSpan,
-            ).getError()
-        }
-        return field
-    }
-
-    private getFieldFromContext_failable(
+    private getFieldFromContext(
         context: Context,
     ): Failable<DataDeclaration['fields'][number]> {
         return this.object.toCIRExpression(context).map((object) => {

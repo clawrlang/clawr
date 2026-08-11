@@ -60,6 +60,7 @@
                     "kind": "RETURN",
                     "value": {
                         "kind": "ALLOCATION",
+                        "semantics": "ISOLATED",
                         "fields": [
                             {
                                 "name": "field",

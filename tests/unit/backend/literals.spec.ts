@@ -49,6 +49,7 @@ describe('Lowering Literals', () => {
         it('lowers as allocInitRC', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
+                semantics: 'ISOLATED',
                 fields: [
                     {
                         name: 'field',
@@ -73,6 +74,7 @@ describe('Lowering Literals', () => {
         it('lowers as allocInitInheritedRC', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
+                semantics: 'ISOLATED',
                 fields: [
                     {
                         name: 'field',

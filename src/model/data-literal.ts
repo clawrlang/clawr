@@ -110,6 +110,7 @@ export class DataLiteral implements Expression {
         return Failable.collect(fieldResults).map((fields) =>
             Failable.success({
                 kind: 'ALLOCATION',
+                semantics: valueSet.semantics,
                 valueSet,
                 fields,
             }),

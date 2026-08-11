@@ -241,6 +241,9 @@
             "type": "object",
             "properties": {
               "kind": { "const": "ALLOCATION" },
+              "semantics": {
+                "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
+              },
               "valueSet": { "$ref": "#/$defs/RcTypeValueSet" },
               "base": {
                 "type": "object",
@@ -256,7 +259,7 @@
                 "items": { "$ref": "#/$defs/__type.o3" }
               }
             },
-            "required": ["kind", "valueSet", "fields"],
+            "required": ["kind", "semantics", "valueSet", "fields"],
             "additionalProperties": false
           },
           "__type.o3": {

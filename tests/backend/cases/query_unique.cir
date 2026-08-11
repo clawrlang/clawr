@@ -28,6 +28,7 @@
                     },
                     "initialValue": {
                         "kind": "ALLOCATION",
+                        "semantics": "ISOLATED",
                         "fields": [
                             {
                                 "name": "field",
@@ -93,7 +94,6 @@
                         "semantics": "SHARED"
                     }
                 },
-                "targetSemantics": "SHARED",
                 "valueSet": {
                     "type": "rc-type",
                     "semantics": "SHARED",

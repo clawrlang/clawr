@@ -392,19 +392,15 @@ export function lowerExpr(expr: cir.Expression): string {
                 name: expr.valueSet.typeName,
                 namespace: expr.valueSet.namespace,
             })
-            const semanticsFlag =
-                expr.valueSet.semantics === 'ISOLATED'
-                    ? '__rc_ISOLATED'
-                    : '__rc_SHARED'
             if (expr.base) {
                 const mangledSuperTypeName = mangleTypeName({
                     name: expr.base.type,
                     namespace: expr.base.namespace,
                 })
-                return `allocInitInheritedRC(${mangledTypeName}, 0, ${mangledSuperTypeName}, ${semanticsFlag},
+                return `allocInitInheritedRC(${mangledTypeName}, 0, ${mangledSuperTypeName}, ${`__rc_${expr.semantics}`},
                     ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
             } else
-                return `allocInitRC(${mangledTypeName}, 0, ${semanticsFlag},
+                return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.semantics}`},
                     ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)

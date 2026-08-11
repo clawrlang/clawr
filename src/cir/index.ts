@@ -136,6 +136,7 @@ type TruthLiteral = {
 
 type MemoryAllocation = {
     kind: 'ALLOCATION'
+    semantics: 'ISOLATED' | 'SHARED'
     valueSet: RcTypeValueSet
     base?: { type: string; namespace?: string }
     fields: {

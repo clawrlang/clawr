@@ -238,6 +238,7 @@ describe('Type declaration', () => {
                             },
                             value: {
                                 kind: 'ALLOCATION',
+                                semantics: 'SHARED',
                                 fields: [],
                                 valueSet: {
                                     type: 'rc-type',

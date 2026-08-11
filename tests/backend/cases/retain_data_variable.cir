@@ -23,6 +23,7 @@
             },
             "initialValue": {
                 "kind": "ALLOCATION",
+                "semantics": "ISOLATED",
                 "valueSet": {
                     "type": "rc-type",
                     "typeName": "FooData",

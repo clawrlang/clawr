@@ -7,6 +7,9 @@
   - `ExplicitUniqueValueSet`
 - Rename `Failable.map`
 - Get the fields from the default set when converting SHARED to UNIQUE
+- `FunctionName` lacks namespace
+  - DataDeclParser
+  - ValueSetParser
 
 ## Incomplete/Postponed Functionality
 

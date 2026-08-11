@@ -2,7 +2,6 @@ import { Statement, Expression, Context } from '.'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
-import { UniqueTypeLattice } from './lattice'
 import { logSemanticError } from './failable'
 
 export class Assignment implements Statement {
@@ -51,7 +50,7 @@ export class Assignment implements Statement {
             target.valueSet.type === 'rc-type' &&
             value.valueSet.type === 'rc-type' &&
             target.valueSet.semantics !== value.valueSet.semantics &&
-            !(currentValue instanceof UniqueTypeLattice)
+            this.value.semantics(context) !== 'UNIQUE'
         )
             logSemanticError(
                 `Cannot assign ${value.valueSet.semantics} value to ${target.valueSet.semantics} target`,
@@ -102,9 +101,8 @@ export class Assignment implements Statement {
             )
         } else if (
             target.valueSet.type === 'rc-type' &&
-            value.valueSet.type === 'rc-type' &&
             value.kind === 'CALL' &&
-            currentValue instanceof UniqueTypeLattice
+            this.value.semantics(context) === 'UNIQUE'
         ) {
             context.scope.emitted.push({
                 kind: 'ASSIGN',

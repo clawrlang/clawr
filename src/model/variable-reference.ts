@@ -2,7 +2,7 @@ import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { Failable, logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
-import { Lattice, UniqueTypeLattice } from './lattice'
+import { Lattice, SharedTypeLattice, UniqueTypeLattice } from './lattice'
 
 export class VariableReference implements Expression {
     private constructor(
@@ -39,6 +39,12 @@ export class VariableReference implements Expression {
         return variableResult.map((variable) =>
             Failable.success(variable.isImmutable),
         )
+    }
+
+    semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
+        const value = this.currentValue(context).value()
+        if (value instanceof SharedTypeLattice) return 'SHARED'
+        return 'ISOLATED'
     }
 
     currentValue(context: Context): Failable<Lattice> {

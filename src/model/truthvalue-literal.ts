@@ -20,6 +20,10 @@ export class TruthValueLiteral implements Expression {
         return new TruthValueLiteral(value, span)
     }
 
+    semantics(_: Context): 'ISOLATED' {
+        return 'ISOLATED'
+    }
+
     currentValue(_: Context): Failable<Lattice> {
         return Failable.success(TruthvalueLattice.create([this.value]))
     }

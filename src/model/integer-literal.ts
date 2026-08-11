@@ -24,6 +24,10 @@ export class IntegerLiteral implements Expression {
         return new IntegerLiteral(value, span)
     }
 
+    semantics(_: Context): 'ISOLATED' {
+        return 'ISOLATED'
+    }
+
     currentValue(_: Context): Failable<Lattice> {
         return Failable.success(
             IntegerLattice.create({ min: this.value, max: this.value }),

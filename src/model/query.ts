@@ -3,7 +3,7 @@ import { Context, Expression } from '.'
 import { Failable } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
-import { Lattice } from './lattice'
+import { Lattice, SharedTypeLattice, UniqueTypeLattice } from './lattice'
 
 export class Query implements Expression {
     private arguments: Expression[]
@@ -40,6 +40,13 @@ export class Query implements Expression {
 
     isEffectivelyConst(_: Context): Failable<boolean> {
         return Failable.success(true)
+    }
+
+    semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
+        const value = this.currentValue(context).value()
+        if (value instanceof UniqueTypeLattice) return 'UNIQUE'
+        if (value instanceof SharedTypeLattice) return 'SHARED'
+        return 'ISOLATED'
     }
 
     currentValue(context: Context): Failable<Lattice> {

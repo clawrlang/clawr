@@ -8,7 +8,12 @@ import {
 } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
-import { IsolatedTypeLattice, Lattice, UniqueTypeLattice } from './lattice'
+import {
+    IsolatedTypeLattice,
+    Lattice,
+    SharedTypeLattice,
+    UniqueTypeLattice,
+} from './lattice'
 import { VariableReference } from './variable-reference'
 
 export class FieldReference implements Expression {
@@ -63,6 +68,12 @@ export class FieldReference implements Expression {
                 this.object.isEffectivelyConst(context).value(),
             )
         })
+    }
+
+    semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
+        const value = this.currentValue(context).value()
+        if (value instanceof SharedTypeLattice) return 'SHARED'
+        return 'ISOLATED'
     }
 
     currentValue(context: Context): Failable<Lattice> {

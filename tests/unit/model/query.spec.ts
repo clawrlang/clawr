@@ -11,7 +11,7 @@ import {
     ExplicitUniqueValueSet,
 } from '../../../src/model/explicit-value-set'
 import { DataLiteral } from '../../../src/model/data-literal'
-import { SharedTypeLattice } from '../../../src/model/lattice'
+import { RCTypeLattice } from '../../../src/model/lattice'
 import { VariableReference } from '../../../src/model/variable-reference'
 
 describe('Query', () => {
@@ -157,7 +157,10 @@ describe('Query', () => {
             })
             context.scope.setCurrentValue(
                 'value',
-                SharedTypeLattice.create({ typeName: 'MyData' }),
+                RCTypeLattice.create({
+                    typeName: 'MyData',
+                    semantics: 'SHARED',
+                }),
             )
 
             const query = Query.create({

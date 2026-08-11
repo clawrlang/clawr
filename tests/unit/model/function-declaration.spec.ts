@@ -17,10 +17,7 @@ import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
-import {
-    IsolatedTypeLattice,
-    SharedTypeLattice,
-} from '../../../src/model/lattice'
+import { RCTypeLattice } from '../../../src/model/lattice'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
@@ -151,9 +148,7 @@ describe('FunctionDeclaration', () => {
         })
         context.scope.setCurrentValue(
             'myVar',
-            SharedTypeLattice.create({
-                typeName: 'MyData',
-            }),
+            RCTypeLattice.create({ typeName: 'MyData', semantics: 'SHARED' }),
         )
 
         const funcDecl = FunctionDeclaration.create({
@@ -196,8 +191,9 @@ describe('FunctionDeclaration', () => {
         })
         context.scope.setCurrentValue(
             'myVar',
-            IsolatedTypeLattice.create({
+            RCTypeLattice.create({
                 typeName: 'MyData',
+                semantics: 'ISOLATED',
                 fields: {},
             }),
         )
@@ -243,8 +239,9 @@ describe('FunctionDeclaration', () => {
         })
         context.scope.setCurrentValue(
             'myVar',
-            IsolatedTypeLattice.create({
+            RCTypeLattice.create({
                 typeName: 'MyData',
+                semantics: 'ISOLATED',
                 fields: {},
             }),
         )
@@ -328,8 +325,9 @@ describe('FunctionDeclaration', () => {
             })
             context.scope.setCurrentValue(
                 'myVar',
-                IsolatedTypeLattice.create({
+                RCTypeLattice.create({
                     typeName: 'MyData',
+                    semantics: 'ISOLATED',
                     fields: {},
                 }),
             )
@@ -380,8 +378,9 @@ describe('FunctionDeclaration', () => {
             })
             context.scope.setCurrentValue(
                 'myVar',
-                SharedTypeLattice.create({
+                RCTypeLattice.create({
                     typeName: 'MyData',
+                    semantics: 'SHARED',
                 }),
             )
 

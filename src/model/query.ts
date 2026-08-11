@@ -3,7 +3,7 @@ import { Context, Expression } from '.'
 import { Failable } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
-import { Lattice, SharedTypeLattice, UniqueTypeLattice } from './lattice'
+import { Lattice, RCTypeLattice } from './lattice'
 
 export class Query implements Expression {
     private arguments: Expression[]
@@ -44,16 +44,17 @@ export class Query implements Expression {
 
     semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
         const value = this.currentValue(context).value()
-        if (value instanceof UniqueTypeLattice) return 'UNIQUE'
-        if (value instanceof SharedTypeLattice) return 'SHARED'
+        if (value instanceof RCTypeLattice) return value.semantics
         return 'ISOLATED'
     }
 
     currentValue(context: Context): Failable<Lattice> {
-        if (this.name.toString() === 'copy(of:)')
-            return Failable.success(
-                this.arguments[0].currentValue(context).value().asUNIQUE(),
-            )
+        if (this.name.toString() === 'copy(of:)') {
+            const value = this.arguments[0].currentValue(context).value()
+            return value instanceof RCTypeLattice
+                ? Failable.success(value.asUNIQUE())
+                : Failable.failure('not a reference-counted type', this.span)
+        }
 
         const decl = context.scope.functionDeclaration(this.name.toString())
         if (!decl)

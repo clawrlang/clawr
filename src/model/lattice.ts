@@ -2,7 +2,6 @@ import * as cir from '../cir'
 
 export interface Lattice {
     unconstrained(): Lattice
-    asUNIQUE(): Lattice
     toCIR(): cir.ValueSet
 }
 
@@ -26,10 +25,6 @@ export class IntegerLattice implements Lattice {
         return IntegerLattice.create({ min: undefined, max: undefined })
     }
 
-    asUNIQUE(): Lattice {
-        return this
-    }
-
     toCIR(): cir.ValueSet {
         return {
             type: 'integer',
@@ -48,10 +43,6 @@ export class TruthvalueLattice implements Lattice {
         values?: ('false' | 'ambiguous' | 'true')[],
     ): TruthvalueLattice {
         return new TruthvalueLattice(values ?? ['false', 'ambiguous', 'true'])
-    }
-
-    asUNIQUE(): Lattice {
-        return this
     }
 
     unconstrained(): Lattice {
@@ -73,10 +64,6 @@ export class StringLattice implements Lattice {
         return new StringLattice()
     }
 
-    asUNIQUE(): Lattice {
-        return this
-    }
-
     unconstrained(): Lattice {
         return this
     }
@@ -86,54 +73,31 @@ export class StringLattice implements Lattice {
     }
 }
 
-export class SharedTypeLattice implements Lattice {
-    private constructor(public readonly typeName: string) {}
-
-    static create({ typeName }: { typeName: string }): SharedTypeLattice {
-        return new SharedTypeLattice(typeName)
-    }
-
-    unconstrained(): Lattice {
-        return this
-    }
-
-    asUNIQUE(): UniqueTypeLattice {
-        return UniqueTypeLattice.create({
-            typeName: this.typeName,
-            fields: {},
-        })
-    }
-
-    toCIR(): cir.ValueSet {
-        return {
-            type: 'rc-type',
-            typeName: this.typeName,
-            semantics: 'SHARED',
-        }
-    }
-}
-
-export class IsolatedTypeLattice implements Lattice {
+export class RCTypeLattice implements Lattice {
     private constructor(
         public readonly typeName: string,
-        public readonly fields: Record<string, Lattice>,
+        public readonly semantics: 'ISOLATED' | 'SHARED' | 'UNIQUE',
+        public readonly fields: Record<string, Lattice> | undefined,
     ) {}
 
     static create({
         typeName,
+        semantics,
         fields,
     }: {
         typeName: string
-        fields: Record<string, Lattice>
-    }): IsolatedTypeLattice {
-        return new IsolatedTypeLattice(typeName, fields)
+        semantics: 'ISOLATED' | 'SHARED' | 'UNIQUE'
+        fields?: Record<string, Lattice>
+    }): RCTypeLattice {
+        return new RCTypeLattice(typeName, semantics, fields)
     }
 
     unconstrained(): Lattice {
-        return IsolatedTypeLattice.create({
+        return RCTypeLattice.create({
             typeName: this.typeName,
+            semantics: this.semantics,
             fields: Object.fromEntries(
-                Object.entries(this.fields).map(([name, field]) => [
+                Object.entries(this.fields ?? {}).map(([name, field]) => [
                     name,
                     field.unconstrained(),
                 ]),
@@ -141,65 +105,12 @@ export class IsolatedTypeLattice implements Lattice {
         })
     }
 
-    asUNIQUE(): UniqueTypeLattice {
-        return UniqueTypeLattice.create({
+    asUNIQUE(): RCTypeLattice {
+        return RCTypeLattice.create({
             typeName: this.typeName,
-            fields: this.fields,
+            semantics: 'UNIQUE',
+            fields: this.fields || {},
         })
-    }
-
-    toCIR(): cir.ValueSet {
-        return {
-            type: 'rc-type',
-            typeName: this.typeName,
-            semantics: 'ISOLATED',
-        }
-    }
-}
-
-export class UniqueTypeLattice implements Lattice {
-    private constructor(
-        public readonly typeName: string,
-        public readonly fields: Record<string, Lattice>,
-    ) {}
-
-    static create({
-        typeName,
-        fields,
-    }: {
-        typeName: string
-        fields: Record<string, Lattice>
-    }): UniqueTypeLattice {
-        return new UniqueTypeLattice(typeName, fields)
-    }
-
-    unconstrained(): Lattice {
-        return UniqueTypeLattice.create({
-            typeName: this.typeName,
-            fields: Object.fromEntries(
-                Object.entries(this.fields).map(([name, field]) => [
-                    name,
-                    field.unconstrained(),
-                ]),
-            ),
-        })
-    }
-
-    asCOW() {
-        return IsolatedTypeLattice.create({
-            typeName: this.typeName,
-            fields: this.fields,
-        })
-    }
-
-    asREF() {
-        return SharedTypeLattice.create({
-            typeName: this.typeName,
-        })
-    }
-
-    asUNIQUE(): Lattice {
-        return this
     }
 
     toCIR(): cir.ValueSet {

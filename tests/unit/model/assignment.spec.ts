@@ -12,10 +12,7 @@ import {
 } from '../../../src/model/explicit-value-set'
 import { FunctionDeclaration } from '../../../src/model/function-declaration'
 import { Query } from '../../../src/model/query'
-import {
-    IsolatedTypeLattice,
-    SharedTypeLattice,
-} from '../../../src/model/lattice'
+import { RCTypeLattice } from '../../../src/model/lattice'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -95,11 +92,13 @@ describe('Assignment', () => {
             })
             context.scope.setCurrentValue(
                 'bar',
-                IsolatedTypeLattice.create({
+                RCTypeLattice.create({
                     typeName: 'OuterType',
+                    semantics: 'ISOLATED',
                     fields: {
-                        field: IsolatedTypeLattice.create({
+                        field: RCTypeLattice.create({
                             typeName: 'InnerType',
+                            semantics: 'ISOLATED',
                             fields: {},
                         }),
                     },
@@ -188,8 +187,9 @@ describe('Assignment', () => {
             })
             context.scope.setCurrentValue(
                 'bar',
-                IsolatedTypeLattice.create({
+                RCTypeLattice.create({
                     typeName: 'MyType',
+                    semantics: 'ISOLATED',
                     fields: {},
                 }),
             )
@@ -440,14 +440,11 @@ describe('Assignment', () => {
                 })
                 context.scope.setCurrentValue(
                     'value',
-                    semantics[1] === 'ISOLATED'
-                        ? IsolatedTypeLattice.create({
-                              typeName: 'MyType',
-                              fields: {},
-                          })
-                        : SharedTypeLattice.create({
-                              typeName: 'MyType',
-                          }),
+                    RCTypeLattice.create({
+                        typeName: 'MyType',
+                        semantics,
+                        fields: {},
+                    }),
                 )
 
                 const assignment = Assignment.create({
@@ -586,7 +583,10 @@ describe('Assignment', () => {
                 })
                 context.scope.setCurrentValue(
                     'value',
-                    SharedTypeLattice.create({ typeName: 'MyType' }),
+                    RCTypeLattice.create({
+                        typeName: 'MyType',
+                        semantics: 'SHARED',
+                    }),
                 )
                 const assignment = Assignment.create({
                     target: VariableReference.create({

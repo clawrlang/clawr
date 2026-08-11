@@ -4,7 +4,9 @@
 
 - Maybe there is too much stuff in the CIR?
   - `valueSet`
+  - `ExplicitUniqueValueSet`
 - Rename `Failable.map`
+- Get the fields from the default set when converting SHARED to UNIQUE
 
 ## Incomplete/Postponed Functionality
 

@@ -3,7 +3,7 @@ import { Context, Declaration, Expression, Statement } from '.'
 import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
-import { IsolatedTypeLattice, Lattice, SharedTypeLattice } from './lattice'
+import { Lattice, RCTypeLattice } from './lattice'
 import { VariableSemantics } from './variable-declaration'
 import { SourceCodeSpan } from '../diagnostics'
 import { logSemanticError } from './failable'
@@ -137,9 +137,11 @@ export class FunctionDeclaration implements Declaration {
                 ...context,
                 ...{
                     semantics:
-                        inferredLattice instanceof IsolatedTypeLattice
+                        inferredLattice instanceof RCTypeLattice &&
+                        inferredLattice.semantics === 'ISOLATED'
                             ? 'const'
-                            : inferredLattice instanceof SharedTypeLattice
+                            : inferredLattice instanceof RCTypeLattice &&
+                                inferredLattice.semantics === 'SHARED'
                               ? 'ref'
                               : undefined,
                 },

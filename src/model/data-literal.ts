@@ -2,7 +2,7 @@ import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
-import { Lattice, UniqueTypeLattice } from './lattice'
+import { Lattice, RCTypeLattice } from './lattice'
 import { Failable } from './failable'
 
 export class DataLiteral implements Expression {
@@ -53,8 +53,9 @@ export class DataLiteral implements Expression {
             }),
         ).map((fieldValues) =>
             Failable.success(
-                UniqueTypeLattice.create({
+                RCTypeLattice.create({
                     typeName: DataDeclaration.name,
+                    semantics: 'UNIQUE',
                     fields: Object.fromEntries(
                         fieldValues.map((value, index) => [
                             this.fields[index].name,

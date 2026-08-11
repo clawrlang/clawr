@@ -2,7 +2,7 @@ import { Context, Declaration, Expression, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
-import { UniqueTypeLattice } from './lattice'
+import { RCTypeLattice } from './lattice'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -55,16 +55,15 @@ export class VariableDeclaration implements Statement, Declaration {
         if (
             valueSet.type === 'rc-type' &&
             initialValue.valueSet.type === 'rc-type' &&
-            valueSet.semantics !== initialValue.valueSet.semantics &&
-            !(
-                this.initialValue.currentValue(context).value() instanceof
-                UniqueTypeLattice
-            )
-        )
-            logSemanticError(
-                `Cannot assign ${initialValue.valueSet.semantics} value to ${valueSet.semantics} target`,
-                { ...context, span: this.initialValue.span },
-            )
+            valueSet.semantics !== initialValue.valueSet.semantics
+        ) {
+            const iv = this.initialValue.currentValue(context).value()
+            if (iv instanceof RCTypeLattice && iv.semantics !== 'UNIQUE')
+                logSemanticError(
+                    `Cannot assign ${initialValue.valueSet.semantics} value to ${valueSet.semantics} target`,
+                    { ...context, span: this.initialValue.span },
+                )
+        }
 
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,
@@ -97,10 +96,19 @@ export class VariableDeclaration implements Statement, Declaration {
                 ...this.valueSet,
             })
             .value()
-        if (!(currentValue instanceof UniqueTypeLattice)) return currentValue
+        if (
+            !(currentValue instanceof RCTypeLattice) ||
+            currentValue.semantics === 'UNIQUE'
+        )
+            return currentValue
 
-        return this.semantics === 'const' || this.semantics === 'mut'
-            ? currentValue.asCOW()
-            : currentValue.asREF()
+        return RCTypeLattice.create({
+            typeName: currentValue.typeName,
+            fields: currentValue.fields,
+            semantics:
+                this.semantics === 'const' || this.semantics === 'mut'
+                    ? 'ISOLATED'
+                    : 'SHARED',
+        })
     }
 }

@@ -6,9 +6,7 @@ import {
     IntegerLattice,
     TruthvalueLattice,
     StringLattice,
-    SharedTypeLattice,
-    IsolatedTypeLattice,
-    UniqueTypeLattice,
+    RCTypeLattice,
 } from './lattice'
 import { VariableSemantics } from './variable-declaration'
 import { convertSemantics } from './variable-reference'
@@ -130,10 +128,14 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
 
     toLattice(context: Context): Lattice {
         if (this.semantics === 'ref' || this.semantics === 'mutref')
-            return SharedTypeLattice.create({ typeName: this.typeName })
+            return RCTypeLattice.create({
+                typeName: this.typeName,
+                semantics: 'ISOLATED',
+            })
 
-        return IsolatedTypeLattice.create({
+        return RCTypeLattice.create({
             typeName: this.typeName,
+            semantics: 'ISOLATED',
             fields: Object.fromEntries(
                 context.scope
                     .dataDeclaration(this.typeName)
@@ -171,8 +173,9 @@ export class ExplicitUniqueValueSet implements ExplicitValueSet {
     }
 
     toLattice(context: Context): Lattice {
-        return UniqueTypeLattice.create({
+        return RCTypeLattice.create({
             typeName: this.typeName,
+            semantics: 'UNIQUE',
             fields: Object.fromEntries(
                 context.scope
                     .dataDeclaration(this.typeName)

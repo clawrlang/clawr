@@ -1,5 +1,5 @@
 import { Context, Expression, Statement } from '.'
-import { IsolatedTypeLattice, SharedTypeLattice } from './lattice'
+import { RCTypeLattice } from './lattice'
 import { logSemanticError } from './failable'
 
 export class ReturnStatement implements Statement {
@@ -20,7 +20,8 @@ export class ReturnStatement implements Statement {
                 )
             }
             if (
-                valueLattice instanceof IsolatedTypeLattice &&
+                valueLattice instanceof RCTypeLattice &&
+                valueLattice.semantics === 'ISOLATED' &&
                 context.semantics === 'ref'
             )
                 logSemanticError(
@@ -28,7 +29,8 @@ export class ReturnStatement implements Statement {
                     { ...context, span: this.value.span },
                 )
             if (
-                valueLattice instanceof SharedTypeLattice &&
+                valueLattice instanceof RCTypeLattice &&
+                valueLattice.semantics === 'SHARED' &&
                 context.semantics !== 'ref'
             )
                 logSemanticError(
@@ -41,8 +43,7 @@ export class ReturnStatement implements Statement {
                 (object.kind === 'VARIABLE_REF' ||
                     object.kind === 'FIELD_REF') &&
                 !context.semantics &&
-                (valueLattice instanceof SharedTypeLattice ||
-                    valueLattice instanceof IsolatedTypeLattice)
+                valueLattice instanceof RCTypeLattice
             ) {
                 context.scope.emitted.push({
                     kind: 'ENSURE_UNIQUE',

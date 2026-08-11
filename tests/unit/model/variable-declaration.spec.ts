@@ -12,7 +12,7 @@ import { VariableReference } from '../../../src/model/variable-reference'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { FieldReference } from '../../../src/model/field-reference'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
-import { IsolatedTypeLattice, IntegerLattice } from '../../../src/model/lattice'
+import { RCTypeLattice, IntegerLattice } from '../../../src/model/lattice'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -190,11 +190,13 @@ describe('VariableDeclaration', () => {
             })
             context.scope.setCurrentValue(
                 'bar',
-                IsolatedTypeLattice.create({
+                RCTypeLattice.create({
                     typeName: 'OuterType',
+                    semantics: 'ISOLATED',
                     fields: {
-                        field: IsolatedTypeLattice.create({
+                        field: RCTypeLattice.create({
                             typeName: 'InnerType',
+                            semantics: 'ISOLATED',
                             fields: {
                                 innerField: IntegerLattice.create({
                                     min: 42n,
@@ -268,8 +270,9 @@ describe('VariableDeclaration', () => {
             })
             context.scope.setCurrentValue(
                 'bar',
-                IsolatedTypeLattice.create({
+                RCTypeLattice.create({
                     typeName: 'MyType',
+                    semantics: 'ISOLATED',
                     fields: {
                         field: IntegerLattice.create({
                             min: 42n,
@@ -434,7 +437,7 @@ describe('VariableDeclaration', () => {
             })
             decl.emitStatement(context)
             expect(context.scope.currentValue('foo')).toBeInstanceOf(
-                IsolatedTypeLattice,
+                RCTypeLattice,
             )
         })
     })
@@ -479,8 +482,9 @@ describe('VariableDeclaration', () => {
                 })
                 context.scope.setCurrentValue(
                     'value',
-                    IsolatedTypeLattice.create({
+                    RCTypeLattice.create({
                         typeName: 'MyType',
+                        semantics: 'ISOLATED',
                         fields: {
                             myField: IntegerLattice.create({
                                 min: 42n,

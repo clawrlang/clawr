@@ -8,12 +8,7 @@ import {
 } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
-import {
-    IsolatedTypeLattice,
-    Lattice,
-    SharedTypeLattice,
-    UniqueTypeLattice,
-} from './lattice'
+import { RCTypeLattice, Lattice } from './lattice'
 import { VariableReference } from './variable-reference'
 
 export class FieldReference implements Expression {
@@ -72,27 +67,28 @@ export class FieldReference implements Expression {
 
     semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
         const value = this.currentValue(context).value()
-        if (value instanceof SharedTypeLattice) return 'SHARED'
+        if (value instanceof RCTypeLattice) return value.semantics
         return 'ISOLATED'
     }
 
     currentValue(context: Context): Failable<Lattice> {
         const objectValue = this.object.currentValue(context).value()
-        if (objectValue instanceof IsolatedTypeLattice)
-            return Failable.success(objectValue.fields[this.field])
+        if (objectValue instanceof RCTypeLattice)
+            return objectValue.fields
+                ? Failable.success(objectValue.fields[this.field])
+                : Failable.failure(
+                      `unknown field value ${this.field}`,
+                      this.span,
+                  )
 
         const field = this.getFieldFromContext(context)
         return Failable.success(field.valueSet.toLattice(context))
     }
 
     setCurrentValue(context: Context, value: Lattice) {
-        if (value instanceof UniqueTypeLattice)
-            throw new Error(
-                `Cannot set current value of field ${this.field} to a UniqueTypeLattice`,
-            )
         const objectValue = this.object.currentValue(context).value()
-        if (objectValue instanceof IsolatedTypeLattice) {
-            objectValue.fields[this.field] = value
+        if (objectValue instanceof RCTypeLattice) {
+            if (objectValue.fields) objectValue.fields[this.field] = value
 
             const object: Expression = this.object
             object.setCurrentValue?.(context, objectValue)

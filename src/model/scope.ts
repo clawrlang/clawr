@@ -2,7 +2,7 @@ import * as cir from '../cir'
 import { Declaration } from '.'
 import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
-import { Lattice, UniqueTypeLattice } from './lattice'
+import { Lattice } from './lattice'
 
 class RootScope {
     public variables: Map<string, Variable> = new Map()
@@ -89,10 +89,6 @@ export class Scope {
     }
 
     setCurrentValue(name: string, valueSet: Lattice) {
-        if (valueSet instanceof UniqueTypeLattice)
-            throw new Error(
-                `Cannot set current value of ${name} to a UniqueTypeLattice`,
-            )
         this.currentValues.set(name, valueSet)
     }
 }

@@ -2,7 +2,7 @@ import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { Failable, logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
-import { Lattice, SharedTypeLattice, UniqueTypeLattice } from './lattice'
+import { Lattice, RCTypeLattice } from './lattice'
 
 export class VariableReference implements Expression {
     private constructor(
@@ -43,7 +43,7 @@ export class VariableReference implements Expression {
 
     semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
         const value = this.currentValue(context).value()
-        if (value instanceof SharedTypeLattice) return 'SHARED'
+        if (value instanceof RCTypeLattice) return value.semantics
         return 'ISOLATED'
     }
 
@@ -59,10 +59,6 @@ export class VariableReference implements Expression {
     }
 
     setCurrentValue(context: Context, value: Lattice): void {
-        if (value instanceof UniqueTypeLattice)
-            throw new Error(
-                `Cannot set current value of ${this.name} to a UniqueTypeLattice`,
-            )
         context.scope.setCurrentValue(this.name, value)
     }
 

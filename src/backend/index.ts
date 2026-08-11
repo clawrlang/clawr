@@ -296,10 +296,7 @@ export function lowerStmt(stmt: cir.Statement): string {
                 }
             }
         case 'VARIABLE_DECL':
-            if (stmt.initialValue.kind === 'ALLOCATION')
-                return `${lowerType(stmt.initialValue.valueSet)} ${lowerInitStmt(stmt)};`
-            else
-                return `${lowerType(stmt.valueSet)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
+            return `${lowerType(stmt.valueSet)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         case 'ASSIGN':
             if (
                 stmt.target.kind === 'VARIABLE_REF' &&
@@ -399,10 +396,10 @@ export function lowerExpr(expr: cir.Expression): string {
                 expr.valueSet.semantics === 'ISOLATED'
                     ? '__rc_ISOLATED'
                     : '__rc_SHARED'
-            if (expr.initializer) {
+            if (expr.base) {
                 const mangledSuperTypeName = mangleTypeName({
-                    name: expr.initializer.type,
-                    namespace: expr.initializer.namespace,
+                    name: expr.base.type,
+                    namespace: expr.base.namespace,
                 })
                 return `allocInitInheritedRC(${mangledTypeName}, 0, ${mangledSuperTypeName}, ${semanticsFlag},
                     ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`

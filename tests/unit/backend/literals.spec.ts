@@ -83,11 +83,8 @@ describe('Lowering Literals', () => {
                         },
                     },
                 ],
-                initializer: {
+                base: {
                     type: 'Super',
-                    baseName: 'init',
-                    labels: [],
-                    arguments: [],
                 },
                 valueSet: {
                     type: 'rc-type',

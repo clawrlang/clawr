@@ -242,28 +242,21 @@
             "properties": {
               "kind": { "const": "ALLOCATION" },
               "valueSet": { "$ref": "#/$defs/RcTypeValueSet" },
-              "initializer": { "$ref": "#/$defs/__type.o2" },
+              "base": {
+                "type": "object",
+                "properties": {
+                  "type": { "type": "string" },
+                  "namespace": { "type": "string" }
+                },
+                "required": ["type"],
+                "additionalProperties": false
+              },
               "fields": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type.o3" }
               }
             },
             "required": ["kind", "valueSet", "fields"],
-            "additionalProperties": false
-          },
-          "__type.o2": {
-            "type": "object",
-            "properties": {
-              "type": { "type": "string" },
-              "namespace": { "type": "string" },
-              "baseName": { "type": "string" },
-              "labels": { "type": "array", "items": { "type": "string" } },
-              "arguments": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/Expression" }
-              }
-            },
-            "required": ["type", "baseName", "labels", "arguments"],
             "additionalProperties": false
           },
           "__type.o3": {

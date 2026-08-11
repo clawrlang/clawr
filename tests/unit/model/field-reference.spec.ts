@@ -19,7 +19,7 @@ describe('Field Reference', () => {
                 typeName: 'MyType',
             },
         })
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addDataDeclaration(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
@@ -60,7 +60,7 @@ describe('Field Reference', () => {
                 typeName: 'MyType',
             },
         })
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addDataDeclaration(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
@@ -114,7 +114,7 @@ describe('Field Reference', () => {
                         typeName: 'MyType',
                     },
                 })
-                context.scope.rootScope.declarations.set(
+                context.scope.rootScope.addDataDeclaration(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
@@ -162,7 +162,7 @@ describe('Field Reference', () => {
                 typeName: 'MyType',
             },
         })
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addDataDeclaration(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
@@ -212,7 +212,7 @@ describe('Field Reference', () => {
                         typeName: 'MyType',
                     },
                 })
-                context.scope.rootScope.declarations.set(
+                context.scope.rootScope.addDataDeclaration(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
@@ -274,7 +274,7 @@ describe('Field Reference', () => {
                         typeName: 'MyType',
                     },
                 })
-                context.scope.rootScope.declarations.set(
+                context.scope.rootScope.addDataDeclaration(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
@@ -316,7 +316,7 @@ describe('Field Reference', () => {
                     typeName: 'MyType',
                 },
             })
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',
@@ -355,7 +355,7 @@ describe('Field Reference', () => {
                     typeName: 'MyType',
                 },
             })
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',

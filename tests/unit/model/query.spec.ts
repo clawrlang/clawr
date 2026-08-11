@@ -22,7 +22,7 @@ describe('Query', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addFunctionDeclaration(
             'foo()',
             FunctionDeclaration.create({
                 baseName: 'foo',
@@ -62,7 +62,7 @@ describe('Query', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addFunctionDeclaration(
             'foo(x:)',
             FunctionDeclaration.create({
                 baseName: 'foo',
@@ -106,7 +106,7 @@ describe('Query', () => {
     describe('converts UNIQUE semantics to ISOLATED in CIR', () => {
         test('for custom function', () => {
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addFunctionDeclaration(
                 'foo()',
                 FunctionDeclaration.create({
                     baseName: 'foo',

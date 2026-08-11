@@ -74,7 +74,7 @@ describe('VariableDeclarationParser', () => {
 
     it('sets the semantics of data literal', () => {
         const context = newSemanticContext()
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addDataDeclaration(
             'MyData',
             DataDeclaration.create({
                 name: 'MyData',

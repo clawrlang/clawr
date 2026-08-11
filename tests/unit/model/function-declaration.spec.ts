@@ -131,7 +131,7 @@ describe('FunctionDeclaration', () => {
 
     it('throws if returning SHARED as UNIQUE', () => {
         const context = newSemanticContext()
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addDataDeclaration(
             'MyData',
             DataDeclaration.create({
                 name: 'MyData',
@@ -174,7 +174,7 @@ describe('FunctionDeclaration', () => {
 
     it('throws if returning ISOLATED as SHARED', () => {
         const context = newSemanticContext()
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addDataDeclaration(
             'MyData',
             DataDeclaration.create({
                 name: 'MyData',
@@ -222,7 +222,7 @@ describe('FunctionDeclaration', () => {
 
     it('throws if returning ISOLATED as SHARED', () => {
         const context = newSemanticContext()
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addDataDeclaration(
             'MyData',
             DataDeclaration.create({
                 name: 'MyData',
@@ -308,7 +308,7 @@ describe('FunctionDeclaration', () => {
 
         it('infers ISOLATED return value-set from ISOLATED variable expression', () => {
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyData',
                 DataDeclaration.create({
                     name: 'MyData',
@@ -361,7 +361,7 @@ describe('FunctionDeclaration', () => {
 
         it('infers SHARED return value-set from SHARED variable expression', () => {
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyData',
                 DataDeclaration.create({
                     name: 'MyData',
@@ -423,12 +423,9 @@ describe('FunctionDeclaration', () => {
         const context = newSemanticContext()
         funcDecl.emitDeclaration(context)
 
-        expect(context.scope.rootScope.declarations.has('myFunction()')).toBe(
-            true,
-        )
-        const decl = context.scope.rootScope.declarations.get(
-            'myFunction()',
-        ) as FunctionDeclaration
+        const decl = context.scope.rootScope.functionDeclaration('myFunction()')
+        expect(decl).not.toBeNil()
+        if (!decl) throw new Error('no function decl!!')
         expect(decl).toBeInstanceOf(FunctionDeclaration)
         expect(decl.baseName).toBe('myFunction')
         expect(decl.parameters).toEqual([])
@@ -478,7 +475,7 @@ describe('FunctionDeclaration', () => {
         test('with no return', () => {
             const context = newSemanticContext()
 
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyData',
                 DataDeclaration.create({
                     name: 'MyData',
@@ -546,7 +543,7 @@ describe('FunctionDeclaration', () => {
         test('ending with return', () => {
             const context = newSemanticContext()
 
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyData',
                 DataDeclaration.create({
                     name: 'MyData',
@@ -620,7 +617,7 @@ describe('FunctionDeclaration', () => {
         test('returns UNIQUE return values with a ref-count of 1', () => {
             const context = newSemanticContext()
 
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyData',
                 DataDeclaration.create({
                     name: 'MyData',

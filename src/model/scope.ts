@@ -6,7 +6,7 @@ import { Lattice } from './lattice'
 
 class RootScope {
     public variables: Map<string, Variable> = new Map()
-    public declarations: Map<string, Declaration> = new Map()
+    private declarations: Map<string, Declaration> = new Map()
     public emitted: cir.Declaration[] = []
 
     dataDeclaration(name: string): DataDeclaration | undefined {
@@ -15,10 +15,18 @@ class RootScope {
         return undefined
     }
 
+    addDataDeclaration(name: string, decl: DataDeclaration) {
+        this.declarations.set(name, decl)
+    }
+
     functionDeclaration(name: string): FunctionDeclaration | undefined {
         const decl = this.declarations.get(name)
         if (decl instanceof FunctionDeclaration) return decl
         return undefined
+    }
+
+    addFunctionDeclaration(name: string, decl: FunctionDeclaration) {
+        this.declarations.set(name, decl)
     }
 
     variableDeclaration(name: string): Variable | undefined {

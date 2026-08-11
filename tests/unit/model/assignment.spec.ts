@@ -42,7 +42,7 @@ describe('Assignment', () => {
     describe('injects RELEASE/RETAIN statements', () => {
         test('for a FieldReference', () => {
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'InnerType',
                 DataDeclaration.create({
                     name: 'InnerType',
@@ -57,7 +57,7 @@ describe('Assignment', () => {
                     ],
                 }),
             )
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'OuterType',
                 DataDeclaration.create({
                     name: 'OuterType',
@@ -162,7 +162,7 @@ describe('Assignment', () => {
 
         test('for a VariableReference', () => {
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',
@@ -245,7 +245,7 @@ describe('Assignment', () => {
 
     it('injects ENSURE_UNIQUE for ISOLATED target before assignment', () => {
         const context = newSemanticContext()
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addDataDeclaration(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
@@ -299,14 +299,14 @@ describe('Assignment', () => {
 
     it('injects AS_SHARED for UNIQUE value before assignment to SHARED target', () => {
         const context = newSemanticContext()
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addDataDeclaration(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
                 fields: [],
             }),
         )
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addFunctionDeclaration(
             'myFunction()',
             FunctionDeclaration.create({
                 baseName: 'myFunction',
@@ -415,7 +415,7 @@ describe('Assignment', () => {
         for (const semantics of ['ISOLATED', 'SHARED'] as const) {
             test(semantics, () => {
                 const context = newSemanticContext()
-                context.scope.rootScope.declarations.set(
+                context.scope.rootScope.addDataDeclaration(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',
@@ -479,7 +479,7 @@ describe('Assignment', () => {
 
     it('throws if the target field is effectively const', () => {
         const context = newSemanticContext()
-        context.scope.rootScope.declarations.set(
+        context.scope.rootScope.addDataDeclaration(
             'MyType',
             DataDeclaration.create({
                 name: 'MyType',
@@ -550,7 +550,7 @@ describe('Assignment', () => {
         cases.forEach(({ targetSemantics, valueSemantics }) => {
             it(`${targetSemantics} target = ${valueSemantics} value`, () => {
                 const context = newSemanticContext()
-                context.scope.rootScope.declarations.set(
+                context.scope.rootScope.addDataDeclaration(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',

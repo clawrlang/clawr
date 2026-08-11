@@ -55,7 +55,7 @@ export class FunctionDeclaration implements Declaration {
                 .filter((param) => param.label)
                 .map((param) => param.label!),
         })
-        context.scope.rootScope.declarations.set(name.toString(), this)
+        context.scope.rootScope.addFunctionDeclaration(name.toString(), this)
 
         const parameters = this.parameters.map((param) => ({
             label: param.label,

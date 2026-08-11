@@ -72,7 +72,7 @@ describe('VariableDeclaration', () => {
                 }),
             })
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',
@@ -122,7 +122,7 @@ describe('VariableDeclaration', () => {
                 }),
             })
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',
@@ -148,7 +148,7 @@ describe('VariableDeclaration', () => {
     describe('injects RETAIN statement', () => {
         test('for a FieldReference', () => {
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'InnerType',
                 DataDeclaration.create({
                     name: 'InnerType',
@@ -163,7 +163,7 @@ describe('VariableDeclaration', () => {
                     ],
                 }),
             )
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'OuterType',
                 DataDeclaration.create({
                     name: 'OuterType',
@@ -245,7 +245,7 @@ describe('VariableDeclaration', () => {
 
         test('for a VariableReference', () => {
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',
@@ -331,7 +331,7 @@ describe('VariableDeclaration', () => {
 
         test('for a nested rc-type variable', () => {
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'InnerType',
                 DataDeclaration.create({
                     name: 'InnerType',
@@ -346,7 +346,7 @@ describe('VariableDeclaration', () => {
                     ],
                 }),
             )
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'OuterType',
                 DataDeclaration.create({
                     name: 'OuterType',
@@ -414,7 +414,7 @@ describe('VariableDeclaration', () => {
 
         it('converts UNIQUE expression to CowTypeLattice', () => {
             const context = newSemanticContext()
-            context.scope.rootScope.declarations.set(
+            context.scope.rootScope.addDataDeclaration(
                 'MyType',
                 DataDeclaration.create({
                     name: 'MyType',
@@ -457,7 +457,7 @@ describe('VariableDeclaration', () => {
         cases.forEach(({ targetSemantics, valueSemantics }) => {
             it(`${targetSemantics} target = ${valueSemantics} value`, () => {
                 const context = newSemanticContext()
-                context.scope.rootScope.declarations.set(
+                context.scope.rootScope.addDataDeclaration(
                     'MyType',
                     DataDeclaration.create({
                         name: 'MyType',

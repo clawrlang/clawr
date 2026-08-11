@@ -4,6 +4,7 @@ import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
 import { Failable } from './failable'
+import { TypeName } from './type-name'
 
 export class DataLiteral implements Expression {
     private constructor(
@@ -29,11 +30,11 @@ export class DataLiteral implements Expression {
         return 'UNIQUE'
     }
 
-    currentValue(context: Context & { typeName: string }): Failable<Lattice> {
-        const DataDeclaration = context.scope.dataDeclaration(context.typeName)
+    currentValue(context: Context & { type: TypeName }): Failable<Lattice> {
+        const DataDeclaration = context.scope.dataDeclaration(context.type.name)
         if (!DataDeclaration)
             return Failable.failure(
-                `DataLiteral.currentValue: type ${context.typeName} not found in scope`,
+                `DataLiteral.currentValue: type ${context.type.name} not found in scope`,
                 this.span,
             )
         return Failable.collect(
@@ -43,7 +44,7 @@ export class DataLiteral implements Expression {
                 )
                 if (!fieldDeclaration)
                     return Failable.failure(
-                        `DataLiteral.currentValue: field ${field.name} not found on type ${context.typeName}`,
+                        `DataLiteral.currentValue: field ${field.name} not found on type ${context.type.name}`,
                         this.span,
                     )
                 return field.value.currentValue({

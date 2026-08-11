@@ -6,6 +6,7 @@ import {
     ExplicitTruthValueSet,
 } from '../../../src/model/explicit-value-set'
 import { newSemanticContext } from '../../util'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('ExplicitValueSet', () => {
     describe('toCIR', () => {
@@ -117,7 +118,7 @@ describe('ExplicitValueSet', () => {
 
         it('converts ISOLATED rc-type to CIR correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
-                typeName: 'MyType',
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'mut',
                 span: {
                     start: { line: 1, column: 1 },
@@ -134,7 +135,7 @@ describe('ExplicitValueSet', () => {
 
         it('converts SHARED rc-type to CIR correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
-                typeName: 'MyType',
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ref',
                 span: {
                     start: { line: 1, column: 1 },
@@ -198,7 +199,7 @@ describe('ExplicitValueSet', () => {
 
         it('converts ISOLATED rc-type to lattice correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
-                typeName: 'MyType',
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'mut',
                 span: {
                     start: { line: 1, column: 1 },
@@ -214,7 +215,7 @@ describe('ExplicitValueSet', () => {
 
         it('converts SHARED rc-type to lattice correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
-                typeName: 'MyType',
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ref',
                 span: {
                     start: { line: 1, column: 1 },

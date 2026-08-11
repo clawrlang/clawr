@@ -10,6 +10,7 @@ import {
 } from './lattice'
 import { VariableSemantics } from './variable-declaration'
 import { convertSemantics } from './variable-reference'
+import { TypeName } from './type-name'
 
 export interface ExplicitValueSet {
     get span(): SourceCodeSpan
@@ -101,27 +102,27 @@ export class ExplicitStringValueSet implements ExplicitValueSet {
 
 export class ExplicitRCTypeValueSet implements ExplicitValueSet {
     private constructor(
-        public readonly typeName: string,
+        public readonly type: TypeName,
         public readonly semantics: VariableSemantics,
         public readonly span: SourceCodeSpan,
     ) {}
 
     static create({
-        typeName,
+        type,
         semantics,
         span,
     }: {
-        typeName: string
+        type: TypeName
         semantics: VariableSemantics
         span: SourceCodeSpan
     }): ExplicitRCTypeValueSet {
-        return new ExplicitRCTypeValueSet(typeName, semantics, span)
+        return new ExplicitRCTypeValueSet(type, semantics, span)
     }
 
     toCIR(): Extract<cir.ValueSet, { type: 'rc-type' }> {
         return {
             type: 'rc-type',
-            typeName: this.typeName,
+            typeName: this.type.name,
             semantics: convertSemantics(this.semantics),
         }
     }
@@ -129,16 +130,16 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
     toLattice(context: Context): Lattice {
         if (this.semantics === 'ref' || this.semantics === 'mutref')
             return RCTypeLattice.create({
-                typeName: this.typeName,
+                typeName: this.type.name,
                 semantics: 'ISOLATED',
             })
 
         return RCTypeLattice.create({
-            typeName: this.typeName,
+            typeName: this.type.name,
             semantics: 'ISOLATED',
             fields: Object.fromEntries(
                 context.scope
-                    .dataDeclaration(this.typeName)
+                    .dataDeclaration(this.type.name)
                     ?.fields.map((field) => [
                         field.name,
                         field.valueSet.toLattice(context),

@@ -7,6 +7,7 @@ import {
     ExplicitIntegerValueSet,
     ExplicitRCTypeValueSet,
 } from '../../../src/model/explicit-value-set'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('Field Reference', () => {
     it('infers its type from the context', () => {
@@ -68,7 +69,7 @@ describe('Field Reference', () => {
                     {
                         name: 'myField',
                         valueSet: ExplicitRCTypeValueSet.create({
-                            typeName: 'MyType',
+                            type: TypeName.create({ name: 'MyType' }),
                             semantics: 'mut',
                             span: someCodeSpan,
                         }),
@@ -122,7 +123,7 @@ describe('Field Reference', () => {
                             {
                                 name: 'myField',
                                 valueSet: ExplicitRCTypeValueSet.create({
-                                    typeName: 'MyType',
+                                    type: TypeName.create({ name: 'MyType' }),
                                     semantics,
                                     span: someCodeSpan,
                                 }),

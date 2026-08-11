@@ -13,6 +13,7 @@ import { DataLiteral } from '../../../src/model/data-literal'
 import { FieldReference } from '../../../src/model/field-reference'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { RCTypeLattice, IntegerLattice } from '../../../src/model/lattice'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -171,7 +172,7 @@ describe('VariableDeclaration', () => {
                         {
                             name: 'field',
                             valueSet: ExplicitRCTypeValueSet.create({
-                                typeName: 'InnerType',
+                                type: TypeName.create({ name: 'InnerType' }),
                                 semantics: 'mut',
                                 span: someCodeSpan,
                             }),
@@ -212,7 +213,7 @@ describe('VariableDeclaration', () => {
                 semantics: 'mut',
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
-                    typeName: 'InnerType',
+                    type: TypeName.create({ name: 'InnerType' }),
                     semantics: 'mut',
                     span: someCodeSpan,
                 }),
@@ -286,7 +287,7 @@ describe('VariableDeclaration', () => {
                 semantics: 'mut',
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
-                    typeName: 'MyType',
+                    type: TypeName.create({ name: 'MyType' }),
                     semantics: 'mut',
                     span: someCodeSpan,
                 }),
@@ -354,7 +355,7 @@ describe('VariableDeclaration', () => {
                         {
                             name: 'field',
                             valueSet: ExplicitRCTypeValueSet.create({
-                                typeName: 'InnerType',
+                                type: TypeName.create({ name: 'InnerType' }),
                                 semantics: 'mut',
                                 span: someCodeSpan,
                             }),
@@ -368,7 +369,7 @@ describe('VariableDeclaration', () => {
                 semantics: 'const',
                 name: 'target',
                 valueSet: ExplicitRCTypeValueSet.create({
-                    typeName: 'OuterType',
+                    type: TypeName.create({ name: 'OuterType' }),
                     semantics: 'mut',
                     span: someCodeSpan,
                 }),
@@ -427,7 +428,7 @@ describe('VariableDeclaration', () => {
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     semantics: 'const',
-                    typeName: 'MyType',
+                    type: TypeName.create({ name: 'MyType' }),
                     span: someCodeSpan,
                 }),
                 initialValue: DataLiteral.create({
@@ -498,7 +499,7 @@ describe('VariableDeclaration', () => {
                     semantics: targetSemantics[0],
                     name: 'target',
                     valueSet: ExplicitRCTypeValueSet.create({
-                        typeName: 'MyType',
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics: targetSemantics[0],
                         span: someCodeSpan,
                     }),

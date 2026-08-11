@@ -9,6 +9,7 @@ import {
     ExplicitIntegerValueSet,
     ExplicitRCTypeValueSet,
 } from '../../../src/model/explicit-value-set'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {
@@ -198,7 +199,7 @@ describe('Literals', () => {
                 dataLiteral
                     .currentValue({
                         ...context,
-                        ...{ typeName: 'MyType' },
+                        type: TypeName.create({ name: 'MyType' }),
                     })
                     .value(),
             ).toMatchObject({
@@ -220,7 +221,9 @@ describe('Literals', () => {
                         {
                             name: 'inner',
                             valueSet: ExplicitRCTypeValueSet.create({
-                                typeName: 'MissingInnerType',
+                                type: TypeName.create({
+                                    name: 'MissingInnerType',
+                                }),
                                 semantics: 'mut',
                                 span: someCodeSpan,
                             }),
@@ -255,7 +258,7 @@ describe('Literals', () => {
                 dataLiteral
                     .currentValue({
                         ...context,
-                        typeName: 'OuterType',
+                        type: TypeName.create({ name: 'OuterType' }),
                     })
                     .isFailure(),
             ).toBe(true)

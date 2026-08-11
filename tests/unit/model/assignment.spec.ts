@@ -13,6 +13,7 @@ import {
 import { FunctionDeclaration } from '../../../src/model/function-declaration'
 import { Query } from '../../../src/model/query'
 import { RCTypeLattice } from '../../../src/model/lattice'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -65,7 +66,7 @@ describe('Assignment', () => {
                         {
                             name: 'field',
                             valueSet: ExplicitRCTypeValueSet.create({
-                                typeName: 'InnerType',
+                                type: TypeName.create({ name: 'InnerType' }),
                                 semantics: 'mut',
                                 span: someCodeSpan,
                             }),

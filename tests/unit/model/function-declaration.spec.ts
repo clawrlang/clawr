@@ -18,6 +18,7 @@ import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { RCTypeLattice } from '../../../src/model/lattice'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
@@ -202,7 +203,7 @@ describe('FunctionDeclaration', () => {
             baseName: 'myFunction',
             parameters: [],
             result: ExplicitRCTypeValueSet.create({
-                typeName: 'MyData',
+                type: TypeName.create({ name: 'MyData' }),
                 semantics: 'ref',
                 span: someCodeSpan,
             }),
@@ -250,7 +251,7 @@ describe('FunctionDeclaration', () => {
             baseName: 'myFunction',
             parameters: [],
             result: ExplicitRCTypeValueSet.create({
-                typeName: 'MyData',
+                type: TypeName.create({ name: 'MyData' }),
                 semantics: 'ref',
                 span: someCodeSpan,
             }),
@@ -502,7 +503,7 @@ describe('FunctionDeclaration', () => {
                             semantics: 'const',
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
-                                typeName: 'MyData',
+                                type: TypeName.create({ name: 'MyData' }),
                                 semantics: 'mut',
                                 span: someCodeSpan,
                             }),
@@ -570,7 +571,7 @@ describe('FunctionDeclaration', () => {
                             semantics: 'const',
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
-                                typeName: 'MyData',
+                                type: TypeName.create({ name: 'MyData' }),
                                 semantics: 'const',
                                 span: someCodeSpan,
                             }),
@@ -639,7 +640,7 @@ describe('FunctionDeclaration', () => {
                             semantics: 'const',
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
-                                typeName: 'MyData',
+                                type: TypeName.create({ name: 'MyData' }),
                                 semantics: 'mut',
                                 span: someCodeSpan,
                             }),

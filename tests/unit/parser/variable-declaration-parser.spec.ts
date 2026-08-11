@@ -37,7 +37,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             semantics: 'mutref',
             name: 'foo',
-            valueSet: { typeName: 'Type' },
+            valueSet: { type: { name: 'Type' } },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: 1n } },
@@ -52,7 +52,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             semantics: 'ref',
             name: 'foo',
-            valueSet: { typeName: 'Type' },
+            valueSet: { type: { name: 'Type' } },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: 1n } },
@@ -89,7 +89,7 @@ describe('VariableDeclarationParser', () => {
             semantics: 'ref',
             name: 'r',
             valueSet: {
-                typeName: 'MyData',
+                type: { name: 'MyData' },
             },
             initialValue: { fields: [] },
         })

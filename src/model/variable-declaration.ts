@@ -1,8 +1,9 @@
 import { Context, Declaration, Expression, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
-import { ExplicitValueSet } from './explicit-value-set'
+import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
 import { RCTypeLattice } from './lattice'
+import { TypeName } from './type-name'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]

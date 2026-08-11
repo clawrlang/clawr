@@ -12,6 +12,7 @@ import {
 } from '../model/explicit-value-set'
 import { VariableSemantics } from '../model/variable-declaration'
 import { ExpressionParser } from './expression-parser'
+import { TypeName } from '../model/type-name'
 
 export class ValueSetParser {
     private constructor(private context: Context) {}
@@ -39,7 +40,7 @@ export class ValueSetParser {
             default:
                 if (semantics)
                     return ExplicitRCTypeValueSet.create({
-                        typeName: type,
+                        type: TypeName.create({ name: type }),
                         semantics,
                         span: { start: typeToken.start, end: typeToken.end },
                     })

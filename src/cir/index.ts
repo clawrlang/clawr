@@ -73,7 +73,10 @@ type Release = {
 type Receiver = {
     object: Storage
 } & (
-    | { dispatch: 'direct' }
+    | {
+          dispatch: 'direct'
+          type: { name: string; namespace?: string }
+      }
     | {
           dispatch: 'inherited'
           declaredIn: { name: string; namespace?: string }

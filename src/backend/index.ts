@@ -266,13 +266,7 @@ export function lowerStmt(stmt: cir.Statement): string {
                         : stmt.arguments.map(lowerExpr)
                     const name = mangleNameWithLabels(
                         stmt.name,
-                        stmt.receiver?.object.valueSet.type === 'rc-type'
-                            ? {
-                                  name: stmt.receiver.object.valueSet.typeName,
-                                  namespace:
-                                      stmt.receiver.object.valueSet.namespace,
-                              }
-                            : undefined,
+                        stmt.receiver?.type,
                     )
 
                     return `${name}(${args.join(', ')});`
@@ -353,13 +347,7 @@ export function lowerExpr(expr: cir.Expression): string {
                         : expr.arguments.map(lowerExpr)
                     const name = mangleNameWithLabels(
                         expr.name,
-                        expr.receiver.object.valueSet.type === 'rc-type'
-                            ? {
-                                  name: expr.receiver.object.valueSet.typeName,
-                                  namespace:
-                                      expr.receiver.object.valueSet.namespace,
-                              }
-                            : undefined,
+                        expr.receiver.type,
                     )
                     return `${name}(${args.join(', ')})`
                 }

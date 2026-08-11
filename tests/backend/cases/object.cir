@@ -133,6 +133,9 @@
                                 "semantics": "ISOLATED"
                             }
                         },
+                        "type": {
+                            "name": "Object"
+                        },
                         "dispatch": "direct"
                     },
                     "name": {

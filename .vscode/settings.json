@@ -138,9 +138,18 @@
             "type": "object",
             "properties": {
               "object": { "$ref": "#/$defs/Storage" },
-              "dispatch": { "const": "direct" }
+              "dispatch": { "const": "direct" },
+              "type": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "namespace": { "type": "string" }
+                },
+                "required": ["name"],
+                "additionalProperties": false
+              }
             },
-            "required": ["object", "dispatch"],
+            "required": ["object", "dispatch", "type"],
             "additionalProperties": false
           },
           "__type__type.o1": {
@@ -256,13 +265,13 @@
               },
               "fields": {
                 "type": "array",
-                "items": { "$ref": "#/$defs/__type.o3" }
+                "items": { "$ref": "#/$defs/__type.o4" }
               }
             },
             "required": ["kind", "semantics", "valueSet", "fields"],
             "additionalProperties": false
           },
-          "__type.o3": {
+          "__type.o4": {
             "type": "object",
             "properties": {
               "name": { "type": "string" },

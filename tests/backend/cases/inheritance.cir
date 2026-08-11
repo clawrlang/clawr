@@ -273,6 +273,9 @@
                                 "semantics": "ISOLATED"
                             }
                         },
+                        "type": {
+                            "name": "Super"
+                        },
                         "dispatch": "direct"
                     },
                     "name": {
@@ -351,6 +354,9 @@
                                 "typeName": "Super",
                                 "semantics": "ISOLATED"
                             }
+                        },
+                        "type": {
+                            "name": "Super"
                         },
                         "dispatch": "direct"
                     },
@@ -457,6 +463,9 @@
                                 "typeName": "Sub1",
                                 "semantics": "ISOLATED"
                             }
+                        },
+                        "type": {
+                            "name": "Sub1"
                         },
                         "dispatch": "direct"
                     },

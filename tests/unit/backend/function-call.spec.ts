@@ -179,6 +179,7 @@ describe('Function Calls', () => {
                             semantics: 'ISOLATED',
                         },
                     },
+                    type: { name: 'Object' },
                     dispatch: 'direct',
                 },
                 name: {
@@ -205,6 +206,7 @@ describe('Function Calls', () => {
                             semantics: 'ISOLATED',
                         },
                     },
+                    type: { name: 'Object' },
                     dispatch: 'direct',
                 },
                 name: {
@@ -298,6 +300,7 @@ describe('Function Calls', () => {
                             semantics: 'ISOLATED',
                         },
                     },
+                    type: { name: 'Object', namespace: 'ns' },
                     dispatch: 'direct',
                 },
                 name: {
@@ -325,6 +328,7 @@ describe('Function Calls', () => {
                             semantics: 'ISOLATED',
                         },
                     },
+                    type: { name: 'Object', namespace: 'ns' },
                     dispatch: 'direct',
                 },
                 name: {

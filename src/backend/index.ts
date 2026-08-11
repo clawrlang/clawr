@@ -60,7 +60,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             const typeInfo = decl.dispatchTable
                 ? `.polymorphic_type = {
                         .data = { .size = sizeof(${mangledTypeName}) },
-                        ${decl.base ? `.super = &${mangleTypeName({ name: decl.base.type, namespace: decl.base.namespace })}ˇtype.polymorphic_type,` : ''}
+                        ${decl.base ? `.super = &${mangleTypeName(decl.base)}ˇtype.polymorphic_type,` : ''}
                         .vtable = &(${mangledTypeName}ˇvtable){
                             ${vtableMethods}
                         }
@@ -71,7 +71,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             } ${mangledTypeName}ˇfields;
 
             typedef struct {
-                ${decl.base ? `${mangleTypeName({ name: decl.base.type, namespace: decl.base.namespace })} super` : '__rc_header header'};
+                ${decl.base ? `${mangleTypeName(decl.base)} super` : '__rc_header header'};
                 ${mangledTypeName}ˇfields fields;
             } ${mangledTypeName};
 
@@ -381,10 +381,7 @@ export function lowerExpr(expr: cir.Expression): string {
                 namespace: expr.valueSet.namespace,
             })
             if (expr.base) {
-                const mangledSuperTypeName = mangleTypeName({
-                    name: expr.base.type,
-                    namespace: expr.base.namespace,
-                })
+                const mangledSuperTypeName = mangleTypeName(expr.base)
                 return `allocInitInheritedRC(${mangledTypeName}, 0, ${mangledSuperTypeName}, ${`__rc_${expr.semantics}`},
                     ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
             } else

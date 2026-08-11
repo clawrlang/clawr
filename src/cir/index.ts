@@ -40,17 +40,19 @@ type TypeDeclaration = {
     }[]
 } & ( // `object`/`service` add methods and optional inheritance
     | {
-          base?: { type: string; namespace?: string }
+          base?: CanonicalName
           methods: FunctionDeclaration[]
           initializers?: Omit<FunctionDeclaration, 'resultValueSet'>[]
           dispatchTable?: {
               slot: FunctionSignature
-              declaredIn: { name: string; namespace?: string }
-              implementedBy?: { name: string; namespace?: string }
+              declaredIn: CanonicalName
+              implementedBy?: CanonicalName
           }[]
       }
     | {}
 )
+
+export type CanonicalName = { name: string; namespace?: string }
 
 export type Declaration = { namespace?: string } & (
     VariableDeclaration | FunctionDeclaration | TypeDeclaration
@@ -75,11 +77,11 @@ type Receiver = {
 } & (
     | {
           dispatch: 'direct'
-          type: { name: string; namespace?: string }
+          type: CanonicalName
       }
     | {
           dispatch: 'inherited'
-          declaredIn: { name: string; namespace?: string }
+          declaredIn: CanonicalName
       }
 )
 
@@ -141,7 +143,7 @@ type MemoryAllocation = {
     kind: 'ALLOCATION'
     semantics: 'ISOLATED' | 'SHARED'
     valueSet: RcTypeValueSet
-    base?: { type: string; namespace?: string }
+    base?: CanonicalName
     fields: {
         name: string
         value: Expression

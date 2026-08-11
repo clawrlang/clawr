@@ -29,7 +29,7 @@ describe('Type declaration', () => {
             const typeDecl: cir.Declaration = {
                 kind: 'TYPE_DECL',
                 name: 'Sub',
-                base: { type: 'Super' },
+                base: { name: 'Super' },
                 fields: [
                     {
                         name: 'field',
@@ -178,7 +178,7 @@ describe('Type declaration', () => {
         const typeDecl: cir.Declaration = {
             kind: 'TYPE_DECL',
             name: 'Sub',
-            base: { type: 'Super' },
+            base: { name: 'Super' },
             fields: [],
             methods: [
                 {

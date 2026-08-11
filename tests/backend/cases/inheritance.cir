@@ -125,7 +125,7 @@
             "kind": "TYPE_DECL",
             "name": "Sub1",
             "base": {
-                "type": "Super"
+                "name": "Super"
             },
             "fields": [
                 {
@@ -196,7 +196,7 @@
             "kind": "TYPE_DECL",
             "name": "Sub2",
             "base": {
-                "type": "Super"
+                "name": "Super"
             },
             "fields": [],
             "methods": [],
@@ -247,7 +247,7 @@
                             }
                         ],
                         "base": {
-                            "type": "Super"
+                            "name": "Super"
                         },
                         "valueSet": {
                             "type": "rc-type",
@@ -329,7 +329,7 @@
                         "semantics": "ISOLATED",
                         "fields": [],
                         "base": {
-                            "type": "Super"
+                            "name": "Super"
                         },
                         "valueSet": {
                             "type": "rc-type",

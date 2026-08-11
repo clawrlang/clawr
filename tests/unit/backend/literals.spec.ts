@@ -85,9 +85,7 @@ describe('Lowering Literals', () => {
                         },
                     },
                 ],
-                base: {
-                    type: 'Super',
-                },
+                base: { name: 'Super' },
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyObject',

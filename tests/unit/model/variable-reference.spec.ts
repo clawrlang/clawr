@@ -9,7 +9,7 @@ describe('Variable Reference', () => {
     it('generates correct CIR', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
-            semantics: 'const',
+            isImmutable: true,
             valueSet: { type: 'integer', min: '10', max: '10' },
         })
 
@@ -43,7 +43,7 @@ describe('Variable Reference', () => {
     it('infers its type from the context', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
-            semantics: 'const',
+            isImmutable: true,
             valueSet: { type: 'integer', min: '10', max: '10' },
         })
 
@@ -61,7 +61,7 @@ describe('Variable Reference', () => {
     it('has the same current value as the referenced variable', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
-            semantics: 'const',
+            isImmutable: true,
             valueSet: { type: 'integer', min: '10', max: '10' },
         })
         context.scope.setCurrentValue(
@@ -107,7 +107,7 @@ describe('Variable Reference', () => {
         for (const { kind, expected } of cases) {
             it(`returns ${expected} for ${kind} variable`, () => {
                 context.scope.variables.set('myVar', {
-                    semantics: kind,
+                    isImmutable: kind === 'const' || kind === 'ref',
                     valueSet: {
                         type: 'rc-type',
                         semantics: expected,

@@ -37,9 +37,7 @@ export class VariableReference implements Expression {
                 variableResult.getError().errors[0].span,
             )
         return variableResult.map((variable) =>
-            Failable.success(
-                variable.semantics === 'const' || variable.semantics === 'ref',
-            ),
+            Failable.success(variable.isImmutable),
         )
     }
 

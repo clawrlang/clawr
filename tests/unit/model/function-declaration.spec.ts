@@ -142,7 +142,7 @@ describe('FunctionDeclaration', () => {
             }),
         )
         context.scope.variables.set('myVar', {
-            semantics: 'const',
+            isImmutable: true,
             valueSet: {
                 type: 'rc-type',
                 typeName: 'MyData',
@@ -187,7 +187,7 @@ describe('FunctionDeclaration', () => {
             }),
         )
         context.scope.variables.set('myVar', {
-            semantics: 'const',
+            isImmutable: true,
             valueSet: {
                 type: 'rc-type',
                 typeName: 'MyData',
@@ -234,7 +234,7 @@ describe('FunctionDeclaration', () => {
             }),
         )
         context.scope.variables.set('myVar', {
-            semantics: 'const',
+            isImmutable: true,
             valueSet: {
                 type: 'rc-type',
                 typeName: 'MyData',
@@ -319,7 +319,7 @@ describe('FunctionDeclaration', () => {
                 }),
             )
             context.scope.variables.set('myVar', {
-                semantics: 'const',
+                isImmutable: true,
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
@@ -371,7 +371,7 @@ describe('FunctionDeclaration', () => {
                 }),
             )
             context.scope.variables.set('myVar', {
-                semantics: 'const',
+                isImmutable: true,
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',

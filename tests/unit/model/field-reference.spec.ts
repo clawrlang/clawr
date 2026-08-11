@@ -12,7 +12,7 @@ describe('Field Reference', () => {
     it('infers its type from the context', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
-            semantics: 'mut',
+            isImmutable: false,
             valueSet: {
                 type: 'rc-type',
                 semantics: 'ISOLATED',
@@ -53,7 +53,7 @@ describe('Field Reference', () => {
     it('infers its isolation level from the context', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
-            semantics: 'mut',
+            isImmutable: false,
             valueSet: {
                 type: 'rc-type',
                 semantics: 'ISOLATED',
@@ -107,7 +107,7 @@ describe('Field Reference', () => {
             test(`${semantics} object`, () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
-                    semantics,
+                    isImmutable: semantics === 'const' || semantics === 'ref',
                     valueSet: {
                         type: 'rc-type',
                         semantics: expectedSemantics,
@@ -155,7 +155,7 @@ describe('Field Reference', () => {
     it('throws if the field does not exist on the type', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
-            semantics: 'mut',
+            isImmutable: false,
             valueSet: {
                 type: 'rc-type',
                 semantics: 'ISOLATED',
@@ -195,17 +195,17 @@ describe('Field Reference', () => {
 
     describe('throws if the object semantics are not compatible with the operator', () => {
         const cases = [
-            { operator: '->', semantics: ['const', 'ISOLATED'] },
-            { operator: '->', semantics: ['mut', 'ISOLATED'] },
-            { operator: '.', semantics: ['ref', 'SHARED'] },
-            { operator: '.', semantics: ['mutref', 'SHARED'] },
+            { operator: '->', semantics: [true, 'ISOLATED'] },
+            { operator: '->', semantics: [false, 'ISOLATED'] },
+            { operator: '.', semantics: [true, 'SHARED'] },
+            { operator: '.', semantics: [false, 'SHARED'] },
         ] as const
 
         for (const { operator, semantics } of cases) {
             test(`${semantics} with "${operator}"`, () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
-                    semantics: semantics[0],
+                    isImmutable: semantics[0],
                     valueSet: {
                         type: 'rc-type',
                         semantics: semantics[1],
@@ -266,7 +266,8 @@ describe('Field Reference', () => {
             it(`returns ${expected} if the object is ${semantics}`, () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
-                    semantics: semantics[0],
+                    isImmutable:
+                        semantics[0] === 'const' || semantics[0] === 'ref',
                     valueSet: {
                         type: 'rc-type',
                         semantics: semantics[1],
@@ -308,7 +309,7 @@ describe('Field Reference', () => {
         it('returns true if the object is immutable', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
-                semantics: 'const',
+                isImmutable: true,
                 valueSet: {
                     type: 'rc-type',
                     semantics: 'ISOLATED',
@@ -347,7 +348,7 @@ describe('Field Reference', () => {
         it('returns false if the object is mutable', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
-                semantics: 'mut',
+                isImmutable: false,
                 valueSet: {
                     type: 'rc-type',
                     semantics: 'ISOLATED',

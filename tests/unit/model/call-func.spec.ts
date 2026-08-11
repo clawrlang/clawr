@@ -123,7 +123,7 @@ describe('CallFunc', () => {
     it('converts print(intvar) to printInt64()', () => {
         const context = newSemanticContext()
         context.scope.variables.set('x', {
-            semantics: 'const',
+            isImmutable: true,
             valueSet: { type: 'integer', min: '42', max: '42' },
         })
 

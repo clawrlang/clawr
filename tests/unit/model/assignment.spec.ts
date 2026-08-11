@@ -21,7 +21,7 @@ describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
         const context = newSemanticContext()
         context.scope.variables.set('x', {
-            semantics: 'mut',
+            isImmutable: false,
             valueSet: { type: 'integer' },
         })
 
@@ -78,7 +78,7 @@ describe('Assignment', () => {
                 }),
             )
             context.scope.variables.set('bar', {
-                semantics: 'const',
+                isImmutable: false,
                 valueSet: {
                     type: 'rc-type',
                     semantics: 'ISOLATED',
@@ -86,7 +86,7 @@ describe('Assignment', () => {
                 },
             })
             context.scope.variables.set('foo', {
-                semantics: 'mut',
+                isImmutable: false,
                 valueSet: {
                     type: 'rc-type',
                     semantics: 'ISOLATED',
@@ -171,7 +171,7 @@ describe('Assignment', () => {
                 }),
             )
             context.scope.variables.set('bar', {
-                semantics: 'const',
+                isImmutable: true,
                 valueSet: {
                     type: 'rc-type',
                     semantics: 'ISOLATED',
@@ -179,7 +179,7 @@ describe('Assignment', () => {
                 },
             })
             context.scope.variables.set('foo', {
-                semantics: 'mut',
+                isImmutable: false,
                 valueSet: {
                     type: 'rc-type',
                     semantics: 'ISOLATED',
@@ -261,7 +261,7 @@ describe('Assignment', () => {
             }),
         )
         context.scope.variables.set('foo', {
-            semantics: 'mut',
+            isImmutable: false,
             valueSet: {
                 type: 'rc-type',
                 semantics: 'ISOLATED',
@@ -325,7 +325,7 @@ describe('Assignment', () => {
             }),
         )
         context.scope.rootScope.variables.set('refVar', {
-            semantics: 'mutref',
+            isImmutable: false,
             valueSet: {
                 type: 'rc-type',
                 semantics: 'SHARED',
@@ -333,7 +333,7 @@ describe('Assignment', () => {
             },
         })
         context.scope.rootScope.variables.set('mutVar', {
-            semantics: 'mut',
+            isImmutable: false,
             valueSet: {
                 type: 'rc-type',
                 semantics: 'ISOLATED',
@@ -412,11 +412,8 @@ describe('Assignment', () => {
     })
 
     describe('throws if the target variable is immutable/non-assignable', () => {
-        for (const [kind, semantics] of [
-            ['const', 'ISOLATED'],
-            ['ref', 'SHARED'],
-        ] as const) {
-            test(kind, () => {
+        for (const semantics of ['ISOLATED', 'SHARED'] as const) {
+            test(semantics, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.declarations.set(
                     'MyType',
@@ -426,7 +423,7 @@ describe('Assignment', () => {
                     }),
                 )
                 context.scope.variables.set('target', {
-                    semantics: kind,
+                    isImmutable: true,
                     valueSet: {
                         type: 'rc-type',
                         semantics: semantics,
@@ -434,7 +431,7 @@ describe('Assignment', () => {
                     },
                 })
                 context.scope.variables.set('value', {
-                    semantics: kind,
+                    isImmutable: true,
                     valueSet: {
                         type: 'rc-type',
                         semantics: semantics,
@@ -501,7 +498,7 @@ describe('Assignment', () => {
             }),
         )
         context.scope.variables.set('x', {
-            semantics: 'const',
+            isImmutable: true,
             valueSet: {
                 type: 'rc-type',
                 semantics: 'ISOLATED',
@@ -572,7 +569,7 @@ describe('Assignment', () => {
                     }),
                 )
                 context.scope.variables.set('target', {
-                    semantics: targetSemantics[0],
+                    isImmutable: false,
                     valueSet: {
                         type: 'rc-type',
                         semantics: targetSemantics[1],
@@ -580,7 +577,7 @@ describe('Assignment', () => {
                     },
                 })
                 context.scope.variables.set('value', {
-                    semantics: valueSemantics[0],
+                    isImmutable: valueSemantics[0] === 'ref',
                     valueSet: {
                         type: 'rc-type',
                         semantics: valueSemantics[1],

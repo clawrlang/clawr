@@ -181,7 +181,7 @@ describe('VariableDeclaration', () => {
                 }),
             )
             context.scope.variables.set('bar', {
-                semantics: 'const',
+                isImmutable: true,
                 valueSet: {
                     type: 'rc-type',
                     semantics: 'ISOLATED',
@@ -259,7 +259,7 @@ describe('VariableDeclaration', () => {
                 }),
             )
             context.scope.variables.set('bar', {
-                semantics: 'const',
+                isImmutable: true,
                 valueSet: {
                     type: 'rc-type',
                     semantics: 'ISOLATED',
@@ -321,7 +321,7 @@ describe('VariableDeclaration', () => {
             const context = newSemanticContext()
             decl.emitStatement(context)
             expect(context.scope.variableDeclaration('x')).toEqual({
-                semantics: 'const',
+                isImmutable: true,
                 valueSet: { type: 'integer', min: '42', max: '42' },
             })
         })
@@ -443,11 +443,11 @@ describe('VariableDeclaration', () => {
         const cases = [
             {
                 targetSemantics: ['mut', 'ISOLATED'],
-                valueSemantics: ['ref', 'SHARED'],
+                valueSemantics: [true, 'SHARED'],
             },
             {
                 targetSemantics: ['mut', 'ISOLATED'],
-                valueSemantics: ['mutref', 'SHARED'],
+                valueSemantics: [false, 'SHARED'],
             },
         ] as const
 
@@ -470,7 +470,7 @@ describe('VariableDeclaration', () => {
                     }),
                 )
                 context.scope.variables.set('value', {
-                    semantics: valueSemantics[0],
+                    isImmutable: valueSemantics[0],
                     valueSet: {
                         type: 'rc-type',
                         semantics: valueSemantics[1],

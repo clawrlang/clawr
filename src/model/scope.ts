@@ -1,7 +1,6 @@
 import * as cir from '../cir'
 import { Declaration } from '.'
 import { DataDeclaration } from './data-declaration'
-import { VariableSemantics } from './variable-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { Lattice, UniqueTypeLattice } from './lattice'
 
@@ -99,6 +98,6 @@ export class Scope {
 }
 
 type Variable = {
-    semantics: VariableSemantics
+    isImmutable: boolean
     valueSet: cir.ValueSet
 }

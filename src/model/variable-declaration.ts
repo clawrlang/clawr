@@ -83,7 +83,7 @@ export class VariableDeclaration implements Statement, Declaration {
         })
 
         scope.variables.set(this.name, {
-            semantics: this.semantics,
+            isImmutable: this.semantics === 'const' || this.semantics === 'ref',
             valueSet,
         })
 

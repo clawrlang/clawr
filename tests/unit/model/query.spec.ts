@@ -148,7 +148,7 @@ describe('Query', () => {
         test('for copy(of:) function', () => {
             const context = newSemanticContext()
             context.scope.variables.set('value', {
-                semantics: 'ref',
+                isImmutable: true,
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',

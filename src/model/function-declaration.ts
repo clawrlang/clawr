@@ -66,7 +66,10 @@ export class FunctionDeclaration implements Declaration {
         const parameterScope = context.scope.createChildScope()
         for (const param of this.parameters) {
             parameterScope.variables.set(param.varName, {
-                semantics: param.semantics ?? 'const',
+                isImmutable:
+                    !param.semantics ||
+                    param.semantics === 'const' ||
+                    param.semantics === 'ref',
                 valueSet:
                     param.defaultValue?.currentValue(context).value().toCIR() ??
                     param.valueSet?.toCIR() ??

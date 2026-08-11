@@ -1,7 +1,5 @@
 # Traits and Roles
 
-Similar to `role`, but can be `ISOLATED`.
-
 - Keyword `trait`
   - Applies to `object` and `data` (through an `extension`)
   - `SHARED` or `ISOLATED`

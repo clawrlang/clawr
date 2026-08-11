@@ -2,6 +2,10 @@
 
 ## In Progress
 
+- Maybe there is too much stuff in the CIR?
+  - `valueSet`
+- Rename `Failable.map`
+
 ## Incomplete/Postponed Functionality
 
 - [Function Parameters](./todo/params.md)

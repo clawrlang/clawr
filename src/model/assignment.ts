@@ -56,15 +56,14 @@ export class Assignment implements Statement {
                     span: { start: this.span.start, end: this.span.end },
                 },
             )
-        const currentValue = this.value.currentValue(context).value()
+        const valueSemantics = this.value.semantics(context)
         if (
             target.valueSet.type === 'rc-type' &&
-            value.valueSet.type === 'rc-type' &&
-            target.valueSet.semantics !== value.valueSet.semantics &&
-            this.value.semantics(context) !== 'UNIQUE'
+            target.valueSet.semantics !== valueSemantics &&
+            valueSemantics !== 'UNIQUE'
         )
             logSemanticError(
-                `Cannot assign ${value.valueSet.semantics} value to ${target.valueSet.semantics} target`,
+                `Cannot assign ${valueSemantics} value to ${target.valueSet.semantics} target`,
                 {
                     ...context,
                     span: { start: this.span.start, end: this.span.end },

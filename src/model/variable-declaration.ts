@@ -107,7 +107,7 @@ export class VariableDeclaration implements Statement, Declaration {
             .value()
         if (
             !(currentValue instanceof RCTypeLattice) ||
-            currentValue.semantics === 'UNIQUE'
+            currentValue.semantics !== 'UNIQUE'
         )
             return currentValue
 

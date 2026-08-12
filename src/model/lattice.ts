@@ -119,7 +119,8 @@ export class RCTypeLattice implements Lattice {
             type: 'rc-type',
             typeName: this.type.name,
             namespace: this.type.namespace,
-            semantics: 'ISOLATED',
+            semantics:
+                this.semantics === 'UNIQUE' ? 'ISOLATED' : this.semantics,
         }
     }
 }

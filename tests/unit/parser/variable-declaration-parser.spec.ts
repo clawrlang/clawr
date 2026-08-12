@@ -4,6 +4,7 @@ import { VariableDeclarationParser } from '../../../src/parser/variable-declarat
 import { newSemanticContext, TestErrorReporter } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { ExplicitRCTypeValueSet } from '../../../src/model/explicit-value-set'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('VariableDeclarationParser', () => {
     it('parses const integer variable declaration', () => {
@@ -75,9 +76,9 @@ describe('VariableDeclarationParser', () => {
     it('sets the semantics of data literal', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            'MyData',
+            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
-                name: 'MyData',
+                name: TypeName.create({ name: 'MyType' }),
                 fields: [],
             }),
         )

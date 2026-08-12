@@ -123,6 +123,7 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
         return {
             type: 'rc-type',
             typeName: this.type.name,
+            namespace: this.type.namespace,
             semantics: convertSemantics(this.semantics),
         }
     }
@@ -130,16 +131,16 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
     toLattice(context: Context): Lattice {
         if (this.semantics === 'ref' || this.semantics === 'mutref')
             return RCTypeLattice.create({
-                typeName: this.type.name,
+                type: this.type,
                 semantics: 'ISOLATED',
             })
 
         return RCTypeLattice.create({
-            typeName: this.type.name,
+            type: this.type,
             semantics: 'ISOLATED',
             fields: Object.fromEntries(
                 context.scope
-                    .dataDeclaration(this.type.name)
+                    .dataDeclaration(this.type)
                     ?.fields.map((field) => [
                         field.name,
                         field.valueSet.toLattice(context),
@@ -151,35 +152,36 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
 
 export class ExplicitUniqueValueSet implements ExplicitValueSet {
     private constructor(
-        public readonly typeName: string,
+        public readonly type: TypeName,
         public readonly span: SourceCodeSpan,
     ) {}
 
     static create({
-        typeName,
+        type,
         span,
     }: {
-        typeName: string
+        type: TypeName
         span: SourceCodeSpan
     }): ExplicitUniqueValueSet {
-        return new ExplicitUniqueValueSet(typeName, span)
+        return new ExplicitUniqueValueSet(type, span)
     }
 
     toCIR(): Extract<cir.ValueSet, { type: 'rc-type' }> {
         return {
             type: 'rc-type',
-            typeName: this.typeName,
+            typeName: this.type.name,
+            namespace: this.type.namespace,
             semantics: 'ISOLATED',
         }
     }
 
     toLattice(context: Context): Lattice {
         return RCTypeLattice.create({
-            typeName: this.typeName,
+            type: this.type,
             semantics: 'UNIQUE',
             fields: Object.fromEntries(
                 context.scope
-                    .dataDeclaration(this.typeName)
+                    .dataDeclaration(this.type)
                     ?.fields.map((field) => [
                         field.name,
                         field.valueSet.toLattice(context),

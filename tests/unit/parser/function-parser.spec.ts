@@ -170,7 +170,7 @@ describe('Function Parser', () => {
         expect(result).toMatchObject({
             baseName: 'myFunction',
             parameters: [],
-            result: { typeName: 'MyData' },
+            result: { type: { name: 'MyData' } },
         })
 
         expect(result.result).toBeInstanceOf(ExplicitUniqueValueSet)

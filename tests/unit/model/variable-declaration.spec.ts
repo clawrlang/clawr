@@ -74,9 +74,9 @@ describe('VariableDeclaration', () => {
             })
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'MyType',
+                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
-                    name: 'MyType',
+                    name: TypeName.create({ name: 'MyType' }),
                     fields: [
                         {
                             name: 'field',
@@ -124,9 +124,9 @@ describe('VariableDeclaration', () => {
             })
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'MyType',
+                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
-                    name: 'MyType',
+                    name: TypeName.create({ name: 'MyType' }),
                     fields: [
                         {
                             name: 'field',
@@ -150,9 +150,9 @@ describe('VariableDeclaration', () => {
         test('for a FieldReference', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'InnerType',
+                TypeName.create({ name: 'InnerType' }),
                 DataDeclaration.create({
-                    name: 'InnerType',
+                    name: TypeName.create({ name: 'InnerType' }),
                     fields: [
                         {
                             name: 'innerField',
@@ -165,9 +165,9 @@ describe('VariableDeclaration', () => {
                 }),
             )
             context.scope.rootScope.addDataDeclaration(
-                'OuterType',
+                TypeName.create({ name: 'OuterType' }),
                 DataDeclaration.create({
-                    name: 'OuterType',
+                    name: TypeName.create({ name: 'OuterType' }),
                     fields: [
                         {
                             name: 'field',
@@ -192,11 +192,11 @@ describe('VariableDeclaration', () => {
             context.scope.setCurrentValue(
                 'bar',
                 RCTypeLattice.create({
-                    typeName: 'OuterType',
+                    type: TypeName.create({ name: 'OuterType' }),
                     semantics: 'ISOLATED',
                     fields: {
                         field: RCTypeLattice.create({
-                            typeName: 'InnerType',
+                            type: TypeName.create({ name: 'InnerType' }),
                             semantics: 'ISOLATED',
                             fields: {
                                 innerField: IntegerLattice.create({
@@ -247,9 +247,9 @@ describe('VariableDeclaration', () => {
         test('for a VariableReference', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'MyType',
+                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
-                    name: 'MyType',
+                    name: TypeName.create({ name: 'MyType' }),
                     fields: [
                         {
                             name: 'field',
@@ -272,7 +272,7 @@ describe('VariableDeclaration', () => {
             context.scope.setCurrentValue(
                 'bar',
                 RCTypeLattice.create({
-                    typeName: 'MyType',
+                    type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
                     fields: {
                         field: IntegerLattice.create({
@@ -333,9 +333,9 @@ describe('VariableDeclaration', () => {
         test('for a nested rc-type variable', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'InnerType',
+                TypeName.create({ name: 'InnerType' }),
                 DataDeclaration.create({
-                    name: 'InnerType',
+                    name: TypeName.create({ name: 'InnerType' }),
                     fields: [
                         {
                             name: 'innerField',
@@ -348,9 +348,9 @@ describe('VariableDeclaration', () => {
                 }),
             )
             context.scope.rootScope.addDataDeclaration(
-                'OuterType',
+                TypeName.create({ name: 'OuterType' }),
                 DataDeclaration.create({
-                    name: 'OuterType',
+                    name: TypeName.create({ name: 'OuterType' }),
                     fields: [
                         {
                             name: 'field',
@@ -398,10 +398,10 @@ describe('VariableDeclaration', () => {
             declaration.emitStatement(context)
 
             expect(context.scope.currentValue('target')).toMatchObject({
-                typeName: 'OuterType',
+                type: { name: 'OuterType' },
                 fields: {
                     field: {
-                        typeName: 'InnerType',
+                        type: { name: 'InnerType' },
                         fields: {
                             innerField: {
                                 min: 42n,
@@ -416,9 +416,9 @@ describe('VariableDeclaration', () => {
         it('converts UNIQUE expression to CowTypeLattice', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'MyType',
+                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
-                    name: 'MyType',
+                    name: TypeName.create({ name: 'MyType' }),
                     fields: [],
                 }),
             )
@@ -459,9 +459,9 @@ describe('VariableDeclaration', () => {
             it(`${targetSemantics} target = ${valueSemantics} value`, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
-                    'MyType',
+                    TypeName.create({ name: 'MyType' }),
                     DataDeclaration.create({
-                        name: 'MyType',
+                        name: TypeName.create({ name: 'MyType' }),
                         fields: [
                             {
                                 name: 'myField',
@@ -484,7 +484,7 @@ describe('VariableDeclaration', () => {
                 context.scope.setCurrentValue(
                     'value',
                     RCTypeLattice.create({
-                        typeName: 'MyType',
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics: 'ISOLATED',
                         fields: {
                             myField: IntegerLattice.create({

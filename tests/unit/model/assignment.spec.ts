@@ -44,9 +44,9 @@ describe('Assignment', () => {
         test('for a FieldReference', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'InnerType',
+                TypeName.create({ name: 'InnerType' }),
                 DataDeclaration.create({
-                    name: 'InnerType',
+                    name: TypeName.create({ name: 'InnerType' }),
                     fields: [
                         {
                             name: 'innerField',
@@ -59,9 +59,9 @@ describe('Assignment', () => {
                 }),
             )
             context.scope.rootScope.addDataDeclaration(
-                'OuterType',
+                TypeName.create({ name: 'OuterType' }),
                 DataDeclaration.create({
-                    name: 'OuterType',
+                    name: TypeName.create({ name: 'OuterType' }),
                     fields: [
                         {
                             name: 'field',
@@ -94,11 +94,11 @@ describe('Assignment', () => {
             context.scope.setCurrentValue(
                 'bar',
                 RCTypeLattice.create({
-                    typeName: 'OuterType',
+                    type: TypeName.create({ name: 'OuterType' }),
                     semantics: 'ISOLATED',
                     fields: {
                         field: RCTypeLattice.create({
-                            typeName: 'InnerType',
+                            type: TypeName.create({ name: 'InnerType' }),
                             semantics: 'ISOLATED',
                             fields: {},
                         }),
@@ -164,9 +164,9 @@ describe('Assignment', () => {
         test('for a VariableReference', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'MyType',
+                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
-                    name: 'MyType',
+                    name: TypeName.create({ name: 'MyType' }),
                     fields: [],
                 }),
             )
@@ -189,7 +189,7 @@ describe('Assignment', () => {
             context.scope.setCurrentValue(
                 'bar',
                 RCTypeLattice.create({
-                    typeName: 'MyType',
+                    type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
                     fields: {},
                 }),
@@ -247,9 +247,9 @@ describe('Assignment', () => {
     it('injects ENSURE_UNIQUE for ISOLATED target before assignment', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            'MyType',
+            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
-                name: 'MyType',
+                name: TypeName.create({ name: 'MyType' }),
                 fields: [
                     {
                         name: 'field',
@@ -301,9 +301,9 @@ describe('Assignment', () => {
     it('injects AS_SHARED for UNIQUE value before assignment to SHARED target', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            'MyType',
+            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
-                name: 'MyType',
+                name: TypeName.create({ name: 'MyType' }),
                 fields: [],
             }),
         )
@@ -312,7 +312,7 @@ describe('Assignment', () => {
             FunctionDeclaration.create({
                 baseName: 'myFunction',
                 result: ExplicitUniqueValueSet.create({
-                    typeName: 'MyType',
+                    type: TypeName.create({ name: 'MyType' }),
                     span: someCodeSpan,
                 }),
                 parameters: [],
@@ -417,9 +417,9 @@ describe('Assignment', () => {
             test(semantics, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
-                    'MyType',
+                    TypeName.create({ name: 'MyType' }),
                     DataDeclaration.create({
-                        name: 'MyType',
+                        name: TypeName.create({ name: 'MyType' }),
                         fields: [],
                     }),
                 )
@@ -442,7 +442,7 @@ describe('Assignment', () => {
                 context.scope.setCurrentValue(
                     'value',
                     RCTypeLattice.create({
-                        typeName: 'MyType',
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics,
                         fields: {},
                     }),
@@ -481,9 +481,9 @@ describe('Assignment', () => {
     it('throws if the target field is effectively const', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            'MyType',
+            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
-                name: 'MyType',
+                name: TypeName.create({ name: 'MyType' }),
                 fields: [
                     {
                         name: 'myField',
@@ -552,9 +552,9 @@ describe('Assignment', () => {
             it(`${targetSemantics} target = ${valueSemantics} value`, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
-                    'MyType',
+                    TypeName.create({ name: 'MyType' }),
                     DataDeclaration.create({
-                        name: 'MyType',
+                        name: TypeName.create({ name: 'MyType' }),
                         fields: [
                             {
                                 name: 'myField',
@@ -585,7 +585,7 @@ describe('Assignment', () => {
                 context.scope.setCurrentValue(
                     'value',
                     RCTypeLattice.create({
-                        typeName: 'MyType',
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics: 'SHARED',
                     }),
                 )

@@ -77,9 +77,9 @@ describe('Literals', () => {
         it('outputs a data literal as ALLOCATE', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'MyType',
+                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
-                    name: 'MyType',
+                    name: TypeName.create({ name: 'MyType' }),
                     fields: [
                         {
                             name: 'x',
@@ -123,11 +123,8 @@ describe('Literals', () => {
                 dataLiteral
                     .toCIRExpression({
                         ...context,
-                        targetValueSet: {
-                            type: 'rc-type',
-                            typeName: 'MyType',
-                            semantics: 'SHARED',
-                        },
+                        type: TypeName.create({ name: 'MyType' }),
+                        semantics: 'SHARED',
                     })
                     .value(),
             ).toMatchObject({
@@ -153,9 +150,9 @@ describe('Literals', () => {
         it('has a current value set of the literal value', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'MyType',
+                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
-                    name: 'MyType',
+                    name: TypeName.create({ name: 'MyType' }),
                     fields: [
                         {
                             name: 'x',
@@ -203,7 +200,7 @@ describe('Literals', () => {
                     })
                     .value(),
             ).toMatchObject({
-                typeName: 'MyType',
+                type: { name: 'MyType' },
                 fields: {
                     x: { min: 42n, max: 42n },
                     y: { min: 17n, max: 17n },
@@ -214,9 +211,9 @@ describe('Literals', () => {
         it('returns a failure from a nested field value', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'OuterType',
+                TypeName.create({ name: 'OuterType' }),
                 DataDeclaration.create({
-                    name: 'OuterType',
+                    name: TypeName.create({ name: 'OuterType' }),
                     fields: [
                         {
                             name: 'inner',

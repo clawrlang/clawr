@@ -31,15 +31,15 @@ export class DataLiteral implements Expression {
     }
 
     currentValue(context: Context & { type: TypeName }): Failable<Lattice> {
-        const DataDeclaration = context.scope.dataDeclaration(context.type.name)
-        if (!DataDeclaration)
+        const decl = context.scope.dataDeclaration(context.type)
+        if (!decl)
             return Failable.failure(
                 `DataLiteral.currentValue: type ${context.type.name} not found in scope`,
                 this.span,
             )
         return Failable.collect(
             this.fields.map((field) => {
-                const fieldDeclaration = DataDeclaration.fields.find(
+                const fieldDeclaration = decl.fields.find(
                     (declaredField) => declaredField.name === field.name,
                 )
                 if (!fieldDeclaration)
@@ -55,7 +55,7 @@ export class DataLiteral implements Expression {
         ).map((fieldValues) =>
             Failable.success(
                 RCTypeLattice.create({
-                    typeName: DataDeclaration.name,
+                    type: decl.name,
                     semantics: 'UNIQUE',
                     fields: Object.fromEntries(
                         fieldValues.map((value, index) => [
@@ -69,20 +69,24 @@ export class DataLiteral implements Expression {
     }
 
     toCIRExpression(
-        context: Context & { targetValueSet: cir.ValueSet },
+        context: Context & { type: TypeName; semantics: 'ISOLATED' | 'SHARED' },
     ): Failable<cir.Expression> {
-        const valueSet = context.targetValueSet
-        if (!valueSet || valueSet.type !== 'rc-type')
+        if (!context.type)
             throw Failable.failure(
-                `DataLiteral.toCIRExpression: target valueSet must be of type rc-type`,
+                'DataLiteral.toCIRExpression: target type not specified',
+                this.span,
+            ).getError()
+        if (!context.semantics)
+            throw Failable.failure(
+                'DataLiteral.toCIRExpression: target semantics not specified',
                 this.span,
             ).getError()
 
-        const targetType = context.scope.dataDeclaration(valueSet.typeName) as
+        const targetType = context.scope.dataDeclaration(context.type) as
             DataDeclaration | undefined
         if (!targetType)
             return Failable.failure(
-                `DataLiteral.toCIRExpression: target type ${valueSet.typeName} not found in scope`,
+                `DataLiteral.toCIRExpression: target type ${context.type.name} not found in scope`,
                 this.span,
             )
         const fieldDeclarations = new Map(
@@ -94,12 +98,12 @@ export class DataLiteral implements Expression {
                 // Nested literals need the declared field type as their target.
                 // Missing fields are rejected here so we do not propagate undefined types.
                 return Failable.failure(
-                    `DataLiteral.toCIRExpression: field ${field.name} not found on type ${valueSet.typeName}`,
+                    `DataLiteral.toCIRExpression: field ${field.name} not found on type ${context.type.name}`,
                     this.span,
                 )
             const nestedContext = {
                 ...context,
-                targetValueSet: fieldDeclaration.valueSet.toCIR(),
+                ...fieldDeclaration.valueSet,
             }
             return field.value.toCIRExpression(nestedContext).map((value) =>
                 Failable.success({
@@ -111,8 +115,13 @@ export class DataLiteral implements Expression {
         return Failable.collect(fieldResults).map((fields) =>
             Failable.success({
                 kind: 'ALLOCATION',
-                semantics: valueSet.semantics,
-                valueSet,
+                semantics: context.semantics,
+                valueSet: {
+                    type: 'rc-type',
+                    typeName: context.type.name,
+                    namespace: context.type.namespace,
+                    semantics: context.semantics,
+                } satisfies cir.ValueSet,
                 fields,
             }),
         )

@@ -122,7 +122,7 @@ describe('ValueSetParser', () => {
         const valueSet = parseValueSet('MyType')
         expect(valueSet).toBeInstanceOf(ExplicitUniqueValueSet)
         expect(valueSet).toMatchObject({
-            typeName: 'MyType',
+            type: { name: 'MyType' },
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 7 },

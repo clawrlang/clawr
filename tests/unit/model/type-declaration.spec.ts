@@ -5,11 +5,12 @@ import {
     ExplicitIntegerValueSet,
     ExplicitTruthValueSet,
 } from '../../../src/model/explicit-value-set'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {
         const dataDecl = DataDeclaration.create({
-            name: 'MyData',
+            name: TypeName.create({ name: 'MyData' }),
             fields: [
                 {
                     name: 'field1',

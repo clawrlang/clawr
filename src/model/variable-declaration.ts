@@ -49,7 +49,15 @@ export class VariableDeclaration implements Statement, Declaration {
         const initialValue = this.initialValue
             .toCIRExpression({
                 ...context,
-                targetValueSet: valueSet,
+                ...(valueSet.type === 'rc-type'
+                    ? {
+                          type: TypeName.create({
+                              name: valueSet.typeName,
+                              namespace: valueSet.namespace,
+                          }),
+                          semantics: valueSet.semantics,
+                      }
+                    : {}),
             })
             .value()
 
@@ -104,7 +112,7 @@ export class VariableDeclaration implements Statement, Declaration {
             return currentValue
 
         return RCTypeLattice.create({
-            typeName: currentValue.typeName,
+            type: currentValue.type,
             fields: currentValue.fields,
             semantics:
                 this.semantics === 'const' || this.semantics === 'mut'

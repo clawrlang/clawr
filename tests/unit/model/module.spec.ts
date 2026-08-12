@@ -9,6 +9,7 @@ import {
     ExplicitIntegerValueSet,
     ExplicitTruthValueSet,
 } from '../../../src/model/explicit-value-set'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('Module', () => {
     it('outputs the main block in CIR', () => {
@@ -56,7 +57,7 @@ describe('Module', () => {
             main: [],
             declarations: [
                 DataDeclaration.create({
-                    name: 'MyData',
+                    name: TypeName.create({ name: 'MyData' }),
                     fields: [
                         {
                             name: 'field1',
@@ -117,7 +118,7 @@ describe('Module', () => {
             main: [],
             declarations: [
                 DataDeclaration.create({
-                    name: 'MyData',
+                    name: TypeName.create({ name: 'MyData' }),
                     fields: [
                         {
                             name: 'field1',
@@ -139,9 +140,11 @@ describe('Module', () => {
         })
         const context = newSemanticContext()
         module.toCIR(context)
-        const myDataDeclaration = context.scope.dataDeclaration('MyData')
+        const myDataDeclaration = context.scope.dataDeclaration(
+            TypeName.create({ name: 'MyData' }),
+        )
         expect(myDataDeclaration).toMatchObject({
-            name: 'MyData',
+            name: { name: 'MyData' },
             fields: [
                 { name: 'field1', semantics: 'mut' },
                 { name: 'field2', semantics: 'mut' },

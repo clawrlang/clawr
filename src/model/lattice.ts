@@ -1,4 +1,5 @@
 import * as cir from '../cir'
+import { TypeName } from './type-name'
 
 export interface Lattice {
     unconstrained(): Lattice
@@ -75,26 +76,26 @@ export class StringLattice implements Lattice {
 
 export class RCTypeLattice implements Lattice {
     private constructor(
-        public readonly typeName: string,
+        public readonly type: TypeName,
         public readonly semantics: 'ISOLATED' | 'SHARED' | 'UNIQUE',
         public readonly fields: Record<string, Lattice> | undefined,
     ) {}
 
     static create({
-        typeName,
+        type,
         semantics,
         fields,
     }: {
-        typeName: string
+        type: TypeName
         semantics: 'ISOLATED' | 'SHARED' | 'UNIQUE'
         fields?: Record<string, Lattice>
     }): RCTypeLattice {
-        return new RCTypeLattice(typeName, semantics, fields)
+        return new RCTypeLattice(type, semantics, fields)
     }
 
     unconstrained(): Lattice {
         return RCTypeLattice.create({
-            typeName: this.typeName,
+            type: this.type,
             semantics: this.semantics,
             fields: Object.fromEntries(
                 Object.entries(this.fields ?? {}).map(([name, field]) => [
@@ -107,7 +108,7 @@ export class RCTypeLattice implements Lattice {
 
     asUNIQUE(): RCTypeLattice {
         return RCTypeLattice.create({
-            typeName: this.typeName,
+            type: this.type,
             semantics: 'UNIQUE',
             fields: this.fields || {},
         })
@@ -116,7 +117,8 @@ export class RCTypeLattice implements Lattice {
     toCIR(): cir.ValueSet {
         return {
             type: 'rc-type',
-            typeName: this.typeName,
+            typeName: this.type.name,
+            namespace: this.type.namespace,
             semantics: 'ISOLATED',
         }
     }

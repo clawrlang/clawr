@@ -21,9 +21,9 @@ describe('Field Reference', () => {
             },
         })
         context.scope.rootScope.addDataDeclaration(
-            'MyType',
+            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
-                name: 'MyType',
+                name: TypeName.create({ name: 'MyType' }),
                 fields: [
                     {
                         name: 'myField',
@@ -62,9 +62,9 @@ describe('Field Reference', () => {
             },
         })
         context.scope.rootScope.addDataDeclaration(
-            'MyType',
+            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
-                name: 'MyType',
+                name: TypeName.create({ name: 'MyType' }),
                 fields: [
                     {
                         name: 'myField',
@@ -116,9 +116,9 @@ describe('Field Reference', () => {
                     },
                 })
                 context.scope.rootScope.addDataDeclaration(
-                    'MyType',
+                    TypeName.create({ name: 'MyType' }),
                     DataDeclaration.create({
-                        name: 'MyType',
+                        name: TypeName.create({ name: 'MyType' }),
                         fields: [
                             {
                                 name: 'myField',
@@ -164,9 +164,9 @@ describe('Field Reference', () => {
             },
         })
         context.scope.rootScope.addDataDeclaration(
-            'MyType',
+            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
-                name: 'MyType',
+                name: TypeName.create({ name: 'MyType' }),
                 fields: [
                     {
                         name: 'myField',
@@ -214,9 +214,9 @@ describe('Field Reference', () => {
                     },
                 })
                 context.scope.rootScope.addDataDeclaration(
-                    'MyType',
+                    TypeName.create({ name: 'MyType' }),
                     DataDeclaration.create({
-                        name: 'MyType',
+                        name: TypeName.create({ name: 'MyType' }),
                         fields: [
                             {
                                 name: 'myField',
@@ -276,9 +276,9 @@ describe('Field Reference', () => {
                     },
                 })
                 context.scope.rootScope.addDataDeclaration(
-                    'MyType',
+                    TypeName.create({ name: 'MyType' }),
                     DataDeclaration.create({
-                        name: 'MyType',
+                        name: TypeName.create({ name: 'MyType' }),
                         fields: [
                             {
                                 name: 'myField',
@@ -318,9 +318,9 @@ describe('Field Reference', () => {
                 },
             })
             context.scope.rootScope.addDataDeclaration(
-                'MyType',
+                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
-                    name: 'MyType',
+                    name: TypeName.create({ name: 'MyType' }),
                     fields: [
                         {
                             name: 'myField',
@@ -357,9 +357,9 @@ describe('Field Reference', () => {
                 },
             })
             context.scope.rootScope.addDataDeclaration(
-                'MyType',
+                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
-                    name: 'MyType',
+                    name: TypeName.create({ name: 'MyType' }),
                     fields: [
                         {
                             name: 'myField',

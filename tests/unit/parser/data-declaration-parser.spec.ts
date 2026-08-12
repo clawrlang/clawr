@@ -19,7 +19,7 @@ describe('DataDeclarationParser', () => {
         const parser = DataDeclarationParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
-            name: 'MyData',
+            name: { name: 'MyData' },
             fields: [
                 { name: 'field1', semantics: 'mut' },
                 { name: 'field2', semantics: 'mut' },
@@ -42,7 +42,7 @@ describe('DataDeclarationParser', () => {
         const parser = DataDeclarationParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
-            name: 'MyData',
+            name: { name: 'MyData' },
             fields: [
                 { name: 'field1', semantics: 'ref' },
                 { name: 'field2', semantics: 'const' },

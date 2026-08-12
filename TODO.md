@@ -10,6 +10,7 @@
 - `FunctionName` lacks namespace
   - DataDeclParser
   - ValueSetParser
+  - RCTypeLattice
 
 ## Incomplete/Postponed Functionality
 

@@ -1,6 +1,7 @@
 import { Context } from '.'
 import { TokenStream } from '../lexer'
 import { DataDeclaration, DataField } from '../model/data-declaration'
+import { TypeName } from '../model/type-name'
 import { DataFieldParser } from './data-field-parser'
 
 export class DataDeclarationParser {
@@ -26,6 +27,9 @@ export class DataDeclarationParser {
             fields.push(fieldParser.parse(stream))
         }
         stream.expect('PUNCTUATION', '}')
-        return DataDeclaration.create({ name, fields })
+        return DataDeclaration.create({
+            name: TypeName.create({ name }),
+            fields,
+        })
     }
 }

@@ -46,7 +46,7 @@ export class ValueSetParser {
                     })
                 else
                     return ExplicitUniqueValueSet.create({
-                        typeName: type,
+                        type: TypeName.create({ name: type }),
                         span: { start: typeToken.start, end: typeToken.end },
                     })
         }

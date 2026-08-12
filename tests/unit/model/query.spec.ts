@@ -13,6 +13,7 @@ import {
 import { DataLiteral } from '../../../src/model/data-literal'
 import { RCTypeLattice } from '../../../src/model/lattice'
 import { VariableReference } from '../../../src/model/variable-reference'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('Query', () => {
     it('converts to CIR', () => {
@@ -112,7 +113,7 @@ describe('Query', () => {
                     baseName: 'foo',
                     parameters: [],
                     result: ExplicitUniqueValueSet.create({
-                        typeName: 'MyData',
+                        type: TypeName.create({ name: 'MyData' }),
                         span: someCodeSpan,
                     }),
                     implementation: {
@@ -158,7 +159,7 @@ describe('Query', () => {
             context.scope.setCurrentValue(
                 'value',
                 RCTypeLattice.create({
-                    typeName: 'MyData',
+                    type: TypeName.create({ name: 'MyData' }),
                     semantics: 'SHARED',
                 }),
             )

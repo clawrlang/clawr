@@ -4,6 +4,7 @@ import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { ExplicitIntegerValueSet } from '../../../src/model/explicit-value-set'
 import { IntegerLattice } from '../../../src/model/lattice'
+import { TypeName } from '../../../src/model/type-name'
 
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
@@ -89,9 +90,9 @@ describe('Variable Reference', () => {
 
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            'MyType',
+            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
-                name: 'MyType',
+                name: TypeName.create({ name: 'MyType' }),
                 fields: [
                     {
                         name: 'myField',

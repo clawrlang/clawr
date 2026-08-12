@@ -133,9 +133,9 @@ describe('FunctionDeclaration', () => {
     it('throws if returning SHARED as UNIQUE', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            'MyData',
+            TypeName.create({ name: 'MyData' }),
             DataDeclaration.create({
-                name: 'MyData',
+                name: TypeName.create({ name: 'MyData' }),
                 fields: [],
             }),
         )
@@ -149,14 +149,17 @@ describe('FunctionDeclaration', () => {
         })
         context.scope.setCurrentValue(
             'myVar',
-            RCTypeLattice.create({ typeName: 'MyData', semantics: 'SHARED' }),
+            RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyData' }),
+                semantics: 'SHARED',
+            }),
         )
 
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
             result: ExplicitUniqueValueSet.create({
-                typeName: 'MyData',
+                type: TypeName.create({ name: 'MyData' }),
                 span: someCodeSpan,
             }),
             implementation: {
@@ -176,9 +179,9 @@ describe('FunctionDeclaration', () => {
     it('throws if returning ISOLATED as SHARED', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            'MyData',
+            TypeName.create({ name: 'MyData' }),
             DataDeclaration.create({
-                name: 'MyData',
+                name: TypeName.create({ name: 'MyData' }),
                 fields: [],
             }),
         )
@@ -193,7 +196,7 @@ describe('FunctionDeclaration', () => {
         context.scope.setCurrentValue(
             'myVar',
             RCTypeLattice.create({
-                typeName: 'MyData',
+                type: TypeName.create({ name: 'MyData' }),
                 semantics: 'ISOLATED',
                 fields: {},
             }),
@@ -224,9 +227,9 @@ describe('FunctionDeclaration', () => {
     it('throws if returning ISOLATED as SHARED', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            'MyData',
+            TypeName.create({ name: 'MyData' }),
             DataDeclaration.create({
-                name: 'MyData',
+                name: TypeName.create({ name: 'MyData' }),
                 fields: [],
             }),
         )
@@ -241,7 +244,7 @@ describe('FunctionDeclaration', () => {
         context.scope.setCurrentValue(
             'myVar',
             RCTypeLattice.create({
-                typeName: 'MyData',
+                type: TypeName.create({ name: 'MyData' }),
                 semantics: 'ISOLATED',
                 fields: {},
             }),
@@ -310,9 +313,9 @@ describe('FunctionDeclaration', () => {
         it('infers ISOLATED return value-set from ISOLATED variable expression', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'MyData',
+                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
-                    name: 'MyData',
+                    name: TypeName.create({ name: 'MyData' }),
                     fields: [],
                 }),
             )
@@ -327,7 +330,7 @@ describe('FunctionDeclaration', () => {
             context.scope.setCurrentValue(
                 'myVar',
                 RCTypeLattice.create({
-                    typeName: 'MyData',
+                    type: TypeName.create({ name: 'MyData' }),
                     semantics: 'ISOLATED',
                     fields: {},
                 }),
@@ -363,9 +366,9 @@ describe('FunctionDeclaration', () => {
         it('infers SHARED return value-set from SHARED variable expression', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                'MyData',
+                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
-                    name: 'MyData',
+                    name: TypeName.create({ name: 'MyData' }),
                     fields: [],
                 }),
             )
@@ -380,7 +383,7 @@ describe('FunctionDeclaration', () => {
             context.scope.setCurrentValue(
                 'myVar',
                 RCTypeLattice.create({
-                    typeName: 'MyData',
+                    type: TypeName.create({ name: 'MyData' }),
                     semantics: 'SHARED',
                 }),
             )
@@ -477,9 +480,9 @@ describe('FunctionDeclaration', () => {
             const context = newSemanticContext()
 
             context.scope.rootScope.addDataDeclaration(
-                'MyData',
+                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
-                    name: 'MyData',
+                    name: TypeName.create({ name: 'MyData' }),
                     fields: [
                         {
                             name: 'field1',
@@ -545,9 +548,9 @@ describe('FunctionDeclaration', () => {
             const context = newSemanticContext()
 
             context.scope.rootScope.addDataDeclaration(
-                'MyData',
+                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
-                    name: 'MyData',
+                    name: TypeName.create({ name: 'MyData' }),
                     fields: [
                         {
                             name: 'field1',
@@ -619,9 +622,9 @@ describe('FunctionDeclaration', () => {
             const context = newSemanticContext()
 
             context.scope.rootScope.addDataDeclaration(
-                'MyData',
+                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
-                    name: 'MyData',
+                    name: TypeName.create({ name: 'MyData' }),
                     fields: [],
                 }),
             )
@@ -630,7 +633,7 @@ describe('FunctionDeclaration', () => {
                 baseName: 'myFunction',
                 parameters: [],
                 result: ExplicitUniqueValueSet.create({
-                    typeName: 'MyData',
+                    type: TypeName.create({ name: 'MyData' }),
                     span: someCodeSpan,
                 }),
                 implementation: {

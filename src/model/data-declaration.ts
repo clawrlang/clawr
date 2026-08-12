@@ -1,6 +1,7 @@
 import { Context, Declaration, Expression } from '.'
 import { VariableSemantics } from './variable-declaration'
 import { ExplicitValueSet } from './explicit-value-set'
+import { TypeName } from './type-name'
 
 export type DataField = {
     semantics: VariableSemantics
@@ -11,7 +12,7 @@ export type DataField = {
 
 export class DataDeclaration implements Declaration {
     private constructor(
-        public name: string,
+        public name: TypeName,
         public fields: DataField[],
     ) {}
 
@@ -19,7 +20,7 @@ export class DataDeclaration implements Declaration {
         name,
         fields,
     }: {
-        name: string
+        name: TypeName
         fields: DataField[]
     }): DataDeclaration {
         return new DataDeclaration(name, fields)
@@ -29,7 +30,8 @@ export class DataDeclaration implements Declaration {
         context.scope.rootScope.addDataDeclaration(this.name, this)
         context.scope.rootScope.emitted.push({
             kind: 'TYPE_DECL',
-            name: this.name,
+            name: this.name.name,
+            namespace: this.name.namespace,
             fields: this.fields.map((field) => ({
                 name: field.name,
                 valueSet: field.valueSet.toCIR(),

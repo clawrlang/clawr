@@ -10,6 +10,7 @@ import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { RCTypeLattice, Lattice } from './lattice'
 import { VariableReference } from './variable-reference'
+import { TypeName } from './type-name'
 
 export class FieldReference implements Expression {
     private constructor(
@@ -114,9 +115,14 @@ export class FieldReference implements Expression {
             const objectValueSet = object.valueSet
             const objectType =
                 objectValueSet.type === 'rc-type'
-                    ? objectValueSet.typeName
-                    : objectValueSet.type
-            const declaration = context.scope.dataDeclaration(objectType)
+                    ? TypeName.create({
+                          name: objectValueSet.typeName,
+                          namespace: objectValueSet.namespace,
+                      })
+                    : undefined
+            const declaration = objectType
+                ? context.scope.dataDeclaration(objectType)
+                : undefined
             if (!declaration) {
                 logSemanticError(
                     `Type ${objectType} is not defined in the current context`,
@@ -132,7 +138,7 @@ export class FieldReference implements Expression {
             const field = declaration.fields.find((f) => f.name === this.field)
             if (!field) {
                 return Failable.failure(
-                    `Field ${this.field} does not exist on type ${objectType}`,
+                    `Field ${this.field} does not exist on type ${objectType?.name}`,
                     this.fieldSpan,
                 )
             }

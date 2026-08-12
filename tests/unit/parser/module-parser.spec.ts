@@ -99,7 +99,7 @@ describe('Module Parser', () => {
         const code = 'data MyData { }'
         const result = parseModule(code)
         expect(result).toMatchObject({
-            declarations: [{ name: 'MyData' }],
+            declarations: [{ name: { name: 'MyData' } }],
         })
     })
 
@@ -152,7 +152,7 @@ describe('Module Parser', () => {
             `
         const result = parseModule(code)
         expect(result).toMatchObject({
-            declarations: [{ name: 'MyData' }],
+            declarations: [{ name: { name: 'MyData' } }],
             main: [
                 {
                     name: { baseName: 'print', arity: 1, labels: [] },

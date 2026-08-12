@@ -3,20 +3,21 @@ import { Declaration } from '.'
 import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { Lattice } from './lattice'
+import { TypeName } from './type-name'
 
 class RootScope {
     public variables: Map<string, Variable> = new Map()
     private declarations: Map<string, Declaration> = new Map()
     public emitted: cir.Declaration[] = []
 
-    dataDeclaration(name: string): DataDeclaration | undefined {
-        const decl = this.declarations.get(name)
+    dataDeclaration(name: TypeName): DataDeclaration | undefined {
+        const decl = this.declarations.get(name.canonical())
         if (decl instanceof DataDeclaration) return decl
         return undefined
     }
 
-    addDataDeclaration(name: string, decl: DataDeclaration) {
-        this.declarations.set(name, decl)
+    addDataDeclaration(name: TypeName, decl: DataDeclaration) {
+        this.declarations.set(name.canonical(), decl)
     }
 
     functionDeclaration(name: string): FunctionDeclaration | undefined {
@@ -57,7 +58,7 @@ export class Scope {
         return `__tempˇ${this.nextTempVarCounter++}`
     }
 
-    dataDeclaration(name: string): DataDeclaration | undefined {
+    dataDeclaration(name: TypeName): DataDeclaration | undefined {
         return this.rootScope.dataDeclaration(name)
     }
 

@@ -31,14 +31,13 @@ describe('VariableDeclaration', () => {
         })
         const context = newSemanticContext()
         decl.emitStatement(context)
-        expect(context.scope.emitted[0]).toEqual({
+        expect(context.scope.emitted[0]).toMatchObject({
             kind: 'VARIABLE_DECL',
             name: 'foo',
             valueSet: { type: 'integer', min: '1', max: '1' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
                 value: '1',
-                valueSet: { type: 'integer', min: '1', max: '1' },
             },
         })
     })

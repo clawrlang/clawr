@@ -3,7 +3,9 @@ import { TypeName } from './type-name'
 
 export interface Lattice {
     unconstrained(): Lattice
+    isSameType(lattice: Lattice): boolean
     toCIR(): cir.ValueSet
+    toString(): string
 }
 
 export class IntegerLattice implements Lattice {
@@ -30,12 +32,20 @@ export class IntegerLattice implements Lattice {
         return IntegerLattice.create({ min: undefined, max: undefined })
     }
 
+    isSameType(lattice: Lattice): boolean {
+        return lattice instanceof IntegerLattice
+    }
+
     toCIR(): cir.ValueSet {
         return {
             type: 'integer',
             min: this.min?.toString(),
             max: this.max?.toString(),
         }
+    }
+
+    toString(): string {
+        return 'integer'
     }
 }
 
@@ -54,11 +64,19 @@ export class TruthvalueLattice implements Lattice {
         return TruthvalueLattice.create(['false', 'ambiguous', 'true'])
     }
 
+    isSameType(lattice: Lattice): boolean {
+        return lattice instanceof TruthvalueLattice
+    }
+
     toCIR(): cir.ValueSet {
         return {
             type: 'truthvalue',
             values: this.values,
         }
+    }
+
+    toString(): string {
+        return 'truthvalue'
     }
 }
 
@@ -73,8 +91,16 @@ export class StringLattice implements Lattice {
         return this
     }
 
+    isSameType(lattice: Lattice): boolean {
+        return lattice instanceof StringLattice
+    }
+
     toCIR(): cir.ValueSet {
         return { type: 'string' }
+    }
+
+    toString(): string {
+        return 'string'
     }
 }
 
@@ -110,6 +136,13 @@ export class RCTypeLattice implements Lattice {
         })
     }
 
+    isSameType(lattice: Lattice): boolean {
+        return (
+            lattice instanceof RCTypeLattice &&
+            this.type.canonical() === lattice.type.canonical()
+        )
+    }
+
     withSemantics(semantics: 'ISOLATED' | 'SHARED' | 'UNIQUE'): RCTypeLattice {
         return RCTypeLattice.create({
             type: this.type,
@@ -130,5 +163,9 @@ export class RCTypeLattice implements Lattice {
             semantics:
                 this.semantics === 'UNIQUE' ? 'ISOLATED' : this.semantics,
         }
+    }
+
+    toString(): string {
+        return `rc-type(${this.type.canonical()}, ${this.semantics})`
     }
 }

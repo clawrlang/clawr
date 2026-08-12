@@ -28,38 +28,26 @@
                     },
                     "initialValue": {
                         "kind": "ALLOCATION",
+                        "type": {
+                            "name": "MyData"
+                        },
                         "semantics": "ISOLATED",
                         "fields": [
                             {
                                 "name": "field",
                                 "value": {
                                     "kind": "INTEGER_LITERAL",
-                                    "value": "42",
-                                    "valueSet": {
-                                        "type": "integer",
-                                        "max": "42",
-                                        "min": "42"
-                                    }
+                                    "value": "42"
                                 }
                             }
-                        ],
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "MyData",
-                            "semantics": "ISOLATED"
-                        }
+                        ]
                     }
                 },
                 {
                     "kind": "RETURN",
                     "value": {
                         "kind": "VARIABLE_REF",
-                        "name": "var",
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "MyData",
-                            "semantics": "ISOLATED"
-                        }
+                        "name": "var"
                     }
                 }
             ],
@@ -93,11 +81,6 @@
                         "typeName": "MyData",
                         "semantics": "SHARED"
                     }
-                },
-                "valueSet": {
-                    "type": "rc-type",
-                    "semantics": "SHARED",
-                    "typeName": "MyData"
                 }
             }
         },
@@ -112,19 +95,9 @@
                     "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
-                        "name": "var",
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "MyData",
-                            "semantics": "SHARED"
-                        }
+                        "name": "var"
                     },
-                    "field": "field",
-                    "valueSet": {
-                        "type": "integer",
-                        "max": "42",
-                        "min": "42"
-                    }
+                    "field": "field"
                 }
             ]
         }

@@ -2,8 +2,6 @@
 
 ## In Progress
 
-- Maybe there is too much stuff in the CIR?
-  - `valueSet`
 - Get the fields from the default set when converting SHARED to UNIQUE
 - `FunctionName` lacks namespace
   - DataDeclParser

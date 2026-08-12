@@ -59,7 +59,6 @@ export class ReturnStatement implements Statement {
                     initialValue: {
                         kind: 'RETAIN',
                         object,
-                        valueSet: valueLattice.toCIR() as any,
                     },
                 })
                 context.scope.releaseVariables()
@@ -68,7 +67,6 @@ export class ReturnStatement implements Statement {
                     value: {
                         kind: 'VARIABLE_REF',
                         name: temp,
-                        valueSet: valueLattice.toCIR(),
                     },
                 })
             } else {

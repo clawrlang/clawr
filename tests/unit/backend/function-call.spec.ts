@@ -15,12 +15,10 @@ describe('Function Calls', () => {
                     {
                         kind: 'INTEGER_LITERAL',
                         value: '42',
-                        valueSet: { type: 'integer', min: '42', max: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
                         value: 'Hello',
-                        valueSet: { type: 'string' },
                     },
                 ],
                 valueSet: { type: 'truthvalue', values: [] },
@@ -40,12 +38,10 @@ describe('Function Calls', () => {
                     {
                         kind: 'INTEGER_LITERAL',
                         value: '42',
-                        valueSet: { type: 'integer', min: '42', max: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
                         value: 'Hello',
-                        valueSet: { type: 'string' },
                     },
                 ],
             }
@@ -66,12 +62,10 @@ describe('Function Calls', () => {
                     {
                         kind: 'INTEGER_LITERAL',
                         value: '42',
-                        valueSet: { type: 'integer', min: '42', max: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
                         value: 'Hello',
-                        valueSet: { type: 'string' },
                     },
                 ],
                 valueSet: { type: 'truthvalue', values: [] },
@@ -91,12 +85,10 @@ describe('Function Calls', () => {
                     {
                         kind: 'INTEGER_LITERAL',
                         value: '42',
-                        valueSet: { type: 'integer', min: '42', max: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
                         value: 'Hello',
-                        valueSet: { type: 'string' },
                     },
                 ],
             }
@@ -173,11 +165,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        valueSet: {
-                            type: 'rc-type',
-                            typeName: 'Object',
-                            semantics: 'ISOLATED',
-                        },
                     },
                     type: { name: 'Object' },
                     dispatch: 'direct',
@@ -200,11 +187,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        valueSet: {
-                            type: 'rc-type',
-                            typeName: 'Object',
-                            semantics: 'ISOLATED',
-                        },
                     },
                     type: { name: 'Object' },
                     dispatch: 'direct',
@@ -228,11 +210,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        valueSet: {
-                            type: 'rc-type',
-                            typeName: 'Object',
-                            semantics: 'ISOLATED',
-                        },
                     },
                     dispatch: 'inherited',
                     declaredIn: {
@@ -260,11 +237,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        valueSet: {
-                            type: 'rc-type',
-                            typeName: 'Object',
-                            semantics: 'ISOLATED',
-                        },
                     },
                     dispatch: 'inherited',
                     declaredIn: {
@@ -293,12 +265,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        valueSet: {
-                            type: 'rc-type',
-                            namespace: 'ns',
-                            typeName: 'Object',
-                            semantics: 'ISOLATED',
-                        },
                     },
                     type: { name: 'Object', namespace: 'ns' },
                     dispatch: 'direct',
@@ -321,12 +287,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        valueSet: {
-                            type: 'rc-type',
-                            namespace: 'ns',
-                            typeName: 'Object',
-                            semantics: 'ISOLATED',
-                        },
                     },
                     type: { name: 'Object', namespace: 'ns' },
                     dispatch: 'direct',

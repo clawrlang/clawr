@@ -48,8 +48,8 @@ export class FieldReference implements Expression {
             this.object instanceof VariableReference ||
             this.object instanceof FieldReference
         ) {
-            const object = this.object.toCIRExpression(context).value()
-            if ((object.valueSet as any).semantics === 'ISOLATED') {
+            if (this.object.semantics(context) === 'ISOLATED') {
+                const object = this.object.toCIRExpression(context).value()
                 return [{ kind: 'ENSURE_UNIQUE', object }]
             }
         }
@@ -57,19 +57,21 @@ export class FieldReference implements Expression {
     }
 
     isEffectivelyConst(context: Context): Failable<boolean> {
-        return this.object.toCIRExpression(context).chaining((object) => {
-            if ((object.valueSet as any).semantics === 'SHARED')
-                return Failable.success(false)
-            return Failable.success(
-                this.object.isEffectivelyConst(context).value(),
-            )
-        })
+        return this.object.semantics(context) === 'SHARED'
+            ? Failable.success(false)
+            : this.object.isEffectivelyConst(context)
     }
 
     semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
-        const value = this.currentValue(context).value()
+        const value = this.declaredValueSet(context).value()
         if (value instanceof RCTypeLattice) return value.semantics
         return 'ISOLATED'
+    }
+
+    declaredValueSet(context: Context): Failable<Lattice> {
+        return this.getFieldFromContext(context).chaining((field) =>
+            Failable.success(field.valueSet.toLattice(context)),
+        )
     }
 
     currentValue(context: Context): Failable<Lattice> {
@@ -111,51 +113,27 @@ export class FieldReference implements Expression {
     private getFieldFromContext(
         context: Context,
     ): Failable<DataDeclaration['fields'][number]> {
-        return this.object.toCIRExpression(context).chaining((object) => {
-            const objectValueSet = object.valueSet
-            const objectType =
-                objectValueSet.type === 'rc-type'
-                    ? TypeName.create({
-                          name: objectValueSet.typeName,
-                          namespace: objectValueSet.namespace,
-                      })
-                    : undefined
-            const declaration = objectType
-                ? context.scope.dataDeclaration(objectType)
-                : undefined
-            if (!declaration) {
-                logSemanticError(
-                    `Type ${objectType} is not defined in the current context`,
-                    { ...context, span: this.span },
-                )
-            }
-            if (!(declaration instanceof DataDeclaration)) {
-                return Failable.failure(
-                    `Type ${objectType} is not a data type, cannot access fields`,
-                    this.span,
-                )
-            }
-            const field = declaration.fields.find((f) => f.name === this.field)
-            if (!field) {
-                return Failable.failure(
-                    `Field ${this.field} does not exist on type ${objectType?.name}`,
-                    this.fieldSpan,
-                )
-            }
-            return Failable.success(field)
-        })
+        const objectValue = this.object.declaredValueSet(context).value()
+        if (!(objectValue instanceof RCTypeLattice))
+            return Failable.failure('unknown object value', this.span)
+        const type = context.scope.dataDeclaration(objectValue.type)
+        const field = type?.fields.find((field) => field.name === this.field)
+        return field
+            ? Failable.success(field)
+            : Failable.failure(
+                  `Field ${this.field} does not exist on type ${type?.name.canonical()}`,
+                  this.fieldSpan,
+              )
     }
 
     private checkOperatorCompatibility_failable(context: Context): Failable {
-        return this.object.toCIRExpression(context).chaining((object) => {
-            const semantics = (object.valueSet as any).semantics
-            if ((semantics === 'SHARED') !== (this.operator === '->')) {
-                const error = SemanticError.create({
-                    message: `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
-                    span: this.span,
-                })
-                return Failable.failure(SemanticErrorCollection.create([error]))
-            } else return Failable.success(undefined)
-        })
+        const semantics = this.object.semantics(context)
+        if ((semantics === 'SHARED') !== (this.operator === '->')) {
+            const error = SemanticError.create({
+                message: `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
+                span: this.span,
+            })
+            return Failable.failure(SemanticErrorCollection.create([error]))
+        } else return Failable.success(undefined)
     }
 }

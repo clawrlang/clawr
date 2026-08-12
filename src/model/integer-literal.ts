@@ -34,6 +34,12 @@ export class IntegerLiteral implements Expression {
         )
     }
 
+    declaredValueSet(_: Context): Failable<Lattice> {
+        return Failable.success(
+            IntegerLattice.create({ min: this.value, max: this.value }),
+        )
+    }
+
     toCIRExpression(_: Context): Failable<cir.Expression> {
         return Failable.success({
             kind: 'INTEGER_LITERAL',

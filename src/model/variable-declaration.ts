@@ -68,18 +68,16 @@ export class VariableDeclaration implements Statement, Declaration {
             })
             .value()
 
+        const valueSemantics = this.initialValue.semantics(context)
         if (
             valueSet.type === 'rc-type' &&
-            initialValue.valueSet.type === 'rc-type' &&
-            valueSet.semantics !== initialValue.valueSet.semantics
-        ) {
-            const iv = this.initialValue.currentValue(context).value()
-            if (iv instanceof RCTypeLattice && iv.semantics !== 'UNIQUE')
-                logSemanticError(
-                    `Cannot assign ${initialValue.valueSet.semantics} value to ${valueSet.semantics} target`,
-                    { ...context, span: this.initialValue.span },
-                )
-        }
+            valueSet.semantics !== valueSemantics &&
+            valueSemantics !== 'UNIQUE'
+        )
+            logSemanticError(
+                `Cannot assign ${valueSemantics} value to ${valueSet.semantics} target`,
+                { ...context, span: this.initialValue.span },
+            )
 
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,
@@ -92,7 +90,6 @@ export class VariableDeclaration implements Statement, Declaration {
                     ? {
                           kind: 'RETAIN' as const,
                           object: initialValue,
-                          valueSet,
                       }
                     : initialValue,
         })

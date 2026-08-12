@@ -11,7 +11,6 @@ describe('Lowering Variables', () => {
             initialValue: {
                 kind: 'INTEGER_LITERAL',
                 value: '42',
-                valueSet: { type: 'integer', min: '42', max: '42' },
             },
         }
         const result = lowerStmt(decl)
@@ -22,7 +21,6 @@ describe('Lowering Variables', () => {
         const expr: Expression = {
             kind: 'VARIABLE_REF',
             name: 'foo',
-            valueSet: { type: 'integer' },
         }
         const result = lowerExpr(expr)
         expect(result).toBe('foo')

@@ -68,6 +68,27 @@ export class DataLiteral implements Expression {
         )
     }
 
+    declaredValueSet(context: Context & { type: TypeName }): Failable<Lattice> {
+        const decl = context.scope.dataDeclaration(context.type)
+        if (!decl)
+            return Failable.failure(
+                `DataLiteral.declaredValueSet: type ${context.type.name} not found in scope`,
+                this.span,
+            )
+        return Failable.success(
+            RCTypeLattice.create({
+                type: decl.name,
+                semantics: 'UNIQUE',
+                fields: Object.fromEntries(
+                    decl.fields.map((field) => [
+                        field.name,
+                        field.valueSet.toLattice(context),
+                    ]),
+                ),
+            }),
+        )
+    }
+
     toCIRExpression(
         context: Context & { type: TypeName; semantics: 'ISOLATED' | 'SHARED' },
     ): Failable<cir.Expression> {
@@ -117,13 +138,8 @@ export class DataLiteral implements Expression {
         return Failable.collect(fieldResults).chaining((fields) =>
             Failable.success({
                 kind: 'ALLOCATION',
+                type: context.type.toCIR(),
                 semantics: context.semantics,
-                valueSet: {
-                    type: 'rc-type',
-                    typeName: context.type.name,
-                    namespace: context.type.namespace,
-                    semantics: context.semantics,
-                } satisfies cir.ValueSet,
                 fields,
             }),
         )

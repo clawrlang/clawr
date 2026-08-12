@@ -10,15 +10,7 @@
             "arguments": [
                 {
                     "kind": "TRUTHVALUE_LITERAL",
-                    "value": "ambiguous",
-                    "valueSet": {
-                        "type": "truthvalue",
-                        "values": [
-                            "true",
-                            "false",
-                            "ambiguous"
-                        ]
-                    }
+                    "value": "ambiguous"
                 }
             ]
         }

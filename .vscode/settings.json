@@ -69,10 +69,9 @@
             "properties": {
               "kind": { "const": "FIELD_REF" },
               "object": { "$ref": "#/$defs/Expression" },
-              "field": { "type": "string" },
-              "valueSet": { "$ref": "#/$defs/ValueSet" }
+              "field": { "type": "string" }
             },
-            "required": ["kind", "object", "field", "valueSet"],
+            "required": ["kind", "object", "field"],
             "additionalProperties": false
           },
           "Expression": {
@@ -92,10 +91,9 @@
             "type": "object",
             "properties": {
               "kind": { "const": "AS_SHARED" },
-              "object": { "$ref": "#/$defs/QueryFunctionCall" },
-              "valueSet": { "$ref": "#/$defs/RcTypeValueSet" }
+              "object": { "$ref": "#/$defs/QueryFunctionCall" }
             },
-            "required": ["kind", "object", "valueSet"],
+            "required": ["kind", "object"],
             "additionalProperties": false
           },
           "QueryFunctionCall": {
@@ -233,27 +231,26 @@
             "type": "object",
             "properties": {
               "kind": { "const": "INTEGER_LITERAL" },
-              "value": { "type": "string" },
-              "valueSet": { "$ref": "#/$defs/IntegerValueSet" }
+              "value": { "type": "string" }
             },
-            "required": ["kind", "value", "valueSet"],
+            "required": ["kind", "value"],
             "additionalProperties": false
           },
           "MemoryAllocation": {
             "type": "object",
             "properties": {
               "kind": { "const": "ALLOCATION" },
+              "type": { "$ref": "#/$defs/CanonicalName" },
+              "base": { "$ref": "#/$defs/CanonicalName" },
               "semantics": {
                 "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
               },
-              "valueSet": { "$ref": "#/$defs/RcTypeValueSet" },
-              "base": { "$ref": "#/$defs/CanonicalName" },
               "fields": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type.o1" }
               }
             },
-            "required": ["kind", "semantics", "valueSet", "fields"],
+            "required": ["kind", "type", "semantics", "fields"],
             "additionalProperties": false
           },
           "__type.o1": {
@@ -269,20 +266,18 @@
             "type": "object",
             "properties": {
               "kind": { "const": "RETAIN" },
-              "object": { "$ref": "#/$defs/Storage" },
-              "valueSet": { "$ref": "#/$defs/RcTypeValueSet" }
+              "object": { "$ref": "#/$defs/Storage" }
             },
-            "required": ["kind", "object", "valueSet"],
+            "required": ["kind", "object"],
             "additionalProperties": false
           },
           "StringLiteral": {
             "type": "object",
             "properties": {
               "kind": { "const": "STRING_LITERAL" },
-              "value": { "type": "string" },
-              "valueSet": { "$ref": "#/$defs/StringValueSet" }
+              "value": { "type": "string" }
             },
-            "required": ["kind", "value", "valueSet"],
+            "required": ["kind", "value"],
             "additionalProperties": false
           },
           "TruthLiteral": {
@@ -295,20 +290,18 @@
                   { "const": "false" },
                   { "const": "true" }
                 ]
-              },
-              "valueSet": { "$ref": "#/$defs/TruthValueSet" }
+              }
             },
-            "required": ["kind", "value", "valueSet"],
+            "required": ["kind", "value"],
             "additionalProperties": false
           },
           "VariableReference": {
             "type": "object",
             "properties": {
               "kind": { "const": "VARIABLE_REF" },
-              "name": { "type": "string" },
-              "valueSet": { "$ref": "#/$defs/ValueSet" }
+              "name": { "type": "string" }
             },
-            "required": ["kind", "name", "valueSet"],
+            "required": ["kind", "name"],
             "additionalProperties": false
           },
           "EnsureUnique": {

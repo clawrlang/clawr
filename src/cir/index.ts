@@ -124,26 +124,23 @@ type Storage = VariableReference | FieldReference
 type StringLiteral = {
     kind: 'STRING_LITERAL'
     value: string
-    valueSet: StringValueSet
 }
 
 type IntegerLiteral = {
     kind: 'INTEGER_LITERAL'
     value: string
-    valueSet: IntegerValueSet
 }
 
 type TruthLiteral = {
     kind: 'TRUTHVALUE_LITERAL'
     value: 'false' | 'ambiguous' | 'true'
-    valueSet: TruthValueSet
 }
 
 type MemoryAllocation = {
     kind: 'ALLOCATION'
-    semantics: 'ISOLATED' | 'SHARED'
-    valueSet: RcTypeValueSet
+    type: CanonicalName
     base?: CanonicalName
+    semantics: 'ISOLATED' | 'SHARED'
     fields: {
         name: string
         value: Expression
@@ -153,26 +150,22 @@ type MemoryAllocation = {
 type MemoryRetention = {
     kind: 'RETAIN'
     object: Storage
-    valueSet: RcTypeValueSet
 }
 
 type AsShared = {
     kind: 'AS_SHARED'
     object: QueryFunctionCall
-    valueSet: RcTypeValueSet
 }
 
 type VariableReference = {
     kind: 'VARIABLE_REF'
     name: string
-    valueSet: ValueSet
 }
 
 type FieldReference = {
     kind: 'FIELD_REF'
     object: Expression
     field: string
-    valueSet: ValueSet
 }
 
 type QueryFunctionCall = FunctionCall & { valueSet: ValueSet }

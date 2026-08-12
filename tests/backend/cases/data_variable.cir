@@ -23,23 +23,16 @@
             },
             "initialValue": {
                 "kind": "ALLOCATION",
-                "semantics": "SHARED",
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "FooData",
-                    "semantics": "SHARED"
+                "type": {
+                    "name": "FooData"
                 },
+                "semantics": "SHARED",
                 "fields": [
                     {
                         "name": "bar",
                         "value": {
                             "kind": "INTEGER_LITERAL",
-                            "value": "2",
-                            "valueSet": {
-                                "type": "integer",
-                                "min": "2",
-                                "max": "2"
-                            }
+                            "value": "2"
                         }
                     }
                 ]
@@ -53,28 +46,13 @@
                 "kind": "FIELD_REF",
                 "object": {
                     "kind": "VARIABLE_REF",
-                    "name": "foo",
-                    "valueSet": {
-                        "type": "rc-type",
-                        "typeName": "FooData",
-                        "semantics": "SHARED"
-                    }
+                    "name": "foo"
                 },
-                "field": "bar",
-                "valueSet": {
-                    "type": "integer",
-                    "min": "1",
-                    "max": "1"
-                }
+                "field": "bar"
             },
             "value": {
                 "kind": "INTEGER_LITERAL",
-                "value": "1",
-                "valueSet": {
-                    "type": "integer",
-                    "min": "1",
-                    "max": "1"
-                }
+                "value": "1"
             }
         },
         {
@@ -88,19 +66,9 @@
                     "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
-                        "name": "foo",
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "FooData",
-                            "semantics": "SHARED"
-                        }
+                        "name": "foo"
                     },
-                    "field": "bar",
-                    "valueSet": {
-                        "type": "integer",
-                        "min": "1",
-                        "max": "1"
-                    }
+                    "field": "bar"
                 }
             ]
         },
@@ -108,12 +76,7 @@
             "kind": "RELEASE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "foo",
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "FooData",
-                    "semantics": "SHARED"
-                }
+                "name": "foo"
             }
         }
     ]

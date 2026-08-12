@@ -119,13 +119,14 @@ export class FunctionDeclaration implements Declaration {
         context.scope.rootScope.emitted.push(cirFuncDecl)
     }
 
-    resultSet(context: Context) {
+    private resultSet(context: Context): cir.ValueSet | undefined {
         let resultValueSet = this.result?.toCIR()
         if (resultValueSet) return resultValueSet
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression
-                .toCIRExpression(this.bodyContext(context))
-                .value().valueSet
+                .currentValue(context)
+                .value()
+                .toCIR()
     }
 
     private bodyContext(context: Context): Context {

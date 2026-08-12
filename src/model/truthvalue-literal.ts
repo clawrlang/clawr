@@ -28,6 +28,10 @@ export class TruthValueLiteral implements Expression {
         return Failable.success(TruthvalueLattice.create([this.value]))
     }
 
+    declaredValueSet(_: Context): Failable<Lattice> {
+        return Failable.success(TruthvalueLattice.create([this.value]))
+    }
+
     toCIRExpression(_: Context): Failable<cir.Expression> {
         return Failable.success({
             kind: 'TRUTHVALUE_LITERAL',

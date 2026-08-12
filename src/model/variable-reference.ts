@@ -42,9 +42,19 @@ export class VariableReference implements Expression {
     }
 
     semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
-        const value = this.currentValue(context).value()
-        if (value instanceof RCTypeLattice) return value.semantics
-        return 'ISOLATED'
+        return this.lookupInScope(context)
+            .chaining((variable) => {
+                if (variable.lattice instanceof RCTypeLattice)
+                    return Failable.success(variable.lattice.semantics)
+                return Failable.success('ISOLATED' as const)
+            })
+            .value()
+    }
+
+    declaredValueSet(context: Context): Failable<Lattice> {
+        return this.lookupInScope(context).chaining((variable) =>
+            Failable.success(variable.lattice),
+        )
     }
 
     currentValue(context: Context): Failable<Lattice> {

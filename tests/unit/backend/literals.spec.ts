@@ -7,7 +7,6 @@ describe('Lowering Literals', () => {
         const expr: Expression = {
             kind: 'STRING_LITERAL',
             value: 'Hello, World!',
-            valueSet: { type: 'string' },
         }
         const result = lowerExpr(expr)
         expect(result).toBe('"Hello, World!"')
@@ -17,7 +16,6 @@ describe('Lowering Literals', () => {
         const expr: Expression = {
             kind: 'INTEGER_LITERAL',
             value: '42',
-            valueSet: { type: 'integer', min: '42', max: '42' },
         }
         const result = lowerExpr(expr)
         expect(result).toBe('42')
@@ -34,10 +32,6 @@ describe('Lowering Literals', () => {
                 const expr: Expression = {
                     kind: 'TRUTHVALUE_LITERAL',
                     value: input as 'false' | 'ambiguous' | 'true',
-                    valueSet: {
-                        type: 'truthvalue',
-                        values: [input as 'false' | 'ambiguous' | 'true'],
-                    },
                 }
                 const result = lowerExpr(expr)
                 expect(result).toBe(expected)
@@ -50,21 +44,19 @@ describe('Lowering Literals', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
                 semantics: 'ISOLATED',
+                type: {
+                    name: 'MyData',
+                    namespace: undefined,
+                },
                 fields: [
                     {
                         name: 'field',
                         value: {
                             kind: 'VARIABLE_REF',
                             name: 'var',
-                            valueSet: { type: 'integer' },
                         },
                     },
                 ],
-                valueSet: {
-                    type: 'rc-type',
-                    typeName: 'MyData',
-                    semantics: 'ISOLATED',
-                },
             }
             const result = lowerExpr(expr)
             expect(result).toContain('allocInitRC(MyData, 0,')
@@ -74,6 +66,10 @@ describe('Lowering Literals', () => {
         it('lowers as allocInitInheritedRC', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
+                type: {
+                    name: 'MyObject',
+                    namespace: undefined,
+                },
                 semantics: 'ISOLATED',
                 fields: [
                     {
@@ -81,16 +77,10 @@ describe('Lowering Literals', () => {
                         value: {
                             kind: 'VARIABLE_REF',
                             name: 'var',
-                            valueSet: { type: 'integer' },
                         },
                     },
                 ],
                 base: { name: 'Super' },
-                valueSet: {
-                    type: 'rc-type',
-                    typeName: 'MyObject',
-                    semantics: 'ISOLATED',
-                },
             }
             const result = lowerExpr(expr)
             expect(result).toContain('allocInitInheritedRC(MyObject, 0, Super')

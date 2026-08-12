@@ -534,7 +534,6 @@ describe('FunctionDeclaration', () => {
                 object: {
                     kind: 'VARIABLE_REF',
                     name: 'myVar',
-                    valueSet: { type: 'rc-type', typeName: 'MyData' },
                 },
             })
         })
@@ -608,7 +607,6 @@ describe('FunctionDeclaration', () => {
                 object: {
                     kind: 'VARIABLE_REF',
                     name: 'myVar',
-                    valueSet: { type: 'rc-type', typeName: 'MyData' },
                 },
             })
         })
@@ -676,7 +674,6 @@ describe('FunctionDeclaration', () => {
                     initialValue: {
                         kind: 'RETAIN',
                         object: { kind: 'VARIABLE_REF', name: 'myVar' },
-                        valueSet: { type: 'rc-type', typeName: 'MyData' },
                     },
                 },
                 { kind: 'RELEASE' },

@@ -46,7 +46,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.toCIRExpression(context).value().valueSet.type).toBe(
+        expect(fieldRef.declaredValueSet(context).value().toCIR().type).toBe(
             'integer',
         )
     })
@@ -69,10 +69,10 @@ describe('Field Reference', () => {
                         name: 'myField',
                         valueSet: ExplicitRCTypeValueSet.create({
                             type: TypeName.create({ name: 'MyType' }),
-                            semantics: 'mut',
+                            semantics: 'ref',
                             span: someCodeSpan,
                         }),
-                        semantics: 'mut',
+                        semantics: 'ref',
                     },
                 ],
             }),
@@ -88,11 +88,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(
-            fieldRef.toCIRExpression(context).value().valueSet,
-        ).toMatchObject({
-            semantics: 'ISOLATED',
-        })
+        expect(fieldRef.semantics(context)).toEqual('SHARED')
     })
 
     describe('infers its type and isolation level from the context', () => {
@@ -114,6 +110,13 @@ describe('Field Reference', () => {
                     }),
                 })
                 context.scope.rootScope.addDataDeclaration(
+                    TypeName.create({ name: 'InnerType' }),
+                    DataDeclaration.create({
+                        name: TypeName.create({ name: 'InnerType' }),
+                        fields: [],
+                    }),
+                )
+                context.scope.rootScope.addDataDeclaration(
                     TypeName.create({ name: 'MyType' }),
                     DataDeclaration.create({
                         name: TypeName.create({ name: 'MyType' }),
@@ -121,7 +124,9 @@ describe('Field Reference', () => {
                             {
                                 name: 'myField',
                                 valueSet: ExplicitRCTypeValueSet.create({
-                                    type: TypeName.create({ name: 'MyType' }),
+                                    type: TypeName.create({
+                                        name: 'InnerType',
+                                    }),
                                     semantics,
                                     span: someCodeSpan,
                                 }),
@@ -141,11 +146,11 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
+                expect(fieldRef.semantics(context)).toEqual(expectedSemantics)
                 expect(
-                    fieldRef.toCIRExpression(context).value().valueSet,
+                    fieldRef.declaredValueSet(context).value(),
                 ).toMatchObject({
-                    type: 'rc-type',
-                    typeName: 'MyType',
+                    type: { name: 'InnerType' },
                     semantics: expectedSemantics,
                 })
             })

@@ -129,11 +129,7 @@ describe('Literals', () => {
                     .value(),
             ).toMatchObject({
                 kind: 'ALLOCATION',
-                valueSet: {
-                    type: 'rc-type',
-                    typeName: 'MyType',
-                    semantics: 'SHARED',
-                },
+                type: { name: 'MyType' },
                 fields: [
                     {
                         name: 'x',

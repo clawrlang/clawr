@@ -3,7 +3,7 @@ import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
 import { logSemanticError } from './failable'
-import { TypeName } from './type-name'
+import { RCTypeLattice } from './lattice'
 
 export class Assignment implements Statement {
     private constructor(
@@ -31,39 +31,33 @@ export class Assignment implements Statement {
                 context.errorReporter.reportError(error.message, error.span)
         }
         const target = targetResult.value()
+        const targetValueSet = this.target.declaredValueSet(context).value()
+        const targetSemantics = this.target.semantics(context)
         const value = this.value
             .toCIRExpression({
                 ...context,
                 type:
-                    target.valueSet.type === 'rc-type'
-                        ? TypeName.create({
-                              name: target.valueSet.typeName,
-                              namespace: target.valueSet.namespace,
-                          })
+                    targetValueSet instanceof RCTypeLattice
+                        ? targetValueSet.type
                         : undefined,
                 semantics:
-                    target.valueSet.type === 'rc-type'
-                        ? target.valueSet.semantics
-                        : undefined,
+                    targetSemantics !== 'UNIQUE' ? targetSemantics : undefined,
             })
             .value()
 
-        if (target.valueSet.type !== value.valueSet.type)
+        const valueSet = this.value.currentValue(context).value()
+        if (!valueSet.isSameType(targetValueSet))
             logSemanticError(
-                `Cannot assign value of type ${value.valueSet.type} to target of type ${target.valueSet.type}`,
+                `Cannot assign value of type ${valueSet.toString()} to target of type ${targetValueSet.toString()}`,
                 {
                     ...context,
                     span: { start: this.span.start, end: this.span.end },
                 },
             )
         const valueSemantics = this.value.semantics(context)
-        if (
-            target.valueSet.type === 'rc-type' &&
-            target.valueSet.semantics !== valueSemantics &&
-            valueSemantics !== 'UNIQUE'
-        )
+        if (targetSemantics !== valueSemantics && valueSemantics !== 'UNIQUE')
             logSemanticError(
-                `Cannot assign ${valueSemantics} value to ${target.valueSet.semantics} target`,
+                `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
                 {
                     ...context,
                     span: { start: this.span.start, end: this.span.end },
@@ -73,20 +67,17 @@ export class Assignment implements Statement {
         const prelude = this.target.assignmentPrelude(context)
         context.scope.emitted.push(...prelude)
 
-        const targetValueSet = this.target
-            .toCIRExpression(context)
-            .value().valueSet
-
         if (
             (value.kind === 'FIELD_REF' || value.kind === 'VARIABLE_REF') &&
-            target.valueSet.type === 'rc-type'
+            this.target.declaredValueSet(context).value() instanceof
+                RCTypeLattice
         ) {
             const tempVar = context.scope.nextTempVar()
 
             context.scope.emitted.push({
                 kind: 'VARIABLE_DECL' as const,
                 name: tempVar,
-                valueSet: targetValueSet,
+                valueSet: targetValueSet.toCIR(),
                 initialValue: target,
             })
 
@@ -97,7 +88,6 @@ export class Assignment implements Statement {
                     value: {
                         kind: 'RETAIN',
                         object: value,
-                        valueSet: targetValueSet as any,
                     },
                 },
                 {
@@ -105,12 +95,12 @@ export class Assignment implements Statement {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: tempVar,
-                        valueSet: targetValueSet,
                     },
                 },
             )
         } else if (
-            target.valueSet.type === 'rc-type' &&
+            this.target.declaredValueSet(context).value() instanceof
+                RCTypeLattice &&
             value.kind === 'CALL' &&
             this.value.semantics(context) === 'UNIQUE'
         ) {
@@ -120,7 +110,6 @@ export class Assignment implements Statement {
                 value: {
                     kind: 'AS_SHARED',
                     object: value,
-                    valueSet: targetValueSet as any,
                 },
             })
         } else {

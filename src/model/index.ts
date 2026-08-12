@@ -14,6 +14,7 @@ export interface Expression {
     get span(): SourceCodeSpan
     isEffectivelyConst(context: Context): Failable<boolean>
     semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE'
+    declaredValueSet(context: Context): Failable<Lattice>
     currentValue(context: Context): Failable<Lattice>
     setCurrentValue?(context: Context, value: Lattice): void
     toCIRExpression(

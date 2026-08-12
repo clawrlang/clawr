@@ -127,6 +127,10 @@ describe('CallFunc', () => {
             isImmutable: true,
             lattice: IntegerLattice.create({ min: 42n, max: 42n }),
         })
+        context.scope.setCurrentValue(
+            'x',
+            IntegerLattice.create({ min: 42n, max: 42n }),
+        )
 
         const statement = CallFunc.create({
             baseName: 'print',

@@ -48,6 +48,10 @@ export class Query implements Expression {
         return 'ISOLATED'
     }
 
+    declaredValueSet(context: Context): Failable<Lattice> {
+        return this.currentValue(context)
+    }
+
     currentValue(context: Context): Failable<Lattice> {
         if (this.name.toString() === 'copy(of:)') {
             const value = this.arguments[0].currentValue(context).value()

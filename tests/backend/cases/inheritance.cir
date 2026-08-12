@@ -31,19 +31,9 @@
                                 "kind": "FIELD_REF",
                                 "object": {
                                     "kind": "VARIABLE_REF",
-                                    "name": "self",
-                                    "valueSet": {
-                                        "type": "rc-type",
-                                        "typeName": "Super",
-                                        "semantics": "SHARED"
-                                    }
+                                    "name": "self"
                                 },
-                                "field": "field",
-                                "valueSet": {
-                                    "type": "integer",
-                                    "min": "0",
-                                    "max": "100"
-                                }
+                                "field": "field"
                             }
                         }
                     ]
@@ -69,33 +59,23 @@
                             "kind": "ASSIGN",
                             "target": {
                                 "kind": "VARIABLE_REF",
-                                "name": "self",
-                                "valueSet": {
-                                    "type": "rc-type",
-                                    "typeName": "Super",
-                                    "semantics": "SHARED"
-                                }
+                                "name": "self"
                             },
                             "value": {
                                 "kind": "ALLOCATION",
+                                "type": {
+                                    "name": "Super"
+                                },
                                 "semantics": "ISOLATED",
                                 "fields": [
                                     {
                                         "name": "field",
                                         "value": {
                                             "kind": "VARIABLE_REF",
-                                            "name": "field",
-                                            "valueSet": {
-                                                "type": "integer"
-                                            }
+                                            "name": "field"
                                         }
                                     }
-                                ],
-                                "valueSet": {
-                                    "type": "rc-type",
-                                    "typeName": "Super",
-                                    "semantics": "ISOLATED"
-                                }
+                                ]
                             }
                         }
                     ]
@@ -154,19 +134,9 @@
                                 "kind": "FIELD_REF",
                                 "object": {
                                     "kind": "VARIABLE_REF",
-                                    "name": "self",
-                                    "valueSet": {
-                                        "type": "rc-type",
-                                        "typeName": "Sub1",
-                                        "semantics": "SHARED"
-                                    }
+                                    "name": "self"
                                 },
-                                "field": "field",
-                                "valueSet": {
-                                    "type": "integer",
-                                    "min": "0",
-                                    "max": "100"
-                                }
+                                "field": "field"
                             }
                         }
                     ]
@@ -231,29 +201,22 @@
                     "name": "__tempˇ0",
                     "initialValue": {
                         "kind": "ALLOCATION",
+                        "type": {
+                            "name": "Sub1"
+                        },
+                        "base": {
+                            "name": "Super"
+                        },
                         "semantics": "ISOLATED",
                         "fields": [
                             {
                                 "name": "field",
                                 "value": {
                                     "kind": "INTEGER_LITERAL",
-                                    "value": "43",
-                                    "valueSet": {
-                                        "type": "integer",
-                                        "min": "43",
-                                        "max": "43"
-                                    }
+                                    "value": "43"
                                 }
                             }
-                        ],
-                        "base": {
-                            "name": "Super"
-                        },
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "Sub1",
-                            "semantics": "ISOLATED"
-                        }
+                        ]
                     },
                     "valueSet": {
                         "type": "rc-type",
@@ -266,12 +229,7 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "__tempˇ0",
-                            "valueSet": {
-                                "type": "rc-type",
-                                "typeName": "Super",
-                                "semantics": "ISOLATED"
-                            }
+                            "name": "__tempˇ0"
                         },
                         "type": {
                             "name": "Super"
@@ -287,12 +245,7 @@
                     "arguments": [
                         {
                             "kind": "INTEGER_LITERAL",
-                            "value": "42",
-                            "valueSet": {
-                                "type": "integer",
-                                "min": "42",
-                                "max": "42"
-                            }
+                            "value": "42"
                         }
                     ]
                 },
@@ -300,12 +253,7 @@
                     "kind": "RETURN",
                     "value": {
                         "kind": "VARIABLE_REF",
-                        "name": "__tempˇ0",
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "Sub1",
-                            "semantics": "ISOLATED"
-                        }
+                        "name": "__tempˇ0"
                     }
                 }
             ],
@@ -326,16 +274,14 @@
                     "name": "__tempˇ0",
                     "initialValue": {
                         "kind": "ALLOCATION",
-                        "semantics": "ISOLATED",
-                        "fields": [],
+                        "type": {
+                            "name": "Sub2"
+                        },
                         "base": {
                             "name": "Super"
                         },
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "Sub2",
-                            "semantics": "ISOLATED"
-                        }
+                        "semantics": "ISOLATED",
+                        "fields": []
                     },
                     "valueSet": {
                         "type": "rc-type",
@@ -348,12 +294,7 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "__tempˇ0",
-                            "valueSet": {
-                                "type": "rc-type",
-                                "typeName": "Super",
-                                "semantics": "ISOLATED"
-                            }
+                            "name": "__tempˇ0"
                         },
                         "type": {
                             "name": "Super"
@@ -369,12 +310,7 @@
                     "arguments": [
                         {
                             "kind": "INTEGER_LITERAL",
-                            "value": "42",
-                            "valueSet": {
-                                "type": "integer",
-                                "min": "42",
-                                "max": "42"
-                            }
+                            "value": "42"
                         }
                     ]
                 },
@@ -382,12 +318,7 @@
                     "kind": "RETURN",
                     "value": {
                         "kind": "VARIABLE_REF",
-                        "name": "__tempˇ0",
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "Sub1",
-                            "semantics": "ISOLATED"
-                        }
+                        "name": "__tempˇ0"
                     }
                 }
             ],
@@ -457,12 +388,7 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj1",
-                            "valueSet": {
-                                "type": "rc-type",
-                                "typeName": "Sub1",
-                                "semantics": "ISOLATED"
-                            }
+                            "name": "obj1"
                         },
                         "type": {
                             "name": "Sub1"
@@ -494,12 +420,7 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj2",
-                            "valueSet": {
-                                "type": "rc-type",
-                                "typeName": "Sub2",
-                                "semantics": "ISOLATED"
-                            }
+                            "name": "obj2"
                         },
                         "dispatch": "inherited",
                         "declaredIn": {

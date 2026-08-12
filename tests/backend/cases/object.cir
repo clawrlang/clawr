@@ -31,19 +31,9 @@
                                 "kind": "FIELD_REF",
                                 "object": {
                                     "kind": "VARIABLE_REF",
-                                    "name": "self",
-                                    "valueSet": {
-                                        "type": "rc-type",
-                                        "typeName": "Object",
-                                        "semantics": "ISOLATED"
-                                    }
+                                    "name": "self"
                                 },
-                                "field": "field",
-                                "valueSet": {
-                                    "type": "integer",
-                                    "min": "42",
-                                    "max": "42"
-                                }
+                                "field": "field"
                             }
                         }
                     ]
@@ -60,26 +50,19 @@
                     "kind": "RETURN",
                     "value": {
                         "kind": "ALLOCATION",
+                        "type": {
+                            "name": "Object"
+                        },
                         "semantics": "ISOLATED",
                         "fields": [
                             {
                                 "name": "field",
                                 "value": {
                                     "kind": "INTEGER_LITERAL",
-                                    "value": "42",
-                                    "valueSet": {
-                                        "type": "integer",
-                                        "min": "42",
-                                        "max": "42"
-                                    }
+                                    "value": "42"
                                 }
                             }
-                        ],
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "Object",
-                            "semantics": "ISOLATED"
-                        }
+                        ]
                     }
                 }
             ],
@@ -126,12 +109,7 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj",
-                            "valueSet": {
-                                "type": "rc-type",
-                                "typeName": "Object",
-                                "semantics": "ISOLATED"
-                            }
+                            "name": "obj"
                         },
                         "type": {
                             "name": "Object"

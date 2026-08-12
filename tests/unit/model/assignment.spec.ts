@@ -368,11 +368,6 @@ describe('Assignment', () => {
                             typeName: 'MyType',
                         },
                     },
-                    valueSet: {
-                        type: 'rc-type',
-                        semantics: 'SHARED',
-                        typeName: 'MyType',
-                    },
                 },
             },
         ])

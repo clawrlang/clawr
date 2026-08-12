@@ -23,23 +23,16 @@
             },
             "initialValue": {
                 "kind": "ALLOCATION",
-                "semantics": "ISOLATED",
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "FooData",
-                    "semantics": "ISOLATED"
+                "type": {
+                    "name": "FooData"
                 },
+                "semantics": "ISOLATED",
                 "fields": [
                     {
                         "name": "bar",
                         "value": {
                             "kind": "INTEGER_LITERAL",
-                            "value": "2",
-                            "valueSet": {
-                                "type": "integer",
-                                "min": "2",
-                                "max": "2"
-                            }
+                            "value": "2"
                         }
                     }
                 ]
@@ -59,17 +52,7 @@
                 "kind": "RETAIN",
                 "object": {
                     "kind": "VARIABLE_REF",
-                    "name": "two",
-                    "valueSet": {
-                        "type": "rc-type",
-                        "typeName": "FooData",
-                        "semantics": "ISOLATED"
-                    }
-                },
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "FooData",
-                    "semantics": "ISOLATED"
+                    "name": "two"
                 }
             }
         },
@@ -77,12 +60,7 @@
             "kind": "ENSURE_UNIQUE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "one",
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "FooData",
-                    "semantics": "ISOLATED"
-                }
+                "name": "one"
             }
         },
         {
@@ -91,28 +69,13 @@
                 "kind": "FIELD_REF",
                 "object": {
                     "kind": "VARIABLE_REF",
-                    "name": "one",
-                    "valueSet": {
-                        "type": "rc-type",
-                        "typeName": "FooData",
-                        "semantics": "ISOLATED"
-                    }
+                    "name": "one"
                 },
-                "field": "bar",
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "FooData",
-                    "semantics": "ISOLATED"
-                }
+                "field": "bar"
             },
             "value": {
                 "kind": "INTEGER_LITERAL",
-                "value": "1",
-                "valueSet": {
-                    "type": "integer",
-                    "min": "1",
-                    "max": "1"
-                }
+                "value": "1"
             }
         },
         {
@@ -126,19 +89,9 @@
                     "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
-                        "name": "two",
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "FooData",
-                            "semantics": "ISOLATED"
-                        }
+                        "name": "two"
                     },
-                    "field": "bar",
-                    "valueSet": {
-                        "type": "integer",
-                        "min": "1",
-                        "max": "1"
-                    }
+                    "field": "bar"
                 }
             ]
         },
@@ -153,19 +106,9 @@
                     "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
-                        "name": "one",
-                        "valueSet": {
-                            "type": "rc-type",
-                            "typeName": "FooData",
-                            "semantics": "ISOLATED"
-                        }
+                        "name": "one"
                     },
-                    "field": "bar",
-                    "valueSet": {
-                        "type": "integer",
-                        "min": "1",
-                        "max": "1"
-                    }
+                    "field": "bar"
                 }
             ]
         },
@@ -173,24 +116,14 @@
             "kind": "RELEASE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "one",
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "FooData",
-                    "semantics": "ISOLATED"
-                }
+                "name": "one"
             }
         },
         {
             "kind": "RELEASE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "two",
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "FooData",
-                    "semantics": "ISOLATED"
-                }
+                "name": "two"
             }
         }
     ]

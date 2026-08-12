@@ -193,12 +193,6 @@ function lowerInitializer(
                     value: {
                         kind: 'VARIABLE_REF',
                         name: 'self',
-                        valueSet: {
-                            type: 'rc-type',
-                            typeName: receiverType.name,
-                            namespace: receiverType.namespace,
-                            semantics: 'ISOLATED',
-                        },
                     },
                 },
             ],
@@ -376,10 +370,7 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'AS_SHARED':
             return `shareRC(${lowerExpr(expr.object)})`
         case 'ALLOCATION':
-            const mangledTypeName = mangleTypeName({
-                name: expr.valueSet.typeName,
-                namespace: expr.valueSet.namespace,
-            })
+            const mangledTypeName = mangleTypeName(expr.type)
             if (expr.base) {
                 const mangledSuperTypeName = mangleTypeName(expr.base)
                 return `allocInitInheritedRC(${mangledTypeName}, 0, ${mangledSuperTypeName}, ${`__rc_${expr.semantics}`},

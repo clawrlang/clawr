@@ -76,15 +76,14 @@ export class Scope {
     releaseVariables() {
         const vars = [...this.variables.entries()]
             .filter((v) => v[1].lattice instanceof RCTypeLattice)
-            .map((v) => [v[0], v[1].lattice] as [string, Lattice])
+            .map((v) => v[0])
 
-        for (const v of vars) {
+        for (const name of vars) {
             this.emitted.push({
                 kind: 'RELEASE',
                 object: {
                     kind: 'VARIABLE_REF',
-                    name: v[0],
-                    valueSet: v[1].toCIR(),
+                    name,
                 },
             })
         }

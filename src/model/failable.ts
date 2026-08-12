@@ -42,7 +42,7 @@ export class Failable<T = void> {
         return this.result as T
     }
 
-    map<U>(fn: (value: T) => Failable<U>): Failable<U> {
+    chaining<U>(fn: (value: T) => Failable<U>): Failable<U> {
         if (this.isFailure()) return this
         return fn(this.value())
     }

@@ -52,7 +52,7 @@ export class DataLiteral implements Expression {
                     ...fieldDeclaration.valueSet,
                 })
             }),
-        ).map((fieldValues) =>
+        ).chaining((fieldValues) =>
             Failable.success(
                 RCTypeLattice.create({
                     type: decl.name,
@@ -105,14 +105,16 @@ export class DataLiteral implements Expression {
                 ...context,
                 ...fieldDeclaration.valueSet,
             }
-            return field.value.toCIRExpression(nestedContext).map((value) =>
-                Failable.success({
-                    name: field.name,
-                    value,
-                }),
-            )
+            return field.value
+                .toCIRExpression(nestedContext)
+                .chaining((value) =>
+                    Failable.success({
+                        name: field.name,
+                        value,
+                    }),
+                )
         })
-        return Failable.collect(fieldResults).map((fields) =>
+        return Failable.collect(fieldResults).chaining((fields) =>
             Failable.success({
                 kind: 'ALLOCATION',
                 semantics: context.semantics,

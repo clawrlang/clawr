@@ -57,7 +57,7 @@ export class FieldReference implements Expression {
     }
 
     isEffectivelyConst(context: Context): Failable<boolean> {
-        return this.object.toCIRExpression(context).map((object) => {
+        return this.object.toCIRExpression(context).chaining((object) => {
             if ((object.valueSet as any).semantics === 'SHARED')
                 return Failable.success(false)
             return Failable.success(
@@ -94,9 +94,9 @@ export class FieldReference implements Expression {
     toCIRExpression(
         context: Context,
     ): Failable<Extract<cir.Expression, { kind: 'FIELD_REF' }>> {
-        return this.checkOperatorCompatibility_failable(context).map((_) =>
-            this.object.toCIRExpression(context).map((object) =>
-                this.getFieldFromContext(context).map((field) =>
+        return this.checkOperatorCompatibility_failable(context).chaining((_) =>
+            this.object.toCIRExpression(context).chaining((object) =>
+                this.getFieldFromContext(context).chaining((field) =>
                     Failable.success({
                         kind: 'FIELD_REF',
                         object,
@@ -111,7 +111,7 @@ export class FieldReference implements Expression {
     private getFieldFromContext(
         context: Context,
     ): Failable<DataDeclaration['fields'][number]> {
-        return this.object.toCIRExpression(context).map((object) => {
+        return this.object.toCIRExpression(context).chaining((object) => {
             const objectValueSet = object.valueSet
             const objectType =
                 objectValueSet.type === 'rc-type'
@@ -147,7 +147,7 @@ export class FieldReference implements Expression {
     }
 
     private checkOperatorCompatibility_failable(context: Context): Failable {
-        return this.object.toCIRExpression(context).map((object) => {
+        return this.object.toCIRExpression(context).chaining((object) => {
             const semantics = (object.valueSet as any).semantics
             if ((semantics === 'SHARED') !== (this.operator === '->')) {
                 const error = SemanticError.create({

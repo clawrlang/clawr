@@ -36,7 +36,7 @@ export class VariableReference implements Expression {
                 variableResult.getError().errors[0].message,
                 variableResult.getError().errors[0].span,
             )
-        return variableResult.map((variable) =>
+        return variableResult.chaining((variable) =>
             Failable.success(variable.isImmutable),
         )
     }
@@ -65,7 +65,7 @@ export class VariableReference implements Expression {
     toCIRExpression(
         context: Context,
     ): Failable<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
-        return this.lookupInScope(context).map((variable) =>
+        return this.lookupInScope(context).chaining((variable) =>
             Failable.success({
                 kind: 'VARIABLE_REF' as const,
                 name: this.name,

@@ -54,7 +54,7 @@ describe('Failable', () => {
                     span: someCodeSpan,
                 }),
             ])
-            const result = Failable.success(42).map((_) =>
+            const result = Failable.success(42).chaining((_) =>
                 Failable.failure(error),
             )
             expect(result.isFailure()).toBe(true)
@@ -68,7 +68,7 @@ describe('Failable', () => {
                     span: someCodeSpan,
                 }),
             ])
-            const result = Failable.failure(error).map((_) =>
+            const result = Failable.failure(error).chaining((_) =>
                 Failable.success(42),
             )
             expect(result.isSuccess()).toBe(false)
@@ -76,7 +76,7 @@ describe('Failable', () => {
         })
 
         it('can chain success with success', () => {
-            const result = Failable.success(42).map((value) =>
+            const result = Failable.success(42).chaining((value) =>
                 Failable.success(value + 1),
             )
             expect(result.isSuccess()).toBe(true)

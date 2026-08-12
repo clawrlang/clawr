@@ -73,10 +73,10 @@ export class Query implements Expression {
     }
 
     toCIRExpression(context: Context): Failable<cir.Expression> {
-        return this.currentValue(context).map((valueSet) =>
+        return this.currentValue(context).chaining((valueSet) =>
             Failable.collect(
                 this.arguments.map((arg) => arg.toCIRExpression(context)),
-            ).map((args) =>
+            ).chaining((args) =>
                 Failable.success({
                     kind: 'CALL',
                     name: this.name.toCIR(),

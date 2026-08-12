@@ -8,17 +8,17 @@ import {
     ExplicitRCTypeValueSet,
 } from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
+import { RCTypeLattice } from '../../../src/model/lattice'
 
 describe('Field Reference', () => {
     it('infers its type from the context', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: false,
-            valueSet: {
-                type: 'rc-type',
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
-                typeName: 'MyType',
-            },
+            }),
         })
         context.scope.rootScope.addDataDeclaration(
             TypeName.create({ name: 'MyType' }),
@@ -55,11 +55,10 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: false,
-            valueSet: {
-                type: 'rc-type',
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
-                typeName: 'MyType',
-            },
+            }),
         })
         context.scope.rootScope.addDataDeclaration(
             TypeName.create({ name: 'MyType' }),
@@ -109,11 +108,10 @@ describe('Field Reference', () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     isImmutable: semantics === 'const' || semantics === 'ref',
-                    valueSet: {
-                        type: 'rc-type',
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics: expectedSemantics,
-                        typeName: 'MyType',
-                    },
+                    }),
                 })
                 context.scope.rootScope.addDataDeclaration(
                     TypeName.create({ name: 'MyType' }),
@@ -157,11 +155,10 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: false,
-            valueSet: {
-                type: 'rc-type',
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
-                typeName: 'MyType',
-            },
+            }),
         })
         context.scope.rootScope.addDataDeclaration(
             TypeName.create({ name: 'MyType' }),
@@ -207,11 +204,10 @@ describe('Field Reference', () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     isImmutable: semantics[0],
-                    valueSet: {
-                        type: 'rc-type',
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics: semantics[1],
-                        typeName: 'MyType',
-                    },
+                    }),
                 })
                 context.scope.rootScope.addDataDeclaration(
                     TypeName.create({ name: 'MyType' }),
@@ -269,11 +265,10 @@ describe('Field Reference', () => {
                 context.scope.variables.set('myVar', {
                     isImmutable:
                         semantics[0] === 'const' || semantics[0] === 'ref',
-                    valueSet: {
-                        type: 'rc-type',
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics: semantics[1],
-                        typeName: 'MyType',
-                    },
+                    }),
                 })
                 context.scope.rootScope.addDataDeclaration(
                     TypeName.create({ name: 'MyType' }),
@@ -311,11 +306,10 @@ describe('Field Reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 isImmutable: true,
-                valueSet: {
-                    type: 'rc-type',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
-                    typeName: 'MyType',
-                },
+                }),
             })
             context.scope.rootScope.addDataDeclaration(
                 TypeName.create({ name: 'MyType' }),
@@ -350,11 +344,10 @@ describe('Field Reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 isImmutable: false,
-                valueSet: {
-                    type: 'rc-type',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
-                    typeName: 'MyType',
-                },
+                }),
             })
             context.scope.rootScope.addDataDeclaration(
                 TypeName.create({ name: 'MyType' }),

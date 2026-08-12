@@ -141,11 +141,10 @@ describe('FunctionDeclaration', () => {
         )
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            valueSet: {
-                type: 'rc-type',
-                typeName: 'MyData',
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyData' }),
                 semantics: 'SHARED',
-            },
+            }),
         })
         context.scope.setCurrentValue(
             'myVar',
@@ -187,11 +186,10 @@ describe('FunctionDeclaration', () => {
         )
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            valueSet: {
-                type: 'rc-type',
-                typeName: 'MyData',
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyData' }),
                 semantics: 'ISOLATED',
-            },
+            }),
         })
         context.scope.setCurrentValue(
             'myVar',
@@ -235,11 +233,10 @@ describe('FunctionDeclaration', () => {
         )
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            valueSet: {
-                type: 'rc-type',
-                typeName: 'MyData',
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyData' }),
                 semantics: 'ISOLATED',
-            },
+            }),
         })
         context.scope.setCurrentValue(
             'myVar',
@@ -321,11 +318,10 @@ describe('FunctionDeclaration', () => {
             )
             context.scope.variables.set('myVar', {
                 isImmutable: true,
-                valueSet: {
-                    type: 'rc-type',
-                    typeName: 'MyData',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyData' }),
                     semantics: 'ISOLATED',
-                },
+                }),
             })
             context.scope.setCurrentValue(
                 'myVar',
@@ -374,11 +370,10 @@ describe('FunctionDeclaration', () => {
             )
             context.scope.variables.set('myVar', {
                 isImmutable: true,
-                valueSet: {
-                    type: 'rc-type',
-                    typeName: 'MyData',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyData' }),
                     semantics: 'SHARED',
-                },
+                }),
             })
             context.scope.setCurrentValue(
                 'myVar',

@@ -14,6 +14,7 @@ import { FieldReference } from '../../../src/model/field-reference'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { RCTypeLattice, IntegerLattice } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
+import { Query } from '../../../src/model/query'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -183,11 +184,10 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('bar', {
                 isImmutable: true,
-                valueSet: {
-                    type: 'rc-type',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'OuterType' }),
                     semantics: 'ISOLATED',
-                    typeName: 'OuterType',
-                },
+                }),
             })
             context.scope.setCurrentValue(
                 'bar',
@@ -263,11 +263,10 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('bar', {
                 isImmutable: true,
-                valueSet: {
-                    type: 'rc-type',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
-                    typeName: 'MyType',
-                },
+                }),
             })
             context.scope.setCurrentValue(
                 'bar',
@@ -326,7 +325,7 @@ describe('VariableDeclaration', () => {
             decl.emitStatement(context)
             expect(context.scope.variableDeclaration('x')).toEqual({
                 isImmutable: true,
-                valueSet: { type: 'integer', min: '42', max: '42' },
+                lattice: IntegerLattice.create({ min: 42n, max: 42n }),
             })
         })
 
@@ -413,7 +412,7 @@ describe('VariableDeclaration', () => {
             })
         })
 
-        it('converts UNIQUE expression to CowTypeLattice', () => {
+        it('converts UNIQUE expression to ISOLATED', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 TypeName.create({ name: 'MyType' }),
@@ -440,6 +439,59 @@ describe('VariableDeclaration', () => {
             expect(context.scope.currentValue('foo')).toBeInstanceOf(
                 RCTypeLattice,
             )
+        })
+
+        it('converts UNIQUE expression to SHARED', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.addDataDeclaration(
+                TypeName.create({ name: 'MyData' }),
+                DataDeclaration.create({
+                    name: TypeName.create({ name: 'MyData' }),
+                    fields: [],
+                }),
+            )
+            context.scope.variables.set('c', {
+                isImmutable: true,
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyData' }),
+                    semantics: 'ISOLATED',
+                }),
+            })
+            context.scope.setCurrentValue(
+                'c',
+                RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyData' }),
+                    semantics: 'ISOLATED',
+                }),
+            )
+
+            const decl = VariableDeclaration.create({
+                semantics: 'ref',
+                name: 'r',
+                valueSet: ExplicitRCTypeValueSet.create({
+                    semantics: 'ref',
+                    type: TypeName.create({ name: 'MyData' }),
+                    span: someCodeSpan,
+                }),
+                initialValue: Query.create({
+                    baseName: 'copy',
+                    arguments: [
+                        {
+                            label: 'of',
+                            value: VariableReference.create({
+                                name: 'c',
+                                span: someCodeSpan,
+                            }),
+                        },
+                    ],
+                    span: someCodeSpan,
+                }),
+            })
+            decl.emitStatement(context)
+            expect(context.scope.currentValue('r')).toMatchObject({
+                type: { name: 'MyData' },
+                semantics: 'SHARED',
+            })
         })
     })
 
@@ -475,11 +527,10 @@ describe('VariableDeclaration', () => {
                 )
                 context.scope.variables.set('value', {
                     isImmutable: valueSemantics[0],
-                    valueSet: {
-                        type: 'rc-type',
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics: valueSemantics[1],
-                        typeName: 'MyType',
-                    },
+                    }),
                 })
                 context.scope.setCurrentValue(
                     'value',

@@ -69,7 +69,7 @@ export class VariableReference implements Expression {
             Failable.success({
                 kind: 'VARIABLE_REF' as const,
                 name: this.name,
-                valueSet: variable.valueSet,
+                valueSet: variable.lattice.toCIR(),
             }),
         )
     }

@@ -150,11 +150,10 @@ describe('Query', () => {
             const context = newSemanticContext()
             context.scope.variables.set('value', {
                 isImmutable: true,
-                valueSet: {
-                    type: 'rc-type',
-                    typeName: 'MyData',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyData' }),
                     semantics: 'SHARED',
-                },
+                }),
             })
             context.scope.setCurrentValue(
                 'value',

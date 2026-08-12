@@ -4,6 +4,7 @@ import { CallFunc } from '../../../src/model/call-func'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
+import { IntegerLattice } from '../../../src/model/lattice'
 
 describe('CallFunc', () => {
     it('converts to CIR', () => {
@@ -124,7 +125,7 @@ describe('CallFunc', () => {
         const context = newSemanticContext()
         context.scope.variables.set('x', {
             isImmutable: true,
-            valueSet: { type: 'integer', min: '42', max: '42' },
+            lattice: IntegerLattice.create({ min: 42n, max: 42n }),
         })
 
         const statement = CallFunc.create({

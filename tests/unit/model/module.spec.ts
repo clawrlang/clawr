@@ -10,6 +10,7 @@ import {
     ExplicitTruthValueSet,
 } from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
+import { IntegerLattice } from '../../../src/model/lattice'
 
 describe('Module', () => {
     it('outputs the main block in CIR', () => {
@@ -109,7 +110,7 @@ describe('Module', () => {
         module.toCIR(context)
         expect(context.scope.variableDeclaration('x')).toEqual({
             isImmutable: true,
-            valueSet: { type: 'integer', min: '42', max: '42' },
+            lattice: IntegerLattice.create({ min: 42n, max: 42n }),
         })
     })
 

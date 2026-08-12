@@ -3,7 +3,7 @@ import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { ExplicitIntegerValueSet } from '../../../src/model/explicit-value-set'
-import { IntegerLattice } from '../../../src/model/lattice'
+import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
 
 describe('Variable Reference', () => {
@@ -11,7 +11,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            valueSet: { type: 'integer', min: '10', max: '10' },
+            lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
 
         const variableRef = VariableReference.create({
@@ -45,7 +45,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            valueSet: { type: 'integer', min: '10', max: '10' },
+            lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
 
         const variableRef = VariableReference.create({
@@ -63,7 +63,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            valueSet: { type: 'integer', min: '10', max: '10' },
+            lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
         context.scope.setCurrentValue(
             'myVar',
@@ -109,11 +109,10 @@ describe('Variable Reference', () => {
             it(`returns ${expected} for ${kind} variable`, () => {
                 context.scope.variables.set('myVar', {
                     isImmutable: kind === 'const' || kind === 'ref',
-                    valueSet: {
-                        type: 'rc-type',
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics: expected,
-                        typeName: 'MyType',
-                    },
+                    }),
                 })
 
                 const variableRef = VariableReference.create({

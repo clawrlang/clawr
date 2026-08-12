@@ -2,7 +2,7 @@ import * as cir from '../cir'
 import { Declaration } from '.'
 import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
-import { Lattice } from './lattice'
+import { Lattice, RCTypeLattice } from './lattice'
 import { TypeName } from './type-name'
 
 class RootScope {
@@ -75,8 +75,8 @@ export class Scope {
 
     releaseVariables() {
         const vars = [...this.variables.entries()]
-            .filter((v) => v[1].valueSet.type === 'rc-type')
-            .map((v) => [v[0], v[1].valueSet] as [string, cir.ValueSet])
+            .filter((v) => v[1].lattice instanceof RCTypeLattice)
+            .map((v) => [v[0], v[1].lattice] as [string, Lattice])
 
         for (const v of vars) {
             this.emitted.push({
@@ -84,7 +84,7 @@ export class Scope {
                 object: {
                     kind: 'VARIABLE_REF',
                     name: v[0],
-                    valueSet: v[1],
+                    valueSet: v[1].toCIR(),
                 },
             })
         }
@@ -104,5 +104,5 @@ export class Scope {
 
 type Variable = {
     isImmutable: boolean
-    valueSet: cir.ValueSet
+    lattice: Lattice
 }

@@ -12,6 +12,10 @@ export class IntegerLattice implements Lattice {
         public readonly max: bigint | undefined,
     ) {}
 
+    static unconstrained() {
+        return new IntegerLattice(undefined, undefined)
+    }
+
     static create({
         min,
         max,
@@ -106,12 +110,16 @@ export class RCTypeLattice implements Lattice {
         })
     }
 
-    asUNIQUE(): RCTypeLattice {
+    withSemantics(semantics: 'ISOLATED' | 'SHARED' | 'UNIQUE'): RCTypeLattice {
         return RCTypeLattice.create({
             type: this.type,
-            semantics: 'UNIQUE',
-            fields: this.fields || {},
+            semantics,
+            fields: this.fields,
         })
+    }
+
+    asUNIQUE(): RCTypeLattice {
+        return this.withSemantics('UNIQUE')
     }
 
     toCIR(): cir.ValueSet {

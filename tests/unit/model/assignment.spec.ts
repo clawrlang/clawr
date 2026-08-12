@@ -12,7 +12,7 @@ import {
 } from '../../../src/model/explicit-value-set'
 import { FunctionDeclaration } from '../../../src/model/function-declaration'
 import { Query } from '../../../src/model/query'
-import { RCTypeLattice } from '../../../src/model/lattice'
+import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
 
 describe('Assignment', () => {
@@ -20,7 +20,7 @@ describe('Assignment', () => {
         const context = newSemanticContext()
         context.scope.variables.set('x', {
             isImmutable: false,
-            valueSet: { type: 'integer' },
+            lattice: IntegerLattice.unconstrained(),
         })
 
         const assignment = Assignment.create({
@@ -77,19 +77,17 @@ describe('Assignment', () => {
             )
             context.scope.variables.set('bar', {
                 isImmutable: false,
-                valueSet: {
-                    type: 'rc-type',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'OuterType' }),
                     semantics: 'ISOLATED',
-                    typeName: 'OuterType',
-                },
+                }),
             })
             context.scope.variables.set('foo', {
                 isImmutable: false,
-                valueSet: {
-                    type: 'rc-type',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'InnerType' }),
                     semantics: 'ISOLATED',
-                    typeName: 'InnerType',
-                },
+                }),
             })
             context.scope.setCurrentValue(
                 'bar',
@@ -172,19 +170,17 @@ describe('Assignment', () => {
             )
             context.scope.variables.set('bar', {
                 isImmutable: true,
-                valueSet: {
-                    type: 'rc-type',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
-                    typeName: 'MyType',
-                },
+                }),
             })
             context.scope.variables.set('foo', {
                 isImmutable: false,
-                valueSet: {
-                    type: 'rc-type',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
-                    typeName: 'MyType',
-                },
+                }),
             })
             context.scope.setCurrentValue(
                 'bar',
@@ -263,11 +259,10 @@ describe('Assignment', () => {
         )
         context.scope.variables.set('foo', {
             isImmutable: false,
-            valueSet: {
-                type: 'rc-type',
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
-                typeName: 'MyType',
-            },
+            }),
         })
 
         const assignment = Assignment.create({
@@ -327,19 +322,17 @@ describe('Assignment', () => {
         )
         context.scope.rootScope.variables.set('refVar', {
             isImmutable: false,
-            valueSet: {
-                type: 'rc-type',
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'SHARED',
-                typeName: 'MyType',
-            },
+            }),
         })
         context.scope.rootScope.variables.set('mutVar', {
             isImmutable: false,
-            valueSet: {
-                type: 'rc-type',
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
-                typeName: 'MyType',
-            },
+            }),
         })
 
         const assignment = Assignment.create({
@@ -425,19 +418,17 @@ describe('Assignment', () => {
                 )
                 context.scope.variables.set('target', {
                     isImmutable: true,
-                    valueSet: {
-                        type: 'rc-type',
-                        semantics: semantics,
-                        typeName: 'MyType',
-                    },
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                        semantics,
+                    }),
                 })
                 context.scope.variables.set('value', {
                     isImmutable: true,
-                    valueSet: {
-                        type: 'rc-type',
-                        semantics: semantics,
-                        typeName: 'MyType',
-                    },
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                        semantics,
+                    }),
                 })
                 context.scope.setCurrentValue(
                     'value',
@@ -497,11 +488,10 @@ describe('Assignment', () => {
         )
         context.scope.variables.set('x', {
             isImmutable: true,
-            valueSet: {
-                type: 'rc-type',
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
-                typeName: 'MyType',
-            },
+            }),
         })
 
         const assignment = Assignment.create({
@@ -568,19 +558,17 @@ describe('Assignment', () => {
                 )
                 context.scope.variables.set('target', {
                     isImmutable: false,
-                    valueSet: {
-                        type: 'rc-type',
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics: targetSemantics[1],
-                        typeName: 'MyType',
-                    },
+                    }),
                 })
                 context.scope.variables.set('value', {
                     isImmutable: valueSemantics[0] === 'ref',
-                    valueSet: {
-                        type: 'rc-type',
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
                         semantics: valueSemantics[1],
-                        typeName: 'MyType',
-                    },
+                    }),
                 })
                 context.scope.setCurrentValue(
                     'value',

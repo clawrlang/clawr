@@ -1,7 +1,7 @@
 import { Context, Declaration, Expression, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
-import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
+import { ExplicitValueSet } from './explicit-value-set'
 import { RCTypeLattice } from './lattice'
 import { TypeName } from './type-name'
 
@@ -39,7 +39,14 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private emit(scope: Scope | Scope['rootScope'], context: Context) {
-        const currentValue = this.currentValueFromInitial(context)
+        let currentValue = this.currentValueFromInitial(context)
+        if (currentValue instanceof RCTypeLattice) {
+            currentValue = currentValue.withSemantics(
+                this.semantics === 'const' || this.semantics === 'mut'
+                    ? 'ISOLATED'
+                    : 'SHARED',
+            )
+        }
         const valueSet =
             this.semantics === 'const'
                 ? currentValue.toCIR()
@@ -92,32 +99,22 @@ export class VariableDeclaration implements Statement, Declaration {
 
         scope.variables.set(this.name, {
             isImmutable: this.semantics === 'const' || this.semantics === 'ref',
-            valueSet,
+            lattice:
+                this.semantics === 'const'
+                    ? currentValue
+                    : (this.valueSet?.toLattice(context) ??
+                      currentValue.unconstrained()),
         })
 
         context.scope.setCurrentValue(this.name, currentValue)
     }
 
     private currentValueFromInitial(context: Context) {
-        const currentValue = this.initialValue
+        return this.initialValue
             .currentValue({
                 ...context,
                 ...this.valueSet,
             })
             .value()
-        if (
-            !(currentValue instanceof RCTypeLattice) ||
-            currentValue.semantics !== 'UNIQUE'
-        )
-            return currentValue
-
-        return RCTypeLattice.create({
-            type: currentValue.type,
-            fields: currentValue.fields,
-            semantics:
-                this.semantics === 'const' || this.semantics === 'mut'
-                    ? 'ISOLATED'
-                    : 'SHARED',
-        })
     }
 }

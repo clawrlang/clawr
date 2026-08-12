@@ -132,7 +132,7 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
         if (this.semantics === 'ref' || this.semantics === 'mutref')
             return RCTypeLattice.create({
                 type: this.type,
-                semantics: 'ISOLATED',
+                semantics: 'SHARED',
             })
 
         return RCTypeLattice.create({

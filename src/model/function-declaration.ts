@@ -70,9 +70,9 @@ export class FunctionDeclaration implements Declaration {
                     !param.semantics ||
                     param.semantics === 'const' ||
                     param.semantics === 'ref',
-                valueSet:
-                    param.defaultValue?.currentValue(context).value().toCIR() ??
-                    param.valueSet?.toCIR() ??
+                lattice:
+                    param.defaultValue?.currentValue(context).value() ??
+                    param.valueSet?.toLattice(context) ??
                     logSemanticError(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
                         { ...context, span: param.span, fatal: true },

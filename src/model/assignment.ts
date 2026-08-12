@@ -3,6 +3,7 @@ import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
 import { logSemanticError } from './failable'
+import { TypeName } from './type-name'
 
 export class Assignment implements Statement {
     private constructor(
@@ -33,7 +34,17 @@ export class Assignment implements Statement {
         const value = this.value
             .toCIRExpression({
                 ...context,
-                ...{ targetValueSet: target.valueSet },
+                type:
+                    target.valueSet.type === 'rc-type'
+                        ? TypeName.create({
+                              name: target.valueSet.typeName,
+                              namespace: target.valueSet.namespace,
+                          })
+                        : undefined,
+                semantics:
+                    target.valueSet.type === 'rc-type'
+                        ? target.valueSet.semantics
+                        : undefined,
             })
             .value()
 

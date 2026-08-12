@@ -3,6 +3,7 @@ import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
 import { Failable } from './failable'
 import { Lattice } from './lattice'
 import { Scope } from './scope'
+import { TypeName } from './type-name'
 
 export type Context = {
     scope: Scope
@@ -16,7 +17,10 @@ export interface Expression {
     currentValue(context: Context): Failable<Lattice>
     setCurrentValue?(context: Context, value: Lattice): void
     toCIRExpression(
-        context: Context & { targetValueSet?: cir.ValueSet },
+        context: Context & {
+            type?: TypeName
+            semantics?: 'ISOLATED' | 'SHARED'
+        },
     ): Failable<cir.Expression>
 }
 

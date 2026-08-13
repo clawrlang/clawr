@@ -134,35 +134,8 @@ export class FunctionDeclaration implements Declaration {
     }
 
     private bodyContext(context: Context): Context {
-        if (!this.result && this.implementation.kind === 'implicit-return') {
-            const inferredLattice = this.implementation.expression
-                .currentValue(context)
-                .value()
-            return {
-                ...context,
-                ...{
-                    semantics:
-                        inferredLattice instanceof RCTypeLattice &&
-                        inferredLattice.semantics === 'ISOLATED'
-                            ? 'const'
-                            : inferredLattice instanceof RCTypeLattice &&
-                                inferredLattice.semantics === 'SHARED'
-                              ? 'ref'
-                              : undefined,
-                },
-                scope: context.scope.createChildScope(),
-            }
-        }
-
-        if (!(this.result instanceof ExplicitRCTypeValueSet))
-            return {
-                ...context,
-                scope: context.scope.createChildScope(),
-            }
-
         return {
             ...context,
-            ...{ semantics: this.result.semantics },
             scope: context.scope.createChildScope(),
         }
     }

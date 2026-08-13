@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Context, Expression } from '.'
+import { Context, Expression, IsolationLevel } from '.'
 import {
     Failable,
     SemanticError,
@@ -10,7 +10,6 @@ import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { RCTypeLattice, Lattice } from './lattice'
 import { VariableReference } from './variable-reference'
-import { TypeName } from './type-name'
 
 export class FieldReference implements Expression {
     private constructor(
@@ -62,7 +61,7 @@ export class FieldReference implements Expression {
             : this.object.isEffectivelyConst(context)
     }
 
-    semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
+    semantics(context: Context): IsolationLevel {
         const value = this.declaredValueSet(context).value()
         if (value instanceof RCTypeLattice) return value.semantics
         return 'ISOLATED'

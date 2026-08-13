@@ -1,5 +1,6 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
+import { IsolationLevel } from '.'
 import { Failable } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
@@ -42,7 +43,7 @@ export class Query implements Expression {
         return Failable.success(true)
     }
 
-    semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
+    semantics(context: Context): IsolationLevel {
         const value = this.currentValue(context).value()
         if (value instanceof RCTypeLattice) return value.semantics
         return 'ISOLATED'

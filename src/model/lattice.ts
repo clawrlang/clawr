@@ -1,5 +1,6 @@
 import * as cir from '../cir'
 import { TypeName } from './type-name'
+import { IsolationLevel } from '.'
 
 export interface Lattice {
     unconstrained(): Lattice
@@ -107,7 +108,7 @@ export class StringLattice implements Lattice {
 export class RCTypeLattice implements Lattice {
     private constructor(
         public readonly type: TypeName,
-        public readonly semantics: 'ISOLATED' | 'SHARED' | 'UNIQUE',
+        public readonly semantics: IsolationLevel,
         public readonly fields: Record<string, Lattice> | undefined,
     ) {}
 
@@ -117,7 +118,7 @@ export class RCTypeLattice implements Lattice {
         fields,
     }: {
         type: TypeName
-        semantics: 'ISOLATED' | 'SHARED' | 'UNIQUE'
+        semantics: IsolationLevel
         fields?: Record<string, Lattice>
     }): RCTypeLattice {
         return new RCTypeLattice(type, semantics, fields)
@@ -143,7 +144,7 @@ export class RCTypeLattice implements Lattice {
         )
     }
 
-    withSemantics(semantics: 'ISOLATED' | 'SHARED' | 'UNIQUE'): RCTypeLattice {
+    withSemantics(semantics: IsolationLevel): RCTypeLattice {
         return RCTypeLattice.create({
             type: this.type,
             semantics,

@@ -13,14 +13,14 @@ export type Context = {
 export interface Expression {
     get span(): SourceCodeSpan
     isEffectivelyConst(context: Context): Failable<boolean>
-    semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE'
+    semantics(context: Context): IsolationLevel
     declaredValueSet(context: Context): Failable<Lattice>
     currentValue(context: Context): Failable<Lattice>
     setCurrentValue?(context: Context, value: Lattice): void
     toCIRExpression(
         context: Context & {
             type?: TypeName
-            semantics?: 'ISOLATED' | 'SHARED'
+            semantics?: ResolvedIsolationLevel
         },
     ): Failable<cir.Expression>
 }
@@ -32,3 +32,6 @@ export interface Statement {
 export interface Declaration {
     emitDeclaration(context: Context): void
 }
+
+export type IsolationLevel = 'ISOLATED' | 'SHARED' | 'UNIQUE'
+export type ResolvedIsolationLevel = 'ISOLATED' | 'SHARED'

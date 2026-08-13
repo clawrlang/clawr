@@ -140,7 +140,7 @@ type MemoryAllocation = {
     kind: 'ALLOCATION'
     type: CanonicalName
     base?: CanonicalName
-    semantics: 'ISOLATED' | 'SHARED'
+    semantics: IsolationLevel
     fields: {
         name: string
         value: Expression
@@ -208,7 +208,7 @@ type RcTypeValueSet = {
     type: 'rc-type'
     namespace?: string
     typeName: string
-    semantics: 'SHARED' | 'ISOLATED'
+    semantics: IsolationLevel
 }
 
 export type ValueSet =
@@ -217,3 +217,5 @@ export type ValueSet =
     | TruthValueSet
     | StringValueSet
     | RcTypeValueSet
+
+type IsolationLevel = 'ISOLATED' | 'SHARED'

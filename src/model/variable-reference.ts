@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Context, Expression } from '.'
+import { Context, Expression, IsolationLevel } from '.'
 import { Failable, logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice, RCTypeLattice } from './lattice'
@@ -41,7 +41,7 @@ export class VariableReference implements Expression {
         )
     }
 
-    semantics(context: Context): 'ISOLATED' | 'SHARED' | 'UNIQUE' {
+    semantics(context: Context): IsolationLevel {
         return this.lookupInScope(context)
             .chaining((variable) => {
                 if (variable.lattice instanceof RCTypeLattice)

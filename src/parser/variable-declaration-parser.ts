@@ -26,16 +26,17 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
 
     parse(stream: TokenStream): VariableDeclaration {
         const semanticsToken = stream.expect('KEYWORD', ...VARIABLE_SEMANTICS)
-        const semantics = semanticsToken.keyword as VariableSemantics
+        const semanticsKeyword = semanticsToken.keyword as VariableSemantics
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
-        const valueSet = this.parseTypeIdentifier(stream, semantics)
+        const valueSet = this.parseTypeIdentifier(stream, semanticsKeyword)
         stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse(stream)
         return VariableDeclaration.create({
-            isImmutable: semantics === 'const' || semantics === 'ref',
+            isImmutable:
+                semanticsKeyword === 'const' || semanticsKeyword === 'ref',
             isolationLevel:
-                semantics === 'const' || semantics === 'mut'
+                semanticsKeyword === 'const' || semanticsKeyword === 'mut'
                     ? 'ISOLATED'
                     : 'SHARED',
             name,

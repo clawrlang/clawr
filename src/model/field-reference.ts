@@ -125,10 +125,10 @@ export class FieldReference implements Expression {
     }
 
     private checkOperatorCompatibility_failable(context: Context): Failable {
-        const semantics = this.object.isolationLevel(context)
-        if ((semantics === 'SHARED') !== (this.operator === '->')) {
+        const isolationLevel = this.object.isolationLevel(context)
+        if ((isolationLevel === 'SHARED') !== (this.operator === '->')) {
             const error = SemanticError.create({
-                message: `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,
+                message: `Cannot access field ${this.field} of a ${isolationLevel} type object with "${this.operator}" operator`,
                 span: this.span,
             })
             return Failable.failure(SemanticErrorCollection.create([error]))

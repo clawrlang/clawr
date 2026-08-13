@@ -398,8 +398,8 @@ describe('Assignment', () => {
     })
 
     describe('throws if the target variable is immutable/non-assignable', () => {
-        for (const semantics of ['ISOLATED', 'SHARED'] as const) {
-            test(semantics, () => {
+        for (const isolationLevel of ['ISOLATED', 'SHARED'] as const) {
+            test(isolationLevel, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
                     TypeName.create({ name: 'MyType' }),
@@ -410,14 +410,14 @@ describe('Assignment', () => {
                 )
                 context.scope.variables.set('target', {
                     isImmutable: true,
-                    isolationLevel: semantics,
+                    isolationLevel: isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
                 context.scope.variables.set('value', {
                     isImmutable: true,
-                    isolationLevel: semantics,
+                    isolationLevel: isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
@@ -518,20 +518,14 @@ describe('Assignment', () => {
         })
     })
 
-    describe('throws if the value and target have incompatible semantics', () => {
+    describe('throws if the value and target have incompatible isolation-levels', () => {
         const cases = [
-            {
-                targetSemantics: ['mut', 'ISOLATED'],
-                valueSemantics: ['ref', 'SHARED'],
-            },
-            {
-                targetSemantics: ['mut', 'ISOLATED'],
-                valueSemantics: ['mutref', 'SHARED'],
-            },
+            { isImmutable: true, mutString: 'immutable' },
+            { isImmutable: false, mutString: 'mutable' },
         ] as const
 
-        cases.forEach(({ targetSemantics, valueSemantics }) => {
-            it(`${targetSemantics} target = ${valueSemantics} value`, () => {
+        cases.forEach(({ isImmutable, mutString }) => {
+            test(`mut target = ${mutString} value`, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
                     TypeName.create({ name: 'MyType' }),
@@ -551,14 +545,14 @@ describe('Assignment', () => {
                 )
                 context.scope.variables.set('target', {
                     isImmutable: false,
-                    isolationLevel: targetSemantics[1],
+                    isolationLevel: 'ISOLATED',
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
                 context.scope.variables.set('value', {
-                    isImmutable: valueSemantics[0] === 'ref',
-                    isolationLevel: valueSemantics[1],
+                    isImmutable: isImmutable,
+                    isolationLevel: 'SHARED',
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
@@ -588,7 +582,7 @@ describe('Assignment', () => {
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
-                            message: `Cannot assign ${valueSemantics[1]} value to ${targetSemantics[1]} target`,
+                            message: `Cannot assign SHARED value to ISOLATED target`,
                             location: {
                                 start: { line: 1, column: 3 },
                                 end: { line: 1, column: 4 },

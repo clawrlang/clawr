@@ -215,7 +215,7 @@ describe('Field Reference', () => {
         )
     })
 
-    describe('throws if the object semantics are not compatible with the operator', () => {
+    describe('throws if the object’s isolation-level is not compatible with the operator', () => {
         const cases = [
             { operator: '->', semantics: [true, 'ISOLATED'] },
             { operator: '->', semantics: [false, 'ISOLATED'] },
@@ -279,38 +279,29 @@ describe('Field Reference', () => {
     describe('effectively const', () => {
         const cases = [
             {
-                semantics: ['const', true, 'ISOLATED'],
                 isImmutable: true,
                 isolationLevel: 'ISOLATED',
                 expected: true,
             },
             {
-                semantics: ['mut', false, 'ISOLATED'],
                 isImmutable: false,
                 isolationLevel: 'ISOLATED',
                 expected: false,
             },
             {
-                semantics: ['ref', true, 'SHARED'],
                 isImmutable: true,
                 isolationLevel: 'SHARED',
                 expected: false,
             },
             {
-                semantics: ['mutref', false, 'SHARED'],
                 isImmutable: false,
                 isolationLevel: 'SHARED',
                 expected: false,
             },
         ] as const
 
-        for (const {
-            semantics,
-            isImmutable,
-            isolationLevel,
-            expected,
-        } of cases) {
-            it(`returns ${expected} if the object is ${semantics}`, () => {
+        for (const { isImmutable, isolationLevel, expected } of cases) {
+            it(`returns ${expected} if the object is ${isolationLevel}`, () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     isImmutable,

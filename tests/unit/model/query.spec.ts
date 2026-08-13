@@ -106,7 +106,7 @@ describe('Query', () => {
         })
     })
 
-    describe('converts UNIQUE semantics to ISOLATED in CIR', () => {
+    describe('converts UNIQUE isolation-level to ISOLATED in CIR', () => {
         test('for custom function', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addFunctionDeclaration(

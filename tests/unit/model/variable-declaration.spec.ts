@@ -501,18 +501,11 @@ describe('VariableDeclaration', () => {
         })
     })
 
-    describe('throws if the value has incompatible semantics', () => {
-        const cases = [
-            {
-                valueSemantics: [true, 'SHARED'],
-            },
-            {
-                valueSemantics: [false, 'SHARED'],
-            },
-        ] as const
+    describe('throws if the value has incompatible isolation-levels', () => {
+        const cases = [true, false] as const
 
-        cases.forEach(({ valueSemantics }) => {
-            it(`mut target = ${valueSemantics} value`, () => {
+        cases.forEach((isImmutable) => {
+            test(`mut target = SHARED value`, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
                     TypeName.create({ name: 'MyType' }),
@@ -531,8 +524,8 @@ describe('VariableDeclaration', () => {
                     }),
                 )
                 context.scope.variables.set('value', {
-                    isImmutable: valueSemantics[0],
-                    isolationLevel: valueSemantics[1],
+                    isImmutable,
+                    isolationLevel: 'SHARED',
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
@@ -570,7 +563,7 @@ describe('VariableDeclaration', () => {
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
-                            message: `Cannot assign ${valueSemantics[1]} value to ISOLATED target`,
+                            message: `Cannot assign SHARED value to ISOLATED target`,
                             location: {
                                 start: { line: 1, column: 3 },
                                 end: { line: 1, column: 4 },

@@ -103,6 +103,11 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                 )
             }
 
+            const isImmutable = semantics === 'const' || semantics === 'ref'
+            const isolationLevel =
+                semantics === 'const' || semantics === 'mut'
+                    ? 'ISOLATED'
+                    : 'SHARED'
             parameters.push(
                 Parameter.create({
                     label:
@@ -111,11 +116,8 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                             : labelToken.identifier,
                     varName: varNameToken.identifier,
                     valueSet,
-                    isImmutable: semantics === 'const' || semantics === 'ref',
-                    isolationLevel:
-                        semantics === 'const' || semantics === 'mut'
-                            ? 'ISOLATED'
-                            : 'SHARED',
+                    isImmutable,
+                    isolationLevel,
                     defaultValue,
                     span: {
                         start: semanticsToken?.start ?? labelToken.start,

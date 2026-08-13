@@ -43,11 +43,7 @@ export class VariableReference implements Expression {
 
     isolationLevel(context: Context): IsolationLevel {
         return this.lookupInScope(context)
-            .chaining((variable) => {
-                if (variable.lattice instanceof RCTypeLattice)
-                    return Failable.success(variable.lattice.semantics)
-                return Failable.success('ISOLATED' as const)
-            })
+            .chaining((variable) => Failable.success(variable.isolationLevel))
             .value()
     }
 

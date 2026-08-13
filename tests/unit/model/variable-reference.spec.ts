@@ -81,12 +81,7 @@ describe('Variable Reference', () => {
     })
 
     describe('infers isolation level from the context', () => {
-        const cases = [
-            { kind: 'const', expected: 'ISOLATED' },
-            { kind: 'mut', expected: 'ISOLATED' },
-            { kind: 'ref', expected: 'SHARED' },
-            { kind: 'mutref', expected: 'SHARED' },
-        ] as const
+        const cases = ['ISOLATED', 'SHARED'] as const
 
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
@@ -105,17 +100,14 @@ describe('Variable Reference', () => {
             }),
         )
 
-        for (const { kind, expected } of cases) {
-            it(`returns ${expected} for ${kind} variable`, () => {
+        for (const isolationLevel of cases) {
+            test(isolationLevel, () => {
                 context.scope.variables.set('myVar', {
-                    isImmutable: kind === 'const' || kind === 'ref',
-                    isolationLevel:
-                        kind === 'ref' || kind === 'mutref'
-                            ? 'SHARED'
-                            : 'ISOLATED',
+                    isImmutable: true,
+                    isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: expected,
+                        semantics: 'UNIQUE',
                     }),
                 })
 
@@ -123,7 +115,9 @@ describe('Variable Reference', () => {
                     name: 'myVar',
                     span: someCodeSpan,
                 })
-                expect(variableRef.isolationLevel(context)).toEqual(expected)
+                expect(variableRef.isolationLevel(context)).toEqual(
+                    isolationLevel,
+                )
             })
         }
     })

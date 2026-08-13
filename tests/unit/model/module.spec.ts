@@ -94,7 +94,8 @@ describe('Module', () => {
         const module = Module.create({
             main: [
                 VariableDeclaration.create({
-                    semantics: 'const',
+                    isImmutable: true,
+                    isolationLevel: 'ISOLATED',
                     name: 'x',
                     valueSet: ExplicitIntegerValueSet.create({
                         span: someCodeSpan,

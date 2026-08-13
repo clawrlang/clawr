@@ -34,7 +34,8 @@ describe('Module Parser', () => {
         expect(result).toMatchObject({
             main: [
                 {
-                    semantics: 'const',
+                    isImmutable: true,
+                    isolationLevel: 'ISOLATED',
                     name: 'x',
                     valueSet: {
                         min: undefined,
@@ -43,7 +44,8 @@ describe('Module Parser', () => {
                     initialValue: { value: 10n },
                 },
                 {
-                    semantics: 'mut',
+                    isImmutable: false,
+                    isolationLevel: 'ISOLATED',
                     name: 'y',
                     valueSet: {
                         min: undefined,
@@ -75,7 +77,8 @@ describe('Module Parser', () => {
         expect(result).toMatchObject({
             main: [
                 {
-                    semantics: 'mut',
+                    isImmutable: false,
+                    isolationLevel: 'ISOLATED',
                     name: 'y',
                     valueSet: {
                         min: undefined,

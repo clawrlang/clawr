@@ -1,4 +1,4 @@
-import { Context, Declaration, Expression, Statement } from '.'
+import { Context, Declaration, Expression, IsolationLevel, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
@@ -10,24 +10,33 @@ export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
 
 export class VariableDeclaration implements Statement, Declaration {
     private constructor(
-        private semantics: VariableSemantics,
+        private readonly isImmutable: boolean,
+        private readonly isolationLevel: Omit<IsolationLevel, 'UNIQUE'>,
         private name: string,
         private valueSet: ExplicitValueSet | undefined,
         private initialValue: Expression,
     ) {}
 
     static create({
-        semantics,
+        isImmutable,
+        isolationLevel,
         name,
         valueSet,
         initialValue,
     }: {
-        semantics: VariableSemantics
+        isImmutable: boolean
+        isolationLevel: Omit<IsolationLevel, 'UNIQUE'>
         name: string
         valueSet?: ExplicitValueSet
         initialValue: Expression
     }): VariableDeclaration {
-        return new VariableDeclaration(semantics, name, valueSet, initialValue)
+        return new VariableDeclaration(
+            isImmutable,
+            isolationLevel,
+            name,
+            valueSet,
+            initialValue,
+        )
     }
 
     emitDeclaration(context: Context): void {
@@ -42,13 +51,11 @@ export class VariableDeclaration implements Statement, Declaration {
         let currentValue = this.currentValueFromInitial(context)
         if (currentValue instanceof RCTypeLattice) {
             currentValue = currentValue.withSemantics(
-                this.semantics === 'const' || this.semantics === 'mut'
-                    ? 'ISOLATED'
-                    : 'SHARED',
+                this.isolationLevel as IsolationLevel,
             )
         }
         const valueSet =
-            this.semantics === 'const'
+            this.isImmutable && this.isolationLevel === 'ISOLATED'
                 ? currentValue.toCIR()
                 : (this.valueSet?.toCIR() ??
                   currentValue.unconstrained().toCIR())
@@ -95,9 +102,9 @@ export class VariableDeclaration implements Statement, Declaration {
         })
 
         scope.variables.set(this.name, {
-            isImmutable: this.semantics === 'const' || this.semantics === 'ref',
+            isImmutable: this.isImmutable,
             lattice:
-                this.semantics === 'const'
+                this.isImmutable && this.isolationLevel === 'ISOLATED'
                     ? currentValue
                     : (this.valueSet?.toLattice(context) ??
                       currentValue.unconstrained()),

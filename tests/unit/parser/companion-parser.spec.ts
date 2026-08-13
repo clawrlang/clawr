@@ -34,7 +34,12 @@ describe('Companion Parser', () => {
         expect(result).toMatchObject({
             name: 'O',
             fields: [
-                { name: 'x', semantics: 'const', initialValue: { value: 10n } },
+                {
+                    name: 'x',
+                    isImmutable: true,
+                    isolationLevel: 'ISOLATED',
+                    initialValue: { value: 10n },
+                },
             ],
         })
     })

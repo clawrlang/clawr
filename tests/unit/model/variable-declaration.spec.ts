@@ -19,7 +19,8 @@ import { Query } from '../../../src/model/query'
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
         const decl = VariableDeclaration.create({
-            semantics: 'const',
+            isImmutable: true,
+            isolationLevel: 'ISOLATED',
             name: 'foo',
             valueSet: ExplicitIntegerValueSet.create({
                 span: someCodeSpan,
@@ -45,7 +46,8 @@ describe('VariableDeclaration', () => {
     describe('inferred type', () => {
         it('infers narrowest value set for constant integer', () => {
             const decl = VariableDeclaration.create({
-                semantics: 'const',
+                isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: undefined,
                 initialValue: IntegerLiteral.create({
@@ -64,7 +66,8 @@ describe('VariableDeclaration', () => {
 
         it('infers widest value set for mutable integer', () => {
             const decl = VariableDeclaration.create({
-                semantics: 'mut',
+                isImmutable: false,
+                isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: undefined,
                 initialValue: IntegerLiteral.create({
@@ -96,7 +99,8 @@ describe('VariableDeclaration', () => {
 
         it('infers narrowest value set for constant truthvalue', () => {
             const decl = VariableDeclaration.create({
-                semantics: 'const',
+                isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: undefined,
                 initialValue: TruthValueLiteral.create({
@@ -114,7 +118,8 @@ describe('VariableDeclaration', () => {
 
         it('infers widest value set for mutable truthvalue', () => {
             const decl = VariableDeclaration.create({
-                semantics: 'mut',
+                isImmutable: false,
+                isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: undefined,
                 initialValue: TruthValueLiteral.create({
@@ -209,7 +214,8 @@ describe('VariableDeclaration', () => {
             )
 
             const decl = VariableDeclaration.create({
-                semantics: 'mut',
+                isImmutable: false,
+                isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'InnerType' }),
@@ -282,7 +288,8 @@ describe('VariableDeclaration', () => {
             )
 
             const decl = VariableDeclaration.create({
-                semantics: 'mut',
+                isImmutable: false,
+                isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'MyType' }),
@@ -310,7 +317,8 @@ describe('VariableDeclaration', () => {
     describe('registers its value in the context', () => {
         test('for a simple integer variable', () => {
             const decl = VariableDeclaration.create({
-                semantics: 'const',
+                isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 name: 'x',
                 valueSet: ExplicitIntegerValueSet.create({
                     span: someCodeSpan,
@@ -364,7 +372,8 @@ describe('VariableDeclaration', () => {
             )
 
             const declaration = VariableDeclaration.create({
-                semantics: 'const',
+                isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 name: 'target',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'OuterType' }),
@@ -422,7 +431,8 @@ describe('VariableDeclaration', () => {
             )
 
             const decl = VariableDeclaration.create({
-                semantics: 'const',
+                isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     semantics: 'const',
@@ -465,7 +475,8 @@ describe('VariableDeclaration', () => {
             )
 
             const decl = VariableDeclaration.create({
-                semantics: 'ref',
+                isImmutable: true,
+                isolationLevel: 'SHARED',
                 name: 'r',
                 valueSet: ExplicitRCTypeValueSet.create({
                     semantics: 'ref',
@@ -497,17 +508,15 @@ describe('VariableDeclaration', () => {
     describe('throws if the value has incompatible semantics', () => {
         const cases = [
             {
-                targetSemantics: ['mut', 'ISOLATED'],
                 valueSemantics: [true, 'SHARED'],
             },
             {
-                targetSemantics: ['mut', 'ISOLATED'],
                 valueSemantics: [false, 'SHARED'],
             },
         ] as const
 
-        cases.forEach(({ targetSemantics, valueSemantics }) => {
-            it(`${targetSemantics} target = ${valueSemantics} value`, () => {
+        cases.forEach(({ valueSemantics }) => {
+            it(`mut target = ${valueSemantics} value`, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
                     TypeName.create({ name: 'MyType' }),
@@ -546,11 +555,12 @@ describe('VariableDeclaration', () => {
                 )
 
                 const declaration = VariableDeclaration.create({
-                    semantics: targetSemantics[0],
+                    isImmutable: false,
+                    isolationLevel: 'ISOLATED',
                     name: 'target',
                     valueSet: ExplicitRCTypeValueSet.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: targetSemantics[0],
+                        semantics: 'mut',
                         span: someCodeSpan,
                     }),
                     initialValue: VariableReference.create({
@@ -565,7 +575,7 @@ describe('VariableDeclaration', () => {
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
-                            message: `Cannot assign ${valueSemantics[1]} value to ${targetSemantics[1]} target`,
+                            message: `Cannot assign ${valueSemantics[1]} value to ISOLATED target`,
                             location: {
                                 start: { line: 1, column: 3 },
                                 end: { line: 1, column: 4 },

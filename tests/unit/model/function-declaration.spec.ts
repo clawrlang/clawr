@@ -498,7 +498,8 @@ describe('FunctionDeclaration', () => {
                     kind: 'body',
                     statements: [
                         VariableDeclaration.create({
-                            semantics: 'const',
+                            isImmutable: true,
+                            isolationLevel: 'ISOLATED',
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
@@ -565,7 +566,8 @@ describe('FunctionDeclaration', () => {
                     kind: 'body',
                     statements: [
                         VariableDeclaration.create({
-                            semantics: 'const',
+                            isImmutable: true,
+                            isolationLevel: 'ISOLATED',
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
@@ -633,7 +635,8 @@ describe('FunctionDeclaration', () => {
                     kind: 'body',
                     statements: [
                         VariableDeclaration.create({
-                            semantics: 'const',
+                            isImmutable: true,
+                            isolationLevel: 'ISOLATED',
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),

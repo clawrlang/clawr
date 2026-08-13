@@ -10,7 +10,8 @@ describe('VariableDeclarationParser', () => {
     it('parses const integer variable declaration', () => {
         const source = `const foo: integer = 1;`
         expect(parseVariableDeclaration(source)).toMatchObject({
-            semantics: 'const',
+            isImmutable: true,
+            isolationLevel: 'ISOLATED',
             name: 'foo',
             valueSet: {
                 min: undefined,
@@ -23,7 +24,8 @@ describe('VariableDeclarationParser', () => {
     it('parses mutable integer variable declaration', () => {
         const source = `mut foo: integer = 1;`
         expect(parseVariableDeclaration(source)).toMatchObject({
-            semantics: 'mut',
+            isImmutable: false,
+            isolationLevel: 'ISOLATED',
             name: 'foo',
             valueSet: {
                 min: undefined,
@@ -36,7 +38,8 @@ describe('VariableDeclarationParser', () => {
     it('parses mutable reference variable declaration', () => {
         const source = `mutref foo: Type = { x: 1, y: 2 }`
         expect(parseVariableDeclaration(source)).toMatchObject({
-            semantics: 'mutref',
+            isImmutable: false,
+            isolationLevel: 'SHARED',
             name: 'foo',
             valueSet: { type: { name: 'Type' } },
             initialValue: {
@@ -51,7 +54,8 @@ describe('VariableDeclarationParser', () => {
     it('parses non-reassignable reference variable declaration', () => {
         const source = `ref foo: Type = { x: 1, y: 2 }`
         expect(parseVariableDeclaration(source)).toMatchObject({
-            semantics: 'ref',
+            isImmutable: true,
+            isolationLevel: 'SHARED',
             name: 'foo',
             valueSet: { type: { name: 'Type' } },
             initialValue: {
@@ -66,7 +70,8 @@ describe('VariableDeclarationParser', () => {
     it('parses variable declaration with inferred type', () => {
         const source = `const foo = 1;`
         expect(parseVariableDeclaration(source)).toMatchObject({
-            semantics: 'const',
+            isImmutable: true,
+            isolationLevel: 'ISOLATED',
             name: 'foo',
             valueSet: undefined,
             initialValue: { value: 1n },
@@ -87,7 +92,8 @@ describe('VariableDeclarationParser', () => {
         const decl = parseVariableDeclaration(source)
 
         expect(decl).toMatchObject({
-            semantics: 'ref',
+            isImmutable: true,
+            isolationLevel: 'SHARED',
             name: 'r',
             valueSet: {
                 type: { name: 'MyData' },

@@ -33,7 +33,11 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
         stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse(stream)
         return VariableDeclaration.create({
-            semantics,
+            isImmutable: semantics === 'const' || semantics === 'ref',
+            isolationLevel:
+                semantics === 'const' || semantics === 'mut'
+                    ? 'ISOLATED'
+                    : 'SHARED',
             name,
             valueSet,
             initialValue,

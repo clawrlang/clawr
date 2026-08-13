@@ -6,11 +6,10 @@ import {
     ResolvedIsolationLevel,
     Statement,
 } from '.'
-import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
+import { ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
-import { Lattice, RCTypeLattice } from './lattice'
-import { VariableSemantics } from './variable-declaration'
+import { Lattice } from './lattice'
 import { SourceCodeSpan } from '../diagnostics'
 import { logSemanticError } from './failable'
 

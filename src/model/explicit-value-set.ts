@@ -9,7 +9,6 @@ import {
     RCTypeLattice,
 } from './lattice'
 import { VariableSemantics } from './variable-declaration'
-import { convertSemantics } from './variable-reference'
 import { TypeName } from './type-name'
 
 export interface ExplicitValueSet {

@@ -2,14 +2,12 @@ import {
     Context,
     Declaration,
     Expression,
-    IsolationLevel,
     ResolvedIsolationLevel,
     Statement,
 } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
-import { RCTypeLattice } from './lattice'
 import { TypeName } from './type-name'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const

@@ -94,21 +94,34 @@ describe('Field Reference', () => {
 
     describe('infers its type and isolation level from the context', () => {
         const cases = [
-            { semantics: 'const', expectedSemantics: 'ISOLATED' },
-            { semantics: 'mut', expectedSemantics: 'ISOLATED' },
-            { semantics: 'ref', expectedSemantics: 'SHARED' },
-            { semantics: 'mutref', expectedSemantics: 'SHARED' },
+            {
+                semantics: 'const',
+                isImmutable: true,
+                expectedSemantics: 'ISOLATED',
+            },
+            {
+                semantics: 'mut',
+                isImmutable: false,
+                expectedSemantics: 'ISOLATED',
+            },
+            {
+                semantics: 'ref',
+                isImmutable: true,
+                expectedSemantics: 'SHARED',
+            },
+            {
+                semantics: 'mutref',
+                isImmutable: false,
+                expectedSemantics: 'SHARED',
+            },
         ] as const
 
-        for (const { semantics, expectedSemantics } of cases)
+        for (const { semantics, isImmutable, expectedSemantics } of cases)
             test(`${semantics} object`, () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
-                    isImmutable: semantics === 'const' || semantics === 'ref',
-                    isolationLevel:
-                        semantics === 'ref' || semantics === 'mutref'
-                            ? 'SHARED'
-                            : 'ISOLATED',
+                    isImmutable,
+                    isolationLevel: expectedSemantics,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
@@ -126,14 +139,8 @@ describe('Field Reference', () => {
                         name: TypeName.create({ name: 'MyType' }),
                         fields: [
                             {
-                                isImmutable:
-                                    semantics === 'const' ||
-                                    semantics === 'ref',
-                                isolationLevel:
-                                    semantics === 'ref' ||
-                                    semantics === 'mutref'
-                                        ? 'SHARED'
-                                        : 'ISOLATED',
+                                isImmutable,
+                                isolationLevel: expectedSemantics,
                                 name: 'myField',
                                 valueSet: ExplicitRCTypeValueSet.create({
                                     type: TypeName.create({

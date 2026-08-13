@@ -55,10 +55,7 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private emit(scope: Scope | Scope['rootScope'], context: Context) {
-        let currentValue = this.currentValueFromInitial(context)
-        if (currentValue instanceof RCTypeLattice) {
-            currentValue = currentValue.withSemantics(this.isolationLevel)
-        }
+        const currentValue = this.currentValueFromInitial(context)
         const valueSet =
             this.isImmutable && this.isolationLevel === 'ISOLATED'
                 ? currentValue.toCIR()

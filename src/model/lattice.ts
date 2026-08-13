@@ -108,26 +108,22 @@ export class StringLattice implements Lattice {
 export class RCTypeLattice implements Lattice {
     private constructor(
         public readonly type: TypeName,
-        public readonly semantics: IsolationLevel,
         public readonly fields: Record<string, Lattice> | undefined,
     ) {}
 
     static create({
         type,
-        semantics,
         fields,
     }: {
         type: TypeName
-        semantics: IsolationLevel
         fields?: Record<string, Lattice>
     }): RCTypeLattice {
-        return new RCTypeLattice(type, semantics, fields)
+        return new RCTypeLattice(type, fields)
     }
 
     unconstrained(): Lattice {
         return RCTypeLattice.create({
             type: this.type,
-            semantics: this.semantics,
             fields: Object.fromEntries(
                 Object.entries(this.fields ?? {}).map(([name, field]) => [
                     name,
@@ -144,18 +140,6 @@ export class RCTypeLattice implements Lattice {
         )
     }
 
-    withSemantics(semantics: IsolationLevel): RCTypeLattice {
-        return RCTypeLattice.create({
-            type: this.type,
-            semantics,
-            fields: this.fields,
-        })
-    }
-
-    asUNIQUE(): RCTypeLattice {
-        return this.withSemantics('UNIQUE')
-    }
-
     toCIR(): cir.ValueSet {
         return {
             type: 'rc-type',
@@ -165,6 +149,6 @@ export class RCTypeLattice implements Lattice {
     }
 
     toString(): string {
-        return `rc-type(${this.type.canonical()}, ${this.semantics})`
+        return this.type.canonical()
     }
 }

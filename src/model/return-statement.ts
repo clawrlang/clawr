@@ -12,6 +12,7 @@ export class ReturnStatement implements Statement {
     emitStatement(context: Context & { semantics?: 'const' | 'ref' }) {
         if (this.value) {
             const valueLattice = this.value.currentValue(context).value()
+            const isolationLevel = this.value.isolationLevel(context)
             if (!valueLattice) {
                 throw new Error(
                     `Return statement value does not have a lattice: ${JSON.stringify(
@@ -21,7 +22,7 @@ export class ReturnStatement implements Statement {
             }
             if (
                 valueLattice instanceof RCTypeLattice &&
-                valueLattice.semantics === 'ISOLATED' &&
+                isolationLevel === 'ISOLATED' &&
                 context.semantics === 'ref'
             )
                 logSemanticError(
@@ -30,7 +31,7 @@ export class ReturnStatement implements Statement {
                 )
             if (
                 valueLattice instanceof RCTypeLattice &&
-                valueLattice.semantics === 'SHARED' &&
+                isolationLevel === 'SHARED' &&
                 context.semantics !== 'ref'
             )
                 logSemanticError(

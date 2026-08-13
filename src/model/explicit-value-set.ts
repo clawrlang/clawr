@@ -103,20 +103,17 @@ export class ExplicitStringValueSet implements ExplicitValueSet {
 export class ExplicitRCTypeValueSet implements ExplicitValueSet {
     private constructor(
         public readonly type: TypeName,
-        public readonly semantics: VariableSemantics,
         public readonly span: SourceCodeSpan,
     ) {}
 
     static create({
         type,
-        semantics,
         span,
     }: {
         type: TypeName
-        semantics: VariableSemantics
         span: SourceCodeSpan
     }): ExplicitRCTypeValueSet {
-        return new ExplicitRCTypeValueSet(type, semantics, span)
+        return new ExplicitRCTypeValueSet(type, span)
     }
 
     toCIR(): Extract<cir.ValueSet, { type: 'rc-type' }> {
@@ -128,15 +125,8 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
     }
 
     toLattice(context: Context): Lattice {
-        if (this.semantics === 'ref' || this.semantics === 'mutref')
-            return RCTypeLattice.create({
-                type: this.type,
-                semantics: 'SHARED',
-            })
-
         return RCTypeLattice.create({
             type: this.type,
-            semantics: 'ISOLATED',
             fields: Object.fromEntries(
                 context.scope
                     .dataDeclaration(this.type)
@@ -176,7 +166,6 @@ export class ExplicitUniqueValueSet implements ExplicitValueSet {
     toLattice(context: Context): Lattice {
         return RCTypeLattice.create({
             type: this.type,
-            semantics: 'UNIQUE',
             fields: Object.fromEntries(
                 context.scope
                     .dataDeclaration(this.type)

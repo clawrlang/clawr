@@ -56,7 +56,6 @@ export class DataLiteral implements Expression {
             Failable.success(
                 RCTypeLattice.create({
                     type: decl.name,
-                    semantics: 'UNIQUE',
                     fields: Object.fromEntries(
                         fieldValues.map((value, index) => [
                             this.fields[index].name,
@@ -78,7 +77,6 @@ export class DataLiteral implements Expression {
         return Failable.success(
             RCTypeLattice.create({
                 type: decl.name,
-                semantics: 'UNIQUE',
                 fields: Object.fromEntries(
                     decl.fields.map((field) => [
                         field.name,

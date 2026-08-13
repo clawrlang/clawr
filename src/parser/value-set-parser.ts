@@ -41,7 +41,6 @@ export class ValueSetParser {
                 if (semantics)
                     return ExplicitRCTypeValueSet.create({
                         type: TypeName.create({ name: type }),
-                        semantics,
                         span: { start: typeToken.start, end: typeToken.end },
                     })
                 else

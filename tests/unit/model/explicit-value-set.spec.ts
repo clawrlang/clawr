@@ -119,7 +119,6 @@ describe('ExplicitValueSet', () => {
         it('converts ISOLATED rc-type to CIR correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'mut',
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 7 },
@@ -135,7 +134,6 @@ describe('ExplicitValueSet', () => {
         it('converts SHARED rc-type to CIR correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'ref',
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 7 },
@@ -198,7 +196,6 @@ describe('ExplicitValueSet', () => {
         it('converts ISOLATED rc-type to lattice correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'mut',
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 7 },
@@ -214,7 +211,6 @@ describe('ExplicitValueSet', () => {
         it('converts SHARED rc-type to lattice correctly', () => {
             const valueSet = ExplicitRCTypeValueSet.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'ref',
                 span: {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 7 },

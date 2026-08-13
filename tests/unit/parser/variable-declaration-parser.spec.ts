@@ -95,13 +95,10 @@ describe('VariableDeclarationParser', () => {
             isImmutable: true,
             isolationLevel: 'SHARED',
             name: 'r',
-            valueSet: {
-                type: { name: 'MyData' },
-            },
+            valueSet: { type: { name: 'MyData' } },
             initialValue: { fields: [] },
         })
         expect((decl as any).valueSet).toBeInstanceOf(ExplicitRCTypeValueSet)
-        expect((decl as any).valueSet.semantics).toBe('ref')
     })
 })
 

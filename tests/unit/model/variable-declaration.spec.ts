@@ -183,7 +183,6 @@ describe('VariableDeclaration', () => {
                             isolationLevel: 'ISOLATED',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'InnerType' }),
-                                semantics: 'mut',
                                 span: someCodeSpan,
                             }),
                         },
@@ -195,18 +194,15 @@ describe('VariableDeclaration', () => {
                 isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'OuterType' }),
-                    semantics: 'ISOLATED',
                 }),
             })
             context.scope.setCurrentValue(
                 'bar',
                 RCTypeLattice.create({
                     type: TypeName.create({ name: 'OuterType' }),
-                    semantics: 'ISOLATED',
                     fields: {
                         field: RCTypeLattice.create({
                             type: TypeName.create({ name: 'InnerType' }),
-                            semantics: 'ISOLATED',
                             fields: {
                                 innerField: IntegerLattice.create({
                                     min: 42n,
@@ -224,7 +220,6 @@ describe('VariableDeclaration', () => {
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'InnerType' }),
-                    semantics: 'mut',
                     span: someCodeSpan,
                 }),
                 initialValue: FieldReference.create({
@@ -277,14 +272,12 @@ describe('VariableDeclaration', () => {
                 isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    semantics: 'ISOLATED',
                 }),
             })
             context.scope.setCurrentValue(
                 'bar',
                 RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    semantics: 'ISOLATED',
                     fields: {
                         field: IntegerLattice.create({
                             min: 42n,
@@ -300,7 +293,6 @@ describe('VariableDeclaration', () => {
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    semantics: 'mut',
                     span: someCodeSpan,
                 }),
                 initialValue: VariableReference.create({
@@ -373,7 +365,6 @@ describe('VariableDeclaration', () => {
                             isolationLevel: 'ISOLATED',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'InnerType' }),
-                                semantics: 'mut',
                                 span: someCodeSpan,
                             }),
                         },
@@ -387,7 +378,6 @@ describe('VariableDeclaration', () => {
                 name: 'target',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'OuterType' }),
-                    semantics: 'mut',
                     span: someCodeSpan,
                 }),
                 initialValue: DataLiteral.create({
@@ -445,7 +435,6 @@ describe('VariableDeclaration', () => {
                 isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
-                    semantics: 'const',
                     type: TypeName.create({ name: 'MyType' }),
                     span: someCodeSpan,
                 }),
@@ -474,14 +463,12 @@ describe('VariableDeclaration', () => {
                 isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
-                    semantics: 'ISOLATED',
                 }),
             })
             context.scope.setCurrentValue(
                 'c',
                 RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
-                    semantics: 'ISOLATED',
                 }),
             )
 
@@ -490,7 +477,6 @@ describe('VariableDeclaration', () => {
                 isolationLevel: 'SHARED',
                 name: 'r',
                 valueSet: ExplicitRCTypeValueSet.create({
-                    semantics: 'ref',
                     type: TypeName.create({ name: 'MyData' }),
                     span: someCodeSpan,
                 }),
@@ -511,7 +497,6 @@ describe('VariableDeclaration', () => {
             decl.emitStatement(context)
             expect(context.scope.currentValue('r')).toMatchObject({
                 type: { name: 'MyData' },
-                semantics: 'SHARED',
             })
         })
     })
@@ -550,14 +535,12 @@ describe('VariableDeclaration', () => {
                     isolationLevel: valueSemantics[1],
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: valueSemantics[1],
                     }),
                 })
                 context.scope.setCurrentValue(
                     'value',
                     RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: 'ISOLATED',
                         fields: {
                             myField: IntegerLattice.create({
                                 min: 42n,
@@ -573,7 +556,6 @@ describe('VariableDeclaration', () => {
                     name: 'target',
                     valueSet: ExplicitRCTypeValueSet.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: 'mut',
                         span: someCodeSpan,
                     }),
                     initialValue: VariableReference.create({

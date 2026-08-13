@@ -146,14 +146,12 @@ describe('FunctionDeclaration', () => {
             isolationLevel: 'SHARED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
-                semantics: 'SHARED',
             }),
         })
         context.scope.setCurrentValue(
             'myVar',
             RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
-                semantics: 'SHARED',
             }),
         )
 
@@ -192,14 +190,12 @@ describe('FunctionDeclaration', () => {
             isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
-                semantics: 'ISOLATED',
             }),
         })
         context.scope.setCurrentValue(
             'myVar',
             RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
-                semantics: 'ISOLATED',
                 fields: {},
             }),
         )
@@ -209,7 +205,6 @@ describe('FunctionDeclaration', () => {
             parameters: [],
             result: ExplicitRCTypeValueSet.create({
                 type: TypeName.create({ name: 'MyData' }),
-                semantics: 'ref',
                 span: someCodeSpan,
             }),
             implementation: {
@@ -240,14 +235,12 @@ describe('FunctionDeclaration', () => {
             isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
-                semantics: 'ISOLATED',
             }),
         })
         context.scope.setCurrentValue(
             'myVar',
             RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
-                semantics: 'ISOLATED',
                 fields: {},
             }),
         )
@@ -257,7 +250,6 @@ describe('FunctionDeclaration', () => {
             parameters: [],
             result: ExplicitRCTypeValueSet.create({
                 type: TypeName.create({ name: 'MyData' }),
-                semantics: 'ref',
                 span: someCodeSpan,
             }),
             implementation: {
@@ -326,14 +318,12 @@ describe('FunctionDeclaration', () => {
                 isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
-                    semantics: 'ISOLATED',
                 }),
             })
             context.scope.setCurrentValue(
                 'myVar',
                 RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
-                    semantics: 'ISOLATED',
                     fields: {},
                 }),
             )
@@ -378,14 +368,12 @@ describe('FunctionDeclaration', () => {
                 isolationLevel: 'SHARED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
-                    semantics: 'SHARED',
                 }),
             })
             context.scope.setCurrentValue(
                 'myVar',
                 RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
-                    semantics: 'SHARED',
                 }),
             )
 
@@ -511,7 +499,6 @@ describe('FunctionDeclaration', () => {
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
-                                semantics: 'mut',
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({
@@ -580,7 +567,6 @@ describe('FunctionDeclaration', () => {
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
-                                semantics: 'const',
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({
@@ -649,7 +635,6 @@ describe('FunctionDeclaration', () => {
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
-                                semantics: 'mut',
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({

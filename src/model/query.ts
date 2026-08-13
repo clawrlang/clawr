@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { IsolationLevel } from '.'
-import { Failable } from './failable'
+import { Failable, SemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice, RCTypeLattice } from './lattice'
@@ -43,10 +43,8 @@ export class Query implements Expression {
         return Failable.success(true)
     }
 
-    isolationLevel(context: Context): IsolationLevel {
-        const value = this.currentValue(context).value()
-        if (value instanceof RCTypeLattice) return value.semantics
-        return 'ISOLATED'
+    isolationLevel(_: Context): IsolationLevel {
+        return 'UNIQUE'
     }
 
     declaredValueSet(context: Context): Failable<Lattice> {
@@ -57,7 +55,7 @@ export class Query implements Expression {
         if (this.name.toString() === 'copy(of:)') {
             const value = this.arguments[0].currentValue(context).value()
             return value instanceof RCTypeLattice
-                ? Failable.success(value.asUNIQUE())
+                ? Failable.success(value)
                 : Failable.failure('not a reference-counted type', this.span)
         }
 

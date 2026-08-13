@@ -71,7 +71,6 @@ describe('Assignment', () => {
                             name: 'field',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'InnerType' }),
-                                semantics: 'mut',
                                 span: someCodeSpan,
                             }),
                         },
@@ -83,7 +82,6 @@ describe('Assignment', () => {
                 isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'OuterType' }),
-                    semantics: 'ISOLATED',
                 }),
             })
             context.scope.variables.set('foo', {
@@ -91,18 +89,15 @@ describe('Assignment', () => {
                 isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'InnerType' }),
-                    semantics: 'ISOLATED',
                 }),
             })
             context.scope.setCurrentValue(
                 'bar',
                 RCTypeLattice.create({
                     type: TypeName.create({ name: 'OuterType' }),
-                    semantics: 'ISOLATED',
                     fields: {
                         field: RCTypeLattice.create({
                             type: TypeName.create({ name: 'InnerType' }),
-                            semantics: 'ISOLATED',
                             fields: {},
                         }),
                     },
@@ -177,7 +172,6 @@ describe('Assignment', () => {
                 isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    semantics: 'ISOLATED',
                 }),
             })
             context.scope.variables.set('foo', {
@@ -185,14 +179,12 @@ describe('Assignment', () => {
                 isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    semantics: 'ISOLATED',
                 }),
             })
             context.scope.setCurrentValue(
                 'bar',
                 RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    semantics: 'ISOLATED',
                     fields: {},
                 }),
             )
@@ -268,7 +260,6 @@ describe('Assignment', () => {
             isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'ISOLATED',
             }),
         })
 
@@ -332,7 +323,6 @@ describe('Assignment', () => {
             isolationLevel: 'SHARED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'SHARED',
             }),
         })
         context.scope.rootScope.variables.set('mutVar', {
@@ -340,7 +330,6 @@ describe('Assignment', () => {
             isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'ISOLATED',
             }),
         })
 
@@ -424,7 +413,6 @@ describe('Assignment', () => {
                     isolationLevel: semantics,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics,
                     }),
                 })
                 context.scope.variables.set('value', {
@@ -432,14 +420,12 @@ describe('Assignment', () => {
                     isolationLevel: semantics,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics,
                     }),
                 })
                 context.scope.setCurrentValue(
                     'value',
                     RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics,
                         fields: {},
                     }),
                 )
@@ -497,7 +483,6 @@ describe('Assignment', () => {
             isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'ISOLATED',
             }),
         })
 
@@ -569,7 +554,6 @@ describe('Assignment', () => {
                     isolationLevel: targetSemantics[1],
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: targetSemantics[1],
                     }),
                 })
                 context.scope.variables.set('value', {
@@ -577,14 +561,12 @@ describe('Assignment', () => {
                     isolationLevel: valueSemantics[1],
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: valueSemantics[1],
                     }),
                 })
                 context.scope.setCurrentValue(
                     'value',
                     RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: 'SHARED',
                     }),
                 )
                 const assignment = Assignment.create({

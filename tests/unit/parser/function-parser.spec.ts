@@ -185,7 +185,7 @@ describe('Function Parser', () => {
         expect(result).toMatchObject({
             baseName: 'myFunction',
             parameters: [],
-            result: { type: { name: 'MyData' }, semantics: 'const' },
+            result: { type: { name: 'MyData' } },
         })
     })
 
@@ -196,7 +196,7 @@ describe('Function Parser', () => {
         expect(result).toMatchObject({
             baseName: 'myFunction',
             parameters: [],
-            result: { type: { name: 'MyData' }, semantics: 'ref' },
+            result: { type: { name: 'MyData' } },
         })
     })
 })

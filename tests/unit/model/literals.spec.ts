@@ -223,7 +223,6 @@ describe('Literals', () => {
                                 type: TypeName.create({
                                     name: 'MissingInnerType',
                                 }),
-                                semantics: 'mut',
                                 span: someCodeSpan,
                             }),
                         },

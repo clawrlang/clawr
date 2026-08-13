@@ -108,7 +108,6 @@ describe('Variable Reference', () => {
                     isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: 'UNIQUE',
                     }),
                 })
 

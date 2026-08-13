@@ -18,7 +18,6 @@ describe('Field Reference', () => {
             isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'ISOLATED',
             }),
         })
         context.scope.rootScope.addDataDeclaration(
@@ -60,7 +59,6 @@ describe('Field Reference', () => {
             isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'ISOLATED',
             }),
         })
         context.scope.rootScope.addDataDeclaration(
@@ -74,7 +72,6 @@ describe('Field Reference', () => {
                         name: 'myField',
                         valueSet: ExplicitRCTypeValueSet.create({
                             type: TypeName.create({ name: 'MyType' }),
-                            semantics: 'ref',
                             span: someCodeSpan,
                         }),
                     },
@@ -114,7 +111,6 @@ describe('Field Reference', () => {
                             : 'ISOLATED',
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: expectedSemantics,
                     }),
                 })
                 context.scope.rootScope.addDataDeclaration(
@@ -143,7 +139,6 @@ describe('Field Reference', () => {
                                     type: TypeName.create({
                                         name: 'InnerType',
                                     }),
-                                    semantics,
                                     span: someCodeSpan,
                                 }),
                             },
@@ -168,7 +163,6 @@ describe('Field Reference', () => {
                     fieldRef.declaredValueSet(context).value(),
                 ).toMatchObject({
                     type: { name: 'InnerType' },
-                    semantics: expectedSemantics,
                 })
             })
     })
@@ -180,7 +174,6 @@ describe('Field Reference', () => {
             isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
-                semantics: 'ISOLATED',
             }),
         })
         context.scope.rootScope.addDataDeclaration(
@@ -231,7 +224,6 @@ describe('Field Reference', () => {
                     isolationLevel: semantics[1],
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: semantics[1],
                     }),
                 })
                 context.scope.rootScope.addDataDeclaration(
@@ -318,7 +310,6 @@ describe('Field Reference', () => {
                     isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: semantics[2],
                     }),
                 })
                 context.scope.rootScope.addDataDeclaration(
@@ -361,7 +352,6 @@ describe('Field Reference', () => {
                 isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    semantics: 'ISOLATED',
                 }),
             })
             context.scope.rootScope.addDataDeclaration(
@@ -401,7 +391,6 @@ describe('Field Reference', () => {
                 isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    semantics: 'ISOLATED',
                 }),
             })
             context.scope.rootScope.addDataDeclaration(

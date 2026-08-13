@@ -154,14 +154,12 @@ describe('Query', () => {
                 isolationLevel: 'SHARED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
-                    semantics: 'SHARED',
                 }),
             })
             context.scope.setCurrentValue(
                 'value',
                 RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
-                    semantics: 'SHARED',
                 }),
             )
 

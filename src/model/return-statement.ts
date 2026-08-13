@@ -39,7 +39,7 @@ export class ReturnStatement implements Statement {
                 )
 
             const object = this.value
-                .toCIRExpression({ ...context, semantics: undefined })
+                .toCIRExpression({ ...context, isolationLevel: undefined })
                 .value()
             if (
                 (object.kind === 'VARIABLE_REF' ||

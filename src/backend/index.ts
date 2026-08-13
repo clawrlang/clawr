@@ -373,10 +373,10 @@ export function lowerExpr(expr: cir.Expression): string {
             const mangledTypeName = mangleTypeName(expr.type)
             if (expr.base) {
                 const mangledSuperTypeName = mangleTypeName(expr.base)
-                return `allocInitInheritedRC(${mangledTypeName}, 0, ${mangledSuperTypeName}, ${`__rc_${expr.semantics}`},
+                return `allocInitInheritedRC(${mangledTypeName}, 0, ${mangledSuperTypeName}, ${`__rc_${expr.isolationLevel}`},
                     ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
             } else
-                return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.semantics}`},
+                return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
                     ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)

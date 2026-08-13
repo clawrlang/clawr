@@ -53,7 +53,7 @@
                         "type": {
                             "name": "Object"
                         },
-                        "semantics": "ISOLATED",
+                        "isolationLevel": "ISOLATED",
                         "fields": [
                             {
                                 "name": "field",

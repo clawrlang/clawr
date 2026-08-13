@@ -186,12 +186,13 @@
               "type": { "const": "rc-type" },
               "namespace": { "type": "string" },
               "typeName": { "type": "string" },
-              "semantics": {
-                "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
-              }
+              "semantics": { "$ref": "#/$defs/IsolationLevel" }
             },
             "required": ["type", "typeName", "semantics"],
             "additionalProperties": false
+          },
+          "IsolationLevel": {
+            "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
           },
           "RealValueSet": {
             "type": "object",
@@ -242,15 +243,13 @@
               "kind": { "const": "ALLOCATION" },
               "type": { "$ref": "#/$defs/CanonicalName" },
               "base": { "$ref": "#/$defs/CanonicalName" },
-              "semantics": {
-                "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
-              },
+              "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
               "fields": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type.o1" }
               }
             },
-            "required": ["kind", "type", "semantics", "fields"],
+            "required": ["kind", "type", "isolationLevel", "fields"],
             "additionalProperties": false
           },
           "__type.o1": {

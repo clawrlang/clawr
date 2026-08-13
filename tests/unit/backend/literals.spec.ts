@@ -43,7 +43,7 @@ describe('Lowering Literals', () => {
         it('lowers as allocInitRC', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
-                semantics: 'ISOLATED',
+                isolationLevel: 'ISOLATED',
                 type: {
                     name: 'MyData',
                     namespace: undefined,
@@ -70,7 +70,7 @@ describe('Lowering Literals', () => {
                     name: 'MyObject',
                     namespace: undefined,
                 },
-                semantics: 'ISOLATED',
+                isolationLevel: 'ISOLATED',
                 fields: [
                     {
                         name: 'field',

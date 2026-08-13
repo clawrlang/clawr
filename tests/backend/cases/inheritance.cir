@@ -66,7 +66,7 @@
                                 "type": {
                                     "name": "Super"
                                 },
-                                "semantics": "ISOLATED",
+                                "isolationLevel": "ISOLATED",
                                 "fields": [
                                     {
                                         "name": "field",
@@ -207,7 +207,7 @@
                         "base": {
                             "name": "Super"
                         },
-                        "semantics": "ISOLATED",
+                        "isolationLevel": "ISOLATED",
                         "fields": [
                             {
                                 "name": "field",
@@ -280,7 +280,7 @@
                         "base": {
                             "name": "Super"
                         },
-                        "semantics": "ISOLATED",
+                        "isolationLevel": "ISOLATED",
                         "fields": []
                     },
                     "valueSet": {

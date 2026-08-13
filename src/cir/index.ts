@@ -140,7 +140,7 @@ type MemoryAllocation = {
     kind: 'ALLOCATION'
     type: CanonicalName
     base?: CanonicalName
-    semantics: IsolationLevel
+    isolationLevel: IsolationLevel
     fields: {
         name: string
         value: Expression

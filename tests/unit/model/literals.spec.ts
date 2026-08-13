@@ -124,7 +124,7 @@ describe('Literals', () => {
                     .toCIRExpression({
                         ...context,
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: 'SHARED',
+                        isolationLevel: 'SHARED',
                     })
                     .value(),
             ).toMatchObject({

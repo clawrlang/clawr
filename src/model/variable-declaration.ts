@@ -62,7 +62,7 @@ export class VariableDeclaration implements Statement, Declaration {
                               name: valueSet.typeName,
                               namespace: valueSet.namespace,
                           }),
-                          semantics: valueSet.semantics,
+                          isolationLevel: valueSet.semantics,
                       }
                     : {}),
             })

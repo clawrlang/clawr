@@ -92,7 +92,7 @@ export class DataLiteral implements Expression {
     toCIRExpression(
         context: Context & {
             type: TypeName
-            semantics: ResolvedIsolationLevel
+            isolationLevel: ResolvedIsolationLevel
         },
     ): Failable<cir.Expression> {
         if (!context.type)
@@ -100,7 +100,7 @@ export class DataLiteral implements Expression {
                 'DataLiteral.toCIRExpression: target type not specified',
                 this.span,
             ).getError()
-        if (!context.semantics)
+        if (!context.isolationLevel)
             throw Failable.failure(
                 'DataLiteral.toCIRExpression: target semantics not specified',
                 this.span,
@@ -142,7 +142,7 @@ export class DataLiteral implements Expression {
             Failable.success({
                 kind: 'ALLOCATION',
                 type: context.type.toCIR(),
-                semantics: context.semantics,
+                isolationLevel: context.isolationLevel,
                 fields,
             }),
         )

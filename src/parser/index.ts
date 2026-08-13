@@ -6,7 +6,7 @@ import { Declaration } from '../model'
 export type Context = {
     errorReporter: ErrorReporter
     type?: string
-    semantics?: (cir.Expression & { kind: 'ALLOCATION' })['semantics']
+    isolationLevel?: (cir.Expression & { kind: 'ALLOCATION' })['isolationLevel']
 }
 
 export { ModuleParser } from './module-parser'

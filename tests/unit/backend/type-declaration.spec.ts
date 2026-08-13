@@ -234,7 +234,7 @@ describe('Type declaration', () => {
                             value: {
                                 kind: 'ALLOCATION',
                                 type: { name: 'Super' },
-                                semantics: 'SHARED',
+                                isolationLevel: 'SHARED',
                                 fields: [],
                             },
                         },

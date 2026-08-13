@@ -40,7 +40,7 @@ export class Assignment implements Statement {
                     targetValueSet instanceof RCTypeLattice
                         ? targetValueSet.type
                         : undefined,
-                semantics:
+                isolationLevel:
                     targetSemantics !== 'UNIQUE' ? targetSemantics : undefined,
             })
             .value()

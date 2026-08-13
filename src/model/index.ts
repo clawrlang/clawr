@@ -20,7 +20,7 @@ export interface Expression {
     toCIRExpression(
         context: Context & {
             type?: TypeName
-            semantics?: ResolvedIsolationLevel
+            isolationLevel?: ResolvedIsolationLevel
         },
     ): Failable<cir.Expression>
 }

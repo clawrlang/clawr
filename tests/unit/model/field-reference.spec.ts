@@ -28,6 +28,8 @@ describe('Field Reference', () => {
                 fields: [
                     {
                         name: 'myField',
+                        isImmutable: false,
+                        isolationLevel: 'ISOLATED',
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
@@ -68,6 +70,8 @@ describe('Field Reference', () => {
                 name: TypeName.create({ name: 'MyType' }),
                 fields: [
                     {
+                        isImmutable: true,
+                        isolationLevel: 'SHARED',
                         name: 'myField',
                         valueSet: ExplicitRCTypeValueSet.create({
                             type: TypeName.create({ name: 'MyType' }),
@@ -128,6 +132,14 @@ describe('Field Reference', () => {
                         name: TypeName.create({ name: 'MyType' }),
                         fields: [
                             {
+                                isImmutable:
+                                    semantics === 'const' ||
+                                    semantics === 'ref',
+                                isolationLevel:
+                                    semantics === 'ref' ||
+                                    semantics === 'mutref'
+                                        ? 'SHARED'
+                                        : 'ISOLATED',
                                 name: 'myField',
                                 valueSet: ExplicitRCTypeValueSet.create({
                                     type: TypeName.create({
@@ -180,6 +192,8 @@ describe('Field Reference', () => {
                 name: TypeName.create({ name: 'MyType' }),
                 fields: [
                     {
+                        isImmutable: false,
+                        isolationLevel: 'ISOLATED',
                         name: 'myField',
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
@@ -231,6 +245,8 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 name: 'myField',
+                                isImmutable: false,
+                                isolationLevel: 'ISOLATED',
                                 valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
@@ -268,25 +284,46 @@ describe('Field Reference', () => {
 
     describe('effectively const', () => {
         const cases = [
-            { semantics: ['const', 'ISOLATED'], expected: true },
-            { semantics: ['mut', 'ISOLATED'], expected: false },
-            { semantics: ['ref', 'SHARED'], expected: false },
-            { semantics: ['mutref', 'SHARED'], expected: false },
+            {
+                semantics: ['const', true, 'ISOLATED'],
+                isImmutable: true,
+                isolationLevel: 'ISOLATED',
+                expected: true,
+            },
+            {
+                semantics: ['mut', false, 'ISOLATED'],
+                isImmutable: false,
+                isolationLevel: 'ISOLATED',
+                expected: false,
+            },
+            {
+                semantics: ['ref', true, 'SHARED'],
+                isImmutable: true,
+                isolationLevel: 'SHARED',
+                expected: false,
+            },
+            {
+                semantics: ['mutref', false, 'SHARED'],
+                isImmutable: false,
+                isolationLevel: 'SHARED',
+                expected: false,
+            },
         ] as const
 
-        for (const { semantics, expected } of cases) {
+        for (const {
+            semantics,
+            isImmutable,
+            isolationLevel,
+            expected,
+        } of cases) {
             it(`returns ${expected} if the object is ${semantics}`, () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
-                    isImmutable:
-                        semantics[0] === 'const' || semantics[0] === 'ref',
-                    isolationLevel:
-                        semantics[0] === 'ref' || semantics[0] === 'mutref'
-                            ? 'SHARED'
-                            : 'ISOLATED',
+                    isImmutable,
+                    isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        semantics: semantics[1],
+                        semantics: semantics[2],
                     }),
                 })
                 context.scope.rootScope.addDataDeclaration(
@@ -296,6 +333,8 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 name: 'myField',
+                                isImmutable,
+                                isolationLevel,
                                 valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
@@ -337,6 +376,8 @@ describe('Field Reference', () => {
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [
                         {
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             name: 'myField',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
@@ -376,6 +417,8 @@ describe('Field Reference', () => {
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [
                         {
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             name: 'myField',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,

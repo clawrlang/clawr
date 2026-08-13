@@ -83,6 +83,8 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'field',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -135,6 +137,8 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'field',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitTruthValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -161,6 +165,8 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'innerField',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -176,6 +182,8 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'field',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'InnerType' }),
                                 semantics: 'mut',
@@ -259,6 +267,8 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'field',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -347,6 +357,8 @@ describe('VariableDeclaration', () => {
                     name: TypeName.create({ name: 'InnerType' }),
                     fields: [
                         {
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             name: 'innerField',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
@@ -363,6 +375,8 @@ describe('VariableDeclaration', () => {
                     fields: [
                         {
                             name: 'field',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'InnerType' }),
                                 semantics: 'mut',
@@ -528,6 +542,8 @@ describe('VariableDeclaration', () => {
                         name: TypeName.create({ name: 'MyType' }),
                         fields: [
                             {
+                                isImmutable: false,
+                                isolationLevel: 'ISOLATED',
                                 name: 'myField',
                                 valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,

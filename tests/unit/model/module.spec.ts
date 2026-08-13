@@ -62,6 +62,8 @@ describe('Module', () => {
                     fields: [
                         {
                             name: 'field1',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -69,6 +71,8 @@ describe('Module', () => {
                         },
                         {
                             name: 'field2',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitTruthValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -125,6 +129,8 @@ describe('Module', () => {
                     fields: [
                         {
                             name: 'field1',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -132,6 +138,8 @@ describe('Module', () => {
                         },
                         {
                             name: 'field2',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitTruthValueSet.create({
                                 span: someCodeSpan,
                             }),

@@ -83,6 +83,8 @@ describe('Literals', () => {
                     fields: [
                         {
                             name: 'x',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -90,6 +92,8 @@ describe('Literals', () => {
                         },
                         {
                             name: 'y',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -152,6 +156,8 @@ describe('Literals', () => {
                     fields: [
                         {
                             name: 'x',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -159,6 +165,8 @@ describe('Literals', () => {
                         },
                         {
                             name: 'y',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -213,6 +221,8 @@ describe('Literals', () => {
                     fields: [
                         {
                             name: 'inner',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({
                                     name: 'MissingInnerType',

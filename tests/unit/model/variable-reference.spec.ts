@@ -90,6 +90,8 @@ describe('Variable Reference', () => {
                 name: TypeName.create({ name: 'MyType' }),
                 fields: [
                     {
+                        isImmutable: false,
+                        isolationLevel: 'ISOLATED',
                         name: 'myField',
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,

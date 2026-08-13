@@ -34,6 +34,11 @@ export class DataFieldParser {
         return {
             name: fieldName,
             valueSet,
+            isImmutable: semantics === 'const' || semantics === 'ref',
+            isolationLevel:
+                semantics === 'const' || semantics === 'mut'
+                    ? 'ISOLATED'
+                    : 'SHARED',
             semantics,
             defaultValue,
         }

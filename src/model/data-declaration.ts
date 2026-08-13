@@ -1,9 +1,11 @@
-import { Context, Declaration, Expression } from '.'
+import { Context, Declaration, Expression, ResolvedIsolationLevel } from '.'
 import { VariableSemantics } from './variable-declaration'
 import { ExplicitValueSet } from './explicit-value-set'
 import { TypeName } from './type-name'
 
 export type DataField = {
+    isImmutable: boolean
+    isolationLevel: ResolvedIsolationLevel
     semantics: VariableSemantics
     name: string
     valueSet: ExplicitValueSet

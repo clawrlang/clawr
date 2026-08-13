@@ -62,9 +62,10 @@ export class FieldReference implements Expression {
     }
 
     isolationLevel(context: Context): IsolationLevel {
-        const value = this.declaredValueSet(context).value()
-        if (value instanceof RCTypeLattice) return value.semantics
-        return 'ISOLATED'
+        const field = this.getFieldFromContext(context).value()
+        return field.semantics === 'const' || field.semantics === 'mut'
+            ? 'ISOLATED'
+            : 'SHARED'
     }
 
     declaredValueSet(context: Context): Failable<Lattice> {

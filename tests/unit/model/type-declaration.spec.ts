@@ -19,7 +19,6 @@ describe('DataDeclaration', () => {
                     valueSet: ExplicitIntegerValueSet.create({
                         span: someCodeSpan,
                     }),
-                    semantics: 'mut',
                 },
                 {
                     name: 'field2',
@@ -28,7 +27,6 @@ describe('DataDeclaration', () => {
                     valueSet: ExplicitTruthValueSet.create({
                         span: someCodeSpan,
                     }),
-                    semantics: 'mut',
                 },
             ],
         })

@@ -88,7 +88,6 @@ describe('VariableDeclaration', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -142,7 +141,6 @@ describe('VariableDeclaration', () => {
                             valueSet: ExplicitTruthValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -170,7 +168,6 @@ describe('VariableDeclaration', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -189,7 +186,6 @@ describe('VariableDeclaration', () => {
                                 semantics: 'mut',
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -272,7 +268,6 @@ describe('VariableDeclaration', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -363,7 +358,6 @@ describe('VariableDeclaration', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -382,7 +376,6 @@ describe('VariableDeclaration', () => {
                                 semantics: 'mut',
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -548,7 +541,6 @@ describe('VariableDeclaration', () => {
                                 valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
-                                semantics: 'mut',
                             },
                         ],
                     }),

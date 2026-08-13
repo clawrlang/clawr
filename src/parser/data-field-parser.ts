@@ -39,7 +39,6 @@ export class DataFieldParser {
                 semantics === 'const' || semantics === 'mut'
                     ? 'ISOLATED'
                     : 'SHARED',
-            semantics,
             defaultValue,
         }
     }

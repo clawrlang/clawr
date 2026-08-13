@@ -489,7 +489,6 @@ describe('FunctionDeclaration', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -559,7 +558,6 @@ describe('FunctionDeclaration', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),

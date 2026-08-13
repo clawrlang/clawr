@@ -88,7 +88,6 @@ describe('Literals', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                         {
                             name: 'y',
@@ -97,7 +96,6 @@ describe('Literals', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -161,7 +159,6 @@ describe('Literals', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                         {
                             name: 'y',
@@ -170,7 +167,6 @@ describe('Literals', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -230,7 +226,6 @@ describe('Literals', () => {
                                 semantics: 'mut',
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),

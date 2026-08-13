@@ -134,12 +134,14 @@ describe('Object Parser', () => {
             fields: [
                 {
                     name: 'field1',
-                    semantics: 'const',
+                    isImmutable: true,
+                    isolationLevel: 'ISOLATED',
                     defaultValue: { value: 10n },
                 },
                 {
                     name: 'field2',
-                    semantics: 'const',
+                    isImmutable: true,
+                    isolationLevel: 'ISOLATED',
                     defaultValue: { value: 'true' },
                 },
             ],

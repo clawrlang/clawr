@@ -96,7 +96,6 @@ describe('Variable Reference', () => {
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
-                        semantics: 'mut',
                     },
                 ],
             }),

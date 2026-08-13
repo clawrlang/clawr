@@ -33,7 +33,6 @@ describe('Field Reference', () => {
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
-                        semantics: 'mut',
                     },
                 ],
             }),
@@ -78,7 +77,6 @@ describe('Field Reference', () => {
                             semantics: 'ref',
                             span: someCodeSpan,
                         }),
-                        semantics: 'ref',
                     },
                 ],
             }),
@@ -148,7 +146,6 @@ describe('Field Reference', () => {
                                     semantics,
                                     span: someCodeSpan,
                                 }),
-                                semantics,
                             },
                         ],
                     }),
@@ -198,7 +195,6 @@ describe('Field Reference', () => {
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
-                        semantics: 'mut',
                     },
                 ],
             }),
@@ -250,7 +246,6 @@ describe('Field Reference', () => {
                                 valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
-                                semantics: 'mut',
                             },
                         ],
                     }),
@@ -338,7 +333,6 @@ describe('Field Reference', () => {
                                 valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
-                                semantics: semantics[0],
                             },
                         ],
                     }),
@@ -382,7 +376,6 @@ describe('Field Reference', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -423,7 +416,6 @@ describe('Field Reference', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),

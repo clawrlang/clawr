@@ -67,7 +67,6 @@ describe('Module', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                         {
                             name: 'field2',
@@ -76,7 +75,6 @@ describe('Module', () => {
                             valueSet: ExplicitTruthValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -134,7 +132,6 @@ describe('Module', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                         {
                             name: 'field2',
@@ -143,7 +140,6 @@ describe('Module', () => {
                             valueSet: ExplicitTruthValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -157,8 +153,16 @@ describe('Module', () => {
         expect(myDataDeclaration).toMatchObject({
             name: { name: 'MyData' },
             fields: [
-                { name: 'field1', semantics: 'mut' },
-                { name: 'field2', semantics: 'mut' },
+                {
+                    name: 'field1',
+                    isImmutable: false,
+                    isolationLevel: 'ISOLATED',
+                },
+                {
+                    name: 'field2',
+                    isImmutable: false,
+                    isolationLevel: 'ISOLATED',
+                },
             ],
         })
         expect(myDataDeclaration?.fields[0].valueSet).toBeInstanceOf(

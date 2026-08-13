@@ -21,8 +21,16 @@ describe('DataDeclarationParser', () => {
         expect(result).toMatchObject({
             name: { name: 'MyData' },
             fields: [
-                { name: 'field1', semantics: 'mut' },
-                { name: 'field2', semantics: 'mut' },
+                {
+                    name: 'field1',
+                    isImmutable: false,
+                    isolationLevel: 'ISOLATED',
+                },
+                {
+                    name: 'field2',
+                    isImmutable: false,
+                    isolationLevel: 'ISOLATED',
+                },
             ],
         })
         expect(result.fields[0].valueSet).toBeInstanceOf(
@@ -44,8 +52,12 @@ describe('DataDeclarationParser', () => {
         expect(result).toMatchObject({
             name: { name: 'MyData' },
             fields: [
-                { name: 'field1', semantics: 'ref' },
-                { name: 'field2', semantics: 'const' },
+                { name: 'field1', isImmutable: true, isolationLevel: 'SHARED' },
+                {
+                    name: 'field2',
+                    isImmutable: true,
+                    isolationLevel: 'ISOLATED',
+                },
             ],
         })
         expect(result.fields[0].valueSet).toBeInstanceOf(

@@ -56,7 +56,6 @@ describe('Assignment', () => {
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -75,7 +74,6 @@ describe('Assignment', () => {
                                 semantics: 'mut',
                                 span: someCodeSpan,
                             }),
-                            semantics: 'mut',
                         },
                     ],
                 }),
@@ -261,7 +259,6 @@ describe('Assignment', () => {
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
-                        semantics: 'mut',
                     },
                 ],
             }),
@@ -491,7 +488,6 @@ describe('Assignment', () => {
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
-                        semantics: 'mut',
                     },
                 ],
             }),
@@ -564,7 +560,6 @@ describe('Assignment', () => {
                                 valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
-                                semantics: 'mut',
                             },
                         ],
                     }),

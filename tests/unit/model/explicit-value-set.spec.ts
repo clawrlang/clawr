@@ -129,7 +129,6 @@ describe('ExplicitValueSet', () => {
             expect(valueSet.toCIR()).toEqual({
                 type: 'rc-type',
                 typeName: 'MyType',
-                semantics: 'ISOLATED',
             })
         })
 
@@ -146,7 +145,6 @@ describe('ExplicitValueSet', () => {
             expect(valueSet.toCIR()).toEqual({
                 type: 'rc-type',
                 typeName: 'MyType',
-                semantics: 'SHARED',
             })
         })
     })

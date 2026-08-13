@@ -208,7 +208,6 @@ type RcTypeValueSet = {
     type: 'rc-type'
     namespace?: string
     typeName: string
-    semantics: IsolationLevel
 }
 
 export type ValueSet =

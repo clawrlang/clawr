@@ -124,7 +124,6 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
             type: 'rc-type',
             typeName: this.type.name,
             namespace: this.type.namespace,
-            semantics: convertSemantics(this.semantics),
         }
     }
 
@@ -171,7 +170,6 @@ export class ExplicitUniqueValueSet implements ExplicitValueSet {
             type: 'rc-type',
             typeName: this.type.name,
             namespace: this.type.namespace,
-            semantics: 'ISOLATED',
         }
     }
 

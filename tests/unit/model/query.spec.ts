@@ -141,7 +141,6 @@ describe('Query', () => {
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'ISOLATED',
                 },
             })
         })
@@ -191,7 +190,6 @@ describe('Query', () => {
                 valueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'ISOLATED',
                 },
             })
         })

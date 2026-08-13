@@ -121,7 +121,6 @@ function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
             valueSet: {
                 type: 'rc-type',
                 typeName: 'void',
-                semantics: 'SHARED',
             } satisfies cir.ValueSet,
         },
         ...slot.parameters,
@@ -150,7 +149,6 @@ function lowerMethod(
                         type: 'rc-type',
                         namespace: receiverType.namespace,
                         typeName: receiverType.name,
-                        semantics: 'SHARED',
                     },
                 },
                 ...decl.parameters,
@@ -171,7 +169,6 @@ function lowerInitializer(
             resultValueSet: {
                 type: 'rc-type',
                 typeName: 'void',
-                semantics: 'ISOLATED',
             },
             parameters: [
                 {
@@ -180,7 +177,6 @@ function lowerInitializer(
                         type: 'rc-type',
                         namespace: receiverType.namespace,
                         typeName: receiverType.name,
-                        semantics: 'SHARED',
                     },
                 },
                 ...decl.parameters,

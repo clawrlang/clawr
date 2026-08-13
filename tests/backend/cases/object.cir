@@ -68,8 +68,7 @@
             ],
             "resultValueSet": {
                 "type": "rc-type",
-                "typeName": "Object",
-                "semantics": "ISOLATED"
+                "typeName": "Object"
             }
         }
     ],
@@ -79,8 +78,7 @@
             "name": "obj",
             "valueSet": {
                 "type": "rc-type",
-                "typeName": "Object",
-                "semantics": "ISOLATED"
+                "typeName": "Object"
             },
             "initialValue": {
                 "kind": "CALL",
@@ -92,8 +90,7 @@
                 "arguments": [],
                 "valueSet": {
                     "type": "rc-type",
-                    "typeName": "Object",
-                    "semantics": "ISOLATED"
+                    "typeName": "Object"
                 }
             }
         },

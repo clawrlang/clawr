@@ -130,7 +130,6 @@ describe('Assignment', () => {
                     valueSet: {
                         type: 'rc-type',
                         typeName: 'InnerType',
-                        semantics: 'ISOLATED',
                     },
                     initialValue: {
                         kind: 'VARIABLE_REF',
@@ -211,7 +210,6 @@ describe('Assignment', () => {
                     valueSet: {
                         type: 'rc-type',
                         typeName: 'MyType',
-                        semantics: 'ISOLATED',
                     },
                     initialValue: {
                         kind: 'VARIABLE_REF',
@@ -364,7 +362,6 @@ describe('Assignment', () => {
                         arguments: [],
                         valueSet: {
                             type: 'rc-type',
-                            semantics: 'ISOLATED',
                             typeName: 'MyType',
                         },
                     },

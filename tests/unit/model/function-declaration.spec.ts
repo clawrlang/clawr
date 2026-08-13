@@ -354,7 +354,6 @@ describe('FunctionDeclaration', () => {
                 resultValueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'ISOLATED',
                 },
             })
         })
@@ -405,7 +404,6 @@ describe('FunctionDeclaration', () => {
                 resultValueSet: {
                     type: 'rc-type',
                     typeName: 'MyData',
-                    semantics: 'SHARED',
                 },
             })
         })

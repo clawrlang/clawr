@@ -23,8 +23,7 @@
                     "name": "var",
                     "valueSet": {
                         "type": "rc-type",
-                        "typeName": "MyData",
-                        "semantics": "ISOLATED"
+                        "typeName": "MyData"
                     },
                     "initialValue": {
                         "kind": "ALLOCATION",
@@ -53,8 +52,7 @@
             ],
             "resultValueSet": {
                 "type": "rc-type",
-                "typeName": "MyData",
-                "semantics": "ISOLATED"
+                "typeName": "MyData"
             }
         }
     ],
@@ -64,8 +62,7 @@
             "name": "var",
             "valueSet": {
                 "type": "rc-type",
-                "typeName": "MyData",
-                "semantics": "SHARED"
+                "typeName": "MyData"
             },
             "initialValue": {
                 "kind": "AS_SHARED",
@@ -78,8 +75,7 @@
                     "arguments": [],
                     "valueSet": {
                         "type": "rc-type",
-                        "typeName": "MyData",
-                        "semantics": "SHARED"
+                        "typeName": "MyData"
                     }
                 }
             }

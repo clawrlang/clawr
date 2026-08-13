@@ -102,7 +102,7 @@ export class DataLiteral implements Expression {
             ).getError()
         if (!context.isolationLevel)
             throw Failable.failure(
-                'DataLiteral.toCIRExpression: target semantics not specified',
+                'DataLiteral.toCIRExpression: target isolation level not specified',
                 this.span,
             ).getError()
 

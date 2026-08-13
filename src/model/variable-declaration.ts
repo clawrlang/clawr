@@ -1,4 +1,11 @@
-import { Context, Declaration, Expression, IsolationLevel, Statement } from '.'
+import {
+    Context,
+    Declaration,
+    Expression,
+    IsolationLevel,
+    ResolvedIsolationLevel,
+    Statement,
+} from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
@@ -11,7 +18,7 @@ export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
 export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private readonly isImmutable: boolean,
-        private readonly isolationLevel: Omit<IsolationLevel, 'UNIQUE'>,
+        private readonly isolationLevel: ResolvedIsolationLevel,
         private name: string,
         private valueSet: ExplicitValueSet | undefined,
         private initialValue: Expression,
@@ -25,7 +32,7 @@ export class VariableDeclaration implements Statement, Declaration {
         initialValue,
     }: {
         isImmutable: boolean
-        isolationLevel: Omit<IsolationLevel, 'UNIQUE'>
+        isolationLevel: ResolvedIsolationLevel
         name: string
         valueSet?: ExplicitValueSet
         initialValue: Expression
@@ -50,9 +57,7 @@ export class VariableDeclaration implements Statement, Declaration {
     private emit(scope: Scope | Scope['rootScope'], context: Context) {
         let currentValue = this.currentValueFromInitial(context)
         if (currentValue instanceof RCTypeLattice) {
-            currentValue = currentValue.withSemantics(
-                this.isolationLevel as IsolationLevel,
-            )
+            currentValue = currentValue.withSemantics(this.isolationLevel)
         }
         const valueSet =
             this.isImmutable && this.isolationLevel === 'ISOLATED'
@@ -69,20 +74,20 @@ export class VariableDeclaration implements Statement, Declaration {
                               name: valueSet.typeName,
                               namespace: valueSet.namespace,
                           }),
-                          isolationLevel: valueSet.semantics,
+                          isolationLevel: this.isolationLevel,
                       }
                     : {}),
             })
             .value()
 
-        const valueSemantics = this.initialValue.isolationLevel(context)
+        const valueIsolationLevel = this.initialValue.isolationLevel(context)
         if (
             valueSet.type === 'rc-type' &&
-            valueSet.semantics !== valueSemantics &&
-            valueSemantics !== 'UNIQUE'
+            this.isolationLevel !== valueIsolationLevel &&
+            valueIsolationLevel !== 'UNIQUE'
         )
             logSemanticError(
-                `Cannot assign ${valueSemantics} value to ${valueSet.semantics} target`,
+                `Cannot assign ${valueIsolationLevel} value to ${this.isolationLevel} target`,
                 { ...context, span: this.initialValue.span },
             )
 

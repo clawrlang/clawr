@@ -185,14 +185,10 @@
             "properties": {
               "type": { "const": "rc-type" },
               "namespace": { "type": "string" },
-              "typeName": { "type": "string" },
-              "semantics": { "$ref": "#/$defs/IsolationLevel" }
+              "typeName": { "type": "string" }
             },
-            "required": ["type", "typeName", "semantics"],
+            "required": ["type", "typeName"],
             "additionalProperties": false
-          },
-          "IsolationLevel": {
-            "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
           },
           "RealValueSet": {
             "type": "object",
@@ -251,6 +247,9 @@
             },
             "required": ["kind", "type", "isolationLevel", "fields"],
             "additionalProperties": false
+          },
+          "IsolationLevel": {
+            "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
           },
           "__type.o1": {
             "type": "object",

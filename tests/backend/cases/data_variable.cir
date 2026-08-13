@@ -18,8 +18,7 @@
             "name": "foo",
             "valueSet": {
                 "type": "rc-type",
-                "typeName": "FooData",
-                "semantics": "SHARED"
+                "typeName": "FooData"
             },
             "initialValue": {
                 "kind": "ALLOCATION",

@@ -18,8 +18,7 @@
             "name": "two",
             "valueSet": {
                 "type": "rc-type",
-                "typeName": "FooData",
-                "semantics": "ISOLATED"
+                "typeName": "FooData"
             },
             "initialValue": {
                 "kind": "ALLOCATION",
@@ -45,8 +44,7 @@
             "name": "one",
             "valueSet": {
                 "type": "rc-type",
-                "typeName": "FooData",
-                "semantics": "ISOLATED"
+                "typeName": "FooData"
             },
             "initialValue": {
                 "kind": "RETAIN",

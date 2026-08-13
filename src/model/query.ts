@@ -43,7 +43,7 @@ export class Query implements Expression {
         return Failable.success(true)
     }
 
-    semantics(context: Context): IsolationLevel {
+    isolationLevel(context: Context): IsolationLevel {
         const value = this.currentValue(context).value()
         if (value instanceof RCTypeLattice) return value.semantics
         return 'ISOLATED'

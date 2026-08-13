@@ -47,7 +47,7 @@ export class FieldReference implements Expression {
             this.object instanceof VariableReference ||
             this.object instanceof FieldReference
         ) {
-            if (this.object.semantics(context) === 'ISOLATED') {
+            if (this.object.isolationLevel(context) === 'ISOLATED') {
                 const object = this.object.toCIRExpression(context).value()
                 return [{ kind: 'ENSURE_UNIQUE', object }]
             }
@@ -56,12 +56,12 @@ export class FieldReference implements Expression {
     }
 
     isEffectivelyConst(context: Context): Failable<boolean> {
-        return this.object.semantics(context) === 'SHARED'
+        return this.object.isolationLevel(context) === 'SHARED'
             ? Failable.success(false)
             : this.object.isEffectivelyConst(context)
     }
 
-    semantics(context: Context): IsolationLevel {
+    isolationLevel(context: Context): IsolationLevel {
         const value = this.declaredValueSet(context).value()
         if (value instanceof RCTypeLattice) return value.semantics
         return 'ISOLATED'
@@ -126,7 +126,7 @@ export class FieldReference implements Expression {
     }
 
     private checkOperatorCompatibility_failable(context: Context): Failable {
-        const semantics = this.object.semantics(context)
+        const semantics = this.object.isolationLevel(context)
         if ((semantics === 'SHARED') !== (this.operator === '->')) {
             const error = SemanticError.create({
                 message: `Cannot access field ${this.field} of a ${semantics} type object with "${this.operator}" operator`,

@@ -88,7 +88,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.semantics(context)).toEqual('SHARED')
+        expect(fieldRef.isolationLevel(context)).toEqual('SHARED')
     })
 
     describe('infers its type and isolation level from the context', () => {
@@ -146,7 +146,9 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                expect(fieldRef.semantics(context)).toEqual(expectedSemantics)
+                expect(fieldRef.isolationLevel(context)).toEqual(
+                    expectedSemantics,
+                )
                 expect(
                     fieldRef.declaredValueSet(context).value(),
                 ).toMatchObject({

@@ -24,7 +24,7 @@ export class IntegerLiteral implements Expression {
         return new IntegerLiteral(value, span)
     }
 
-    semantics(_: Context): 'ISOLATED' {
+    isolationLevel(_: Context): 'ISOLATED' {
         return 'ISOLATED'
     }
 

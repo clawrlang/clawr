@@ -32,7 +32,7 @@ export class Assignment implements Statement {
         }
         const target = targetResult.value()
         const targetValueSet = this.target.declaredValueSet(context).value()
-        const targetSemantics = this.target.semantics(context)
+        const targetSemantics = this.target.isolationLevel(context)
         const value = this.value
             .toCIRExpression({
                 ...context,
@@ -54,7 +54,7 @@ export class Assignment implements Statement {
                     span: { start: this.span.start, end: this.span.end },
                 },
             )
-        const valueSemantics = this.value.semantics(context)
+        const valueSemantics = this.value.isolationLevel(context)
         if (targetSemantics !== valueSemantics && valueSemantics !== 'UNIQUE')
             logSemanticError(
                 `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
@@ -102,7 +102,7 @@ export class Assignment implements Statement {
             this.target.declaredValueSet(context).value() instanceof
                 RCTypeLattice &&
             value.kind === 'CALL' &&
-            this.value.semantics(context) === 'UNIQUE'
+            this.value.isolationLevel(context) === 'UNIQUE'
         ) {
             context.scope.emitted.push({
                 kind: 'ASSIGN',

@@ -68,7 +68,7 @@ export class VariableDeclaration implements Statement, Declaration {
             })
             .value()
 
-        const valueSemantics = this.initialValue.semantics(context)
+        const valueSemantics = this.initialValue.isolationLevel(context)
         if (
             valueSet.type === 'rc-type' &&
             valueSet.semantics !== valueSemantics &&

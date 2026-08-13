@@ -26,7 +26,7 @@ export class DataLiteral implements Expression {
         return Failable.success(true)
     }
 
-    semantics(_: Context): IsolationLevel {
+    isolationLevel(_: Context): IsolationLevel {
         return 'UNIQUE'
     }
 

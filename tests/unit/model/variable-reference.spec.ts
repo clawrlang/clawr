@@ -116,7 +116,7 @@ describe('Variable Reference', () => {
                     name: 'myVar',
                     span: someCodeSpan,
                 })
-                expect(variableRef.semantics(context)).toEqual(expected)
+                expect(variableRef.isolationLevel(context)).toEqual(expected)
             })
         }
     })

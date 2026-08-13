@@ -20,7 +20,7 @@ export class TruthValueLiteral implements Expression {
         return new TruthValueLiteral(value, span)
     }
 
-    semantics(_: Context): 'ISOLATED' {
+    isolationLevel(_: Context): 'ISOLATED' {
         return 'ISOLATED'
     }
 

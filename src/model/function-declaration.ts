@@ -70,6 +70,10 @@ export class FunctionDeclaration implements Declaration {
                     !param.semantics ||
                     param.semantics === 'const' ||
                     param.semantics === 'ref',
+                isolationLevel:
+                    param.semantics === 'ref' || param.semantics === 'mutref'
+                        ? 'SHARED'
+                        : 'ISOLATED',
                 lattice:
                     param.defaultValue?.currentValue(context).value() ??
                     param.valueSet?.toLattice(context) ??

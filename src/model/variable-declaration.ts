@@ -108,6 +108,7 @@ export class VariableDeclaration implements Statement, Declaration {
 
         scope.variables.set(this.name, {
             isImmutable: this.isImmutable,
+            isolationLevel: this.isolationLevel,
             lattice:
                 this.isImmutable && this.isolationLevel === 'ISOLATED'
                     ? currentValue

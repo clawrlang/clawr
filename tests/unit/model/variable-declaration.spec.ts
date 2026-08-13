@@ -188,6 +188,7 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('bar', {
                 isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'OuterType' }),
                     semantics: 'ISOLATED',
@@ -268,6 +269,7 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('bar', {
                 isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
@@ -332,6 +334,7 @@ describe('VariableDeclaration', () => {
             decl.emitStatement(context)
             expect(context.scope.variableDeclaration('x')).toEqual({
                 isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 lattice: IntegerLattice.create({ min: 42n, max: 42n }),
             })
         })
@@ -461,6 +464,7 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('c', {
                 isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                     semantics: 'ISOLATED',
@@ -535,6 +539,7 @@ describe('VariableDeclaration', () => {
                 )
                 context.scope.variables.set('value', {
                     isImmutable: valueSemantics[0],
+                    isolationLevel: valueSemantics[1],
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                         semantics: valueSemantics[1],

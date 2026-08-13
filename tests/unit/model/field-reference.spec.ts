@@ -15,6 +15,7 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: false,
+            isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
@@ -55,6 +56,7 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: false,
+            isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
@@ -104,6 +106,10 @@ describe('Field Reference', () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     isImmutable: semantics === 'const' || semantics === 'ref',
+                    isolationLevel:
+                        semantics === 'ref' || semantics === 'mutref'
+                            ? 'SHARED'
+                            : 'ISOLATED',
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                         semantics: expectedSemantics,
@@ -162,6 +168,7 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: false,
+            isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
@@ -211,6 +218,7 @@ describe('Field Reference', () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     isImmutable: semantics[0],
+                    isolationLevel: semantics[1],
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                         semantics: semantics[1],
@@ -272,6 +280,10 @@ describe('Field Reference', () => {
                 context.scope.variables.set('myVar', {
                     isImmutable:
                         semantics[0] === 'const' || semantics[0] === 'ref',
+                    isolationLevel:
+                        semantics[0] === 'ref' || semantics[0] === 'mutref'
+                            ? 'SHARED'
+                            : 'ISOLATED',
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                         semantics: semantics[1],
@@ -313,6 +325,7 @@ describe('Field Reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
@@ -351,6 +364,7 @@ describe('Field Reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 isImmutable: false,
+                isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',

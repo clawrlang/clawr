@@ -20,6 +20,7 @@ describe('Assignment', () => {
         const context = newSemanticContext()
         context.scope.variables.set('x', {
             isImmutable: false,
+            isolationLevel: 'ISOLATED',
             lattice: IntegerLattice.unconstrained(),
         })
 
@@ -77,6 +78,7 @@ describe('Assignment', () => {
             )
             context.scope.variables.set('bar', {
                 isImmutable: false,
+                isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'OuterType' }),
                     semantics: 'ISOLATED',
@@ -84,6 +86,7 @@ describe('Assignment', () => {
             })
             context.scope.variables.set('foo', {
                 isImmutable: false,
+                isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'InnerType' }),
                     semantics: 'ISOLATED',
@@ -169,6 +172,7 @@ describe('Assignment', () => {
             )
             context.scope.variables.set('bar', {
                 isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
@@ -176,6 +180,7 @@ describe('Assignment', () => {
             })
             context.scope.variables.set('foo', {
                 isImmutable: false,
+                isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                     semantics: 'ISOLATED',
@@ -257,6 +262,7 @@ describe('Assignment', () => {
         )
         context.scope.variables.set('foo', {
             isImmutable: false,
+            isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
@@ -320,6 +326,7 @@ describe('Assignment', () => {
         )
         context.scope.rootScope.variables.set('refVar', {
             isImmutable: false,
+            isolationLevel: 'SHARED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
                 semantics: 'SHARED',
@@ -327,6 +334,7 @@ describe('Assignment', () => {
         })
         context.scope.rootScope.variables.set('mutVar', {
             isImmutable: false,
+            isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
@@ -410,6 +418,7 @@ describe('Assignment', () => {
                 )
                 context.scope.variables.set('target', {
                     isImmutable: true,
+                    isolationLevel: semantics,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                         semantics,
@@ -417,6 +426,7 @@ describe('Assignment', () => {
                 })
                 context.scope.variables.set('value', {
                     isImmutable: true,
+                    isolationLevel: semantics,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                         semantics,
@@ -480,6 +490,7 @@ describe('Assignment', () => {
         )
         context.scope.variables.set('x', {
             isImmutable: true,
+            isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
                 semantics: 'ISOLATED',
@@ -550,6 +561,7 @@ describe('Assignment', () => {
                 )
                 context.scope.variables.set('target', {
                     isImmutable: false,
+                    isolationLevel: targetSemantics[1],
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                         semantics: targetSemantics[1],
@@ -557,6 +569,7 @@ describe('Assignment', () => {
                 })
                 context.scope.variables.set('value', {
                     isImmutable: valueSemantics[0] === 'ref',
+                    isolationLevel: valueSemantics[1],
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                         semantics: valueSemantics[1],

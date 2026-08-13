@@ -149,6 +149,7 @@ describe('Query', () => {
             const context = newSemanticContext()
             context.scope.variables.set('value', {
                 isImmutable: true,
+                isolationLevel: 'SHARED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                     semantics: 'SHARED',

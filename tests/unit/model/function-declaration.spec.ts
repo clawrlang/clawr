@@ -141,6 +141,7 @@ describe('FunctionDeclaration', () => {
         )
         context.scope.variables.set('myVar', {
             isImmutable: true,
+            isolationLevel: 'SHARED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
                 semantics: 'SHARED',
@@ -186,6 +187,7 @@ describe('FunctionDeclaration', () => {
         )
         context.scope.variables.set('myVar', {
             isImmutable: true,
+            isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
                 semantics: 'ISOLATED',
@@ -233,6 +235,7 @@ describe('FunctionDeclaration', () => {
         )
         context.scope.variables.set('myVar', {
             isImmutable: true,
+            isolationLevel: 'ISOLATED',
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
                 semantics: 'ISOLATED',
@@ -318,6 +321,7 @@ describe('FunctionDeclaration', () => {
             )
             context.scope.variables.set('myVar', {
                 isImmutable: true,
+                isolationLevel: 'ISOLATED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                     semantics: 'ISOLATED',
@@ -369,6 +373,7 @@ describe('FunctionDeclaration', () => {
             )
             context.scope.variables.set('myVar', {
                 isImmutable: true,
+                isolationLevel: 'SHARED',
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                     semantics: 'SHARED',

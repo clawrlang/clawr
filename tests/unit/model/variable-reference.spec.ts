@@ -11,6 +11,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: true,
+            isolationLevel: 'ISOLATED',
             lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
 
@@ -44,6 +45,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: true,
+            isolationLevel: 'ISOLATED',
             lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
 
@@ -60,6 +62,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: true,
+            isolationLevel: 'ISOLATED',
             lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
         context.scope.setCurrentValue(
@@ -106,6 +109,10 @@ describe('Variable Reference', () => {
             it(`returns ${expected} for ${kind} variable`, () => {
                 context.scope.variables.set('myVar', {
                     isImmutable: kind === 'const' || kind === 'ref',
+                    isolationLevel:
+                        kind === 'ref' || kind === 'mutref'
+                            ? 'SHARED'
+                            : 'ISOLATED',
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                         semantics: expected,

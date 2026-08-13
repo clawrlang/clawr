@@ -111,6 +111,7 @@ describe('Module', () => {
         module.toCIR(context)
         expect(context.scope.variableDeclaration('x')).toEqual({
             isImmutable: true,
+            isolationLevel: 'ISOLATED',
             lattice: IntegerLattice.create({ min: 42n, max: 42n }),
         })
     })

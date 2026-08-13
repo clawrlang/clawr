@@ -125,6 +125,7 @@ describe('CallFunc', () => {
         const context = newSemanticContext()
         context.scope.variables.set('x', {
             isImmutable: true,
+            isolationLevel: 'ISOLATED',
             lattice: IntegerLattice.create({ min: 42n, max: 42n }),
         })
         context.scope.setCurrentValue(

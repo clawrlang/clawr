@@ -89,7 +89,8 @@ describe('Function Parser', () => {
             parameters: [
                 {
                     varName: 'x',
-                    semantics: 'ref',
+                    isImmutable: true,
+                    isolationLevel: 'SHARED',
                     span: {
                         start: { line: 1, column: 17 },
                         end: { line: 1, column: 32 },
@@ -98,7 +99,8 @@ describe('Function Parser', () => {
                 {
                     varName: 'y',
                     valueSet: { values: ['false', 'ambiguous', 'true'] },
-                    semantics: 'const',
+                    isImmutable: true,
+                    isolationLevel: 'ISOLATED',
                     span: {
                         start: { line: 1, column: 34 },
                         end: { line: 1, column: 59 },

@@ -1,5 +1,11 @@
 import * as cir from '../cir'
-import { Context, Declaration, Expression, Statement } from '.'
+import {
+    Context,
+    Declaration,
+    Expression,
+    ResolvedIsolationLevel,
+    Statement,
+} from '.'
 import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
@@ -66,14 +72,8 @@ export class FunctionDeclaration implements Declaration {
         const parameterScope = context.scope.createChildScope()
         for (const param of this.parameters) {
             parameterScope.variables.set(param.varName, {
-                isImmutable:
-                    !param.semantics ||
-                    param.semantics === 'const' ||
-                    param.semantics === 'ref',
-                isolationLevel:
-                    param.semantics === 'ref' || param.semantics === 'mutref'
-                        ? 'SHARED'
-                        : 'ISOLATED',
+                isImmutable: param.isImmutable,
+                isolationLevel: param.isolationLevel,
                 lattice:
                     param.defaultValue?.currentValue(context).value() ??
                     param.valueSet?.toLattice(context) ??
@@ -170,7 +170,8 @@ export class FunctionDeclaration implements Declaration {
 
 export class Parameter {
     private constructor(
-        public semantics: VariableSemantics | undefined,
+        public isImmutable: boolean,
+        public isolationLevel: ResolvedIsolationLevel,
         public label: string | undefined,
         public varName: string,
         public span: SourceCodeSpan,
@@ -179,7 +180,8 @@ export class Parameter {
     ) {}
 
     static create({
-        semantics,
+        isImmutable,
+        isolationLevel,
         label,
         varName,
         valueSet,
@@ -189,12 +191,14 @@ export class Parameter {
         label: string | undefined
         varName: string
         valueSet?: ExplicitValueSet
-        semantics?: VariableSemantics
+        isImmutable: boolean
+        isolationLevel: ResolvedIsolationLevel
         defaultValue?: Expression
         span: SourceCodeSpan
     }): Parameter {
         return new Parameter(
-            semantics,
+            isImmutable,
+            isolationLevel,
             label,
             varName,
             span,

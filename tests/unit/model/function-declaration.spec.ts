@@ -27,6 +27,8 @@ describe('FunctionDeclaration', () => {
             parameters: [
                 Parameter.create({
                     label: 'param1',
+                    isImmutable: true,
+                    isolationLevel: 'ISOLATED',
                     varName: 'x',
                     valueSet: ExplicitStringValueSet.create({
                         span: someCodeSpan,
@@ -441,6 +443,8 @@ describe('FunctionDeclaration', () => {
             parameters: [
                 Parameter.create({
                     label: 'param1',
+                    isImmutable: true,
+                    isolationLevel: 'ISOLATED',
                     varName: 'x',
                     valueSet: ExplicitStringValueSet.create({
                         span: someCodeSpan,

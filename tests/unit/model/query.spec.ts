@@ -70,6 +70,8 @@ describe('Query', () => {
                 parameters: [
                     Parameter.create({
                         label: 'x',
+                        isImmutable: true,
+                        isolationLevel: 'ISOLATED',
                         varName: 'x',
                         valueSet: ExplicitIntegerValueSet.create({
                             min: 0n,

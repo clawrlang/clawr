@@ -1,8 +1,7 @@
 import { Context, Declaration, Expression, IsolationLevel, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
-import { ExplicitValueSet } from './explicit-value-set'
-import { TypeName } from './type-name'
+import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -48,32 +47,24 @@ export class VariableDeclaration implements Statement, Declaration {
 
     private emit(scope: Scope | Scope['rootScope'], context: Context) {
         const currentValue = this.currentValueFromInitial(context)
-        const valueSet =
+        const lattice =
             this.isImmutable && this.isolationLevel === 'ISOLATED'
-                ? currentValue.toCIR()
-                : (this.valueSet?.toCIR() ??
-                  currentValue.unconstrained().toCIR())
-
-        const initialValue = this.initialValue
-            .toCIRExpression({
+                ? currentValue
+                : (this.valueSet?.toLattice(context) ??
+                  currentValue.unconstrained())
+        if (
+            this.valueSet &&
+            !lattice.isSameType(this.valueSet.toLattice(context))
+        )
+            return logSemanticError('Incompatible initial value', {
                 ...context,
-                ...(valueSet.type === 'rc-type'
-                    ? {
-                          type: TypeName.create({
-                              name: valueSet.typeName,
-                              namespace: valueSet.namespace,
-                          }),
-                          isolationLevel: this.isolationLevel,
-                      }
-                    : {}),
+                span: this.initialValue.span,
             })
-            .value()
 
         const valueIsolationLevel = this.initialValue
             .isolationLevel(context)
             .value()
         if (
-            valueSet.type === 'rc-type' &&
             this.isolationLevel !== valueIsolationLevel &&
             valueIsolationLevel !== 'UNIQUE'
         )
@@ -82,12 +73,24 @@ export class VariableDeclaration implements Statement, Declaration {
                 { ...context, span: this.initialValue.span },
             )
 
+        const initialValue = this.initialValue
+            .toCIRExpression({
+                ...context,
+                ...(this.valueSet instanceof ExplicitRCTypeValueSet
+                    ? {
+                          type: this.valueSet.type,
+                          isolationLevel: this.isolationLevel,
+                      }
+                    : {}),
+            })
+            .value()
+
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,
             name: this.name,
-            valueSet,
+            valueSet: lattice.toCIR(),
             initialValue:
-                valueSet.type === 'rc-type' &&
+                this.valueSet instanceof ExplicitRCTypeValueSet &&
                 (initialValue.kind === 'VARIABLE_REF' ||
                     initialValue.kind === 'FIELD_REF')
                     ? {
@@ -100,11 +103,7 @@ export class VariableDeclaration implements Statement, Declaration {
         scope.variables.set(this.name, {
             isImmutable: this.isImmutable,
             isolationLevel: this.isolationLevel,
-            lattice:
-                this.isImmutable && this.isolationLevel === 'ISOLATED'
-                    ? currentValue
-                    : (this.valueSet?.toLattice(context) ??
-                      currentValue.unconstrained()),
+            lattice,
         })
 
         context.scope.setCurrentValue(this.name, currentValue)

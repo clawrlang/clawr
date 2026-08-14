@@ -15,6 +15,7 @@ export interface ExplicitValueSet {
     get span(): SourceCodeSpan
     toCIR(): cir.ValueSet
     toLattice(context: Context): Lattice
+    isValidValue(lattice: Lattice): boolean
 }
 
 export class UnspecifiedType {
@@ -58,6 +59,16 @@ export class ExplicitIntegerValueSet implements ExplicitValueSet {
         }
     }
 
+    isValidValue(lattice: Lattice): boolean {
+        return (
+            lattice instanceof IntegerLattice &&
+            (this.min === undefined ||
+                (lattice.min !== undefined && lattice.min >= this.min)) &&
+            (this.max === undefined ||
+                (lattice.max !== undefined && lattice.max <= this.max))
+        )
+    }
+
     toLattice(): Lattice {
         return IntegerLattice.create({
             min: this.min,
@@ -94,6 +105,13 @@ export class ExplicitTruthValueSet implements ExplicitValueSet {
         }
     }
 
+    isValidValue(lattice: Lattice): boolean {
+        return (
+            lattice instanceof TruthvalueLattice &&
+            lattice.values.every((v) => this.values.includes(v))
+        )
+    }
+
     toLattice(): Lattice {
         return TruthvalueLattice.create(this.values)
     }
@@ -110,6 +128,10 @@ export class ExplicitStringValueSet implements ExplicitValueSet {
 
     toCIR(): Extract<cir.ValueSet, { type: 'string' }> {
         return { type: 'string' }
+    }
+
+    isValidValue(lattice: Lattice): boolean {
+        return lattice instanceof StringLattice
     }
 
     toLattice(): Lattice {
@@ -142,6 +164,13 @@ export class ExplicitRCTypeValueSet implements ExplicitValueSet {
             typeName: this.type.name,
             namespace: this.type.namespace,
         }
+    }
+
+    isValidValue(lattice: Lattice): boolean {
+        return (
+            lattice instanceof RCTypeLattice &&
+            lattice.type.canonical() === this.type.canonical()
+        )
     }
 
     toLattice(context: Context): Lattice {

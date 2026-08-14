@@ -6,6 +6,7 @@ import {
     ExplicitValueSet,
     UnspecifiedType,
 } from './explicit-value-set'
+import { Lattice } from './lattice'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -46,34 +47,26 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private emit(scope: Scope | Scope['rootScope'], context: Context) {
-        const currentValue = this.currentValueFromInitial(context)
+        const initialValue = this.currentValueFromInitial(context)
+        this.checkValidity(initialValue, context)
+
         const lattice =
             this.isImmutable && this.valueSet.isolationLevel === 'ISOLATED'
-                ? currentValue
+                ? initialValue
                 : this.valueSet instanceof UnspecifiedType
-                  ? currentValue.unconstrained()
+                  ? initialValue.unconstrained()
                   : this.valueSet?.toLattice(context)
-        if (
-            !(this.valueSet instanceof UnspecifiedType) &&
-            !lattice.isSameType(this.valueSet.toLattice(context))
-        )
-            return logSemanticError('Incompatible initial value', {
-                ...context,
-                span: this.initialValue.span,
-            })
 
-        const valueIsolationLevel = this.initialValue
-            .isolationLevel(context)
-            .value()
-        if (
-            this.valueSet.isolationLevel !== valueIsolationLevel &&
-            valueIsolationLevel !== 'UNIQUE'
-        )
-            logSemanticError(
-                `Cannot assign ${valueIsolationLevel} value to ${this.valueSet.isolationLevel} target`,
-                { ...context, span: this.initialValue.span },
-            )
+        this.emitCIRDeclaration(context, lattice, scope)
+        this.addDeclarationToScope(scope, lattice)
+        this.setCurrentValue(context, initialValue)
+    }
 
+    private emitCIRDeclaration(
+        context: Context,
+        lattice: Lattice,
+        scope: Scope | Scope['rootScope'],
+    ) {
         const initialValue = this.initialValue
             .toCIRExpression({
                 ...context,
@@ -100,14 +93,48 @@ export class VariableDeclaration implements Statement, Declaration {
                       }
                     : initialValue,
         })
+    }
 
+    private addDeclarationToScope(
+        scope: Scope | Scope['rootScope'],
+        lattice: Lattice,
+    ) {
         scope.variables.set(this.name, {
             isImmutable: this.isImmutable,
             isolationLevel: this.valueSet.isolationLevel!!,
             lattice,
         })
+    }
 
+    private setCurrentValue(context: Context, currentValue: Lattice) {
         context.scope.setCurrentValue(this.name, currentValue)
+    }
+
+    private checkValidity(currentValue: Lattice, context: Context) {
+        if (!this.isValidValue(currentValue))
+            logSemanticError('Incompatible initial value', {
+                ...context,
+                span: this.initialValue.span,
+            })
+
+        const valueIsolationLevel = this.initialValue
+            .isolationLevel(context)
+            .value()
+        if (
+            this.valueSet.isolationLevel !== valueIsolationLevel &&
+            valueIsolationLevel !== 'UNIQUE'
+        )
+            logSemanticError(
+                `Cannot assign ${valueIsolationLevel} value to ${this.valueSet.isolationLevel} target`,
+                { ...context, span: this.initialValue.span },
+            )
+    }
+
+    private isValidValue(currentValue: Lattice) {
+        return (
+            this.valueSet instanceof UnspecifiedType ||
+            this.valueSet.isValidValue(currentValue)
+        )
     }
 
     private currentValueFromInitial(context: Context) {

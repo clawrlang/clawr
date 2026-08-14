@@ -3,8 +3,10 @@
 - `FunctionDeclaration`
 - `CallFunc` / `Query`
 - `ReturnStatement`
-- `VariableDeclaration`
-- `Assignment`
+- `Assignment.target` may not be a `default`-param
+- `Assignment.value` may not be a `default`-param nor a field on one
+  - `default` works as `const` in `isEffectivelyConst`
+- `VariableDeclaration.initialValue` may not be a `default`-param
 
 - Ensure that `valueSet` and `defaultValue` are compatible
 - Ensure that `undefined` variables are not modified

@@ -10,6 +10,7 @@ import {
     VariableSemantics,
 } from '../model/variable-declaration'
 import { Expression } from '../model'
+import { KeywordToken } from '../lexer/token'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
     private readonly valueSetParser: ValueSetParser
@@ -39,10 +40,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')
                 ? stream.expect('KEYWORD', 'ref', 'const')
                 : undefined
-            result = this.valueSetParser.parse(
-                stream,
-                semanticsToken?.keyword as 'const' | 'ref',
-            )
+            result = this.valueSetParser.parse(stream, semanticsToken?.keyword)
         }
 
         if (stream.isNext('PUNCTUATION', '=>')) {
@@ -76,11 +74,12 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         stream.expect('PUNCTUATION', '(')
         const parameters: Parameter[] = []
         while (!stream.isNext('PUNCTUATION', ')')) {
-            let semanticsToken: Token | undefined
+            let semanticsToken:
+                (KeywordToken & { keyword: VariableSemantics }) | undefined
             let semantics: VariableSemantics | undefined
             if (stream.isNext('KEYWORD', ...VARIABLE_SEMANTICS)) {
                 semanticsToken = stream.expect('KEYWORD', ...VARIABLE_SEMANTICS)
-                semantics = semanticsToken.keyword as VariableSemantics
+                semantics = semanticsToken.keyword
             }
             const labelToken = stream.expect('IDENTIFIER')
             let varNameToken: (Token & { kind: 'IDENTIFIER' }) | undefined

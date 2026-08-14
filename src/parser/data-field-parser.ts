@@ -49,7 +49,7 @@ export class DataFieldParser {
                 'KEYWORD',
                 ...VARIABLE_SEMANTICS,
             )
-            return semanticsToken.keyword as VariableSemantics
+            return semanticsToken.keyword
         }
         return 'mut'
     }

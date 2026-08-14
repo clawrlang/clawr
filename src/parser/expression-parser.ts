@@ -55,9 +55,7 @@ export class ExpressionParser {
 
         if (!stream.isNext('OPERATOR', '.', '->')) return expression
 
-        const operator = stream.expect('OPERATOR', '.', '->').operator as
-            | '.'
-            | '->'
+        const operator = stream.expect('OPERATOR', '.', '->').operator
         const fieldToken = stream.expect('IDENTIFIER')
         return FieldReference.create({
             object: expression,

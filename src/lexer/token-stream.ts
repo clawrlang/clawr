@@ -109,9 +109,18 @@ export class TokenStream {
     expect(kind: 'REAL_LITERAL'): RealLiteralToken
     expect(kind: 'NEWLINE'): NewlineToken
     expect(kind: 'IDENTIFIER'): IdentifierToken
-    expect(kind: 'ANNOTATION', ...annotations: Annotation[]): AnnotationToken
-    expect(kind: 'OPERATOR', ...operators: Operator[]): OperatorToken
-    expect(kind: 'KEYWORD', ...keywords: Keyword[]): KeywordToken
+    expect<A extends Annotation[]>(
+        kind: 'ANNOTATION',
+        ...annotations: A
+    ): AnnotationToken & { annotation: A[number] }
+    expect<O extends Operator[]>(
+        kind: 'OPERATOR',
+        ...operators: O
+    ): OperatorToken & { operator: O[number] }
+    expect<K extends Keyword[]>(
+        kind: 'KEYWORD',
+        ...keywords: K
+    ): KeywordToken & { keyword: K[number] }
     expect(
         kind: 'PUNCTUATION',
         ...symbols: PunctuationSymbol[]

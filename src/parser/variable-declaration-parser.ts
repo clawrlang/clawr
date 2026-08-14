@@ -26,7 +26,7 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
 
     parse(stream: TokenStream): VariableDeclaration {
         const semanticsToken = stream.expect('KEYWORD', ...VARIABLE_SEMANTICS)
-        const semanticsKeyword = semanticsToken.keyword as VariableSemantics
+        const semanticsKeyword = semanticsToken.keyword
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
         const valueSet = this.parseTypeIdentifier(stream, semanticsKeyword)

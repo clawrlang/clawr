@@ -69,7 +69,9 @@ export class VariableDeclaration implements Statement, Declaration {
             })
             .value()
 
-        const valueIsolationLevel = this.initialValue.isolationLevel(context)
+        const valueIsolationLevel = this.initialValue
+            .isolationLevel(context)
+            .value()
         if (
             valueSet.type === 'rc-type' &&
             this.isolationLevel !== valueIsolationLevel &&

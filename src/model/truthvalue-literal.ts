@@ -20,8 +20,8 @@ export class TruthValueLiteral implements Expression {
         return new TruthValueLiteral(value, span)
     }
 
-    isolationLevel(_: Context): 'ISOLATED' {
-        return 'ISOLATED'
+    isolationLevel(_: Context): Failable<'ISOLATED'> {
+        return Failable.success('ISOLATED')
     }
 
     currentValue(_: Context): Failable<Lattice> {

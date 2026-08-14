@@ -24,8 +24,8 @@ export class IntegerLiteral implements Expression {
         return new IntegerLiteral(value, span)
     }
 
-    isolationLevel(_: Context): 'ISOLATED' {
-        return 'ISOLATED'
+    isolationLevel(_: Context): Failable<'ISOLATED'> {
+        return Failable.success('ISOLATED')
     }
 
     currentValue(_: Context): Failable<Lattice> {

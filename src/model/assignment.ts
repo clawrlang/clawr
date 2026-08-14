@@ -32,7 +32,7 @@ export class Assignment implements Statement {
         }
         const target = targetResult.value()
         const targetValueSet = this.target.declaredValueSet(context).value()
-        const targetIsolationLevel = this.target.isolationLevel(context)
+        const targetIsolationLevel = this.target.isolationLevel(context).value()
         const value = this.value
             .toCIRExpression({
                 ...context,
@@ -53,7 +53,7 @@ export class Assignment implements Statement {
                     span: { start: this.span.start, end: this.span.end },
                 },
             )
-        const valueIsolationLevel = this.value.isolationLevel(context)
+        const valueIsolationLevel = this.value.isolationLevel(context).value()
         if (
             targetIsolationLevel !== valueIsolationLevel &&
             valueIsolationLevel !== 'UNIQUE'
@@ -104,7 +104,7 @@ export class Assignment implements Statement {
             this.target.declaredValueSet(context).value() instanceof
                 RCTypeLattice &&
             value.kind === 'CALL' &&
-            this.value.isolationLevel(context) === 'UNIQUE'
+            this.value.isolationLevel(context).value() === 'UNIQUE'
         ) {
             context.scope.emitted.push({
                 kind: 'ASSIGN',

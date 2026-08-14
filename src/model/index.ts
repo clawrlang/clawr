@@ -13,7 +13,7 @@ export type Context = {
 export interface Expression {
     get span(): SourceCodeSpan
     isEffectivelyConst(context: Context): Failable<boolean>
-    isolationLevel(context: Context): AnyIsolationLevel
+    isolationLevel(context: Context): Failable<AnyIsolationLevel>
     declaredValueSet(context: Context): Failable<Lattice>
     currentValue(context: Context): Failable<Lattice>
     setCurrentValue?(context: Context, value: Lattice): void

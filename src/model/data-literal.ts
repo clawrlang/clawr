@@ -26,8 +26,8 @@ export class DataLiteral implements Expression {
         return Failable.success(true)
     }
 
-    isolationLevel(_: Context): 'UNIQUE' {
-        return 'UNIQUE'
+    isolationLevel(_: Context): Failable<'UNIQUE'> {
+        return Failable.success('UNIQUE')
     }
 
     currentValue(context: Context & { type: TypeName }): Failable<Lattice> {

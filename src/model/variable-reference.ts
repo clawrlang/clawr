@@ -41,10 +41,10 @@ export class VariableReference implements Expression {
         )
     }
 
-    isolationLevel(context: Context): IsolationLevel {
-        return this.lookupInScope(context)
-            .chaining((variable) => Failable.success(variable.isolationLevel))
-            .value()
+    isolationLevel(context: Context): Failable<IsolationLevel> {
+        return this.lookupInScope(context).chaining((variable) =>
+            Failable.success(variable.isolationLevel),
+        )
     }
 
     declaredValueSet(context: Context): Failable<Lattice> {

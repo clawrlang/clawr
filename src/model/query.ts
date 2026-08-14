@@ -41,16 +41,17 @@ export class Query implements Expression {
         return Failable.success(true)
     }
 
-    isolationLevel(context: Context): AnyIsolationLevel {
-        if (this.name.toString() === 'copy(of:)') return 'UNIQUE'
+    isolationLevel(context: Context): Failable<AnyIsolationLevel> {
+        if (this.name.toString() === 'copy(of:)')
+            return Failable.success('UNIQUE')
 
         const decl = context.scope.functionDeclaration(this.name.toString())
         if (!decl)
-            throw SemanticError.create({
-                message: `unknown function ${this.name.toString()}`,
-                span: this.span,
-            })
-        return decl?.resultIsolationLevel(context)
+            return Failable.failure(
+                `unknown function ${this.name.toString()}`,
+                this.span,
+            )
+        return decl.resultIsolationLevel(context)
     }
 
     declaredValueSet(context: Context): Failable<Lattice> {

@@ -1,11 +1,6 @@
 import * as cir from '../cir'
 import { Context, Expression, IsolationLevel } from '.'
-import {
-    Failable,
-    SemanticError,
-    SemanticErrorCollection,
-    logSemanticError,
-} from './failable'
+import { Failable, logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { RCTypeLattice, Lattice } from './lattice'
@@ -48,7 +43,7 @@ export class FieldReference implements Expression {
             this.object instanceof VariableReference ||
             this.object instanceof FieldReference
         ) {
-            if (this.object.isolationLevel(context) === 'ISOLATED') {
+            if (this.object.isolationLevel(context).value() === 'ISOLATED') {
                 const object = this.object.toCIRExpression(context).value()
                 return [{ kind: 'ENSURE_UNIQUE', object }]
             }
@@ -57,16 +52,20 @@ export class FieldReference implements Expression {
     }
 
     isEffectivelyConst(context: Context): Failable<boolean> {
-        return this.object.isolationLevel(context) === 'SHARED'
-            ? Failable.success(false)
-            : this.object.isEffectivelyConst(context)
+        return this.object
+            .isolationLevel(context)
+            .chaining((isolationLevel) =>
+                isolationLevel === 'SHARED'
+                    ? Failable.success(false)
+                    : this.object.isEffectivelyConst(context),
+            )
     }
 
-    isolationLevel(context: Context): IsolationLevel {
+    isolationLevel(context: Context): Failable<IsolationLevel> {
         const field = this.getFieldFromContext(context).value()
         return field.valueSet instanceof ExplicitRCTypeValueSet
-            ? (field.valueSet.isolationLevel ?? 'ISOLATED')
-            : 'ISOLATED'
+            ? Failable.success(field.valueSet.isolationLevel ?? 'ISOLATED')
+            : Failable.success('ISOLATED')
     }
 
     declaredValueSet(context: Context): Failable<Lattice> {
@@ -128,13 +127,18 @@ export class FieldReference implements Expression {
     }
 
     private checkOperatorCompatibility_failable(context: Context): Failable {
-        const isolationLevel = this.object.isolationLevel(context)
-        if ((isolationLevel === 'SHARED') !== (this.operator === '->')) {
-            const error = SemanticError.create({
-                message: `Cannot access field ${this.field} of a ${isolationLevel} type object with "${this.operator}" operator`,
-                span: this.span,
+        return this.object
+            .isolationLevel(context)
+            .chaining((isolationLevel) => {
+                if (
+                    (isolationLevel === 'SHARED') !==
+                    (this.operator === '->')
+                ) {
+                    return Failable.failure(
+                        `Cannot access field ${this.field} of a ${isolationLevel} type object with "${this.operator}" operator`,
+                        this.span,
+                    )
+                } else return Failable.success(undefined)
             })
-            return Failable.failure(SemanticErrorCollection.create([error]))
-        } else return Failable.success(undefined)
     }
 }

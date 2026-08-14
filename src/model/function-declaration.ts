@@ -12,7 +12,7 @@ import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { Lattice } from './lattice'
 import { SourceCodeSpan } from '../diagnostics'
-import { logSemanticError } from './failable'
+import { Failable, logSemanticError } from './failable'
 import { mapFilter } from '../tools/map-filter'
 
 export class FunctionDeclaration implements Declaration {
@@ -46,13 +46,16 @@ export class FunctionDeclaration implements Declaration {
         )
     }
 
-    resultIsolationLevel(context: Context): AnyIsolationLevel {
+    resultIsolationLevel(context: Context): Failable<AnyIsolationLevel> {
         if (this.result instanceof ExplicitRCTypeValueSet)
-            return this.result.isolationLevel ?? 'UNIQUE'
-        if (this.result) return 'ISOLATED'
+            return Failable.success(this.result.isolationLevel ?? 'UNIQUE')
+        if (this.result) return Failable.success('ISOLATED')
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.isolationLevel(context)
-        else throw new Error('unable to infer isolation level')
+        else
+            throw new Error(
+                `unable to infer isolation level for ${this.baseName}`,
+            )
     }
 
     resultLattice(context: Context): Lattice | undefined {

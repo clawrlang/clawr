@@ -1,6 +1,6 @@
 import * as cir from '../cir'
-import { Context, Expression } from '.'
-import { Failable } from './failable'
+import { AnyIsolationLevel, Context, Expression } from '.'
+import { Failable, SemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice, RCTypeLattice } from './lattice'
@@ -41,8 +41,16 @@ export class Query implements Expression {
         return Failable.success(true)
     }
 
-    isolationLevel(_: Context): 'UNIQUE' {
-        return 'UNIQUE'
+    isolationLevel(context: Context): AnyIsolationLevel {
+        if (this.name.toString() === 'copy(of:)') return 'UNIQUE'
+
+        const decl = context.scope.functionDeclaration(this.name.toString())
+        if (!decl)
+            throw SemanticError.create({
+                message: `unknown function ${this.name.toString()}`,
+                span: this.span,
+            })
+        return decl?.resultIsolationLevel(context)
     }
 
     declaredValueSet(context: Context): Failable<Lattice> {

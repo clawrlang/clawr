@@ -1,6 +1,13 @@
 import * as cir from '../cir'
-import { Context, Declaration, Expression, IsolationLevel, Statement } from '.'
-import { ExplicitValueSet } from './explicit-value-set'
+import {
+    AnyIsolationLevel,
+    Context,
+    Declaration,
+    Expression,
+    IsolationLevel,
+    Statement,
+} from '.'
+import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { Lattice } from './lattice'
@@ -37,6 +44,15 @@ export class FunctionDeclaration implements Declaration {
             result,
             implementation,
         )
+    }
+
+    resultIsolationLevel(context: Context): AnyIsolationLevel {
+        if (this.result instanceof ExplicitRCTypeValueSet)
+            return this.result.isolationLevel ?? 'UNIQUE'
+        if (this.result) return 'ISOLATED'
+        if (this.implementation.kind === 'implicit-return')
+            return this.implementation.expression.isolationLevel(context)
+        else throw new Error('unable to infer isolation level')
     }
 
     resultLattice(context: Context): Lattice | undefined {

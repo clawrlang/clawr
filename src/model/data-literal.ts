@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { Context, Expression, IsolationLevel, ResolvedIsolationLevel } from '.'
+import { Context, Expression, IsolationLevel } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
@@ -26,7 +26,7 @@ export class DataLiteral implements Expression {
         return Failable.success(true)
     }
 
-    isolationLevel(_: Context): IsolationLevel {
+    isolationLevel(_: Context): 'UNIQUE' {
         return 'UNIQUE'
     }
 
@@ -90,7 +90,7 @@ export class DataLiteral implements Expression {
     toCIRExpression(
         context: Context & {
             type: TypeName
-            isolationLevel: ResolvedIsolationLevel
+            isolationLevel: IsolationLevel
         },
     ): Failable<cir.Expression> {
         if (!context.type)

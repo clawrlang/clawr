@@ -2,7 +2,7 @@ import * as cir from '../cir'
 import { Context, Expression, IsolationLevel } from '.'
 import { Failable, logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
-import { Lattice, RCTypeLattice } from './lattice'
+import { Lattice } from './lattice'
 
 export class VariableReference implements Expression {
     private constructor(

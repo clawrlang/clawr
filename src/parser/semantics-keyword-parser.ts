@@ -1,6 +1,6 @@
 import { TokenStream } from '../lexer'
 import { KeywordToken } from '../lexer/token'
-import { ResolvedIsolationLevel } from '../model'
+import { IsolationLevel } from '../model'
 import {
     VARIABLE_SEMANTICS,
     VariableSemantics,
@@ -23,7 +23,7 @@ export class SemanticsKeywordParser {
 
 export class SemanticsKeyword {
     private constructor(
-        public readonly isolationLevel: ResolvedIsolationLevel,
+        public readonly isolationLevel: IsolationLevel,
         public readonly isImmutable: boolean,
     ) {}
 

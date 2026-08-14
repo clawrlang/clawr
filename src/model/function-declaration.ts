@@ -1,11 +1,5 @@
 import * as cir from '../cir'
-import {
-    Context,
-    Declaration,
-    Expression,
-    ResolvedIsolationLevel,
-    Statement,
-} from '.'
+import { Context, Declaration, Expression, IsolationLevel, Statement } from '.'
 import { ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
@@ -142,7 +136,7 @@ export class FunctionDeclaration implements Declaration {
 export class Parameter {
     private constructor(
         public isImmutable: boolean,
-        public isolationLevel: ResolvedIsolationLevel,
+        public isolationLevel: IsolationLevel,
         public label: string | undefined,
         public varName: string,
         public span: SourceCodeSpan,
@@ -163,7 +157,7 @@ export class Parameter {
         varName: string
         valueSet?: ExplicitValueSet
         isImmutable: boolean
-        isolationLevel: ResolvedIsolationLevel
+        isolationLevel: IsolationLevel
         defaultValue?: Expression
         span: SourceCodeSpan
     }): Parameter {

@@ -40,10 +40,7 @@ export class Assignment implements Statement {
                     targetValueSet instanceof RCTypeLattice
                         ? targetValueSet.type
                         : undefined,
-                isolationLevel:
-                    targetIsolationLevel !== 'UNIQUE'
-                        ? targetIsolationLevel
-                        : undefined,
+                isolationLevel: targetIsolationLevel,
             })
             .value()
 

@@ -1,6 +1,5 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
-import { IsolationLevel } from '.'
 import { Failable } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
@@ -42,7 +41,7 @@ export class Query implements Expression {
         return Failable.success(true)
     }
 
-    isolationLevel(_: Context): IsolationLevel {
+    isolationLevel(_: Context): 'UNIQUE' {
         return 'UNIQUE'
     }
 

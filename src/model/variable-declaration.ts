@@ -1,10 +1,4 @@
-import {
-    Context,
-    Declaration,
-    Expression,
-    ResolvedIsolationLevel,
-    Statement,
-} from '.'
+import { Context, Declaration, Expression, IsolationLevel, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
@@ -16,7 +10,7 @@ export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
 export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private readonly isImmutable: boolean,
-        private readonly isolationLevel: ResolvedIsolationLevel,
+        private readonly isolationLevel: IsolationLevel,
         private name: string,
         private valueSet: ExplicitValueSet | undefined,
         private initialValue: Expression,
@@ -30,7 +24,7 @@ export class VariableDeclaration implements Statement, Declaration {
         initialValue,
     }: {
         isImmutable: boolean
-        isolationLevel: ResolvedIsolationLevel
+        isolationLevel: IsolationLevel
         name: string
         valueSet?: ExplicitValueSet
         initialValue: Expression

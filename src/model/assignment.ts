@@ -32,7 +32,7 @@ export class Assignment implements Statement {
         }
         const target = targetResult.value()
         const targetValueSet = this.target.declaredValueSet(context).value()
-        const targetSemantics = this.target.isolationLevel(context)
+        const targetIsolationLevel = this.target.isolationLevel(context)
         const value = this.value
             .toCIRExpression({
                 ...context,
@@ -41,7 +41,9 @@ export class Assignment implements Statement {
                         ? targetValueSet.type
                         : undefined,
                 isolationLevel:
-                    targetSemantics !== 'UNIQUE' ? targetSemantics : undefined,
+                    targetIsolationLevel !== 'UNIQUE'
+                        ? targetIsolationLevel
+                        : undefined,
             })
             .value()
 
@@ -54,10 +56,13 @@ export class Assignment implements Statement {
                     span: { start: this.span.start, end: this.span.end },
                 },
             )
-        const valueSemantics = this.value.isolationLevel(context)
-        if (targetSemantics !== valueSemantics && valueSemantics !== 'UNIQUE')
+        const valueIsolationLevel = this.value.isolationLevel(context)
+        if (
+            targetIsolationLevel !== valueIsolationLevel &&
+            valueIsolationLevel !== 'UNIQUE'
+        )
             logSemanticError(
-                `Cannot assign ${valueSemantics} value to ${targetSemantics} target`,
+                `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,
                 {
                     ...context,
                     span: { start: this.span.start, end: this.span.end },

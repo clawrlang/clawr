@@ -2,12 +2,11 @@ import { Context } from '.'
 import { TokenStream } from '../lexer'
 import { Expression } from '../model'
 import { DataField } from '../model/data-declaration'
-import { ExplicitValueSet } from '../model/explicit-value-set'
-import {
-    VARIABLE_SEMANTICS,
-    VariableSemantics,
-} from '../model/variable-declaration'
 import { ExpressionParser } from './expression-parser'
+import {
+    SemanticsKeyword,
+    SemanticsKeywordParser,
+} from './semantics-keyword-parser'
 import { ValueSetParser } from './value-set-parser'
 
 export class DataFieldParser {
@@ -18,12 +17,15 @@ export class DataFieldParser {
     }
 
     parse(stream: TokenStream): DataField {
-        let semantics = this.parseFieldSemantics(stream)
+        let keyword =
+            SemanticsKeywordParser.parse(stream) ?? SemanticsKeyword.mut
         const fieldNameToken = stream.expect('IDENTIFIER')
         const fieldName = fieldNameToken.identifier
 
         stream.expect('PUNCTUATION', ':')
-        const valueSet = ValueSetParser.create(this.context).parse(stream)
+        const valueSet = ValueSetParser.create(this.context).parse(stream, {
+            uniquelyReferenced: true,
+        })
 
         let defaultValue: Expression | undefined
         if (stream.isNext('PUNCTUATION', '=')) {
@@ -32,25 +34,10 @@ export class DataFieldParser {
         }
 
         return {
+            ...keyword,
             name: fieldName,
             valueSet,
-            isImmutable: semantics === 'const' || semantics === 'ref',
-            isolationLevel:
-                semantics === 'const' || semantics === 'mut'
-                    ? 'ISOLATED'
-                    : 'SHARED',
             defaultValue,
         }
-    }
-
-    private parseFieldSemantics(stream: TokenStream) {
-        if (stream.isNext('KEYWORD', ...VARIABLE_SEMANTICS)) {
-            const semanticsToken = stream.expect(
-                'KEYWORD',
-                ...VARIABLE_SEMANTICS,
-            )
-            return semanticsToken.keyword
-        }
-        return 'mut'
     }
 }

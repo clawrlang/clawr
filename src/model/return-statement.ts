@@ -9,7 +9,7 @@ export class ReturnStatement implements Statement {
         return new ReturnStatement(value)
     }
 
-    emitStatement(context: Context & { semantics?: 'const' | 'ref' }) {
+    emitStatement(context: Context) {
         if (this.value) {
             const valueLattice = this.value.currentValue(context).value()
             const isolationLevel = this.value.isolationLevel(context)
@@ -20,24 +20,6 @@ export class ReturnStatement implements Statement {
                     )}`,
                 )
             }
-            if (
-                valueLattice instanceof RCTypeLattice &&
-                isolationLevel === 'ISOLATED' &&
-                context.semantics === 'ref'
-            )
-                logSemanticError(
-                    `Cannot return an ISOLATED variable as ${context.semantics}`,
-                    { ...context, span: this.value.span },
-                )
-            if (
-                valueLattice instanceof RCTypeLattice &&
-                isolationLevel === 'SHARED' &&
-                context.semantics !== 'ref'
-            )
-                logSemanticError(
-                    `Cannot return a SHARED variable as ${context.semantics ?? 'UNIQUE'}`,
-                    { ...context, span: this.value.span },
-                )
 
             const object = this.value
                 .toCIRExpression({ ...context, isolationLevel: undefined })
@@ -45,7 +27,6 @@ export class ReturnStatement implements Statement {
             if (
                 (object.kind === 'VARIABLE_REF' ||
                     object.kind === 'FIELD_REF') &&
-                !context.semantics &&
                 valueLattice instanceof RCTypeLattice
             ) {
                 context.scope.emitted.push({

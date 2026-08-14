@@ -6,9 +6,6 @@
 - `FunctionName` lacks namespace
   - DataDeclParser
   - ValueSetParser
-  - RCTypeLattice
-- `ReturnStatement.emitStatement` is never called with `semantics`
-  - Add called function to scope/context?
 
 ## Incomplete/Postponed Functionality
 

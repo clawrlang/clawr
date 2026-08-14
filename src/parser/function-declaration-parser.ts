@@ -5,12 +5,11 @@ import { ExplicitValueSet } from '../model/explicit-value-set'
 import { BlockParser } from './block-parser'
 import { ExpressionParser } from './expression-parser'
 import { ValueSetParser } from './value-set-parser'
-import {
-    VARIABLE_SEMANTICS,
-    VariableSemantics,
-} from '../model/variable-declaration'
 import { Expression } from '../model'
-import { KeywordToken } from '../lexer/token'
+import {
+    SemanticsKeyword,
+    SemanticsKeywordParser,
+} from './semantics-keyword-parser'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
     private readonly valueSetParser: ValueSetParser
@@ -40,7 +39,9 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')
                 ? stream.expect('KEYWORD', 'ref', 'const')
                 : undefined
-            result = this.valueSetParser.parse(stream, semanticsToken?.keyword)
+            result = this.valueSetParser.parse(stream, {
+                uniquelyReferenced: !semanticsToken,
+            })
         }
 
         if (stream.isNext('PUNCTUATION', '=>')) {
@@ -74,13 +75,10 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         stream.expect('PUNCTUATION', '(')
         const parameters: Parameter[] = []
         while (!stream.isNext('PUNCTUATION', ')')) {
-            let semanticsToken:
-                (KeywordToken & { keyword: VariableSemantics }) | undefined
-            let semantics: VariableSemantics | undefined
-            if (stream.isNext('KEYWORD', ...VARIABLE_SEMANTICS)) {
-                semanticsToken = stream.expect('KEYWORD', ...VARIABLE_SEMANTICS)
-                semantics = semanticsToken.keyword
-            }
+            const semanticsToken = SemanticsKeywordParser.readToken(stream)
+            const semanticsKeyword = semanticsToken
+                ? SemanticsKeyword[semanticsToken.keyword]
+                : SemanticsKeyword.const
             const labelToken = stream.expect('IDENTIFIER')
             let varNameToken: (Token & { kind: 'IDENTIFIER' }) | undefined
 
@@ -91,7 +89,9 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             let valueSet: ExplicitValueSet | undefined
             if (stream.isNext('PUNCTUATION', ':')) {
                 stream.expect('PUNCTUATION', ':')
-                valueSet = this.valueSetParser.parse(stream)
+                valueSet = this.valueSetParser.parse(stream, {
+                    uniquelyReferenced: true,
+                })
             }
 
             let defaultValue: Expression | undefined
@@ -102,21 +102,15 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                 )
             }
 
-            const isImmutable = semantics === 'const' || semantics === 'ref'
-            const isolationLevel =
-                semantics === 'const' || semantics === 'mut'
-                    ? 'ISOLATED'
-                    : 'SHARED'
             parameters.push(
                 Parameter.create({
+                    ...semanticsKeyword,
                     label:
                         labelToken.identifier === '_'
                             ? undefined
                             : labelToken.identifier,
                     varName: varNameToken.identifier,
                     valueSet,
-                    isImmutable,
-                    isolationLevel,
                     defaultValue,
                     span: {
                         start: semanticsToken?.start ?? labelToken.start,

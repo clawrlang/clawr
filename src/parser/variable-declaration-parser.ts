@@ -1,13 +1,13 @@
 import { ExpressionParser } from './expression-parser'
 import { TokenStream } from '../lexer'
 import {
-    VariableSemantics,
     VARIABLE_SEMANTICS,
     VariableDeclaration,
 } from '../model/variable-declaration'
 import { StatementParser } from './statement-parser'
 import { Context } from '.'
 import { ValueSetParser } from './value-set-parser'
+import { SemanticsKeyword } from './semantics-keyword-parser'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser
@@ -26,32 +26,24 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
 
     parse(stream: TokenStream): VariableDeclaration {
         const semanticsToken = stream.expect('KEYWORD', ...VARIABLE_SEMANTICS)
-        const semanticsKeyword = semanticsToken.keyword
+        const semanticsKeyword = SemanticsKeyword[semanticsToken.keyword]
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
-        const valueSet = this.parseTypeIdentifier(stream, semanticsKeyword)
+        const valueSet = this.parseTypeIdentifier(stream)
         stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse(stream)
         return VariableDeclaration.create({
-            isImmutable:
-                semanticsKeyword === 'const' || semanticsKeyword === 'ref',
-            isolationLevel:
-                semanticsKeyword === 'const' || semanticsKeyword === 'mut'
-                    ? 'ISOLATED'
-                    : 'SHARED',
+            ...semanticsKeyword,
             name,
             valueSet,
             initialValue,
         })
     }
 
-    private parseTypeIdentifier(
-        stream: TokenStream,
-        semantics: VariableSemantics,
-    ) {
+    private parseTypeIdentifier(stream: TokenStream) {
         if (!stream.isNext('PUNCTUATION', ':')) return undefined
 
         stream.expect('PUNCTUATION', ':')
-        return ValueSetParser.create(this.context).parse(stream, semantics)
+        return ValueSetParser.create(this.context).parse(stream)
     }
 }

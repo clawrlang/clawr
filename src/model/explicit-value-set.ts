@@ -8,7 +8,6 @@ import {
     StringLattice,
     RCTypeLattice,
 } from './lattice'
-import { VariableSemantics } from './variable-declaration'
 import { TypeName } from './type-name'
 
 export interface ExplicitValueSet {

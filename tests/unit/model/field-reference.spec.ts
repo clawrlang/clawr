@@ -95,33 +95,33 @@ describe('Field Reference', () => {
     describe('infers its type and isolation level from the context', () => {
         const cases = [
             {
-                semantics: 'const',
+                keyword: 'const',
                 isImmutable: true,
-                expectedSemantics: 'ISOLATED',
+                expected: 'ISOLATED',
             },
             {
-                semantics: 'mut',
+                keyword: 'mut',
                 isImmutable: false,
-                expectedSemantics: 'ISOLATED',
+                expected: 'ISOLATED',
             },
             {
-                semantics: 'ref',
+                keyword: 'ref',
                 isImmutable: true,
-                expectedSemantics: 'SHARED',
+                expected: 'SHARED',
             },
             {
-                semantics: 'mutref',
+                keyword: 'mutref',
                 isImmutable: false,
-                expectedSemantics: 'SHARED',
+                expected: 'SHARED',
             },
         ] as const
 
-        for (const { semantics, isImmutable, expectedSemantics } of cases)
-            test(`${semantics} object`, () => {
+        for (const { keyword, isImmutable, expected } of cases)
+            test(`${keyword} object`, () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
                     isImmutable,
-                    isolationLevel: expectedSemantics,
+                    isolationLevel: expected,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
@@ -140,7 +140,7 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 isImmutable,
-                                isolationLevel: expectedSemantics,
+                                isolationLevel: expected,
                                 name: 'myField',
                                 valueSet: ExplicitRCTypeValueSet.create({
                                     type: TypeName.create({
@@ -158,14 +158,12 @@ describe('Field Reference', () => {
                         name: 'myVar',
                         span: someCodeSpan,
                     }),
-                    operator: expectedSemantics === 'SHARED' ? '->' : '.',
+                    operator: expected === 'SHARED' ? '->' : '.',
                     field: 'myField',
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                expect(fieldRef.isolationLevel(context)).toEqual(
-                    expectedSemantics,
-                )
+                expect(fieldRef.isolationLevel(context)).toEqual(expected)
                 expect(
                     fieldRef.declaredValueSet(context).value(),
                 ).toMatchObject({
@@ -217,18 +215,34 @@ describe('Field Reference', () => {
 
     describe('throws if the object’s isolation-level is not compatible with the operator', () => {
         const cases = [
-            { operator: '->', semantics: [true, 'ISOLATED'] },
-            { operator: '->', semantics: [false, 'ISOLATED'] },
-            { operator: '.', semantics: [true, 'SHARED'] },
-            { operator: '.', semantics: [false, 'SHARED'] },
+            {
+                operator: '->',
+                isImmutable: true,
+                isolationLevel: 'ISOLATED',
+            },
+            {
+                operator: '->',
+                isImmutable: false,
+                isolationLevel: 'ISOLATED',
+            },
+            {
+                operator: '.',
+                isImmutable: true,
+                isolationLevel: 'SHARED',
+            },
+            {
+                operator: '.',
+                isImmutable: false,
+                isolationLevel: 'SHARED',
+            },
         ] as const
 
-        for (const { operator, semantics } of cases) {
-            test(`${semantics} with "${operator}"`, () => {
+        for (const { operator, isImmutable, isolationLevel } of cases) {
+            test(`${isolationLevel} with "${operator}"`, () => {
                 const context = newSemanticContext()
                 context.scope.variables.set('myVar', {
-                    isImmutable: semantics[0],
-                    isolationLevel: semantics[1],
+                    isImmutable,
+                    isolationLevel: isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
@@ -266,7 +280,7 @@ describe('Field Reference', () => {
                 const result = fieldRef.toCIRExpression(context)
                 expect(result.isFailure()).toBeTrue()
                 expect(result.getError().errors[0]).toMatchObject({
-                    message: `Cannot access field myField of a ${semantics[1]} type object with "${operator}" operator`,
+                    message: `Cannot access field myField of a ${isolationLevel} type object with "${operator}" operator`,
                     span: {
                         start: { line: 1, column: 1 },
                         end: { line: 1, column: 10 },

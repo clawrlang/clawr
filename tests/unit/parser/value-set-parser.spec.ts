@@ -120,7 +120,7 @@ describe('ValueSetParser', () => {
 
     it('parses rc-types', () => {
         const valueSet = parseValueSet('MyType')
-        expect(valueSet).toBeInstanceOf(ExplicitUniqueValueSet)
+        expect(valueSet).toBeInstanceOf(ExplicitRCTypeValueSet)
         expect(valueSet).toMatchObject({
             type: { name: 'MyType' },
             span: {

@@ -6,6 +6,10 @@
   - did-you-mean suggestions
   - fixits
 - `real`
+- `enum`/`union`
+  - Java-like enums? — Complex objects with identifiers
+  - “Type '{}' is not assignable to type 'number' as required for computed enum member values.ts(18033)”
+  - Can that 'number' be its position in the declaration? Or its name (because strings work too)?
 - `subset` (mentioned in the documentation)
   - Does not propagate to the CIR
   - Short-hand syntax for ranged

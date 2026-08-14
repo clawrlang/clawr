@@ -90,7 +90,3 @@ export class VariableReference implements Expression {
         return Failable.success(variable)
     }
 }
-
-export function convertSemantics(semantics: string) {
-    return semantics === 'mut' || semantics === 'const' ? 'ISOLATED' : 'SHARED'
-}

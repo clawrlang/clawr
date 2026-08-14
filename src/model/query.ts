@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { IsolationLevel } from '.'
-import { Failable, SemanticError } from './failable'
+import { Failable } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice, RCTypeLattice } from './lattice'

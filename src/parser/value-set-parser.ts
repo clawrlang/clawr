@@ -10,7 +10,6 @@ import {
     ExplicitUniqueValueSet,
     ExplicitValueSet,
 } from '../model/explicit-value-set'
-import { VariableSemantics } from '../model/variable-declaration'
 import { ExpressionParser } from './expression-parser'
 import { TypeName } from '../model/type-name'
 
@@ -23,7 +22,7 @@ export class ValueSetParser {
 
     parse(
         stream: TokenStream,
-        semantics?: VariableSemantics,
+        flag?: { uniquelyReferenced: boolean },
     ): ExplicitValueSet {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
@@ -38,13 +37,13 @@ export class ValueSetParser {
                     span: { start: typeToken.start, end: typeToken.end },
                 })
             default:
-                if (semantics)
-                    return ExplicitRCTypeValueSet.create({
+                if (flag && flag.uniquelyReferenced)
+                    return ExplicitUniqueValueSet.create({
                         type: TypeName.create({ name: type }),
                         span: { start: typeToken.start, end: typeToken.end },
                     })
                 else
-                    return ExplicitUniqueValueSet.create({
+                    return ExplicitRCTypeValueSet.create({
                         type: TypeName.create({ name: type }),
                         span: { start: typeToken.start, end: typeToken.end },
                     })

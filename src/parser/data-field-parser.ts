@@ -23,7 +23,10 @@ export class DataFieldParser {
         const fieldName = fieldNameToken.identifier
 
         stream.expect('PUNCTUATION', ':')
-        const valueSet = ValueSetParser.create(this.context).parse(stream)
+        const valueSet = ValueSetParser.create(this.context).parse(
+            stream,
+            keyword.isolationLevel,
+        )
 
         let defaultValue: Expression | undefined
         if (stream.isNext('PUNCTUATION', '=')) {

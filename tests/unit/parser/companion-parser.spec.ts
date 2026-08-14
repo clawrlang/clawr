@@ -37,7 +37,6 @@ describe('Companion Parser', () => {
                 {
                     name: 'x',
                     isImmutable: true,
-                    isolationLevel: 'ISOLATED',
                     initialValue: { value: 10n },
                 },
             ],

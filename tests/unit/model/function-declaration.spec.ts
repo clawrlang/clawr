@@ -493,10 +493,10 @@ describe('FunctionDeclaration', () => {
                     statements: [
                         VariableDeclaration.create({
                             isImmutable: true,
-                            isolationLevel: 'ISOLATED',
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
+                                isolationLevel: 'ISOLATED',
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({
@@ -560,10 +560,10 @@ describe('FunctionDeclaration', () => {
                     statements: [
                         VariableDeclaration.create({
                             isImmutable: true,
-                            isolationLevel: 'ISOLATED',
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
+                                isolationLevel: 'ISOLATED',
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({
@@ -628,10 +628,10 @@ describe('FunctionDeclaration', () => {
                     statements: [
                         VariableDeclaration.create({
                             isImmutable: true,
-                            isolationLevel: 'ISOLATED',
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
+                                isolationLevel: 'ISOLATED',
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({

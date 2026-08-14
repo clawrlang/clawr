@@ -3,7 +3,10 @@ import { TokenStream } from '../../../src/lexer'
 import { VariableDeclarationParser } from '../../../src/parser/variable-declaration-parser'
 import { newSemanticContext, TestErrorReporter } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import { ExplicitRCTypeValueSet } from '../../../src/model/explicit-value-set'
+import {
+    ExplicitRCTypeValueSet,
+    UnspecifiedType,
+} from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
 
 describe('VariableDeclarationParser', () => {
@@ -11,7 +14,6 @@ describe('VariableDeclarationParser', () => {
         const source = `const foo: integer = 1;`
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
-            isolationLevel: 'ISOLATED',
             name: 'foo',
             valueSet: {
                 min: undefined,
@@ -25,7 +27,6 @@ describe('VariableDeclarationParser', () => {
         const source = `mut foo: integer = 1;`
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: false,
-            isolationLevel: 'ISOLATED',
             name: 'foo',
             valueSet: {
                 min: undefined,
@@ -39,9 +40,8 @@ describe('VariableDeclarationParser', () => {
         const source = `mutref foo: Type = { x: 1, y: 2 }`
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: false,
-            isolationLevel: 'SHARED',
             name: 'foo',
-            valueSet: { type: { name: 'Type' } },
+            valueSet: { type: { name: 'Type' }, isolationLevel: 'SHARED' },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: 1n } },
@@ -55,9 +55,8 @@ describe('VariableDeclarationParser', () => {
         const source = `ref foo: Type = { x: 1, y: 2 }`
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
-            isolationLevel: 'SHARED',
             name: 'foo',
-            valueSet: { type: { name: 'Type' } },
+            valueSet: { type: { name: 'Type' }, isolationLevel: 'SHARED' },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: 1n } },
@@ -71,9 +70,8 @@ describe('VariableDeclarationParser', () => {
         const source = `const foo = 1;`
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
-            isolationLevel: 'ISOLATED',
             name: 'foo',
-            valueSet: undefined,
+            valueSet: { isolationLevel: 'ISOLATED' },
             initialValue: { value: 1n },
         })
     })
@@ -93,9 +91,8 @@ describe('VariableDeclarationParser', () => {
 
         expect(decl).toMatchObject({
             isImmutable: true,
-            isolationLevel: 'SHARED',
             name: 'r',
-            valueSet: { type: { name: 'MyData' } },
+            valueSet: { type: { name: 'MyData' }, isolationLevel: 'SHARED' },
             initialValue: { fields: [] },
         })
         expect((decl as any).valueSet).toBeInstanceOf(ExplicitRCTypeValueSet)

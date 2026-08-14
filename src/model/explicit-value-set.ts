@@ -11,12 +11,27 @@ import {
 import { TypeName } from './type-name'
 
 export interface ExplicitValueSet {
+    get isolationLevel(): IsolationLevel | undefined
     get span(): SourceCodeSpan
     toCIR(): cir.ValueSet
     toLattice(context: Context): Lattice
 }
 
+export class UnspecifiedType {
+    constructor(public readonly isolationLevel: IsolationLevel) {}
+
+    static create({
+        isolationLevel,
+    }: {
+        isolationLevel: IsolationLevel
+    }): UnspecifiedType {
+        return new UnspecifiedType(isolationLevel)
+    }
+}
+
 export class ExplicitIntegerValueSet implements ExplicitValueSet {
+    readonly isolationLevel = 'ISOLATED'
+
     private constructor(
         public readonly min: bigint | undefined,
         public readonly max: bigint | undefined,
@@ -52,6 +67,8 @@ export class ExplicitIntegerValueSet implements ExplicitValueSet {
 }
 
 export class ExplicitTruthValueSet implements ExplicitValueSet {
+    readonly isolationLevel = 'ISOLATED'
+
     private constructor(
         public readonly values: ('false' | 'ambiguous' | 'true')[],
         public readonly span: SourceCodeSpan,
@@ -83,6 +100,8 @@ export class ExplicitTruthValueSet implements ExplicitValueSet {
 }
 
 export class ExplicitStringValueSet implements ExplicitValueSet {
+    readonly isolationLevel = 'ISOLATED'
+
     private constructor(public readonly span: SourceCodeSpan) {}
 
     static create({ span }: { span: SourceCodeSpan }): ExplicitStringValueSet {

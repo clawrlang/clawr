@@ -35,7 +35,6 @@ describe('Module Parser', () => {
             main: [
                 {
                     isImmutable: true,
-                    isolationLevel: 'ISOLATED',
                     name: 'x',
                     valueSet: {
                         min: undefined,
@@ -45,7 +44,6 @@ describe('Module Parser', () => {
                 },
                 {
                     isImmutable: false,
-                    isolationLevel: 'ISOLATED',
                     name: 'y',
                     valueSet: {
                         min: undefined,
@@ -78,7 +76,6 @@ describe('Module Parser', () => {
             main: [
                 {
                     isImmutable: false,
-                    isolationLevel: 'ISOLATED',
                     name: 'y',
                     valueSet: {
                         min: undefined,

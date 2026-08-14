@@ -95,7 +95,6 @@ describe('Module', () => {
             main: [
                 VariableDeclaration.create({
                     isImmutable: true,
-                    isolationLevel: 'ISOLATED',
                     name: 'x',
                     valueSet: ExplicitIntegerValueSet.create({
                         span: someCodeSpan,

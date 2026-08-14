@@ -1,7 +1,11 @@
-import { Context, Declaration, Expression, IsolationLevel, Statement } from '.'
+import { Context, Declaration, Expression, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
-import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
+import {
+    ExplicitRCTypeValueSet,
+    ExplicitValueSet,
+    UnspecifiedType,
+} from './explicit-value-set'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -9,28 +13,24 @@ export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
 export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private readonly isImmutable: boolean,
-        private readonly isolationLevel: IsolationLevel,
-        private name: string,
-        private valueSet: ExplicitValueSet | undefined,
-        private initialValue: Expression,
+        private readonly name: string,
+        private readonly valueSet: ExplicitValueSet | UnspecifiedType,
+        private readonly initialValue: Expression,
     ) {}
 
     static create({
         isImmutable,
-        isolationLevel,
         name,
         valueSet,
         initialValue,
     }: {
         isImmutable: boolean
-        isolationLevel: IsolationLevel
         name: string
-        valueSet?: ExplicitValueSet
+        valueSet: ExplicitValueSet | UnspecifiedType
         initialValue: Expression
     }): VariableDeclaration {
         return new VariableDeclaration(
             isImmutable,
-            isolationLevel,
             name,
             valueSet,
             initialValue,
@@ -48,12 +48,13 @@ export class VariableDeclaration implements Statement, Declaration {
     private emit(scope: Scope | Scope['rootScope'], context: Context) {
         const currentValue = this.currentValueFromInitial(context)
         const lattice =
-            this.isImmutable && this.isolationLevel === 'ISOLATED'
+            this.isImmutable && this.valueSet.isolationLevel === 'ISOLATED'
                 ? currentValue
-                : (this.valueSet?.toLattice(context) ??
-                  currentValue.unconstrained())
+                : this.valueSet instanceof UnspecifiedType
+                  ? currentValue.unconstrained()
+                  : this.valueSet?.toLattice(context)
         if (
-            this.valueSet &&
+            !(this.valueSet instanceof UnspecifiedType) &&
             !lattice.isSameType(this.valueSet.toLattice(context))
         )
             return logSemanticError('Incompatible initial value', {
@@ -65,11 +66,11 @@ export class VariableDeclaration implements Statement, Declaration {
             .isolationLevel(context)
             .value()
         if (
-            this.isolationLevel !== valueIsolationLevel &&
+            this.valueSet.isolationLevel !== valueIsolationLevel &&
             valueIsolationLevel !== 'UNIQUE'
         )
             logSemanticError(
-                `Cannot assign ${valueIsolationLevel} value to ${this.isolationLevel} target`,
+                `Cannot assign ${valueIsolationLevel} value to ${this.valueSet.isolationLevel} target`,
                 { ...context, span: this.initialValue.span },
             )
 
@@ -79,7 +80,7 @@ export class VariableDeclaration implements Statement, Declaration {
                 ...(this.valueSet instanceof ExplicitRCTypeValueSet
                     ? {
                           type: this.valueSet.type,
-                          isolationLevel: this.isolationLevel,
+                          isolationLevel: this.valueSet.isolationLevel,
                       }
                     : {}),
             })
@@ -102,7 +103,7 @@ export class VariableDeclaration implements Statement, Declaration {
 
         scope.variables.set(this.name, {
             isImmutable: this.isImmutable,
-            isolationLevel: this.isolationLevel,
+            isolationLevel: this.valueSet.isolationLevel!!,
             lattice,
         })
 

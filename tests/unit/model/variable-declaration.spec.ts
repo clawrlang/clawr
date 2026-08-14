@@ -5,6 +5,7 @@ import {
     ExplicitIntegerValueSet,
     ExplicitRCTypeValueSet,
     ExplicitTruthValueSet,
+    UnspecifiedType,
 } from '../../../src/model/explicit-value-set'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
@@ -20,7 +21,6 @@ describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
         const decl = VariableDeclaration.create({
             isImmutable: true,
-            isolationLevel: 'ISOLATED',
             name: 'foo',
             valueSet: ExplicitIntegerValueSet.create({
                 span: someCodeSpan,
@@ -47,9 +47,10 @@ describe('VariableDeclaration', () => {
         it('infers narrowest value set for constant integer', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
                 name: 'foo',
-                valueSet: undefined,
+                valueSet: UnspecifiedType.create({
+                    isolationLevel: 'ISOLATED',
+                }),
                 initialValue: IntegerLiteral.create({
                     value: 1n,
                     span: someCodeSpan,
@@ -67,9 +68,10 @@ describe('VariableDeclaration', () => {
         it('infers widest value set for mutable integer', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: false,
-                isolationLevel: 'ISOLATED',
                 name: 'foo',
-                valueSet: undefined,
+                valueSet: UnspecifiedType.create({
+                    isolationLevel: 'ISOLATED',
+                }),
                 initialValue: IntegerLiteral.create({
                     value: 1n,
                     span: someCodeSpan,
@@ -100,9 +102,10 @@ describe('VariableDeclaration', () => {
         it('infers narrowest value set for constant truthvalue', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
                 name: 'foo',
-                valueSet: undefined,
+                valueSet: UnspecifiedType.create({
+                    isolationLevel: 'ISOLATED',
+                }),
                 initialValue: TruthValueLiteral.create({
                     value: 'true',
                     span: someCodeSpan,
@@ -119,9 +122,10 @@ describe('VariableDeclaration', () => {
         it('infers widest value set for mutable truthvalue', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: false,
-                isolationLevel: 'ISOLATED',
                 name: 'foo',
-                valueSet: undefined,
+                valueSet: UnspecifiedType.create({
+                    isolationLevel: 'ISOLATED',
+                }),
                 initialValue: TruthValueLiteral.create({
                     value: 'true',
                     span: someCodeSpan,
@@ -213,10 +217,10 @@ describe('VariableDeclaration', () => {
 
             const decl = VariableDeclaration.create({
                 isImmutable: false,
-                isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'InnerType' }),
+                    isolationLevel: 'ISOLATED',
                     span: someCodeSpan,
                 }),
                 initialValue: FieldReference.create({
@@ -285,10 +289,10 @@ describe('VariableDeclaration', () => {
 
             const decl = VariableDeclaration.create({
                 isImmutable: false,
-                isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'MyType' }),
+                    isolationLevel: 'ISOLATED',
                     span: someCodeSpan,
                 }),
                 initialValue: VariableReference.create({
@@ -313,7 +317,6 @@ describe('VariableDeclaration', () => {
         test('for a simple integer variable', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
                 name: 'x',
                 valueSet: ExplicitIntegerValueSet.create({
                     span: someCodeSpan,
@@ -369,10 +372,10 @@ describe('VariableDeclaration', () => {
 
             const declaration = VariableDeclaration.create({
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
                 name: 'target',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'OuterType' }),
+                    isolationLevel: 'ISOLATED',
                     span: someCodeSpan,
                 }),
                 initialValue: DataLiteral.create({
@@ -427,10 +430,10 @@ describe('VariableDeclaration', () => {
 
             const decl = VariableDeclaration.create({
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'MyType' }),
+                    isolationLevel: 'ISOLATED',
                     span: someCodeSpan,
                 }),
                 initialValue: DataLiteral.create({
@@ -469,10 +472,10 @@ describe('VariableDeclaration', () => {
 
             const decl = VariableDeclaration.create({
                 isImmutable: true,
-                isolationLevel: 'SHARED',
                 name: 'r',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'MyData' }),
+                    isolationLevel: 'SHARED',
                     span: someCodeSpan,
                 }),
                 initialValue: Query.create({
@@ -539,10 +542,10 @@ describe('VariableDeclaration', () => {
 
                 const declaration = VariableDeclaration.create({
                     isImmutable: false,
-                    isolationLevel: 'ISOLATED',
                     name: 'target',
                     valueSet: ExplicitRCTypeValueSet.create({
                         type: TypeName.create({ name: 'MyType' }),
+                        isolationLevel: 'ISOLATED',
                         span: someCodeSpan,
                     }),
                     initialValue: VariableReference.create({

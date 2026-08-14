@@ -11,6 +11,7 @@ import {
 } from '../model/explicit-value-set'
 import { ExpressionParser } from './expression-parser'
 import { TypeName } from '../model/type-name'
+import { IsolationLevel } from '../model'
 
 export class ValueSetParser {
     private constructor(private context: Context) {}
@@ -19,7 +20,10 @@ export class ValueSetParser {
         return new ValueSetParser(context)
     }
 
-    parse(stream: TokenStream): ExplicitValueSet {
+    parse(
+        stream: TokenStream,
+        isolationLevel: IsolationLevel,
+    ): ExplicitValueSet {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
 
@@ -35,6 +39,7 @@ export class ValueSetParser {
             default:
                 return ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: type }),
+                    isolationLevel,
                     span: { start: typeToken.start, end: typeToken.end },
                 })
         }

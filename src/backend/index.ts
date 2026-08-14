@@ -1,4 +1,5 @@
 import * as cir from '../cir'
+import { mapFilter } from '../tools/map-filter'
 import { validateCIR } from './generated/validate-cir.typia'
 
 export function lower(cir: cir.ClawrModule): string {
@@ -394,15 +395,9 @@ function mangleNameWithParameters(
     receiver?: { name: string; namespace?: string },
 ): string {
     return mangleNameWithLabels(
-        { ...decl, labels: getParameterLabels(decl.parameters) },
+        { ...decl, labels: mapFilter(decl.parameters, (p) => p.label) },
         receiver,
     )
-}
-
-function getParameterLabels(parameters: Array<{ label?: string }>): string[] {
-    return parameters
-        .map((p) => p.label)
-        .filter((label): label is string => label !== undefined)
 }
 
 function mangleNameWithLabels(

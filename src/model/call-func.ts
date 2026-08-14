@@ -1,4 +1,5 @@
 import { Statement, Expression, Context } from '.'
+import { mapFilter } from '../tools/map-filter'
 import { FunctionName } from './function-name'
 
 export class CallFunc implements Statement {
@@ -21,9 +22,7 @@ export class CallFunc implements Statement {
         return new CallFunc(
             FunctionName.create({
                 baseName,
-                labels: args
-                    .filter((arg) => arg.label)
-                    .map((arg) => arg.label!),
+                labels: mapFilter(args, (arg) => arg.label),
                 arity: args.length,
             }),
             args.map((arg) => arg.value),

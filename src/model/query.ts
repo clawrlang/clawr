@@ -5,6 +5,7 @@ import { Failable } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice, RCTypeLattice } from './lattice'
+import { mapFilter } from '../tools/map-filter'
 
 export class Query implements Expression {
     private arguments: Expression[]
@@ -29,9 +30,7 @@ export class Query implements Expression {
         return new Query(
             FunctionName.create({
                 baseName,
-                labels: args
-                    .filter((arg) => arg.label)
-                    .map((arg) => arg.label!),
+                labels: mapFilter(args, (arg) => arg.label),
                 arity: args.length,
             }),
             args.map((arg) => arg.value),

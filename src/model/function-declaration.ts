@@ -12,6 +12,7 @@ import { FunctionName } from './function-name'
 import { Lattice } from './lattice'
 import { SourceCodeSpan } from '../diagnostics'
 import { logSemanticError } from './failable'
+import { mapFilter } from '../tools/map-filter'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -56,9 +57,7 @@ export class FunctionDeclaration implements Declaration {
         const name = FunctionName.create({
             baseName: this.baseName,
             arity: this.parameters.length,
-            labels: this.parameters
-                .filter((param) => param.label)
-                .map((param) => param.label!),
+            labels: mapFilter(this.parameters, (param) => param.label),
         })
         context.scope.rootScope.addFunctionDeclaration(name.toString(), this)
 

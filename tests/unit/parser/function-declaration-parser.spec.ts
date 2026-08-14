@@ -4,7 +4,7 @@ import { TokenStream } from '../../../src/lexer'
 import { FunctionDeclarationParser } from '../../../src/parser/function-declaration-parser'
 import { ExplicitRCTypeValueSet } from '../../../src/model/explicit-value-set'
 
-describe('Function Parser', () => {
+describe('Function Declaration Parser', () => {
     it('parses a function with no parameters and no return type', () => {
         const code = 'func myFunction() {}'
 

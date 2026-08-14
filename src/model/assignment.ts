@@ -1,9 +1,9 @@
-import { Statement, Expression, Context } from '.'
+import { Statement, Expression, Context, IsolationLevel } from '.'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
 import { logSemanticError } from './failable'
-import { RCTypeLattice } from './lattice'
+import { Lattice, RCTypeLattice } from './lattice'
 
 export class Assignment implements Statement {
     private constructor(
@@ -25,50 +25,43 @@ export class Assignment implements Statement {
     }
 
     emitStatement(context: Context) {
-        const targetResult = this.target.toCIRExpression(context)
+        const targetResult = this.target.declaredValueSet(context)
         if (targetResult.isFailure()) {
             for (const error of targetResult.getError().errors)
                 context.errorReporter.reportError(error.message, error.span)
         }
-        const target = targetResult.value()
-        const targetValueSet = this.target.declaredValueSet(context).value()
+        const targetLattice = targetResult.value()
         const targetIsolationLevel = this.target.isolationLevel(context).value()
+        const assignedValue = this.value.currentValue(context).value()
+
+        this.checkValidity(
+            targetLattice,
+            assignedValue,
+            context,
+            targetIsolationLevel,
+        )
+
+        this.emitCIRStatements(context, targetLattice, targetIsolationLevel)
+    }
+
+    private emitCIRStatements(
+        context: Context,
+        targetLattice: Lattice,
+        targetIsolationLevel: IsolationLevel,
+    ) {
+        const prelude = this.target.assignmentPrelude(context)
+        context.scope.emitted.push(...prelude)
+
         const value = this.value
             .toCIRExpression({
                 ...context,
                 type:
-                    targetValueSet instanceof RCTypeLattice
-                        ? targetValueSet.type
+                    targetLattice instanceof RCTypeLattice
+                        ? targetLattice.type
                         : undefined,
                 isolationLevel: targetIsolationLevel,
             })
             .value()
-
-        const valueSet = this.value.currentValue(context).value()
-        if (!valueSet.isSameType(targetValueSet))
-            logSemanticError(
-                `Cannot assign value of type ${valueSet.toString()} to target of type ${targetValueSet.toString()}`,
-                {
-                    ...context,
-                    span: { start: this.span.start, end: this.span.end },
-                },
-            )
-        const valueIsolationLevel = this.value.isolationLevel(context).value()
-        if (
-            targetIsolationLevel !== valueIsolationLevel &&
-            valueIsolationLevel !== 'UNIQUE'
-        )
-            logSemanticError(
-                `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,
-                {
-                    ...context,
-                    span: { start: this.span.start, end: this.span.end },
-                },
-            )
-
-        const prelude = this.target.assignmentPrelude(context)
-        context.scope.emitted.push(...prelude)
-
         if (
             (value.kind === 'FIELD_REF' || value.kind === 'VARIABLE_REF') &&
             this.target.declaredValueSet(context).value() instanceof
@@ -79,14 +72,14 @@ export class Assignment implements Statement {
             context.scope.emitted.push({
                 kind: 'VARIABLE_DECL' as const,
                 name: tempVar,
-                valueSet: targetValueSet.toCIR(),
-                initialValue: target,
+                valueSet: targetLattice.toCIR(),
+                initialValue: this.target.toCIRExpression(context).value(),
             })
 
             context.scope.emitted.push(
                 {
                     kind: 'ASSIGN',
-                    target,
+                    target: this.target.toCIRExpression(context).value(),
                     value: {
                         kind: 'RETAIN',
                         object: value,
@@ -108,7 +101,7 @@ export class Assignment implements Statement {
         ) {
             context.scope.emitted.push({
                 kind: 'ASSIGN',
-                target,
+                target: this.target.toCIRExpression(context).value(),
                 value: {
                     kind: 'AS_SHARED',
                     object: value,
@@ -117,9 +110,35 @@ export class Assignment implements Statement {
         } else {
             context.scope.emitted.push({
                 kind: 'ASSIGN',
-                target,
+                target: this.target.toCIRExpression(context).value(),
                 value,
             })
         }
+    }
+
+    private checkValidity(
+        targetLattice: Lattice,
+        assignedValue: Lattice,
+        context: Context,
+        targetIsolationLevel: string,
+    ) {
+        if (!targetLattice.isSupersetTo(assignedValue))
+            logSemanticError(
+                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
+                {
+                    ...context,
+                    span: { start: this.span.start, end: this.span.end },
+                },
+            )
+        const valueIsolationLevel = this.value.isolationLevel(context).value()
+        if (valueIsolationLevel === 'UNIQUE') return
+        if (targetIsolationLevel !== valueIsolationLevel)
+            logSemanticError(
+                `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,
+                {
+                    ...context,
+                    span: { start: this.span.start, end: this.span.end },
+                },
+            )
     }
 }

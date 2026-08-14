@@ -120,10 +120,8 @@ export class VariableDeclaration implements Statement, Declaration {
         const valueIsolationLevel = this.initialValue
             .isolationLevel(context)
             .value()
-        if (
-            this.valueSet.isolationLevel !== valueIsolationLevel &&
-            valueIsolationLevel !== 'UNIQUE'
-        )
+        if (valueIsolationLevel === 'UNIQUE') return
+        if (this.valueSet.isolationLevel !== valueIsolationLevel)
             logSemanticError(
                 `Cannot assign ${valueIsolationLevel} value to ${this.valueSet.isolationLevel} target`,
                 { ...context, span: this.initialValue.span },

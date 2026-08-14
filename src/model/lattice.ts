@@ -3,6 +3,7 @@ import { TypeName } from './type-name'
 
 export interface Lattice {
     unconstrained(): Lattice
+    isSupersetTo(lattice: Lattice): boolean
     isSameType(lattice: Lattice): boolean
     toCIR(): cir.ValueSet
     toString(): string
@@ -30,6 +31,16 @@ export class IntegerLattice implements Lattice {
 
     unconstrained(): Lattice {
         return IntegerLattice.create({ min: undefined, max: undefined })
+    }
+
+    isSupersetTo(lattice: Lattice): boolean {
+        return (
+            lattice instanceof IntegerLattice &&
+            (this.min === undefined ||
+                (lattice.min !== undefined && lattice.min >= this.min)) &&
+            (this.max === undefined ||
+                (lattice.max !== undefined && lattice.max <= this.max))
+        )
     }
 
     isSameType(lattice: Lattice): boolean {
@@ -64,6 +75,13 @@ export class TruthvalueLattice implements Lattice {
         return TruthvalueLattice.create(['false', 'ambiguous', 'true'])
     }
 
+    isSupersetTo(lattice: Lattice): boolean {
+        return (
+            lattice instanceof TruthvalueLattice &&
+            lattice.values.every((v) => this.values.includes(v))
+        )
+    }
+
     isSameType(lattice: Lattice): boolean {
         return lattice instanceof TruthvalueLattice
     }
@@ -89,6 +107,10 @@ export class StringLattice implements Lattice {
 
     unconstrained(): Lattice {
         return this
+    }
+
+    isSupersetTo(lattice: Lattice): boolean {
+        return lattice instanceof StringLattice
     }
 
     isSameType(lattice: Lattice): boolean {
@@ -130,6 +152,13 @@ export class RCTypeLattice implements Lattice {
                 ]),
             ),
         })
+    }
+
+    isSupersetTo(lattice: Lattice): boolean {
+        return (
+            lattice instanceof RCTypeLattice &&
+            this.type.canonical() === lattice.type.canonical()
+        )
     }
 
     isSameType(lattice: Lattice): boolean {

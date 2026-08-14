@@ -8,7 +8,6 @@ import {
     ExplicitIntegerValueSet,
     ExplicitRCTypeValueSet,
     ExplicitStringValueSet,
-    ExplicitUniqueValueSet,
 } from '../../../src/model/explicit-value-set'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
@@ -158,7 +157,7 @@ describe('FunctionDeclaration', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
-            result: ExplicitUniqueValueSet.create({
+            result: ExplicitRCTypeValueSet.create({
                 type: TypeName.create({ name: 'MyData' }),
                 span: someCodeSpan,
             }),
@@ -622,7 +621,7 @@ describe('FunctionDeclaration', () => {
             const funcDecl = FunctionDeclaration.create({
                 baseName: 'myFunction',
                 parameters: [],
-                result: ExplicitUniqueValueSet.create({
+                result: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'MyData' }),
                     span: someCodeSpan,
                 }),

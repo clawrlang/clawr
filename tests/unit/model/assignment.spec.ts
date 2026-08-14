@@ -8,7 +8,6 @@ import { DataDeclaration } from '../../../src/model/data-declaration'
 import {
     ExplicitIntegerValueSet,
     ExplicitRCTypeValueSet,
-    ExplicitUniqueValueSet,
 } from '../../../src/model/explicit-value-set'
 import { FunctionDeclaration } from '../../../src/model/function-declaration'
 import { Query } from '../../../src/model/query'
@@ -304,7 +303,7 @@ describe('Assignment', () => {
             'myFunction()',
             FunctionDeclaration.create({
                 baseName: 'myFunction',
-                result: ExplicitUniqueValueSet.create({
+                result: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'MyType' }),
                     span: someCodeSpan,
                 }),

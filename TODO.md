@@ -2,10 +2,7 @@
 
 ## In Progress
 
-- Get the fields from the default set when converting SHARED to UNIQUE
-- `FunctionName` lacks namespace
-  - DataDeclParser
-  - ValueSetParser
+- Function parameters and return values
 
 ## Incomplete/Postponed Functionality
 
@@ -15,3 +12,9 @@
 - `VariableDeclaration` `initialValue` type mismatch
 - `DataLiteral` field type mismatch
 - [Object](./todo/object.md)
+- Get the fields from the default-lattice when converting SHARED to UNIQUE
+- Parse namespace
+  - `FunctionName`
+  - `DataDeclarationParser`
+  - `FunctionDeclarationParser`
+  - `ValueSetParser`

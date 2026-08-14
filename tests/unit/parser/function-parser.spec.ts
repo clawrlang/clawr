@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
 import { FunctionDeclarationParser } from '../../../src/parser/function-declaration-parser'
-import { ExplicitUniqueValueSet } from '../../../src/model/explicit-value-set'
+import { ExplicitRCTypeValueSet } from '../../../src/model/explicit-value-set'
 
 describe('Function Parser', () => {
     it('parses a function with no parameters and no return type', () => {
@@ -175,7 +175,7 @@ describe('Function Parser', () => {
             result: { type: { name: 'MyData' } },
         })
 
-        expect(result.result).toBeInstanceOf(ExplicitUniqueValueSet)
+        expect(result.result).toBeInstanceOf(ExplicitRCTypeValueSet)
     })
 
     it('parses a function with an ISOLATED return type', () => {

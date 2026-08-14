@@ -8,7 +8,7 @@ import {
 } from '../../../src/model/function-declaration'
 import {
     ExplicitIntegerValueSet,
-    ExplicitUniqueValueSet,
+    ExplicitRCTypeValueSet,
 } from '../../../src/model/explicit-value-set'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { RCTypeLattice } from '../../../src/model/lattice'
@@ -114,7 +114,7 @@ describe('Query', () => {
                 FunctionDeclaration.create({
                     baseName: 'foo',
                     parameters: [],
-                    result: ExplicitUniqueValueSet.create({
+                    result: ExplicitRCTypeValueSet.create({
                         type: TypeName.create({ name: 'MyData' }),
                         span: someCodeSpan,
                     }),

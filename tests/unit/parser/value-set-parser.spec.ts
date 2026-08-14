@@ -4,7 +4,6 @@ import {
     ExplicitTruthValueSet,
     ExplicitStringValueSet,
     ExplicitRCTypeValueSet,
-    ExplicitUniqueValueSet,
 } from '../../../src/model/explicit-value-set'
 import { TokenStream } from '../../../src/lexer'
 import { ValueSetParser } from '../../../src/parser/value-set-parser'

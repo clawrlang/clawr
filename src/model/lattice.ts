@@ -1,6 +1,5 @@
 import * as cir from '../cir'
 import { TypeName } from './type-name'
-import { IsolationLevel } from '.'
 
 export interface Lattice {
     unconstrained(): Lattice

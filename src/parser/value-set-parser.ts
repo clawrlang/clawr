@@ -7,7 +7,6 @@ import {
     ExplicitRCTypeValueSet,
     ExplicitStringValueSet,
     ExplicitTruthValueSet,
-    ExplicitUniqueValueSet,
     ExplicitValueSet,
 } from '../model/explicit-value-set'
 import { ExpressionParser } from './expression-parser'
@@ -20,10 +19,7 @@ export class ValueSetParser {
         return new ValueSetParser(context)
     }
 
-    parse(
-        stream: TokenStream,
-        flag?: { uniquelyReferenced: boolean },
-    ): ExplicitValueSet {
+    parse(stream: TokenStream): ExplicitValueSet {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
 
@@ -37,16 +33,10 @@ export class ValueSetParser {
                     span: { start: typeToken.start, end: typeToken.end },
                 })
             default:
-                if (flag && flag.uniquelyReferenced)
-                    return ExplicitUniqueValueSet.create({
-                        type: TypeName.create({ name: type }),
-                        span: { start: typeToken.start, end: typeToken.end },
-                    })
-                else
-                    return ExplicitRCTypeValueSet.create({
-                        type: TypeName.create({ name: type }),
-                        span: { start: typeToken.start, end: typeToken.end },
-                    })
+                return ExplicitRCTypeValueSet.create({
+                    type: TypeName.create({ name: type }),
+                    span: { start: typeToken.start, end: typeToken.end },
+                })
         }
     }
 

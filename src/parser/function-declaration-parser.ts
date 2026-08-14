@@ -39,9 +39,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')
                 ? stream.expect('KEYWORD', 'ref', 'const')
                 : undefined
-            result = this.valueSetParser.parse(stream, {
-                uniquelyReferenced: !semanticsToken,
-            })
+            result = this.valueSetParser.parse(stream)
         }
 
         if (stream.isNext('PUNCTUATION', '=>')) {
@@ -89,9 +87,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             let valueSet: ExplicitValueSet | undefined
             if (stream.isNext('PUNCTUATION', ':')) {
                 stream.expect('PUNCTUATION', ':')
-                valueSet = this.valueSetParser.parse(stream, {
-                    uniquelyReferenced: true,
-                })
+                valueSet = this.valueSetParser.parse(stream)
             }
 
             let defaultValue: Expression | undefined

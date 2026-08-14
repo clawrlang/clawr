@@ -365,6 +365,7 @@ describe('VariableDeclaration', () => {
                             isolationLevel: 'ISOLATED',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'InnerType' }),
+                                isolationLevel: 'ISOLATED',
                                 span: someCodeSpan,
                             }),
                         },

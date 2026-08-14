@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 import { SourceCodeSpan } from '../diagnostics'
-import { Context } from '.'
+import { Context, IsolationLevel } from '.'
 import {
     Lattice,
     IntegerLattice,
@@ -101,17 +101,20 @@ export class ExplicitStringValueSet implements ExplicitValueSet {
 export class ExplicitRCTypeValueSet implements ExplicitValueSet {
     private constructor(
         public readonly type: TypeName,
+        public readonly isolationLevel: IsolationLevel | undefined,
         public readonly span: SourceCodeSpan,
     ) {}
 
     static create({
         type,
+        isolationLevel,
         span,
     }: {
         type: TypeName
+        isolationLevel?: IsolationLevel
         span: SourceCodeSpan
     }): ExplicitRCTypeValueSet {
-        return new ExplicitRCTypeValueSet(type, span)
+        return new ExplicitRCTypeValueSet(type, isolationLevel, span)
     }
 
     toCIR(): Extract<cir.ValueSet, { type: 'rc-type' }> {

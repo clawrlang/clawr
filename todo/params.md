@@ -1,5 +1,11 @@
 # Function Parameters — Semantic Model
 
+- `FunctionDeclaration`
+- `CallFunc` / `Query`
+- `ReturnStatement`
+- `VariableDeclaration`
+- `Assignment`
+
 - Ensure that `valueSet` and `defaultValue` are compatible
 - Ensure that `undefined` variables are not modified
 - Ensure that `undefined` variables are not assigned without `copy(of:)`

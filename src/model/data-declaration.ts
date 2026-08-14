@@ -1,10 +1,9 @@
-import { Context, Declaration, Expression, IsolationLevel } from '.'
+import { Context, Declaration, Expression } from '.'
 import { ExplicitValueSet } from './explicit-value-set'
 import { TypeName } from './type-name'
 
 export type DataField = {
     isImmutable: boolean
-    isolationLevel: IsolationLevel
     name: string
     valueSet: ExplicitValueSet
     defaultValue?: Expression

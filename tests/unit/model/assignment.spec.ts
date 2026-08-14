@@ -50,7 +50,6 @@ describe('Assignment', () => {
                     fields: [
                         {
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             name: 'innerField',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
@@ -66,10 +65,10 @@ describe('Assignment', () => {
                     fields: [
                         {
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             name: 'field',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'InnerType' }),
+                                isolationLevel: 'ISOLATED',
                                 span: someCodeSpan,
                             }),
                         },
@@ -246,7 +245,6 @@ describe('Assignment', () => {
                     {
                         name: 'field',
                         isImmutable: false,
-                        isolationLevel: 'ISOLATED',
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
@@ -469,7 +467,6 @@ describe('Assignment', () => {
                     {
                         name: 'myField',
                         isImmutable: false,
-                        isolationLevel: 'ISOLATED',
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
@@ -534,7 +531,6 @@ describe('Assignment', () => {
                             {
                                 name: 'myField',
                                 isImmutable: false,
-                                isolationLevel: 'ISOLATED',
                                 valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),

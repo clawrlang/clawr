@@ -28,7 +28,6 @@ describe('Field Reference', () => {
                     {
                         name: 'myField',
                         isImmutable: false,
-                        isolationLevel: 'ISOLATED',
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
                         }),
@@ -68,10 +67,10 @@ describe('Field Reference', () => {
                 fields: [
                     {
                         isImmutable: true,
-                        isolationLevel: 'SHARED',
                         name: 'myField',
                         valueSet: ExplicitRCTypeValueSet.create({
                             type: TypeName.create({ name: 'MyType' }),
+                            isolationLevel: 'SHARED',
                             span: someCodeSpan,
                         }),
                     },
@@ -140,12 +139,12 @@ describe('Field Reference', () => {
                         fields: [
                             {
                                 isImmutable,
-                                isolationLevel: expected,
                                 name: 'myField',
                                 valueSet: ExplicitRCTypeValueSet.create({
                                     type: TypeName.create({
                                         name: 'InnerType',
                                     }),
+                                    isolationLevel: expected,
                                     span: someCodeSpan,
                                 }),
                             },
@@ -188,7 +187,6 @@ describe('Field Reference', () => {
                 fields: [
                     {
                         isImmutable: false,
-                        isolationLevel: 'ISOLATED',
                         name: 'myField',
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,
@@ -255,7 +253,6 @@ describe('Field Reference', () => {
                             {
                                 name: 'myField',
                                 isImmutable: false,
-                                isolationLevel: 'ISOLATED',
                                 valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
@@ -332,7 +329,6 @@ describe('Field Reference', () => {
                             {
                                 name: 'myField',
                                 isImmutable,
-                                isolationLevel,
                                 valueSet: ExplicitIntegerValueSet.create({
                                     span: someCodeSpan,
                                 }),
@@ -373,7 +369,6 @@ describe('Field Reference', () => {
                     fields: [
                         {
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             name: 'myField',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
@@ -412,7 +407,6 @@ describe('Field Reference', () => {
                     fields: [
                         {
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             name: 'myField',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,

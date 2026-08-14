@@ -63,7 +63,6 @@ describe('Module', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -71,7 +70,6 @@ describe('Module', () => {
                         {
                             name: 'field2',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitTruthValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -128,7 +126,6 @@ describe('Module', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -136,7 +133,6 @@ describe('Module', () => {
                         {
                             name: 'field2',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitTruthValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -153,16 +149,8 @@ describe('Module', () => {
         expect(myDataDeclaration).toMatchObject({
             name: { name: 'MyData' },
             fields: [
-                {
-                    name: 'field1',
-                    isImmutable: false,
-                    isolationLevel: 'ISOLATED',
-                },
-                {
-                    name: 'field2',
-                    isImmutable: false,
-                    isolationLevel: 'ISOLATED',
-                },
+                { name: 'field1', isImmutable: false },
+                { name: 'field2', isImmutable: false },
             ],
         })
         expect(myDataDeclaration?.fields[0].valueSet).toBeInstanceOf(

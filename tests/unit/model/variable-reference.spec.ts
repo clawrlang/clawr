@@ -91,7 +91,6 @@ describe('Variable Reference', () => {
                 fields: [
                     {
                         isImmutable: false,
-                        isolationLevel: 'ISOLATED',
                         name: 'myField',
                         valueSet: ExplicitIntegerValueSet.create({
                             span: someCodeSpan,

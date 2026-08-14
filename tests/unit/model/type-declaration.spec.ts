@@ -15,7 +15,6 @@ describe('DataDeclaration', () => {
                 {
                     name: 'field1',
                     isImmutable: false,
-                    isolationLevel: 'ISOLATED',
                     valueSet: ExplicitIntegerValueSet.create({
                         span: someCodeSpan,
                     }),
@@ -23,7 +22,6 @@ describe('DataDeclaration', () => {
                 {
                     name: 'field2',
                     isImmutable: false,
-                    isolationLevel: 'ISOLATED',
                     valueSet: ExplicitTruthValueSet.create({
                         span: someCodeSpan,
                     }),

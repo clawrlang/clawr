@@ -84,7 +84,6 @@ describe('Literals', () => {
                         {
                             name: 'x',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -92,7 +91,6 @@ describe('Literals', () => {
                         {
                             name: 'y',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -155,7 +153,6 @@ describe('Literals', () => {
                         {
                             name: 'x',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -163,7 +160,6 @@ describe('Literals', () => {
                         {
                             name: 'y',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -218,11 +214,11 @@ describe('Literals', () => {
                         {
                             name: 'inner',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({
                                     name: 'MissingInnerType',
                                 }),
+                                isolationLevel: 'ISOLATED',
                                 span: someCodeSpan,
                             }),
                         },

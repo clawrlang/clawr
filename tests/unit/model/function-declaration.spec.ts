@@ -476,7 +476,6 @@ describe('FunctionDeclaration', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),
@@ -544,7 +543,6 @@ describe('FunctionDeclaration', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            isolationLevel: 'ISOLATED',
                             valueSet: ExplicitIntegerValueSet.create({
                                 span: someCodeSpan,
                             }),

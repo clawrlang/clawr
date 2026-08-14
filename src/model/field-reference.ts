@@ -96,7 +96,7 @@ export class FieldReference implements Expression {
     toCIRExpression(
         context: Context,
     ): Failable<Extract<cir.Expression, { kind: 'FIELD_REF' }>> {
-        return this.checkOperatorCompatibility_failable(context).chaining((_) =>
+        return this.checkOperatorCompatibility(context).chaining((_) =>
             this.object.toCIRExpression(context).chaining((object) =>
                 this.getFieldFromContext(context).chaining((field) =>
                     Failable.success({
@@ -126,7 +126,7 @@ export class FieldReference implements Expression {
               )
     }
 
-    private checkOperatorCompatibility_failable(context: Context): Failable {
+    private checkOperatorCompatibility(context: Context): Failable {
         return this.object
             .isolationLevel(context)
             .chaining((isolationLevel) => {

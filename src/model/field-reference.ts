@@ -6,7 +6,6 @@ import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { RCTypeLattice, Lattice } from './lattice'
 import { VariableReference } from './variable-reference'
-import { ExplicitRCTypeValueSet } from './explicit-value-set'
 
 export class FieldReference implements Expression {
     private constructor(
@@ -64,14 +63,14 @@ export class FieldReference implements Expression {
 
     isolationLevel(context: Context): Failable<IsolationLevel> {
         const field = this.getFieldFromContext(context).value()
-        return field.valueSet instanceof ExplicitRCTypeValueSet
+        return field.valueSet.lattice instanceof RCTypeLattice
             ? Failable.success(field.valueSet.isolationLevel ?? ISOLATED)
             : Failable.success(ISOLATED)
     }
 
     declaredValueSet(context: Context): Failable<Lattice> {
         return this.getFieldFromContext(context).chaining((field) =>
-            Failable.success(field.valueSet.toLattice(context)),
+            Failable.success(field.valueSet.lattice!),
         )
     }
 
@@ -104,7 +103,7 @@ export class FieldReference implements Expression {
                         kind: 'FIELD_REF',
                         object,
                         field: this.field,
-                        valueSet: field.valueSet.toCIR(),
+                        valueSet: field.valueSet.lattice!.toCIR(),
                     }),
                 ),
             ),

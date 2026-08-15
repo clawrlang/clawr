@@ -2,16 +2,16 @@ import { Context } from '.'
 import { Token, TokenStream } from '../lexer'
 import { IdentifierToken } from '../lexer/token'
 import { IntegerLiteral } from '../model/integer-literal'
-import {
-    ExplicitIntegerValueSet,
-    ExplicitRCTypeValueSet,
-    ExplicitStringValueSet,
-    ExplicitTruthValueSet,
-    ExplicitValueSet,
-} from '../model/explicit-value-set'
+import { ExplicitValueSet } from '../model/explicit-value-set'
 import { ExpressionParser } from './expression-parser'
 import { TypeName } from '../model/type-name'
-import { IsolationLevel } from '../model/isolation-level'
+import { AnyIsolationLevel, ISOLATED } from '../model/isolation-level'
+import {
+    IntegerLattice,
+    RCTypeLattice,
+    StringLattice,
+    TruthvalueLattice,
+} from '../model/lattice'
 
 export class ValueSetParser {
     private constructor(private context: Context) {}
@@ -20,10 +20,10 @@ export class ValueSetParser {
         return new ValueSetParser(context)
     }
 
-    parse(
+    parse<IsolationLevel extends AnyIsolationLevel>(
         stream: TokenStream,
         isolationLevel: IsolationLevel,
-    ): ExplicitValueSet {
+    ): ExplicitValueSet<IsolationLevel | ISOLATED> {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
 
@@ -33,26 +33,32 @@ export class ValueSetParser {
             case 'truthvalue':
                 return this.parseTruthvalueValueSet(stream, typeToken)
             case 'string':
-                return ExplicitStringValueSet.create({
-                    span: { start: typeToken.start, end: typeToken.end },
-                })
-            default:
-                return ExplicitRCTypeValueSet.create({
-                    type: TypeName.create({ name: type }),
+                return {
                     isolationLevel,
+                    lattice: StringLattice.create(),
                     span: { start: typeToken.start, end: typeToken.end },
-                })
+                }
+            default:
+                return {
+                    isolationLevel,
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: type }),
+                    }),
+                    span: { start: typeToken.start, end: typeToken.end },
+                }
         }
     }
 
-    parseIntegerValueSet(
+    private parseIntegerValueSet(
         stream: TokenStream,
         typeToken: Token,
-    ): ExplicitValueSet {
+    ): ExplicitValueSet<ISOLATED> {
         if (!stream.isNext('PUNCTUATION', '('))
-            return ExplicitIntegerValueSet.create({
+            return {
+                isolationLevel: ISOLATED,
+                lattice: IntegerLattice.unconstrained(),
                 span: { start: typeToken.start, end: typeToken.end },
-            })
+            }
 
         let max: bigint | undefined
         let min: bigint | undefined
@@ -96,21 +102,23 @@ export class ValueSetParser {
 
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return ExplicitIntegerValueSet.create({
-            min,
-            max,
+        return {
+            isolationLevel: ISOLATED,
+            lattice: IntegerLattice.create({ min, max }),
             span: { start: typeToken.start, end: endToken.end },
-        })
+        }
     }
 
-    parseTruthvalueValueSet(
+    private parseTruthvalueValueSet(
         stream: TokenStream,
         typeToken: IdentifierToken,
-    ): ExplicitValueSet {
+    ): ExplicitValueSet<ISOLATED> {
         if (!stream.isNext('PUNCTUATION', '('))
-            return ExplicitTruthValueSet.create({
+            return {
+                isolationLevel: ISOLATED,
+                lattice: TruthvalueLattice.unconstrained(),
                 span: { start: typeToken.start, end: typeToken.end },
-            })
+            }
 
         const values: ('false' | 'ambiguous' | 'true')[] = []
 
@@ -123,9 +131,13 @@ export class ValueSetParser {
         }
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return ExplicitTruthValueSet.create({
-            values: values.length > 0 ? values : undefined,
+        return {
+            isolationLevel: ISOLATED,
+            lattice:
+                values.length > 0
+                    ? TruthvalueLattice.create(values)
+                    : TruthvalueLattice.unconstrained(),
             span: { start: typeToken.start, end: endToken.end },
-        })
+        }
     }
 }

@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'bun:test'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import {
-    ExplicitIntegerValueSet,
-    ExplicitTruthValueSet,
-} from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
+import { ISOLATED } from '../../../src/model/isolation-level'
+import { IntegerLattice, TruthvalueLattice } from '../../../src/model/lattice'
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {
@@ -15,16 +13,20 @@ describe('DataDeclaration', () => {
                 {
                     name: 'field1',
                     isImmutable: false,
-                    valueSet: ExplicitIntegerValueSet.create({
+                    valueSet: {
+                        isolationLevel: ISOLATED,
+                        lattice: IntegerLattice.unconstrained(),
                         span: someCodeSpan,
-                    }),
+                    },
                 },
                 {
                     name: 'field2',
                     isImmutable: false,
-                    valueSet: ExplicitTruthValueSet.create({
+                    valueSet: {
+                        isolationLevel: ISOLATED,
+                        lattice: TruthvalueLattice.unconstrained(),
                         span: someCodeSpan,
-                    }),
+                    },
                 },
             ],
         })

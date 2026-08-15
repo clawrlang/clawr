@@ -10,7 +10,7 @@ import {
     SemanticsKeyword,
     SemanticsKeywordParser,
 } from './semantics-keyword-parser'
-import { ISOLATED } from '../model/isolation-level'
+import { ISOLATED, IsolationLevel, UNIQUE } from '../model/isolation-level'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
     private readonly valueSetParser: ValueSetParser
@@ -34,7 +34,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
 
         const parameters = this.parseParameters(stream)
 
-        let result: ExplicitValueSet | undefined = undefined
+        let result: ExplicitValueSet<IsolationLevel | UNIQUE> | undefined
         if (stream.isNext('OPERATOR', '->')) {
             stream.expect('OPERATOR', '->')
             const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')
@@ -85,7 +85,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                 varNameToken = stream.expect('IDENTIFIER')
             else varNameToken = labelToken
 
-            let valueSet: ExplicitValueSet | undefined
+            let valueSet: ExplicitValueSet<IsolationLevel> | undefined
             if (stream.isNext('PUNCTUATION', ':')) {
                 stream.expect('PUNCTUATION', ':')
                 valueSet = this.valueSetParser.parse(
@@ -116,7 +116,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                         start: semanticsToken?.start ?? labelToken.start,
                         end:
                             defaultValue?.span.end ??
-                            valueSet?.span.end ??
+                            valueSet?.span?.end ??
                             varNameToken.end,
                     },
                 }),

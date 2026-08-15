@@ -50,7 +50,11 @@ export class DataLiteral implements Expression {
                     )
                 return field.value.currentValue({
                     ...context,
-                    ...fieldDeclaration.valueSet,
+                    type:
+                        fieldDeclaration.valueSet.lattice instanceof
+                        RCTypeLattice
+                            ? fieldDeclaration.valueSet.lattice.type
+                            : undefined,
                 })
             }),
         ).chaining((fieldValues) =>
@@ -81,7 +85,7 @@ export class DataLiteral implements Expression {
                 fields: Object.fromEntries(
                     decl.fields.map((field) => [
                         field.name,
-                        field.valueSet.toLattice(context),
+                        field.valueSet.lattice!,
                     ]),
                 ),
             }),
@@ -126,7 +130,10 @@ export class DataLiteral implements Expression {
                 )
             const nestedContext = {
                 ...context,
-                ...fieldDeclaration.valueSet,
+                type:
+                    fieldDeclaration.valueSet.lattice instanceof RCTypeLattice
+                        ? fieldDeclaration.valueSet.lattice.type
+                        : undefined,
             }
             return field.value
                 .toCIRExpression(nestedContext)

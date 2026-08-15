@@ -1,11 +1,12 @@
 import { Context, Declaration, Expression } from '.'
 import { ExplicitValueSet } from './explicit-value-set'
+import { IsolationLevel } from './isolation-level'
 import { TypeName } from './type-name'
 
 export type DataField = {
     isImmutable: boolean
     name: string
-    valueSet: ExplicitValueSet
+    valueSet: ExplicitValueSet<IsolationLevel>
     defaultValue?: Expression
 }
 
@@ -33,7 +34,7 @@ export class DataDeclaration implements Declaration {
             namespace: this.name.namespace,
             fields: this.fields.map((field) => ({
                 name: field.name,
-                valueSet: field.valueSet.toCIR(),
+                valueSet: field.valueSet.lattice!.toCIR(),
             })),
         })
     }

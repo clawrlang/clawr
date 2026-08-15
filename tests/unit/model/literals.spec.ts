@@ -5,12 +5,9 @@ import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import {
-    ExplicitIntegerValueSet,
-    ExplicitRCTypeValueSet,
-} from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {
@@ -85,16 +82,20 @@ describe('Literals', () => {
                         {
                             name: 'x',
                             isImmutable: false,
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                         {
                             name: 'y',
                             isImmutable: false,
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),
@@ -154,16 +155,20 @@ describe('Literals', () => {
                         {
                             name: 'x',
                             isImmutable: false,
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                         {
                             name: 'y',
                             isImmutable: false,
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),
@@ -215,13 +220,15 @@ describe('Literals', () => {
                         {
                             name: 'inner',
                             isImmutable: false,
-                            valueSet: ExplicitRCTypeValueSet.create({
-                                type: TypeName.create({
-                                    name: 'MissingInnerType',
-                                }),
+                            valueSet: {
                                 isolationLevel: ISOLATED,
+                                lattice: RCTypeLattice.create({
+                                    type: TypeName.create({
+                                        name: 'MissingInnerType',
+                                    }),
+                                }),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),

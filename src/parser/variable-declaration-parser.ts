@@ -8,8 +8,13 @@ import { StatementParser } from './statement-parser'
 import { Context } from '.'
 import { ValueSetParser } from './value-set-parser'
 import { SemanticsKeyword } from './semantics-keyword-parser'
-import { UnspecifiedType } from '../model/explicit-value-set'
-import { IsolationLevel } from '../model/isolation-level'
+import {
+    AnyIsolationLevel,
+    ISOLATED,
+    IsolationLevel,
+    UNIQUE,
+} from '../model/isolation-level'
+import { ExplicitValueSet } from '../model/explicit-value-set'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser
@@ -31,9 +36,10 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
         const semanticsKeyword = SemanticsKeyword[semanticsToken.keyword]
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
-        const valueSet =
-            this.parseTypeIdentifier(stream, semanticsKeyword.isolationLevel) ??
-            UnspecifiedType.create(semanticsKeyword)
+        const valueSet = this.parseTypeIdentifier(
+            stream,
+            semanticsKeyword.isolationLevel,
+        )
         stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse(stream)
         return VariableDeclaration.create({
@@ -44,13 +50,18 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
         })
     }
 
-    private parseTypeIdentifier(
+    private parseTypeIdentifier<IsolationLevel extends AnyIsolationLevel>(
         stream: TokenStream,
         isolationLevel: IsolationLevel,
-    ) {
-        if (!stream.isNext('PUNCTUATION', ':')) return undefined
+    ): ExplicitValueSet<IsolationLevel | ISOLATED> {
+        if (!stream.isNext('PUNCTUATION', ':')) return { isolationLevel }
 
         stream.expect('PUNCTUATION', ':')
-        return ValueSetParser.create(this.context).parse(stream, isolationLevel)
+        return (
+            ValueSetParser.create(this.context).parse(
+                stream,
+                isolationLevel,
+            ) ?? { isolationLevel }
+        )
     }
 }

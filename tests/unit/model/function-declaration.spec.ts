@@ -4,11 +4,6 @@ import {
     FunctionDeclaration,
     Parameter,
 } from '../../../src/model/function-declaration'
-import {
-    ExplicitIntegerValueSet,
-    ExplicitRCTypeValueSet,
-    ExplicitStringValueSet,
-} from '../../../src/model/explicit-value-set'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { ReturnStatement } from '../../../src/model/return-statement'
@@ -16,7 +11,11 @@ import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
-import { RCTypeLattice } from '../../../src/model/lattice'
+import {
+    IntegerLattice,
+    RCTypeLattice,
+    StringLattice,
+} from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
@@ -30,9 +29,11 @@ describe('FunctionDeclaration', () => {
                     isImmutable: true,
                     isolationLevel: ISOLATED,
                     varName: 'x',
-                    valueSet: ExplicitStringValueSet.create({
+                    valueSet: {
+                        isolationLevel: ISOLATED,
+                        lattice: StringLattice.create(),
                         span: someCodeSpan,
-                    }),
+                    },
                     span: someCodeSpan,
                 }),
             ],
@@ -97,9 +98,11 @@ describe('FunctionDeclaration', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
-            result: ExplicitIntegerValueSet.create({
+            result: {
+                isolationLevel: ISOLATED,
+                lattice: IntegerLattice.unconstrained(),
                 span: someCodeSpan,
-            }),
+            },
             implementation: {
                 kind: 'body',
                 statements: [
@@ -158,10 +161,13 @@ describe('FunctionDeclaration', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
-            result: ExplicitRCTypeValueSet.create({
-                type: TypeName.create({ name: 'MyData' }),
+            result: {
+                isolationLevel: ISOLATED,
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyData' }),
+                }),
                 span: someCodeSpan,
-            }),
+            },
             implementation: {
                 kind: 'implicit-return',
                 expression: VariableReference.create({
@@ -203,10 +209,13 @@ describe('FunctionDeclaration', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
-            result: ExplicitRCTypeValueSet.create({
-                type: TypeName.create({ name: 'MyData' }),
+            result: {
+                isolationLevel: ISOLATED,
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyData' }),
+                }),
                 span: someCodeSpan,
-            }),
+            },
             implementation: {
                 kind: 'implicit-return',
                 expression: VariableReference.create({
@@ -248,10 +257,13 @@ describe('FunctionDeclaration', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
             parameters: [],
-            result: ExplicitRCTypeValueSet.create({
-                type: TypeName.create({ name: 'MyData' }),
+            result: {
+                isolationLevel: ISOLATED,
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyData' }),
+                }),
                 span: someCodeSpan,
-            }),
+            },
             implementation: {
                 kind: 'implicit-return',
                 expression: VariableReference.create({
@@ -434,9 +446,11 @@ describe('FunctionDeclaration', () => {
                     isImmutable: true,
                     isolationLevel: ISOLATED,
                     varName: 'x',
-                    valueSet: ExplicitStringValueSet.create({
+                    valueSet: {
+                        isolationLevel: ISOLATED,
+                        lattice: StringLattice.create(),
                         span: someCodeSpan,
-                    }),
+                    },
                     span: someCodeSpan,
                 }),
             ],
@@ -477,9 +491,11 @@ describe('FunctionDeclaration', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),
@@ -495,11 +511,13 @@ describe('FunctionDeclaration', () => {
                         VariableDeclaration.create({
                             isImmutable: true,
                             name: 'myVar',
-                            valueSet: ExplicitRCTypeValueSet.create({
-                                type: TypeName.create({ name: 'MyData' }),
+                            valueSet: {
                                 isolationLevel: ISOLATED,
+                                lattice: RCTypeLattice.create({
+                                    type: TypeName.create({ name: 'MyData' }),
+                                }),
                                 span: someCodeSpan,
-                            }),
+                            },
                             initialValue: DataLiteral.create({
                                 fields: [
                                     {
@@ -544,9 +562,11 @@ describe('FunctionDeclaration', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),
@@ -555,18 +575,24 @@ describe('FunctionDeclaration', () => {
             const funcDecl = FunctionDeclaration.create({
                 baseName: 'myFunction',
                 parameters: [],
-                result: ExplicitIntegerValueSet.create({ span: someCodeSpan }),
+                result: {
+                    isolationLevel: ISOLATED,
+                    lattice: IntegerLattice.unconstrained(),
+                    span: someCodeSpan,
+                },
                 implementation: {
                     kind: 'body',
                     statements: [
                         VariableDeclaration.create({
                             isImmutable: true,
                             name: 'myVar',
-                            valueSet: ExplicitRCTypeValueSet.create({
-                                type: TypeName.create({ name: 'MyData' }),
+                            valueSet: {
                                 isolationLevel: ISOLATED,
+                                lattice: RCTypeLattice.create({
+                                    type: TypeName.create({ name: 'MyData' }),
+                                }),
                                 span: someCodeSpan,
-                            }),
+                            },
                             initialValue: DataLiteral.create({
                                 fields: [
                                     {
@@ -620,21 +646,26 @@ describe('FunctionDeclaration', () => {
             const funcDecl = FunctionDeclaration.create({
                 baseName: 'myFunction',
                 parameters: [],
-                result: ExplicitRCTypeValueSet.create({
-                    type: TypeName.create({ name: 'MyData' }),
+                result: {
+                    isolationLevel: ISOLATED,
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyData' }),
+                    }),
                     span: someCodeSpan,
-                }),
+                },
                 implementation: {
                     kind: 'body',
                     statements: [
                         VariableDeclaration.create({
                             isImmutable: true,
                             name: 'myVar',
-                            valueSet: ExplicitRCTypeValueSet.create({
-                                type: TypeName.create({ name: 'MyData' }),
+                            valueSet: {
                                 isolationLevel: ISOLATED,
+                                lattice: RCTypeLattice.create({
+                                    type: TypeName.create({ name: 'MyData' }),
+                                }),
                                 span: someCodeSpan,
-                            }),
+                            },
                             initialValue: DataLiteral.create({
                                 fields: [],
                                 span: someCodeSpan,

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
 import { FunctionDeclarationParser } from '../../../src/parser/function-declaration-parser'
-import { ExplicitRCTypeValueSet } from '../../../src/model/explicit-value-set'
+import { RCTypeLattice } from '../../../src/model/lattice'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('Function Declaration Parser', () => {
@@ -27,7 +27,7 @@ describe('Function Declaration Parser', () => {
             parameters: [
                 {
                     varName: 'x',
-                    valueSet: { max: undefined, min: undefined },
+                    valueSet: { lattice: { max: undefined, min: undefined } },
                     label: 'x',
                     span: {
                         start: { line: 1, column: 17 },
@@ -36,7 +36,9 @@ describe('Function Declaration Parser', () => {
                 },
                 {
                     varName: 'y',
-                    valueSet: { values: ['false', 'ambiguous', 'true'] },
+                    valueSet: {
+                        lattice: { values: ['false', 'ambiguous', 'true'] },
+                    },
                     label: 'y',
                     span: {
                         start: { line: 1, column: 29 },
@@ -58,7 +60,7 @@ describe('Function Declaration Parser', () => {
             parameters: [
                 {
                     varName: 'x',
-                    valueSet: { max: undefined, min: undefined },
+                    valueSet: { lattice: { max: undefined, min: undefined } },
                     label: undefined,
                     span: {
                         start: { line: 1, column: 17 },
@@ -67,7 +69,9 @@ describe('Function Declaration Parser', () => {
                 },
                 {
                     varName: 'y',
-                    valueSet: { values: ['false', 'ambiguous', 'true'] },
+                    valueSet: {
+                        lattice: { values: ['false', 'ambiguous', 'true'] },
+                    },
                     label: 'label',
                     span: {
                         start: { line: 1, column: 31 },
@@ -99,7 +103,9 @@ describe('Function Declaration Parser', () => {
                 },
                 {
                     varName: 'y',
-                    valueSet: { values: ['false', 'ambiguous', 'true'] },
+                    valueSet: {
+                        lattice: { values: ['false', 'ambiguous', 'true'] },
+                    },
                     isImmutable: true,
                     isolationLevel: ISOLATED,
                     span: {
@@ -143,7 +149,7 @@ describe('Function Declaration Parser', () => {
         expect(result).toMatchObject({
             baseName: 'myFunction',
             parameters: [],
-            result: { max: undefined, min: undefined },
+            result: { lattice: { max: undefined, min: undefined } },
             implementation: {
                 kind: 'body',
                 statements: [{ value: { value: 42n } }],
@@ -173,10 +179,10 @@ describe('Function Declaration Parser', () => {
         expect(result).toMatchObject({
             baseName: 'myFunction',
             parameters: [],
-            result: { type: { name: 'MyData' } },
+            result: { lattice: { type: { name: 'MyData' } } },
         })
 
-        expect(result.result).toBeInstanceOf(ExplicitRCTypeValueSet)
+        expect(result.result?.lattice).toBeInstanceOf(RCTypeLattice)
     })
 
     it('parses a function with an ISOLATED return type', () => {
@@ -186,7 +192,7 @@ describe('Function Declaration Parser', () => {
         expect(result).toMatchObject({
             baseName: 'myFunction',
             parameters: [],
-            result: { type: { name: 'MyData' } },
+            result: { lattice: { type: { name: 'MyData' } } },
         })
     })
 
@@ -197,7 +203,7 @@ describe('Function Declaration Parser', () => {
         expect(result).toMatchObject({
             baseName: 'myFunction',
             parameters: [],
-            result: { type: { name: 'MyData' } },
+            result: { lattice: { type: { name: 'MyData' } } },
         })
     })
 })

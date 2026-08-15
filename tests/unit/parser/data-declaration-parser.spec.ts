@@ -2,11 +2,8 @@ import { describe, expect, it } from 'bun:test'
 import { TokenStream } from '../../../src/lexer'
 import { TestErrorReporter } from '../../util'
 import { DataDeclarationParser } from '../../../src/parser/data-declaration-parser'
-import {
-    ExplicitIntegerValueSet,
-    ExplicitTruthValueSet,
-} from '../../../src/model/explicit-value-set'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { IntegerLattice, TruthvalueLattice } from '../../../src/model/lattice'
 
 describe('DataDeclarationParser', () => {
     it('parses a data declaration with default-mutability', () => {
@@ -34,10 +31,10 @@ describe('DataDeclarationParser', () => {
                 },
             ],
         })
-        expect(result.fields[0].valueSet).toBeInstanceOf(
-            ExplicitIntegerValueSet,
+        expect(result.fields[0].valueSet.lattice).toBeInstanceOf(IntegerLattice)
+        expect(result.fields[1].valueSet.lattice).toBeInstanceOf(
+            TruthvalueLattice,
         )
-        expect(result.fields[1].valueSet).toBeInstanceOf(ExplicitTruthValueSet)
     })
 
     it('parses a data declaration with mixed semantics', () => {
@@ -61,9 +58,9 @@ describe('DataDeclarationParser', () => {
                 },
             ],
         })
-        expect(result.fields[0].valueSet).toBeInstanceOf(
-            ExplicitIntegerValueSet,
+        expect(result.fields[0].valueSet.lattice).toBeInstanceOf(IntegerLattice)
+        expect(result.fields[1].valueSet.lattice).toBeInstanceOf(
+            TruthvalueLattice,
         )
-        expect(result.fields[1].valueSet).toBeInstanceOf(ExplicitTruthValueSet)
     })
 })

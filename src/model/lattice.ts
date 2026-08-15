@@ -65,10 +65,14 @@ export class TruthvalueLattice implements Lattice {
         public readonly values: ('false' | 'ambiguous' | 'true')[],
     ) {}
 
+    static unconstrained() {
+        return this.create(['false', 'ambiguous', 'true'])
+    }
+
     static create(
-        values?: ('false' | 'ambiguous' | 'true')[],
+        values: ('false' | 'ambiguous' | 'true')[],
     ): TruthvalueLattice {
-        return new TruthvalueLattice(values ?? ['false', 'ambiguous', 'true'])
+        return new TruthvalueLattice(values)
     }
 
     unconstrained(): Lattice {

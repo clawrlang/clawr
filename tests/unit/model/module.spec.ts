@@ -5,12 +5,8 @@ import { CallFunc } from '../../../src/model/call-func'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
-import {
-    ExplicitIntegerValueSet,
-    ExplicitTruthValueSet,
-} from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
-import { IntegerLattice } from '../../../src/model/lattice'
+import { IntegerLattice, TruthvalueLattice } from '../../../src/model/lattice'
 import { ISOLATED } from '../../../src/model/isolation-level'
 
 describe('Module', () => {
@@ -64,16 +60,20 @@ describe('Module', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                         {
                             name: 'field2',
                             isImmutable: false,
-                            valueSet: ExplicitTruthValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),
@@ -97,9 +97,11 @@ describe('Module', () => {
                 VariableDeclaration.create({
                     isImmutable: true,
                     name: 'x',
-                    valueSet: ExplicitIntegerValueSet.create({
+                    valueSet: {
+                        isolationLevel: ISOLATED,
+                        lattice: IntegerLattice.unconstrained(),
                         span: someCodeSpan,
-                    }),
+                    },
                     initialValue: IntegerLiteral.create({
                         value: 42n,
                         span: someCodeSpan,
@@ -126,16 +128,20 @@ describe('Module', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                         {
                             name: 'field2',
                             isImmutable: false,
-                            valueSet: ExplicitTruthValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: TruthvalueLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),
@@ -153,11 +159,11 @@ describe('Module', () => {
                 { name: 'field2', isImmutable: false },
             ],
         })
-        expect(myDataDeclaration?.fields[0].valueSet).toBeInstanceOf(
-            ExplicitIntegerValueSet,
+        expect(myDataDeclaration?.fields[0].valueSet.lattice).toBeInstanceOf(
+            IntegerLattice,
         )
-        expect(myDataDeclaration?.fields[1].valueSet).toBeInstanceOf(
-            ExplicitTruthValueSet,
+        expect(myDataDeclaration?.fields[1].valueSet.lattice).toBeInstanceOf(
+            TruthvalueLattice,
         )
     })
 })

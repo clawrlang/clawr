@@ -2,7 +2,6 @@ import { describe, expect, it, test } from 'bun:test'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import { ExplicitIntegerValueSet } from '../../../src/model/explicit-value-set'
 import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
@@ -93,9 +92,11 @@ describe('Variable Reference', () => {
                     {
                         isImmutable: false,
                         name: 'myField',
-                        valueSet: ExplicitIntegerValueSet.create({
+                        valueSet: {
+                            isolationLevel: ISOLATED,
+                            lattice: IntegerLattice.unconstrained(),
                             span: someCodeSpan,
-                        }),
+                        },
                     },
                 ],
             }),

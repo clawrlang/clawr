@@ -3,12 +3,8 @@ import { FieldReference } from '../../../src/model/field-reference'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import {
-    ExplicitIntegerValueSet,
-    ExplicitRCTypeValueSet,
-} from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
-import { RCTypeLattice } from '../../../src/model/lattice'
+import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('Field Reference', () => {
@@ -29,9 +25,11 @@ describe('Field Reference', () => {
                     {
                         name: 'myField',
                         isImmutable: false,
-                        valueSet: ExplicitIntegerValueSet.create({
+                        valueSet: {
+                            isolationLevel: ISOLATED,
+                            lattice: IntegerLattice.unconstrained(),
                             span: someCodeSpan,
-                        }),
+                        },
                     },
                 ],
             }),
@@ -69,11 +67,13 @@ describe('Field Reference', () => {
                     {
                         isImmutable: true,
                         name: 'myField',
-                        valueSet: ExplicitRCTypeValueSet.create({
-                            type: TypeName.create({ name: 'MyType' }),
+                        valueSet: {
                             isolationLevel: SHARED,
+                            lattice: RCTypeLattice.create({
+                                type: TypeName.create({ name: 'MyType' }),
+                            }),
                             span: someCodeSpan,
-                        }),
+                        },
                     },
                 ],
             }),
@@ -141,13 +141,15 @@ describe('Field Reference', () => {
                             {
                                 isImmutable,
                                 name: 'myField',
-                                valueSet: ExplicitRCTypeValueSet.create({
-                                    type: TypeName.create({
-                                        name: 'InnerType',
-                                    }),
+                                valueSet: {
                                     isolationLevel: expected,
+                                    lattice: RCTypeLattice.create({
+                                        type: TypeName.create({
+                                            name: 'InnerType',
+                                        }),
+                                    }),
                                     span: someCodeSpan,
-                                }),
+                                },
                             },
                         ],
                     }),
@@ -191,9 +193,11 @@ describe('Field Reference', () => {
                     {
                         isImmutable: false,
                         name: 'myField',
-                        valueSet: ExplicitIntegerValueSet.create({
+                        valueSet: {
+                            isolationLevel: ISOLATED,
+                            lattice: IntegerLattice.unconstrained(),
                             span: someCodeSpan,
-                        }),
+                        },
                     },
                 ],
             }),
@@ -256,9 +260,11 @@ describe('Field Reference', () => {
                             {
                                 name: 'myField',
                                 isImmutable: false,
-                                valueSet: ExplicitIntegerValueSet.create({
+                                valueSet: {
+                                    isolationLevel: ISOLATED,
+                                    lattice: IntegerLattice.unconstrained(),
                                     span: someCodeSpan,
-                                }),
+                                },
                             },
                         ],
                     }),
@@ -332,9 +338,11 @@ describe('Field Reference', () => {
                             {
                                 name: 'myField',
                                 isImmutable,
-                                valueSet: ExplicitIntegerValueSet.create({
+                                valueSet: {
+                                    isolationLevel: ISOLATED,
+                                    lattice: IntegerLattice.unconstrained(),
                                     span: someCodeSpan,
-                                }),
+                                },
                             },
                         ],
                     }),
@@ -373,9 +381,11 @@ describe('Field Reference', () => {
                         {
                             isImmutable: false,
                             name: 'myField',
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),
@@ -411,9 +421,11 @@ describe('Field Reference', () => {
                         {
                             isImmutable: false,
                             name: 'myField',
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),

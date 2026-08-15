@@ -6,12 +6,8 @@ import {
     FunctionDeclaration,
     Parameter,
 } from '../../../src/model/function-declaration'
-import {
-    ExplicitIntegerValueSet,
-    ExplicitRCTypeValueSet,
-} from '../../../src/model/explicit-value-set'
 import { DataLiteral } from '../../../src/model/data-literal'
-import { RCTypeLattice } from '../../../src/model/lattice'
+import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
@@ -74,11 +70,14 @@ describe('Query', () => {
                         isImmutable: true,
                         isolationLevel: ISOLATED,
                         varName: 'x',
-                        valueSet: ExplicitIntegerValueSet.create({
-                            min: 0n,
-                            max: 100n,
+                        valueSet: {
+                            isolationLevel: ISOLATED,
+                            lattice: IntegerLattice.create({
+                                min: 0n,
+                                max: 100n,
+                            }),
                             span: someCodeSpan,
-                        }),
+                        },
                         span: someCodeSpan,
                     }),
                 ],
@@ -115,10 +114,13 @@ describe('Query', () => {
                 FunctionDeclaration.create({
                     baseName: 'foo',
                     parameters: [],
-                    result: ExplicitRCTypeValueSet.create({
-                        type: TypeName.create({ name: 'MyData' }),
+                    result: {
+                        isolationLevel: ISOLATED,
+                        lattice: RCTypeLattice.create({
+                            type: TypeName.create({ name: 'MyData' }),
+                        }),
                         span: someCodeSpan,
-                    }),
+                    },
                     implementation: {
                         kind: 'implicit-return',
                         expression: DataLiteral.create({

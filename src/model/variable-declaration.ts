@@ -1,13 +1,9 @@
 import { Context, Declaration, Expression, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
-import {
-    ExplicitRCTypeValueSet,
-    ExplicitValueSet,
-    UnspecifiedType,
-} from './explicit-value-set'
-import { Lattice } from './lattice'
-import { ISOLATED, UNIQUE } from './isolation-level'
+import { ExplicitValueSet } from './explicit-value-set'
+import { Lattice, RCTypeLattice } from './lattice'
+import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -16,7 +12,7 @@ export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private readonly isImmutable: boolean,
         private readonly name: string,
-        private readonly valueSet: ExplicitValueSet | UnspecifiedType,
+        private readonly valueSet: ExplicitValueSet<IsolationLevel>,
         private readonly initialValue: Expression,
     ) {}
 
@@ -28,7 +24,7 @@ export class VariableDeclaration implements Statement, Declaration {
     }: {
         isImmutable: boolean
         name: string
-        valueSet: ExplicitValueSet | UnspecifiedType
+        valueSet: ExplicitValueSet<IsolationLevel>
         initialValue: Expression
     }): VariableDeclaration {
         return new VariableDeclaration(
@@ -54,9 +50,7 @@ export class VariableDeclaration implements Statement, Declaration {
         const lattice =
             this.isImmutable && this.valueSet.isolationLevel === ISOLATED
                 ? initialValue
-                : this.valueSet instanceof UnspecifiedType
-                  ? initialValue.unconstrained()
-                  : this.valueSet?.toLattice(context)
+                : (this.valueSet.lattice ?? initialValue.unconstrained())
 
         this.emitCIRDeclaration(context, lattice, scope)
         this.addDeclarationToScope(scope, lattice)
@@ -71,9 +65,9 @@ export class VariableDeclaration implements Statement, Declaration {
         const initialValue = this.initialValue
             .toCIRExpression({
                 ...context,
-                ...(this.valueSet instanceof ExplicitRCTypeValueSet
+                ...(this.valueSet.lattice instanceof RCTypeLattice
                     ? {
-                          type: this.valueSet.type,
+                          type: this.valueSet.lattice.type,
                           isolationLevel: this.valueSet.isolationLevel,
                       }
                     : {}),
@@ -85,9 +79,8 @@ export class VariableDeclaration implements Statement, Declaration {
             name: this.name,
             valueSet: lattice.toCIR(),
             initialValue:
-                this.valueSet instanceof ExplicitRCTypeValueSet &&
-                (initialValue.kind === 'VARIABLE_REF' ||
-                    initialValue.kind === 'FIELD_REF')
+                initialValue.kind === 'VARIABLE_REF' ||
+                initialValue.kind === 'FIELD_REF'
                     ? {
                           kind: 'RETAIN' as const,
                           object: initialValue,
@@ -131,8 +124,8 @@ export class VariableDeclaration implements Statement, Declaration {
 
     private isValidValue(currentValue: Lattice) {
         return (
-            this.valueSet instanceof UnspecifiedType ||
-            this.valueSet.isValidValue(currentValue)
+            !this.valueSet.lattice ||
+            this.valueSet.lattice.isSupersetTo(currentValue)
         )
     }
 
@@ -140,7 +133,10 @@ export class VariableDeclaration implements Statement, Declaration {
         return this.initialValue
             .currentValue({
                 ...context,
-                ...this.valueSet,
+                type:
+                    this.valueSet.lattice instanceof RCTypeLattice
+                        ? this.valueSet.lattice.type
+                        : undefined,
             })
             .value()
     }

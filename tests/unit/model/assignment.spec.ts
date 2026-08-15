@@ -5,15 +5,11 @@ import { VariableReference } from '../../../src/model/variable-reference'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { FieldReference } from '../../../src/model/field-reference'
 import { DataDeclaration } from '../../../src/model/data-declaration'
-import {
-    ExplicitIntegerValueSet,
-    ExplicitRCTypeValueSet,
-} from '../../../src/model/explicit-value-set'
 import { FunctionDeclaration } from '../../../src/model/function-declaration'
 import { Query } from '../../../src/model/query'
 import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
-import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { ISOLATED, SHARED, UNIQUE } from '../../../src/model/isolation-level'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -52,9 +48,11 @@ describe('Assignment', () => {
                         {
                             isImmutable: false,
                             name: 'innerField',
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),
@@ -67,11 +65,15 @@ describe('Assignment', () => {
                         {
                             isImmutable: false,
                             name: 'field',
-                            valueSet: ExplicitRCTypeValueSet.create({
-                                type: TypeName.create({ name: 'InnerType' }),
+                            valueSet: {
                                 isolationLevel: ISOLATED,
+                                lattice: RCTypeLattice.create({
+                                    type: TypeName.create({
+                                        name: 'InnerType',
+                                    }),
+                                }),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),
@@ -246,9 +248,11 @@ describe('Assignment', () => {
                     {
                         name: 'field',
                         isImmutable: false,
-                        valueSet: ExplicitIntegerValueSet.create({
+                        valueSet: {
+                            isolationLevel: ISOLATED,
+                            lattice: IntegerLattice.unconstrained(),
                             span: someCodeSpan,
-                        }),
+                        },
                     },
                 ],
             }),
@@ -308,10 +312,13 @@ describe('Assignment', () => {
             'myFunction()',
             FunctionDeclaration.create({
                 baseName: 'myFunction',
-                result: ExplicitRCTypeValueSet.create({
-                    type: TypeName.create({ name: 'MyType' }),
+                result: {
+                    isolationLevel: UNIQUE,
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                    }),
                     span: someCodeSpan,
-                }),
+                },
                 parameters: [],
                 implementation: {
                     kind: 'implicit-return',
@@ -474,9 +481,11 @@ describe('Assignment', () => {
                     {
                         name: 'myField',
                         isImmutable: false,
-                        valueSet: ExplicitIntegerValueSet.create({
+                        valueSet: {
+                            isolationLevel: ISOLATED,
+                            lattice: IntegerLattice.unconstrained(),
                             span: someCodeSpan,
-                        }),
+                        },
                     },
                 ],
             }),
@@ -542,9 +551,11 @@ describe('Assignment', () => {
                             {
                                 name: 'myField',
                                 isImmutable: false,
-                                valueSet: ExplicitIntegerValueSet.create({
+                                valueSet: {
+                                    isolationLevel: ISOLATED,
+                                    lattice: IntegerLattice.unconstrained(),
                                     span: someCodeSpan,
-                                }),
+                                },
                             },
                         ],
                     }),
@@ -638,9 +649,11 @@ describe('Assignment', () => {
                         {
                             name: 'field',
                             isImmutable: false,
-                            valueSet: ExplicitIntegerValueSet.create({
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
                                 span: someCodeSpan,
-                            }),
+                            },
                         },
                     ],
                 }),

@@ -16,7 +16,7 @@ export interface Expression {
     isEffectivelyConst(context: Context): Failable<boolean>
     isolationLevel(context: Context): Failable<AnyIsolationLevel>
     declaredValueSet(context: Context): Failable<Lattice>
-    currentValue(context: Context): Failable<Lattice>
+    currentValue(context: Context & { type?: TypeName }): Failable<Lattice>
     setCurrentValue?(context: Context, value: Lattice): void
     toCIRExpression(
         context: Context & {

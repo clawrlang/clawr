@@ -3,6 +3,7 @@ import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
 import { FunctionDeclarationParser } from '../../../src/parser/function-declaration-parser'
 import { ExplicitRCTypeValueSet } from '../../../src/model/explicit-value-set'
+import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('Function Declaration Parser', () => {
     it('parses a function with no parameters and no return type', () => {
@@ -90,7 +91,7 @@ describe('Function Declaration Parser', () => {
                 {
                     varName: 'x',
                     isImmutable: true,
-                    isolationLevel: 'SHARED',
+                    isolationLevel: SHARED,
                     span: {
                         start: { line: 1, column: 17 },
                         end: { line: 1, column: 32 },
@@ -100,7 +101,7 @@ describe('Function Declaration Parser', () => {
                     varName: 'y',
                     valueSet: { values: ['false', 'ambiguous', 'true'] },
                     isImmutable: true,
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                     span: {
                         start: { line: 1, column: 34 },
                         end: { line: 1, column: 59 },

@@ -18,6 +18,7 @@ import { DataLiteral } from '../../../src/model/data-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { RCTypeLattice } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
+import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
@@ -27,7 +28,7 @@ describe('FunctionDeclaration', () => {
                 Parameter.create({
                     label: 'param1',
                     isImmutable: true,
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                     varName: 'x',
                     valueSet: ExplicitStringValueSet.create({
                         span: someCodeSpan,
@@ -142,7 +143,7 @@ describe('FunctionDeclaration', () => {
         )
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            isolationLevel: 'SHARED',
+            isolationLevel: SHARED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
             }),
@@ -186,7 +187,7 @@ describe('FunctionDeclaration', () => {
         )
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            isolationLevel: 'ISOLATED',
+            isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
             }),
@@ -231,7 +232,7 @@ describe('FunctionDeclaration', () => {
         )
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            isolationLevel: 'ISOLATED',
+            isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
             }),
@@ -314,7 +315,7 @@ describe('FunctionDeclaration', () => {
             )
             context.scope.variables.set('myVar', {
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
@@ -364,7 +365,7 @@ describe('FunctionDeclaration', () => {
             )
             context.scope.variables.set('myVar', {
                 isImmutable: true,
-                isolationLevel: 'SHARED',
+                isolationLevel: SHARED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
@@ -431,7 +432,7 @@ describe('FunctionDeclaration', () => {
                 Parameter.create({
                     label: 'param1',
                     isImmutable: true,
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                     varName: 'x',
                     valueSet: ExplicitStringValueSet.create({
                         span: someCodeSpan,
@@ -496,7 +497,7 @@ describe('FunctionDeclaration', () => {
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
-                                isolationLevel: 'ISOLATED',
+                                isolationLevel: ISOLATED,
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({
@@ -563,7 +564,7 @@ describe('FunctionDeclaration', () => {
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
-                                isolationLevel: 'ISOLATED',
+                                isolationLevel: ISOLATED,
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({
@@ -631,7 +632,7 @@ describe('FunctionDeclaration', () => {
                             name: 'myVar',
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
-                                isolationLevel: 'ISOLATED',
+                                isolationLevel: ISOLATED,
                                 span: someCodeSpan,
                             }),
                             initialValue: DataLiteral.create({

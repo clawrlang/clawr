@@ -16,6 +16,7 @@ import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { RCTypeLattice, IntegerLattice } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
 import { Query } from '../../../src/model/query'
+import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -49,7 +50,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: true,
                 name: 'foo',
                 valueSet: UnspecifiedType.create({
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                 }),
                 initialValue: IntegerLiteral.create({
                     value: 1n,
@@ -70,7 +71,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: false,
                 name: 'foo',
                 valueSet: UnspecifiedType.create({
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                 }),
                 initialValue: IntegerLiteral.create({
                     value: 1n,
@@ -104,7 +105,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: true,
                 name: 'foo',
                 valueSet: UnspecifiedType.create({
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                 }),
                 initialValue: TruthValueLiteral.create({
                     value: 'true',
@@ -124,7 +125,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: false,
                 name: 'foo',
                 valueSet: UnspecifiedType.create({
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                 }),
                 initialValue: TruthValueLiteral.create({
                     value: 'true',
@@ -183,7 +184,7 @@ describe('VariableDeclaration', () => {
                             isImmutable: false,
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'InnerType' }),
-                                isolationLevel: 'ISOLATED',
+                                isolationLevel: ISOLATED,
                                 span: someCodeSpan,
                             }),
                         },
@@ -192,7 +193,7 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('bar', {
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'OuterType' }),
                 }),
@@ -220,7 +221,7 @@ describe('VariableDeclaration', () => {
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'InnerType' }),
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                     span: someCodeSpan,
                 }),
                 initialValue: FieldReference.create({
@@ -269,7 +270,7 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('bar', {
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
@@ -292,7 +293,7 @@ describe('VariableDeclaration', () => {
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                     span: someCodeSpan,
                 }),
                 initialValue: VariableReference.create({
@@ -330,7 +331,7 @@ describe('VariableDeclaration', () => {
             decl.emitStatement(context)
             expect(context.scope.variableDeclaration('x')).toEqual({
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 lattice: IntegerLattice.create({ min: 42n, max: 42n }),
             })
         })
@@ -362,7 +363,7 @@ describe('VariableDeclaration', () => {
                             isImmutable: false,
                             valueSet: ExplicitRCTypeValueSet.create({
                                 type: TypeName.create({ name: 'InnerType' }),
-                                isolationLevel: 'ISOLATED',
+                                isolationLevel: ISOLATED,
                                 span: someCodeSpan,
                             }),
                         },
@@ -375,7 +376,7 @@ describe('VariableDeclaration', () => {
                 name: 'target',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'OuterType' }),
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                     span: someCodeSpan,
                 }),
                 initialValue: DataLiteral.create({
@@ -433,7 +434,7 @@ describe('VariableDeclaration', () => {
                 name: 'foo',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                     span: someCodeSpan,
                 }),
                 initialValue: DataLiteral.create({
@@ -458,7 +459,7 @@ describe('VariableDeclaration', () => {
             )
             context.scope.variables.set('c', {
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
@@ -475,7 +476,7 @@ describe('VariableDeclaration', () => {
                 name: 'r',
                 valueSet: ExplicitRCTypeValueSet.create({
                     type: TypeName.create({ name: 'MyData' }),
-                    isolationLevel: 'SHARED',
+                    isolationLevel: SHARED,
                     span: someCodeSpan,
                 }),
                 initialValue: Query.create({
@@ -522,7 +523,7 @@ describe('VariableDeclaration', () => {
                 )
                 context.scope.variables.set('value', {
                     isImmutable,
-                    isolationLevel: 'SHARED',
+                    isolationLevel: SHARED,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
@@ -545,7 +546,7 @@ describe('VariableDeclaration', () => {
                     name: 'target',
                     valueSet: ExplicitRCTypeValueSet.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        isolationLevel: 'ISOLATED',
+                        isolationLevel: ISOLATED,
                         span: someCodeSpan,
                     }),
                     initialValue: VariableReference.create({

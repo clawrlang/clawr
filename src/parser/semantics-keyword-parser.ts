@@ -1,6 +1,6 @@
 import { TokenStream } from '../lexer'
 import { KeywordToken } from '../lexer/token'
-import { IsolationLevel } from '../model'
+import { ISOLATED, IsolationLevel, SHARED } from '../model/isolation-level'
 import {
     VARIABLE_SEMANTICS,
     VariableSemantics,
@@ -27,8 +27,8 @@ export class SemanticsKeyword {
         public readonly isImmutable: boolean,
     ) {}
 
-    static readonly const = new SemanticsKeyword('ISOLATED', true)
-    static readonly mut = new SemanticsKeyword('ISOLATED', false)
-    static readonly ref = new SemanticsKeyword('SHARED', true)
-    static readonly mutref = new SemanticsKeyword('SHARED', false)
+    static readonly const = new SemanticsKeyword(ISOLATED, true)
+    static readonly mut = new SemanticsKeyword(ISOLATED, false)
+    static readonly ref = new SemanticsKeyword(SHARED, true)
+    static readonly mutref = new SemanticsKeyword(SHARED, false)
 }

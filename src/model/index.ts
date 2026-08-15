@@ -1,6 +1,7 @@
 import * as cir from '../cir'
 import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
 import { Failable } from './failable'
+import { AnyIsolationLevel, IsolationLevel } from './isolation-level'
 import { Lattice } from './lattice'
 import { Scope } from './scope'
 import { TypeName } from './type-name'
@@ -32,6 +33,3 @@ export interface Statement {
 export interface Declaration {
     emitDeclaration(context: Context): void
 }
-
-export type AnyIsolationLevel = IsolationLevel | 'UNIQUE' | 'UNKNOWN'
-export type IsolationLevel = 'ISOLATED' | 'SHARED'

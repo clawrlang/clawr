@@ -7,6 +7,7 @@ import {
     UnspecifiedType,
 } from './explicit-value-set'
 import { Lattice } from './lattice'
+import { ISOLATED, UNIQUE } from './isolation-level'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -51,7 +52,7 @@ export class VariableDeclaration implements Statement, Declaration {
         this.checkValidity(initialValue, context)
 
         const lattice =
-            this.isImmutable && this.valueSet.isolationLevel === 'ISOLATED'
+            this.isImmutable && this.valueSet.isolationLevel === ISOLATED
                 ? initialValue
                 : this.valueSet instanceof UnspecifiedType
                   ? initialValue.unconstrained()
@@ -120,7 +121,7 @@ export class VariableDeclaration implements Statement, Declaration {
         const valueIsolationLevel = this.initialValue
             .isolationLevel(context)
             .value()
-        if (valueIsolationLevel === 'UNIQUE') return
+        if (valueIsolationLevel === UNIQUE) return
         if (this.valueSet.isolationLevel !== valueIsolationLevel)
             logSemanticError(
                 `Cannot assign ${valueIsolationLevel} value to ${this.valueSet.isolationLevel} target`,

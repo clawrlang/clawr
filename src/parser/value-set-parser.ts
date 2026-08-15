@@ -11,7 +11,7 @@ import {
 } from '../model/explicit-value-set'
 import { ExpressionParser } from './expression-parser'
 import { TypeName } from '../model/type-name'
-import { IsolationLevel } from '../model'
+import { IsolationLevel } from '../model/isolation-level'
 
 export class ValueSetParser {
     private constructor(private context: Context) {}

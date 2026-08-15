@@ -2,6 +2,7 @@ import { describe, it, expect, test } from 'bun:test'
 import { TokenStream } from '../../../src/lexer'
 import { TestErrorReporter } from '../../util'
 import { ObjectDeclarationParser } from '../../../src/parser/object-declaration-parser'
+import { ISOLATED } from '../../../src/model/isolation-level'
 
 describe('Object Parser', () => {
     it('parses an empty object', () => {
@@ -135,13 +136,13 @@ describe('Object Parser', () => {
                 {
                     name: 'field1',
                     isImmutable: true,
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                     defaultValue: { value: 10n },
                 },
                 {
                     name: 'field2',
                     isImmutable: true,
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                     defaultValue: { value: 'true' },
                 },
             ],

@@ -5,6 +5,7 @@ import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { IntegerLattice } from '../../../src/model/lattice'
+import { ISOLATED } from '../../../src/model/isolation-level'
 
 describe('CallFunc', () => {
     it('converts to CIR', () => {
@@ -125,7 +126,7 @@ describe('CallFunc', () => {
         const context = newSemanticContext()
         context.scope.variables.set('x', {
             isImmutable: true,
-            isolationLevel: 'ISOLATED',
+            isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min: 42n, max: 42n }),
         })
         context.scope.setCurrentValue(

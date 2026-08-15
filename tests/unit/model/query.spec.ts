@@ -14,6 +14,7 @@ import { DataLiteral } from '../../../src/model/data-literal'
 import { RCTypeLattice } from '../../../src/model/lattice'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { TypeName } from '../../../src/model/type-name'
+import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('Query', () => {
     it('converts to CIR', () => {
@@ -71,7 +72,7 @@ describe('Query', () => {
                     Parameter.create({
                         label: 'x',
                         isImmutable: true,
-                        isolationLevel: 'ISOLATED',
+                        isolationLevel: ISOLATED,
                         varName: 'x',
                         valueSet: ExplicitIntegerValueSet.create({
                             min: 0n,
@@ -151,7 +152,7 @@ describe('Query', () => {
             const context = newSemanticContext()
             context.scope.variables.set('value', {
                 isImmutable: true,
-                isolationLevel: 'SHARED',
+                isolationLevel: SHARED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),

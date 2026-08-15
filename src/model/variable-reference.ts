@@ -1,5 +1,6 @@
 import * as cir from '../cir'
-import { Context, Expression, IsolationLevel } from '.'
+import { Context, Expression } from '.'
+import { IsolationLevel } from './isolation-level'
 import { Failable, logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice } from './lattice'

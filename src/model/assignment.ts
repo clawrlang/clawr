@@ -1,4 +1,5 @@
-import { Statement, Expression, Context, IsolationLevel } from '.'
+import { Statement, Expression, Context } from '.'
+import { IsolationLevel, UNIQUE } from './isolation-level'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
@@ -98,7 +99,7 @@ export class Assignment implements Statement {
             this.target.declaredValueSet(context).value() instanceof
                 RCTypeLattice &&
             value.kind === 'CALL' &&
-            this.value.isolationLevel(context).value() === 'UNIQUE'
+            this.value.isolationLevel(context).value() === UNIQUE
         ) {
             context.scope.emitted.push({
                 kind: 'ASSIGN',
@@ -132,7 +133,7 @@ export class Assignment implements Statement {
                 },
             )
         const valueIsolationLevel = this.value.isolationLevel(context).value()
-        if (valueIsolationLevel === 'UNIQUE') return
+        if (valueIsolationLevel === UNIQUE) return
         if (targetIsolationLevel !== valueIsolationLevel)
             logSemanticError(
                 `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,

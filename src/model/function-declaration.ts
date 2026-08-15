@@ -1,12 +1,11 @@
 import * as cir from '../cir'
+import { Context, Declaration, Expression, Statement } from '.'
 import {
     AnyIsolationLevel,
-    Context,
-    Declaration,
-    Expression,
+    ISOLATED,
     IsolationLevel,
-    Statement,
-} from '.'
+    UNIQUE,
+} from './isolation-level'
 import { ExplicitRCTypeValueSet, ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
@@ -48,8 +47,8 @@ export class FunctionDeclaration implements Declaration {
 
     resultIsolationLevel(context: Context): Failable<AnyIsolationLevel> {
         if (this.result instanceof ExplicitRCTypeValueSet)
-            return Failable.success(this.result.isolationLevel ?? 'UNIQUE')
-        if (this.result) return Failable.success('ISOLATED')
+            return Failable.success(this.result.isolationLevel ?? UNIQUE)
+        if (this.result) return Failable.success(ISOLATED)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.isolationLevel(context)
         else

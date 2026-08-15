@@ -3,6 +3,7 @@ import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { IntegerLattice, Lattice } from './lattice'
 import { Failable } from './failable'
+import { ISOLATED } from './isolation-level'
 
 export class IntegerLiteral implements Expression {
     get negated(): IntegerLiteral {
@@ -24,8 +25,8 @@ export class IntegerLiteral implements Expression {
         return new IntegerLiteral(value, span)
     }
 
-    isolationLevel(_: Context): Failable<'ISOLATED'> {
-        return Failable.success('ISOLATED')
+    isolationLevel(_: Context): Failable<ISOLATED> {
+        return Failable.success(ISOLATED)
     }
 
     currentValue(_: Context): Failable<Lattice> {

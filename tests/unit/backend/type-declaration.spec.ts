@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test'
 
 import type * as cir from '../../../src/cir'
 import { lowerDecl } from '../../../src/backend'
+import { SHARED } from '../../../src/model/isolation-level'
 
 describe('Type declaration', () => {
     describe('fields', () => {
@@ -234,7 +235,7 @@ describe('Type declaration', () => {
                             value: {
                                 kind: 'ALLOCATION',
                                 type: { name: 'Super' },
-                                isolationLevel: 'SHARED',
+                                isolationLevel: SHARED,
                                 fields: [],
                             },
                         },

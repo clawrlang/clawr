@@ -1,5 +1,6 @@
 import * as cir from '../cir'
-import { Declaration, IsolationLevel } from '.'
+import { Declaration } from '.'
+import { IsolationLevel } from './isolation-level'
 import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { Lattice, RCTypeLattice } from './lattice'

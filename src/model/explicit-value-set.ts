@@ -1,6 +1,7 @@
 import * as cir from '../cir'
 import { SourceCodeSpan } from '../diagnostics'
-import { Context, IsolationLevel } from '.'
+import { Context } from '.'
+import { ISOLATED, IsolationLevel } from './isolation-level'
 import {
     Lattice,
     IntegerLattice,
@@ -31,7 +32,7 @@ export class UnspecifiedType {
 }
 
 export class ExplicitIntegerValueSet implements ExplicitValueSet {
-    readonly isolationLevel = 'ISOLATED'
+    readonly isolationLevel = ISOLATED
 
     private constructor(
         public readonly min: bigint | undefined,
@@ -78,7 +79,7 @@ export class ExplicitIntegerValueSet implements ExplicitValueSet {
 }
 
 export class ExplicitTruthValueSet implements ExplicitValueSet {
-    readonly isolationLevel = 'ISOLATED'
+    readonly isolationLevel = ISOLATED
 
     private constructor(
         public readonly values: ('false' | 'ambiguous' | 'true')[],
@@ -118,7 +119,7 @@ export class ExplicitTruthValueSet implements ExplicitValueSet {
 }
 
 export class ExplicitStringValueSet implements ExplicitValueSet {
-    readonly isolationLevel = 'ISOLATED'
+    readonly isolationLevel = ISOLATED
 
     private constructor(public readonly span: SourceCodeSpan) {}
 

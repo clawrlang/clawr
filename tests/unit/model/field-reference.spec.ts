@@ -9,13 +9,14 @@ import {
 } from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
 import { RCTypeLattice } from '../../../src/model/lattice'
+import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('Field Reference', () => {
     it('infers its type from the context', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: false,
-            isolationLevel: 'ISOLATED',
+            isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
@@ -55,7 +56,7 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: false,
-            isolationLevel: 'ISOLATED',
+            isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
@@ -70,7 +71,7 @@ describe('Field Reference', () => {
                         name: 'myField',
                         valueSet: ExplicitRCTypeValueSet.create({
                             type: TypeName.create({ name: 'MyType' }),
-                            isolationLevel: 'SHARED',
+                            isolationLevel: SHARED,
                             span: someCodeSpan,
                         }),
                     },
@@ -88,7 +89,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.isolationLevel(context).value()).toEqual('SHARED')
+        expect(fieldRef.isolationLevel(context).value()).toEqual(SHARED)
     })
 
     describe('infers its type and isolation level from the context', () => {
@@ -96,22 +97,22 @@ describe('Field Reference', () => {
             {
                 keyword: 'const',
                 isImmutable: true,
-                expected: 'ISOLATED',
+                expected: ISOLATED,
             },
             {
                 keyword: 'mut',
                 isImmutable: false,
-                expected: 'ISOLATED',
+                expected: ISOLATED,
             },
             {
                 keyword: 'ref',
                 isImmutable: true,
-                expected: 'SHARED',
+                expected: SHARED,
             },
             {
                 keyword: 'mutref',
                 isImmutable: false,
-                expected: 'SHARED',
+                expected: SHARED,
             },
         ] as const
 
@@ -157,7 +158,7 @@ describe('Field Reference', () => {
                         name: 'myVar',
                         span: someCodeSpan,
                     }),
-                    operator: expected === 'SHARED' ? '->' : '.',
+                    operator: expected === SHARED ? '->' : '.',
                     field: 'myField',
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
@@ -177,7 +178,7 @@ describe('Field Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: false,
-            isolationLevel: 'ISOLATED',
+            isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
@@ -218,22 +219,22 @@ describe('Field Reference', () => {
             {
                 operator: '->',
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
             },
             {
                 operator: '->',
                 isImmutable: false,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
             },
             {
                 operator: '.',
                 isImmutable: true,
-                isolationLevel: 'SHARED',
+                isolationLevel: SHARED,
             },
             {
                 operator: '.',
                 isImmutable: false,
-                isolationLevel: 'SHARED',
+                isolationLevel: SHARED,
             },
         ] as const
 
@@ -293,22 +294,22 @@ describe('Field Reference', () => {
         const cases = [
             {
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 expected: true,
             },
             {
                 isImmutable: false,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 expected: false,
             },
             {
                 isImmutable: true,
-                isolationLevel: 'SHARED',
+                isolationLevel: SHARED,
                 expected: false,
             },
             {
                 isImmutable: false,
-                isolationLevel: 'SHARED',
+                isolationLevel: SHARED,
                 expected: false,
             },
         ] as const
@@ -359,7 +360,7 @@ describe('Field Reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 isImmutable: true,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
@@ -397,7 +398,7 @@ describe('Field Reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 isImmutable: false,
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),

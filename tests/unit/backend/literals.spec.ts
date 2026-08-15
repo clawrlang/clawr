@@ -1,6 +1,7 @@
 import { describe, expect, it, test } from 'bun:test'
 import { Expression } from '../../../src/cir'
 import { lowerExpr } from '../../../src/backend'
+import { ISOLATED } from '../../../src/model/isolation-level'
 
 describe('Lowering Literals', () => {
     it('lowers string literals correctly', () => {
@@ -43,7 +44,7 @@ describe('Lowering Literals', () => {
         it('lowers as allocInitRC', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 type: {
                     name: 'MyData',
                     namespace: undefined,
@@ -70,7 +71,7 @@ describe('Lowering Literals', () => {
                     name: 'MyObject',
                     namespace: undefined,
                 },
-                isolationLevel: 'ISOLATED',
+                isolationLevel: ISOLATED,
                 fields: [
                     {
                         name: 'field',

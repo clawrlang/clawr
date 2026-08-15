@@ -9,7 +9,7 @@ import { Context } from '.'
 import { ValueSetParser } from './value-set-parser'
 import { SemanticsKeyword } from './semantics-keyword-parser'
 import { UnspecifiedType } from '../model/explicit-value-set'
-import { IsolationLevel } from '../model'
+import { IsolationLevel } from '../model/isolation-level'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser

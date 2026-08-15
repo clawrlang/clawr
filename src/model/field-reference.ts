@@ -1,5 +1,6 @@
 import * as cir from '../cir'
-import { Context, Expression, IsolationLevel } from '.'
+import { Context, Expression } from '.'
+import { ISOLATED, IsolationLevel, SHARED } from './isolation-level'
 import { Failable, logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
@@ -43,7 +44,7 @@ export class FieldReference implements Expression {
             this.object instanceof VariableReference ||
             this.object instanceof FieldReference
         ) {
-            if (this.object.isolationLevel(context).value() === 'ISOLATED') {
+            if (this.object.isolationLevel(context).value() === ISOLATED) {
                 const object = this.object.toCIRExpression(context).value()
                 return [{ kind: 'ENSURE_UNIQUE', object }]
             }
@@ -55,7 +56,7 @@ export class FieldReference implements Expression {
         return this.object
             .isolationLevel(context)
             .chaining((isolationLevel) =>
-                isolationLevel === 'SHARED'
+                isolationLevel === SHARED
                     ? Failable.success(false)
                     : this.object.isEffectivelyConst(context),
             )
@@ -64,8 +65,8 @@ export class FieldReference implements Expression {
     isolationLevel(context: Context): Failable<IsolationLevel> {
         const field = this.getFieldFromContext(context).value()
         return field.valueSet instanceof ExplicitRCTypeValueSet
-            ? Failable.success(field.valueSet.isolationLevel ?? 'ISOLATED')
-            : Failable.success('ISOLATED')
+            ? Failable.success(field.valueSet.isolationLevel ?? ISOLATED)
+            : Failable.success(ISOLATED)
     }
 
     declaredValueSet(context: Context): Failable<Lattice> {
@@ -130,10 +131,7 @@ export class FieldReference implements Expression {
         return this.object
             .isolationLevel(context)
             .chaining((isolationLevel) => {
-                if (
-                    (isolationLevel === 'SHARED') !==
-                    (this.operator === '->')
-                ) {
+                if ((isolationLevel === SHARED) !== (this.operator === '->')) {
                     return Failable.failure(
                         `Cannot access field ${this.field} of a ${isolationLevel} type object with "${this.operator}" operator`,
                         this.span,

@@ -10,6 +10,7 @@ import {
     ExplicitRCTypeValueSet,
 } from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
+import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {
@@ -124,7 +125,7 @@ describe('Literals', () => {
                     .toCIRExpression({
                         ...context,
                         type: TypeName.create({ name: 'MyType' }),
-                        isolationLevel: 'SHARED',
+                        isolationLevel: SHARED,
                     })
                     .value(),
             ).toMatchObject({
@@ -218,7 +219,7 @@ describe('Literals', () => {
                                 type: TypeName.create({
                                     name: 'MissingInnerType',
                                 }),
-                                isolationLevel: 'ISOLATED',
+                                isolationLevel: ISOLATED,
                                 span: someCodeSpan,
                             }),
                         },

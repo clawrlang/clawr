@@ -1,5 +1,6 @@
 import * as cir from '../cir'
-import { AnyIsolationLevel, Context, Expression } from '.'
+import { Context, Expression } from '.'
+import { AnyIsolationLevel, UNIQUE } from './isolation-level'
 import { Failable, SemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
@@ -43,7 +44,7 @@ export class Query implements Expression {
 
     isolationLevel(context: Context): Failable<AnyIsolationLevel> {
         if (this.name.toString() === 'copy(of:)')
-            return Failable.success('UNIQUE')
+            return Failable.success(UNIQUE)
 
         const decl = context.scope.functionDeclaration(this.name.toString())
         if (!decl)

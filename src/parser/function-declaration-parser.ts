@@ -10,6 +10,7 @@ import {
     SemanticsKeyword,
     SemanticsKeywordParser,
 } from './semantics-keyword-parser'
+import { ISOLATED } from '../model/isolation-level'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
     private readonly valueSetParser: ValueSetParser
@@ -39,7 +40,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')
                 ? stream.expect('KEYWORD', 'ref', 'const')
                 : undefined
-            result = this.valueSetParser.parse(stream, 'ISOLATED')
+            result = this.valueSetParser.parse(stream, ISOLATED)
         }
 
         if (stream.isNext('PUNCTUATION', '=>')) {

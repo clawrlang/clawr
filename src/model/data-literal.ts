@@ -1,5 +1,6 @@
 import * as cir from '../cir'
-import { Context, Expression, IsolationLevel } from '.'
+import { Context, Expression } from '.'
+import { IsolationLevel, UNIQUE } from './isolation-level'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
@@ -26,8 +27,8 @@ export class DataLiteral implements Expression {
         return Failable.success(true)
     }
 
-    isolationLevel(_: Context): Failable<'UNIQUE'> {
-        return Failable.success('UNIQUE')
+    isolationLevel(_: Context): Failable<UNIQUE> {
+        return Failable.success(UNIQUE)
     }
 
     currentValue(context: Context & { type: TypeName }): Failable<Lattice> {

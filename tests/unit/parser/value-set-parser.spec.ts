@@ -8,6 +8,7 @@ import {
 import { TokenStream } from '../../../src/lexer'
 import { ValueSetParser } from '../../../src/parser/value-set-parser'
 import { TestErrorReporter } from '../../util'
+import { ISOLATED } from '../../../src/model/isolation-level'
 
 describe('ValueSetParser', () => {
     it('parses unconstrained integer type', () => {
@@ -134,5 +135,5 @@ function parseValueSet(input: string) {
     const errorReporter = new TestErrorReporter()
     const stream = TokenStream.read(input, errorReporter)
     const parser = ValueSetParser.create({ errorReporter })
-    return parser.parse(stream, 'ISOLATED')
+    return parser.parse(stream, ISOLATED)
 }

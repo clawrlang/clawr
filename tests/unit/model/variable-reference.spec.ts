@@ -5,13 +5,14 @@ import { DataDeclaration } from '../../../src/model/data-declaration'
 import { ExplicitIntegerValueSet } from '../../../src/model/explicit-value-set'
 import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
+import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            isolationLevel: 'ISOLATED',
+            isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
 
@@ -45,7 +46,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            isolationLevel: 'ISOLATED',
+            isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
 
@@ -62,7 +63,7 @@ describe('Variable Reference', () => {
         const context = newSemanticContext()
         context.scope.variables.set('myVar', {
             isImmutable: true,
-            isolationLevel: 'ISOLATED',
+            isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
         context.scope.setCurrentValue(
@@ -81,7 +82,7 @@ describe('Variable Reference', () => {
     })
 
     describe('infers isolation level from the context', () => {
-        const cases = ['ISOLATED', 'SHARED'] as const
+        const cases = [ISOLATED, SHARED] as const
 
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(

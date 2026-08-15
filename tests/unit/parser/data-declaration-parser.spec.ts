@@ -6,6 +6,7 @@ import {
     ExplicitIntegerValueSet,
     ExplicitTruthValueSet,
 } from '../../../src/model/explicit-value-set'
+import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('DataDeclarationParser', () => {
     it('parses a data declaration with default-mutability', () => {
@@ -24,12 +25,12 @@ describe('DataDeclarationParser', () => {
                 {
                     name: 'field1',
                     isImmutable: false,
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                 },
                 {
                     name: 'field2',
                     isImmutable: false,
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                 },
             ],
         })
@@ -52,11 +53,11 @@ describe('DataDeclarationParser', () => {
         expect(result).toMatchObject({
             name: { name: 'MyData' },
             fields: [
-                { name: 'field1', isImmutable: true, isolationLevel: 'SHARED' },
+                { name: 'field1', isImmutable: true, isolationLevel: SHARED },
                 {
                     name: 'field2',
                     isImmutable: true,
-                    isolationLevel: 'ISOLATED',
+                    isolationLevel: ISOLATED,
                 },
             ],
         })

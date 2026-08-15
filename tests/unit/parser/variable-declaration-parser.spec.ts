@@ -8,6 +8,7 @@ import {
     UnspecifiedType,
 } from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
+import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 
 describe('VariableDeclarationParser', () => {
     it('parses const integer variable declaration', () => {
@@ -41,7 +42,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: false,
             name: 'foo',
-            valueSet: { type: { name: 'Type' }, isolationLevel: 'SHARED' },
+            valueSet: { type: { name: 'Type' }, isolationLevel: SHARED },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: 1n } },
@@ -56,7 +57,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
             name: 'foo',
-            valueSet: { type: { name: 'Type' }, isolationLevel: 'SHARED' },
+            valueSet: { type: { name: 'Type' }, isolationLevel: SHARED },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: 1n } },
@@ -71,7 +72,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
             name: 'foo',
-            valueSet: { isolationLevel: 'ISOLATED' },
+            valueSet: { isolationLevel: ISOLATED },
             initialValue: { value: 1n },
         })
     })
@@ -92,7 +93,7 @@ describe('VariableDeclarationParser', () => {
         expect(decl).toMatchObject({
             isImmutable: true,
             name: 'r',
-            valueSet: { type: { name: 'MyData' }, isolationLevel: 'SHARED' },
+            valueSet: { type: { name: 'MyData' }, isolationLevel: SHARED },
             initialValue: { fields: [] },
         })
         expect((decl as any).valueSet).toBeInstanceOf(ExplicitRCTypeValueSet)

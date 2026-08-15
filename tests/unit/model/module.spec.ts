@@ -11,6 +11,7 @@ import {
 } from '../../../src/model/explicit-value-set'
 import { TypeName } from '../../../src/model/type-name'
 import { IntegerLattice } from '../../../src/model/lattice'
+import { ISOLATED } from '../../../src/model/isolation-level'
 
 describe('Module', () => {
     it('outputs the main block in CIR', () => {
@@ -110,7 +111,7 @@ describe('Module', () => {
         module.toCIR(context)
         expect(context.scope.variableDeclaration('x')).toEqual({
             isImmutable: true,
-            isolationLevel: 'ISOLATED',
+            isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min: 42n, max: 42n }),
         })
     })

@@ -3,6 +3,7 @@ import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice, TruthvalueLattice } from './lattice'
 import { Failable } from './failable'
+import { ISOLATED } from './isolation-level'
 
 export class TruthValueLiteral implements Expression {
     private constructor(
@@ -20,8 +21,8 @@ export class TruthValueLiteral implements Expression {
         return new TruthValueLiteral(value, span)
     }
 
-    isolationLevel(_: Context): Failable<'ISOLATED'> {
-        return Failable.success('ISOLATED')
+    isolationLevel(_: Context): Failable<ISOLATED> {
+        return Failable.success(ISOLATED)
     }
 
     currentValue(_: Context): Failable<Lattice> {

@@ -259,6 +259,12 @@ describe('Assignment', () => {
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
+        context.scope.setCurrentValue(
+            'foo',
+            RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyType' }),
+            }),
+        )
 
         const assignment = Assignment.create({
             target: FieldReference.create({
@@ -481,6 +487,10 @@ describe('Assignment', () => {
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
+        context.scope.setCurrentValue(
+            'x',
+            RCTypeLattice.create({ type: TypeName.create({ name: 'MyType' }) }),
+        )
 
         const assignment = Assignment.create({
             target: FieldReference.create({
@@ -585,6 +595,91 @@ describe('Assignment', () => {
                         },
                     ],
                 })
+            })
+        })
+    })
+
+    describe('updates current-value', () => {
+        test('variable-reference', () => {
+            const context = newSemanticContext()
+            context.scope.variables.set('x', {
+                isImmutable: true,
+                isolationLevel: 'ISOLATED',
+                lattice: IntegerLattice.unconstrained(),
+            })
+
+            const assignment = Assignment.create({
+                target: VariableReference.create({
+                    name: 'x',
+                    span: someCodeSpan,
+                }),
+                value: IntegerLiteral.create({
+                    value: 42n,
+                    span: someCodeSpan,
+                }),
+                span: someCodeSpan,
+            })
+            expect(() => assignment.emitStatement(context)).not.toThrow()
+            expect(context.scope.currentValue('x')).not.toBeNil()
+            expect(context.scope.currentValue('x')).toMatchObject({
+                min: 42n,
+                max: 42n,
+            })
+        })
+
+        test('field-reference', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.addDataDeclaration(
+                TypeName.create({ name: 'MyType' }),
+                DataDeclaration.create({
+                    name: TypeName.create({ name: 'MyType' }),
+                    fields: [
+                        {
+                            name: 'field',
+                            isImmutable: false,
+                            valueSet: ExplicitIntegerValueSet.create({
+                                span: someCodeSpan,
+                            }),
+                        },
+                    ],
+                }),
+            )
+            context.scope.variables.set('x', {
+                isImmutable: true,
+                isolationLevel: 'ISOLATED',
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
+                }),
+            })
+            context.scope.setCurrentValue(
+                'x',
+                RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
+                    fields: {},
+                }),
+            )
+
+            const assignment = Assignment.create({
+                target: FieldReference.create({
+                    object: VariableReference.create({
+                        name: 'x',
+                        span: someCodeSpan,
+                    }),
+                    operator: '.',
+                    field: 'field',
+                    fieldSpan: someCodeSpan,
+                    span: someCodeSpan,
+                }),
+                value: IntegerLiteral.create({
+                    value: 42n,
+                    span: someCodeSpan,
+                }),
+                span: someCodeSpan,
+            })
+            expect(() => assignment.emitStatement(context)).not.toThrow()
+            expect(context.scope.currentValue('x')).not.toBeNil()
+            expect(context.scope.currentValue('x')).toMatchObject({
+                fields: { field: { min: 42n, max: 42n } },
             })
         })
     })

@@ -42,6 +42,7 @@ export class Assignment implements Statement {
         )
 
         this.emitCIRStatements(context, targetLattice, targetIsolationLevel)
+        this.target.setCurrentValue(context, assignedValue)
     }
 
     private emitCIRStatements(

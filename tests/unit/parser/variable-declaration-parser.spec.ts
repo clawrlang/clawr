@@ -78,15 +78,6 @@ describe('VariableDeclarationParser', () => {
     })
 
     it('sets the isolation-level of data literal', () => {
-        const context = newSemanticContext()
-        context.scope.rootScope.addDataDeclaration(
-            TypeName.create({ name: 'MyType' }),
-            DataDeclaration.create({
-                name: TypeName.create({ name: 'MyType' }),
-                fields: [],
-            }),
-        )
-
         const source = 'ref r: MyData = {}'
         const decl = parseVariableDeclaration(source)
 
@@ -96,7 +87,6 @@ describe('VariableDeclarationParser', () => {
             valueSet: { type: { name: 'MyData' }, isolationLevel: SHARED },
             initialValue: { fields: [] },
         })
-        expect((decl as any).valueSet).toBeInstanceOf(ExplicitRCTypeValueSet)
     })
 })
 

@@ -1,5 +1,5 @@
 import { Statement, Expression, Context } from '.'
-import { IsolationLevel, UNIQUE } from './isolation-level'
+import { IsolationLevel, UNIQUE, UNKNOWN } from './isolation-level'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
@@ -49,7 +49,7 @@ export class Assignment implements Statement {
     private emitCIRStatements(
         context: Context,
         targetLattice: Lattice,
-        targetIsolationLevel: IsolationLevel,
+        targetIsolationLevel: IsolationLevel | UNKNOWN,
     ) {
         const prelude = this.target.assignmentPrelude(context)
         context.scope.emitted.push(...prelude)
@@ -61,7 +61,10 @@ export class Assignment implements Statement {
                     targetLattice instanceof RCTypeLattice
                         ? targetLattice.type
                         : undefined,
-                isolationLevel: targetIsolationLevel,
+                isolationLevel:
+                    targetIsolationLevel !== UNKNOWN
+                        ? targetIsolationLevel
+                        : undefined,
             })
             .value()
         if (

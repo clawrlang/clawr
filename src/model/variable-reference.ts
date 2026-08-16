@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
-import { IsolationLevel } from './isolation-level'
+import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { Failable, logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice } from './lattice'
@@ -42,7 +42,7 @@ export class VariableReference implements Expression {
         )
     }
 
-    isolationLevel(context: Context): Failable<IsolationLevel> {
+    isolationLevel(context: Context): Failable<IsolationLevel | UNKNOWN> {
         return this.lookupInScope(context).chaining((variable) =>
             Failable.success(variable.isolationLevel),
         )

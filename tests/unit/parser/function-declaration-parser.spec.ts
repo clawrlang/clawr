@@ -3,7 +3,7 @@ import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
 import { FunctionDeclarationParser } from '../../../src/parser/function-declaration-parser'
 import { RCTypeLattice } from '../../../src/model/lattice'
-import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { ISOLATED, SHARED, UNKNOWN } from '../../../src/model/isolation-level'
 
 describe('Function Declaration Parser', () => {
     it('parses a function with no parameters and no return type', () => {
@@ -95,7 +95,7 @@ describe('Function Declaration Parser', () => {
                 {
                     varName: 'x',
                     isImmutable: true,
-                    isolationLevel: SHARED,
+                    valueSet: { isolationLevel: SHARED },
                     span: {
                         start: { line: 1, column: 17 },
                         end: { line: 1, column: 32 },
@@ -104,14 +104,33 @@ describe('Function Declaration Parser', () => {
                 {
                     varName: 'y',
                     valueSet: {
+                        isolationLevel: ISOLATED,
                         lattice: { values: ['false', 'ambiguous', 'true'] },
                     },
                     isImmutable: true,
-                    isolationLevel: ISOLATED,
                     span: {
                         start: { line: 1, column: 34 },
                         end: { line: 1, column: 59 },
                     },
+                },
+            ],
+            result: undefined,
+            implementation: { kind: 'body', statements: [] },
+        })
+    })
+
+    it('parses parameters with UNKNOWN semantics', () => {
+        const code = 'func myFunction(x: SomeRCType) {}'
+
+        const result = parseFunction(code)
+        expect(result).toMatchObject({
+            baseName: 'myFunction',
+            parameters: [
+                {
+                    label: 'x',
+                    varName: 'x',
+                    valueSet: { isolationLevel: UNKNOWN },
+                    isImmutable: true,
                 },
             ],
             result: undefined,
@@ -128,7 +147,7 @@ describe('Function Declaration Parser', () => {
             parameters: [
                 {
                     varName: 'x',
-                    valueSet: undefined,
+                    valueSet: { isolationLevel: ISOLATED },
                     label: undefined,
                     defaultValue: { value: 42n },
                     span: {
@@ -139,6 +158,9 @@ describe('Function Declaration Parser', () => {
             ],
             result: undefined,
             implementation: { kind: 'body', statements: [] },
+        })
+        expect(result).not.toMatchObject({
+            parameters: [{ valueSet: { lattice: expect.anything() } }],
         })
     })
 

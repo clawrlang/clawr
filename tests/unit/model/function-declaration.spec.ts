@@ -27,7 +27,6 @@ describe('FunctionDeclaration', () => {
                 Parameter.create({
                     label: 'param1',
                     isImmutable: true,
-                    isolationLevel: ISOLATED,
                     varName: 'x',
                     valueSet: {
                         isolationLevel: ISOLATED,
@@ -444,7 +443,6 @@ describe('FunctionDeclaration', () => {
                 Parameter.create({
                     label: 'param1',
                     isImmutable: true,
-                    isolationLevel: ISOLATED,
                     varName: 'x',
                     valueSet: {
                         isolationLevel: ISOLATED,

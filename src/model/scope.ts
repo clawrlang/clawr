@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 import { Declaration } from '.'
-import { IsolationLevel } from './isolation-level'
+import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
@@ -104,6 +104,6 @@ export class Scope {
 
 type Variable = {
     isImmutable: boolean
-    isolationLevel: IsolationLevel
+    isolationLevel: IsolationLevel | UNKNOWN
     lattice: Lattice
 }

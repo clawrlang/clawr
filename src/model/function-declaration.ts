@@ -1,6 +1,11 @@
 import * as cir from '../cir'
 import { Context, Declaration, Expression, Statement } from '.'
-import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
+import {
+    AnyIsolationLevel,
+    IsolationLevel,
+    UNIQUE,
+    UNKNOWN,
+} from './isolation-level'
 import { ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
@@ -70,7 +75,7 @@ export class FunctionDeclaration implements Declaration {
         for (const param of this.parameters) {
             parameterScope.variables.set(param.varName, {
                 isImmutable: param.isImmutable,
-                isolationLevel: param.isolationLevel,
+                isolationLevel: param.valueSet.isolationLevel,
                 lattice:
                     param.defaultValue?.currentValue(context).value() ??
                     param.valueSet?.lattice ??
@@ -145,17 +150,15 @@ export class FunctionDeclaration implements Declaration {
 export class Parameter {
     private constructor(
         public isImmutable: boolean,
-        public isolationLevel: IsolationLevel,
         public label: string | undefined,
         public varName: string,
         public span: SourceCodeSpan,
-        public valueSet?: ExplicitValueSet<IsolationLevel>,
+        public valueSet: ExplicitValueSet<IsolationLevel | UNKNOWN>,
         public defaultValue?: Expression,
     ) {}
 
     static create({
         isImmutable,
-        isolationLevel,
         label,
         varName,
         valueSet,
@@ -164,15 +167,13 @@ export class Parameter {
     }: {
         label: string | undefined
         varName: string
-        valueSet?: ExplicitValueSet<IsolationLevel>
+        valueSet: ExplicitValueSet<IsolationLevel | UNKNOWN>
         isImmutable: boolean
-        isolationLevel: IsolationLevel
         defaultValue?: Expression
         span: SourceCodeSpan
     }): Parameter {
         return new Parameter(
             isImmutable,
-            isolationLevel,
             label,
             varName,
             span,

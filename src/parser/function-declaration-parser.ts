@@ -10,7 +10,12 @@ import {
     SemanticsKeyword,
     SemanticsKeywordParser,
 } from './semantics-keyword-parser'
-import { ISOLATED, IsolationLevel, UNIQUE } from '../model/isolation-level'
+import {
+    ISOLATED,
+    IsolationLevel,
+    UNIQUE,
+    UNKNOWN,
+} from '../model/isolation-level'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
     private readonly valueSetParser: ValueSetParser
@@ -77,7 +82,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             const semanticsToken = SemanticsKeywordParser.readToken(stream)
             const semanticsKeyword = semanticsToken
                 ? SemanticsKeyword[semanticsToken.keyword]
-                : SemanticsKeyword.const
+                : undefined
             const labelToken = stream.expect('IDENTIFIER')
             let varNameToken: (Token & { kind: 'IDENTIFIER' }) | undefined
 
@@ -85,14 +90,10 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                 varNameToken = stream.expect('IDENTIFIER')
             else varNameToken = labelToken
 
-            let valueSet: ExplicitValueSet<IsolationLevel> | undefined
-            if (stream.isNext('PUNCTUATION', ':')) {
-                stream.expect('PUNCTUATION', ':')
-                valueSet = this.valueSetParser.parse(
-                    stream,
-                    semanticsKeyword.isolationLevel,
-                )
-            }
+            const valueSet = this.parseValueSet(
+                stream,
+                semanticsKeyword?.isolationLevel ?? UNKNOWN,
+            )
 
             let defaultValue: Expression | undefined
             if (stream.isNext('PUNCTUATION', '=')) {
@@ -104,7 +105,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
 
             parameters.push(
                 Parameter.create({
-                    ...semanticsKeyword,
+                    isImmutable: semanticsKeyword?.isImmutable ?? true,
                     label:
                         labelToken.identifier === '_'
                             ? undefined
@@ -127,5 +128,14 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         }
         stream.expect('PUNCTUATION', ')')
         return parameters
+    }
+
+    private parseValueSet(
+        stream: TokenStream,
+        isolationLevel: IsolationLevel | UNKNOWN,
+    ): ExplicitValueSet<IsolationLevel | UNKNOWN> {
+        if (!stream.isNext('PUNCTUATION', ':')) return { isolationLevel }
+        stream.expect('PUNCTUATION', ':')
+        return this.valueSetParser.parse(stream, isolationLevel)
     }
 }

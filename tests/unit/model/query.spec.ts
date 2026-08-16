@@ -68,7 +68,6 @@ describe('Query', () => {
                     Parameter.create({
                         label: 'x',
                         isImmutable: true,
-                        isolationLevel: ISOLATED,
                         varName: 'x',
                         valueSet: {
                             isolationLevel: ISOLATED,

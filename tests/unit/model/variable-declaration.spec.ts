@@ -76,7 +76,6 @@ describe('VariableDeclaration', () => {
             })
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [
@@ -128,7 +127,6 @@ describe('VariableDeclaration', () => {
             })
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [
@@ -156,7 +154,6 @@ describe('VariableDeclaration', () => {
         test('for a FieldReference', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'InnerType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'InnerType' }),
                     fields: [
@@ -173,7 +170,6 @@ describe('VariableDeclaration', () => {
                 }),
             )
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'OuterType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'OuterType' }),
                     fields: [
@@ -258,7 +254,6 @@ describe('VariableDeclaration', () => {
         test('for a VariableReference', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [
@@ -349,7 +344,6 @@ describe('VariableDeclaration', () => {
         test('for a nested rc-type variable', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'InnerType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'InnerType' }),
                     fields: [
@@ -366,7 +360,6 @@ describe('VariableDeclaration', () => {
                 }),
             )
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'OuterType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'OuterType' }),
                     fields: [
@@ -440,7 +433,6 @@ describe('VariableDeclaration', () => {
         it('converts UNIQUE expression to ISOLATED', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [],
@@ -471,7 +463,6 @@ describe('VariableDeclaration', () => {
         it('converts UNIQUE expression to SHARED', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyData' }),
                     fields: [],
@@ -529,7 +520,6 @@ describe('VariableDeclaration', () => {
             test(`mut target = SHARED value`, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
-                    TypeName.create({ name: 'MyType' }),
                     DataDeclaration.create({
                         name: TypeName.create({ name: 'MyType' }),
                         fields: [

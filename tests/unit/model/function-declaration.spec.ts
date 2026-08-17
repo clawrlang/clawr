@@ -135,7 +135,6 @@ describe('FunctionDeclaration', () => {
     it('throws if returning SHARED as UNIQUE', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            TypeName.create({ name: 'MyData' }),
             DataDeclaration.create({
                 name: TypeName.create({ name: 'MyData' }),
                 fields: [],
@@ -182,7 +181,6 @@ describe('FunctionDeclaration', () => {
     it('throws if returning ISOLATED as SHARED', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            TypeName.create({ name: 'MyData' }),
             DataDeclaration.create({
                 name: TypeName.create({ name: 'MyData' }),
                 fields: [],
@@ -230,7 +228,6 @@ describe('FunctionDeclaration', () => {
     it('throws if returning ISOLATED as SHARED', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            TypeName.create({ name: 'MyData' }),
             DataDeclaration.create({
                 name: TypeName.create({ name: 'MyData' }),
                 fields: [],
@@ -316,7 +313,6 @@ describe('FunctionDeclaration', () => {
         it('infers ISOLATED return value-set from ISOLATED variable expression', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyData' }),
                     fields: [],
@@ -366,7 +362,6 @@ describe('FunctionDeclaration', () => {
         it('infers SHARED return value-set from SHARED variable expression', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyData' }),
                     fields: [],
@@ -480,7 +475,6 @@ describe('FunctionDeclaration', () => {
             const context = newSemanticContext()
 
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyData' }),
                     fields: [
@@ -551,7 +545,6 @@ describe('FunctionDeclaration', () => {
             const context = newSemanticContext()
 
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyData' }),
                     fields: [
@@ -632,7 +625,6 @@ describe('FunctionDeclaration', () => {
             const context = newSemanticContext()
 
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyData' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyData' }),
                     fields: [],

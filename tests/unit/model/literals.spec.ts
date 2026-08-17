@@ -75,7 +75,6 @@ describe('Literals', () => {
         it('outputs a data literal as ALLOCATE', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [
@@ -150,7 +149,6 @@ describe('Literals', () => {
         it('has a current value set of the literal value', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [
@@ -217,7 +215,6 @@ describe('Literals', () => {
         it('returns a failure from a nested field value', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'OuterType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'OuterType' }),
                     fields: [

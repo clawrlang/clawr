@@ -17,8 +17,8 @@ class RootScope {
         return undefined
     }
 
-    addDataDeclaration(name: TypeName, decl: DataDeclaration) {
-        this.declarations.set(name.canonical(), decl)
+    addDataDeclaration(decl: DataDeclaration) {
+        this.declarations.set(decl.name.canonical(), decl)
     }
 
     functionDeclaration(name: string): FunctionDeclaration | undefined {

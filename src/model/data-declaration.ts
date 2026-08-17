@@ -27,7 +27,7 @@ export class DataDeclaration implements Declaration {
     }
 
     emitDeclaration(context: Context) {
-        context.scope.rootScope.addDataDeclaration(this.name, this)
+        context.scope.rootScope.addDataDeclaration(this)
         context.scope.rootScope.emitted.push({
             kind: 'TYPE_DECL',
             name: this.name.name,

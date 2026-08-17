@@ -41,7 +41,6 @@ describe('Assignment', () => {
         test('for a FieldReference', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'InnerType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'InnerType' }),
                     fields: [
@@ -58,7 +57,6 @@ describe('Assignment', () => {
                 }),
             )
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'OuterType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'OuterType' }),
                     fields: [
@@ -162,7 +160,6 @@ describe('Assignment', () => {
         test('for a VariableReference', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [],
@@ -241,7 +238,6 @@ describe('Assignment', () => {
     it('injects ENSURE_UNIQUE for ISOLATED target before assignment', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
                 name: TypeName.create({ name: 'MyType' }),
                 fields: [
@@ -302,7 +298,6 @@ describe('Assignment', () => {
     it('injects AS_SHARED for UNIQUE value before assignment to SHARED target', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
                 name: TypeName.create({ name: 'MyType' }),
                 fields: [],
@@ -413,7 +408,6 @@ describe('Assignment', () => {
             test(isolationLevel, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
-                    TypeName.create({ name: 'MyType' }),
                     DataDeclaration.create({
                         name: TypeName.create({ name: 'MyType' }),
                         fields: [],
@@ -474,7 +468,6 @@ describe('Assignment', () => {
     it('throws if the target field is effectively const', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
                 name: TypeName.create({ name: 'MyType' }),
                 fields: [
@@ -544,7 +537,6 @@ describe('Assignment', () => {
             test(`mut target = ${mutString} value`, () => {
                 const context = newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
-                    TypeName.create({ name: 'MyType' }),
                     DataDeclaration.create({
                         name: TypeName.create({ name: 'MyType' }),
                         fields: [
@@ -642,7 +634,6 @@ describe('Assignment', () => {
         test('field-reference', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
-                TypeName.create({ name: 'MyType' }),
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [

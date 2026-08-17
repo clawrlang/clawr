@@ -85,7 +85,6 @@ describe('Variable Reference', () => {
 
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
-            TypeName.create({ name: 'MyType' }),
             DataDeclaration.create({
                 name: TypeName.create({ name: 'MyType' }),
                 fields: [

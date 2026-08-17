@@ -125,7 +125,9 @@ describe('Literals', () => {
                 dataLiteral
                     .toCIRExpression({
                         ...context,
-                        type: TypeName.create({ name: 'MyType' }),
+                        explicitLattice: RCTypeLattice.create({
+                            type: TypeName.create({ name: 'MyType' }),
+                        }),
                         isolationLevel: SHARED,
                     })
                     .value(),
@@ -198,7 +200,9 @@ describe('Literals', () => {
                 dataLiteral
                     .currentValue({
                         ...context,
-                        type: TypeName.create({ name: 'MyType' }),
+                        explicitLattice: RCTypeLattice.create({
+                            type: TypeName.create({ name: 'MyType' }),
+                        }),
                     })
                     .value(),
             ).toMatchObject({
@@ -259,7 +263,9 @@ describe('Literals', () => {
                 dataLiteral
                     .currentValue({
                         ...context,
-                        type: TypeName.create({ name: 'OuterType' }),
+                        explicitLattice: RCTypeLattice.create({
+                            type: TypeName.create({ name: 'OuterType' }),
+                        }),
                     })
                     .isFailure(),
             ).toBe(true)

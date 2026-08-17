@@ -57,10 +57,7 @@ export class Assignment implements Statement {
         const value = this.value
             .toCIRExpression({
                 ...context,
-                type:
-                    targetLattice instanceof RCTypeLattice
-                        ? targetLattice.type
-                        : undefined,
+                explicitLattice: targetLattice,
                 isolationLevel:
                     targetIsolationLevel !== UNKNOWN
                         ? targetIsolationLevel

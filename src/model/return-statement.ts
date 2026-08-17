@@ -1,6 +1,5 @@
 import { Context, Expression, Statement } from '.'
 import { RCTypeLattice } from './lattice'
-import { logSemanticError } from './failable'
 
 export class ReturnStatement implements Statement {
     private constructor(public value: Expression | undefined) {}
@@ -12,7 +11,6 @@ export class ReturnStatement implements Statement {
     emitStatement(context: Context) {
         if (this.value) {
             const valueLattice = this.value.currentValue(context).value()
-            const isolationLevel = this.value.isolationLevel(context)
             if (!valueLattice) {
                 throw new Error(
                     `Return statement value does not have a lattice: ${JSON.stringify(

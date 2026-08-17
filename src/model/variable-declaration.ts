@@ -2,7 +2,7 @@ import { Context, Declaration, Expression, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
-import { Lattice, RCTypeLattice } from './lattice'
+import { Lattice } from './lattice'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
@@ -65,12 +65,8 @@ export class VariableDeclaration implements Statement, Declaration {
         const initialValue = this.initialValue
             .toCIRExpression({
                 ...context,
-                ...(this.valueSet.lattice instanceof RCTypeLattice
-                    ? {
-                          type: this.valueSet.lattice.type,
-                          isolationLevel: this.valueSet.isolationLevel,
-                      }
-                    : {}),
+                explicitLattice: this.valueSet.lattice,
+                isolationLevel: this.valueSet.isolationLevel,
             })
             .value()
 
@@ -133,10 +129,7 @@ export class VariableDeclaration implements Statement, Declaration {
         return this.initialValue
             .currentValue({
                 ...context,
-                type:
-                    this.valueSet.lattice instanceof RCTypeLattice
-                        ? this.valueSet.lattice.type
-                        : undefined,
+                explicitLattice: this.valueSet.lattice,
             })
             .value()
     }

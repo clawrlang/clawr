@@ -4,26 +4,25 @@ import { Failable } from './failable'
 import { AnyIsolationLevel, IsolationLevel } from './isolation-level'
 import { Lattice } from './lattice'
 import { Scope } from './scope'
-import { TypeName } from './type-name'
 
 export type Context = {
     scope: Scope
     errorReporter: ErrorReporter
 }
 
+export type ContextWithValueSet = Context & {
+    explicitLattice?: Lattice
+    isolationLevel?: IsolationLevel
+}
+
 export interface Expression {
     get span(): SourceCodeSpan
     isEffectivelyConst(context: Context): Failable<boolean>
     isolationLevel(context: Context): Failable<AnyIsolationLevel>
-    declaredValueSet(context: Context): Failable<Lattice>
-    currentValue(context: Context & { type?: TypeName }): Failable<Lattice>
+    declaredValueSet(context: ContextWithValueSet): Failable<Lattice>
+    currentValue(context: ContextWithValueSet): Failable<Lattice>
     setCurrentValue?(context: Context, value: Lattice): void
-    toCIRExpression(
-        context: Context & {
-            type?: TypeName
-            isolationLevel?: IsolationLevel
-        },
-    ): Failable<cir.Expression>
+    toCIRExpression(context: ContextWithValueSet): Failable<cir.Expression>
 }
 
 export interface Statement {

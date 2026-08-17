@@ -1,10 +1,10 @@
 import { Statement, Expression, Context } from '.'
-import { IsolationLevel, UNIQUE, UNKNOWN } from './isolation-level'
+import { UNIQUE, UNKNOWN } from './isolation-level'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
-import { logSemanticError, SemanticError } from './failable'
-import { Lattice, RCTypeLattice } from './lattice'
+import { Failable, logSemanticError, SemanticError } from './failable'
+import { RCTypeLattice } from './lattice'
 
 export class Assignment implements Statement {
     private constructor(
@@ -27,81 +27,87 @@ export class Assignment implements Statement {
 
     emitStatement(context: Context) {
         this.checkValidity(context)
-        this.emitCIRStatements(context)
+        this.emitCIRStatements(context).throwIfFailure()
         this.target.setCurrentValue(
             context,
             this.value.currentValue(context).value(),
         )
     }
 
-    private emitCIRStatements(context: Context) {
-        const targetLattice = this.target.declaredValueSet(context).value()
-        const targetIsolationLevel = this.target.isolationLevel(context).value()
-        const prelude = this.target.assignmentPrelude(context)
-        context.scope.emitted.push(...prelude)
+    private emitCIRStatements(context: Context): Failable {
+        return Failable.collect([
+            this.target.declaredValueSet(context),
+            this.target.isolationLevel(context),
+        ]).chaining(([targetLattice, targetIsolationLevel]) => {
+            const prelude = this.target.assignmentPrelude(context)
+            context.scope.emitted.push(...prelude)
 
-        const value = this.value
-            .toCIRExpression({
-                ...context,
-                explicitLattice: targetLattice,
-                isolationLevel:
-                    targetIsolationLevel !== UNKNOWN
-                        ? targetIsolationLevel
-                        : undefined,
-            })
-            .value()
-        if (
-            (value.kind === 'FIELD_REF' || value.kind === 'VARIABLE_REF') &&
-            this.target.declaredValueSet(context).value() instanceof
-                RCTypeLattice
-        ) {
-            const tempVar = context.scope.nextTempVar()
+            return Failable.collect([
+                this.value.toCIRExpression({
+                    ...context,
+                    explicitLattice: targetLattice,
+                    isolationLevel:
+                        targetIsolationLevel !== UNKNOWN
+                            ? targetIsolationLevel
+                            : undefined,
+                }),
+                this.target.toCIRExpression(context),
+                this.value.isolationLevel(context),
+            ]).chaining(([value, target, valueIsolationLevel]) => {
+                if (
+                    (value.kind === 'FIELD_REF' ||
+                        value.kind === 'VARIABLE_REF') &&
+                    targetLattice instanceof RCTypeLattice
+                ) {
+                    const tempVar = context.scope.nextTempVar()
 
-            context.scope.emitted.push({
-                kind: 'VARIABLE_DECL' as const,
-                name: tempVar,
-                valueSet: targetLattice.toCIR(),
-                initialValue: this.target.toCIRExpression(context).value(),
-            })
-
-            context.scope.emitted.push(
-                {
-                    kind: 'ASSIGN',
-                    target: this.target.toCIRExpression(context).value(),
-                    value: {
-                        kind: 'RETAIN',
-                        object: value,
-                    },
-                },
-                {
-                    kind: 'RELEASE',
-                    object: {
-                        kind: 'VARIABLE_REF',
+                    context.scope.emitted.push({
+                        kind: 'VARIABLE_DECL' as const,
                         name: tempVar,
-                    },
-                },
-            )
-        } else if (
-            this.target.declaredValueSet(context).value() instanceof
-                RCTypeLattice &&
-            value.kind === 'CALL' &&
-            this.value.isolationLevel(context).value() === UNIQUE
-        ) {
-            context.scope.emitted.push({
-                kind: 'ASSIGN',
-                target: this.target.toCIRExpression(context).value(),
-                value: {
-                    kind: 'AS_SHARED',
-                    object: value,
-                },
+                        valueSet: targetLattice.toCIR(),
+                        initialValue: target,
+                    })
+
+                    context.scope.emitted.push(
+                        {
+                            kind: 'ASSIGN',
+                            target,
+                            value: {
+                                kind: 'RETAIN',
+                                object: value,
+                            },
+                        },
+                        {
+                            kind: 'RELEASE',
+                            object: {
+                                kind: 'VARIABLE_REF',
+                                name: tempVar,
+                            },
+                        },
+                    )
+                } else if (
+                    targetLattice instanceof RCTypeLattice &&
+                    value.kind === 'CALL' &&
+                    valueIsolationLevel === UNIQUE
+                ) {
+                    context.scope.emitted.push({
+                        kind: 'ASSIGN',
+                        target,
+                        value: {
+                            kind: 'AS_SHARED',
+                            object: value,
+                        },
+                    })
+                } else {
+                    context.scope.emitted.push({
+                        kind: 'ASSIGN',
+                        target,
+                        value,
+                    })
+                }
+                return Failable.success(undefined)
             })
-        } else {
-            context.scope.emitted.push({
-                kind: 'ASSIGN',
-                target: this.target.toCIRExpression(context).value(),
-                value,
-            })
-        }
+        })
     }
 
     private checkValidity(context: Context) {

@@ -20,10 +20,7 @@ export class ValueSetParser {
         return new ValueSetParser(context)
     }
 
-    parse<IsolationLevel extends AnyIsolationLevel>(
-        stream: TokenStream,
-        isolationLevel: IsolationLevel,
-    ): ExplicitValueSet<IsolationLevel | ISOLATED> {
+    parse(stream: TokenStream): ExplicitValueSet {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
 
@@ -34,13 +31,11 @@ export class ValueSetParser {
                 return this.parseTruthvalueValueSet(stream, typeToken)
             case 'string':
                 return {
-                    isolationLevel,
                     lattice: StringLattice.create(),
                     span: { start: typeToken.start, end: typeToken.end },
                 }
             default:
                 return {
-                    isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: type }),
                     }),
@@ -52,10 +47,9 @@ export class ValueSetParser {
     private parseIntegerValueSet(
         stream: TokenStream,
         typeToken: Token,
-    ): ExplicitValueSet<ISOLATED> {
+    ): ExplicitValueSet {
         if (!stream.isNext('PUNCTUATION', '('))
             return {
-                isolationLevel: ISOLATED,
                 lattice: IntegerLattice.unconstrained(),
                 span: { start: typeToken.start, end: typeToken.end },
             }
@@ -103,7 +97,6 @@ export class ValueSetParser {
         const endToken = stream.expect('PUNCTUATION', ')')
 
         return {
-            isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min, max }),
             span: { start: typeToken.start, end: endToken.end },
         }
@@ -112,10 +105,9 @@ export class ValueSetParser {
     private parseTruthvalueValueSet(
         stream: TokenStream,
         typeToken: IdentifierToken,
-    ): ExplicitValueSet<ISOLATED> {
+    ): ExplicitValueSet {
         if (!stream.isNext('PUNCTUATION', '('))
             return {
-                isolationLevel: ISOLATED,
                 lattice: TruthvalueLattice.unconstrained(),
                 span: { start: typeToken.start, end: typeToken.end },
             }
@@ -132,7 +124,6 @@ export class ValueSetParser {
         const endToken = stream.expect('PUNCTUATION', ')')
 
         return {
-            isolationLevel: ISOLATED,
             lattice:
                 values.length > 0
                     ? TruthvalueLattice.create(values)

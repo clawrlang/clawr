@@ -40,13 +40,18 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
 
         const parameters = this.parseParameters(stream)
 
-        let result: ExplicitValueSet<IsolationLevel | UNIQUE> | undefined
+        let result:
+            | (ExplicitValueSet & { isolationLevel: IsolationLevel | UNIQUE })
+            | undefined
         if (stream.isNext('OPERATOR', '->')) {
             stream.expect('OPERATOR', '->')
             const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')
                 ? stream.expect('KEYWORD', 'ref', 'const')
                 : undefined
-            result = this.valueSetParser.parse(stream, ISOLATED)
+            result = {
+                ...this.valueSetParser.parse(stream),
+                isolationLevel: ISOLATED,
+            }
         }
 
         if (stream.isNext('PUNCTUATION', '=>')) {
@@ -91,10 +96,13 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                 varNameToken = stream.expect('IDENTIFIER')
             else varNameToken = labelToken
 
-            const valueSet = this.parseValueSet(
-                stream,
-                semanticsKeyword?.isolationLevel ?? UNKNOWN,
-            )
+            const valueSet = {
+                ...(this.parseValueSet(stream) || {
+                    lattice: undefined,
+                    span: undefined,
+                }),
+                isolationLevel: semanticsKeyword?.isolationLevel ?? UNKNOWN,
+            }
 
             let defaultValue: Expression | undefined
             if (stream.isNext('PUNCTUATION', '=')) {
@@ -131,12 +139,9 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         return parameters
     }
 
-    private parseValueSet(
-        stream: TokenStream,
-        isolationLevel: IsolationLevel | UNKNOWN,
-    ): ExplicitValueSet<IsolationLevel | UNKNOWN> {
-        if (!stream.isNext('PUNCTUATION', ':')) return { isolationLevel }
+    private parseValueSet(stream: TokenStream): ExplicitValueSet | undefined {
+        if (!stream.isNext('PUNCTUATION', ':')) return undefined
         stream.expect('PUNCTUATION', ':')
-        return this.valueSetParser.parse(stream, isolationLevel)
+        return this.valueSetParser.parse(stream)
     }
 }

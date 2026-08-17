@@ -9,7 +9,9 @@ export class Parameter {
         public label: string | undefined,
         public varName: string,
         public span: SourceCodeSpan,
-        public valueSet: ExplicitValueSet<IsolationLevel | UNKNOWN>,
+        public valueSet: ExplicitValueSet & {
+            isolationLevel: IsolationLevel | UNKNOWN
+        },
         public defaultValue?: Expression,
     ) {}
 
@@ -23,7 +25,9 @@ export class Parameter {
     }: {
         label: string | undefined
         varName: string
-        valueSet: ExplicitValueSet<IsolationLevel | UNKNOWN>
+        valueSet: ExplicitValueSet & {
+            isolationLevel: IsolationLevel | UNKNOWN
+        }
         isImmutable: boolean
         defaultValue?: Expression
         span: SourceCodeSpan

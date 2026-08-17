@@ -6,7 +6,7 @@ import { TypeName } from './type-name'
 export type DataField = {
     isImmutable: boolean
     name: string
-    valueSet: ExplicitValueSet<IsolationLevel>
+    valueSet: ExplicitValueSet & { isolationLevel: IsolationLevel }
     defaultValue?: Expression
 }
 

@@ -22,12 +22,12 @@ describe('DataDeclarationParser', () => {
                 {
                     name: 'field1',
                     isImmutable: false,
-                    isolationLevel: ISOLATED,
+                    valueSet: { isolationLevel: ISOLATED },
                 },
                 {
                     name: 'field2',
                     isImmutable: false,
-                    isolationLevel: ISOLATED,
+                    valueSet: { isolationLevel: ISOLATED },
                 },
             ],
         })
@@ -50,11 +50,15 @@ describe('DataDeclarationParser', () => {
         expect(result).toMatchObject({
             name: { name: 'MyData' },
             fields: [
-                { name: 'field1', isImmutable: true, isolationLevel: SHARED },
+                {
+                    name: 'field1',
+                    isImmutable: true,
+                    valueSet: { isolationLevel: SHARED },
+                },
                 {
                     name: 'field2',
                     isImmutable: true,
-                    isolationLevel: ISOLATED,
+                    valueSet: { isolationLevel: ISOLATED },
                 },
             ],
         })

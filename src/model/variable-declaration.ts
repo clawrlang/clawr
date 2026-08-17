@@ -12,7 +12,9 @@ export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private readonly isImmutable: boolean,
         private readonly name: string,
-        private readonly valueSet: ExplicitValueSet<IsolationLevel>,
+        private readonly valueSet: ExplicitValueSet & {
+            isolationLevel: IsolationLevel
+        },
         private readonly initialValue: Expression,
     ) {}
 
@@ -24,7 +26,7 @@ export class VariableDeclaration implements Statement, Declaration {
     }: {
         isImmutable: boolean
         name: string
-        valueSet: ExplicitValueSet<IsolationLevel>
+        valueSet: ExplicitValueSet & { isolationLevel: IsolationLevel }
         initialValue: Expression
     }): VariableDeclaration {
         return new VariableDeclaration(

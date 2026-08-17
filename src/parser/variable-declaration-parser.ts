@@ -36,10 +36,10 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
         const semanticsKeyword = SemanticsKeyword[semanticsToken.keyword]
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
-        const valueSet = this.parseTypeIdentifier(
-            stream,
-            semanticsKeyword.isolationLevel,
-        )
+        const valueSet = {
+            ...(this.parseTypeIdentifier(stream) || {}),
+            isolationLevel: semanticsKeyword.isolationLevel,
+        }
         stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse(stream)
         return VariableDeclaration.create({
@@ -50,18 +50,12 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
         })
     }
 
-    private parseTypeIdentifier<IsolationLevel extends AnyIsolationLevel>(
+    private parseTypeIdentifier(
         stream: TokenStream,
-        isolationLevel: IsolationLevel,
-    ): ExplicitValueSet<IsolationLevel | ISOLATED> {
-        if (!stream.isNext('PUNCTUATION', ':')) return { isolationLevel }
+    ): ExplicitValueSet | undefined {
+        if (!stream.isNext('PUNCTUATION', ':')) return undefined
 
         stream.expect('PUNCTUATION', ':')
-        return (
-            ValueSetParser.create(this.context).parse(
-                stream,
-                isolationLevel,
-            ) ?? { isolationLevel }
-        )
+        return ValueSetParser.create(this.context).parse(stream)
     }
 }

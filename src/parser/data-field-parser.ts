@@ -23,10 +23,7 @@ export class DataFieldParser {
         const fieldName = fieldNameToken.identifier
 
         stream.expect('PUNCTUATION', ':')
-        const valueSet = ValueSetParser.create(this.context).parse(
-            stream,
-            keyword.isolationLevel,
-        )
+        const valueSet = ValueSetParser.create(this.context).parse(stream)
 
         let defaultValue: Expression | undefined
         if (stream.isNext('PUNCTUATION', '=')) {
@@ -35,9 +32,9 @@ export class DataFieldParser {
         }
 
         return {
-            ...keyword,
             name: fieldName,
-            valueSet,
+            isImmutable: keyword.isImmutable,
+            valueSet: { ...valueSet, isolationLevel: keyword.isolationLevel },
             defaultValue,
         }
     }

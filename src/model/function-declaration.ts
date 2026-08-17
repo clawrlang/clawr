@@ -13,7 +13,9 @@ export class FunctionDeclaration implements Declaration {
     private constructor(
         public baseName: string,
         public parameters: Parameter[],
-        public result: ExplicitValueSet<IsolationLevel | UNIQUE> | undefined,
+        public result:
+            | (ExplicitValueSet & { isolationLevel: IsolationLevel | UNIQUE })
+            | undefined,
         public implementation:
             | { kind: 'implicit-return'; expression: Expression }
             | { kind: 'body'; statements: Statement[] },
@@ -27,7 +29,9 @@ export class FunctionDeclaration implements Declaration {
     }: {
         baseName: string
         parameters: Parameter[]
-        result: ExplicitValueSet<IsolationLevel | UNIQUE> | undefined
+        result:
+            | (ExplicitValueSet & { isolationLevel: IsolationLevel | UNIQUE })
+            | undefined
         implementation:
             | { kind: 'implicit-return'; expression: Expression }
             | { kind: 'body'; statements: Statement[] }

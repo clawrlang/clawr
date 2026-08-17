@@ -1,7 +1,6 @@
 # Function Parameters — Semantic Model
 
 - `CallFunc` / `Query`
-- `Assignment.value` may not be an `UNKNOWN` param
 - `VariableDeclaration.initialValue` may not be an `UNKNOWN` param
 - Function return values
   - Do not `ENSURE_UNIQUE` `SHARED` return-value

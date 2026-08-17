@@ -669,6 +669,58 @@ describe('Assignment', () => {
             })
         })
     })
+    describe('throws if the value is UNKNOWN isolation level', () => {
+        for (const isolationLevel of [ISOLATED, SHARED] as const) {
+            test(isolationLevel, () => {
+                const context = newSemanticContext()
+                context.scope.rootScope.addDataDeclaration(
+                    DataDeclaration.create({
+                        name: TypeName.create({ name: 'MyType' }),
+                        fields: [],
+                    }),
+                )
+                context.scope.variables.set('target', {
+                    isImmutable: false,
+                    isolationLevel: isolationLevel,
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                    }),
+                })
+                context.scope.variables.set('value', {
+                    isImmutable: true,
+                    isolationLevel: UNKNOWN,
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                    }),
+                })
+                context.scope.setCurrentValue(
+                    'value',
+                    RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                        fields: {},
+                    }),
+                )
+
+                const assignment = Assignment.create({
+                    target: VariableReference.create({
+                        name: 'target',
+                        span: {
+                            start: { line: 1, column: 1 },
+                            end: { line: 1, column: 2 },
+                        },
+                    }),
+                    value: VariableReference.create({
+                        name: 'value',
+                        span: someCodeSpan,
+                    }),
+                    span: someCodeSpan,
+                })
+                expect(() => assignment.emitStatement(context)).toThrow(
+                    /Parameter with unspecified isolation level may not be used in assignment/,
+                )
+            })
+        }
+    })
 
     describe('updates current-value', () => {
         test('variable-reference', () => {

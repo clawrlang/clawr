@@ -3,7 +3,7 @@ import { IsolationLevel, UNIQUE, UNKNOWN } from './isolation-level'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
-import { logSemanticError } from './failable'
+import { logSemanticError, SemanticError } from './failable'
 import { Lattice, RCTypeLattice } from './lattice'
 
 export class Assignment implements Statement {
@@ -35,6 +35,13 @@ export class Assignment implements Statement {
         const targetIsolationLevel = this.target.isolationLevel(context).value()
         const assignedValue = this.value.currentValue(context).value()
 
+        const valueIsolationLevel = this.value.isolationLevel(context).value()
+        if (valueIsolationLevel === UNKNOWN)
+            throw SemanticError.create({
+                message:
+                    'Parameter with unspecified isolation level may not be used in assignment',
+                span: this.value.span,
+            })
         this.checkValidity(
             targetLattice,
             assignedValue,

@@ -1,9 +1,7 @@
 import * as cir from '../../../src/cir'
 import { describe, it, expect, test } from 'bun:test'
-import {
-    FunctionDeclaration,
-    Parameter,
-} from '../../../src/model/function-declaration'
+import { FunctionDeclaration } from '../../../src/model/function-declaration'
+import { Parameter } from '../../../src/model/parameter'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { ReturnStatement } from '../../../src/model/return-statement'

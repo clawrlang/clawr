@@ -2,10 +2,8 @@ import { describe, expect, it, test } from 'bun:test'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { Query } from '../../../src/model/query'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
-import {
-    FunctionDeclaration,
-    Parameter,
-} from '../../../src/model/function-declaration'
+import { FunctionDeclaration } from '../../../src/model/function-declaration'
+import { Parameter } from '../../../src/model/parameter'
 import { DataLiteral } from '../../../src/model/data-literal'
 import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { VariableReference } from '../../../src/model/variable-reference'

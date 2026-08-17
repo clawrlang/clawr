@@ -1,6 +1,7 @@
 import { Context, DeclarationParser } from '.'
 import { TokenStream, Token } from '../lexer'
-import { FunctionDeclaration, Parameter } from '../model/function-declaration'
+import { FunctionDeclaration } from '../model/function-declaration'
+import { Parameter } from '../model/parameter'
 import { ExplicitValueSet } from '../model/explicit-value-set'
 import { BlockParser } from './block-parser'
 import { ExpressionParser } from './expression-parser'

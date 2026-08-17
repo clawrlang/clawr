@@ -1,18 +1,13 @@
 import * as cir from '../cir'
 import { Context, Declaration, Expression, Statement } from '.'
-import {
-    AnyIsolationLevel,
-    IsolationLevel,
-    UNIQUE,
-    UNKNOWN,
-} from './isolation-level'
+import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
 import { ExplicitValueSet } from './explicit-value-set'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { Lattice } from './lattice'
-import { SourceCodeSpan } from '../diagnostics'
 import { Failable, logSemanticError } from './failable'
 import { mapFilter } from '../tools/map-filter'
+import { Parameter } from './parameter'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -144,41 +139,5 @@ export class FunctionDeclaration implements Declaration {
             ...context,
             scope: context.scope.createChildScope(),
         }
-    }
-}
-
-export class Parameter {
-    private constructor(
-        public isImmutable: boolean,
-        public label: string | undefined,
-        public varName: string,
-        public span: SourceCodeSpan,
-        public valueSet: ExplicitValueSet<IsolationLevel | UNKNOWN>,
-        public defaultValue?: Expression,
-    ) {}
-
-    static create({
-        isImmutable,
-        label,
-        varName,
-        valueSet,
-        defaultValue,
-        span,
-    }: {
-        label: string | undefined
-        varName: string
-        valueSet: ExplicitValueSet<IsolationLevel | UNKNOWN>
-        isImmutable: boolean
-        defaultValue?: Expression
-        span: SourceCodeSpan
-    }): Parameter {
-        return new Parameter(
-            isImmutable,
-            label,
-            varName,
-            span,
-            valueSet,
-            defaultValue,
-        )
     }
 }

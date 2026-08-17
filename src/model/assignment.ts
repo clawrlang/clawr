@@ -26,38 +26,17 @@ export class Assignment implements Statement {
     }
 
     emitStatement(context: Context) {
-        const targetResult = this.target.declaredValueSet(context)
-        if (targetResult.isFailure()) {
-            for (const error of targetResult.getError().errors)
-                context.errorReporter.reportError(error.message, error.span)
-        }
-        const targetLattice = targetResult.value()
-        const targetIsolationLevel = this.target.isolationLevel(context).value()
-        const assignedValue = this.value.currentValue(context).value()
-
-        const valueIsolationLevel = this.value.isolationLevel(context).value()
-        if (valueIsolationLevel === UNKNOWN)
-            throw SemanticError.create({
-                message:
-                    'Parameter with unspecified isolation level may not be used in assignment',
-                span: this.value.span,
-            })
-        this.checkValidity(
-            targetLattice,
-            assignedValue,
+        this.checkValidity(context)
+        this.emitCIRStatements(context)
+        this.target.setCurrentValue(
             context,
-            targetIsolationLevel,
+            this.value.currentValue(context).value(),
         )
-
-        this.emitCIRStatements(context, targetLattice, targetIsolationLevel)
-        this.target.setCurrentValue(context, assignedValue)
     }
 
-    private emitCIRStatements(
-        context: Context,
-        targetLattice: Lattice,
-        targetIsolationLevel: IsolationLevel | UNKNOWN,
-    ) {
+    private emitCIRStatements(context: Context) {
+        const targetLattice = this.target.declaredValueSet(context).value()
+        const targetIsolationLevel = this.target.isolationLevel(context).value()
         const prelude = this.target.assignmentPrelude(context)
         context.scope.emitted.push(...prelude)
 
@@ -125,12 +104,15 @@ export class Assignment implements Statement {
         }
     }
 
-    private checkValidity(
-        targetLattice: Lattice,
-        assignedValue: Lattice,
-        context: Context,
-        targetIsolationLevel: string,
-    ) {
+    private checkValidity(context: Context) {
+        const targetResult = this.target.declaredValueSet(context)
+        if (targetResult.isFailure()) {
+            for (const error of targetResult.getError().errors)
+                context.errorReporter.reportError(error.message, error.span)
+        }
+
+        const targetLattice = this.target.declaredValueSet(context).value()
+        const assignedValue = this.value.currentValue(context).value()
         if (!targetLattice.isSupersetTo(assignedValue))
             logSemanticError(
                 `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
@@ -141,6 +123,13 @@ export class Assignment implements Statement {
             )
         const valueIsolationLevel = this.value.isolationLevel(context).value()
         if (valueIsolationLevel === UNIQUE) return
+        if (valueIsolationLevel === UNKNOWN)
+            throw SemanticError.create({
+                message:
+                    'Parameter with unspecified isolation level may not be used in assignment',
+                span: this.value.span,
+            })
+        const targetIsolationLevel = this.target.isolationLevel(context).value()
         if (targetIsolationLevel !== valueIsolationLevel)
             logSemanticError(
                 `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,

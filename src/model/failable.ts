@@ -47,19 +47,26 @@ export class Failable<T = void> {
         return fn(this.value())
     }
 
-    static collect<T>(values: Failable<T>[]): Failable<T[]> {
-        return values.reduce(
-            (acc, value) => {
-                if (acc.isFailure()) {
-                    if (value.isFailure())
-                        acc.getError().add(...value.getError().errors)
-                    return acc
-                }
-                if (value.isFailure()) return value as any
-                return Failable.success([...acc.value(), value.value()])
-            },
-            Failable.success([]) as Failable<T[]>,
-        )
+    static collect<T extends unknown[]>(values: {
+        [K in keyof T]: Failable<T[K]>
+    }): Failable<T> {
+        const result: unknown[] = []
+        const errors: SemanticError[] = []
+
+        for (let i = 0; i < values.length; i++) {
+            const value = values[i]
+            if (value.isFailure()) {
+                errors.push(...value.getError().errors)
+            } else {
+                result.push(value.value())
+            }
+        }
+
+        if (errors.length > 0) {
+            return Failable.failure(SemanticErrorCollection.create(errors))
+        }
+
+        return Failable.success(result as T)
     }
 
     throwIfFailure() {

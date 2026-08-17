@@ -98,7 +98,7 @@ describe('Failable', () => {
                 Failable.success(3),
             ])
             expect(result.isFailure()).toBe(true)
-            expect(result.getError()).toBe(error)
+            expect(result.getError()).toEqual(error)
         })
 
         it('collects all successful values', () => {
@@ -109,6 +109,13 @@ describe('Failable', () => {
             ])
             expect(result.isSuccess()).toBe(true)
             expect(result.value()).toEqual([1, 2, 3])
+        })
+
+        it('merges list of failables', () => {
+            const result: Failable<[number, string]> = Failable.collect([
+                Failable.success(32),
+                Failable.success('hello'),
+            ])
         })
     })
 })

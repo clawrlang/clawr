@@ -3,7 +3,12 @@ import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
 import { FunctionDeclarationParser } from '../../../src/parser/function-declaration-parser'
 import { RCTypeLattice } from '../../../src/model/lattice'
-import { ISOLATED, SHARED, UNKNOWN } from '../../../src/model/isolation-level'
+import {
+    ISOLATED,
+    SHARED,
+    UNIQUE,
+    UNKNOWN,
+} from '../../../src/model/isolation-level'
 
 describe('Function Declaration Parser', () => {
     it('parses a function with no parameters and no return type', () => {
@@ -198,35 +203,21 @@ describe('Function Declaration Parser', () => {
         const code = 'func myFunction() -> MyData { return {} }'
 
         const result = parseFunction(code)
-        expect(result).toMatchObject({
-            baseName: 'myFunction',
-            parameters: [],
-            result: { lattice: { type: { name: 'MyData' } } },
-        })
-
-        expect(result.result?.lattice).toBeInstanceOf(RCTypeLattice)
+        expect(result.result).toMatchObject({ isolationLevel: UNIQUE })
     })
 
     it('parses a function with an ISOLATED return type', () => {
         const code = 'func myFunction() -> const MyData { return {} }'
 
         const result = parseFunction(code)
-        expect(result).toMatchObject({
-            baseName: 'myFunction',
-            parameters: [],
-            result: { lattice: { type: { name: 'MyData' } } },
-        })
+        expect(result.result).toMatchObject({ isolationLevel: ISOLATED })
     })
 
     it('parses a function with a SHARED return type', () => {
         const code = 'func myFunction() -> ref MyData { return {} }'
 
         const result = parseFunction(code)
-        expect(result).toMatchObject({
-            baseName: 'myFunction',
-            parameters: [],
-            result: { lattice: { type: { name: 'MyData' } } },
-        })
+        expect(result.result).toMatchObject({ isolationLevel: SHARED })
     })
 })
 

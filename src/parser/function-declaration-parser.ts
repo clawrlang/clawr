@@ -14,6 +14,7 @@ import {
 import {
     ISOLATED,
     IsolationLevel,
+    SHARED,
     UNIQUE,
     UNKNOWN,
 } from '../model/isolation-level'
@@ -39,20 +40,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         const baseName = nameToken.identifier
 
         const parameters = this.parseParameters(stream)
-
-        let result:
-            | (ExplicitValueSet & { isolationLevel: IsolationLevel | UNIQUE })
-            | undefined
-        if (stream.isNext('OPERATOR', '->')) {
-            stream.expect('OPERATOR', '->')
-            const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')
-                ? stream.expect('KEYWORD', 'ref', 'const')
-                : undefined
-            result = {
-                ...this.valueSetParser.parse(stream),
-                isolationLevel: ISOLATED,
-            }
-        }
+        const result = this.parseResultValueSet(stream)
 
         if (stream.isNext('PUNCTUATION', '=>')) {
             stream.expect('PUNCTUATION', '=>')
@@ -79,6 +67,32 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             result,
             implementation: { kind: 'body', statements },
         })
+    }
+
+    private parseResultValueSet(stream: TokenStream) {
+        if (stream.isNext('OPERATOR', '->')) {
+            stream.expect('OPERATOR', '->')
+            const isolationLevel = this.parseIsolationlevel(stream)
+            return {
+                ...this.valueSetParser.parse(stream),
+                isolationLevel,
+            }
+        }
+    }
+
+    private parseIsolationlevel(stream: TokenStream) {
+        const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')
+            ? stream.expect('KEYWORD', 'ref', 'const')
+            : undefined
+
+        switch (semanticsToken?.keyword) {
+            case 'const':
+                return ISOLATED
+            case 'ref':
+                return SHARED
+            default:
+                return UNIQUE
+        }
     }
 
     private parseParameters(stream: TokenStream) {

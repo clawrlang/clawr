@@ -1,13 +1,17 @@
 import * as cir from '../cir'
 import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
 import { Failable } from './failable'
-import { AnyIsolationLevel, IsolationLevel } from './isolation-level'
+import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
 import { Lattice } from './lattice'
 import { Scope } from './scope'
 
 export type Context = {
     scope: Scope
     errorReporter: ErrorReporter
+    calleeResult?: {
+        lattice: Lattice
+        isolationLevel: IsolationLevel | UNIQUE
+    }
 }
 
 export type ContextWithValueSet = Context & {

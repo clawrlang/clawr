@@ -1,4 +1,5 @@
 import { Context, Expression, Statement } from '.'
+import { SemanticError } from './failable'
 import { RCTypeLattice } from './lattice'
 
 export class ReturnStatement implements Statement {
@@ -10,6 +11,11 @@ export class ReturnStatement implements Statement {
 
     emitStatement(context: Context) {
         if (this.value) {
+            if (!context.calleeResult)
+                throw SemanticError.create({
+                    message: 'Called function has no return value',
+                    span: this.value.span,
+                })
             const valueLattice = this.value.currentValue(context).value()
             if (!valueLattice) {
                 throw new Error(
@@ -18,6 +24,20 @@ export class ReturnStatement implements Statement {
                     )}`,
                 )
             }
+
+            if (!context.calleeResult.lattice.isSupersetTo(valueLattice))
+                throw SemanticError.create({
+                    message: 'Return value type mismatch',
+                    span: this.value.span,
+                })
+            if (
+                context.calleeResult.isolationLevel !==
+                this.value.isolationLevel(context).value()
+            )
+                throw SemanticError.create({
+                    message: `Cannot return an ${this.value.isolationLevel(context).value()} value as ${context.calleeResult.isolationLevel}`,
+                    span: this.value.span,
+                })
 
             const object = this.value
                 .toCIRExpression({ ...context, isolationLevel: undefined })

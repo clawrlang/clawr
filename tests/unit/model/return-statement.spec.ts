@@ -2,6 +2,17 @@ import { describe, it, expect } from 'bun:test'
 import { ReturnStatement } from '../../../src/model/return-statement'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
+import { Context } from '../../../src/model'
+import {
+    IntegerLattice,
+    RCTypeLattice,
+    TruthvalueLattice,
+} from '../../../src/model/lattice'
+import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { TypeName } from '../../../src/model/type-name'
+import { DataLiteral } from '../../../src/model/data-literal'
+import { DataDeclaration } from '../../../src/model/data-declaration'
+import { VariableReference } from '../../../src/model/variable-reference'
 
 describe('ReturnStatement', () => {
     it('converts to CIR', () => {
@@ -9,12 +20,81 @@ describe('ReturnStatement', () => {
             IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
         )
 
-        const context = newSemanticContext()
+        const context: Context = {
+            ...newSemanticContext(),
+            calleeResult: {
+                lattice: IntegerLattice.unconstrained(),
+                isolationLevel: ISOLATED,
+            },
+        }
         returnStatement.emitStatement(context)
 
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'RETURN',
             value: { value: '42' },
         })
+    })
+
+    it('disallows value for void functions', () => {
+        const returnStatement = ReturnStatement.create(
+            IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
+        )
+
+        const context = newSemanticContext()
+        expect(() => returnStatement.emitStatement(context)).toThrow()
+        expect(context.scope.emitted.length).toBe(0)
+    })
+
+    it('disallows value with incompatible type', () => {
+        const returnStatement = ReturnStatement.create(
+            IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
+        )
+
+        const context: Context = {
+            ...newSemanticContext(),
+            calleeResult: {
+                lattice: TruthvalueLattice.unconstrained(),
+                isolationLevel: ISOLATED,
+            },
+        }
+        expect(() => returnStatement.emitStatement(context)).toThrow()
+        expect(context.scope.emitted.length).toBe(0)
+    })
+
+    it.only('disallows value with wrong isolation-level', () => {
+        const context = newSemanticContext()
+        context.scope.rootScope.addDataDeclaration(
+            DataDeclaration.create({
+                name: TypeName.create({ name: 'MyData' }),
+                fields: [],
+            }),
+        )
+        context.scope.variables.set('x', {
+            isImmutable: true,
+            isolationLevel: ISOLATED,
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyData' }),
+            }),
+        })
+        context.scope.setCurrentValue(
+            'x',
+            RCTypeLattice.create({ type: TypeName.create({ name: 'MyData' }) }),
+        )
+        const returnStatement = ReturnStatement.create(
+            VariableReference.create({ name: 'x', span: someCodeSpan }),
+        )
+
+        expect(() =>
+            returnStatement.emitStatement({
+                ...context,
+                calleeResult: {
+                    lattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyData' }),
+                    }),
+                    isolationLevel: SHARED,
+                },
+            }),
+        ).toThrow(/Cannot return an ISOLATED value as SHARED/)
+        expect(context.scope.emitted.length).toBe(0)
     })
 })

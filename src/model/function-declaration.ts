@@ -94,9 +94,22 @@ export class FunctionDeclaration implements Declaration {
             )
         }
 
+        const contextWithParameters = { ...context, scope: parameterScope }
         const bodyContext = this.bodyContext({
             ...context,
             scope: parameterScope,
+            calleeResult: this.result?.lattice
+                ? this.result
+                : this.implementation.kind === 'body'
+                  ? undefined
+                  : {
+                        isolationLevel: this.implementation.expression
+                            .isolationLevel(contextWithParameters)
+                            .value() as IsolationLevel,
+                        lattice: this.implementation.expression
+                            .currentValue(contextWithParameters)
+                            .value(),
+                    },
         })
 
         const body =

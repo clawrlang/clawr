@@ -1,8 +1,6 @@
 # Function Parameters — Semantic Model
 
-- `FunctionDeclaration`
 - `CallFunc` / `Query`
-- `ReturnStatement`
 - `Assignment.target` may not be an `UNKNOWN` param
 - `Assignment.value` may not be an `UNKNOWN` param nor a field on one
   - `UNKNOWN` works as `const` in `isEffectivelyConst`

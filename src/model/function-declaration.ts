@@ -8,6 +8,7 @@ import { Lattice } from './lattice'
 import { Failable, logSemanticError } from './failable'
 import { mapFilter } from '../tools/map-filter'
 import { Parameter } from './parameter'
+import { Scope } from './scope'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -70,47 +71,7 @@ export class FunctionDeclaration implements Declaration {
         })
         context.scope.rootScope.addFunctionDeclaration(name.toString(), this)
 
-        const parameterScope = context.scope.createChildScope()
-        for (const param of this.parameters) {
-            parameterScope.variables.set(param.varName, {
-                isImmutable: param.isImmutable,
-                isolationLevel: param.valueSet.isolationLevel,
-                lattice:
-                    param.defaultValue?.currentValue(context).value() ??
-                    param.valueSet?.lattice ??
-                    logSemanticError(
-                        `Parameter ${param.varName} must have either an explicit value set or a default value.`,
-                        { ...context, span: param.span, fatal: true },
-                    ),
-            })
-            parameterScope.setCurrentValue(
-                param.varName,
-                param.defaultValue?.currentValue(context).value() ??
-                    param.valueSet?.lattice ??
-                    logSemanticError(
-                        `Parameter ${param.varName} must have either a default value or an explicit value set.`,
-                        { ...context, span: param.span, fatal: true },
-                    ),
-            )
-        }
-
-        const contextWithParameters = { ...context, scope: parameterScope }
-        const bodyContext = this.bodyContext({
-            ...context,
-            scope: parameterScope,
-            calleeResult: this.result?.lattice
-                ? this.result
-                : this.implementation.kind === 'body'
-                  ? undefined
-                  : {
-                        isolationLevel: this.implementation.expression
-                            .isolationLevel(contextWithParameters)
-                            .value() as IsolationLevel,
-                        lattice: this.implementation.expression
-                            .currentValue(contextWithParameters)
-                            .value(),
-                    },
-        })
+        const bodyContext = this.makeBodyContext(context)
 
         const body =
             this.implementation.kind === 'body'
@@ -139,6 +100,56 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
+    }
+
+    private makeBodyContext(context: Context): Context {
+        const parameterScope = this.scopeAddingParameters(context)
+
+        const contextWithParameters = { ...context, scope: parameterScope }
+        const bodyContext = this.bodyContext({
+            ...context,
+            scope: parameterScope,
+            calleeResult: this.result?.lattice
+                ? this.result
+                : this.implementation.kind === 'body'
+                  ? undefined
+                  : {
+                        isolationLevel: this.implementation.expression
+                            .isolationLevel(contextWithParameters)
+                            .value() as IsolationLevel,
+                        lattice: this.implementation.expression
+                            .currentValue(contextWithParameters)
+                            .value(),
+                    },
+        })
+        return bodyContext
+    }
+
+    private scopeAddingParameters(context: Context): Scope {
+        const parameterScope = context.scope.createChildScope()
+        for (const param of this.parameters) {
+            parameterScope.variables.set(param.varName, {
+                isImmutable: param.isImmutable,
+                isolationLevel: param.valueSet.isolationLevel,
+                lattice:
+                    param.defaultValue?.currentValue(context).value() ??
+                    param.valueSet?.lattice ??
+                    logSemanticError(
+                        `Parameter ${param.varName} must have either an explicit value set or a default value.`,
+                        { ...context, span: param.span, fatal: true },
+                    ),
+            })
+            parameterScope.setCurrentValue(
+                param.varName,
+                param.defaultValue?.currentValue(context).value() ??
+                    param.valueSet?.lattice ??
+                    logSemanticError(
+                        `Parameter ${param.varName} must have either a default value or an explicit value set.`,
+                        { ...context, span: param.span, fatal: true },
+                    ),
+            )
+        }
+        return parameterScope
     }
 
     private resultSet(context: Context): cir.ValueSet | undefined {

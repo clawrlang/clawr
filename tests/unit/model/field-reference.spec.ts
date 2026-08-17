@@ -5,7 +5,7 @@ import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { TypeName } from '../../../src/model/type-name'
 import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
-import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { ISOLATED, SHARED, UNKNOWN } from '../../../src/model/isolation-level'
 
 describe('Field Reference', () => {
     it('infers its type from the context', () => {
@@ -357,11 +357,50 @@ describe('Field Reference', () => {
             })
         }
 
-        it('returns true if the object is immutable', () => {
+        it('returns true if the object is ISOLATED immutable', () => {
             const context = newSemanticContext()
             context.scope.variables.set('myVar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
+                }),
+            })
+            context.scope.rootScope.addDataDeclaration(
+                DataDeclaration.create({
+                    name: TypeName.create({ name: 'MyType' }),
+                    fields: [
+                        {
+                            isImmutable: false,
+                            name: 'myField',
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
+                                span: someCodeSpan,
+                            },
+                        },
+                    ],
+                }),
+            )
+
+            const fieldRef = FieldReference.create({
+                object: VariableReference.create({
+                    name: 'myVar',
+                    span: someCodeSpan,
+                }),
+                operator: '.',
+                field: 'myField',
+                span: someCodeSpan,
+                fieldSpan: someCodeSpan,
+            })
+            expect(fieldRef.isEffectivelyConst(context).value()).toBe(true)
+        })
+
+        it('returns true if the object is UNKNOWN immutable', () => {
+            const context = newSemanticContext()
+            context.scope.variables.set('myVar', {
+                isImmutable: true,
+                isolationLevel: UNKNOWN,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),

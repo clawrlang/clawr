@@ -2,8 +2,6 @@
 
 - `CallFunc` / `Query`
 - `Assignment.value` may not be an `UNKNOWN` param
-- `Assignment.target` may not be an `UNKNOWN` param nor a `mut` field on one
-  - `UNKNOWN` works as `const` in `isEffectivelyConst`
 - `VariableDeclaration.initialValue` may not be an `UNKNOWN` param
 - Function return values
   - Do not `ENSURE_UNIQUE` `SHARED` return-value

@@ -9,7 +9,12 @@ import { FunctionDeclaration } from '../../../src/model/function-declaration'
 import { Query } from '../../../src/model/query'
 import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
-import { ISOLATED, SHARED, UNIQUE } from '../../../src/model/isolation-level'
+import {
+    ISOLATED,
+    SHARED,
+    UNIQUE,
+    UNKNOWN,
+} from '../../../src/model/isolation-level'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -465,7 +470,7 @@ describe('Assignment', () => {
         }
     })
 
-    it('throws if the target field is effectively const', () => {
+    it('throws if the target field is effectively const (ISOLATED)', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
@@ -486,6 +491,68 @@ describe('Assignment', () => {
         context.scope.variables.set('x', {
             isImmutable: true,
             isolationLevel: ISOLATED,
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyType' }),
+            }),
+        })
+        context.scope.setCurrentValue(
+            'x',
+            RCTypeLattice.create({ type: TypeName.create({ name: 'MyType' }) }),
+        )
+
+        const assignment = Assignment.create({
+            target: FieldReference.create({
+                object: VariableReference.create({
+                    name: 'x',
+                    span: someCodeSpan,
+                }),
+                operator: '.',
+                field: 'myField',
+                span: {
+                    start: { line: 1, column: 3 },
+                    end: { line: 1, column: 4 },
+                },
+                fieldSpan: someCodeSpan,
+            }),
+            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
+            span: someCodeSpan,
+        })
+        expect(() => assignment.emitStatement(context)).not.toThrow()
+        expect(context.errorReporter).toMatchObject({
+            errors: [
+                {
+                    message:
+                        'Cannot mutate field myField of a reference type object',
+                    location: {
+                        start: { line: 1, column: 3 },
+                        end: { line: 1, column: 4 },
+                    },
+                },
+            ],
+        })
+    })
+
+    it('throws if the target field is effectively const (UNKNOWN isolation level)', () => {
+        const context = newSemanticContext()
+        context.scope.rootScope.addDataDeclaration(
+            DataDeclaration.create({
+                name: TypeName.create({ name: 'MyType' }),
+                fields: [
+                    {
+                        name: 'myField',
+                        isImmutable: false,
+                        valueSet: {
+                            isolationLevel: ISOLATED,
+                            lattice: IntegerLattice.unconstrained(),
+                            span: someCodeSpan,
+                        },
+                    },
+                ],
+            }),
+        )
+        context.scope.variables.set('x', {
+            isImmutable: true,
+            isolationLevel: UNKNOWN,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
@@ -560,7 +627,7 @@ describe('Assignment', () => {
                     }),
                 })
                 context.scope.variables.set('value', {
-                    isImmutable: isImmutable,
+                    isImmutable,
                     isolationLevel: SHARED,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),

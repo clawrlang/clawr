@@ -16,6 +16,7 @@
         {
             "kind": "FUNCTION_DECL",
             "baseName": "f",
+            "labels": [],
             "parameters": [],
             "body": [
                 {

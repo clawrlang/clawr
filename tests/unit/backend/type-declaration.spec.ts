@@ -59,6 +59,7 @@ describe('Type declaration', () => {
                 {
                     kind: 'FUNCTION_DECL',
                     baseName: 'myMethod',
+                    labels: [],
                     parameters: [],
                     body: [],
                 },
@@ -79,6 +80,7 @@ describe('Type declaration', () => {
                 {
                     kind: 'FUNCTION_DECL',
                     baseName: 'myMethod',
+                    labels: [],
                     parameters: [],
                     body: [],
                 },
@@ -96,6 +98,7 @@ describe('Type declaration', () => {
             kind: 'FUNCTION_DECL',
             namespace: 'MyType',
             baseName: 'myCompanionMethod',
+            labels: [],
             parameters: [],
             body: [],
         }
@@ -113,6 +116,7 @@ describe('Type declaration', () => {
                 {
                     kind: 'FUNCTION_DECL',
                     baseName: 'f',
+                    labels: [],
                     parameters: [],
                     body: [],
                     resultValueSet: { type: 'integer' },
@@ -122,6 +126,7 @@ describe('Type declaration', () => {
                 {
                     slot: {
                         baseName: 'f',
+                        labels: [],
                         parameters: [],
                         resultValueSet: { type: 'integer' },
                     },
@@ -151,9 +156,9 @@ describe('Type declaration', () => {
                 {
                     slot: {
                         baseName: 'f',
+                        labels: ['label'],
                         parameters: [
                             {
-                                label: 'label',
                                 varName: 'v',
                                 valueSet: { type: 'integer' },
                             },
@@ -185,6 +190,7 @@ describe('Type declaration', () => {
                 {
                     kind: 'FUNCTION_DECL',
                     baseName: 'f',
+                    labels: [],
                     parameters: [],
                     body: [],
                     resultValueSet: { type: 'integer' },
@@ -192,7 +198,7 @@ describe('Type declaration', () => {
             ],
             dispatchTable: [
                 {
-                    slot: { baseName: 'f', parameters: [] },
+                    slot: { baseName: 'f', labels: [], parameters: [] },
                     declaredIn: { name: 'Super' },
                     implementedBy: { name: 'Sub' },
                 },
@@ -214,9 +220,9 @@ describe('Type declaration', () => {
                 {
                     kind: 'FUNCTION_DECL',
                     baseName: 'init',
+                    labels: ['field'],
                     parameters: [
                         {
-                            label: 'field',
                             varName: 'field',
                             valueSet: {
                                 type: 'integer',

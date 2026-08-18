@@ -402,12 +402,12 @@
                 "items": { "$ref": "#/$defs/Statement" }
               },
               "baseName": { "type": "string" },
+              "labels": { "type": "array", "items": { "type": "string" } },
               "parameters": {
                 "type": "array",
                 "items": {
                   "type": "object",
                   "properties": {
-                    "label": { "type": "string" },
                     "varName": { "type": "string" },
                     "valueSet": { "$ref": "#/$defs/ValueSet" }
                   },
@@ -426,7 +426,7 @@
               },
               "namespace": { "type": "string" }
             },
-            "required": ["kind", "body", "baseName", "parameters"],
+            "required": ["kind", "body", "baseName", "labels", "parameters"],
             "additionalProperties": false
           },
           "__type__type__type": {
@@ -484,12 +484,12 @@
                 "items": { "$ref": "#/$defs/Statement" }
               },
               "baseName": { "type": "string" },
+              "labels": { "type": "array", "items": { "type": "string" } },
               "parameters": {
                 "type": "array",
                 "items": {
                   "type": "object",
                   "properties": {
-                    "label": { "type": "string" },
                     "varName": { "type": "string" },
                     "valueSet": { "$ref": "#/$defs/ValueSet" }
                   },
@@ -507,7 +507,7 @@
                 ]
               }
             },
-            "required": ["kind", "body", "baseName", "parameters"],
+            "required": ["kind", "body", "baseName", "labels", "parameters"],
             "additionalProperties": false
           },
           "OmitFunctionDeclarationresultValueSet": {
@@ -519,12 +519,12 @@
                 "items": { "$ref": "#/$defs/Statement" }
               },
               "baseName": { "type": "string" },
+              "labels": { "type": "array", "items": { "type": "string" } },
               "parameters": {
                 "type": "array",
                 "items": {
                   "type": "object",
                   "properties": {
-                    "label": { "type": "string" },
                     "varName": { "type": "string" },
                     "valueSet": { "$ref": "#/$defs/ValueSet" }
                   },
@@ -533,19 +533,19 @@
                 }
               }
             },
-            "required": ["kind", "body", "baseName", "parameters"],
+            "required": ["kind", "body", "baseName", "labels", "parameters"],
             "additionalProperties": false
           },
           "FunctionSignature": {
             "type": "object",
             "properties": {
               "baseName": { "type": "string" },
+              "labels": { "type": "array", "items": { "type": "string" } },
               "parameters": {
                 "type": "array",
                 "items": {
                   "type": "object",
                   "properties": {
-                    "label": { "type": "string" },
                     "varName": { "type": "string" },
                     "valueSet": { "$ref": "#/$defs/ValueSet" }
                   },
@@ -563,7 +563,7 @@
                 ]
               }
             },
-            "required": ["baseName", "parameters"],
+            "required": ["baseName", "labels", "parameters"],
             "additionalProperties": false
           }
         }

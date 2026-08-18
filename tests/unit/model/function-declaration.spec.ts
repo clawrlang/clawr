@@ -46,9 +46,9 @@ describe('FunctionDeclaration', () => {
         expect(decl).toMatchObject({
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
+            labels: ['param1'],
             parameters: [
                 {
-                    label: 'param1',
                     varName: 'x',
                     valueSet: { type: 'string' },
                 },

@@ -91,8 +91,8 @@ export class FunctionDeclaration implements Declaration {
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
             baseName: this.baseName,
+            labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
-                label: param.label,
                 varName: param.varName,
                 valueSet: param.valueSet!.lattice!.toCIR(),
             })),

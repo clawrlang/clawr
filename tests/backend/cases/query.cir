@@ -4,9 +4,11 @@
         {
             "kind": "FUNCTION_DECL",
             "baseName": "f",
+            "labels": [
+                "l"
+            ],
             "parameters": [
                 {
-                    "label": "l",
                     "varName": "var",
                     "valueSet": {
                         "type": "integer"

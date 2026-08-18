@@ -22,8 +22,8 @@ type FunctionDeclaration = {
 
 type FunctionSignature = {
     baseName: string
+    labels: string[]
     parameters: {
-        label?: string
         varName: string
         valueSet: ValueSet
     }[]

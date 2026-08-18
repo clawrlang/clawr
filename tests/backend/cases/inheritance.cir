@@ -18,6 +18,7 @@
                 {
                     "kind": "FUNCTION_DECL",
                     "baseName": "f",
+                    "labels": [],
                     "parameters": [],
                     "resultValueSet": {
                         "type": "integer",
@@ -43,10 +44,12 @@
                 {
                     "kind": "FUNCTION_DECL",
                     "baseName": "init",
+                    "labels": [
+                        "field"
+                    ],
                     "parameters": [
                         {
                             "varName": "field",
-                            "label": "field",
                             "valueSet": {
                                 "type": "integer",
                                 "min": "0",
@@ -85,6 +88,7 @@
                 {
                     "slot": {
                         "baseName": "f",
+                        "labels": [],
                         "parameters": [],
                         "resultValueSet": {
                             "type": "integer",
@@ -121,6 +125,7 @@
                 {
                     "kind": "FUNCTION_DECL",
                     "baseName": "f",
+                    "labels": [],
                     "parameters": [],
                     "resultValueSet": {
                         "type": "integer",
@@ -146,6 +151,7 @@
                 {
                     "slot": {
                         "baseName": "f",
+                        "labels": [],
                         "parameters": [],
                         "resultValueSet": {
                             "type": "integer",
@@ -174,6 +180,7 @@
                 {
                     "slot": {
                         "baseName": "f",
+                        "labels": [],
                         "parameters": [],
                         "resultValueSet": {
                             "type": "integer",
@@ -194,6 +201,7 @@
             "kind": "FUNCTION_DECL",
             "namespace": "Sub1",
             "baseName": "new",
+            "labels": [],
             "parameters": [],
             "body": [
                 {
@@ -265,6 +273,7 @@
             "kind": "FUNCTION_DECL",
             "namespace": "Sub2",
             "baseName": "new",
+            "labels": [],
             "parameters": [],
             "body": [
                 {

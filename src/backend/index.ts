@@ -1,6 +1,7 @@
 import * as cir from '../cir'
 import { mapFilter } from '../tools/map-filter'
 import { validateCIR } from './generated/validate-cir.typia'
+import { TypeName } from '../model/type-name'
 
 export function lower(cir: cir.ClawrModule): string {
     const result = validateCIR(cir)
@@ -387,17 +388,20 @@ export function lowerTruthvalueLiteral(
 }
 
 function mangleNameWithParameters(
-    decl: {
-        namespace?: string
-        baseName: string
-        parameters: { label?: string }[]
-    },
+    decl: FunctionSignature | (FunctionSignature & { namespace?: string }),
     receiver?: { name: string; namespace?: string },
 ): string {
-    return mangleNameWithLabels(
-        { ...decl, labels: mapFilter(decl.parameters, (p) => p.label) },
-        receiver,
-    )
+    return mangleNameWithLabels(decl, receiver)
+}
+
+type FunctionSignature = {
+    baseName: string
+    labels: string[]
+    parameters: {
+        varName: string
+        valueSet: cir.ValueSet
+    }[]
+    resultValueSet?: cir.ValueSet
 }
 
 function mangleNameWithLabels(

@@ -18,6 +18,7 @@
                 {
                     "kind": "FUNCTION_DECL",
                     "baseName": "field",
+                    "labels": [],
                     "parameters": [],
                     "resultValueSet": {
                         "type": "integer",
@@ -44,6 +45,7 @@
             "kind": "FUNCTION_DECL",
             "namespace": "Object",
             "baseName": "new",
+            "labels": [],
             "parameters": [],
             "body": [
                 {

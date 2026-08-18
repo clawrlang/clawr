@@ -1,0 +1,28 @@
+
+data Inner {
+    field: integer(0..<100)
+}
+
+data Outer {
+    field1: integer(0..<100)
+    ref inner: Inner
+}
+
+@main {
+    ref a: Outer = { field1: 42, inner: { field: 47 } }
+    ref b = a
+
+    const c = copy(of: a)
+    mut d = c
+
+    b->field1 = 0 // changes a
+    d.field1 = 1 // only chsnges d
+
+    print(a->field1)
+    print(c.field1)
+
+//    ref e = c.field2
+//    b->field2->field = 3
+//
+//    print(e->field)
+}

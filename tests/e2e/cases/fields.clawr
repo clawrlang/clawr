@@ -21,8 +21,8 @@ data Outer {
     print(a->field1)
     print(c.field1)
 
-//    ref e = c.field2
-//    b->field2->field = 3
-//
-//    print(e->field)
+    ref e = c.inner
+    b->inner->field = 3
+
+    print(e->field)
 }

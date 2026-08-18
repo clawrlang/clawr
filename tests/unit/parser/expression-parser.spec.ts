@@ -7,7 +7,6 @@ import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { FieldReference } from '../../../src/model/field-reference'
 import { Expression } from '../../../src/model'
-import { CallFunc } from '../../../src/model/call-func'
 import { Query } from '../../../src/model/query'
 
 describe('Expression Parser', () => {
@@ -66,11 +65,11 @@ describe('Expression Parser', () => {
     })
 
     it('parses field lookup expressions', () => {
-        const input = 'myVar->field'
+        const input = 'myVar->field1->field2'
         const fieldAccess = parseExpression(input)
         expect(fieldAccess).toMatchObject({
-            object: { name: 'myVar' },
-            field: 'field',
+            object: { object: { name: 'myVar' }, field: 'field1' },
+            field: 'field2',
         })
         expect(fieldAccess).toBeInstanceOf(FieldReference)
     })

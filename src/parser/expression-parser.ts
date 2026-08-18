@@ -31,7 +31,7 @@ export class ExpressionParser {
                 'Unary negation is so far only supported for integer literals',
             )
         }
-        const expression = this.parsePrimaryExpression(stream)
+        let expression = this.parsePrimaryExpression(stream)
 
         if (stream.isNext('PUNCTUATION', '(')) {
             if (!(expression instanceof VariableReference)) {
@@ -53,17 +53,18 @@ export class ExpressionParser {
             })
         }
 
-        if (!stream.isNext('OPERATOR', '.', '->')) return expression
-
-        const operator = stream.expect('OPERATOR', '.', '->').operator
-        const fieldToken = stream.expect('IDENTIFIER')
-        return FieldReference.create({
-            object: expression,
-            operator,
-            field: fieldToken.identifier,
-            span: { start: expression.span.start, end: fieldToken.end },
-            fieldSpan: { start: fieldToken.start, end: fieldToken.end },
-        })
+        while (stream.isNext('OPERATOR', '.', '->')) {
+            const operator = stream.expect('OPERATOR', '.', '->').operator
+            const fieldToken = stream.expect('IDENTIFIER')
+            expression = FieldReference.create({
+                object: expression,
+                operator,
+                field: fieldToken.identifier,
+                span: { start: expression.span.start, end: fieldToken.end },
+                fieldSpan: { start: fieldToken.start, end: fieldToken.end },
+            })
+        }
+        return expression
     }
 
     private parsePrimaryExpression(stream: TokenStream): Expression {

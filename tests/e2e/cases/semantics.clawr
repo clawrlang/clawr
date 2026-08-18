@@ -1,0 +1,47 @@
+
+data EmptyData {}
+data MyData {
+    mut field1: integer(0..<100)
+    mutref field2: EmptyData
+}
+
+ref a: MyData = { field1: 42, field2: {} }
+const b = copy(of: a)
+
+func getShared() -> ref MyData => a
+func getIsolated() -> const MyData => b
+// func getUnique() -> MyData => b // not possible/allowed?
+
+func modify(ref _ x: MyData) {
+    x->field1 = 10
+}
+func read(const _ x: MyData) {
+
+}
+func with(_ x: MyData) {} // either
+
+@main {
+
+    const c = a->field1 // incorrectly retained
+    const d = b.field1 // incorrectly retained
+
+    ref e = a->field2
+    ref f = b.field2
+
+    ref g = copy(of: getIsolated())
+    const h = getIsolated()
+
+    with(a)
+    with(b)
+    with(getShared())
+    with(getIsolated())
+    modify(a)
+    modify(copy(of: b)) // still suspicious
+    modify(getShared())
+    modify(getIsolated()) // not allowed - semantic mismatch
+
+    read(copy(of: a))
+    read(b)
+    read(copy(of: getShared()))
+    read(getIsolated())
+}

@@ -37,10 +37,6 @@ export class TruthValueLiteral implements Expression {
         return Failable.success({
             kind: 'TRUTHVALUE_LITERAL',
             value: this.value,
-            valueSet: {
-                type: 'truthvalue',
-                values: [this.value],
-            },
         })
     }
 

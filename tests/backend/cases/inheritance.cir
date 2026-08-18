@@ -340,11 +340,7 @@
                     "baseName": "new",
                     "labels": []
                 },
-                "arguments": [],
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "Sub1"
-                }
+                "arguments": []
             }
         },
         {
@@ -361,11 +357,7 @@
                     "baseName": "new",
                     "labels": []
                 },
-                "arguments": [],
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "Sub2"
-                }
+                "arguments": []
             }
         },
         {
@@ -391,12 +383,7 @@
                         "baseName": "f",
                         "labels": []
                     },
-                    "arguments": [],
-                    "valueSet": {
-                        "type": "integer",
-                        "min": "0",
-                        "max": "100"
-                    }
+                    "arguments": []
                 }
             ]
         },
@@ -423,12 +410,7 @@
                         "baseName": "f",
                         "labels": []
                     },
-                    "arguments": [],
-                    "valueSet": {
-                        "type": "integer",
-                        "min": "0",
-                        "max": "100"
-                    }
+                    "arguments": []
                 }
             ]
         }

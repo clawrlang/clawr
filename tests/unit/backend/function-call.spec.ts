@@ -1,6 +1,6 @@
-import { describe, expect, it, test } from 'bun:test'
-import { Expression, ClawrModule, Statement } from '../../../src/cir'
-import { lower, lowerExpr, lowerStmt } from '../../../src/backend'
+import { describe, expect, test } from 'bun:test'
+import { Expression, Statement } from '../../../src/cir'
+import { lowerExpr, lowerStmt } from '../../../src/backend'
 
 describe('Function Calls', () => {
     describe('includes parameter labels in the function name', () => {
@@ -21,7 +21,6 @@ describe('Function Calls', () => {
                         value: 'Hello',
                     },
                 ],
-                valueSet: { type: 'truthvalue', values: [] },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myFunction˛param1˛param2(42, "Hello")')
@@ -68,7 +67,6 @@ describe('Function Calls', () => {
                         value: 'Hello',
                     },
                 ],
-                valueSet: { type: 'truthvalue', values: [] },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myFunction˛param1(42, "Hello")')
@@ -106,7 +104,6 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                valueSet: { type: 'truthvalue', values: [] },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('noParamFunction()')
@@ -136,7 +133,6 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                valueSet: { type: 'truthvalue', values: [] },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myNamespace¸myFunction()')
@@ -174,7 +170,6 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                valueSet: { type: 'truthvalue', values: [] },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('Object·myMethod(myObject)')
@@ -222,7 +217,6 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                valueSet: { type: 'truthvalue', values: [] },
             }
             const result = lowerExpr(expr)
             expect(result).toBe(
@@ -274,7 +268,6 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                valueSet: { type: 'truthvalue', values: [] },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('ns¸Object·myMethod(myObject)')

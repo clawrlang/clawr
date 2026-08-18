@@ -50,12 +50,7 @@
                             "kind": "INTEGER_LITERAL",
                             "value": "1"
                         }
-                    ],
-                    "valueSet": {
-                        "type": "integer",
-                        "max": "42",
-                        "min": "42"
-                    }
+                    ]
                 }
             ]
         }

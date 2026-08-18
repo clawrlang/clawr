@@ -464,7 +464,6 @@ describe('FunctionDeclaration', () => {
                 value: {
                     kind: 'VARIABLE_REF',
                     name: 'x',
-                    valueSet: { type: 'string' },
                 },
             },
         ])

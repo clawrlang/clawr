@@ -371,10 +371,6 @@ describe('Assignment', () => {
                             labels: [],
                         },
                         arguments: [],
-                        valueSet: {
-                            type: 'rc-type',
-                            typeName: 'MyType',
-                        },
                     },
                 },
             },

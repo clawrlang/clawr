@@ -140,10 +140,6 @@ describe('Query', () => {
                     labels: [],
                 },
                 arguments: [],
-                valueSet: {
-                    type: 'rc-type',
-                    typeName: 'MyData',
-                },
             })
         })
 
@@ -188,10 +184,6 @@ describe('Query', () => {
                         name: 'value',
                     },
                 ],
-                valueSet: {
-                    type: 'rc-type',
-                    typeName: 'MyData',
-                },
             })
         })
     })

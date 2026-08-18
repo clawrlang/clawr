@@ -72,11 +72,7 @@
                         "baseName": "f",
                         "labels": []
                     },
-                    "arguments": [],
-                    "valueSet": {
-                        "type": "rc-type",
-                        "typeName": "MyData"
-                    }
+                    "arguments": []
                 }
             }
         },

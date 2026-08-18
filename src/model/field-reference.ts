@@ -95,17 +95,17 @@ export class FieldReference implements Expression {
 
     toCIRExpression(
         context: Context,
-    ): Failable<Extract<cir.Expression, { kind: 'FIELD_REF' }>> {
-        return this.checkOperatorCompatibility(context).chaining((_) =>
+    ): Failable<cir.Expression & { kind: 'FIELD_REF' }> {
+        return Failable.collect([
+            this.getFieldFromContext(context),
+            this.checkOperatorCompatibility(context),
+        ]).chaining((_) =>
             this.object.toCIRExpression(context).chaining((object) =>
-                this.getFieldFromContext(context).chaining((field) =>
-                    Failable.success({
-                        kind: 'FIELD_REF',
-                        object,
-                        field: this.field,
-                        valueSet: field.valueSet.lattice!.toCIR(),
-                    }),
-                ),
+                Failable.success({
+                    kind: 'FIELD_REF',
+                    object,
+                    field: this.field,
+                } satisfies cir.Expression),
             ),
         )
     }

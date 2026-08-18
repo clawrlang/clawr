@@ -87,11 +87,7 @@
                     "baseName": "new",
                     "labels": []
                 },
-                "arguments": [],
-                "valueSet": {
-                    "type": "rc-type",
-                    "typeName": "Object"
-                }
+                "arguments": []
             }
         },
         {
@@ -117,12 +113,7 @@
                         "baseName": "field",
                         "labels": []
                     },
-                    "arguments": [],
-                    "valueSet": {
-                        "type": "integer",
-                        "min": "42",
-                        "max": "42"
-                    }
+                    "arguments": []
                 }
             ]
         }

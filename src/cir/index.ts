@@ -154,7 +154,7 @@ type MemoryRetention = {
 
 type AsShared = {
     kind: 'AS_SHARED'
-    object: QueryFunctionCall
+    object: FunctionCall
 }
 
 type VariableReference = {
@@ -168,8 +168,6 @@ type FieldReference = {
     field: string
 }
 
-type QueryFunctionCall = FunctionCall & { valueSet: ValueSet }
-
 export type Expression =
     | StringLiteral
     | IntegerLiteral
@@ -179,7 +177,7 @@ export type Expression =
     | AsShared
     | VariableReference
     | FieldReference
-    | QueryFunctionCall
+    | FunctionCall
 
 // ----------
 // Value Sets

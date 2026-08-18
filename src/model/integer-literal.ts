@@ -45,11 +45,6 @@ export class IntegerLiteral implements Expression {
         return Failable.success({
             kind: 'INTEGER_LITERAL',
             value: this.value.toString(),
-            valueSet: {
-                type: 'integer',
-                min: this.value.toString(),
-                max: this.value.toString(),
-            },
         })
     }
 

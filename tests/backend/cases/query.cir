@@ -9,7 +9,7 @@
             ],
             "parameters": [
                 {
-                    "varName": "var",
+                    "name": "var",
                     "valueSet": {
                         "type": "integer"
                     }

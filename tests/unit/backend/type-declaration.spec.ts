@@ -159,7 +159,7 @@ describe('Type declaration', () => {
                         labels: ['label'],
                         parameters: [
                             {
-                                varName: 'v',
+                                name: 'v',
                                 valueSet: { type: 'integer' },
                             },
                         ],
@@ -223,7 +223,7 @@ describe('Type declaration', () => {
                     labels: ['field'],
                     parameters: [
                         {
-                            varName: 'field',
+                            name: 'field',
                             valueSet: {
                                 type: 'integer',
                                 min: '0',

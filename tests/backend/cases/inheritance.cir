@@ -49,7 +49,7 @@
                     ],
                     "parameters": [
                         {
-                            "varName": "field",
+                            "name": "field",
                             "valueSet": {
                                 "type": "integer",
                                 "min": "0",

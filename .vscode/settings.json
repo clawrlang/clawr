@@ -408,10 +408,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "varName": { "type": "string" },
+                    "name": { "type": "string" },
                     "valueSet": { "$ref": "#/$defs/ValueSet" }
                   },
-                  "required": ["varName", "valueSet"],
+                  "required": ["name", "valueSet"],
                   "additionalProperties": false
                 }
               },
@@ -490,10 +490,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "varName": { "type": "string" },
+                    "name": { "type": "string" },
                     "valueSet": { "$ref": "#/$defs/ValueSet" }
                   },
-                  "required": ["varName", "valueSet"],
+                  "required": ["name", "valueSet"],
                   "additionalProperties": false
                 }
               },
@@ -525,10 +525,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "varName": { "type": "string" },
+                    "name": { "type": "string" },
                     "valueSet": { "$ref": "#/$defs/ValueSet" }
                   },
-                  "required": ["varName", "valueSet"],
+                  "required": ["name", "valueSet"],
                   "additionalProperties": false
                 }
               }
@@ -546,10 +546,10 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "varName": { "type": "string" },
+                    "name": { "type": "string" },
                     "valueSet": { "$ref": "#/$defs/ValueSet" }
                   },
-                  "required": ["varName", "valueSet"],
+                  "required": ["name", "valueSet"],
                   "additionalProperties": false
                 }
               },

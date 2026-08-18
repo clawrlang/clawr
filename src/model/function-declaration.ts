@@ -93,7 +93,7 @@ export class FunctionDeclaration implements Declaration {
             baseName: this.baseName,
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
-                varName: param.varName,
+                name: param.varName,
                 valueSet: param.valueSet!.lattice!.toCIR(),
             })),
             resultValueSet,

@@ -119,7 +119,7 @@ function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
 
     const params = [
         {
-            varName: 'self',
+            name: 'self',
             valueSet: {
                 type: 'rc-type',
                 typeName: 'void',
@@ -131,7 +131,7 @@ function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
     const mangledName = mangleNameWithParameters(slot, declaredIn)
 
     const paramDecls = params
-        .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
+        .map((param) => `${lowerType(param.valueSet)} ${param.name}`)
         .join(', ')
     return `typedef ${returnType} (*${mangledName}ˇmethod)(${paramDecls});`
 }
@@ -146,7 +146,7 @@ function lowerMethod(
             ...decl,
             parameters: [
                 {
-                    varName: 'self',
+                    name: 'self',
                     valueSet: {
                         type: 'rc-type',
                         namespace: receiverType.namespace,
@@ -174,7 +174,7 @@ function lowerInitializer(
             },
             parameters: [
                 {
-                    varName: 'self',
+                    name: 'self',
                     valueSet: {
                         type: 'rc-type',
                         namespace: receiverType.namespace,
@@ -204,7 +204,7 @@ function lowerFunction(
     mangledName: string,
 ) {
     const params = decl.parameters
-        .map((param) => `${lowerType(param.valueSet)} ${param.varName}`)
+        .map((param) => `${lowerType(param.valueSet)} ${param.name}`)
         .join(', ')
     const returnType = decl.resultValueSet
         ? lowerType(decl.resultValueSet)
@@ -398,7 +398,7 @@ type FunctionSignature = {
     baseName: string
     labels: string[]
     parameters: {
-        varName: string
+        name: string
         valueSet: cir.ValueSet
     }[]
     resultValueSet?: cir.ValueSet

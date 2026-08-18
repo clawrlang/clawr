@@ -24,7 +24,7 @@ type FunctionSignature = {
     baseName: string
     labels: string[]
     parameters: {
-        varName: string
+        name: string
         valueSet: ValueSet
     }[]
     resultValueSet?: ValueSet

@@ -2,7 +2,7 @@ import { Context, Declaration, Expression, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { ExplicitValueSet } from './explicit-value-set'
-import { Lattice } from './lattice'
+import { Lattice, RCTypeLattice } from './lattice'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
@@ -77,8 +77,9 @@ export class VariableDeclaration implements Statement, Declaration {
             name: this.name,
             valueSet: lattice.toCIR(),
             initialValue:
-                initialValue.kind === 'VARIABLE_REF' ||
-                initialValue.kind === 'FIELD_REF'
+                lattice instanceof RCTypeLattice &&
+                (initialValue.kind === 'VARIABLE_REF' ||
+                    initialValue.kind === 'FIELD_REF')
                     ? {
                           kind: 'RETAIN' as const,
                           object: initialValue,

@@ -315,6 +315,76 @@ describe('VariableDeclaration', () => {
                 },
             })
         })
+
+        test('but not for non-RC fields', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.addDataDeclaration(
+                DataDeclaration.create({
+                    name: TypeName.create({ name: 'MyType' }),
+                    fields: [
+                        {
+                            name: 'field',
+                            isImmutable: false,
+                            valueSet: {
+                                isolationLevel: ISOLATED,
+                                lattice: IntegerLattice.unconstrained(),
+                                span: someCodeSpan,
+                            },
+                        },
+                    ],
+                }),
+            )
+            context.scope.variables.set('bar', {
+                isImmutable: true,
+                isolationLevel: ISOLATED,
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
+                }),
+            })
+            context.scope.setCurrentValue(
+                'bar',
+                RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
+                    fields: {
+                        field: IntegerLattice.create({
+                            min: 42n,
+                            max: 42n,
+                        }),
+                    },
+                }),
+            )
+
+            const decl = VariableDeclaration.create({
+                isImmutable: false,
+                name: 'foo',
+                valueSet: {
+                    isolationLevel: ISOLATED,
+                    lattice: IntegerLattice.unconstrained(),
+                    span: someCodeSpan,
+                },
+                initialValue: FieldReference.create({
+                    object: VariableReference.create({
+                        name: 'bar',
+                        span: someCodeSpan,
+                    }),
+                    field: 'field',
+                    operator: '.',
+                    span: someCodeSpan,
+                    fieldSpan: someCodeSpan,
+                }),
+            })
+            decl.emitStatement(context)
+            expect(context.scope.emitted[0]).toMatchObject({
+                initialValue: {
+                    kind: 'FIELD_REF',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'bar',
+                    },
+                    field: 'field',
+                },
+            })
+        })
     })
 
     describe('registers its value in the context', () => {

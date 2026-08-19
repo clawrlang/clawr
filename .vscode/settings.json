@@ -301,8 +301,8 @@
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
-              "min": { "type": "string" },
-              "max": { "type": "string" }
+              "min": { "type": "string", "pattern": "^-?\\d+$" },
+              "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
             "required": ["type"],
             "additionalProperties": false

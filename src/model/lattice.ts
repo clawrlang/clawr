@@ -50,8 +50,8 @@ export class IntegerLattice implements Lattice {
     toCIR(): cir.ValueSet {
         return {
             type: 'integer',
-            min: this.min?.toString(),
-            max: this.max?.toString(),
+            min: this.min?.toString() as `${bigint}`,
+            max: this.max?.toString() as `${bigint}`,
         }
     }
 

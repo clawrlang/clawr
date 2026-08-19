@@ -1,3 +1,5 @@
+import { tags } from 'typia'
+
 export type ClawrModule = {
     $schema: 'http://clawr.lang/schema/cir/DRAFT-0'
     startBlock?: Statement[]
@@ -185,8 +187,8 @@ export type Expression =
 
 type IntegerValueSet = {
     type: 'integer'
-    min?: string
-    max?: string
+    min?: `${bigint}` & tags.Pattern<'^-?\\d+$'>
+    max?: `${bigint}` & tags.Pattern<'^-?\\d+$'>
 }
 
 type RealValueSet = {

@@ -1,12 +1,22 @@
 import { Context, Expression, Statement } from '.'
+import { SourceCodeSpan } from '../diagnostics'
 import { SemanticError } from './failable'
 import { RCTypeLattice } from './lattice'
 
 export class ReturnStatement implements Statement {
-    private constructor(public value: Expression | undefined) {}
+    private constructor(
+        public readonly value: Expression | undefined,
+        public readonly span: SourceCodeSpan,
+    ) {}
 
-    static create(value: Expression | undefined): ReturnStatement {
-        return new ReturnStatement(value)
+    static create({
+        value,
+        span,
+    }: {
+        value?: Expression
+        span: SourceCodeSpan
+    }): ReturnStatement {
+        return new ReturnStatement(value, span)
     }
 
     emitStatement(context: Context) {
@@ -77,6 +87,12 @@ export class ReturnStatement implements Statement {
                 })
             }
         } else {
+            if (context.calleeResult)
+                throw SemanticError.create({
+                    message: `Must return a ${context.calleeResult.lattice.toString()} value`,
+                    span: this.span,
+                })
+
             context.scope.releaseVariables()
             context.scope.emitted.push({
                 kind: 'RETURN',

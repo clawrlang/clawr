@@ -76,7 +76,12 @@ export class FunctionDeclaration implements Declaration {
         const body =
             this.implementation.kind === 'body'
                 ? this.implementation.statements
-                : [ReturnStatement.create(this.implementation.expression)]
+                : [
+                      ReturnStatement.create({
+                          value: this.implementation.expression,
+                          span: undefined as any,
+                      }),
+                  ]
 
         for (const stmt of body) stmt.emitStatement(bodyContext)
 

@@ -16,10 +16,18 @@ export class ReturnStatementParser implements StatementParser<ReturnStatement> {
     }
 
     parse(stream: TokenStream) {
-        stream.expect('KEYWORD', 'return')
-        return stream.isNext('NEWLINE') || stream.isNext('PUNCTUATION', '}')
-            ? ReturnStatement.create(undefined)
-            : ReturnStatement.create(this.parseExpression(stream))
+        const keywordToken = stream.expect('KEYWORD', 'return')
+        if (stream.isNext('NEWLINE') || stream.isNext('PUNCTUATION', '}'))
+            return ReturnStatement.create({
+                span: { start: keywordToken.start, end: keywordToken.end },
+            })
+        else {
+            const value = this.parseExpression(stream)
+            return ReturnStatement.create({
+                value,
+                span: { start: keywordToken.start, end: value.span.end },
+            })
+        }
     }
 
     private parseExpression(stream: TokenStream) {

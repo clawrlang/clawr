@@ -103,12 +103,13 @@ describe('FunctionDeclaration', () => {
             implementation: {
                 kind: 'body',
                 statements: [
-                    ReturnStatement.create(
-                        IntegerLiteral.create({
+                    ReturnStatement.create({
+                        value: IntegerLiteral.create({
                             value: 42n,
                             span: someCodeSpan,
                         }),
-                    ),
+                        span: someCodeSpan,
+                    }),
                 ],
             },
         })
@@ -594,12 +595,13 @@ describe('FunctionDeclaration', () => {
                                 span: someCodeSpan,
                             }),
                         }),
-                        ReturnStatement.create(
-                            IntegerLiteral.create({
+                        ReturnStatement.create({
+                            value: IntegerLiteral.create({
                                 value: 42n,
                                 span: someCodeSpan,
                             }),
-                        ),
+                            span: someCodeSpan,
+                        }),
                     ],
                 },
             })
@@ -658,12 +660,13 @@ describe('FunctionDeclaration', () => {
                                 span: someCodeSpan,
                             }),
                         }),
-                        ReturnStatement.create(
-                            VariableReference.create({
+                        ReturnStatement.create({
+                            value: VariableReference.create({
                                 name: 'myVar',
                                 span: someCodeSpan,
                             }),
-                        ),
+                            span: someCodeSpan,
+                        }),
                     ],
                 },
             })

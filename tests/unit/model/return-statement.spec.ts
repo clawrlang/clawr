@@ -10,15 +10,15 @@ import {
 } from '../../../src/model/lattice'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 import { TypeName } from '../../../src/model/type-name'
-import { DataLiteral } from '../../../src/model/data-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableReference } from '../../../src/model/variable-reference'
 
 describe('ReturnStatement', () => {
     it('converts to CIR', () => {
-        const returnStatement = ReturnStatement.create(
-            IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-        )
+        const returnStatement = ReturnStatement.create({
+            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
+            span: someCodeSpan,
+        })
 
         const context: Context = {
             ...newSemanticContext(),
@@ -36,9 +36,10 @@ describe('ReturnStatement', () => {
     })
 
     it('disallows value for void functions', () => {
-        const returnStatement = ReturnStatement.create(
-            IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-        )
+        const returnStatement = ReturnStatement.create({
+            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
+            span: someCodeSpan,
+        })
 
         const context = newSemanticContext()
         expect(() => returnStatement.emitStatement(context)).toThrow()
@@ -46,9 +47,10 @@ describe('ReturnStatement', () => {
     })
 
     it('disallows value with incompatible type', () => {
-        const returnStatement = ReturnStatement.create(
-            IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-        )
+        const returnStatement = ReturnStatement.create({
+            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
+            span: someCodeSpan,
+        })
 
         const context: Context = {
             ...newSemanticContext(),
@@ -61,7 +63,7 @@ describe('ReturnStatement', () => {
         expect(context.scope.emitted.length).toBe(0)
     })
 
-    it.only('disallows value with wrong isolation-level', () => {
+    it('disallows value with wrong isolation-level', () => {
         const context = newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
@@ -80,9 +82,10 @@ describe('ReturnStatement', () => {
             'x',
             RCTypeLattice.create({ type: TypeName.create({ name: 'MyData' }) }),
         )
-        const returnStatement = ReturnStatement.create(
-            VariableReference.create({ name: 'x', span: someCodeSpan }),
-        )
+        const returnStatement = ReturnStatement.create({
+            value: VariableReference.create({ name: 'x', span: someCodeSpan }),
+            span: someCodeSpan,
+        })
 
         expect(() =>
             returnStatement.emitStatement({

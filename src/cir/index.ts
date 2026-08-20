@@ -132,7 +132,7 @@ type StringLiteral = {
 
 type IntegerLiteral = {
     kind: 'INTEGER_LITERAL'
-    value: string
+    value: `${bigint}` & tags.Pattern<'^-?\\d+$'>
 }
 
 type TruthLiteral = {

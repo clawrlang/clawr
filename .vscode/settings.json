@@ -164,7 +164,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "INTEGER_LITERAL" },
-              "value": { "type": "string" }
+              "value": { "type": "string", "pattern": "^-?\\d+$" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false

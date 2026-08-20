@@ -44,7 +44,7 @@ export class IntegerLiteral implements Expression {
     toCIRExpression(_: Context): Failable<cir.Expression> {
         return Failable.success({
             kind: 'INTEGER_LITERAL',
-            value: this.value.toString(),
+            value: this.value.toString() as `${bigint}`,
         })
     }
 

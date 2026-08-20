@@ -355,7 +355,7 @@ describe('FunctionDeclaration', () => {
                 baseName: 'myFunction',
                 resultValueSet: {
                     type: 'rc-type',
-                    typeName: 'MyData',
+                    name: 'MyData',
                 },
             })
         })
@@ -403,7 +403,7 @@ describe('FunctionDeclaration', () => {
                 baseName: 'myFunction',
                 resultValueSet: {
                     type: 'rc-type',
-                    typeName: 'MyData',
+                    name: 'MyData',
                 },
             })
         })

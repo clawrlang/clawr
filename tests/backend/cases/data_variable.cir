@@ -2,7 +2,7 @@
     "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
     "declarations": [
         {
-            "kind": "TYPE_DECL",
+            "kind": "RC_TYPE_DECL",
             "name": "FooData",
             "fields": [
                 {
@@ -18,7 +18,7 @@
             "name": "foo",
             "valueSet": {
                 "type": "rc-type",
-                "typeName": "FooData"
+                "name": "FooData"
             },
             "initialValue": {
                 "kind": "ALLOCATION",

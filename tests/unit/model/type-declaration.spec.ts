@@ -34,7 +34,7 @@ describe('DataDeclaration', () => {
         dataDecl.emitDeclaration(context)
         expect(context.scope.rootScope.emitted).toEqual([
             {
-                kind: 'TYPE_DECL',
+                kind: 'RC_TYPE_DECL',
                 name: 'MyData',
                 fields: [
                     {

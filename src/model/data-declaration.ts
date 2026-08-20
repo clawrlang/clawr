@@ -29,7 +29,7 @@ export class DataDeclaration implements Declaration {
     emitDeclaration(context: Context) {
         context.scope.rootScope.addDataDeclaration(this)
         context.scope.rootScope.emitted.push({
-            kind: 'TYPE_DECL',
+            kind: 'RC_TYPE_DECL',
             name: this.name.name,
             namespace: this.name.namespace,
             fields: this.fields.map((field) => ({

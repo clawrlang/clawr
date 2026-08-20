@@ -84,7 +84,7 @@ describe('Module', () => {
             startBlock: [],
             declarations: [
                 {
-                    kind: 'TYPE_DECL',
+                    kind: 'RC_TYPE_DECL',
                     name: 'MyData',
                 },
             ],

@@ -175,7 +175,7 @@ export class RCTypeLattice implements Lattice {
     toCIR(): cir.ValueSet {
         return {
             type: 'rc-type',
-            typeName: this.type.name,
+            name: this.type.name,
             namespace: this.type.namespace,
         }
     }

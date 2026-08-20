@@ -2,7 +2,7 @@
     "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
     "declarations": [
         {
-            "kind": "TYPE_DECL",
+            "kind": "RC_TYPE_DECL",
             "name": "Object",
             "fields": [
                 {
@@ -70,7 +70,7 @@
             ],
             "resultValueSet": {
                 "type": "rc-type",
-                "typeName": "Object"
+                "name": "Object"
             }
         }
     ],
@@ -80,7 +80,7 @@
             "name": "obj",
             "valueSet": {
                 "type": "rc-type",
-                "typeName": "Object"
+                "name": "Object"
             },
             "initialValue": {
                 "kind": "CALL",

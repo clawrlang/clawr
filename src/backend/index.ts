@@ -27,7 +27,7 @@ export function lower(cir: cir.ClawrModule): string {
 
 export function lowerDecl(decl: cir.Declaration): string {
     switch (decl.kind) {
-        case 'TYPE_DECL': {
+        case 'RC_TYPE_DECL': {
             const mangledTypeName = mangleTypeName(decl)
             const fields = decl.fields
                 .map((field) => `${lowerType(field.valueSet)} ${field.name};`)
@@ -122,7 +122,7 @@ function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
             name: 'self',
             valueSet: {
                 type: 'rc-type',
-                typeName: 'void',
+                name: 'void',
             } satisfies cir.ValueSet,
         },
         ...slot.parameters,
@@ -138,7 +138,7 @@ function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
 
 function lowerMethod(
     decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
-    receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
+    receiverType: cir.Declaration & { kind: 'RC_TYPE_DECL' },
 ): string {
     const mangledFunctionName = mangleNameWithParameters(decl, receiverType)
     return lowerFunction(
@@ -150,7 +150,7 @@ function lowerMethod(
                     valueSet: {
                         type: 'rc-type',
                         namespace: receiverType.namespace,
-                        typeName: receiverType.name,
+                        name: receiverType.name,
                     },
                 },
                 ...decl.parameters,
@@ -162,7 +162,7 @@ function lowerMethod(
 
 function lowerInitializer(
     decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
-    receiverType: cir.Declaration & { kind: 'TYPE_DECL' },
+    receiverType: cir.Declaration & { kind: 'RC_TYPE_DECL' },
 ): string {
     const mangledFunctionName = mangleNameWithParameters(decl, receiverType)
     return lowerFunction(
@@ -170,7 +170,7 @@ function lowerInitializer(
             ...decl,
             resultValueSet: {
                 type: 'rc-type',
-                typeName: 'void',
+                name: 'void',
             },
             parameters: [
                 {
@@ -178,7 +178,7 @@ function lowerInitializer(
                     valueSet: {
                         type: 'rc-type',
                         namespace: receiverType.namespace,
-                        typeName: receiverType.name,
+                        name: receiverType.name,
                     },
                 },
                 ...decl.parameters,
@@ -230,7 +230,7 @@ function lowerType(valueSet: cir.ValueSet): string {
         case 'truthvalue':
             return 'truthvalue_t'
         case 'rc-type':
-            return `${valueSet.typeName}*`
+            return `${valueSet.name}*`
         default:
             throw new Error(`Unknown value set type: ${(valueSet as any).type}`)
     }
@@ -436,7 +436,7 @@ function mangleTypeName({
 type DispatchSlot = NonNullable<
     Extract<
         cir.Declaration & {
-            kind: 'TYPE_DECL'
+            kind: 'RC_TYPE_DECL'
         },
         { dispatchTable?: any }
     >['dispatchTable']

@@ -133,7 +133,7 @@ describe('Assignment', () => {
                     name: '__tempˇ0',
                     valueSet: {
                         type: 'rc-type',
-                        typeName: 'InnerType',
+                        name: 'InnerType',
                     },
                     initialValue: {
                         kind: 'VARIABLE_REF',
@@ -211,7 +211,7 @@ describe('Assignment', () => {
                     name: '__tempˇ0',
                     valueSet: {
                         type: 'rc-type',
-                        typeName: 'MyType',
+                        name: 'MyType',
                     },
                     initialValue: {
                         kind: 'VARIABLE_REF',

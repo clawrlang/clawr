@@ -2,7 +2,7 @@
     "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
     "declarations": [
         {
-            "kind": "TYPE_DECL",
+            "kind": "RC_TYPE_DECL",
             "name": "MyData",
             "fields": [
                 {
@@ -24,7 +24,7 @@
                     "name": "var",
                     "valueSet": {
                         "type": "rc-type",
-                        "typeName": "MyData"
+                        "name": "MyData"
                     },
                     "initialValue": {
                         "kind": "ALLOCATION",
@@ -53,7 +53,7 @@
             ],
             "resultValueSet": {
                 "type": "rc-type",
-                "typeName": "MyData"
+                "name": "MyData"
             }
         }
     ],
@@ -63,7 +63,7 @@
             "name": "var",
             "valueSet": {
                 "type": "rc-type",
-                "typeName": "MyData"
+                "name": "MyData"
             },
             "initialValue": {
                 "kind": "AS_SHARED",

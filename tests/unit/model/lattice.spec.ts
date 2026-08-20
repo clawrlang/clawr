@@ -84,7 +84,7 @@ describe('Lattice', () => {
 
             expect(lattice.toCIR()).toEqual({
                 type: 'rc-type',
-                typeName: 'MyType',
+                name: 'MyType',
             })
         })
     })

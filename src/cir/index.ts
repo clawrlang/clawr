@@ -32,9 +32,9 @@ type FunctionSignature = {
     resultValueSet?: ValueSet
 }
 
-type TypeDeclaration = {
+type RCTypeDeclaration = {
     // `data` only supports these
-    kind: 'TYPE_DECL'
+    kind: 'RC_TYPE_DECL'
     name: string
     fields: {
         name: string
@@ -44,7 +44,9 @@ type TypeDeclaration = {
     | {
           base?: CanonicalName
           methods: FunctionDeclaration[]
-          initializers?: Omit<FunctionDeclaration, 'resultValueSet'>[]
+          initializers?: (FunctionDeclaration & {
+              resultValueSet?: undefined
+          })[]
           dispatchTable?: {
               slot: FunctionSignature
               declaredIn: CanonicalName
@@ -57,7 +59,7 @@ type TypeDeclaration = {
 export type CanonicalName = { name: string; namespace?: string }
 
 export type Declaration = { namespace?: string } & (
-    VariableDeclaration | FunctionDeclaration | TypeDeclaration
+    VariableDeclaration | FunctionDeclaration | RCTypeDeclaration
 )
 
 // ----------
@@ -204,10 +206,10 @@ type TruthValueSet = {
 
 type StringValueSet = { type: 'string' }
 
-type RcTypeValueSet = {
+type RCTypeValueSet = {
     type: 'rc-type'
     namespace?: string
-    typeName: string
+    name: string
 }
 
 export type ValueSet =
@@ -215,6 +217,6 @@ export type ValueSet =
     | RealValueSet
     | TruthValueSet
     | StringValueSet
-    | RcTypeValueSet
+    | RCTypeValueSet
 
 type IsolationLevel = 'ISOLATED' | 'SHARED'

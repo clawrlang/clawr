@@ -8,7 +8,7 @@ describe('Type declaration', () => {
     describe('fields', () => {
         it('adds fields to the type struct', () => {
             const typeDecl: cir.Declaration = {
-                kind: 'TYPE_DECL',
+                kind: 'RC_TYPE_DECL',
                 name: 'MyData',
                 fields: [
                     {
@@ -28,7 +28,7 @@ describe('Type declaration', () => {
 
         it('adds super fields to inherited types', () => {
             const typeDecl: cir.Declaration = {
-                kind: 'TYPE_DECL',
+                kind: 'RC_TYPE_DECL',
                 name: 'Sub',
                 base: { name: 'Super' },
                 fields: [
@@ -52,7 +52,7 @@ describe('Type declaration', () => {
 
     it('adds methods as functions with mangled names', () => {
         const typeDecl: cir.Declaration = {
-            kind: 'TYPE_DECL',
+            kind: 'RC_TYPE_DECL',
             name: 'MyType',
             fields: [],
             methods: [
@@ -72,7 +72,7 @@ describe('Type declaration', () => {
 
     it('includes namespace in mangled method names', () => {
         const typeDecl: cir.Declaration = {
-            kind: 'TYPE_DECL',
+            kind: 'RC_TYPE_DECL',
             namespace: 'my_namespace',
             name: 'MyType',
             fields: [],
@@ -109,7 +109,7 @@ describe('Type declaration', () => {
 
     it('declares vtable for polymorphic methods', () => {
         const typeDecl: cir.Declaration = {
-            kind: 'TYPE_DECL',
+            kind: 'RC_TYPE_DECL',
             name: 'MyType',
             fields: [],
             methods: [
@@ -148,7 +148,7 @@ describe('Type declaration', () => {
 
     it('adds labels to vtable method names', () => {
         const typeDecl: cir.Declaration = {
-            kind: 'TYPE_DECL',
+            kind: 'RC_TYPE_DECL',
             name: 'MyType',
             fields: [],
             methods: [],
@@ -182,7 +182,7 @@ describe('Type declaration', () => {
 
     it('adds vtable for subtypes', () => {
         const typeDecl: cir.Declaration = {
-            kind: 'TYPE_DECL',
+            kind: 'RC_TYPE_DECL',
             name: 'Sub',
             base: { name: 'Super' },
             fields: [],
@@ -212,7 +212,7 @@ describe('Type declaration', () => {
 
     it('adds initializers', () => {
         const typeDecl: cir.Declaration = {
-            kind: 'TYPE_DECL',
+            kind: 'RC_TYPE_DECL',
             name: 'Super',
             fields: [],
             methods: [],

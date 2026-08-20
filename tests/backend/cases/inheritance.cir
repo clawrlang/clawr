@@ -2,7 +2,7 @@
     "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
     "declarations": [
         {
-            "kind": "TYPE_DECL",
+            "kind": "RC_TYPE_DECL",
             "name": "Super",
             "fields": [
                 {
@@ -106,7 +106,7 @@
             ]
         },
         {
-            "kind": "TYPE_DECL",
+            "kind": "RC_TYPE_DECL",
             "name": "Sub1",
             "base": {
                 "name": "Super"
@@ -169,7 +169,7 @@
             ]
         },
         {
-            "kind": "TYPE_DECL",
+            "kind": "RC_TYPE_DECL",
             "name": "Sub2",
             "base": {
                 "name": "Super"
@@ -228,7 +228,7 @@
                     },
                     "valueSet": {
                         "type": "rc-type",
-                        "typeName": "void"
+                        "name": "void"
                     }
                 },
                 {
@@ -266,7 +266,7 @@
             ],
             "resultValueSet": {
                 "type": "rc-type",
-                "typeName": "Sub1"
+                "name": "Sub1"
             }
         },
         {
@@ -292,7 +292,7 @@
                     },
                     "valueSet": {
                         "type": "rc-type",
-                        "typeName": "void"
+                        "name": "void"
                     }
                 },
                 {
@@ -330,7 +330,7 @@
             ],
             "resultValueSet": {
                 "type": "rc-type",
-                "typeName": "Sub2"
+                "name": "Sub2"
             }
         }
     ],
@@ -340,7 +340,7 @@
             "name": "obj1",
             "valueSet": {
                 "type": "rc-type",
-                "typeName": "Sub1"
+                "name": "Sub1"
             },
             "initialValue": {
                 "kind": "CALL",
@@ -357,7 +357,7 @@
             "name": "obj2",
             "valueSet": {
                 "type": "rc-type",
-                "typeName": "Sub2"
+                "name": "Sub2"
             },
             "initialValue": {
                 "kind": "CALL",

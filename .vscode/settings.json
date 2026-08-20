@@ -291,7 +291,7 @@
           "ValueSet": {
             "oneOf": [
               { "$ref": "#/$defs/IntegerValueSet" },
-              { "$ref": "#/$defs/RcTypeValueSet" },
+              { "$ref": "#/$defs/RCTypeValueSet" },
               { "$ref": "#/$defs/RealValueSet" },
               { "$ref": "#/$defs/StringValueSet" },
               { "$ref": "#/$defs/TruthValueSet" }
@@ -307,14 +307,14 @@
             "required": ["type"],
             "additionalProperties": false
           },
-          "RcTypeValueSet": {
+          "RCTypeValueSet": {
             "type": "object",
             "properties": {
               "type": { "const": "rc-type" },
               "namespace": { "type": "string" },
-              "typeName": { "type": "string" }
+              "name": { "type": "string" }
             },
-            "required": ["type", "typeName"],
+            "required": ["type", "name"],
             "additionalProperties": false
           },
           "RealValueSet": {
@@ -375,7 +375,7 @@
             "type": "object",
             "properties": {
               "namespace": { "type": "string" },
-              "kind": { "const": "TYPE_DECL" },
+              "kind": { "const": "RC_TYPE_DECL" },
               "name": { "type": "string" },
               "fields": {
                 "type": "array",
@@ -418,7 +418,7 @@
               "resultValueSet": {
                 "oneOf": [
                   { "$ref": "#/$defs/IntegerValueSet" },
-                  { "$ref": "#/$defs/RcTypeValueSet" },
+                  { "$ref": "#/$defs/RCTypeValueSet" },
                   { "$ref": "#/$defs/RealValueSet" },
                   { "$ref": "#/$defs/StringValueSet" },
                   { "$ref": "#/$defs/TruthValueSet" }
@@ -433,7 +433,7 @@
             "type": "object",
             "properties": {
               "namespace": { "type": "string" },
-              "kind": { "const": "TYPE_DECL" },
+              "kind": { "const": "RC_TYPE_DECL" },
               "name": { "type": "string" },
               "fields": {
                 "type": "array",
@@ -454,9 +454,7 @@
               },
               "initializers": {
                 "type": "array",
-                "items": {
-                  "$ref": "#/$defs/OmitFunctionDeclarationresultValueSet"
-                }
+                "items": { "$ref": "#/$defs/__typeFunctionSignature__type" }
               },
               "dispatchTable": {
                 "type": "array",
@@ -500,7 +498,7 @@
               "resultValueSet": {
                 "oneOf": [
                   { "$ref": "#/$defs/IntegerValueSet" },
-                  { "$ref": "#/$defs/RcTypeValueSet" },
+                  { "$ref": "#/$defs/RCTypeValueSet" },
                   { "$ref": "#/$defs/RealValueSet" },
                   { "$ref": "#/$defs/StringValueSet" },
                   { "$ref": "#/$defs/TruthValueSet" }
@@ -510,7 +508,7 @@
             "required": ["kind", "body", "baseName", "labels", "parameters"],
             "additionalProperties": false
           },
-          "OmitFunctionDeclarationresultValueSet": {
+          "__typeFunctionSignature__type": {
             "type": "object",
             "properties": {
               "kind": { "const": "FUNCTION_DECL" },
@@ -556,7 +554,7 @@
               "resultValueSet": {
                 "oneOf": [
                   { "$ref": "#/$defs/IntegerValueSet" },
-                  { "$ref": "#/$defs/RcTypeValueSet" },
+                  { "$ref": "#/$defs/RCTypeValueSet" },
                   { "$ref": "#/$defs/RealValueSet" },
                   { "$ref": "#/$defs/StringValueSet" },
                   { "$ref": "#/$defs/TruthValueSet" }

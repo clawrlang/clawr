@@ -63,14 +63,14 @@ export class FieldReference implements Expression {
 
     isolationLevel(context: Context): Failable<IsolationLevel> {
         const field = this.getFieldFromContext(context).value()
-        return field.valueSet.lattice instanceof RCTypeLattice
-            ? Failable.success(field.valueSet.isolationLevel ?? ISOLATED)
+        return field.lattice instanceof RCTypeLattice
+            ? Failable.success(field.isolationLevel ?? ISOLATED)
             : Failable.success(ISOLATED)
     }
 
-    declaredValueSet(context: Context): Failable<Lattice> {
+    declaredLattice(context: Context): Failable<Lattice> {
         return this.getFieldFromContext(context).chaining((field) =>
-            Failable.success(field.valueSet.lattice!),
+            Failable.success(field.lattice!),
         )
     }
 
@@ -113,7 +113,7 @@ export class FieldReference implements Expression {
     private getFieldFromContext(
         context: Context,
     ): Failable<DataDeclaration['fields'][number]> {
-        const objectValue = this.object.declaredValueSet(context).value()
+        const objectValue = this.object.declaredLattice(context).value()
         if (!(objectValue instanceof RCTypeLattice))
             return Failable.failure('unknown object value', this.span)
         const type = context.scope.dataDeclaration(objectValue.type)

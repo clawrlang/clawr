@@ -1,5 +1,5 @@
 import * as cir from '../cir'
-import { ContextWithValueSet, Context, Expression } from '.'
+import { ContextWithLattice, Context, Expression } from '.'
 import { UNIQUE } from './isolation-level'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
@@ -31,7 +31,7 @@ export class DataLiteral implements Expression {
         return Failable.success(UNIQUE)
     }
 
-    currentValue(context: ContextWithValueSet): Failable<Lattice> {
+    currentValue(context: ContextWithLattice): Failable<Lattice> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
             return Failable.failure(
@@ -56,7 +56,7 @@ export class DataLiteral implements Expression {
                     )
                 return field.value.currentValue({
                     ...context,
-                    explicitLattice: fieldDeclaration.valueSet.lattice,
+                    explicitLattice: fieldDeclaration.lattice,
                 })
             }),
         ).chaining((fieldValues) =>
@@ -74,27 +74,24 @@ export class DataLiteral implements Expression {
         )
     }
 
-    declaredValueSet(context: Context & { type: TypeName }): Failable<Lattice> {
+    declaredLattice(context: Context & { type: TypeName }): Failable<Lattice> {
         const decl = context.scope.dataDeclaration(context.type)
         if (!decl)
             return Failable.failure(
-                `DataLiteral.declaredValueSet: type ${context.type.name} not found in scope`,
+                `DataLiteral.declaredLattice: type ${context.type.name} not found in scope`,
                 this.span,
             )
         return Failable.success(
             RCTypeLattice.create({
                 type: decl.name,
                 fields: Object.fromEntries(
-                    decl.fields.map((field) => [
-                        field.name,
-                        field.valueSet.lattice!,
-                    ]),
+                    decl.fields.map((field) => [field.name, field.lattice]),
                 ),
             }),
         )
     }
 
-    toCIRExpression(context: ContextWithValueSet): Failable<cir.Expression> {
+    toCIRExpression(context: ContextWithLattice): Failable<cir.Expression> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
             return Failable.failure(
@@ -127,10 +124,10 @@ export class DataLiteral implements Expression {
                     `DataLiteral.toCIRExpression: field ${field.name} not found on type ${explicitLattice.type.name}`,
                     this.span,
                 )
-            const nestedContext: ContextWithValueSet = {
+            const nestedContext: ContextWithLattice = {
                 ...context,
-                explicitLattice: fieldDeclaration.valueSet.lattice,
-                isolationLevel: fieldDeclaration.valueSet.isolationLevel,
+                explicitLattice: fieldDeclaration.lattice,
+                isolationLevel: fieldDeclaration.isolationLevel,
             }
             return field.value
                 .toCIRExpression(nestedContext)

@@ -1,33 +1,32 @@
 import { Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { ExplicitValueSet } from './explicit-value-set'
+import { LatticeDeclaration } from './lattice-declaration'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 
 export class Parameter {
     private constructor(
-        public isImmutable: boolean,
-        public label: string | undefined,
-        public varName: string,
-        public span: SourceCodeSpan,
-        public valueSet: ExplicitValueSet & {
-            isolationLevel: IsolationLevel | UNKNOWN
-        },
-        public defaultValue?: Expression,
+        public readonly isImmutable: boolean,
+        public readonly label: string | undefined,
+        public readonly varName: string,
+        public readonly span: SourceCodeSpan,
+        public readonly isolationLevel: IsolationLevel | UNKNOWN,
+        public readonly lattice: LatticeDeclaration | undefined,
+        public readonly defaultValue?: Expression,
     ) {}
 
     static create({
         isImmutable,
         label,
         varName,
-        valueSet,
+        isolationLevel,
+        lattice,
         defaultValue,
         span,
     }: {
         label: string | undefined
         varName: string
-        valueSet: ExplicitValueSet & {
-            isolationLevel: IsolationLevel | UNKNOWN
-        }
+        isolationLevel: IsolationLevel | UNKNOWN
+        lattice?: LatticeDeclaration
         isImmutable: boolean
         defaultValue?: Expression
         span: SourceCodeSpan
@@ -37,7 +36,8 @@ export class Parameter {
             label,
             varName,
             span,
-            valueSet,
+            isolationLevel,
+            lattice,
             defaultValue,
         )
     }

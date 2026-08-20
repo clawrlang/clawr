@@ -6,7 +6,7 @@ import { Context } from '../../../src/model'
 import {
     IntegerLattice,
     RCTypeLattice,
-    TruthvalueLattice,
+    Truthlattice,
 } from '../../../src/model/lattice'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 import { TypeName } from '../../../src/model/type-name'
@@ -55,7 +55,7 @@ describe('ReturnStatement', () => {
         const context: Context = {
             ...newSemanticContext(),
             calleeResult: {
-                lattice: TruthvalueLattice.unconstrained(),
+                lattice: Truthlattice.unconstrained(),
                 isolationLevel: ISOLATED,
             },
         }

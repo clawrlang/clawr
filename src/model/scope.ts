@@ -97,8 +97,8 @@ export class Scope {
         return undefined
     }
 
-    setCurrentValue(name: string, valueSet: Lattice) {
-        this.currentValues.set(name, valueSet)
+    setCurrentValue(name: string, lattice: Lattice) {
+        this.currentValues.set(name, lattice)
     }
 }
 

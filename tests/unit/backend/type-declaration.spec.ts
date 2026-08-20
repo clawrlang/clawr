@@ -13,7 +13,7 @@ describe('Type declaration', () => {
                 fields: [
                     {
                         name: 'field',
-                        valueSet: {
+                        lattice: {
                             type: 'integer',
                             min: '0',
                             max: '100',
@@ -34,7 +34,7 @@ describe('Type declaration', () => {
                 fields: [
                     {
                         name: 'field',
-                        valueSet: {
+                        lattice: {
                             type: 'integer',
                             min: '0',
                             max: '100',
@@ -119,7 +119,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    resultValueSet: { type: 'integer' },
+                    lattice: { type: 'integer' },
                 },
             ],
             dispatchTable: [
@@ -128,7 +128,7 @@ describe('Type declaration', () => {
                         baseName: 'f',
                         labels: [],
                         parameters: [],
-                        resultValueSet: { type: 'integer' },
+                        lattice: { type: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
                     implementedBy: { name: 'MyType' },
@@ -160,10 +160,10 @@ describe('Type declaration', () => {
                         parameters: [
                             {
                                 name: 'v',
-                                valueSet: { type: 'integer' },
+                                lattice: { type: 'integer' },
                             },
                         ],
-                        resultValueSet: { type: 'integer' },
+                        lattice: { type: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
                     implementedBy: { name: 'MyType' },
@@ -193,7 +193,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    resultValueSet: { type: 'integer' },
+                    lattice: { type: 'integer' },
                 },
             ],
             dispatchTable: [
@@ -224,7 +224,7 @@ describe('Type declaration', () => {
                     parameters: [
                         {
                             name: 'field',
-                            valueSet: {
+                            lattice: {
                                 type: 'integer',
                                 min: '0',
                                 max: '100',

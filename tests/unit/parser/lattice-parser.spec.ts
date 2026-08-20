@@ -3,18 +3,17 @@ import {
     IntegerLattice,
     RCTypeLattice,
     StringLattice,
-    TruthvalueLattice,
+    Truthlattice,
 } from '../../../src/model/lattice'
 import { TokenStream } from '../../../src/lexer'
-import { ValueSetParser } from '../../../src/parser/value-set-parser'
+import { LatticeParser } from '../../../src/parser/lattice-parser'
 import { TestErrorReporter } from '../../util'
-import { ISOLATED } from '../../../src/model/isolation-level'
 
-describe('ValueSetParser', () => {
+describe('LatticeParser', () => {
     it('parses unconstrained integer type', () => {
-        const valueSet = parseValueSet('integer')
-        expect(valueSet.lattice).toBeInstanceOf(IntegerLattice)
-        expect(valueSet).toMatchObject({
+        const lattice = parseLattice('integer')
+        expect(lattice).toBeInstanceOf(IntegerLattice)
+        expect(lattice).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 8 },
@@ -23,10 +22,10 @@ describe('ValueSetParser', () => {
     })
 
     it('parses integer type with min constraint only', () => {
-        const valueSet = parseValueSet('integer(1...)')
-        expect(valueSet.lattice).toBeInstanceOf(IntegerLattice)
-        expect(valueSet).toMatchObject({
-            lattice: { min: 1n },
+        const lattice = parseLattice('integer(1...)')
+        expect(lattice).toBeInstanceOf(IntegerLattice)
+        expect(lattice).toMatchObject({
+            min: 1n,
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 14 },
@@ -35,10 +34,10 @@ describe('ValueSetParser', () => {
     })
 
     it('parses integer type with (exclusive) max constraint only', () => {
-        const valueSet = parseValueSet('integer(..<10)')
-        expect(valueSet.lattice).toBeInstanceOf(IntegerLattice)
-        expect(valueSet).toMatchObject({
-            lattice: { max: 9n },
+        const lattice = parseLattice('integer(..<10)')
+        expect(lattice).toBeInstanceOf(IntegerLattice)
+        expect(lattice).toMatchObject({
+            max: 9n,
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 15 },
@@ -47,10 +46,10 @@ describe('ValueSetParser', () => {
     })
 
     it('parses integer type with (inclusive) max constraint only', () => {
-        const valueSet = parseValueSet('integer(...10)')
-        expect(valueSet.lattice).toBeInstanceOf(IntegerLattice)
-        expect(valueSet).toMatchObject({
-            lattice: { max: 10n },
+        const lattice = parseLattice('integer(...10)')
+        expect(lattice).toBeInstanceOf(IntegerLattice)
+        expect(lattice).toMatchObject({
+            max: 10n,
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 15 },
@@ -59,10 +58,11 @@ describe('ValueSetParser', () => {
     })
 
     it('parses integer type with min and (inclusive) max constraints', () => {
-        const valueSet = parseValueSet('integer(1...10)')
-        expect(valueSet.lattice).toBeInstanceOf(IntegerLattice)
-        expect(valueSet).toMatchObject({
-            lattice: { min: 1n, max: 10n },
+        const lattice = parseLattice('integer(1...10)')
+        expect(lattice).toBeInstanceOf(IntegerLattice)
+        expect(lattice).toMatchObject({
+            min: 1n,
+            max: 10n,
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 16 },
@@ -71,10 +71,11 @@ describe('ValueSetParser', () => {
     })
 
     it('parses integer type with min and (exclusive) max constraints', () => {
-        const valueSet = parseValueSet('integer(1..<10)')
-        expect(valueSet.lattice).toBeInstanceOf(IntegerLattice)
-        expect(valueSet).toMatchObject({
-            lattice: { min: 1n, max: 9n },
+        const lattice = parseLattice('integer(1..<10)')
+        expect(lattice).toBeInstanceOf(IntegerLattice)
+        expect(lattice).toMatchObject({
+            min: 1n,
+            max: 9n,
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 16 },
@@ -83,9 +84,9 @@ describe('ValueSetParser', () => {
     })
 
     it('parses unconstrained truthvalue type', () => {
-        const valueSet = parseValueSet('truthvalue')
-        expect(valueSet.lattice).toBeInstanceOf(TruthvalueLattice)
-        expect(valueSet).toMatchObject({
+        const lattice = parseLattice('truthvalue')
+        expect(lattice).toBeInstanceOf(Truthlattice)
+        expect(lattice).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 11 },
@@ -94,10 +95,10 @@ describe('ValueSetParser', () => {
     })
 
     it('parses truthvalue type with constraints', () => {
-        const valueSet = parseValueSet('truthvalue(true, false)')
-        expect(valueSet.lattice).toBeInstanceOf(TruthvalueLattice)
-        expect(valueSet).toMatchObject({
-            lattice: { values: ['true', 'false'] },
+        const lattice = parseLattice('truthvalue(true, false)')
+        expect(lattice).toBeInstanceOf(Truthlattice)
+        expect(lattice).toMatchObject({
+            values: ['true', 'false'],
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 24 },
@@ -106,9 +107,9 @@ describe('ValueSetParser', () => {
     })
 
     it('parses unconstrained string type', () => {
-        const valueSet = parseValueSet('string')
-        expect(valueSet.lattice).toBeInstanceOf(StringLattice)
-        expect(valueSet).toMatchObject({
+        const lattice = parseLattice('string')
+        expect(lattice).toBeInstanceOf(StringLattice)
+        expect(lattice).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 7 },
@@ -117,10 +118,10 @@ describe('ValueSetParser', () => {
     })
 
     it('parses rc-types', () => {
-        const valueSet = parseValueSet('MyType')
-        expect(valueSet.lattice).toBeInstanceOf(RCTypeLattice)
-        expect(valueSet).toMatchObject({
-            lattice: { type: { name: 'MyType' } },
+        const lattice = parseLattice('MyType')
+        expect(lattice).toBeInstanceOf(RCTypeLattice)
+        expect(lattice).toMatchObject({
+            type: { name: 'MyType' },
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 7 },
@@ -129,9 +130,9 @@ describe('ValueSetParser', () => {
     })
 })
 
-function parseValueSet(input: string) {
+function parseLattice(input: string) {
     const errorReporter = new TestErrorReporter()
     const stream = TokenStream.read(input, errorReporter)
-    const parser = ValueSetParser.create({ errorReporter })
+    const parser = LatticeParser.create({ errorReporter })
     return parser.parse(stream)
 }

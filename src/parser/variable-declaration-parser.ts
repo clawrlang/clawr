@@ -6,15 +6,9 @@ import {
 } from '../model/variable-declaration'
 import { StatementParser } from './statement-parser'
 import { Context } from '.'
-import { ValueSetParser } from './value-set-parser'
+import { LatticeParser } from './lattice-parser'
 import { SemanticsKeyword } from './semantics-keyword-parser'
-import {
-    AnyIsolationLevel,
-    ISOLATED,
-    IsolationLevel,
-    UNIQUE,
-} from '../model/isolation-level'
-import { ExplicitValueSet } from '../model/explicit-value-set'
+import { LatticeDeclaration } from '../model/lattice-declaration'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser
@@ -36,26 +30,22 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
         const semanticsKeyword = SemanticsKeyword[semanticsToken.keyword]
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
-        const valueSet = {
-            ...(this.parseTypeIdentifier(stream) || {}),
-            isolationLevel: semanticsKeyword.isolationLevel,
-        }
+        const lattice = this.parseLattice(stream)
         stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse(stream)
         return VariableDeclaration.create({
             ...semanticsKeyword,
             name,
-            valueSet,
+            isolationLevel: semanticsKeyword.isolationLevel,
+            lattice,
             initialValue,
         })
     }
 
-    private parseTypeIdentifier(
-        stream: TokenStream,
-    ): ExplicitValueSet | undefined {
+    private parseLattice(stream: TokenStream): LatticeDeclaration | undefined {
         if (!stream.isNext('PUNCTUATION', ':')) return undefined
 
         stream.expect('PUNCTUATION', ':')
-        return ValueSetParser.create(this.context).parse(stream)
+        return LatticeParser.create(this.context).parse(stream)
     }
 }

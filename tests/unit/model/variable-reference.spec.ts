@@ -5,6 +5,7 @@ import { DataDeclaration } from '../../../src/model/data-declaration'
 import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { decorateLattice } from '../../../src/model/lattice-declaration'
 
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
@@ -53,7 +54,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.declaredValueSet(context).value()).toEqual(
+        expect(variableRef.declaredLattice(context).value()).toEqual(
             IntegerLattice.create({ min: 10n, max: 10n }),
         )
     })
@@ -91,11 +92,11 @@ describe('Variable Reference', () => {
                     {
                         isImmutable: false,
                         name: 'myField',
-                        valueSet: {
-                            isolationLevel: ISOLATED,
-                            lattice: IntegerLattice.unconstrained(),
-                            span: someCodeSpan,
-                        },
+                        isolationLevel: ISOLATED,
+                        lattice: decorateLattice(
+                            IntegerLattice.unconstrained(),
+                            { span: someCodeSpan },
+                        ),
                     },
                 ],
             }),

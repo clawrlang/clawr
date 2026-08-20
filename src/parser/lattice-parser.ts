@@ -2,57 +2,59 @@ import { Context } from '.'
 import { Token, TokenStream } from '../lexer'
 import { IdentifierToken } from '../lexer/token'
 import { IntegerLiteral } from '../model/integer-literal'
-import { ExplicitValueSet } from '../model/explicit-value-set'
+import {
+    decorateLattice,
+    LatticeDeclaration,
+} from '../model/lattice-declaration'
 import { ExpressionParser } from './expression-parser'
 import { TypeName } from '../model/type-name'
-import { AnyIsolationLevel, ISOLATED } from '../model/isolation-level'
 import {
     IntegerLattice,
     RCTypeLattice,
     StringLattice,
-    TruthvalueLattice,
+    Truthlattice,
 } from '../model/lattice'
 
-export class ValueSetParser {
+export class LatticeParser {
     private constructor(private context: Context) {}
 
-    static create(context: Context): ValueSetParser {
-        return new ValueSetParser(context)
+    static create(context: Context): LatticeParser {
+        return new LatticeParser(context)
     }
 
-    parse(stream: TokenStream): ExplicitValueSet {
+    parse(stream: TokenStream): LatticeDeclaration {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
 
         switch (type) {
             case 'integer':
-                return this.parseIntegerValueSet(stream, typeToken)
+                return this.parseIntegerLattice(stream, typeToken)
             case 'truthvalue':
-                return this.parseTruthvalueValueSet(stream, typeToken)
+                return this.parseTruthvalueLattice(stream, typeToken)
             case 'string':
-                return {
-                    lattice: StringLattice.create(),
+                return decorateLattice(StringLattice.create(), {
                     span: { start: typeToken.start, end: typeToken.end },
-                }
+                })
             default:
-                return {
-                    lattice: RCTypeLattice.create({
+                return decorateLattice(
+                    RCTypeLattice.create({
                         type: TypeName.create({ name: type }),
                     }),
-                    span: { start: typeToken.start, end: typeToken.end },
-                }
+                    {
+                        span: { start: typeToken.start, end: typeToken.end },
+                    },
+                )
         }
     }
 
-    private parseIntegerValueSet(
+    private parseIntegerLattice(
         stream: TokenStream,
         typeToken: Token,
-    ): ExplicitValueSet {
+    ): LatticeDeclaration {
         if (!stream.isNext('PUNCTUATION', '('))
-            return {
-                lattice: IntegerLattice.unconstrained(),
+            return decorateLattice(IntegerLattice.unconstrained(), {
                 span: { start: typeToken.start, end: typeToken.end },
-            }
+            })
 
         let max: bigint | undefined
         let min: bigint | undefined
@@ -96,21 +98,19 @@ export class ValueSetParser {
 
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return {
-            lattice: IntegerLattice.create({ min, max }),
+        return decorateLattice(IntegerLattice.create({ min, max }), {
             span: { start: typeToken.start, end: endToken.end },
-        }
+        })
     }
 
-    private parseTruthvalueValueSet(
+    private parseTruthvalueLattice(
         stream: TokenStream,
         typeToken: IdentifierToken,
-    ): ExplicitValueSet {
+    ): LatticeDeclaration {
         if (!stream.isNext('PUNCTUATION', '('))
-            return {
-                lattice: TruthvalueLattice.unconstrained(),
+            return decorateLattice(Truthlattice.unconstrained(), {
                 span: { start: typeToken.start, end: typeToken.end },
-            }
+            })
 
         const values: ('false' | 'ambiguous' | 'true')[] = []
 
@@ -123,12 +123,11 @@ export class ValueSetParser {
         }
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return {
-            lattice:
-                values.length > 0
-                    ? TruthvalueLattice.create(values)
-                    : TruthvalueLattice.unconstrained(),
-            span: { start: typeToken.start, end: endToken.end },
-        }
+        return decorateLattice(
+            values.length > 0
+                ? Truthlattice.create(values)
+                : Truthlattice.unconstrained(),
+            { span: { start: typeToken.start, end: endToken.end } },
+        )
     }
 }

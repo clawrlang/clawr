@@ -5,7 +5,7 @@ export interface Lattice {
     unconstrained(): Lattice
     isSupersetTo(lattice: Lattice): boolean
     isSameType(lattice: Lattice): boolean
-    toCIR(): cir.ValueSet
+    toCIR(): cir.Lattice
     toString(): string
 }
 
@@ -47,7 +47,7 @@ export class IntegerLattice implements Lattice {
         return lattice instanceof IntegerLattice
     }
 
-    toCIR(): cir.ValueSet {
+    toCIR(): cir.Lattice {
         return {
             type: 'integer',
             min: this.min?.toString() as `${bigint}`,
@@ -60,7 +60,7 @@ export class IntegerLattice implements Lattice {
     }
 }
 
-export class TruthvalueLattice implements Lattice {
+export class Truthlattice implements Lattice {
     private constructor(
         public readonly values: ('false' | 'ambiguous' | 'true')[],
     ) {}
@@ -69,28 +69,26 @@ export class TruthvalueLattice implements Lattice {
         return this.create(['false', 'ambiguous', 'true'])
     }
 
-    static create(
-        values: ('false' | 'ambiguous' | 'true')[],
-    ): TruthvalueLattice {
-        return new TruthvalueLattice(values)
+    static create(values: ('false' | 'ambiguous' | 'true')[]): Truthlattice {
+        return new Truthlattice(values)
     }
 
     unconstrained(): Lattice {
-        return TruthvalueLattice.create(['false', 'ambiguous', 'true'])
+        return Truthlattice.create(['false', 'ambiguous', 'true'])
     }
 
     isSupersetTo(lattice: Lattice): boolean {
         return (
-            lattice instanceof TruthvalueLattice &&
+            lattice instanceof Truthlattice &&
             lattice.values.every((v) => this.values.includes(v))
         )
     }
 
     isSameType(lattice: Lattice): boolean {
-        return lattice instanceof TruthvalueLattice
+        return lattice instanceof Truthlattice
     }
 
-    toCIR(): cir.ValueSet {
+    toCIR(): cir.Lattice {
         return {
             type: 'truthvalue',
             values: this.values,
@@ -121,7 +119,7 @@ export class StringLattice implements Lattice {
         return lattice instanceof StringLattice
     }
 
-    toCIR(): cir.ValueSet {
+    toCIR(): cir.Lattice {
         return { type: 'string' }
     }
 
@@ -172,7 +170,7 @@ export class RCTypeLattice implements Lattice {
         )
     }
 
-    toCIR(): cir.ValueSet {
+    toCIR(): cir.Lattice {
         return {
             type: 'rc-type',
             name: this.type.name,

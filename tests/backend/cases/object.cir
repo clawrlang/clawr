@@ -7,7 +7,7 @@
             "fields": [
                 {
                     "name": "field",
-                    "valueSet": {
+                    "lattice": {
                         "type": "integer",
                         "min": "42",
                         "max": "42"
@@ -20,7 +20,7 @@
                     "baseName": "field",
                     "labels": [],
                     "parameters": [],
-                    "resultValueSet": {
+                    "lattice": {
                         "type": "integer",
                         "min": "42",
                         "max": "42"
@@ -68,7 +68,7 @@
                     }
                 }
             ],
-            "resultValueSet": {
+            "lattice": {
                 "type": "rc-type",
                 "name": "Object"
             }
@@ -78,7 +78,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "obj",
-            "valueSet": {
+            "lattice": {
                 "type": "rc-type",
                 "name": "Object"
             },

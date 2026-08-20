@@ -3,7 +3,7 @@ import { TokenStream } from '../../../src/lexer'
 import { TestErrorReporter } from '../../util'
 import { DataDeclarationParser } from '../../../src/parser/data-declaration-parser'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
-import { IntegerLattice, TruthvalueLattice } from '../../../src/model/lattice'
+import { IntegerLattice, Truthlattice } from '../../../src/model/lattice'
 
 describe('DataDeclarationParser', () => {
     it('parses a data declaration with default-mutability', () => {
@@ -22,19 +22,17 @@ describe('DataDeclarationParser', () => {
                 {
                     name: 'field1',
                     isImmutable: false,
-                    valueSet: { isolationLevel: ISOLATED },
+                    isolationLevel: ISOLATED,
                 },
                 {
                     name: 'field2',
                     isImmutable: false,
-                    valueSet: { isolationLevel: ISOLATED },
+                    isolationLevel: ISOLATED,
                 },
             ],
         })
-        expect(result.fields[0].valueSet.lattice).toBeInstanceOf(IntegerLattice)
-        expect(result.fields[1].valueSet.lattice).toBeInstanceOf(
-            TruthvalueLattice,
-        )
+        expect(result.fields[0].lattice).toBeInstanceOf(IntegerLattice)
+        expect(result.fields[1].lattice).toBeInstanceOf(Truthlattice)
     })
 
     it('parses a data declaration with mixed semantics', () => {
@@ -53,18 +51,16 @@ describe('DataDeclarationParser', () => {
                 {
                     name: 'field1',
                     isImmutable: true,
-                    valueSet: { isolationLevel: SHARED },
+                    isolationLevel: SHARED,
                 },
                 {
                     name: 'field2',
                     isImmutable: true,
-                    valueSet: { isolationLevel: ISOLATED },
+                    isolationLevel: ISOLATED,
                 },
             ],
         })
-        expect(result.fields[0].valueSet.lattice).toBeInstanceOf(IntegerLattice)
-        expect(result.fields[1].valueSet.lattice).toBeInstanceOf(
-            TruthvalueLattice,
-        )
+        expect(result.fields[0].lattice).toBeInstanceOf(IntegerLattice)
+        expect(result.fields[1].lattice).toBeInstanceOf(Truthlattice)
     })
 })

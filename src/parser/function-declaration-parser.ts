@@ -2,28 +2,22 @@ import { Context, DeclarationParser } from '.'
 import { TokenStream, Token } from '../lexer'
 import { FunctionDeclaration } from '../model/function-declaration'
 import { Parameter } from '../model/parameter'
-import { ExplicitValueSet } from '../model/explicit-value-set'
+import { LatticeDeclaration } from '../model/lattice-declaration'
 import { BlockParser } from './block-parser'
 import { ExpressionParser } from './expression-parser'
-import { ValueSetParser } from './value-set-parser'
+import { LatticeParser } from './lattice-parser'
 import { Expression } from '../model'
 import {
     SemanticsKeyword,
     SemanticsKeywordParser,
 } from './semantics-keyword-parser'
-import {
-    ISOLATED,
-    IsolationLevel,
-    SHARED,
-    UNIQUE,
-    UNKNOWN,
-} from '../model/isolation-level'
+import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '../model/isolation-level'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
-    private readonly valueSetParser: ValueSetParser
+    private readonly latticeParser: LatticeParser
 
     private constructor(private context: Context) {
-        this.valueSetParser = ValueSetParser.create(context)
+        this.latticeParser = LatticeParser.create(context)
     }
 
     static create(context: Context): FunctionDeclarationParser {
@@ -40,7 +34,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         const baseName = nameToken.identifier
 
         const parameters = this.parseParameters(stream)
-        const result = this.parseResultValueSet(stream)
+        const result = this.parseResultLattice(stream)
 
         if (stream.isNext('PUNCTUATION', '=>')) {
             stream.expect('PUNCTUATION', '=>')
@@ -69,12 +63,12 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         })
     }
 
-    private parseResultValueSet(stream: TokenStream) {
+    private parseResultLattice(stream: TokenStream) {
         if (stream.isNext('OPERATOR', '->')) {
             stream.expect('OPERATOR', '->')
             const isolationLevel = this.parseIsolationlevel(stream)
             return {
-                ...this.valueSetParser.parse(stream),
+                lattice: this.latticeParser.parse(stream),
                 isolationLevel,
             }
         }
@@ -110,13 +104,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                 varNameToken = stream.expect('IDENTIFIER')
             else varNameToken = labelToken
 
-            const valueSet = {
-                ...(this.parseValueSet(stream) || {
-                    lattice: undefined,
-                    span: undefined,
-                }),
-                isolationLevel: semanticsKeyword?.isolationLevel ?? UNKNOWN,
-            }
+            const lattice = this.parseLattice(stream)
 
             let defaultValue: Expression | undefined
             if (stream.isNext('PUNCTUATION', '=')) {
@@ -134,13 +122,14 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                             ? undefined
                             : labelToken.identifier,
                     varName: varNameToken.identifier,
-                    valueSet,
+                    isolationLevel: semanticsKeyword?.isolationLevel ?? UNKNOWN,
+                    lattice: lattice,
                     defaultValue,
                     span: {
                         start: semanticsToken?.start ?? labelToken.start,
                         end:
                             defaultValue?.span.end ??
-                            valueSet?.span?.end ??
+                            lattice?.span?.end ??
                             varNameToken.end,
                     },
                 }),
@@ -153,9 +142,9 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         return parameters
     }
 
-    private parseValueSet(stream: TokenStream): ExplicitValueSet | undefined {
+    private parseLattice(stream: TokenStream): LatticeDeclaration | undefined {
         if (!stream.isNext('PUNCTUATION', ':')) return undefined
         stream.expect('PUNCTUATION', ':')
-        return this.valueSetParser.parse(stream)
+        return this.latticeParser.parse(stream)
     }
 }

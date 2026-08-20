@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Declaration, Expression, Statement } from '.'
 import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
-import { ExplicitValueSet } from './explicit-value-set'
+import { LatticeDeclaration } from './lattice-declaration'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { Lattice } from './lattice'
@@ -12,12 +12,15 @@ import { Scope } from './scope'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
-        public baseName: string,
-        public parameters: Parameter[],
-        public result:
-            | (ExplicitValueSet & { isolationLevel: IsolationLevel | UNIQUE })
+        public readonly baseName: string,
+        public readonly parameters: Parameter[],
+        public readonly result:
+            | {
+                  lattice: LatticeDeclaration
+                  isolationLevel: IsolationLevel | UNIQUE
+              }
             | undefined,
-        public implementation:
+        public readonly implementation:
             | { kind: 'implicit-return'; expression: Expression }
             | { kind: 'body'; statements: Statement[] },
     ) {}
@@ -31,7 +34,10 @@ export class FunctionDeclaration implements Declaration {
         baseName: string
         parameters: Parameter[]
         result:
-            | (ExplicitValueSet & { isolationLevel: IsolationLevel | UNIQUE })
+            | {
+                  lattice: LatticeDeclaration
+                  isolationLevel: IsolationLevel | UNIQUE
+              }
             | undefined
         implementation:
             | { kind: 'implicit-return'; expression: Expression }
@@ -55,8 +61,8 @@ export class FunctionDeclaration implements Declaration {
             )
     }
 
-    resultLattice(context: Context): Lattice | undefined {
-        if (this.result?.lattice) return this.result.lattice
+    lattice(context: Context): Lattice | undefined {
+        if (this.result) return this.result.lattice
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression
                 .currentValue(this.bodyContext(context))
@@ -91,7 +97,7 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const resultValueSet = this.resultSet(bodyContext)
+        const lattice = this.resultLattice(bodyContext)
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -99,9 +105,9 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                valueSet: param.valueSet!.lattice!.toCIR(),
+                lattice: param.lattice!.toCIR(),
             })),
-            resultValueSet,
+            lattice,
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
@@ -114,7 +120,7 @@ export class FunctionDeclaration implements Declaration {
         const bodyContext = this.bodyContext({
             ...context,
             scope: parameterScope,
-            calleeResult: this.result?.lattice
+            calleeResult: this.result
                 ? this.result
                 : this.implementation.kind === 'body'
                   ? undefined
@@ -135,10 +141,10 @@ export class FunctionDeclaration implements Declaration {
         for (const param of this.parameters) {
             parameterScope.variables.set(param.varName, {
                 isImmutable: param.isImmutable,
-                isolationLevel: param.valueSet.isolationLevel,
+                isolationLevel: param.isolationLevel,
                 lattice:
                     param.defaultValue?.currentValue(context).value() ??
-                    param.valueSet?.lattice ??
+                    param.lattice ??
                     logSemanticError(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
                         { ...context, span: param.span, fatal: true },
@@ -147,7 +153,7 @@ export class FunctionDeclaration implements Declaration {
             parameterScope.setCurrentValue(
                 param.varName,
                 param.defaultValue?.currentValue(context).value() ??
-                    param.valueSet?.lattice ??
+                    param.lattice ??
                     logSemanticError(
                         `Parameter ${param.varName} must have either a default value or an explicit value set.`,
                         { ...context, span: param.span, fatal: true },
@@ -157,9 +163,8 @@ export class FunctionDeclaration implements Declaration {
         return parameterScope
     }
 
-    private resultSet(context: Context): cir.ValueSet | undefined {
-        let resultValueSet = this.result?.lattice?.toCIR()
-        if (resultValueSet) return resultValueSet
+    private resultLattice(context: Context): cir.Lattice | undefined {
+        if (this.result) return this.result.lattice.toCIR()
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression
                 .currentValue(context)

@@ -9,9 +9,9 @@
 - `VariableDeclaration` `initialValue` type mismatch
 - `DataLiteral` field type mismatch
 - [Object](./todo/object.md)
-- Get the fields from the default-lattice when converting SHARED to UNIQUE
+- Get the field values from the declared lattice when converting `SHARED` to `ISOLATED`
 - Parse namespace
   - `FunctionName`
   - `DataDeclarationParser`
   - `FunctionDeclarationParser`
-  - `ValueSetParser`
+  - `LatticeParser`

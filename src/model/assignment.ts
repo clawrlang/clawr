@@ -36,7 +36,7 @@ export class Assignment implements Statement {
 
     private emitCIRStatements(context: Context): Failable {
         return Failable.collect([
-            this.target.declaredValueSet(context),
+            this.target.declaredLattice(context),
             this.target.isolationLevel(context),
         ]).chaining(([targetLattice, targetIsolationLevel]) => {
             const prelude = this.target.assignmentPrelude(context)
@@ -64,7 +64,7 @@ export class Assignment implements Statement {
                     context.scope.emitted.push({
                         kind: 'VARIABLE_DECL' as const,
                         name: tempVar,
-                        valueSet: targetLattice.toCIR(),
+                        lattice: targetLattice.toCIR(),
                         initialValue: target,
                     })
 
@@ -111,13 +111,13 @@ export class Assignment implements Statement {
     }
 
     private checkValidity(context: Context) {
-        const targetResult = this.target.declaredValueSet(context)
+        const targetResult = this.target.declaredLattice(context)
         if (targetResult.isFailure()) {
             for (const error of targetResult.getError().errors)
                 context.errorReporter.reportError(error.message, error.span)
         }
 
-        const targetLattice = this.target.declaredValueSet(context).value()
+        const targetLattice = this.target.declaredLattice(context).value()
         const assignedValue = this.value.currentValue(context).value()
         if (!targetLattice.isSupersetTo(assignedValue))
             logSemanticError(

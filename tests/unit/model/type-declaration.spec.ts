@@ -3,7 +3,8 @@ import { newSemanticContext, someCodeSpan } from '../../util'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED } from '../../../src/model/isolation-level'
-import { IntegerLattice, TruthvalueLattice } from '../../../src/model/lattice'
+import { IntegerLattice, Truthlattice } from '../../../src/model/lattice'
+import { decorateLattice } from '../../../src/model/lattice-declaration'
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {
@@ -13,20 +14,18 @@ describe('DataDeclaration', () => {
                 {
                     name: 'field1',
                     isImmutable: false,
-                    valueSet: {
-                        isolationLevel: ISOLATED,
-                        lattice: IntegerLattice.unconstrained(),
+                    isolationLevel: ISOLATED,
+                    lattice: decorateLattice(IntegerLattice.unconstrained(), {
                         span: someCodeSpan,
-                    },
+                    }),
                 },
                 {
                     name: 'field2',
                     isImmutable: false,
-                    valueSet: {
-                        isolationLevel: ISOLATED,
-                        lattice: TruthvalueLattice.unconstrained(),
+                    isolationLevel: ISOLATED,
+                    lattice: decorateLattice(Truthlattice.unconstrained(), {
                         span: someCodeSpan,
-                    },
+                    }),
                 },
             ],
         })
@@ -39,7 +38,7 @@ describe('DataDeclaration', () => {
                 fields: [
                     {
                         name: 'field1',
-                        valueSet: {
+                        lattice: {
                             type: 'integer',
                             min: undefined,
                             max: undefined,
@@ -47,7 +46,7 @@ describe('DataDeclaration', () => {
                     },
                     {
                         name: 'field2',
-                        valueSet: {
+                        lattice: {
                             type: 'truthvalue',
                             values: ['false', 'ambiguous', 'true'],
                         },

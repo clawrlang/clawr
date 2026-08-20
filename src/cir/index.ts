@@ -13,7 +13,7 @@ export type ClawrModule = {
 type VariableDeclaration = {
     kind: 'VARIABLE_DECL'
     name: string
-    valueSet: ValueSet
+    lattice: Lattice
     initialValue: Expression
 }
 
@@ -27,9 +27,9 @@ type FunctionSignature = {
     labels: string[]
     parameters: {
         name: string
-        valueSet: ValueSet
+        lattice: Lattice
     }[]
-    resultValueSet?: ValueSet
+    lattice?: Lattice
 }
 
 type RCTypeDeclaration = {
@@ -38,15 +38,13 @@ type RCTypeDeclaration = {
     name: string
     fields: {
         name: string
-        valueSet: ValueSet
+        lattice: Lattice
     }[]
 } & ( // `object`/`service` add methods and optional inheritance
     | {
           base?: CanonicalName
           methods: FunctionDeclaration[]
-          initializers?: (FunctionDeclaration & {
-              resultValueSet?: undefined
-          })[]
+          initializers?: (FunctionDeclaration & { lattice?: undefined })[]
           dispatchTable?: {
               slot: FunctionSignature
               declaredIn: CanonicalName
@@ -183,40 +181,40 @@ export type Expression =
     | FieldReference
     | FunctionCall
 
-// ----------
-// Value Sets
-// ----------
+// --------
+// Lattices
+// --------
 
-type IntegerValueSet = {
+type IntegerLattice = {
     type: 'integer'
     min?: `${bigint}` & tags.Pattern<'^-?\\d+$'>
     max?: `${bigint}` & tags.Pattern<'^-?\\d+$'>
 }
 
-type RealValueSet = {
+type RealLattice = {
     type: 'real'
     min?: string // numeric, can be arbitrarity big
     max?: string // numeric, can be arbitrarity big
 }
 
-type TruthValueSet = {
+type TruthvalueLattice = {
     type: 'truthvalue'
     values: ('false' | 'ambiguous' | 'true')[]
 }
 
-type StringValueSet = { type: 'string' }
+type StringLattice = { type: 'string' }
 
-type RCTypeValueSet = {
+type RCTypeLattice = {
     type: 'rc-type'
     namespace?: string
     name: string
 }
 
-export type ValueSet =
-    | IntegerValueSet
-    | RealValueSet
-    | TruthValueSet
-    | StringValueSet
-    | RCTypeValueSet
+export type Lattice =
+    | IntegerLattice
+    | RealLattice
+    | TruthvalueLattice
+    | StringLattice
+    | RCTypeLattice
 
 type IsolationLevel = 'ISOLATED' | 'SHARED'

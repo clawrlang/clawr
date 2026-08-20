@@ -9,6 +9,7 @@ import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { decorateLattice } from '../../../src/model/lattice-declaration'
 
 describe('Query', () => {
     it('converts to CIR', () => {
@@ -67,14 +68,14 @@ describe('Query', () => {
                         label: 'x',
                         isImmutable: true,
                         varName: 'x',
-                        valueSet: {
-                            isolationLevel: ISOLATED,
-                            lattice: IntegerLattice.create({
+                        isolationLevel: ISOLATED,
+                        lattice: decorateLattice(
+                            IntegerLattice.create({
                                 min: 0n,
                                 max: 100n,
                             }),
-                            span: someCodeSpan,
-                        },
+                            { span: someCodeSpan },
+                        ),
                         span: someCodeSpan,
                     }),
                 ],
@@ -112,11 +113,13 @@ describe('Query', () => {
                     baseName: 'foo',
                     parameters: [],
                     result: {
+                        lattice: decorateLattice(
+                            RCTypeLattice.create({
+                                type: TypeName.create({ name: 'MyData' }),
+                            }),
+                            { span: someCodeSpan },
+                        ),
                         isolationLevel: ISOLATED,
-                        lattice: RCTypeLattice.create({
-                            type: TypeName.create({ name: 'MyData' }),
-                        }),
-                        span: someCodeSpan,
                     },
                     implementation: {
                         kind: 'implicit-return',

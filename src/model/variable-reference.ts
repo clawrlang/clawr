@@ -48,7 +48,7 @@ export class VariableReference implements Expression {
         )
     }
 
-    declaredValueSet(context: Context): Failable<Lattice> {
+    declaredLattice(context: Context): Failable<Lattice> {
         return this.lookupInScope(context).chaining((variable) =>
             Failable.success(variable.lattice),
         )

@@ -55,7 +55,7 @@ export class Query implements Expression {
         return decl.resultIsolationLevel(context)
     }
 
-    declaredValueSet(context: Context): Failable<Lattice> {
+    declaredLattice(context: Context): Failable<Lattice> {
         return this.currentValue(context)
     }
 
@@ -74,7 +74,7 @@ export class Query implements Expression {
                 this.span,
             )
 
-        const result = decl.resultLattice(context)
+        const result = decl.lattice(context)
         if (!result)
             return Failable.failure(
                 `Function declaration has no result lattice: ${this.name.toString()}`,

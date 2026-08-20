@@ -15,6 +15,7 @@ import {
     UNIQUE,
     UNKNOWN,
 } from '../../../src/model/isolation-level'
+import { decorateLattice } from '../../../src/model/lattice-declaration'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -52,11 +53,11 @@ describe('Assignment', () => {
                         {
                             isImmutable: false,
                             name: 'innerField',
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -68,15 +69,15 @@ describe('Assignment', () => {
                         {
                             isImmutable: false,
                             name: 'field',
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: RCTypeLattice.create({
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                RCTypeLattice.create({
                                     type: TypeName.create({
                                         name: 'InnerType',
                                     }),
                                 }),
-                                span: someCodeSpan,
-                            },
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -131,7 +132,7 @@ describe('Assignment', () => {
                 {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
-                    valueSet: {
+                    lattice: {
                         type: 'rc-type',
                         name: 'InnerType',
                     },
@@ -209,7 +210,7 @@ describe('Assignment', () => {
                 {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
-                    valueSet: {
+                    lattice: {
                         type: 'rc-type',
                         name: 'MyType',
                     },
@@ -249,11 +250,11 @@ describe('Assignment', () => {
                     {
                         name: 'field',
                         isImmutable: false,
-                        valueSet: {
-                            isolationLevel: ISOLATED,
-                            lattice: IntegerLattice.unconstrained(),
-                            span: someCodeSpan,
-                        },
+                        isolationLevel: ISOLATED,
+                        lattice: decorateLattice(
+                            IntegerLattice.unconstrained(),
+                            { span: someCodeSpan },
+                        ),
                     },
                 ],
             }),
@@ -313,11 +314,13 @@ describe('Assignment', () => {
             FunctionDeclaration.create({
                 baseName: 'myFunction',
                 result: {
+                    lattice: decorateLattice(
+                        RCTypeLattice.create({
+                            type: TypeName.create({ name: 'MyType' }),
+                        }),
+                        { span: someCodeSpan },
+                    ),
                     isolationLevel: UNIQUE,
-                    lattice: RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyType' }),
-                    }),
-                    span: someCodeSpan,
                 },
                 parameters: [],
                 implementation: {
@@ -475,11 +478,11 @@ describe('Assignment', () => {
                     {
                         name: 'myField',
                         isImmutable: false,
-                        valueSet: {
-                            isolationLevel: ISOLATED,
-                            lattice: IntegerLattice.unconstrained(),
-                            span: someCodeSpan,
-                        },
+                        isolationLevel: ISOLATED,
+                        lattice: decorateLattice(
+                            IntegerLattice.unconstrained(),
+                            { span: someCodeSpan },
+                        ),
                     },
                 ],
             }),
@@ -537,11 +540,11 @@ describe('Assignment', () => {
                     {
                         name: 'myField',
                         isImmutable: false,
-                        valueSet: {
-                            isolationLevel: ISOLATED,
-                            lattice: IntegerLattice.unconstrained(),
-                            span: someCodeSpan,
-                        },
+                        isolationLevel: ISOLATED,
+                        lattice: decorateLattice(
+                            IntegerLattice.unconstrained(),
+                            { span: someCodeSpan },
+                        ),
                     },
                 ],
             }),
@@ -606,11 +609,11 @@ describe('Assignment', () => {
                             {
                                 name: 'myField',
                                 isImmutable: false,
-                                valueSet: {
-                                    isolationLevel: ISOLATED,
-                                    lattice: IntegerLattice.unconstrained(),
-                                    span: someCodeSpan,
-                                },
+                                isolationLevel: ISOLATED,
+                                lattice: decorateLattice(
+                                    IntegerLattice.unconstrained(),
+                                    { span: someCodeSpan },
+                                ),
                             },
                         ],
                     }),
@@ -755,11 +758,11 @@ describe('Assignment', () => {
                         {
                             name: 'field',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),

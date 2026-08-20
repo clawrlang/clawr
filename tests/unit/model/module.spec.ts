@@ -6,8 +6,9 @@ import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { TypeName } from '../../../src/model/type-name'
-import { IntegerLattice, TruthvalueLattice } from '../../../src/model/lattice'
+import { IntegerLattice, Truthlattice } from '../../../src/model/lattice'
 import { ISOLATED } from '../../../src/model/isolation-level'
+import { decorateLattice } from '../../../src/model/lattice-declaration'
 
 describe('Module', () => {
     it('outputs the main block in CIR', () => {
@@ -60,20 +61,20 @@ describe('Module', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                         {
                             name: 'field2',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -97,11 +98,10 @@ describe('Module', () => {
                 VariableDeclaration.create({
                     isImmutable: true,
                     name: 'x',
-                    valueSet: {
-                        isolationLevel: ISOLATED,
-                        lattice: IntegerLattice.unconstrained(),
+                    isolationLevel: ISOLATED,
+                    lattice: decorateLattice(IntegerLattice.unconstrained(), {
                         span: someCodeSpan,
-                    },
+                    }),
                     initialValue: IntegerLiteral.create({
                         value: 42n,
                         span: someCodeSpan,
@@ -128,20 +128,20 @@ describe('Module', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                         {
                             name: 'field2',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: TruthvalueLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                Truthlattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -159,11 +159,11 @@ describe('Module', () => {
                 { name: 'field2', isImmutable: false },
             ],
         })
-        expect(myDataDeclaration?.fields[0].valueSet.lattice).toBeInstanceOf(
+        expect(myDataDeclaration?.fields[0].lattice).toBeInstanceOf(
             IntegerLattice,
         )
-        expect(myDataDeclaration?.fields[1].valueSet.lattice).toBeInstanceOf(
-            TruthvalueLattice,
+        expect(myDataDeclaration?.fields[1].lattice).toBeInstanceOf(
+            Truthlattice,
         )
     })
 })

@@ -6,6 +6,7 @@ import { DataDeclaration } from '../../../src/model/data-declaration'
 import { TypeName } from '../../../src/model/type-name'
 import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { ISOLATED, SHARED, UNKNOWN } from '../../../src/model/isolation-level'
+import { decorateLattice } from '../../../src/model/lattice-declaration'
 
 describe('Field Reference', () => {
     it('infers its type from the context', () => {
@@ -24,11 +25,11 @@ describe('Field Reference', () => {
                     {
                         name: 'myField',
                         isImmutable: false,
-                        valueSet: {
-                            isolationLevel: ISOLATED,
-                            lattice: IntegerLattice.unconstrained(),
-                            span: someCodeSpan,
-                        },
+                        isolationLevel: ISOLATED,
+                        lattice: decorateLattice(
+                            IntegerLattice.unconstrained(),
+                            { span: someCodeSpan },
+                        ),
                     },
                 ],
             }),
@@ -44,7 +45,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.declaredValueSet(context).value().toCIR().type).toBe(
+        expect(fieldRef.declaredLattice(context).value().toCIR().type).toBe(
             'integer',
         )
     })
@@ -65,13 +66,13 @@ describe('Field Reference', () => {
                     {
                         isImmutable: true,
                         name: 'myField',
-                        valueSet: {
-                            isolationLevel: SHARED,
-                            lattice: RCTypeLattice.create({
+                        isolationLevel: SHARED,
+                        lattice: decorateLattice(
+                            RCTypeLattice.create({
                                 type: TypeName.create({ name: 'MyType' }),
                             }),
-                            span: someCodeSpan,
-                        },
+                            { span: someCodeSpan },
+                        ),
                     },
                 ],
             }),
@@ -137,15 +138,15 @@ describe('Field Reference', () => {
                             {
                                 isImmutable,
                                 name: 'myField',
-                                valueSet: {
-                                    isolationLevel: expected,
-                                    lattice: RCTypeLattice.create({
+                                isolationLevel: expected,
+                                lattice: decorateLattice(
+                                    RCTypeLattice.create({
                                         type: TypeName.create({
                                             name: 'InnerType',
                                         }),
                                     }),
-                                    span: someCodeSpan,
-                                },
+                                    { span: someCodeSpan },
+                                ),
                             },
                         ],
                     }),
@@ -164,11 +165,11 @@ describe('Field Reference', () => {
                 expect(fieldRef.isolationLevel(context).value()).toEqual(
                     expected,
                 )
-                expect(
-                    fieldRef.declaredValueSet(context).value(),
-                ).toMatchObject({
-                    type: { name: 'InnerType' },
-                })
+                expect(fieldRef.declaredLattice(context).value()).toMatchObject(
+                    {
+                        type: { name: 'InnerType' },
+                    },
+                )
             })
     })
 
@@ -188,11 +189,11 @@ describe('Field Reference', () => {
                     {
                         isImmutable: false,
                         name: 'myField',
-                        valueSet: {
-                            isolationLevel: ISOLATED,
-                            lattice: IntegerLattice.unconstrained(),
-                            span: someCodeSpan,
-                        },
+                        isolationLevel: ISOLATED,
+                        lattice: decorateLattice(
+                            IntegerLattice.unconstrained(),
+                            { span: someCodeSpan },
+                        ),
                     },
                 ],
             }),
@@ -254,11 +255,11 @@ describe('Field Reference', () => {
                             {
                                 name: 'myField',
                                 isImmutable: false,
-                                valueSet: {
-                                    isolationLevel: ISOLATED,
-                                    lattice: IntegerLattice.unconstrained(),
-                                    span: someCodeSpan,
-                                },
+                                isolationLevel: ISOLATED,
+                                lattice: decorateLattice(
+                                    IntegerLattice.unconstrained(),
+                                    { span: someCodeSpan },
+                                ),
                             },
                         ],
                     }),
@@ -331,11 +332,11 @@ describe('Field Reference', () => {
                             {
                                 name: 'myField',
                                 isImmutable,
-                                valueSet: {
-                                    isolationLevel: ISOLATED,
-                                    lattice: IntegerLattice.unconstrained(),
-                                    span: someCodeSpan,
-                                },
+                                isolationLevel: ISOLATED,
+                                lattice: decorateLattice(
+                                    IntegerLattice.unconstrained(),
+                                    { span: someCodeSpan },
+                                ),
                             },
                         ],
                     }),
@@ -373,11 +374,11 @@ describe('Field Reference', () => {
                         {
                             isImmutable: false,
                             name: 'myField',
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -412,11 +413,11 @@ describe('Field Reference', () => {
                         {
                             isImmutable: false,
                             name: 'myField',
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -451,11 +452,11 @@ describe('Field Reference', () => {
                         {
                             isImmutable: false,
                             name: 'myField',
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),

@@ -1,7 +1,7 @@
 import { Context, Declaration, Expression, Statement } from '.'
 import { logSemanticError } from './failable'
 import { Scope } from './scope'
-import { ExplicitValueSet } from './explicit-value-set'
+import { LatticeDeclaration } from './lattice-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 
@@ -12,27 +12,29 @@ export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private readonly isImmutable: boolean,
         private readonly name: string,
-        private readonly valueSet: ExplicitValueSet & {
-            isolationLevel: IsolationLevel
-        },
+        private readonly isolationLevel: IsolationLevel,
+        private readonly lattice: LatticeDeclaration | undefined,
         private readonly initialValue: Expression,
     ) {}
 
     static create({
         isImmutable,
         name,
-        valueSet,
+        isolationLevel,
+        lattice: lattice,
         initialValue,
     }: {
         isImmutable: boolean
         name: string
-        valueSet: ExplicitValueSet & { isolationLevel: IsolationLevel }
+        isolationLevel: IsolationLevel
+        lattice?: LatticeDeclaration
         initialValue: Expression
     }): VariableDeclaration {
         return new VariableDeclaration(
             isImmutable,
             name,
-            valueSet,
+            isolationLevel,
+            lattice,
             initialValue,
         )
     }
@@ -50,9 +52,9 @@ export class VariableDeclaration implements Statement, Declaration {
         this.checkValidity(initialValue, context)
 
         const lattice =
-            this.isImmutable && this.valueSet.isolationLevel === ISOLATED
+            this.isImmutable && this.isolationLevel === ISOLATED
                 ? initialValue
-                : (this.valueSet.lattice ?? initialValue.unconstrained())
+                : (this.lattice ?? initialValue.unconstrained())
 
         this.emitCIRDeclaration(context, lattice, scope)
         this.addDeclarationToScope(scope, lattice)
@@ -67,15 +69,15 @@ export class VariableDeclaration implements Statement, Declaration {
         const initialValue = this.initialValue
             .toCIRExpression({
                 ...context,
-                explicitLattice: this.valueSet.lattice,
-                isolationLevel: this.valueSet.isolationLevel,
+                explicitLattice: this.lattice,
+                isolationLevel: this.isolationLevel,
             })
             .value()
 
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,
             name: this.name,
-            valueSet: lattice.toCIR(),
+            lattice: lattice.toCIR(),
             initialValue:
                 lattice instanceof RCTypeLattice &&
                 (initialValue.kind === 'VARIABLE_REF' ||
@@ -94,7 +96,7 @@ export class VariableDeclaration implements Statement, Declaration {
     ) {
         scope.variables.set(this.name, {
             isImmutable: this.isImmutable,
-            isolationLevel: this.valueSet.isolationLevel!!,
+            isolationLevel: this.isolationLevel!!,
             lattice,
         })
     }
@@ -114,25 +116,22 @@ export class VariableDeclaration implements Statement, Declaration {
             .isolationLevel(context)
             .value()
         if (valueIsolationLevel === UNIQUE) return
-        if (this.valueSet.isolationLevel !== valueIsolationLevel)
+        if (this.isolationLevel !== valueIsolationLevel)
             logSemanticError(
-                `Cannot assign ${valueIsolationLevel} value to ${this.valueSet.isolationLevel} target`,
+                `Cannot assign ${valueIsolationLevel} value to ${this.isolationLevel} target`,
                 { ...context, span: this.initialValue.span },
             )
     }
 
     private isValidValue(currentValue: Lattice) {
-        return (
-            !this.valueSet.lattice ||
-            this.valueSet.lattice.isSupersetTo(currentValue)
-        )
+        return !this.lattice || this.lattice.isSupersetTo(currentValue)
     }
 
     private currentValueFromInitial(context: Context) {
         return this.initialValue
             .currentValue({
                 ...context,
-                explicitLattice: this.valueSet.lattice,
+                explicitLattice: this.lattice,
             })
             .value()
     }

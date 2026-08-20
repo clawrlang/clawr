@@ -35,7 +35,7 @@ export class IntegerLiteral implements Expression {
         )
     }
 
-    declaredValueSet(_: Context): Failable<Lattice> {
+    declaredLattice(_: Context): Failable<Lattice> {
         return Failable.success(
             IntegerLattice.create({ min: this.value, max: this.value }),
         )

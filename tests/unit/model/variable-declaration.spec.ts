@@ -10,22 +10,22 @@ import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import {
     RCTypeLattice,
     IntegerLattice,
-    TruthvalueLattice,
+    Truthlattice,
 } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
 import { Query } from '../../../src/model/query'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { decorateLattice } from '../../../src/model/lattice-declaration'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
         const decl = VariableDeclaration.create({
             isImmutable: true,
             name: 'foo',
-            valueSet: {
-                isolationLevel: ISOLATED,
-                lattice: IntegerLattice.unconstrained(),
+            isolationLevel: ISOLATED,
+            lattice: decorateLattice(IntegerLattice.unconstrained(), {
                 span: someCodeSpan,
-            },
+            }),
             initialValue: IntegerLiteral.create({
                 value: 1n,
                 span: someCodeSpan,
@@ -36,7 +36,7 @@ describe('VariableDeclaration', () => {
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'VARIABLE_DECL',
             name: 'foo',
-            valueSet: { type: 'integer', min: '1', max: '1' },
+            lattice: { type: 'integer', min: '1', max: '1' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
                 value: '1',
@@ -49,7 +49,7 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: true,
                 name: 'foo',
-                valueSet: { isolationLevel: ISOLATED },
+                isolationLevel: ISOLATED,
                 initialValue: IntegerLiteral.create({
                     value: 1n,
                     span: someCodeSpan,
@@ -57,7 +57,7 @@ describe('VariableDeclaration', () => {
             })
             const context = newSemanticContext()
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).valueSet).toEqual({
+            expect((context.scope.emitted[0] as any).lattice).toEqual({
                 type: 'integer',
                 min: '1',
                 max: '1',
@@ -68,7 +68,7 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: false,
                 name: 'foo',
-                valueSet: { isolationLevel: ISOLATED },
+                isolationLevel: ISOLATED,
                 initialValue: IntegerLiteral.create({
                     value: 1n,
                     span: someCodeSpan,
@@ -82,17 +82,17 @@ describe('VariableDeclaration', () => {
                         {
                             name: 'field',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
             )
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).valueSet).toEqual({
+            expect((context.scope.emitted[0] as any).lattice).toEqual({
                 type: 'integer',
             })
         })
@@ -101,7 +101,7 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: true,
                 name: 'foo',
-                valueSet: { isolationLevel: ISOLATED },
+                isolationLevel: ISOLATED,
                 initialValue: TruthValueLiteral.create({
                     value: 'true',
                     span: someCodeSpan,
@@ -109,7 +109,7 @@ describe('VariableDeclaration', () => {
             })
             const context = newSemanticContext()
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).valueSet).toEqual({
+            expect((context.scope.emitted[0] as any).lattice).toEqual({
                 type: 'truthvalue',
                 values: ['true'],
             })
@@ -119,7 +119,7 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: false,
                 name: 'foo',
-                valueSet: { isolationLevel: ISOLATED },
+                isolationLevel: ISOLATED,
                 initialValue: TruthValueLiteral.create({
                     value: 'true',
                     span: someCodeSpan,
@@ -133,17 +133,17 @@ describe('VariableDeclaration', () => {
                         {
                             name: 'field',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: TruthvalueLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                Truthlattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
             )
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).valueSet).toEqual({
+            expect((context.scope.emitted[0] as any).lattice).toEqual({
                 type: 'truthvalue',
                 values: ['false', 'ambiguous', 'true'],
             })
@@ -160,11 +160,11 @@ describe('VariableDeclaration', () => {
                         {
                             name: 'innerField',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -176,15 +176,15 @@ describe('VariableDeclaration', () => {
                         {
                             name: 'field',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: RCTypeLattice.create({
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                RCTypeLattice.create({
                                     type: TypeName.create({
                                         name: 'InnerType',
                                     }),
                                 }),
-                                span: someCodeSpan,
-                            },
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -217,13 +217,13 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: false,
                 name: 'foo',
-                valueSet: {
-                    isolationLevel: ISOLATED,
-                    lattice: RCTypeLattice.create({
+                isolationLevel: ISOLATED,
+                lattice: decorateLattice(
+                    RCTypeLattice.create({
                         type: TypeName.create({ name: 'InnerType' }),
                     }),
-                    span: someCodeSpan,
-                },
+                    { span: someCodeSpan },
+                ),
                 initialValue: FieldReference.create({
                     object: VariableReference.create({
                         name: 'bar',
@@ -260,11 +260,11 @@ describe('VariableDeclaration', () => {
                         {
                             name: 'field',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -292,13 +292,13 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: false,
                 name: 'foo',
-                valueSet: {
-                    isolationLevel: ISOLATED,
-                    lattice: RCTypeLattice.create({
+                isolationLevel: ISOLATED,
+                lattice: decorateLattice(
+                    RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
-                    span: someCodeSpan,
-                },
+                    { span: someCodeSpan },
+                ),
                 initialValue: VariableReference.create({
                     name: 'bar',
                     span: someCodeSpan,
@@ -325,11 +325,11 @@ describe('VariableDeclaration', () => {
                         {
                             name: 'field',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -357,11 +357,10 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: false,
                 name: 'foo',
-                valueSet: {
-                    isolationLevel: ISOLATED,
-                    lattice: IntegerLattice.unconstrained(),
+                isolationLevel: ISOLATED,
+                lattice: decorateLattice(IntegerLattice.unconstrained(), {
                     span: someCodeSpan,
-                },
+                }),
                 initialValue: FieldReference.create({
                     object: VariableReference.create({
                         name: 'bar',
@@ -392,11 +391,10 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: true,
                 name: 'x',
-                valueSet: {
-                    isolationLevel: ISOLATED,
-                    lattice: IntegerLattice.unconstrained(),
+                isolationLevel: ISOLATED,
+                lattice: decorateLattice(IntegerLattice.unconstrained(), {
                     span: someCodeSpan,
-                },
+                }),
                 initialValue: IntegerLiteral.create({
                     value: 42n,
                     span: someCodeSpan,
@@ -420,11 +418,11 @@ describe('VariableDeclaration', () => {
                         {
                             isImmutable: false,
                             name: 'innerField',
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -436,15 +434,15 @@ describe('VariableDeclaration', () => {
                         {
                             name: 'field',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: RCTypeLattice.create({
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                RCTypeLattice.create({
                                     type: TypeName.create({
                                         name: 'InnerType',
                                     }),
                                 }),
-                                span: someCodeSpan,
-                            },
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -453,13 +451,13 @@ describe('VariableDeclaration', () => {
             const declaration = VariableDeclaration.create({
                 isImmutable: true,
                 name: 'target',
-                valueSet: {
-                    isolationLevel: ISOLATED,
-                    lattice: RCTypeLattice.create({
+                isolationLevel: ISOLATED,
+                lattice: decorateLattice(
+                    RCTypeLattice.create({
                         type: TypeName.create({ name: 'OuterType' }),
                     }),
-                    span: someCodeSpan,
-                },
+                    { span: someCodeSpan },
+                ),
                 initialValue: DataLiteral.create({
                     fields: [
                         {
@@ -512,13 +510,13 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: true,
                 name: 'foo',
-                valueSet: {
-                    isolationLevel: ISOLATED,
-                    lattice: RCTypeLattice.create({
+                isolationLevel: ISOLATED,
+                lattice: decorateLattice(
+                    RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
-                    span: someCodeSpan,
-                },
+                    { span: someCodeSpan },
+                ),
                 initialValue: DataLiteral.create({
                     fields: [],
                     span: someCodeSpan,
@@ -555,13 +553,13 @@ describe('VariableDeclaration', () => {
             const decl = VariableDeclaration.create({
                 isImmutable: true,
                 name: 'r',
-                valueSet: {
-                    isolationLevel: SHARED,
-                    lattice: RCTypeLattice.create({
+                isolationLevel: SHARED,
+                lattice: decorateLattice(
+                    RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyData' }),
                     }),
-                    span: someCodeSpan,
-                },
+                    { span: someCodeSpan },
+                ),
                 initialValue: Query.create({
                     baseName: 'copy',
                     arguments: [
@@ -596,11 +594,11 @@ describe('VariableDeclaration', () => {
                             {
                                 name: 'myField',
                                 isImmutable: false,
-                                valueSet: {
-                                    isolationLevel: ISOLATED,
-                                    lattice: IntegerLattice.unconstrained(),
-                                    span: someCodeSpan,
-                                },
+                                isolationLevel: ISOLATED,
+                                lattice: decorateLattice(
+                                    IntegerLattice.unconstrained(),
+                                    { span: someCodeSpan },
+                                ),
                             },
                         ],
                     }),
@@ -628,13 +626,13 @@ describe('VariableDeclaration', () => {
                 const declaration = VariableDeclaration.create({
                     isImmutable: false,
                     name: 'target',
-                    valueSet: {
-                        isolationLevel: ISOLATED,
-                        lattice: RCTypeLattice.create({
+                    isolationLevel: ISOLATED,
+                    lattice: decorateLattice(
+                        RCTypeLattice.create({
                             type: TypeName.create({ name: 'MyType' }),
                         }),
-                        span: someCodeSpan,
-                    },
+                        { span: someCodeSpan },
+                    ),
                     initialValue: VariableReference.create({
                         name: 'value',
                         span: {

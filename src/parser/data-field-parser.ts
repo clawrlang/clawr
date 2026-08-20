@@ -7,7 +7,7 @@ import {
     SemanticsKeyword,
     SemanticsKeywordParser,
 } from './semantics-keyword-parser'
-import { ValueSetParser } from './value-set-parser'
+import { LatticeParser } from './lattice-parser'
 
 export class DataFieldParser {
     private constructor(private context: Context) {}
@@ -23,7 +23,7 @@ export class DataFieldParser {
         const fieldName = fieldNameToken.identifier
 
         stream.expect('PUNCTUATION', ':')
-        const valueSet = ValueSetParser.create(this.context).parse(stream)
+        const lattice = LatticeParser.create(this.context).parse(stream)
 
         let defaultValue: Expression | undefined
         if (stream.isNext('PUNCTUATION', '=')) {
@@ -34,7 +34,8 @@ export class DataFieldParser {
         return {
             name: fieldName,
             isImmutable: keyword.isImmutable,
-            valueSet: { ...valueSet, isolationLevel: keyword.isolationLevel },
+            isolationLevel: keyword.isolationLevel,
+            lattice,
             defaultValue,
         }
     }

@@ -16,6 +16,7 @@ import {
 } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { decorateLattice } from '../../../src/model/lattice-declaration'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
@@ -26,11 +27,10 @@ describe('FunctionDeclaration', () => {
                     label: 'param1',
                     isImmutable: true,
                     varName: 'x',
-                    valueSet: {
-                        isolationLevel: ISOLATED,
-                        lattice: StringLattice.create(),
+                    isolationLevel: ISOLATED,
+                    lattice: decorateLattice(StringLattice.create(), {
                         span: someCodeSpan,
-                    },
+                    }),
                     span: someCodeSpan,
                 }),
             ],
@@ -50,10 +50,10 @@ describe('FunctionDeclaration', () => {
             parameters: [
                 {
                     name: 'x',
-                    valueSet: { type: 'string' },
+                    lattice: { type: 'string' },
                 },
             ],
-            resultValueSet: undefined,
+            lattice: undefined,
             body: [],
         })
     })
@@ -81,7 +81,7 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            resultValueSet: { type: 'integer', min: '42', max: '42' },
+            lattice: { type: 'integer', min: '42', max: '42' },
             body: [
                 {
                     kind: 'RETURN',
@@ -96,9 +96,10 @@ describe('FunctionDeclaration', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
+                lattice: decorateLattice(IntegerLattice.unconstrained(), {
+                    span: someCodeSpan,
+                }),
                 isolationLevel: ISOLATED,
-                lattice: IntegerLattice.unconstrained(),
-                span: someCodeSpan,
             },
             implementation: {
                 kind: 'body',
@@ -123,7 +124,7 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            resultValueSet: { type: 'integer', min: undefined, max: undefined },
+            lattice: { type: 'integer', min: undefined, max: undefined },
             body: [
                 {
                     kind: 'RETURN',
@@ -159,11 +160,13 @@ describe('FunctionDeclaration', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
+                lattice: decorateLattice(
+                    RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyData' }),
+                    }),
+                    { span: someCodeSpan },
+                ),
                 isolationLevel: ISOLATED,
-                lattice: RCTypeLattice.create({
-                    type: TypeName.create({ name: 'MyData' }),
-                }),
-                span: someCodeSpan,
             },
             implementation: {
                 kind: 'implicit-return',
@@ -206,11 +209,13 @@ describe('FunctionDeclaration', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
+                lattice: decorateLattice(
+                    RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyData' }),
+                    }),
+                    { span: someCodeSpan },
+                ),
                 isolationLevel: ISOLATED,
-                lattice: RCTypeLattice.create({
-                    type: TypeName.create({ name: 'MyData' }),
-                }),
-                span: someCodeSpan,
             },
             implementation: {
                 kind: 'implicit-return',
@@ -253,11 +258,13 @@ describe('FunctionDeclaration', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
+                lattice: decorateLattice(
+                    RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyData' }),
+                    }),
+                    { span: someCodeSpan },
+                ),
                 isolationLevel: ISOLATED,
-                lattice: RCTypeLattice.create({
-                    type: TypeName.create({ name: 'MyData' }),
-                }),
-                span: someCodeSpan,
             },
             implementation: {
                 kind: 'implicit-return',
@@ -297,7 +304,7 @@ describe('FunctionDeclaration', () => {
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 parameters: [],
-                resultValueSet: {
+                lattice: {
                     type: 'integer',
                     min: '42',
                     max: '42',
@@ -353,7 +360,7 @@ describe('FunctionDeclaration', () => {
             expect(decl).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                resultValueSet: {
+                lattice: {
                     type: 'rc-type',
                     name: 'MyData',
                 },
@@ -401,7 +408,7 @@ describe('FunctionDeclaration', () => {
             expect(decl).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                resultValueSet: {
+                lattice: {
                     type: 'rc-type',
                     name: 'MyData',
                 },
@@ -438,11 +445,10 @@ describe('FunctionDeclaration', () => {
                     label: 'param1',
                     isImmutable: true,
                     varName: 'x',
-                    valueSet: {
-                        isolationLevel: ISOLATED,
-                        lattice: StringLattice.create(),
+                    isolationLevel: ISOLATED,
+                    lattice: decorateLattice(StringLattice.create(), {
                         span: someCodeSpan,
-                    },
+                    }),
                     span: someCodeSpan,
                 }),
             ],
@@ -481,11 +487,11 @@ describe('FunctionDeclaration', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -501,13 +507,13 @@ describe('FunctionDeclaration', () => {
                         VariableDeclaration.create({
                             isImmutable: true,
                             name: 'myVar',
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: RCTypeLattice.create({
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                RCTypeLattice.create({
                                     type: TypeName.create({ name: 'MyData' }),
                                 }),
-                                span: someCodeSpan,
-                            },
+                                { span: someCodeSpan },
+                            ),
                             initialValue: DataLiteral.create({
                                 fields: [
                                     {
@@ -551,11 +557,11 @@ describe('FunctionDeclaration', () => {
                         {
                             name: 'field1',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -565,9 +571,10 @@ describe('FunctionDeclaration', () => {
                 baseName: 'myFunction',
                 parameters: [],
                 result: {
+                    lattice: decorateLattice(IntegerLattice.unconstrained(), {
+                        span: someCodeSpan,
+                    }),
                     isolationLevel: ISOLATED,
-                    lattice: IntegerLattice.unconstrained(),
-                    span: someCodeSpan,
                 },
                 implementation: {
                     kind: 'body',
@@ -575,13 +582,13 @@ describe('FunctionDeclaration', () => {
                         VariableDeclaration.create({
                             isImmutable: true,
                             name: 'myVar',
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: RCTypeLattice.create({
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                RCTypeLattice.create({
                                     type: TypeName.create({ name: 'MyData' }),
                                 }),
-                                span: someCodeSpan,
-                            },
+                                { span: someCodeSpan },
+                            ),
                             initialValue: DataLiteral.create({
                                 fields: [
                                     {
@@ -636,11 +643,13 @@ describe('FunctionDeclaration', () => {
                 baseName: 'myFunction',
                 parameters: [],
                 result: {
+                    lattice: decorateLattice(
+                        RCTypeLattice.create({
+                            type: TypeName.create({ name: 'MyData' }),
+                        }),
+                        { span: someCodeSpan },
+                    ),
                     isolationLevel: ISOLATED,
-                    lattice: RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyData' }),
-                    }),
-                    span: someCodeSpan,
                 },
                 implementation: {
                     kind: 'body',
@@ -648,13 +657,13 @@ describe('FunctionDeclaration', () => {
                         VariableDeclaration.create({
                             isImmutable: true,
                             name: 'myVar',
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: RCTypeLattice.create({
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                RCTypeLattice.create({
                                     type: TypeName.create({ name: 'MyData' }),
                                 }),
-                                span: someCodeSpan,
-                            },
+                                { span: someCodeSpan },
+                            ),
                             initialValue: DataLiteral.create({
                                 fields: [],
                                 span: someCodeSpan,

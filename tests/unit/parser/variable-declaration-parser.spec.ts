@@ -10,7 +10,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
             name: 'foo',
-            valueSet: { lattice: { min: undefined, max: undefined } },
+            lattice: { min: undefined, max: undefined },
             initialValue: { value: 1n },
         })
     })
@@ -20,7 +20,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: false,
             name: 'foo',
-            valueSet: { lattice: { min: undefined, max: undefined } },
+            lattice: { min: undefined, max: undefined },
             initialValue: { value: 1n },
         })
     })
@@ -30,10 +30,8 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: false,
             name: 'foo',
-            valueSet: {
-                lattice: { type: { name: 'Type' } },
-                isolationLevel: SHARED,
-            },
+            isolationLevel: SHARED,
+            lattice: { type: { name: 'Type' } },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: 1n } },
@@ -48,10 +46,8 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
             name: 'foo',
-            valueSet: {
-                lattice: { type: { name: 'Type' } },
-                isolationLevel: SHARED,
-            },
+            isolationLevel: SHARED,
+            lattice: { type: { name: 'Type' } },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: 1n } },
@@ -66,7 +62,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
             name: 'foo',
-            valueSet: { isolationLevel: ISOLATED },
+            isolationLevel: ISOLATED,
             initialValue: { value: 1n },
         })
     })
@@ -78,10 +74,8 @@ describe('VariableDeclarationParser', () => {
         expect(decl).toMatchObject({
             isImmutable: true,
             name: 'r',
-            valueSet: {
-                lattice: { type: { name: 'MyData' } },
-                isolationLevel: SHARED,
-            },
+            isolationLevel: SHARED,
+            lattice: { type: { name: 'MyData' } },
             initialValue: { fields: [] },
         })
     })

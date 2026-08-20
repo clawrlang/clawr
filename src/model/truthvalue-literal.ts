@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { Lattice, TruthvalueLattice } from './lattice'
+import { Lattice, Truthlattice } from './lattice'
 import { Failable } from './failable'
 import { ISOLATED } from './isolation-level'
 
@@ -26,11 +26,11 @@ export class TruthValueLiteral implements Expression {
     }
 
     currentValue(_: Context): Failable<Lattice> {
-        return Failable.success(TruthvalueLattice.create([this.value]))
+        return Failable.success(Truthlattice.create([this.value]))
     }
 
-    declaredValueSet(_: Context): Failable<Lattice> {
-        return Failable.success(TruthvalueLattice.create([this.value]))
+    declaredLattice(_: Context): Failable<Lattice> {
+        return Failable.success(Truthlattice.create([this.value]))
     }
 
     toCIRExpression(_: Context): Failable<cir.Expression> {

@@ -36,17 +36,13 @@ describe('Module Parser', () => {
                 {
                     isImmutable: true,
                     name: 'x',
-                    valueSet: {
-                        lattice: { min: undefined, max: undefined },
-                    },
+                    lattice: { min: undefined, max: undefined },
                     initialValue: { value: 10n },
                 },
                 {
                     isImmutable: false,
                     name: 'y',
-                    valueSet: {
-                        lattice: { min: undefined, max: undefined },
-                    },
+                    lattice: { min: undefined, max: undefined },
                     initialValue: { value: 20n },
                 },
                 {
@@ -75,11 +71,9 @@ describe('Module Parser', () => {
                 {
                     isImmutable: false,
                     name: 'y',
-                    valueSet: {
-                        lattice: {
-                            min: undefined,
-                            max: undefined,
-                        },
+                    lattice: {
+                        min: undefined,
+                        max: undefined,
                     },
                     initialValue: { value: 20n },
                 },

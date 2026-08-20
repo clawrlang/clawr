@@ -14,7 +14,7 @@ export type Context = {
     }
 }
 
-export type ContextWithValueSet = Context & {
+export type ContextWithLattice = Context & {
     explicitLattice?: Lattice
     isolationLevel?: IsolationLevel
 }
@@ -23,10 +23,10 @@ export interface Expression {
     get span(): SourceCodeSpan
     isEffectivelyConst(context: Context): Failable<boolean>
     isolationLevel(context: Context): Failable<AnyIsolationLevel>
-    declaredValueSet(context: ContextWithValueSet): Failable<Lattice>
-    currentValue(context: ContextWithValueSet): Failable<Lattice>
+    declaredLattice(context: ContextWithLattice): Failable<Lattice>
+    currentValue(context: ContextWithLattice): Failable<Lattice>
     setCurrentValue?(context: Context, value: Lattice): void
-    toCIRExpression(context: ContextWithValueSet): Failable<cir.Expression>
+    toCIRExpression(context: ContextWithLattice): Failable<cir.Expression>
 }
 
 export interface Statement {

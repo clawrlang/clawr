@@ -10,7 +10,7 @@
             "parameters": [
                 {
                     "name": "var",
-                    "valueSet": {
+                    "lattice": {
                         "type": "integer"
                     }
                 }
@@ -24,7 +24,7 @@
                     }
                 }
             ],
-            "resultValueSet": {
+            "lattice": {
                 "type": "integer",
                 "max": "42",
                 "min": "42"

@@ -136,13 +136,13 @@ describe('Object Parser', () => {
                 {
                     name: 'field1',
                     isImmutable: true,
-                    valueSet: { isolationLevel: ISOLATED },
+                    isolationLevel: ISOLATED,
                     defaultValue: { value: 10n },
                 },
                 {
                     name: 'field2',
                     isImmutable: true,
-                    valueSet: { isolationLevel: ISOLATED },
+                    isolationLevel: ISOLATED,
                     defaultValue: { value: 'true' },
                 },
             ],

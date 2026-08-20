@@ -282,22 +282,22 @@
             "properties": {
               "kind": { "const": "VARIABLE_DECL" },
               "name": { "type": "string" },
-              "valueSet": { "$ref": "#/$defs/ValueSet" },
+              "lattice": { "$ref": "#/$defs/Lattice" },
               "initialValue": { "$ref": "#/$defs/Expression" }
             },
-            "required": ["kind", "name", "valueSet", "initialValue"],
+            "required": ["kind", "name", "lattice", "initialValue"],
             "additionalProperties": false
           },
-          "ValueSet": {
+          "Lattice": {
             "oneOf": [
-              { "$ref": "#/$defs/IntegerValueSet" },
-              { "$ref": "#/$defs/RCTypeValueSet" },
-              { "$ref": "#/$defs/RealValueSet" },
-              { "$ref": "#/$defs/StringValueSet" },
-              { "$ref": "#/$defs/TruthValueSet" }
+              { "$ref": "#/$defs/IntegerLattice" },
+              { "$ref": "#/$defs/RCTypeLattice" },
+              { "$ref": "#/$defs/RealLattice" },
+              { "$ref": "#/$defs/StringLattice" },
+              { "$ref": "#/$defs/TruthvalueLattice" }
             ]
           },
-          "IntegerValueSet": {
+          "IntegerLattice": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
@@ -307,7 +307,7 @@
             "required": ["type"],
             "additionalProperties": false
           },
-          "RCTypeValueSet": {
+          "RCTypeLattice": {
             "type": "object",
             "properties": {
               "type": { "const": "rc-type" },
@@ -317,7 +317,7 @@
             "required": ["type", "name"],
             "additionalProperties": false
           },
-          "RealValueSet": {
+          "RealLattice": {
             "type": "object",
             "properties": {
               "type": { "const": "real" },
@@ -327,13 +327,13 @@
             "required": ["type"],
             "additionalProperties": false
           },
-          "StringValueSet": {
+          "StringLattice": {
             "type": "object",
             "properties": { "type": { "const": "string" } },
             "required": ["type"],
             "additionalProperties": false
           },
-          "TruthValueSet": {
+          "TruthvalueLattice": {
             "type": "object",
             "properties": {
               "type": { "const": "truthvalue" },
@@ -364,11 +364,11 @@
             "properties": {
               "kind": { "const": "VARIABLE_DECL" },
               "name": { "type": "string" },
-              "valueSet": { "$ref": "#/$defs/ValueSet" },
+              "lattice": { "$ref": "#/$defs/Lattice" },
               "initialValue": { "$ref": "#/$defs/Expression" },
               "namespace": { "type": "string" }
             },
-            "required": ["kind", "name", "valueSet", "initialValue"],
+            "required": ["kind", "name", "lattice", "initialValue"],
             "additionalProperties": false
           },
           "__type__type.o2": {
@@ -383,9 +383,9 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                    "lattice": { "$ref": "#/$defs/Lattice" }
                   },
-                  "required": ["name", "valueSet"],
+                  "required": ["name", "lattice"],
                   "additionalProperties": false
                 }
               }
@@ -409,19 +409,19 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                    "lattice": { "$ref": "#/$defs/Lattice" }
                   },
-                  "required": ["name", "valueSet"],
+                  "required": ["name", "lattice"],
                   "additionalProperties": false
                 }
               },
-              "resultValueSet": {
+              "lattice": {
                 "oneOf": [
-                  { "$ref": "#/$defs/IntegerValueSet" },
-                  { "$ref": "#/$defs/RCTypeValueSet" },
-                  { "$ref": "#/$defs/RealValueSet" },
-                  { "$ref": "#/$defs/StringValueSet" },
-                  { "$ref": "#/$defs/TruthValueSet" }
+                  { "$ref": "#/$defs/IntegerLattice" },
+                  { "$ref": "#/$defs/RCTypeLattice" },
+                  { "$ref": "#/$defs/RealLattice" },
+                  { "$ref": "#/$defs/StringLattice" },
+                  { "$ref": "#/$defs/TruthvalueLattice" }
                 ]
               },
               "namespace": { "type": "string" }
@@ -441,9 +441,9 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                    "lattice": { "$ref": "#/$defs/Lattice" }
                   },
-                  "required": ["name", "valueSet"],
+                  "required": ["name", "lattice"],
                   "additionalProperties": false
                 }
               },
@@ -489,19 +489,19 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                    "lattice": { "$ref": "#/$defs/Lattice" }
                   },
-                  "required": ["name", "valueSet"],
+                  "required": ["name", "lattice"],
                   "additionalProperties": false
                 }
               },
-              "resultValueSet": {
+              "lattice": {
                 "oneOf": [
-                  { "$ref": "#/$defs/IntegerValueSet" },
-                  { "$ref": "#/$defs/RCTypeValueSet" },
-                  { "$ref": "#/$defs/RealValueSet" },
-                  { "$ref": "#/$defs/StringValueSet" },
-                  { "$ref": "#/$defs/TruthValueSet" }
+                  { "$ref": "#/$defs/IntegerLattice" },
+                  { "$ref": "#/$defs/RCTypeLattice" },
+                  { "$ref": "#/$defs/RealLattice" },
+                  { "$ref": "#/$defs/StringLattice" },
+                  { "$ref": "#/$defs/TruthvalueLattice" }
                 ]
               }
             },
@@ -524,9 +524,9 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                    "lattice": { "$ref": "#/$defs/Lattice" }
                   },
-                  "required": ["name", "valueSet"],
+                  "required": ["name", "lattice"],
                   "additionalProperties": false
                 }
               }
@@ -545,19 +545,19 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "valueSet": { "$ref": "#/$defs/ValueSet" }
+                    "lattice": { "$ref": "#/$defs/Lattice" }
                   },
-                  "required": ["name", "valueSet"],
+                  "required": ["name", "lattice"],
                   "additionalProperties": false
                 }
               },
-              "resultValueSet": {
+              "lattice": {
                 "oneOf": [
-                  { "$ref": "#/$defs/IntegerValueSet" },
-                  { "$ref": "#/$defs/RCTypeValueSet" },
-                  { "$ref": "#/$defs/RealValueSet" },
-                  { "$ref": "#/$defs/StringValueSet" },
-                  { "$ref": "#/$defs/TruthValueSet" }
+                  { "$ref": "#/$defs/IntegerLattice" },
+                  { "$ref": "#/$defs/RCTypeLattice" },
+                  { "$ref": "#/$defs/RealLattice" },
+                  { "$ref": "#/$defs/StringLattice" },
+                  { "$ref": "#/$defs/TruthvalueLattice" }
                 ]
               }
             },

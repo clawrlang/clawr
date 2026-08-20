@@ -5,12 +5,11 @@
 - Function return values
   - Do not `ENSURE_UNIQUE` `SHARED` return-value
   - Ensure that value has the right isolation-level
-  - Add executing function to scope — isolation-level & `resultValueSet`
 
 - `toCIR()`
 - Refactoring: improve encapsulation; `Parameter` does nothing
 
-- Ensure that `valueSet` and `defaultValue` are compatible
+- Ensure that `lattice` and `defaultValue` are compatible
 - Ensure that `undefined` variables are not modified
 - Ensure that `undefined` variables are not assigned without `copy(of:)`
 

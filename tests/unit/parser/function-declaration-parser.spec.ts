@@ -2,7 +2,6 @@ import { describe, expect, it } from 'bun:test'
 import { TestErrorReporter } from '../../util'
 import { TokenStream } from '../../../src/lexer'
 import { FunctionDeclarationParser } from '../../../src/parser/function-declaration-parser'
-import { RCTypeLattice } from '../../../src/model/lattice'
 import {
     ISOLATED,
     SHARED,
@@ -32,7 +31,7 @@ describe('Function Declaration Parser', () => {
             parameters: [
                 {
                     varName: 'x',
-                    valueSet: { lattice: { max: undefined, min: undefined } },
+                    lattice: { max: undefined, min: undefined },
                     label: 'x',
                     span: {
                         start: { line: 1, column: 17 },
@@ -41,9 +40,7 @@ describe('Function Declaration Parser', () => {
                 },
                 {
                     varName: 'y',
-                    valueSet: {
-                        lattice: { values: ['false', 'ambiguous', 'true'] },
-                    },
+                    lattice: { values: ['false', 'ambiguous', 'true'] },
                     label: 'y',
                     span: {
                         start: { line: 1, column: 29 },
@@ -65,7 +62,7 @@ describe('Function Declaration Parser', () => {
             parameters: [
                 {
                     varName: 'x',
-                    valueSet: { lattice: { max: undefined, min: undefined } },
+                    lattice: { max: undefined, min: undefined },
                     label: undefined,
                     span: {
                         start: { line: 1, column: 17 },
@@ -74,9 +71,7 @@ describe('Function Declaration Parser', () => {
                 },
                 {
                     varName: 'y',
-                    valueSet: {
-                        lattice: { values: ['false', 'ambiguous', 'true'] },
-                    },
+                    lattice: { values: ['false', 'ambiguous', 'true'] },
                     label: 'label',
                     span: {
                         start: { line: 1, column: 31 },
@@ -100,7 +95,7 @@ describe('Function Declaration Parser', () => {
                 {
                     varName: 'x',
                     isImmutable: true,
-                    valueSet: { isolationLevel: SHARED },
+                    isolationLevel: SHARED,
                     span: {
                         start: { line: 1, column: 17 },
                         end: { line: 1, column: 32 },
@@ -108,10 +103,8 @@ describe('Function Declaration Parser', () => {
                 },
                 {
                     varName: 'y',
-                    valueSet: {
-                        isolationLevel: ISOLATED,
-                        lattice: { values: ['false', 'ambiguous', 'true'] },
-                    },
+                    isolationLevel: ISOLATED,
+                    lattice: { values: ['false', 'ambiguous', 'true'] },
                     isImmutable: true,
                     span: {
                         start: { line: 1, column: 34 },
@@ -134,7 +127,7 @@ describe('Function Declaration Parser', () => {
                 {
                     label: 'x',
                     varName: 'x',
-                    valueSet: { isolationLevel: UNKNOWN },
+                    isolationLevel: UNKNOWN,
                     isImmutable: true,
                 },
             ],
@@ -152,7 +145,7 @@ describe('Function Declaration Parser', () => {
             parameters: [
                 {
                     varName: 'x',
-                    valueSet: { isolationLevel: ISOLATED },
+                    isolationLevel: ISOLATED,
                     label: undefined,
                     defaultValue: { value: 42n },
                     span: {
@@ -165,7 +158,7 @@ describe('Function Declaration Parser', () => {
             implementation: { kind: 'body', statements: [] },
         })
         expect(result).not.toMatchObject({
-            parameters: [{ valueSet: { lattice: expect.anything() } }],
+            parameters: [{ lattice: { lattice: expect.anything() } }],
         })
     })
 

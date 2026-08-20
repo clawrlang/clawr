@@ -7,7 +7,7 @@
             "fields": [
                 {
                     "name": "bar",
-                    "valueSet": {
+                    "lattice": {
                         "type": "integer"
                     }
                 }
@@ -16,7 +16,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "two",
-            "valueSet": {
+            "lattice": {
                 "type": "rc-type",
                 "name": "FooData"
             },
@@ -42,7 +42,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "one",
-            "valueSet": {
+            "lattice": {
                 "type": "rc-type",
                 "name": "FooData"
             },

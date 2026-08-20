@@ -30,7 +30,7 @@ export function lowerDecl(decl: cir.Declaration): string {
         case 'RC_TYPE_DECL': {
             const mangledTypeName = mangleTypeName(decl)
             const fields = decl.fields
-                .map((field) => `${lowerType(field.valueSet)} ${field.name};`)
+                .map((field) => `${lowerType(field.lattice)} ${field.name};`)
                 .join('\n')
             if (!('methods' in decl))
                 return `typedef struct {
@@ -87,7 +87,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             `
         }
         case 'VARIABLE_DECL':
-            return `${lowerType(decl.valueSet)} ${decl.name};`
+            return `${lowerType(decl.lattice)} ${decl.name};`
 
         case 'FUNCTION_DECL':
             return lowerFunction(decl, mangleNameWithParameters(decl))
@@ -113,17 +113,15 @@ function lowerVtableSlot({ slot, declaredIn }: DispatchSlot) {
 }
 
 function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
-    const returnType = slot.resultValueSet
-        ? lowerType(slot.resultValueSet)
-        : 'void'
+    const returnType = slot.lattice ? lowerType(slot.lattice) : 'void'
 
-    const params = [
+    const params: FunctionSignature['parameters'] = [
         {
             name: 'self',
-            valueSet: {
+            lattice: {
                 type: 'rc-type',
                 name: 'void',
-            } satisfies cir.ValueSet,
+            },
         },
         ...slot.parameters,
     ]
@@ -131,7 +129,7 @@ function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
     const mangledName = mangleNameWithParameters(slot, declaredIn)
 
     const paramDecls = params
-        .map((param) => `${lowerType(param.valueSet)} ${param.name}`)
+        .map((param) => `${lowerType(param.lattice)} ${param.name}`)
         .join(', ')
     return `typedef ${returnType} (*${mangledName}ˇmethod)(${paramDecls});`
 }
@@ -147,7 +145,7 @@ function lowerMethod(
             parameters: [
                 {
                     name: 'self',
-                    valueSet: {
+                    lattice: {
                         type: 'rc-type',
                         namespace: receiverType.namespace,
                         name: receiverType.name,
@@ -168,14 +166,14 @@ function lowerInitializer(
     return lowerFunction(
         {
             ...decl,
-            resultValueSet: {
+            lattice: {
                 type: 'rc-type',
                 name: 'void',
             },
             parameters: [
                 {
                     name: 'self',
-                    valueSet: {
+                    lattice: {
                         type: 'rc-type',
                         namespace: receiverType.namespace,
                         name: receiverType.name,
@@ -204,11 +202,9 @@ function lowerFunction(
     mangledName: string,
 ) {
     const params = decl.parameters
-        .map((param) => `${lowerType(param.valueSet)} ${param.name}`)
+        .map((param) => `${lowerType(param.lattice)} ${param.name}`)
         .join(', ')
-    const returnType = decl.resultValueSet
-        ? lowerType(decl.resultValueSet)
-        : 'void'
+    const returnType = decl.lattice ? lowerType(decl.lattice) : 'void'
 
     return `${returnType} ${mangledName}(${params}) {
         ${decl.body.map(lowerStmt).join('\n')}
@@ -223,16 +219,16 @@ function lowerInit(
     }`
 }
 
-function lowerType(valueSet: cir.ValueSet): string {
-    switch (valueSet.type) {
+function lowerType(lattice: cir.Lattice): string {
+    switch (lattice.type) {
         case 'integer':
             return 'int64_t'
         case 'truthvalue':
             return 'truthvalue_t'
         case 'rc-type':
-            return `${valueSet.name}*`
+            return `${lattice.name}*`
         default:
-            throw new Error(`Unknown value set type: ${(valueSet as any).type}`)
+            throw new Error(`Unknown value set type: ${(lattice as any).type}`)
     }
 }
 
@@ -282,7 +278,7 @@ export function lowerStmt(stmt: cir.Statement): string {
                 }
             }
         case 'VARIABLE_DECL':
-            return `${lowerType(stmt.valueSet)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
+            return `${lowerType(stmt.lattice)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         case 'ASSIGN':
             if (
                 stmt.target.kind === 'VARIABLE_REF' &&
@@ -399,9 +395,9 @@ type FunctionSignature = {
     labels: string[]
     parameters: {
         name: string
-        valueSet: cir.ValueSet
+        lattice: cir.Lattice
     }[]
-    resultValueSet?: cir.ValueSet
+    lattice?: cir.Lattice
 }
 
 function mangleNameWithLabels(

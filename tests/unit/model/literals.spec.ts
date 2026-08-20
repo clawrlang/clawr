@@ -8,6 +8,7 @@ import { DataDeclaration } from '../../../src/model/data-declaration'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
+import { decorateLattice } from '../../../src/model/lattice-declaration'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {
@@ -81,20 +82,20 @@ describe('Literals', () => {
                         {
                             name: 'x',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                         {
                             name: 'y',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -155,20 +156,20 @@ describe('Literals', () => {
                         {
                             name: 'x',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                         {
                             name: 'y',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: IntegerLattice.unconstrained(),
-                                span: someCodeSpan,
-                            },
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                IntegerLattice.unconstrained(),
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),
@@ -221,15 +222,15 @@ describe('Literals', () => {
                         {
                             name: 'inner',
                             isImmutable: false,
-                            valueSet: {
-                                isolationLevel: ISOLATED,
-                                lattice: RCTypeLattice.create({
+                            isolationLevel: ISOLATED,
+                            lattice: decorateLattice(
+                                RCTypeLattice.create({
                                     type: TypeName.create({
                                         name: 'MissingInnerType',
                                     }),
                                 }),
-                                span: someCodeSpan,
-                            },
+                                { span: someCodeSpan },
+                            ),
                         },
                     ],
                 }),

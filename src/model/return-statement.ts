@@ -26,8 +26,8 @@ export class ReturnStatement implements Statement {
                     message: 'Called function has no return value',
                     span: this.value.span,
                 })
-            const valueLattice = this.value.currentValue(context).value()
-            if (!valueLattice) {
+            const lattice = this.value.currentValue(context).value()
+            if (!lattice) {
                 throw new Error(
                     `Return statement value does not have a lattice: ${JSON.stringify(
                         this.value,
@@ -35,7 +35,7 @@ export class ReturnStatement implements Statement {
                 )
             }
 
-            if (!context.calleeResult.lattice.isSupersetTo(valueLattice))
+            if (!context.calleeResult.lattice.isSupersetTo(lattice))
                 throw SemanticError.create({
                     message: 'Return value type mismatch',
                     span: this.value.span,
@@ -55,7 +55,7 @@ export class ReturnStatement implements Statement {
             if (
                 (object.kind === 'VARIABLE_REF' ||
                     object.kind === 'FIELD_REF') &&
-                valueLattice instanceof RCTypeLattice
+                lattice instanceof RCTypeLattice
             ) {
                 context.scope.emitted.push({
                     kind: 'ENSURE_UNIQUE',
@@ -65,7 +65,7 @@ export class ReturnStatement implements Statement {
                 context.scope.emitted.push({
                     kind: 'VARIABLE_DECL',
                     name: temp,
-                    valueSet: valueLattice.toCIR(),
+                    lattice: lattice.toCIR(),
                     initialValue: {
                         kind: 'RETAIN',
                         object,

@@ -2,12 +2,13 @@ import { describe, expect, it, test } from 'bun:test'
 import { Expression } from '../../../src/cir'
 import { lowerExpr } from '../../../src/backend'
 import { ISOLATED } from '../../../src/model/isolation-level'
+import { truthvalue } from '../../../src/model/lattice'
 
 describe('Lowering Literals', () => {
     it('lowers string literals correctly', () => {
         const expr: Expression = {
             kind: 'STRING_LITERAL',
-            value: 'Hello, World!',
+            value: { type: 'string', value: 'Hello, World!' },
         }
         const result = lowerExpr(expr)
         expect(result).toBe('"Hello, World!"')
@@ -16,7 +17,7 @@ describe('Lowering Literals', () => {
     it('lowers integer literals correctly', () => {
         const expr: Expression = {
             kind: 'INTEGER_LITERAL',
-            value: '42',
+            value: { type: 'integer', max: '42', min: '42' },
         }
         const result = lowerExpr(expr)
         expect(result).toBe('42')
@@ -32,7 +33,10 @@ describe('Lowering Literals', () => {
             test(`${input} -> ${expected}`, () => {
                 const expr: Expression = {
                     kind: 'TRUTHVALUE_LITERAL',
-                    value: input as 'false' | 'ambiguous' | 'true',
+                    value: {
+                        type: 'truthvalue',
+                        values: [input as truthvalue],
+                    },
                 }
                 const result = lowerExpr(expr)
                 expect(result).toBe(expected)
@@ -55,9 +59,11 @@ describe('Lowering Literals', () => {
                         value: {
                             kind: 'VARIABLE_REF',
                             name: 'var',
+                            value: { type: 'rc-type', name: 'MyType' },
                         },
                     },
                 ],
+                value: { type: 'rc-type', name: 'MyType' },
             }
             const result = lowerExpr(expr)
             expect(result).toContain('allocInitRC(MyData, 0,')
@@ -78,10 +84,12 @@ describe('Lowering Literals', () => {
                         value: {
                             kind: 'VARIABLE_REF',
                             name: 'var',
+                            value: { type: 'integer', max: '42', min: '42' },
                         },
                     },
                 ],
                 base: { name: 'Super' },
+                value: { type: 'rc-type', name: 'MyType' },
             }
             const result = lowerExpr(expr)
             expect(result).toContain('allocInitInheritedRC(MyObject, 0, Super')

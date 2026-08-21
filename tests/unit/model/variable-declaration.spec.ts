@@ -39,7 +39,7 @@ describe('VariableDeclaration', () => {
             lattice: { type: 'integer', min: '1', max: '1' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
-                value: '1',
+                value: { type: 'integer', min: '1', max: '1' },
             },
         })
     })

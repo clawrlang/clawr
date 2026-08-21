@@ -55,7 +55,7 @@ export class ReturnStatement implements Statement {
             if (
                 (object.kind === 'VARIABLE_REF' ||
                     object.kind === 'FIELD_REF') &&
-                lattice instanceof RCTypeLattice
+                object.value.type === 'rc-type'
             ) {
                 context.scope.emitted.push({
                     kind: 'ENSURE_UNIQUE',
@@ -69,6 +69,7 @@ export class ReturnStatement implements Statement {
                     initialValue: {
                         kind: 'RETAIN',
                         object,
+                        value: object.value,
                     },
                 })
                 context.scope.releaseVariables()
@@ -77,6 +78,7 @@ export class ReturnStatement implements Statement {
                     value: {
                         kind: 'VARIABLE_REF',
                         name: temp,
+                        value: object.value,
                     },
                 })
             } else {

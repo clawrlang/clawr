@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'bun:test'
-import { Expression } from '../../../src/cir'
 import { newSemanticContext, someCodeSpan } from '../../util'
 import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { IntegerLiteral } from '../../../src/model/integer-literal'
@@ -7,12 +6,16 @@ import { DataLiteral } from '../../../src/model/data-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
-import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
+import {
+    IntegerLattice,
+    RCTypeLattice,
+    truthvalue,
+} from '../../../src/model/lattice'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {
-        const cases: Truthvalue[] = ['true', 'false', 'ambiguous'] as const
+        const cases: truthvalue[] = ['true', 'false', 'ambiguous'] as const
         for (const input of cases) {
             it(`outputs ${input} as TRUTHVALUE_LITERAL`, () => {
                 const literal = TruthValueLiteral.create({
@@ -23,7 +26,7 @@ describe('Literals', () => {
                     literal.toCIRExpression(newSemanticContext()).value(),
                 ).toMatchObject({
                     kind: 'TRUTHVALUE_LITERAL',
-                    value: input,
+                    value: { values: [input] },
                 })
             })
 
@@ -53,7 +56,7 @@ describe('Literals', () => {
                     literal.toCIRExpression(newSemanticContext()).value(),
                 ).toMatchObject({
                     kind: 'INTEGER_LITERAL',
-                    value: input,
+                    value: { max: input, min: input },
                 })
             })
 
@@ -137,11 +140,17 @@ describe('Literals', () => {
                 fields: [
                     {
                         name: 'x',
-                        value: { kind: 'INTEGER_LITERAL', value: '42' },
+                        value: {
+                            kind: 'INTEGER_LITERAL',
+                            value: { max: '42', min: '42' },
+                        },
                     },
                     {
                         name: 'y',
-                        value: { kind: 'INTEGER_LITERAL', value: '17' },
+                        value: {
+                            kind: 'INTEGER_LITERAL',
+                            value: { max: '17', min: '17' },
+                        },
                     },
                 ],
             })
@@ -270,5 +279,3 @@ describe('Literals', () => {
         })
     })
 })
-
-type Truthvalue = Extract<Expression, { kind: 'TRUTHVALUE_LITERAL' }>['value']

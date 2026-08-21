@@ -25,6 +25,7 @@ describe('Assignment', () => {
             isolationLevel: ISOLATED,
             lattice: IntegerLattice.unconstrained(),
         })
+        context.scope.setCurrentValue('x', IntegerLattice.singleton(0n))
 
         const assignment = Assignment.create({
             target: VariableReference.create({ name: 'x', span: someCodeSpan }),
@@ -38,7 +39,10 @@ describe('Assignment', () => {
             {
                 kind: 'ASSIGN',
                 target: { kind: 'VARIABLE_REF', name: 'x' },
-                value: { kind: 'INTEGER_LITERAL', value: '42' },
+                value: {
+                    kind: 'INTEGER_LITERAL',
+                    value: { min: '42', max: '42' },
+                },
             },
         ])
     })
@@ -96,6 +100,12 @@ describe('Assignment', () => {
                     type: TypeName.create({ name: 'InnerType' }),
                 }),
             })
+            context.scope.setCurrentValue(
+                'foo',
+                RCTypeLattice.create({
+                    type: TypeName.create({ name: 'InnerType' }),
+                }),
+            )
             context.scope.setCurrentValue(
                 'bar',
                 RCTypeLattice.create({
@@ -190,6 +200,12 @@ describe('Assignment', () => {
                 RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                     fields: {},
+                }),
+            )
+            context.scope.setCurrentValue(
+                'foo',
+                RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
                 }),
             )
 
@@ -346,6 +362,10 @@ describe('Assignment', () => {
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
+        context.scope.setCurrentValue(
+            'refVar',
+            RCTypeLattice.create({ type: TypeName.create({ name: 'MyType' }) }),
+        )
 
         const assignment = Assignment.create({
             target: VariableReference.create({
@@ -431,6 +451,13 @@ describe('Assignment', () => {
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
+                context.scope.setCurrentValue(
+                    'target',
+                    RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                        fields: {},
+                    }),
+                )
                 context.scope.setCurrentValue(
                     'value',
                     RCTypeLattice.create({
@@ -633,6 +660,12 @@ describe('Assignment', () => {
                     }),
                 })
                 context.scope.setCurrentValue(
+                    'target',
+                    RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                    }),
+                )
+                context.scope.setCurrentValue(
                     'value',
                     RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
@@ -729,6 +762,7 @@ describe('Assignment', () => {
                 isolationLevel: ISOLATED,
                 lattice: IntegerLattice.unconstrained(),
             })
+            context.scope.setCurrentValue('x', IntegerLattice.singleton(0n))
 
             const assignment = Assignment.create({
                 target: VariableReference.create({
@@ -741,6 +775,7 @@ describe('Assignment', () => {
                 }),
                 span: someCodeSpan,
             })
+            assignment.emitStatement(context)
             expect(() => assignment.emitStatement(context)).not.toThrow()
             expect(context.scope.currentValue('x')).not.toBeNil()
             expect(context.scope.currentValue('x')).toMatchObject({

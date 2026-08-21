@@ -72,10 +72,14 @@ export class VariableReference implements Expression {
     toCIRExpression(
         context: Context,
     ): Failable<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
-        return this.lookupInScope(context).chaining((_) =>
+        return Failable.collect([
+            this.lookupInScope(context),
+            this.currentValue(context),
+        ]).chaining(([, value]) =>
             Failable.success({
                 kind: 'VARIABLE_REF' as const,
                 name: this.name,
+                value: value.toCIR(),
             }),
         )
     }

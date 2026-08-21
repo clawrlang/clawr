@@ -85,7 +85,7 @@ describe('FunctionDeclaration', () => {
             body: [
                 {
                     kind: 'RETURN',
-                    value: { value: '42' },
+                    value: { value: { max: '42', min: '42' } },
                 },
             ],
         })
@@ -128,7 +128,7 @@ describe('FunctionDeclaration', () => {
             body: [
                 {
                     kind: 'RETURN',
-                    value: { value: '42' },
+                    value: { value: { max: '42', min: '42' } },
                 },
             ],
         })
@@ -312,7 +312,7 @@ describe('FunctionDeclaration', () => {
                 body: [
                     {
                         kind: 'RETURN',
-                        value: { value: '42' },
+                        value: { value: { max: '42', min: '42' } },
                     },
                 ],
             })

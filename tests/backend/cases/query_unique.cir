@@ -32,12 +32,20 @@
                             "name": "MyData"
                         },
                         "isolationLevel": "ISOLATED",
+                        "value": {
+                            "type": "rc-type",
+                            "name": "MyData"
+                        },
                         "fields": [
                             {
                                 "name": "field",
                                 "value": {
                                     "kind": "INTEGER_LITERAL",
-                                    "value": "42"
+                                    "value": {
+                                        "type": "integer",
+                                        "max": "42",
+                                        "min": "42"
+                                    }
                                 }
                             }
                         ]
@@ -47,7 +55,11 @@
                     "kind": "RETURN",
                     "value": {
                         "kind": "VARIABLE_REF",
-                        "name": "var"
+                        "name": "var",
+                        "value": {
+                            "type": "rc-type",
+                            "name": "MyData"
+                        }
                     }
                 }
             ],
@@ -73,7 +85,15 @@
                         "baseName": "f",
                         "labels": []
                     },
-                    "arguments": []
+                    "arguments": [],
+                    "value": {
+                        "type": "rc-type",
+                        "name": "MyData"
+                    }
+                },
+                "value": {
+                    "type": "rc-type",
+                    "name": "MyData"
                 }
             }
         },
@@ -88,9 +108,15 @@
                     "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
-                        "name": "var"
+                        "name": "var",
+                        "value": {
+                            "type": "integer"
+                        }
                     },
-                    "field": "field"
+                    "field": "field",
+                    "value": {
+                        "type": "integer"
+                    }
                 }
             ]
         }

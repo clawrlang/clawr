@@ -9,7 +9,7 @@ describe('Assignment Parser', () => {
         const result = parseAssignment(code)
         expect(result).toMatchObject({
             target: { name: 'x' },
-            value: { value: 42n },
+            value: { value: { max: 42n, min: 42n } },
         })
     })
 
@@ -21,7 +21,7 @@ describe('Assignment Parser', () => {
                 object: { name: 'obj' },
                 field: 'field',
             },
-            value: { value: 'true' },
+            value: { value: { values: ['true'] } },
         })
     })
 })

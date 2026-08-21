@@ -125,17 +125,17 @@ type Storage = VariableReference | FieldReference
 
 type StringLiteral = {
     kind: 'STRING_LITERAL'
-    value: string
+    value: StringLattice & { value: string }
 }
 
-type IntegerLiteral = {
+type IntegerLiteral<Value extends bigint> = {
     kind: 'INTEGER_LITERAL'
-    value: `${bigint}` & tags.Pattern<'^-?\\d+$'>
+    value: IntegerLattice<Value, Value>
 }
 
-type TruthLiteral = {
+type TruthLiteral<Value extends truthvalue> = {
     kind: 'TRUTHVALUE_LITERAL'
-    value: 'false' | 'ambiguous' | 'true'
+    value: TruthvalueLattice<[Value]>
 }
 
 type MemoryAllocation = {
@@ -147,49 +147,60 @@ type MemoryAllocation = {
         name: string
         value: Expression
     }[]
+    value: RCTypeLattice
 }
 
 type MemoryRetention = {
     kind: 'RETAIN'
     object: Storage
+    value: RCTypeLattice
 }
 
 type AsShared = {
     kind: 'AS_SHARED'
-    object: FunctionCall
+    object: FunctionCall & Expression
+    value: RCTypeLattice
 }
 
 type VariableReference = {
     kind: 'VARIABLE_REF'
     name: string
+    value: Lattice
 }
 
 type FieldReference = {
     kind: 'FIELD_REF'
     object: Expression
     field: string
+    value: Lattice
 }
 
 export type Expression =
     | StringLiteral
-    | IntegerLiteral
-    | TruthLiteral
+    | IntegerLiteral<bigint>
+    | TruthLiteral<truthvalue>
     | MemoryAllocation
     | MemoryRetention
     | AsShared
     | VariableReference
     | FieldReference
-    | FunctionCall
+    | (FunctionCall & { value: Lattice })
 
 // --------
 // Lattices
 // --------
 
-type IntegerLattice = {
+type IntegerLattice<
+    Min extends bigint | undefined,
+    Max extends bigint | undefined,
+> = {
     type: 'integer'
-    min?: `${bigint}` & tags.Pattern<'^-?\\d+$'>
-    max?: `${bigint}` & tags.Pattern<'^-?\\d+$'>
-}
+} & (Min extends undefined
+    ? { min?: undefined }
+    : { min: `${Min}` & tags.Pattern<'^-?\\d+$'> }) &
+    (Max extends undefined
+        ? { max?: undefined }
+        : { max: `${Max}` & tags.Pattern<'^-?\\d+$'> })
 
 type RealLattice = {
     type: 'real'
@@ -197,12 +208,12 @@ type RealLattice = {
     max?: string // numeric, can be arbitrarity big
 }
 
-type TruthvalueLattice = {
+type TruthvalueLattice<T extends truthvalue[]> = {
     type: 'truthvalue'
-    values: ('false' | 'ambiguous' | 'true')[]
+    values: T
 }
 
-type StringLattice = { type: 'string' }
+type StringLattice = { type: 'string'; value?: string }
 
 type RCTypeLattice = {
     type: 'rc-type'
@@ -211,10 +222,11 @@ type RCTypeLattice = {
 }
 
 export type Lattice =
-    | IntegerLattice
+    | IntegerLattice<bigint | undefined, bigint | undefined>
     | RealLattice
-    | TruthvalueLattice
+    | TruthvalueLattice<truthvalue[]>
     | StringLattice
     | RCTypeLattice
 
 type IsolationLevel = 'ISOLATED' | 'SHARED'
+type truthvalue = 'false' | 'ambiguous' | 'true'

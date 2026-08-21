@@ -1,3 +1,4 @@
+import * as cir from '../../../src/cir'
 import { describe, expect, test } from 'bun:test'
 import { Expression, Statement } from '../../../src/cir'
 import { lowerExpr, lowerStmt } from '../../../src/backend'
@@ -14,13 +15,14 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        value: '42',
+                        value: { type: 'integer', min: '42', max: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
-                        value: 'Hello',
+                        value: { type: 'string', value: 'Hello' },
                     },
                 ],
+                value: { type: 'integer' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myFunction˛param1˛param2(42, "Hello")')
@@ -36,11 +38,11 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        value: '42',
+                        value: { type: 'integer', min: '42', max: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
-                        value: 'Hello',
+                        value: { type: 'string', value: 'Hello' },
                     },
                 ],
             }
@@ -60,13 +62,14 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        value: '42',
+                        value: { type: 'integer', min: '42', max: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
-                        value: 'Hello',
+                        value: { type: 'string', value: 'Hello' },
                     },
                 ],
+                value: { type: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myFunction˛param1(42, "Hello")')
@@ -82,11 +85,11 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        value: '42',
+                        value: { type: 'integer', min: '42', max: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
-                        value: 'Hello',
+                        value: { type: 'string', value: 'Hello' },
                     },
                 ],
             }
@@ -104,6 +107,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
+                value: { type: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('noParamFunction()')
@@ -133,6 +137,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
+                value: { type: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myNamespace¸myFunction()')
@@ -161,6 +166,7 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     type: { name: 'Object' },
                     dispatch: 'direct',
@@ -170,6 +176,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
+                value: { type: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('Object·myMethod(myObject)')
@@ -182,6 +189,7 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     type: { name: 'Object' },
                     dispatch: 'direct',
@@ -205,6 +213,7 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     dispatch: 'inherited',
                     declaredIn: {
@@ -217,6 +226,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
+                value: { type: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe(
@@ -231,6 +241,7 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     dispatch: 'inherited',
                     declaredIn: {
@@ -259,6 +270,7 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     type: { name: 'Object', namespace: 'ns' },
                     dispatch: 'direct',
@@ -268,6 +280,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
+                value: { type: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('ns¸Object·myMethod(myObject)')
@@ -280,6 +293,7 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     type: { name: 'Object', namespace: 'ns' },
                     dispatch: 'direct',

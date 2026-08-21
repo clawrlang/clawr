@@ -25,13 +25,21 @@
                 "type": {
                     "name": "FooData"
                 },
+                "value": {
+                    "type": "rc-type",
+                    "name": "FooData"
+                },
                 "isolationLevel": "SHARED",
                 "fields": [
                     {
                         "name": "bar",
                         "value": {
                             "kind": "INTEGER_LITERAL",
-                            "value": "2"
+                            "value": {
+                                "type": "integer",
+                                "max": "2",
+                                "min": "2"
+                            }
                         }
                     }
                 ]
@@ -45,13 +53,24 @@
                 "kind": "FIELD_REF",
                 "object": {
                     "kind": "VARIABLE_REF",
-                    "name": "foo"
+                    "name": "foo",
+                    "value": {
+                        "type": "rc-type",
+                        "name": "FooData"
+                    }
                 },
-                "field": "bar"
+                "field": "bar",
+                "value": {
+                    "type": "integer"
+                }
             },
             "value": {
                 "kind": "INTEGER_LITERAL",
-                "value": "1"
+                "value": {
+                    "type": "integer",
+                    "max": "1",
+                    "min": "1"
+                }
             }
         },
         {
@@ -65,9 +84,16 @@
                     "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
-                        "name": "foo"
+                        "name": "foo",
+                        "value": {
+                            "type": "rc-type",
+                            "name": "FooData"
+                        }
                     },
-                    "field": "bar"
+                    "field": "bar",
+                    "value": {
+                        "type": "integer"
+                    }
                 }
             ]
         },
@@ -75,7 +101,11 @@
             "kind": "RELEASE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "foo"
+                "name": "foo",
+                "value": {
+                    "type": "rc-type",
+                    "name": "FooData"
+                }
             }
         }
     ]

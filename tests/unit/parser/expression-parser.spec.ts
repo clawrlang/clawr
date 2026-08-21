@@ -15,7 +15,7 @@ describe('Expression Parser', () => {
         for (const input of cases) {
             it(`parses ${input} as Truthvalue`, () => {
                 const literal = parseExpression(input)
-                expect(literal).toMatchObject({ value: input })
+                expect(literal).toMatchObject({ value: { values: [input] } })
                 expect(literal).toBeInstanceOf(TruthValueLiteral)
             })
         }
@@ -26,7 +26,9 @@ describe('Expression Parser', () => {
         for (const input of cases) {
             it(`parses ${input} as Integer`, () => {
                 const literal = parseExpression(input)
-                expect(literal).toMatchObject({ value: BigInt(input) })
+                expect(literal).toMatchObject({
+                    value: { max: BigInt(input), min: BigInt(input) },
+                })
                 expect(literal).toBeInstanceOf(IntegerLiteral)
             })
         }
@@ -41,8 +43,8 @@ describe('Expression Parser', () => {
         const result = parseExpression(code)
         expect(result).toMatchObject({
             fields: [
-                { name: 'x', value: { value: 42n } },
-                { name: 'y', value: { value: 17n } },
+                { name: 'x', value: { value: { max: 42n, min: 42n } } },
+                { name: 'y', value: { value: { max: 17n, min: 17n } } },
             ],
         })
     })
@@ -80,7 +82,10 @@ describe('Expression Parser', () => {
         expect(result).toBeInstanceOf(Query)
         expect(result).toMatchObject({
             name: { baseName: 'add', labels: [] },
-            arguments: [{ value: 1n }, { value: 2n }],
+            arguments: [
+                { value: { min: 1n, max: 1n } },
+                { value: { min: 2n, max: 2n } },
+            ],
         })
     })
 })

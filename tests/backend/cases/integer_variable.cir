@@ -5,11 +5,17 @@
             "kind": "VARIABLE_DECL",
             "name": "foo",
             "lattice": {
-                "type": "integer"
+                "type": "integer",
+                "max": "1",
+                "min": "1"
             },
             "initialValue": {
                 "kind": "INTEGER_LITERAL",
-                "value": "1"
+                "value": {
+                    "type": "integer",
+                    "max": "1",
+                    "min": "1"
+                }
             }
         }
     ],
@@ -23,7 +29,12 @@
             "arguments": [
                 {
                     "kind": "VARIABLE_REF",
-                    "name": "foo"
+                    "name": "foo",
+                    "value": {
+                        "type": "integer",
+                        "max": "1",
+                        "min": "1"
+                    }
                 }
             ]
         }

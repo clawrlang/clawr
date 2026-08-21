@@ -10,7 +10,11 @@
             "arguments": [
                 {
                     "kind": "INTEGER_LITERAL",
-                    "value": "1"
+                    "value": {
+                        "type": "integer",
+                        "max": "1",
+                        "min": "1"
+                    }
                 }
             ]
         }

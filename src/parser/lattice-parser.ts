@@ -70,7 +70,7 @@ export class LatticeParser {
                     minExpression.span,
                 )
 
-            min = minExpression.value
+            min = minExpression.value.min
         }
 
         const operatorToken = stream.expect('OPERATOR', '...', '..<')
@@ -82,7 +82,7 @@ export class LatticeParser {
                     maxExpression.span,
                 )
 
-            max = maxExpression.value - 1n
+            max = maxExpression.value.max - 1n
         }
 
         if (!stream.isNext('PUNCTUATION', ')')) {
@@ -93,7 +93,7 @@ export class LatticeParser {
                     maxExpression.span,
                 )
 
-            max = maxExpression.value
+            max = maxExpression.value.max
         }
 
         const endToken = stream.expect('PUNCTUATION', ')')

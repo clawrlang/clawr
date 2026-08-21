@@ -11,7 +11,7 @@ describe('VariableDeclarationParser', () => {
             isImmutable: true,
             name: 'foo',
             lattice: { min: undefined, max: undefined },
-            initialValue: { value: 1n },
+            initialValue: { value: { min: 1n, max: 1n } },
         })
     })
 
@@ -21,7 +21,7 @@ describe('VariableDeclarationParser', () => {
             isImmutable: false,
             name: 'foo',
             lattice: { min: undefined, max: undefined },
-            initialValue: { value: 1n },
+            initialValue: { value: { min: 1n, max: 1n } },
         })
     })
 
@@ -34,8 +34,8 @@ describe('VariableDeclarationParser', () => {
             lattice: { type: { name: 'Type' } },
             initialValue: {
                 fields: [
-                    { name: 'x', value: { value: 1n } },
-                    { name: 'y', value: { value: 2n } },
+                    { name: 'x', value: { value: { min: 1n, max: 1n } } },
+                    { name: 'y', value: { value: { min: 2n, max: 2n } } },
                 ],
             },
         })
@@ -50,8 +50,8 @@ describe('VariableDeclarationParser', () => {
             lattice: { type: { name: 'Type' } },
             initialValue: {
                 fields: [
-                    { name: 'x', value: { value: 1n } },
-                    { name: 'y', value: { value: 2n } },
+                    { name: 'x', value: { value: { min: 1n, max: 1n } } },
+                    { name: 'y', value: { value: { min: 2n, max: 2n } } },
                 ],
             },
         })
@@ -63,7 +63,7 @@ describe('VariableDeclarationParser', () => {
             isImmutable: true,
             name: 'foo',
             isolationLevel: ISOLATED,
-            initialValue: { value: 1n },
+            initialValue: { value: { min: 1n, max: 1n } },
         })
     })
 

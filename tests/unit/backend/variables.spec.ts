@@ -10,7 +10,7 @@ describe('Lowering Variables', () => {
             lattice: { type: 'integer' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
-                value: '42',
+                value: { type: 'integer', max: '42', min: '42' },
             },
         }
         const result = lowerStmt(decl)
@@ -21,6 +21,7 @@ describe('Lowering Variables', () => {
         const expr: Expression = {
             kind: 'VARIABLE_REF',
             name: 'foo',
+            value: { type: 'integer', max: '42', min: '42' },
         }
         const result = lowerExpr(expr)
         expect(result).toBe('foo')

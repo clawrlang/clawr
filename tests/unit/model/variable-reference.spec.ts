@@ -15,6 +15,7 @@ describe('Variable Reference', () => {
             isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
+        context.scope.setCurrentValue('myVar', IntegerLattice.singleton(0n))
 
         const variableRef = VariableReference.create({
             name: 'myVar',

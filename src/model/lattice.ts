@@ -9,24 +9,28 @@ export interface Lattice {
     toString(): string
 }
 
-export class IntegerLattice implements Lattice {
+export class IntegerLattice<
+    Min extends bigint | undefined,
+    Max extends bigint | undefined,
+> implements Lattice {
     private constructor(
-        public readonly min: bigint | undefined,
-        public readonly max: bigint | undefined,
+        public readonly min: Min,
+        public readonly max: Max,
     ) {}
 
     static unconstrained() {
         return new IntegerLattice(undefined, undefined)
     }
 
-    static create({
-        min,
-        max,
-    }: {
-        min?: bigint
-        max?: bigint
-    }): IntegerLattice {
-        return new IntegerLattice(min, max)
+    static singleton<Value extends bigint>(v: Value) {
+        return new IntegerLattice(v, v)
+    }
+
+    static create<
+        Min extends bigint | undefined,
+        Max extends bigint | undefined,
+    >({ min, max }: { min?: Min; max?: Max }) {
+        return new IntegerLattice<Min, Max>(min as Min, max as Max)
     }
 
     unconstrained(): Lattice {
@@ -47,11 +51,11 @@ export class IntegerLattice implements Lattice {
         return lattice instanceof IntegerLattice
     }
 
-    toCIR(): cir.Lattice {
+    toCIR(): cir.Lattice & { type: 'integer' } {
         return {
-            type: 'integer',
-            min: this.min?.toString() as `${bigint}`,
-            max: this.max?.toString() as `${bigint}`,
+            type: 'integer' as const,
+            min: this.min?.toString() as any,
+            max: this.max?.toString() as any,
         }
     }
 
@@ -60,16 +64,19 @@ export class IntegerLattice implements Lattice {
     }
 }
 
-export class Truthlattice implements Lattice {
-    private constructor(
-        public readonly values: ('false' | 'ambiguous' | 'true')[],
-    ) {}
+export type truthvalue = 'false' | 'ambiguous' | 'true'
+export class Truthlattice<Values extends truthvalue[]> implements Lattice {
+    private constructor(public readonly values: Values) {}
 
     static unconstrained() {
         return this.create(['false', 'ambiguous', 'true'])
     }
 
-    static create(values: ('false' | 'ambiguous' | 'true')[]): Truthlattice {
+    static singleton<Value extends truthvalue>(value: Value) {
+        return new Truthlattice<[Value]>([value])
+    }
+
+    static create<Values extends truthvalue[]>(values: Values) {
         return new Truthlattice(values)
     }
 
@@ -80,7 +87,9 @@ export class Truthlattice implements Lattice {
     isSupersetTo(lattice: Lattice): boolean {
         return (
             lattice instanceof Truthlattice &&
-            lattice.values.every((v) => this.values.includes(v))
+            (lattice.values as truthvalue[]).every((v) =>
+                this.values.includes(v),
+            )
         )
     }
 
@@ -88,7 +97,7 @@ export class Truthlattice implements Lattice {
         return lattice instanceof Truthlattice
     }
 
-    toCIR(): cir.Lattice {
+    toCIR(): cir.Lattice & { type: 'truthvalue'; values: Values } {
         return {
             type: 'truthvalue',
             values: this.values,
@@ -119,7 +128,7 @@ export class StringLattice implements Lattice {
         return lattice instanceof StringLattice
     }
 
-    toCIR(): cir.Lattice {
+    toCIR(): cir.Lattice & { type: 'string' } {
         return { type: 'string' }
     }
 
@@ -170,7 +179,7 @@ export class RCTypeLattice implements Lattice {
         )
     }
 
-    toCIR(): cir.Lattice {
+    toCIR(): cir.Lattice & { type: 'rc-type' } {
         return {
             type: 'rc-type',
             name: this.type.name,

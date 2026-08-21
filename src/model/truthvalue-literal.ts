@@ -1,24 +1,24 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { Lattice, Truthlattice } from './lattice'
+import { Lattice, Truthlattice, truthvalue } from './lattice'
 import { Failable } from './failable'
 import { ISOLATED } from './isolation-level'
 
-export class TruthValueLiteral implements Expression {
+export class TruthValueLiteral<Value extends truthvalue> implements Expression {
     private constructor(
-        private value: 'false' | 'ambiguous' | 'true',
+        public value: Truthlattice<[Value]>,
         public span: SourceCodeSpan,
     ) {}
 
-    static create({
+    static create<Value extends truthvalue>({
         value,
         span,
     }: {
-        value: 'false' | 'ambiguous' | 'true'
+        value: Value
         span: SourceCodeSpan
-    }): TruthValueLiteral {
-        return new TruthValueLiteral(value, span)
+    }) {
+        return new TruthValueLiteral(Truthlattice.singleton(value), span)
     }
 
     isolationLevel(_: Context): Failable<ISOLATED> {
@@ -26,17 +26,17 @@ export class TruthValueLiteral implements Expression {
     }
 
     currentValue(_: Context): Failable<Lattice> {
-        return Failable.success(Truthlattice.create([this.value]))
+        return Failable.success(this.value)
     }
 
     declaredLattice(_: Context): Failable<Lattice> {
-        return Failable.success(Truthlattice.create([this.value]))
+        return Failable.success(this.value)
     }
 
     toCIRExpression(_: Context): Failable<cir.Expression> {
         return Failable.success({
             kind: 'TRUTHVALUE_LITERAL',
-            value: this.value,
+            value: this.value.toCIR(),
         })
     }
 

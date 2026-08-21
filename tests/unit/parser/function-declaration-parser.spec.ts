@@ -147,7 +147,7 @@ describe('Function Declaration Parser', () => {
                     varName: 'x',
                     isolationLevel: ISOLATED,
                     label: undefined,
-                    defaultValue: { value: 42n },
+                    defaultValue: { value: { min: 42n, max: 42n } },
                     span: {
                         start: { line: 1, column: 17 },
                         end: { line: 1, column: 31 },
@@ -172,7 +172,7 @@ describe('Function Declaration Parser', () => {
             result: { lattice: { max: undefined, min: undefined } },
             implementation: {
                 kind: 'body',
-                statements: [{ value: { value: 42n } }],
+                statements: [{ value: { value: { min: 42n, max: 42n } } }],
             },
         })
     })
@@ -187,7 +187,7 @@ describe('Function Declaration Parser', () => {
             result: undefined,
             implementation: {
                 kind: 'implicit-return',
-                expression: { value: 42n },
+                expression: { value: { min: 42n, max: 42n } },
             },
         })
     })

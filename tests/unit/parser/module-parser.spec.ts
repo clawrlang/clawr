@@ -15,7 +15,7 @@ describe('Module Parser', () => {
             main: [
                 {
                     name: { baseName: 'print', arity: 1, labels: [] },
-                    arguments: [{ value: 42n }],
+                    arguments: [{ value: { min: 42n, max: 42n } }],
                 },
             ],
         })
@@ -37,13 +37,13 @@ describe('Module Parser', () => {
                     isImmutable: true,
                     name: 'x',
                     lattice: { min: undefined, max: undefined },
-                    initialValue: { value: 10n },
+                    initialValue: { value: { min: 10n, max: 10n } },
                 },
                 {
                     isImmutable: false,
                     name: 'y',
                     lattice: { min: undefined, max: undefined },
-                    initialValue: { value: 20n },
+                    initialValue: { value: { min: 20n, max: 20n } },
                 },
                 {
                     name: { baseName: 'print', arity: 1, labels: [] },
@@ -75,11 +75,11 @@ describe('Module Parser', () => {
                         min: undefined,
                         max: undefined,
                     },
-                    initialValue: { value: 20n },
+                    initialValue: { value: { min: 20n, max: 20n } },
                 },
                 {
                     target: { name: 'y' },
-                    value: { value: 30n },
+                    value: { value: { min: 30n, max: 30n } },
                 },
                 {
                     name: { baseName: 'print', arity: 1, labels: [] },
@@ -150,7 +150,7 @@ describe('Module Parser', () => {
             main: [
                 {
                     name: { baseName: 'print', arity: 1, labels: [] },
-                    arguments: [{ value: 42n }],
+                    arguments: [{ value: { min: 42n, max: 42n } }],
                 },
             ],
         })

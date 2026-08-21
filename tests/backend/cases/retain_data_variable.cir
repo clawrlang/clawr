@@ -31,10 +31,18 @@
                         "name": "bar",
                         "value": {
                             "kind": "INTEGER_LITERAL",
-                            "value": "2"
+                            "value": {
+                                "type": "integer",
+                                "min": "2",
+                                "max": "2"
+                            }
                         }
                     }
-                ]
+                ],
+                "value": {
+                    "type": "rc-type",
+                    "name": "FooData"
+                }
             }
         }
     ],
@@ -50,7 +58,15 @@
                 "kind": "RETAIN",
                 "object": {
                     "kind": "VARIABLE_REF",
-                    "name": "two"
+                    "name": "two",
+                    "value": {
+                        "type": "rc-type",
+                        "name": "FooData"
+                    }
+                },
+                "value": {
+                    "type": "rc-type",
+                    "name": "FooData"
                 }
             }
         },
@@ -58,7 +74,11 @@
             "kind": "ENSURE_UNIQUE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "one"
+                "name": "one",
+                "value": {
+                    "type": "rc-type",
+                    "name": "FooData"
+                }
             }
         },
         {
@@ -67,13 +87,24 @@
                 "kind": "FIELD_REF",
                 "object": {
                     "kind": "VARIABLE_REF",
-                    "name": "one"
+                    "name": "one",
+                    "value": {
+                        "type": "rc-type",
+                        "name": "FooData"
+                    }
                 },
-                "field": "bar"
+                "field": "bar",
+                "value": {
+                    "type": "integer"
+                }
             },
             "value": {
                 "kind": "INTEGER_LITERAL",
-                "value": "1"
+                "value": {
+                    "type": "integer",
+                    "min": "1",
+                    "max": "1"
+                }
             }
         },
         {
@@ -87,9 +118,16 @@
                     "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
-                        "name": "two"
+                        "name": "two",
+                        "value": {
+                            "type": "rc-type",
+                            "name": "FooData"
+                        }
                     },
-                    "field": "bar"
+                    "field": "bar",
+                    "value": {
+                        "type": "integer"
+                    }
                 }
             ]
         },
@@ -104,9 +142,16 @@
                     "kind": "FIELD_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
-                        "name": "one"
+                        "name": "one",
+                        "value": {
+                            "type": "rc-type",
+                            "name": "FooData"
+                        }
                     },
-                    "field": "bar"
+                    "field": "bar",
+                    "value": {
+                        "type": "integer"
+                    }
                 }
             ]
         },
@@ -114,14 +159,22 @@
             "kind": "RELEASE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "one"
+                "name": "one",
+                "value": {
+                    "type": "rc-type",
+                    "name": "FooData"
+                }
             }
         },
         {
             "kind": "RELEASE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "two"
+                "name": "two",
+                "value": {
+                    "type": "rc-type",
+                    "name": "FooData"
+                }
             }
         }
     ]

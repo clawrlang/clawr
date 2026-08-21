@@ -32,9 +32,18 @@
                                 "kind": "FIELD_REF",
                                 "object": {
                                     "kind": "VARIABLE_REF",
-                                    "name": "self"
+                                    "name": "self",
+                                    "value": {
+                                        "type": "rc-type",
+                                        "name": "Super"
+                                    }
                                 },
-                                "field": "field"
+                                "field": "field",
+                                "value": {
+                                    "type": "integer",
+                                    "min": "0",
+                                    "max": "100"
+                                }
                             }
                         }
                     ]
@@ -62,7 +71,11 @@
                             "kind": "ASSIGN",
                             "target": {
                                 "kind": "VARIABLE_REF",
-                                "name": "self"
+                                "name": "self",
+                                "value": {
+                                    "type": "rc-type",
+                                    "name": "Super"
+                                }
                             },
                             "value": {
                                 "kind": "ALLOCATION",
@@ -70,12 +83,21 @@
                                     "name": "Super"
                                 },
                                 "isolationLevel": "ISOLATED",
+                                "value": {
+                                    "type": "rc-type",
+                                    "name": "Super"
+                                },
                                 "fields": [
                                     {
                                         "name": "field",
                                         "value": {
                                             "kind": "VARIABLE_REF",
-                                            "name": "field"
+                                            "name": "field",
+                                            "value": {
+                                                "type": "integer",
+                                                "min": "0",
+                                                "max": "100"
+                                            }
                                         }
                                     }
                                 ]
@@ -139,9 +161,18 @@
                                 "kind": "FIELD_REF",
                                 "object": {
                                     "kind": "VARIABLE_REF",
-                                    "name": "self"
+                                    "name": "self",
+                                    "value": {
+                                        "type": "rc-type",
+                                        "name": "Super"
+                                    }
                                 },
-                                "field": "field"
+                                "field": "field",
+                                "value": {
+                                    "type": "integer",
+                                    "min": "0",
+                                    "max": "100"
+                                }
                             }
                         }
                     ]
@@ -221,10 +252,18 @@
                                 "name": "field",
                                 "value": {
                                     "kind": "INTEGER_LITERAL",
-                                    "value": "43"
+                                    "value": {
+                                        "type": "integer",
+                                        "min": "43",
+                                        "max": "43"
+                                    }
                                 }
                             }
-                        ]
+                        ],
+                        "value": {
+                            "type": "rc-type",
+                            "name": "Sub1"
+                        }
                     },
                     "lattice": {
                         "type": "rc-type",
@@ -236,7 +275,11 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "__tempˇ0"
+                            "name": "__tempˇ0",
+                            "value": {
+                                "type": "rc-type",
+                                "name": "Super"
+                            }
                         },
                         "type": {
                             "name": "Super"
@@ -252,7 +295,11 @@
                     "arguments": [
                         {
                             "kind": "INTEGER_LITERAL",
-                            "value": "42"
+                            "value": {
+                                "type": "integer",
+                                "min": "42",
+                                "max": "42"
+                            }
                         }
                     ]
                 },
@@ -260,7 +307,11 @@
                     "kind": "RETURN",
                     "value": {
                         "kind": "VARIABLE_REF",
-                        "name": "__tempˇ0"
+                        "name": "__tempˇ0",
+                        "value": {
+                            "type": "rc-type",
+                            "name": "Super"
+                        }
                     }
                 }
             ],
@@ -288,6 +339,10 @@
                             "name": "Super"
                         },
                         "isolationLevel": "ISOLATED",
+                        "value": {
+                            "type": "rc-type",
+                            "name": "Sub2"
+                        },
                         "fields": []
                     },
                     "lattice": {
@@ -300,7 +355,11 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "__tempˇ0"
+                            "name": "__tempˇ0",
+                            "value": {
+                                "type": "rc-type",
+                                "name": "Super"
+                            }
                         },
                         "type": {
                             "name": "Super"
@@ -316,7 +375,11 @@
                     "arguments": [
                         {
                             "kind": "INTEGER_LITERAL",
-                            "value": "42"
+                            "value": {
+                                "type": "integer",
+                                "max": "42",
+                                "min": "42"
+                            }
                         }
                     ]
                 },
@@ -324,7 +387,11 @@
                     "kind": "RETURN",
                     "value": {
                         "kind": "VARIABLE_REF",
-                        "name": "__tempˇ0"
+                        "name": "__tempˇ0",
+                        "value": {
+                            "type": "rc-type",
+                            "name": "Super"
+                        }
                     }
                 }
             ],
@@ -349,7 +416,11 @@
                     "baseName": "new",
                     "labels": []
                 },
-                "arguments": []
+                "arguments": [],
+                "value": {
+                    "type": "rc-type",
+                    "name": "Sub1"
+                }
             }
         },
         {
@@ -366,7 +437,11 @@
                     "baseName": "new",
                     "labels": []
                 },
-                "arguments": []
+                "arguments": [],
+                "value": {
+                    "type": "rc-type",
+                    "name": "Sub2"
+                }
             }
         },
         {
@@ -381,7 +456,11 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj1"
+                            "name": "obj1",
+                            "value": {
+                                "type": "rc-type",
+                                "name": "Sub1"
+                            }
                         },
                         "type": {
                             "name": "Sub1"
@@ -392,7 +471,12 @@
                         "baseName": "f",
                         "labels": []
                     },
-                    "arguments": []
+                    "arguments": [],
+                    "value": {
+                        "type": "integer",
+                        "min": "0",
+                        "max": "100"
+                    }
                 }
             ]
         },
@@ -408,7 +492,11 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj2"
+                            "name": "obj2",
+                            "value": {
+                                "type": "rc-type",
+                                "name": "Sub2"
+                            }
                         },
                         "dispatch": "inherited",
                         "declaredIn": {
@@ -419,7 +507,12 @@
                         "baseName": "f",
                         "labels": []
                     },
-                    "arguments": []
+                    "arguments": [],
+                    "value": {
+                        "type": "integer",
+                        "min": "0",
+                        "max": "100"
+                    }
                 }
             ]
         }

@@ -43,8 +43,14 @@ describe('Module', () => {
                         labels: [],
                     },
                     arguments: [
-                        { kind: 'INTEGER_LITERAL', value: '1' },
-                        { kind: 'INTEGER_LITERAL', value: '2' },
+                        {
+                            kind: 'INTEGER_LITERAL',
+                            value: { max: '1', min: '1' },
+                        },
+                        {
+                            kind: 'INTEGER_LITERAL',
+                            value: { max: '2', min: '2' },
+                        },
                     ],
                 },
             ],

@@ -237,12 +237,14 @@ describe('Type declaration', () => {
                             target: {
                                 kind: 'VARIABLE_REF',
                                 name: 'self',
+                                value: { type: 'rc-type', name: 'MyType' },
                             },
                             value: {
                                 kind: 'ALLOCATION',
                                 type: { name: 'Super' },
                                 isolationLevel: SHARED,
                                 fields: [],
+                                value: { type: 'rc-type', name: 'MyType' },
                             },
                         },
                     ],

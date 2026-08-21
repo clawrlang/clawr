@@ -32,9 +32,18 @@
                                 "kind": "FIELD_REF",
                                 "object": {
                                     "kind": "VARIABLE_REF",
-                                    "name": "self"
+                                    "name": "self",
+                                    "value": {
+                                        "type": "rc-type",
+                                        "name": "Object"
+                                    }
                                 },
-                                "field": "field"
+                                "field": "field",
+                                "value": {
+                                    "type": "integer",
+                                    "min": "42",
+                                    "max": "42"
+                                }
                             }
                         }
                     ]
@@ -56,12 +65,20 @@
                             "name": "Object"
                         },
                         "isolationLevel": "ISOLATED",
+                        "value": {
+                            "type": "rc-type",
+                            "name": "Object"
+                        },
                         "fields": [
                             {
                                 "name": "field",
                                 "value": {
                                     "kind": "INTEGER_LITERAL",
-                                    "value": "42"
+                                    "value": {
+                                        "type": "integer",
+                                        "min": "42",
+                                        "max": "42"
+                                    }
                                 }
                             }
                         ]
@@ -89,7 +106,11 @@
                     "baseName": "new",
                     "labels": []
                 },
-                "arguments": []
+                "arguments": [],
+                "value": {
+                    "type": "rc-type",
+                    "name": "Object"
+                }
             }
         },
         {
@@ -104,7 +125,11 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj"
+                            "name": "obj",
+                            "value": {
+                                "type": "rc-type",
+                                "name": "Object"
+                            }
                         },
                         "type": {
                             "name": "Object"
@@ -115,7 +140,12 @@
                         "baseName": "field",
                         "labels": []
                     },
-                    "arguments": []
+                    "arguments": [],
+                    "value": {
+                        "type": "integer",
+                        "min": "42",
+                        "max": "42"
+                    }
                 }
             ]
         }

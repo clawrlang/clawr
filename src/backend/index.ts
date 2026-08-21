@@ -163,35 +163,23 @@ function lowerInitializer(
     receiverType: cir.Declaration & { kind: 'RC_TYPE_DECL' },
 ): string {
     const mangledFunctionName = mangleNameWithParameters(decl, receiverType)
+    const lattice = {
+        type: 'rc-type' as const,
+        namespace: receiverType.namespace,
+        name: receiverType.name,
+    }
+    const self = {
+        kind: 'VARIABLE_REF' as const,
+        name: 'self',
+        value: lattice,
+        lattice,
+    }
     return lowerFunction(
         {
             ...decl,
-            lattice: {
-                type: 'rc-type',
-                name: 'void',
-            },
-            parameters: [
-                {
-                    name: 'self',
-                    lattice: {
-                        type: 'rc-type',
-                        namespace: receiverType.namespace,
-                        name: receiverType.name,
-                    },
-                },
-                ...decl.parameters,
-            ],
-            body: [
-                ...decl.body,
-                // TODO: Can we just add `return self;` literally?
-                {
-                    kind: 'RETURN',
-                    value: {
-                        kind: 'VARIABLE_REF',
-                        name: 'self',
-                    },
-                },
-            ],
+            lattice: { type: 'rc-type', name: 'void', namespace: undefined },
+            parameters: [self, ...decl.parameters],
+            body: [...decl.body, { kind: 'RETURN', value: self }],
         },
         mangledFunctionName,
     )
@@ -314,9 +302,9 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'RETAIN':
             return `retainRC(${lowerExpr(expr.object)})`
         case 'STRING_LITERAL':
-            return `"${expr.value}"`
+            return `"${expr.value.value}"`
         case 'INTEGER_LITERAL':
-            return expr.value
+            return expr.value.max
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
         case 'CALL':
@@ -380,7 +368,7 @@ export function lowerExpr(expr: cir.Expression): string {
 export function lowerTruthvalueLiteral(
     expr: Extract<cir.Expression, { kind: 'TRUTHVALUE_LITERAL' }>,
 ): string {
-    return `c_${expr.value}`
+    return `c_${expr.value.values[0]}`
 }
 
 function mangleNameWithParameters(

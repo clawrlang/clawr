@@ -98,7 +98,7 @@ describe('Query', () => {
             arguments: [
                 {
                     kind: 'INTEGER_LITERAL',
-                    value: '42',
+                    value: { max: '42', min: '42' },
                 },
             ],
         })

@@ -75,6 +75,7 @@ export class Assignment implements Statement {
                             value: {
                                 kind: 'RETAIN',
                                 object: value,
+                                value: targetLattice.toCIR(),
                             },
                         },
                         {
@@ -82,6 +83,7 @@ export class Assignment implements Statement {
                             object: {
                                 kind: 'VARIABLE_REF',
                                 name: tempVar,
+                                value: value.value,
                             },
                         },
                     )
@@ -96,6 +98,7 @@ export class Assignment implements Statement {
                         value: {
                             kind: 'AS_SHARED',
                             object: value,
+                            value: targetLattice.toCIR(),
                         },
                     })
                 } else {

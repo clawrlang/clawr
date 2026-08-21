@@ -36,8 +36,14 @@ describe('CallFunc', () => {
                     labels: [],
                 },
                 arguments: [
-                    { kind: 'INTEGER_LITERAL', value: '42' },
-                    { kind: 'TRUTHVALUE_LITERAL', value: 'ambiguous' },
+                    {
+                        kind: 'INTEGER_LITERAL',
+                        value: { max: '42', min: '42' },
+                    },
+                    {
+                        kind: 'TRUTHVALUE_LITERAL',
+                        value: { values: ['ambiguous'] },
+                    },
                 ],
             },
         ])
@@ -65,7 +71,12 @@ describe('CallFunc', () => {
                     baseName: 'foo',
                     labels: ['x'],
                 },
-                arguments: [{ kind: 'TRUTHVALUE_LITERAL', value: 'ambiguous' }],
+                arguments: [
+                    {
+                        kind: 'TRUTHVALUE_LITERAL',
+                        value: { values: ['ambiguous'] },
+                    },
+                ],
             },
         ])
     })
@@ -91,7 +102,9 @@ describe('CallFunc', () => {
                     baseName: 'printInt64',
                     labels: [],
                 },
-                arguments: [{ kind: 'INTEGER_LITERAL', value: '1' }],
+                arguments: [
+                    { kind: 'INTEGER_LITERAL', value: { max: '1', min: '1' } },
+                ],
             },
         ])
     })
@@ -117,7 +130,9 @@ describe('CallFunc', () => {
                     baseName: 'printTruthvalue',
                     labels: [],
                 },
-                arguments: [{ kind: 'TRUTHVALUE_LITERAL', value: 'true' }],
+                arguments: [
+                    { kind: 'TRUTHVALUE_LITERAL', value: { values: ['true'] } },
+                ],
             },
         ])
     })

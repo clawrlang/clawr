@@ -22,8 +22,8 @@ describe('DataLiteralParser', () => {
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             fields: [
-                { name: 'x', value: { value: 42n } },
-                { name: 'y', value: { value: 17n } },
+                { name: 'x', value: { value: { min: 42n, max: 42n } } },
+                { name: 'y', value: { value: { min: 17n, max: 17n } } },
             ],
         })
     })
@@ -39,8 +39,8 @@ describe('DataLiteralParser', () => {
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             fields: [
-                { name: 'x', value: { value: 42n } },
-                { name: 'y', value: { value: 17n } },
+                { name: 'x', value: { value: { min: 42n, max: 42n } } },
+                { name: 'y', value: { value: { min: 17n, max: 17n } } },
             ],
         })
     })

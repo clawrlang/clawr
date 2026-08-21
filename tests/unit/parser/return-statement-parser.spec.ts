@@ -8,7 +8,7 @@ describe('Return Statement Parser', () => {
         const code = 'return 42\n'
         const result = parseReturnStatement(code)
         expect(result).toMatchObject({
-            value: { value: 42n },
+            value: { value: { min: 42n, max: 42n } },
         })
     })
 

@@ -5,24 +5,30 @@ import { IntegerLattice, Lattice } from './lattice'
 import { Failable } from './failable'
 import { ISOLATED } from './isolation-level'
 
-export class IntegerLiteral implements Expression {
-    get negated(): IntegerLiteral {
-        return new IntegerLiteral(-this.value, this.span)
+export class IntegerLiteral<Value extends bigint> implements Expression {
+    get negated() {
+        return IntegerLiteral.create({
+            value: -(this.value.min as bigint),
+            span: this.span,
+        })
     }
 
     private constructor(
-        public readonly value: bigint,
+        public readonly value: IntegerLattice<Value, Value>,
         public readonly span: SourceCodeSpan,
     ) {}
 
-    static create({
+    static create<Value extends bigint>({
         value,
         span,
     }: {
-        value: bigint
+        value: Value
         span: SourceCodeSpan
-    }): IntegerLiteral {
-        return new IntegerLiteral(value, span)
+    }) {
+        return new IntegerLiteral(
+            IntegerLattice.create({ min: value, max: value }),
+            span,
+        )
     }
 
     isolationLevel(_: Context): Failable<ISOLATED> {
@@ -30,21 +36,21 @@ export class IntegerLiteral implements Expression {
     }
 
     currentValue(_: Context): Failable<Lattice> {
-        return Failable.success(
-            IntegerLattice.create({ min: this.value, max: this.value }),
-        )
+        return Failable.success(this.value)
     }
 
     declaredLattice(_: Context): Failable<Lattice> {
-        return Failable.success(
-            IntegerLattice.create({ min: this.value, max: this.value }),
-        )
+        return Failable.success(this.value)
     }
 
     toCIRExpression(_: Context): Failable<cir.Expression> {
         return Failable.success({
             kind: 'INTEGER_LITERAL',
-            value: this.value.toString() as `${bigint}`,
+            value: this.value.toCIR() as cir.Lattice & {
+                type: 'integer'
+                min: `${Value}`
+                max: `${Value}`
+            },
         })
     }
 

@@ -135,6 +135,7 @@ export class DataLiteral implements Expression {
                     Failable.success({
                         name: field.name,
                         value,
+                        lattice: value.value,
                     }),
                 )
         })
@@ -144,6 +145,10 @@ export class DataLiteral implements Expression {
                 type: explicitLattice.type.toCIR(),
                 isolationLevel: context.isolationLevel!,
                 fields,
+                value: {
+                    type: 'rc-type',
+                    ...explicitLattice.type.toCIR(),
+                },
             }),
         )
     }

@@ -79,12 +79,13 @@ export class VariableDeclaration implements Statement, Declaration {
             name: this.name,
             lattice: lattice.toCIR(),
             initialValue:
-                lattice instanceof RCTypeLattice &&
+                initialValue.value.type === 'rc-type' &&
                 (initialValue.kind === 'VARIABLE_REF' ||
                     initialValue.kind === 'FIELD_REF')
                     ? {
                           kind: 'RETAIN' as const,
                           object: initialValue,
+                          value: initialValue.value,
                       }
                     : initialValue,
         })

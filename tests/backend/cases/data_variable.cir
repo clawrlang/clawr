@@ -59,10 +59,7 @@
                         "name": "FooData"
                     }
                 },
-                "field": "bar",
-                "value": {
-                    "type": "integer"
-                }
+                "field": "bar"
             },
             "value": {
                 "kind": "INTEGER_LITERAL",
@@ -101,11 +98,7 @@
             "kind": "RELEASE",
             "object": {
                 "kind": "VARIABLE_REF",
-                "name": "foo",
-                "value": {
-                    "type": "rc-type",
-                    "name": "FooData"
-                }
+                "name": "foo"
             }
         }
     ]

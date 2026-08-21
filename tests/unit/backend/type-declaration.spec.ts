@@ -237,7 +237,6 @@ describe('Type declaration', () => {
                             target: {
                                 kind: 'VARIABLE_REF',
                                 name: 'self',
-                                value: { type: 'rc-type', name: 'MyType' },
                             },
                             value: {
                                 kind: 'ALLOCATION',

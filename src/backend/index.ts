@@ -236,7 +236,7 @@ export function lowerStmt(stmt: cir.Statement): string {
                 case 'direct': {
                     const args = stmt.receiver
                         ? [
-                              lowerExpr(stmt.receiver.object),
+                              lowerStorage(stmt.receiver.object),
                               ...stmt.arguments.map(lowerExpr),
                           ]
                         : stmt.arguments.map(lowerExpr)
@@ -248,7 +248,7 @@ export function lowerStmt(stmt: cir.Statement): string {
                     return `${name}(${args.join(', ')});`
                 }
                 case 'inherited': {
-                    const targetName = lowerExpr(stmt.receiver.object)
+                    const targetName = lowerStorage(stmt.receiver.object)
                     const declarationType = mangleTypeName(
                         stmt.receiver.declaredIn,
                     )
@@ -258,7 +258,7 @@ export function lowerStmt(stmt: cir.Statement): string {
                     })
                     const args = stmt.receiver
                         ? [
-                              lowerExpr(stmt.receiver.object),
+                              lowerStorage(stmt.receiver.object),
                               ...stmt.arguments.map(lowerExpr),
                           ]
                         : stmt.arguments.map(lowerExpr)
@@ -276,11 +276,12 @@ export function lowerStmt(stmt: cir.Statement): string {
                         .field = field,
                     },
                     sizeof(Superˇfields));`
-            else return `${lowerExpr(stmt.target)} = ${lowerExpr(stmt.value)};`
+            else
+                return `${lowerStorage(stmt.target)} = ${lowerExpr(stmt.value)};`
         case 'ENSURE_UNIQUE':
-            return `mutateRC(${lowerExpr(stmt.object)});`
+            return `mutateRC(${lowerStorage(stmt.object)});`
         case 'RELEASE':
-            return `releaseRC(${lowerExpr(stmt.object)});`
+            return `releaseRC(${lowerStorage(stmt.object)});`
         case 'RETURN':
             return stmt.value ? `return ${lowerExpr(stmt.value)};` : 'return;'
         default:
@@ -300,7 +301,7 @@ export function lowerInitStmt(stmt: cir.Statement): string {
 export function lowerExpr(expr: cir.Expression): string {
     switch (expr.kind) {
         case 'RETAIN':
-            return `retainRC(${lowerExpr(expr.object)})`
+            return `retainRC(${lowerStorage(expr.object)})`
         case 'STRING_LITERAL':
             return `"${expr.value.value}"`
         case 'INTEGER_LITERAL':
@@ -317,7 +318,7 @@ export function lowerExpr(expr: cir.Expression): string {
                 case 'direct': {
                     const args = expr.receiver
                         ? [
-                              lowerExpr(expr.receiver.object),
+                              lowerStorage(expr.receiver.object),
                               ...expr.arguments.map(lowerExpr),
                           ]
                         : expr.arguments.map(lowerExpr)
@@ -328,7 +329,7 @@ export function lowerExpr(expr: cir.Expression): string {
                     return `${name}(${args.join(', ')})`
                 }
                 case 'inherited': {
-                    const targetName = lowerExpr(expr.receiver.object)
+                    const targetName = lowerStorage(expr.receiver.object)
                     const declarationType = mangleTypeName(
                         expr.receiver.declaredIn,
                     )
@@ -338,7 +339,7 @@ export function lowerExpr(expr: cir.Expression): string {
                     })
                     const args = expr.receiver
                         ? [
-                              lowerExpr(expr.receiver.object),
+                              lowerStorage(expr.receiver.object),
                               ...expr.arguments.map(lowerExpr),
                           ]
                         : expr.arguments.map(lowerExpr)
@@ -360,6 +361,21 @@ export function lowerExpr(expr: cir.Expression): string {
             } else
                 return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
                     ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
+        default:
+            throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
+    }
+}
+
+export function lowerStorage(
+    expr:
+        | Omit<cir.Expression & { kind: 'VARIABLE_REF' }, 'value'>
+        | Omit<cir.Expression & { kind: 'FIELD_REF' }, 'value'>,
+): string {
+    switch (expr.kind) {
+        case 'VARIABLE_REF':
+            return expr.name
+        case 'FIELD_REF':
+            return `${lowerExpr(expr.object)}->fields.${expr.field}`
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
     }

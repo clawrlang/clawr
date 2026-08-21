@@ -117,7 +117,7 @@ export type Statement =
     | VariableDeclaration
     | Assign
 
-type Storage = VariableReference | FieldReference
+type Storage = Omit<VariableReference, 'value'> | Omit<FieldReference, 'value'>
 
 // -----------
 // Expressions

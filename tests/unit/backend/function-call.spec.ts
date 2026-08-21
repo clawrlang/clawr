@@ -166,7 +166,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     type: { name: 'Object' },
                     dispatch: 'direct',
@@ -189,7 +188,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     type: { name: 'Object' },
                     dispatch: 'direct',
@@ -213,7 +211,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     dispatch: 'inherited',
                     declaredIn: {
@@ -241,7 +238,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     dispatch: 'inherited',
                     declaredIn: {
@@ -270,7 +266,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     type: { name: 'Object', namespace: 'ns' },
                     dispatch: 'direct',
@@ -293,7 +288,6 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        value: { type: 'rc-type', name: 'MyType' },
                     },
                     type: { name: 'Object', namespace: 'ns' },
                     dispatch: 'direct',

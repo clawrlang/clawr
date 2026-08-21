@@ -71,11 +71,7 @@
                             "kind": "ASSIGN",
                             "target": {
                                 "kind": "VARIABLE_REF",
-                                "name": "self",
-                                "value": {
-                                    "type": "rc-type",
-                                    "name": "Super"
-                                }
+                                "name": "self"
                             },
                             "value": {
                                 "kind": "ALLOCATION",
@@ -275,11 +271,7 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "__tempˇ0",
-                            "value": {
-                                "type": "rc-type",
-                                "name": "Super"
-                            }
+                            "name": "__tempˇ0"
                         },
                         "type": {
                             "name": "Super"
@@ -355,11 +347,7 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "__tempˇ0",
-                            "value": {
-                                "type": "rc-type",
-                                "name": "Super"
-                            }
+                            "name": "__tempˇ0"
                         },
                         "type": {
                             "name": "Super"
@@ -456,11 +444,7 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj1",
-                            "value": {
-                                "type": "rc-type",
-                                "name": "Sub1"
-                            }
+                            "name": "obj1"
                         },
                         "type": {
                             "name": "Sub1"
@@ -492,11 +476,7 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj2",
-                            "value": {
-                                "type": "rc-type",
-                                "name": "Sub2"
-                            }
+                            "name": "obj2"
                         },
                         "dispatch": "inherited",
                         "declaredIn": {

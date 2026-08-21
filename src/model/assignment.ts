@@ -83,7 +83,6 @@ export class Assignment implements Statement {
                             object: {
                                 kind: 'VARIABLE_REF',
                                 name: tempVar,
-                                value: value.value,
                             },
                         },
                     )

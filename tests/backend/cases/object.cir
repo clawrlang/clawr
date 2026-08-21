@@ -125,11 +125,7 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj",
-                            "value": {
-                                "type": "rc-type",
-                                "name": "Object"
-                            }
+                            "name": "obj"
                         },
                         "type": {
                             "name": "Object"

@@ -60,19 +60,18 @@
           },
           "Storage": {
             "oneOf": [
-              { "$ref": "#/$defs/FieldReference" },
-              { "$ref": "#/$defs/VariableReference" }
+              { "$ref": "#/$defs/OmitFieldReferencevalue" },
+              { "$ref": "#/$defs/OmitVariableReferencevalue" }
             ]
           },
-          "FieldReference": {
+          "OmitFieldReferencevalue": {
             "type": "object",
             "properties": {
               "kind": { "const": "FIELD_REF" },
               "object": { "$ref": "#/$defs/Expression" },
-              "field": { "type": "string" },
-              "value": { "$ref": "#/$defs/Lattice" }
+              "field": { "type": "string" }
             },
-            "required": ["kind", "object", "field", "value"],
+            "required": ["kind", "object", "field"],
             "additionalProperties": false
           },
           "Expression": {
@@ -257,6 +256,17 @@
             "required": ["kind", "object", "value"],
             "additionalProperties": false
           },
+          "FieldReference": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "FIELD_REF" },
+              "object": { "$ref": "#/$defs/Expression" },
+              "field": { "type": "string" },
+              "value": { "$ref": "#/$defs/Lattice" }
+            },
+            "required": ["kind", "object", "field", "value"],
+            "additionalProperties": false
+          },
           "IntegerLiteralbigint": {
             "type": "object",
             "properties": {
@@ -362,6 +372,15 @@
               "value": { "$ref": "#/$defs/Lattice" }
             },
             "required": ["kind", "name", "value"],
+            "additionalProperties": false
+          },
+          "OmitVariableReferencevalue": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "VARIABLE_REF" },
+              "name": { "type": "string" }
+            },
+            "required": ["kind", "name"],
             "additionalProperties": false
           },
           "EnsureUnique": {

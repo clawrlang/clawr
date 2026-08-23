@@ -22,9 +22,6 @@
             },
             "initialValue": {
                 "kind": "ALLOCATION",
-                "type": {
-                    "name": "FooData"
-                },
                 "isolationLevel": "ISOLATED",
                 "fields": [
                     {

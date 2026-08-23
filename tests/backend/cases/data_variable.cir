@@ -22,9 +22,6 @@
             },
             "initialValue": {
                 "kind": "ALLOCATION",
-                "type": {
-                    "name": "FooData"
-                },
                 "value": {
                     "type": "rc-type",
                     "name": "FooData"

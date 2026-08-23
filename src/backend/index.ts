@@ -353,7 +353,7 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'AS_SHARED':
             return `shareRC(${lowerExpr(expr.object)})`
         case 'ALLOCATION':
-            const mangledTypeName = mangleTypeName(expr.type)
+            const mangledTypeName = mangleTypeName(expr.value)
             if (expr.base) {
                 const mangledSuperTypeName = mangleTypeName(expr.base)
                 return `allocInitInheritedRC(${mangledTypeName}, 0, ${mangledSuperTypeName}, ${`__rc_${expr.isolationLevel}`},

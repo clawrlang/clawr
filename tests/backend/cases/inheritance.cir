@@ -75,9 +75,6 @@
                             },
                             "value": {
                                 "kind": "ALLOCATION",
-                                "type": {
-                                    "name": "Super"
-                                },
                                 "isolationLevel": "ISOLATED",
                                 "value": {
                                     "type": "rc-type",
@@ -236,9 +233,6 @@
                     "name": "__tempˇ0",
                     "initialValue": {
                         "kind": "ALLOCATION",
-                        "type": {
-                            "name": "Sub1"
-                        },
                         "base": {
                             "name": "Super"
                         },
@@ -324,9 +318,6 @@
                     "name": "__tempˇ0",
                     "initialValue": {
                         "kind": "ALLOCATION",
-                        "type": {
-                            "name": "Sub2"
-                        },
                         "base": {
                             "name": "Super"
                         },

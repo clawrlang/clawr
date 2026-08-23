@@ -240,10 +240,9 @@ describe('Type declaration', () => {
                             },
                             value: {
                                 kind: 'ALLOCATION',
-                                type: { name: 'Super' },
                                 isolationLevel: SHARED,
                                 fields: [],
-                                value: { type: 'rc-type', name: 'MyType' },
+                                value: { type: 'rc-type', name: 'Super' },
                             },
                         },
                     ],

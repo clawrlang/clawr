@@ -49,10 +49,6 @@ describe('Lowering Literals', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
                 isolationLevel: ISOLATED,
-                type: {
-                    name: 'MyData',
-                    namespace: undefined,
-                },
                 fields: [
                     {
                         name: 'field',
@@ -63,7 +59,7 @@ describe('Lowering Literals', () => {
                         },
                     },
                 ],
-                value: { type: 'rc-type', name: 'MyType' },
+                value: { type: 'rc-type', name: 'MyData' },
             }
             const result = lowerExpr(expr)
             expect(result).toContain('allocInitRC(MyData, 0,')
@@ -73,10 +69,6 @@ describe('Lowering Literals', () => {
         it('lowers as allocInitInheritedRC', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
-                type: {
-                    name: 'MyObject',
-                    namespace: undefined,
-                },
                 isolationLevel: ISOLATED,
                 fields: [
                     {
@@ -89,7 +81,7 @@ describe('Lowering Literals', () => {
                     },
                 ],
                 base: { name: 'Super' },
-                value: { type: 'rc-type', name: 'MyType' },
+                value: { type: 'rc-type', name: 'MyObject' },
             }
             const result = lowerExpr(expr)
             expect(result).toContain('allocInitInheritedRC(MyObject, 0, Super')

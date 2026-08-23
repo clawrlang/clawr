@@ -140,7 +140,6 @@ type TruthLiteral<Value extends truthvalue> = {
 
 type MemoryAllocation = {
     kind: 'ALLOCATION'
-    type: CanonicalName
     base?: CanonicalName
     isolationLevel: IsolationLevel
     fields: {
@@ -208,9 +207,9 @@ type RealLattice = {
     max?: string // numeric, can be arbitrarity big
 }
 
-type TruthvalueLattice<T extends truthvalue[]> = {
+type TruthvalueLattice<Values extends truthvalue[]> = {
     type: 'truthvalue'
-    values: T
+    values: Values
 }
 
 type StringLattice = { type: 'string'; value?: string }

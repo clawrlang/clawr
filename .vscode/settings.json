@@ -290,7 +290,6 @@
             "type": "object",
             "properties": {
               "kind": { "const": "ALLOCATION" },
-              "type": { "$ref": "#/$defs/CanonicalName" },
               "base": { "$ref": "#/$defs/CanonicalName" },
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
               "fields": {
@@ -299,7 +298,7 @@
               },
               "value": { "$ref": "#/$defs/RCTypeLattice" }
             },
-            "required": ["kind", "type", "isolationLevel", "fields", "value"],
+            "required": ["kind", "isolationLevel", "fields", "value"],
             "additionalProperties": false
           },
           "IsolationLevel": {

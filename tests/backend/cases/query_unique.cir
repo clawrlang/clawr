@@ -28,9 +28,6 @@
                     },
                     "initialValue": {
                         "kind": "ALLOCATION",
-                        "type": {
-                            "name": "MyData"
-                        },
                         "isolationLevel": "ISOLATED",
                         "value": {
                             "type": "rc-type",

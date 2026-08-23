@@ -61,9 +61,6 @@
                     "kind": "RETURN",
                     "value": {
                         "kind": "ALLOCATION",
-                        "type": {
-                            "name": "Object"
-                        },
                         "isolationLevel": "ISOLATED",
                         "value": {
                             "type": "rc-type",

@@ -1,3 +1,4 @@
+import * as cir from '../cir'
 import { Statement, Expression, Context } from '.'
 import { UNIQUE, UNKNOWN } from './isolation-level'
 import { FieldReference } from './field-reference'
@@ -5,6 +6,7 @@ import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
 import { Failable, logSemanticError, SemanticError } from './failable'
 import { RCTypeLattice } from './lattice'
+import { Retain } from './retain'
 
 export class Assignment implements Statement {
     private constructor(
@@ -35,30 +37,38 @@ export class Assignment implements Statement {
     }
 
     private emitCIRStatements(context: Context): Failable {
-        return Failable.collect([
-            this.target.declaredLattice(context),
-            this.target.isolationLevel(context),
-        ]).chaining(([targetLattice, targetIsolationLevel]) => {
-            const prelude = this.target.assignmentPrelude(context)
-            context.scope.emitted.push(...prelude)
-
-            return Failable.collect([
-                this.value.toCIRExpression({
-                    ...context,
-                    explicitLattice: targetLattice,
-                    isolationLevel:
-                        targetIsolationLevel !== UNKNOWN
-                            ? targetIsolationLevel
-                            : undefined,
-                }),
+        return Failable.pipe(
+            Failable.collect([
+                this.target.declaredLattice(context),
                 this.target.toCIRExpression(context),
                 this.value.isolationLevel(context),
-            ]).chaining(([value, target, valueIsolationLevel]) => {
-                if (
-                    (value.kind === 'FIELD_REF' ||
-                        value.kind === 'VARIABLE_REF') &&
-                    targetLattice instanceof RCTypeLattice
-                ) {
+                Retain.ifStorage(this.value, context),
+            ]),
+            ([targetLattice, target, valueIsolationLevel, retainedValue]) => {
+                return retainedValue
+                    .toCIRExpression(context)
+                    .chaining(
+                        (retainedValueCIR) =>
+                            [
+                                targetLattice,
+                                target,
+                                valueIsolationLevel,
+                                retainedValue,
+                                retainedValueCIR,
+                            ] as const,
+                    )
+            },
+            ([
+                targetLattice,
+                target,
+                valueIsolationLevel,
+                retainedValue,
+                retainedValueCIR,
+            ]) => {
+                const prelude = this.target.assignmentPrelude(context)
+                context.scope.emitted.push(...prelude)
+
+                if (retainedValue instanceof Retain) {
                     const tempVar = context.scope.nextTempVar()
 
                     context.scope.emitted.push({
@@ -72,11 +82,7 @@ export class Assignment implements Statement {
                         {
                             kind: 'ASSIGN',
                             target,
-                            value: {
-                                kind: 'RETAIN',
-                                object: value,
-                                value: targetLattice.toCIR(),
-                            },
+                            value: retainedValueCIR,
                         },
                         {
                             kind: 'RELEASE',
@@ -88,7 +94,7 @@ export class Assignment implements Statement {
                     )
                 } else if (
                     targetLattice instanceof RCTypeLattice &&
-                    value.kind === 'CALL' &&
+                    retainedValueCIR.kind === 'CALL' &&
                     valueIsolationLevel === UNIQUE
                 ) {
                     context.scope.emitted.push({
@@ -96,7 +102,7 @@ export class Assignment implements Statement {
                         target,
                         value: {
                             kind: 'AS_SHARED',
-                            object: value,
+                            object: retainedValueCIR,
                             value: targetLattice.toCIR(),
                         },
                     })
@@ -104,12 +110,11 @@ export class Assignment implements Statement {
                     context.scope.emitted.push({
                         kind: 'ASSIGN',
                         target,
-                        value,
+                        value: retainedValueCIR,
                     })
                 }
-                return Failable.success(undefined)
-            })
-        })
+            },
+        )
     }
 
     private checkValidity(context: Context) {

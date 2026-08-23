@@ -1,7 +1,7 @@
 import { Context, Expression, Statement } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { SemanticError } from './failable'
-import { RCTypeLattice } from './lattice'
+import { Failable } from './failable'
+import { Retain } from './retain'
 
 export class ReturnStatement implements Statement {
     private constructor(
@@ -20,85 +20,118 @@ export class ReturnStatement implements Statement {
     }
 
     emitStatement(context: Context) {
-        if (this.value) {
-            if (!context.calleeResult)
-                throw SemanticError.create({
-                    message: 'Called function has no return value',
-                    span: this.value.span,
+        Failable.pipe(this.validateInput(context), () => {
+            if (!this.value || !context.calleeResult) {
+                context.scope.releaseVariables()
+                context.scope.emitted.push({
+                    kind: 'RETURN',
                 })
-            const lattice = this.value.currentValue(context).value()
-            if (!lattice) {
-                throw new Error(
-                    `Return statement value does not have a lattice: ${JSON.stringify(
-                        this.value,
-                    )}`,
-                )
+                return
             }
 
-            if (!context.calleeResult.lattice.isSupersetTo(lattice))
-                throw SemanticError.create({
-                    message: 'Return value type mismatch',
-                    span: this.value.span,
-                })
-            if (
-                context.calleeResult.isolationLevel !==
-                this.value.isolationLevel(context).value()
+            return Failable.pipe(
+                Failable.collect([
+                    this.value.currentValue(context),
+                    Retain.ifStorage(this.value, {
+                        ...context,
+                        ...{ isolationLevel: undefined },
+                    }),
+                ]),
+                ([lattice, retainedValue]) =>
+                    retainedValue
+                        .toCIRExpression(context)
+                        .chaining(
+                            (retainedValueCIR) =>
+                                [
+                                    lattice,
+                                    retainedValue,
+                                    retainedValueCIR,
+                                ] as const,
+                        ),
+                ([lattice, retainedValue, retainedValueCIR]) => {
+                    if (retainedValue instanceof Retain) {
+                        context.scope.emitted.push({
+                            kind: 'ENSURE_UNIQUE',
+                            object: retainedValue.value
+                                .toCIRExpression(context)
+                                .value(),
+                        })
+                        const temp = context.scope.nextTempVar()
+                        context.scope.emitted.push({
+                            kind: 'VARIABLE_DECL',
+                            name: temp,
+                            lattice: lattice.toCIR(),
+                            initialValue: retainedValueCIR,
+                        })
+                        context.scope.releaseVariables()
+                        context.scope.emitted.push({
+                            kind: 'RETURN',
+                            value: {
+                                kind: 'VARIABLE_REF',
+                                name: temp,
+                                value: retainedValueCIR.value,
+                            },
+                        })
+                    } else {
+                        context.scope.releaseVariables()
+                        context.scope.emitted.push({
+                            kind: 'RETURN',
+                            value: retainedValueCIR,
+                        })
+                    }
+                },
             )
-                throw SemanticError.create({
-                    message: `Cannot return an ${this.value.isolationLevel(context).value()} value as ${context.calleeResult.isolationLevel}`,
-                    span: this.value.span,
-                })
+        }).throwIfFailure()
+    }
 
-            const object = this.value
-                .toCIRExpression({ ...context, isolationLevel: undefined })
-                .value()
-            if (
-                (object.kind === 'VARIABLE_REF' ||
-                    object.kind === 'FIELD_REF') &&
-                object.value.type === 'rc-type'
-            ) {
-                context.scope.emitted.push({
-                    kind: 'ENSURE_UNIQUE',
-                    object,
-                })
-                const temp = context.scope.nextTempVar()
-                context.scope.emitted.push({
-                    kind: 'VARIABLE_DECL',
-                    name: temp,
-                    lattice: lattice.toCIR(),
-                    initialValue: {
-                        kind: 'RETAIN',
-                        object,
-                        value: object.value,
-                    },
-                })
-                context.scope.releaseVariables()
-                context.scope.emitted.push({
-                    kind: 'RETURN',
-                    value: {
-                        kind: 'VARIABLE_REF',
-                        name: temp,
-                        value: object.value,
-                    },
-                })
-            } else {
-                context.scope.releaseVariables()
-                context.scope.emitted.push({
-                    kind: 'RETURN',
-                    value: object,
-                })
-            }
-        } else {
-            if (context.calleeResult)
-                throw SemanticError.create({
-                    message: `Must return a ${context.calleeResult.lattice.toString()} value`,
-                    span: this.span,
-                })
-
-            context.scope.releaseVariables()
-            context.scope.emitted.push({
-                kind: 'RETURN',
-            })
+    private validateInput(context: Context): Failable {
+        if (!this.value) {
+            return context.calleeResult
+                ? Failable.failure(
+                      `Must return a ${context.calleeResult.lattice.toString()} value`,
+                      this.span,
+                  )
+                : Failable.success(undefined)
         }
+
+        return Failable.pipe(
+            Failable.success(context.calleeResult),
+            (calleeResult) =>
+                calleeResult ||
+                Failable.failure(
+                    'Called function has no return value',
+                    this.value!.span,
+                ),
+            (calleeResult) =>
+                Failable.collect([
+                    calleeResult,
+                    this.value?.currentValue(context),
+                ]),
+            ([calleeResult, lattice]) => {
+                if (!lattice) {
+                    throw new Error(
+                        `Return statement value does not have a lattice: ${JSON.stringify(
+                            this.value,
+                        )}`,
+                    )
+                }
+                return !calleeResult.lattice.isSupersetTo(lattice)
+                    ? Failable.failure(
+                          'Return value type mismatch',
+                          this.value!.span,
+                      )
+                    : calleeResult
+            },
+            (calleeResult) =>
+                this.value!.isolationLevel(context).chaining(
+                    (isolationLevel) =>
+                        calleeResult.isolationLevel !== isolationLevel
+                            ? Failable.failure(
+                                  `Cannot return an ${this.value?.isolationLevel(context).value()} value as ${calleeResult.isolationLevel}`,
+                                  this.value!.span,
+                              )
+                            : undefined,
+                ),
+        )
     }
 }

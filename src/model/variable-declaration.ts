@@ -1,9 +1,10 @@
 import { Context, Declaration, Expression, Statement } from '.'
-import { logSemanticError } from './failable'
+import { Failable, logSemanticError, pipeFailable } from './failable'
 import { Scope } from './scope'
 import { LatticeDeclaration } from './lattice-declaration'
-import { Lattice, RCTypeLattice } from './lattice'
+import { Lattice } from './lattice'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
+import { Retain } from './retain'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -56,7 +57,7 @@ export class VariableDeclaration implements Statement, Declaration {
                 ? initialValue
                 : (this.lattice ?? initialValue.unconstrained())
 
-        this.emitCIRDeclaration(context, lattice, scope)
+        this.emitCIRDeclaration(context, lattice, scope).throwIfFailure()
         this.addDeclarationToScope(scope, lattice)
         this.setCurrentValue(context, initialValue)
     }
@@ -65,30 +66,24 @@ export class VariableDeclaration implements Statement, Declaration {
         context: Context,
         lattice: Lattice,
         scope: Scope | Scope['rootScope'],
-    ) {
-        const initialValue = this.initialValue
-            .toCIRExpression({
-                ...context,
-                explicitLattice: this.lattice,
-                isolationLevel: this.isolationLevel,
-            })
-            .value()
-
-        scope.emitted.push({
-            kind: 'VARIABLE_DECL' as const,
-            name: this.name,
-            lattice: lattice.toCIR(),
-            initialValue:
-                initialValue.value.type === 'rc-type' &&
-                (initialValue.kind === 'VARIABLE_REF' ||
-                    initialValue.kind === 'FIELD_REF')
-                    ? {
-                          kind: 'RETAIN' as const,
-                          object: initialValue,
-                          value: initialValue.value,
-                      }
-                    : initialValue,
-        })
+    ): Failable {
+        return Failable.pipe(
+            Retain.ifStorage(this.initialValue, context),
+            (value) =>
+                value.toCIRExpression({
+                    ...context,
+                    explicitLattice: this.lattice,
+                    isolationLevel: this.isolationLevel,
+                }),
+            (initialValue) => {
+                scope.emitted.push({
+                    kind: 'VARIABLE_DECL' as const,
+                    name: this.name,
+                    lattice: lattice.toCIR(),
+                    initialValue: initialValue,
+                })
+            },
+        )
     }
 
     private addDeclarationToScope(

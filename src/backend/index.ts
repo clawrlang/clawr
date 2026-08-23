@@ -223,48 +223,7 @@ function lowerType(lattice: cir.Lattice): string {
 export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
         case 'CALL':
-            switch (stmt.receiver?.dispatch) {
-                case undefined: {
-                    const args = stmt.arguments.map(lowerExpr)
-                    const name = mangleNameWithLabels({
-                        namespace: stmt.name.namespace,
-                        baseName: stmt.name.baseName,
-                        labels: stmt.name.labels,
-                    })
-                    return `${name}(${args.join(', ')});`
-                }
-                case 'direct': {
-                    const args = stmt.receiver
-                        ? [
-                              lowerStorage(stmt.receiver.object),
-                              ...stmt.arguments.map(lowerExpr),
-                          ]
-                        : stmt.arguments.map(lowerExpr)
-                    const name = mangleNameWithLabels(
-                        stmt.name,
-                        stmt.receiver?.type,
-                    )
-
-                    return `${name}(${args.join(', ')});`
-                }
-                case 'inherited': {
-                    const targetName = lowerStorage(stmt.receiver.object)
-                    const declarationType = mangleTypeName(
-                        stmt.receiver.declaredIn,
-                    )
-                    const slotName = mangleNameWithLabels({
-                        ...stmt.name,
-                        namespace: undefined,
-                    })
-                    const args = stmt.receiver
-                        ? [
-                              lowerStorage(stmt.receiver.object),
-                              ...stmt.arguments.map(lowerExpr),
-                          ]
-                        : stmt.arguments.map(lowerExpr)
-                    return `VTABLE(${targetName}, ${declarationType})->${slotName}(${args});`
-                }
-            }
+            return `${lowerFunctionCall(stmt)};`
         case 'VARIABLE_DECL':
             return `${lowerType(stmt.lattice)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         case 'ASSIGN':
@@ -309,43 +268,7 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
         case 'CALL':
-            switch (expr.receiver?.dispatch) {
-                case undefined: {
-                    const name = mangleNameWithLabels(expr.name)
-                    const args = expr.arguments.map(lowerExpr)
-                    return `${name}(${args.join(', ')})`
-                }
-                case 'direct': {
-                    const args = expr.receiver
-                        ? [
-                              lowerStorage(expr.receiver.object),
-                              ...expr.arguments.map(lowerExpr),
-                          ]
-                        : expr.arguments.map(lowerExpr)
-                    const name = mangleNameWithLabels(
-                        expr.name,
-                        expr.receiver.type,
-                    )
-                    return `${name}(${args.join(', ')})`
-                }
-                case 'inherited': {
-                    const targetName = lowerStorage(expr.receiver.object)
-                    const declarationType = mangleTypeName(
-                        expr.receiver.declaredIn,
-                    )
-                    const slotName = mangleNameWithLabels({
-                        ...expr.name,
-                        namespace: undefined,
-                    })
-                    const args = expr.receiver
-                        ? [
-                              lowerStorage(expr.receiver.object),
-                              ...expr.arguments.map(lowerExpr),
-                          ]
-                        : expr.arguments.map(lowerExpr)
-                    return `VTABLE(${targetName}, ${declarationType})->${slotName}(${args})`
-                }
-            }
+            return lowerFunctionCall(expr)
         case 'VARIABLE_REF':
             return expr.name
         case 'FIELD_REF':
@@ -378,6 +301,38 @@ export function lowerStorage(
             return `${lowerExpr(expr.object)}->fields.${expr.field}`
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
+    }
+}
+
+function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
+    const receiver = call.receiver
+    switch (receiver?.dispatch) {
+        case undefined: {
+            const name = mangleNameWithLabels(call.name)
+            const args = call.arguments.map(lowerExpr)
+            return `${name}(${args.join(', ')})`
+        }
+        case 'direct': {
+            const args = [
+                lowerStorage(receiver.object),
+                ...call.arguments.map(lowerExpr),
+            ]
+            const name = mangleNameWithLabels(call.name, receiver.type)
+            return `${name}(${args.join(', ')})`
+        }
+        case 'inherited': {
+            const targetName = lowerStorage(receiver.object)
+            const declarationType = mangleTypeName(receiver.declaredIn)
+            const slotName = mangleNameWithLabels({
+                ...call.name,
+                namespace: undefined,
+            })
+            const args = [
+                lowerStorage(receiver.object),
+                ...call.arguments.map(lowerExpr),
+            ]
+            return `VTABLE(${targetName}, ${declarationType})->${slotName}(${args})`
+        }
     }
 }
 

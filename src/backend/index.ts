@@ -333,6 +333,12 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
             ]
             return `VTABLE(${targetName}, ${declarationType})->${slotName}(${args})`
         }
+        case 'conformance-open':
+        case 'conformance-closed':
+        default:
+            throw new Error(
+                `Dispatch mode of ${receiver?.dispatch} not yet supported`,
+            )
     }
 }
 

@@ -44,6 +44,7 @@ type RCTypeDeclaration = {
     | {
           base?: CanonicalName
           methods: FunctionDeclaration[]
+          implements?: ProtocolImplementation[]
           initializers?: (FunctionDeclaration & { lattice?: undefined })[]
           dispatchTable?: {
               slot: FunctionSignature
@@ -55,6 +56,19 @@ type RCTypeDeclaration = {
 )
 
 export type CanonicalName = { name: string; namespace?: string }
+
+type FunctionName = {
+    baseName: string
+    labels: string[]
+}
+
+type ProtocolImplementation = {
+    protocol: string
+    methodMap: {
+        interfaceMethod: FunctionName
+        implementationMethod: FunctionName
+    }[]
+}
 
 export type Declaration = { namespace?: string } & (
     VariableDeclaration | FunctionDeclaration | RCTypeDeclaration
@@ -74,27 +88,36 @@ type Release = {
     object: Storage
 }
 
-type Receiver = {
-    object: Storage
-} & (
+type Receiver =
     | {
+          // ordinary call or proven concrete type
+          object: Storage
           dispatch: 'direct'
           type: CanonicalName
       }
     | {
+          // virtual method
+          object: Storage
           dispatch: 'inherited'
           declaredIn: CanonicalName
       }
-)
+    | {
+          // backend MAY devirtualize via whole-program proof
+          object: Storage
+          dispatch: 'conformance-closed'
+          declaredIn: CanonicalName
+      }
+    | {
+          // role or unresolved trait - MUST NOT devirtualize
+          object: Storage
+          dispatch: 'conformance-open'
+          declaredIn: CanonicalName
+      }
 
 type FunctionCall = {
     kind: 'CALL'
     receiver?: Receiver
-    name: {
-        namespace?: string
-        baseName: string
-        labels: string[]
-    }
+    name: FunctionName & { namespace?: string }
     arguments: Expression[]
 }
 

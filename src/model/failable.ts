@@ -1,23 +1,23 @@
 import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
 
-export class Failable<T = void> {
+export class _Failable<T = void> {
     private constructor(private result: T | SemanticErrorCollection) {}
 
-    static success<T>(value: T): Failable<T> {
-        return new Failable<T>(value)
+    static success<T>(value: T): _Failable<T> {
+        return new _Failable<T>(value)
     }
 
-    static failure(message: string, span: SourceCodeSpan): Failable<never>
-    static failure(error: SemanticErrorCollection): Failable<never>
+    static failure(message: string, span: SourceCodeSpan): _Failable<never>
+    static failure(error: SemanticErrorCollection): _Failable<never>
     static failure(
         errorOrMessage: string | SemanticErrorCollection,
         span?: SourceCodeSpan,
-    ): Failable<never> {
+    ): _Failable<never> {
         if (errorOrMessage instanceof SemanticErrorCollection)
-            return new Failable<never>(errorOrMessage)
+            return new _Failable<never>(errorOrMessage)
 
         if (typeof errorOrMessage === 'string' && span) {
-            return new Failable<never>(
+            return new _Failable<never>(
                 SemanticErrorCollection.create([
                     SemanticError.create({
                         message: errorOrMessage,
@@ -33,7 +33,7 @@ export class Failable<T = void> {
         return !this.isFailure()
     }
 
-    isFailure(): this is Failable<never> {
+    isFailure(): this is _Failable<never> {
         return this.result instanceof SemanticErrorCollection
     }
 
@@ -42,55 +42,55 @@ export class Failable<T = void> {
         return this.result as T
     }
 
-    chaining<U>(fn: (value: T) => U | Failable<U>): Failable<U> {
+    chaining<U>(fn: (value: T) => U | _Failable<U>): _Failable<U> {
         if (this.isFailure()) return this
         return wrap(fn(this.value()))
     }
 
     static collect<T extends unknown[]>(values: {
-        [K in keyof T]: T[K] | Failable<T[K]>
-    }): Failable<T> {
+        [K in keyof T]: T[K] | _Failable<T[K]>
+    }): _Failable<T> {
         const result: unknown[] = []
         const errors: SemanticError[] = []
 
         for (let i = 0; i < values.length; i++) {
             const value = values[i]
-            if (value instanceof Failable && value.isFailure())
+            if (value instanceof _Failable && value.isFailure())
                 errors.push(...value.getError().errors)
             else result.push(unwrap(value))
         }
 
         if (errors.length > 0)
-            return Failable.failure(SemanticErrorCollection.create(errors))
+            return _Failable.failure(SemanticErrorCollection.create(errors))
 
-        return Failable.success(result as T)
+        return _Failable.success(result as T)
     }
 
     static pipe<A, B>(
-        value: Failable<A>,
-        fn1: (input: A) => B | Failable<B>,
-    ): Failable<B>
+        value: _Failable<A>,
+        fn1: (input: A) => B | _Failable<B>,
+    ): _Failable<B>
     static pipe<A, B, C>(
-        value: Failable<A>,
-        fn1: (input: A) => B | Failable<B>,
-        fn2: (input: B) => C | Failable<C>,
-    ): Failable<C>
+        value: _Failable<A>,
+        fn1: (input: A) => B | _Failable<B>,
+        fn2: (input: B) => C | _Failable<C>,
+    ): _Failable<C>
     static pipe<A, B, C, D>(
-        value: Failable<A>,
-        fn1: (input: A) => B | Failable<B>,
-        fn2: (input: B) => C | Failable<C>,
-        fn3: (input: C) => D | Failable<D>,
-    ): Failable<D>
+        value: _Failable<A>,
+        fn1: (input: A) => B | _Failable<B>,
+        fn2: (input: B) => C | _Failable<C>,
+        fn3: (input: C) => D | _Failable<D>,
+    ): _Failable<D>
     static pipe<A, B, C, D, E>(
-        value: Failable<A>,
-        fn1: (input: A) => B | Failable<B>,
-        fn2: (input: B) => C | Failable<C>,
-        fn3: (input: C) => D | Failable<D>,
-        fn4: (input: D) => E | Failable<E>,
-    ): Failable<E>
+        value: _Failable<A>,
+        fn1: (input: A) => B | _Failable<B>,
+        fn2: (input: B) => C | _Failable<C>,
+        fn3: (input: C) => D | _Failable<D>,
+        fn4: (input: D) => E | _Failable<E>,
+    ): _Failable<E>
     static pipe(value: any, ...fns: Function[]): unknown {
         return fns.reduce((acc, fn) => {
-            if (!(acc instanceof Failable)) return Failable.success(acc)
+            if (!(acc instanceof _Failable)) return _Failable.success(acc)
             return wrap(acc.isSuccess() ? fn(acc.value()) : acc)
         }, value)
     }
@@ -139,12 +139,12 @@ export class SemanticErrorCollection extends Error {
     }
 }
 
-function wrap<T>(result: T | Failable<T>): Failable<T> {
-    return result instanceof Failable ? result : Failable.success(result)
+function wrap<T>(result: T | _Failable<T>): _Failable<T> {
+    return result instanceof _Failable ? result : _Failable.success(result)
 }
 
-function unwrap<T>(result: T | Failable<T>): T {
-    return result instanceof Failable ? result.value() : result
+function unwrap<T>(result: T | _Failable<T>): T {
+    return result instanceof _Failable ? result.value() : result
 }
 
 export function logSemanticError(
@@ -186,13 +186,13 @@ export function logSemanticError(
     if (fatal) throw SemanticError.create({ message, span })
 }
 export function pipeFailable<A, B, C>(
-    value: Failable<A>,
-    fn1: (input: A) => Failable<B>,
-    fn2: (input: B) => Failable<C>,
-): Failable<C>
+    value: _Failable<A>,
+    fn1: (input: A) => _Failable<B>,
+    fn2: (input: B) => _Failable<C>,
+): _Failable<C>
 export function pipeFailable(value: any, ...fns: Function[]): unknown {
     return fns.reduce(
-        (acc: Failable<unknown>, fn) => (acc.isSuccess() ? fn(acc) : acc),
+        (acc: _Failable<unknown>, fn) => (acc.isSuccess() ? fn(acc) : acc),
         value,
     )
 }

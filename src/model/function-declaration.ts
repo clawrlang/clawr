@@ -5,7 +5,7 @@ import { LatticeDeclaration } from './lattice-declaration'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { Lattice } from './lattice'
-import { Failable, logSemanticError } from './failable'
+import { _Failable, logSemanticError } from './failable'
 import { mapFilter } from '../tools/map-filter'
 import { Parameter } from './parameter'
 import { Scope } from './scope'
@@ -51,8 +51,8 @@ export class FunctionDeclaration implements Declaration {
         )
     }
 
-    resultIsolationLevel(context: Context): Failable<AnyIsolationLevel> {
-        if (this.result) return Failable.success(this.result.isolationLevel)
+    resultIsolationLevel(context: Context): _Failable<AnyIsolationLevel> {
+        if (this.result) return _Failable.success(this.result.isolationLevel)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.isolationLevel(context)
         else

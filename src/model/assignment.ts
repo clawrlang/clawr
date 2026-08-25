@@ -4,7 +4,7 @@ import { UNIQUE, UNKNOWN } from './isolation-level'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
-import { Failable, logSemanticError, SemanticError } from './failable'
+import { _Failable, logSemanticError, SemanticError } from './failable'
 import { RCTypeLattice } from './lattice'
 import { Retain } from './retain'
 
@@ -36,9 +36,9 @@ export class Assignment implements Statement {
         )
     }
 
-    private emitCIRStatements(context: Context): Failable {
-        return Failable.pipe(
-            Failable.collect([
+    private emitCIRStatements(context: Context): _Failable {
+        return _Failable.pipe(
+            _Failable.collect([
                 this.target.declaredLattice(context),
                 this.target.toCIRExpression(context),
                 this.value.isolationLevel(context),

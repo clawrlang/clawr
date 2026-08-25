@@ -4,33 +4,33 @@ import {
     SemanticErrorCollection,
 } from '../../../src/model/failable'
 import { someCodeSpan } from '../../util'
-import { Failable } from '../../../src/model/failable'
+import { _Failable } from '../../../src/model/failable'
 
 describe('Failable', () => {
     describe('success', () => {
         it('is successful', () => {
-            expect(Failable.success(42).isSuccess()).toBe(true)
+            expect(_Failable.success(42).isSuccess()).toBe(true)
         })
 
         it('has no error', () => {
-            expect(() => Failable.success(42).getError()).toThrow(
+            expect(() => _Failable.success(42).getError()).toThrow(
                 'Cannot get error of a successful Failable',
             )
         })
 
         it('has a resolved value', () => {
-            expect(Failable.success(42).value()).toBe(42)
+            expect(_Failable.success(42).value()).toBe(42)
         })
     })
 
     describe('failure', () => {
         it('is not successful', () => {
-            expect(Failable.failure(someError).isSuccess()).toBe(false)
+            expect(_Failable.failure(someError).isSuccess()).toBe(false)
         })
 
         it('has an error', () => {
             const error = someError
-            expect(Failable.failure(error).getError()).toBe(error)
+            expect(_Failable.failure(error).getError()).toBe(error)
         })
 
         it('throws when accessing value', () => {
@@ -40,7 +40,7 @@ describe('Failable', () => {
                     span: someCodeSpan,
                 }),
             ])
-            expect(() => Failable.failure(error).value()).toThrow(
+            expect(() => _Failable.failure(error).value()).toThrow(
                 'This is an error',
             )
         })
@@ -54,9 +54,9 @@ describe('Failable', () => {
                     span: someCodeSpan,
                 }),
             ])
-            const result = Failable.success(42).chaining((_) =>
-                Failable.failure(error),
-            )
+            const result = _Failable
+                .success(42)
+                .chaining((_) => _Failable.failure(error))
             expect(result.isFailure()).toBe(true)
             expect(result.getError()).toBe(error)
         })
@@ -68,17 +68,17 @@ describe('Failable', () => {
                     span: someCodeSpan,
                 }),
             ])
-            const result = Failable.failure(error).chaining((_) =>
-                Failable.success(42),
-            )
+            const result = _Failable
+                .failure(error)
+                .chaining((_) => _Failable.success(42))
             expect(result.isSuccess()).toBe(false)
             expect(result.getError()).toBe(error)
         })
 
         it('can chain success with success', () => {
-            const result = Failable.success(42).chaining((value) =>
-                Failable.success(value + 1),
-            )
+            const result = _Failable
+                .success(42)
+                .chaining((value) => _Failable.success(value + 1))
             expect(result.isSuccess()).toBe(true)
             expect(result.value()).toBe(43)
         })
@@ -92,29 +92,29 @@ describe('Failable', () => {
                     span: someCodeSpan,
                 }),
             ])
-            const result = Failable.collect([
-                Failable.success(1),
-                Failable.failure(error),
-                Failable.success(3),
+            const result = _Failable.collect([
+                _Failable.success(1),
+                _Failable.failure(error),
+                _Failable.success(3),
             ])
             expect(result.isFailure()).toBe(true)
             expect(result.getError()).toEqual(error)
         })
 
         it('collects all successful values', () => {
-            const result = Failable.collect([
-                Failable.success(1),
-                Failable.success(2),
-                Failable.success(3),
+            const result = _Failable.collect([
+                _Failable.success(1),
+                _Failable.success(2),
+                _Failable.success(3),
             ])
             expect(result.isSuccess()).toBe(true)
             expect(result.value()).toEqual([1, 2, 3])
         })
 
         it('merges list of failables', () => {
-            const result: Failable<[number, string]> = Failable.collect([
-                Failable.success(32),
-                Failable.success('hello'),
+            const result: _Failable<[number, string]> = _Failable.collect([
+                _Failable.success(32),
+                _Failable.success('hello'),
             ])
         })
     })

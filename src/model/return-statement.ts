@@ -1,6 +1,6 @@
 import { Context, Expression, Statement } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { Failable } from './failable'
+import { _Failable } from './failable'
 import { Retain } from './retain'
 
 export class ReturnStatement implements Statement {
@@ -20,90 +20,92 @@ export class ReturnStatement implements Statement {
     }
 
     emitStatement(context: Context) {
-        Failable.pipe(this.validateInput(context), () => {
-            if (!this.value || !context.calleeResult) {
-                context.scope.releaseVariables()
-                context.scope.emitted.push({
-                    kind: 'RETURN',
-                })
-                return
-            }
+        _Failable
+            .pipe(this.validateInput(context), () => {
+                if (!this.value || !context.calleeResult) {
+                    context.scope.releaseVariables()
+                    context.scope.emitted.push({
+                        kind: 'RETURN',
+                    })
+                    return
+                }
 
-            return Failable.pipe(
-                Failable.collect([
-                    this.value.currentValue(context),
-                    Retain.ifStorage(this.value, {
-                        ...context,
-                        ...{ isolationLevel: undefined },
-                    }),
-                ]),
-                ([lattice, retainedValue]) =>
-                    retainedValue
-                        .toCIRExpression(context)
-                        .chaining(
-                            (retainedValueCIR) =>
-                                [
-                                    lattice,
-                                    retainedValue,
-                                    retainedValueCIR,
-                                ] as const,
-                        ),
-                ([lattice, retainedValue, retainedValueCIR]) => {
-                    if (retainedValue instanceof Retain) {
-                        context.scope.emitted.push({
-                            kind: 'ENSURE_UNIQUE',
-                            object: retainedValue.value
-                                .toCIRExpression(context)
-                                .value(),
-                        })
-                        const temp = context.scope.nextTempVar()
-                        context.scope.emitted.push({
-                            kind: 'VARIABLE_DECL',
-                            name: temp,
-                            lattice: lattice.toCIR(),
-                            initialValue: retainedValueCIR,
-                        })
-                        context.scope.releaseVariables()
-                        context.scope.emitted.push({
-                            kind: 'RETURN',
-                            value: {
-                                kind: 'VARIABLE_REF',
+                return _Failable.pipe(
+                    _Failable.collect([
+                        this.value.currentValue(context),
+                        Retain.ifStorage(this.value, {
+                            ...context,
+                            ...{ isolationLevel: undefined },
+                        }),
+                    ]),
+                    ([lattice, retainedValue]) =>
+                        retainedValue
+                            .toCIRExpression(context)
+                            .chaining(
+                                (retainedValueCIR) =>
+                                    [
+                                        lattice,
+                                        retainedValue,
+                                        retainedValueCIR,
+                                    ] as const,
+                            ),
+                    ([lattice, retainedValue, retainedValueCIR]) => {
+                        if (retainedValue instanceof Retain) {
+                            context.scope.emitted.push({
+                                kind: 'ENSURE_UNIQUE',
+                                object: retainedValue.value
+                                    .toCIRExpression(context)
+                                    .value(),
+                            })
+                            const temp = context.scope.nextTempVar()
+                            context.scope.emitted.push({
+                                kind: 'VARIABLE_DECL',
                                 name: temp,
-                                value: retainedValueCIR.value,
-                            },
-                        })
-                    } else {
-                        context.scope.releaseVariables()
-                        context.scope.emitted.push({
-                            kind: 'RETURN',
-                            value: retainedValueCIR,
-                        })
-                    }
-                },
-            )
-        }).throwIfFailure()
+                                lattice: lattice.toCIR(),
+                                initialValue: retainedValueCIR,
+                            })
+                            context.scope.releaseVariables()
+                            context.scope.emitted.push({
+                                kind: 'RETURN',
+                                value: {
+                                    kind: 'VARIABLE_REF',
+                                    name: temp,
+                                    value: retainedValueCIR.value,
+                                },
+                            })
+                        } else {
+                            context.scope.releaseVariables()
+                            context.scope.emitted.push({
+                                kind: 'RETURN',
+                                value: retainedValueCIR,
+                            })
+                        }
+                    },
+                )
+            })
+            .throwIfFailure()
     }
 
-    private validateInput(context: Context): Failable {
+    private validateInput(context: Context): _Failable {
         if (!this.value) {
             return context.calleeResult
-                ? Failable.failure(
+                ? _Failable.failure(
                       `Must return a ${context.calleeResult.lattice.toString()} value`,
                       this.span,
                   )
-                : Failable.success(undefined)
+                : _Failable.success(undefined)
         }
 
-        return Failable.pipe(
-            Failable.success(context.calleeResult),
+        return _Failable.pipe(
+            _Failable.success(context.calleeResult),
             (calleeResult) =>
                 calleeResult ||
-                Failable.failure(
+                _Failable.failure(
                     'Called function has no return value',
                     this.value!.span,
                 ),
             (calleeResult) =>
-                Failable.collect([
+                _Failable.collect([
                     calleeResult,
                     this.value?.currentValue(context),
                 ]),
@@ -116,7 +118,7 @@ export class ReturnStatement implements Statement {
                     )
                 }
                 return !calleeResult.lattice.isSupersetTo(lattice)
-                    ? Failable.failure(
+                    ? _Failable.failure(
                           'Return value type mismatch',
                           this.value!.span,
                       )
@@ -126,7 +128,7 @@ export class ReturnStatement implements Statement {
                 this.value!.isolationLevel(context).chaining(
                     (isolationLevel) =>
                         calleeResult.isolationLevel !== isolationLevel
-                            ? Failable.failure(
+                            ? _Failable.failure(
                                   `Cannot return an ${this.value?.isolationLevel(context).value()} value as ${calleeResult.isolationLevel}`,
                                   this.value!.span,
                               )

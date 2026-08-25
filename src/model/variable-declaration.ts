@@ -1,5 +1,5 @@
 import { Context, Declaration, Expression, Statement } from '.'
-import { Failable, logSemanticError, pipeFailable } from './failable'
+import { _Failable, logSemanticError, pipeFailable } from './failable'
 import { Scope } from './scope'
 import { LatticeDeclaration } from './lattice-declaration'
 import { Lattice } from './lattice'
@@ -66,8 +66,8 @@ export class VariableDeclaration implements Statement, Declaration {
         context: Context,
         lattice: Lattice,
         scope: Scope | Scope['rootScope'],
-    ): Failable {
-        return Failable.pipe(
+    ): _Failable {
+        return _Failable.pipe(
             Retain.ifStorage(this.initialValue, context),
             (value) =>
                 value.toCIRExpression({

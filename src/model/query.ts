@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { AnyIsolationLevel, UNIQUE } from './isolation-level'
-import { Failable, SemanticError } from './failable'
+import { _Failable, SemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice, RCTypeLattice } from './lattice'
@@ -38,62 +38,64 @@ export class Query implements Expression {
         )
     }
 
-    isEffectivelyConst(_: Context): Failable<boolean> {
-        return Failable.success(true)
+    isEffectivelyConst(_: Context): _Failable<boolean> {
+        return _Failable.success(true)
     }
 
-    isolationLevel(context: Context): Failable<AnyIsolationLevel> {
+    isolationLevel(context: Context): _Failable<AnyIsolationLevel> {
         if (this.name.toString() === 'copy(of:)')
-            return Failable.success(UNIQUE)
+            return _Failable.success(UNIQUE)
 
         const decl = context.scope.functionDeclaration(this.name.toString())
         if (!decl)
-            return Failable.failure(
+            return _Failable.failure(
                 `unknown function ${this.name.toString()}`,
                 this.span,
             )
         return decl.resultIsolationLevel(context)
     }
 
-    declaredLattice(context: Context): Failable<Lattice> {
+    declaredLattice(context: Context): _Failable<Lattice> {
         return this.currentValue(context)
     }
 
-    currentValue(context: Context): Failable<Lattice> {
+    currentValue(context: Context): _Failable<Lattice> {
         if (this.name.toString() === 'copy(of:)') {
             const value = this.arguments[0].currentValue(context).value()
             return value instanceof RCTypeLattice
-                ? Failable.success(value)
-                : Failable.failure('not a reference-counted type', this.span)
+                ? _Failable.success(value)
+                : _Failable.failure('not a reference-counted type', this.span)
         }
 
         const decl = context.scope.functionDeclaration(this.name.toString())
         if (!decl)
-            return Failable.failure(
+            return _Failable.failure(
                 `Function declaration not found: ${this.name.toString()}`,
                 this.span,
             )
 
         const result = decl.lattice(context)
         if (!result)
-            return Failable.failure(
+            return _Failable.failure(
                 `Function declaration has no result lattice: ${this.name.toString()}`,
                 this.span,
             )
-        return Failable.success(result)
+        return _Failable.success(result)
     }
 
-    toCIRExpression(context: Context): Failable<cir.Expression> {
-        return Failable.collect([
-            this.currentValue(context),
-            ...this.arguments.map((arg) => arg.toCIRExpression(context)),
-        ]).chaining(([value, ...args]) =>
-            Failable.success({
-                kind: 'CALL',
-                name: this.name.toCIR(),
-                arguments: args,
-                value: value.toCIR(),
-            } satisfies cir.Expression),
-        )
+    toCIRExpression(context: Context): _Failable<cir.Expression> {
+        return _Failable
+            .collect([
+                this.currentValue(context),
+                ...this.arguments.map((arg) => arg.toCIRExpression(context)),
+            ])
+            .chaining(([value, ...args]) =>
+                _Failable.success({
+                    kind: 'CALL',
+                    name: this.name.toCIR(),
+                    arguments: args,
+                    value: value.toCIR(),
+                } satisfies cir.Expression),
+            )
     }
 }

@@ -12,8 +12,8 @@ import {
     truthvalue,
 } from '../../../src/model/lattice'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable } from '../../../src/model/gen-failable'
-import { _Failable } from '../../../src/model/failable'
+import { Failable, isFailure, isSuccess } from '../../../src/model/gen-failable'
+import assert from 'assert'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {
@@ -24,15 +24,11 @@ describe('Literals', () => {
                     value: input,
                     span: someCodeSpan,
                 })
-                expect(
-                    _Failable
-                        .of(
-                            Failable.do(() =>
-                                literal.toCIRExpression(newSemanticContext()),
-                            ),
-                        )
-                        .value(),
-                ).toMatchObject({
+                const result = Failable.do(() =>
+                    literal.toCIRExpression(newSemanticContext()),
+                )
+                assert(isSuccess(result))
+                expect(result.value).toMatchObject({
                     kind: 'TRUTHVALUE_LITERAL',
                     value: { values: [input] },
                 })
@@ -43,15 +39,11 @@ describe('Literals', () => {
                     value: input,
                     span: someCodeSpan,
                 })
-                expect(
-                    _Failable
-                        .of(
-                            Failable.do(() =>
-                                literal.currentValue(newSemanticContext()),
-                            ),
-                        )
-                        .value(),
-                ).toMatchObject({
+                const result = Failable.do(() =>
+                    literal.currentValue(newSemanticContext()),
+                )
+                assert(isSuccess(result))
+                expect(result.value).toMatchObject({
                     values: [input],
                 })
             })
@@ -66,15 +58,11 @@ describe('Literals', () => {
                     value: BigInt(input),
                     span: someCodeSpan,
                 })
-                expect(
-                    _Failable
-                        .of(
-                            Failable.do(() =>
-                                literal.toCIRExpression(newSemanticContext()),
-                            ),
-                        )
-                        .value(),
-                ).toMatchObject({
+                const result = Failable.do(() =>
+                    literal.toCIRExpression(newSemanticContext()),
+                )
+                assert(isSuccess(result))
+                expect(result.value).toMatchObject({
                     kind: 'INTEGER_LITERAL',
                     value: { max: input, min: input },
                 })
@@ -85,15 +73,11 @@ describe('Literals', () => {
                     value: BigInt(input),
                     span: someCodeSpan,
                 })
-                expect(
-                    _Failable
-                        .of(
-                            Failable.do(() =>
-                                literal.currentValue(newSemanticContext()),
-                            ),
-                        )
-                        .value(),
-                ).toMatchObject({
+                const result = Failable.do(() =>
+                    literal.currentValue(newSemanticContext()),
+                )
+                assert(isSuccess(result))
+                expect(result.value).toMatchObject({
                     min: BigInt(input),
                     max: BigInt(input),
                 })
@@ -150,21 +134,17 @@ describe('Literals', () => {
                 span: someCodeSpan,
             })
 
-            expect(
-                _Failable
-                    .of(
-                        Failable.do(() =>
-                            dataLiteral.toCIRExpression({
-                                ...context,
-                                explicitLattice: RCTypeLattice.create({
-                                    type: TypeName.create({ name: 'MyType' }),
-                                }),
-                                isolationLevel: SHARED,
-                            }),
-                        ),
-                    )
-                    .value(),
-            ).toMatchObject({
+            const result = Failable.do(() =>
+                dataLiteral.toCIRExpression({
+                    ...context,
+                    explicitLattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                    }),
+                    isolationLevel: SHARED,
+                }),
+            )
+            assert(isSuccess(result))
+            expect(result.value).toMatchObject({
                 kind: 'ALLOCATION',
                 fields: [
                     {
@@ -233,20 +213,16 @@ describe('Literals', () => {
                 span: someCodeSpan,
             })
 
-            expect(
-                _Failable
-                    .of(
-                        Failable.do(() =>
-                            dataLiteral.currentValue({
-                                ...context,
-                                explicitLattice: RCTypeLattice.create({
-                                    type: TypeName.create({ name: 'MyType' }),
-                                }),
-                            }),
-                        ),
-                    )
-                    .value(),
-            ).toMatchObject({
+            const result = Failable.do(() =>
+                dataLiteral.currentValue({
+                    ...context,
+                    explicitLattice: RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                    }),
+                }),
+            )
+            assert(isSuccess(result))
+            expect(result.value).toMatchObject({
                 type: { name: 'MyType' },
                 fields: {
                     x: { min: 42n, max: 42n },
@@ -299,22 +275,17 @@ describe('Literals', () => {
                 span: someCodeSpan,
             })
 
-            expect(
-                _Failable
-                    .of(
-                        Failable.do(() =>
-                            dataLiteral.currentValue({
-                                ...context,
-                                explicitLattice: RCTypeLattice.create({
-                                    type: TypeName.create({
-                                        name: 'OuterType',
-                                    }),
-                                }),
-                            }),
-                        ),
-                    )
-                    .isFailure(),
-            ).toBe(true)
+            const result = Failable.do(() =>
+                dataLiteral.currentValue({
+                    ...context,
+                    explicitLattice: RCTypeLattice.create({
+                        type: TypeName.create({
+                            name: 'OuterType',
+                        }),
+                    }),
+                }),
+            )
+            expect(isFailure(result)).toBeTrue()
         })
     })
 })

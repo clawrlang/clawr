@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 import { Context, Declaration, Expression, Statement } from '.'
-import { logSemanticError } from './failable'
+import { logSemanticError } from './gen-failable'
 import { Scope } from './scope'
 import { LatticeDeclaration } from './lattice-declaration'
 import { Lattice } from './lattice'

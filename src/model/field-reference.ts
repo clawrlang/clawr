@@ -6,7 +6,7 @@ import {
     IsolationLevel,
     SHARED,
 } from './isolation-level'
-import { logSemanticError } from './failable'
+import { logSemanticError } from './gen-failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration, DataField } from './data-declaration'
 import { RCTypeLattice, Lattice } from './lattice'

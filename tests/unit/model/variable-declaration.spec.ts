@@ -16,7 +16,6 @@ import { TypeName } from '../../../src/model/type-name'
 import { Query } from '../../../src/model/query'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { _Failable } from '../../../src/model/failable'
 import { Failable } from '../../../src/model/gen-failable'
 
 describe('VariableDeclaration', () => {

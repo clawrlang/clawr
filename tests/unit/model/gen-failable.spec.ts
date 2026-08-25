@@ -1,7 +1,11 @@
 import { describe, it, expect, test } from 'bun:test'
 import { someCodeSpan } from '../../util'
-import { Failable, isFailure, isSuccess } from '../../../src/model/gen-failable'
-import { SemanticError } from '../../../src/model/failable'
+import {
+    Failable,
+    isFailure,
+    isSuccess,
+    SemanticError,
+} from '../../../src/model/gen-failable'
 
 describe('Failable', () => {
     describe('success', () => {

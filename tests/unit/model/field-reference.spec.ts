@@ -7,8 +7,8 @@ import { TypeName } from '../../../src/model/type-name'
 import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
 import { ISOLATED, SHARED, UNKNOWN } from '../../../src/model/isolation-level'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { _Failable } from '../../../src/model/failable'
-import { Failable } from '../../../src/model/gen-failable'
+import { Failable, isFailure, isSuccess } from '../../../src/model/gen-failable'
+import assert from 'assert'
 
 describe('Field Reference', () => {
     it('infers its type from the context', () => {
@@ -47,12 +47,9 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(
-            _Failable
-                .of(Failable.do(() => fieldRef.declaredLattice(context)))
-                .value()
-                .toCIR().type,
-        ).toBe('integer')
+        const result = Failable.do(() => fieldRef.declaredLattice(context))
+        assert(isSuccess(result))
+        expect(result.value.toCIR().type).toBe('integer')
     })
 
     it('infers its isolation level from the context', () => {
@@ -93,11 +90,9 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(
-            _Failable
-                .of(Failable.do(() => fieldRef.isolationLevel(context)))
-                .value(),
-        ).toEqual(SHARED)
+        const result = Failable.do(() => fieldRef.isolationLevel(context))
+        assert(isSuccess(result))
+        expect(result.value).toEqual(SHARED)
     })
 
     describe('infers its type and isolation level from the context', () => {
@@ -171,22 +166,19 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                expect(
-                    _Failable
-                        .of(Failable.do(() => fieldRef.isolationLevel(context)))
-                        .value(),
-                ).toEqual(expected)
-                expect(
-                    _Failable
-                        .of(
-                            Failable.do(() =>
-                                fieldRef.declaredLattice(context),
-                            ),
-                        )
-                        .value(),
-                ).toMatchObject({
-                    type: { name: 'InnerType' },
+                const result = Failable.do(function* () {
+                    return Failable.success([
+                        yield yield* fieldRef.isolationLevel(context),
+                        yield yield* fieldRef.declaredLattice(context),
+                    ])
                 })
+                assert(isSuccess(result))
+                expect(result.value).toMatchObject([
+                    expected,
+                    {
+                        type: { name: 'InnerType' },
+                    },
+                ])
             })
     })
 
@@ -226,11 +218,11 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(
-            _Failable
-                .of(Failable.do(() => fieldRef.toCIRExpression(context)))
-                .getError().message,
-        ).toMatch(/Field nonExistentField does not exist on type MyType/)
+        const result = Failable.do(() => fieldRef.toCIRExpression(context))
+        assert(isFailure(result))
+        expect(result.errors.map((e) => e.message)).toContain(
+            'Field nonExistentField does not exist on type MyType',
+        )
     })
 
     describe('throws if the object’s isolation-level is not compatible with the operator', () => {
@@ -297,11 +289,11 @@ describe('Field Reference', () => {
                     },
                     fieldSpan: someCodeSpan,
                 })
-                const result = _Failable.of(
-                    Failable.do(() => fieldRef.toCIRExpression(context)),
+                const result = Failable.do(() =>
+                    fieldRef.toCIRExpression(context),
                 )
-                expect(result.isFailure()).toBeTrue()
-                expect(result.getError().errors[0]).toMatchObject({
+                assert(isFailure(result))
+                expect(result.errors[0]).toMatchObject({
                     message: `Cannot access field myField of a ${isolationLevel} type object with "${operator}" operator`,
                     span: {
                         start: { line: 1, column: 1 },
@@ -373,15 +365,11 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                expect(
-                    _Failable
-                        .of(
-                            Failable.do(() =>
-                                fieldRef.isEffectivelyConst(context),
-                            ),
-                        )
-                        .value(),
-                ).toBe(expected)
+                const result = Failable.do(() =>
+                    fieldRef.isEffectivelyConst(context),
+                )
+                assert(isSuccess(result))
+                expect(result.value).toBe(expected)
             })
         }
 
@@ -421,11 +409,11 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            expect(
-                _Failable
-                    .of(Failable.do(() => fieldRef.isEffectivelyConst(context)))
-                    .value(),
-            ).toBe(true)
+            const result = Failable.do(() =>
+                fieldRef.isEffectivelyConst(context),
+            )
+            assert(isSuccess(result))
+            expect(result.value).toBeTrue()
         })
 
         it('returns true if the object is UNKNOWN immutable', () => {
@@ -464,11 +452,11 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            expect(
-                _Failable
-                    .of(Failable.do(() => fieldRef.isEffectivelyConst(context)))
-                    .value(),
-            ).toBe(true)
+            const result = Failable.do(() =>
+                fieldRef.isEffectivelyConst(context),
+            )
+            assert(isSuccess(result))
+            expect(result.value).toBeTrue()
         })
 
         it('returns false if the object is mutable', () => {
@@ -507,11 +495,11 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            expect(
-                _Failable
-                    .of(Failable.do(() => fieldRef.isEffectivelyConst(context)))
-                    .value(),
-            ).toBe(false)
+            const result = Failable.do(() =>
+                fieldRef.isEffectivelyConst(context),
+            )
+            assert(isSuccess(result))
+            expect(result.value).toBeFalse()
         })
     })
 })

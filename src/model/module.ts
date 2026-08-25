@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Declaration, Statement } from '.'
-import { Failable } from './gen-failable'
-import { _Failable } from './failable'
+import { Failable, isFailure } from './gen-failable'
+import { SemanticErrorCollection } from './gen-failable'
 
 export class Module {
     private constructor(
@@ -28,7 +28,8 @@ export class Module {
                 yield yield* stmt.emitStatement(context)
             return Failable.success(undefined)
         })
-        _Failable.of(result).throwIfFailure()
+        if (isFailure(result))
+            throw SemanticErrorCollection.create(result.errors)
         return {
             $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
             declarations: context.scope.rootScope.emitted,

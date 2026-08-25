@@ -1,5 +1,4 @@
-import { SourceCodeSpan } from '../diagnostics'
-import { SemanticError } from './failable'
+import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
 
 export type Result<T> = Success<T> | Failure
 type Success<T> = { value: T }
@@ -110,3 +109,75 @@ function* map<T, U>(
 }
 
 export type Failable<T = void> = Generator<Result<unknown>, Result<T>, any>
+
+export class SemanticError extends Error {
+    private constructor(
+        message: string,
+        public span: SourceCodeSpan,
+    ) {
+        super(message)
+    }
+
+    static create({
+        message,
+        span,
+    }: {
+        message: string
+        span: SourceCodeSpan
+    }) {
+        return new SemanticError(message, span)
+    }
+}
+
+export class SemanticErrorCollection extends Error {
+    private constructor(public errors: SemanticError[]) {
+        super(errors.map((e) => e.message).join('\n'))
+    }
+
+    static create(errors: SemanticError[]): SemanticErrorCollection {
+        return new SemanticErrorCollection(errors)
+    }
+
+    add(...errors: SemanticError[]): void {
+        this.errors.push(...errors)
+        this.message = this.errors.map((e) => e.message).join('\n')
+    }
+}
+export function logSemanticError(
+    message: string,
+    {
+        span,
+        errorReporter,
+    }: {
+        span: SourceCodeSpan
+        errorReporter: ErrorReporter
+        fatal?: false
+    },
+): void
+export function logSemanticError(
+    message: string,
+    {
+        span,
+        errorReporter,
+        fatal,
+    }: {
+        span: SourceCodeSpan
+        errorReporter: ErrorReporter
+        fatal: true
+    },
+): never
+export function logSemanticError(
+    message: string,
+    {
+        span,
+        errorReporter,
+        fatal,
+    }: {
+        span: SourceCodeSpan
+        errorReporter: ErrorReporter
+        fatal?: boolean
+    },
+): void {
+    errorReporter.reportError(message, span)
+    if (fatal) throw SemanticError.create({ message, span })
+}

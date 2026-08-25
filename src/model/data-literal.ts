@@ -4,7 +4,6 @@ import { UNIQUE } from './isolation-level'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
-import { _Failable } from './failable'
 import { TypeName } from './type-name'
 import { Failable, isFailure } from './gen-failable'
 
@@ -27,17 +26,9 @@ export class DataLiteral implements Expression {
     *isEffectivelyConst(_: Context): Failable<boolean> {
         return Failable.success(true)
     }
-    _isEffectivelyConst(context: Context): _Failable<boolean> {
-        const result = Failable.do(() => this.isEffectivelyConst(context))
-        return _Failable.of(result)
-    }
 
     *isolationLevel(_: Context): Failable<UNIQUE> {
         return Failable.success(UNIQUE)
-    }
-    _isolationLevel(context: Context): _Failable<UNIQUE> {
-        const result = Failable.do(() => this.isolationLevel(context))
-        return _Failable.of(result)
     }
 
     *currentValue(context: ContextWithLattice): Failable<Lattice> {
@@ -86,10 +77,6 @@ export class DataLiteral implements Expression {
             }),
         )
     }
-    _currentValue(context: ContextWithLattice): _Failable<Lattice> {
-        const result = Failable.do(() => this.currentValue(context))
-        return _Failable.of(result)
-    }
 
     *declaredLattice(context: Context & { type: TypeName }): Failable<Lattice> {
         const decl = context.scope.dataDeclaration(context.type)
@@ -106,12 +93,6 @@ export class DataLiteral implements Expression {
                 ),
             }),
         )
-    }
-    _declaredLattice(
-        context: Context & { type: TypeName },
-    ): _Failable<Lattice> {
-        const result = Failable.do(() => this.declaredLattice(context))
-        return _Failable.of(result)
     }
 
     *toCIRExpression(context: ContextWithLattice): Failable<cir.Expression> {
@@ -178,10 +159,6 @@ export class DataLiteral implements Expression {
                 ...explicitLattice.type.toCIR(),
             },
         } satisfies cir.Expression)
-    }
-    _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression> {
-        const result = Failable.do(() => this.toCIRExpression(context))
-        return _Failable.of(result)
     }
 }
 

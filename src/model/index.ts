@@ -1,10 +1,11 @@
 import * as cir from '../cir'
 import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
-import { _Failable } from './failable'
+import { FieldReference } from './field-reference'
 import { Failable } from './gen-failable'
 import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
 import { Lattice } from './lattice'
 import { Scope } from './scope'
+import { VariableReference } from './variable-reference'
 
 export type Context = {
     scope: Scope
@@ -29,17 +30,20 @@ export interface Expression {
     currentValue(context: ContextWithLattice): Failable<Lattice>
     toCIRExpression(context: ContextWithLattice): Failable<cir.Expression>
 
-    setCurrentValue?(context: Context, value: Lattice): void
-
-    _isolationLevel(context: Context): _Failable<AnyIsolationLevel>
-    _currentValue(context: ContextWithLattice): _Failable<Lattice>
-    _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression>
+    setCurrentValue?(context: Context, value: Lattice): Failable
 }
 
 export interface Statement {
+    emitStatement(context: Context): Failable
     _emitStatement(context: Context): void
 }
 
 export interface Declaration {
+    emitDeclaration(context: Context): Failable
     _emitDeclaration(context: Context): void
+}
+export function isStorage(
+    value: any,
+): value is VariableReference | FieldReference {
+    return value instanceof VariableReference || value instanceof FieldReference
 }

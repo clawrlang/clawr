@@ -2,6 +2,7 @@ import { SourceCodeSpan } from '../diagnostics'
 import { FunctionDeclaration } from './function-declaration'
 import { DataField } from './data-declaration'
 import { Context, Declaration } from '.'
+import { Failable } from './gen-failable'
 
 export class ObjectDeclaration implements Declaration {
     private constructor(
@@ -46,5 +47,8 @@ export class ObjectDeclaration implements Declaration {
         )
     }
 
+    *emitDeclaration(context: Context): Failable {
+        return Failable.success()
+    }
     _emitDeclaration(context: Context) {}
 }

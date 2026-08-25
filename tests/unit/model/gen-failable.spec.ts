@@ -53,7 +53,7 @@ describe('Failable', () => {
             let yielded: any
             Failable.do(function* () {
                 yielded = yield* muchSuccess()
-                return Failable.success(undefined)
+                return Failable.success()
             })
             expect(yielded).toBeUndefined()
         })
@@ -64,7 +64,7 @@ describe('Failable', () => {
                 yield Failable.failure('This is does not end it', someCodeSpan)
                 yield Failable.failure('This also is does end it', someCodeSpan)
                 yield Failable.failure('This is the final thing', someCodeSpan)
-                return Failable.success(undefined)
+                return Failable.success()
             })
             expect(isFailure(result)).toBeTrue()
             expect((result as any).errors).toHaveLength(3)

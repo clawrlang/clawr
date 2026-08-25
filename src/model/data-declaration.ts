@@ -2,6 +2,8 @@ import { Context, Declaration, Expression } from '.'
 import { LatticeDeclaration } from './lattice-declaration'
 import { IsolationLevel } from './isolation-level'
 import { TypeName } from './type-name'
+import { Failable } from './gen-failable'
+import { _Failable } from './failable'
 
 export type DataField = {
     isImmutable: boolean
@@ -27,7 +29,7 @@ export class DataDeclaration implements Declaration {
         return new DataDeclaration(name, fields)
     }
 
-    _emitDeclaration(context: Context) {
+    *emitDeclaration(context: Context): Failable {
         context.scope.rootScope.addDataDeclaration(this)
         context.scope.rootScope.emitted.push({
             kind: 'RC_TYPE_DECL',
@@ -38,5 +40,11 @@ export class DataDeclaration implements Declaration {
                 lattice: field.lattice!.toCIR(),
             })),
         })
+        return Failable.success()
+    }
+
+    _emitDeclaration(context: Context) {
+        const result = Failable.do(() => this.emitDeclaration(context))
+        return _Failable.of(result)
     }
 }

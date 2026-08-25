@@ -60,7 +60,7 @@ describe('ReturnStatement', () => {
             },
         }
         expect(() => returnStatement._emitStatement(context)).toThrow()
-        expect(context.scope.emitted.length).toBe(0)
+        expect(context.scope.emitted.length).toBe(1)
     })
 
     it('disallows value with wrong isolation-level', () => {

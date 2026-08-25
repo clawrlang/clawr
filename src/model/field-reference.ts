@@ -1,16 +1,15 @@
 import * as cir from '../cir'
-import { Context, Expression } from '.'
+import { Context, Expression, isStorage } from '.'
 import {
     AnyIsolationLevel,
     ISOLATED,
     IsolationLevel,
     SHARED,
 } from './isolation-level'
-import { _Failable, logSemanticError } from './failable'
+import { logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration, DataField } from './data-declaration'
 import { RCTypeLattice, Lattice } from './lattice'
-import { VariableReference } from './variable-reference'
 import { Failable, isFailure } from './gen-failable'
 
 export class FieldReference implements Expression {
@@ -38,23 +37,24 @@ export class FieldReference implements Expression {
         return new FieldReference(object, operator, field, span, fieldSpan)
     }
 
-    assignmentPrelude(context: Context): cir.Statement[] {
-        if (this._isEffectivelyConst(context).value())
+    *assignmentPrelude(context: Context): Failable<cir.Statement[]> {
+        if (yield yield* this.isEffectivelyConst(context))
             logSemanticError(
                 `Cannot mutate field ${this.field} of a reference type object`,
                 { ...context, span: this.span },
             )
 
-        if (
-            this.object instanceof VariableReference ||
-            this.object instanceof FieldReference
-        ) {
-            if (this.object._isolationLevel(context).value() === ISOLATED) {
-                const object = this.object._toCIRExpression(context).value()
-                return [{ kind: 'ENSURE_UNIQUE', object }]
+        if (isStorage(this.object)) {
+            const isolationLevel =
+                yield yield* this.object.isolationLevel(context)
+            if (isolationLevel === ISOLATED) {
+                const object: cir.Expression & {
+                    kind: 'VARABLE_REF' | 'FIELD_REF'
+                } = yield yield* this.object.toCIRExpression(context)
+                return Failable.success([{ kind: 'ENSURE_UNIQUE', object }])
             }
         }
-        return []
+        return Failable.success([])
     }
 
     *isEffectivelyConst(context: Context): Failable<boolean> {
@@ -66,11 +66,6 @@ export class FieldReference implements Expression {
         return yield* this.object.isEffectivelyConst(context)
     }
 
-    _isEffectivelyConst(context: Context): _Failable<boolean> {
-        const result = Failable.do(() => this.isEffectivelyConst(context))
-        return _Failable.of(result)
-    }
-
     *isolationLevel(context: Context): Failable<IsolationLevel> {
         const field: DataField = yield yield* this.getFieldFromContext(context)
         return field.lattice instanceof RCTypeLattice
@@ -78,19 +73,9 @@ export class FieldReference implements Expression {
             : Failable.success(ISOLATED)
     }
 
-    _isolationLevel(context: Context): _Failable<IsolationLevel> {
-        const result = Failable.do(() => this.isolationLevel(context))
-        return _Failable.of(result)
-    }
-
     *declaredLattice(context: Context): Failable<Lattice> {
         const field = yield yield* this.getFieldFromContext(context)
         return Failable.success(field.lattice!)
-    }
-
-    _declaredLattice(context: Context): _Failable<Lattice> {
-        const result = Failable.do(() => this.declaredLattice(context))
-        return _Failable.of(result)
     }
 
     *currentValue(context: Context): Failable<Lattice> {
@@ -102,19 +87,16 @@ export class FieldReference implements Expression {
             : Failable.failure(`unknown field value ${this.field}`, this.span)
     }
 
-    _currentValue(context: Context): _Failable<Lattice> {
-        const result = Failable.do(() => this.currentValue(context))
-        return _Failable.of(result)
-    }
-
-    setCurrentValue(context: Context, value: Lattice) {
-        const objectValue = this.object._currentValue(context).value()
+    *setCurrentValue(context: Context, value: Lattice): Failable {
+        const objectValue = yield yield* this.object.currentValue(context)
         if (objectValue instanceof RCTypeLattice) {
             if (objectValue.fields) objectValue.fields[this.field] = value
 
             const object: Expression = this.object
-            object.setCurrentValue?.(context, objectValue)
+            const result = object.setCurrentValue?.(context, objectValue)
+            if (result) return yield* result
         }
+        return Failable.success()
     }
 
     *toCIRExpression(
@@ -133,13 +115,6 @@ export class FieldReference implements Expression {
             field: this.field,
             value: field.lattice.toCIR(),
         } satisfies cir.Expression)
-    }
-
-    _toCIRExpression(
-        context: Context,
-    ): _Failable<cir.Expression & { kind: 'FIELD_REF' }> {
-        const result = Failable.do(() => this.toCIRExpression(context))
-        return _Failable.of(result)
     }
 
     private *getFieldFromContext(

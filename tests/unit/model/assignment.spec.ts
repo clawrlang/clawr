@@ -413,7 +413,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
-        expect(() => assignment._emitStatement(context)).toThrow()
+        expect(() => assignment._emitStatement(context)).not.toThrow()
         expect(context.errorReporter).toMatchObject({
             errors: [
                 {
@@ -732,6 +732,12 @@ describe('Assignment', () => {
                         fields: {},
                     }),
                 )
+                context.scope.setCurrentValue(
+                    'target',
+                    RCTypeLattice.create({
+                        type: TypeName.create({ name: 'MyType' }),
+                    }),
+                )
 
                 const assignment = Assignment.create({
                     target: VariableReference.create({
@@ -747,9 +753,11 @@ describe('Assignment', () => {
                     }),
                     span: someCodeSpan,
                 })
-                expect(() => assignment._emitStatement(context)).toThrow(
-                    /Parameter with unspecified isolation level may not be used in assignment/,
-                )
+                expect(() => assignment._emitStatement(context)).not.toThrow()
+                expect((context.errorReporter as any).errors[0]).toMatchObject({
+                    message:
+                        'Parameter with unspecified isolation level may not be used in assignment',
+                })
             })
         }
     })

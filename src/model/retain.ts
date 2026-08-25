@@ -1,7 +1,6 @@
-import { Expression, Context, ContextWithLattice } from '.'
 import * as cir from '../cir'
+import { Expression, Context, ContextWithLattice, isStorage } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { _Failable } from './failable'
 import { FieldReference } from './field-reference'
 import { Failable } from './gen-failable'
 import { AnyIsolationLevel } from './isolation-level'
@@ -18,48 +17,31 @@ export class Retain implements Expression {
         private readonly lattice: RCTypeLattice,
     ) {}
 
-    static ifStorage<T extends Expression>(
+    static *ifStorage<T extends Expression>(
         value: T,
         context: Context,
-    ): _Failable<T | Retain> {
-        if (!isStorage(value)) return _Failable.success(value)
-        return value._currentValue(context).chaining((lattice) => {
-            return lattice instanceof RCTypeLattice
-                ? new Retain(value, lattice)
-                : (value as T)
-        })
+    ): Failable<T | Retain> {
+        if (!isStorage(value)) return Failable.success(value)
+        const lattice: Lattice = yield yield* value.currentValue(context)
+        return lattice instanceof RCTypeLattice
+            ? Failable.success(new Retain(value, lattice))
+            : Failable.success(value as T)
     }
 
     *isEffectivelyConst(): Failable<boolean> {
         return Failable.success(true)
     }
-    _isEffectivelyConst(): _Failable<boolean> {
-        const result = Failable.do(() => this.isEffectivelyConst())
-        return _Failable.of(result)
-    }
 
     isolationLevel(context: Context): Failable<AnyIsolationLevel> {
         return this.value.isolationLevel(context)
-    }
-    _isolationLevel(context: Context): _Failable<AnyIsolationLevel> {
-        const result = Failable.do(() => this.isolationLevel(context))
-        return _Failable.of(result)
     }
 
     declaredLattice(context: ContextWithLattice): Failable<Lattice> {
         return this.value.declaredLattice(context)
     }
-    _declaredLattice(context: ContextWithLattice): _Failable<Lattice> {
-        const result = Failable.do(() => this.declaredLattice(context))
-        return _Failable.of(result)
-    }
 
     currentValue(context: ContextWithLattice): Failable<Lattice> {
         return this.value.currentValue(context)
-    }
-    _currentValue(context: ContextWithLattice): _Failable<Lattice> {
-        const result = Failable.do(() => this.currentValue(context))
-        return _Failable.of(result)
     }
 
     *toCIRExpression(context: ContextWithLattice): Failable<cir.Expression> {
@@ -70,12 +52,4 @@ export class Retain implements Expression {
             value: this.lattice.toCIR(),
         })
     }
-    _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression> {
-        const result = Failable.do(() => this.toCIRExpression(context))
-        return _Failable.of(result)
-    }
-}
-
-function isStorage(value: any): value is VariableReference | FieldReference {
-    return value instanceof VariableReference || value instanceof FieldReference
 }

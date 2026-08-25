@@ -1,7 +1,6 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { AnyIsolationLevel, UNIQUE } from './isolation-level'
-import { _Failable, SemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice, RCTypeLattice } from './lattice'
@@ -42,10 +41,6 @@ export class Query implements Expression {
     *isEffectivelyConst(_: Context): Failable<boolean> {
         return Failable.success(true)
     }
-    _isEffectivelyConst(context: Context): _Failable<boolean> {
-        const result = Failable.do(() => this.isEffectivelyConst(context))
-        return _Failable.of(result)
-    }
 
     *isolationLevel(context: Context): Failable<AnyIsolationLevel> {
         if (this.name.toString() === 'copy(of:)')
@@ -57,21 +52,11 @@ export class Query implements Expression {
                 `unknown function ${this.name.toString()}`,
                 this.span,
             )
-        return decl.resultIsolationLevel(context).makeProper()
-    }
-
-    _isolationLevel(context: Context): _Failable<AnyIsolationLevel> {
-        const result = Failable.do(() => this.isolationLevel(context))
-        return _Failable.of(result)
+        return yield* decl.resultIsolationLevel(context)
     }
 
     declaredLattice(context: Context): Failable<Lattice> {
         return this.currentValue(context)
-    }
-
-    _declaredLattice(context: Context): _Failable<Lattice> {
-        const result = Failable.do(() => this.declaredLattice(context))
-        return _Failable.of(result)
     }
 
     *currentValue(context: Context): Failable<Lattice> {
@@ -89,18 +74,13 @@ export class Query implements Expression {
                 this.span,
             )
 
-        const result = decl.lattice(context)
-        if (!result)
+        const lattice: Lattice | undefined = yield yield* decl.lattice(context)
+        if (!lattice)
             return Failable.failure(
                 `Function declaration has no result lattice: ${this.name.toString()}`,
                 this.span,
             )
-        return Failable.success(result)
-    }
-
-    _currentValue(context: Context): _Failable<Lattice> {
-        const result = Failable.do(() => this.currentValue(context))
-        return _Failable.of(result)
+        return Failable.success(lattice)
     }
 
     *toCIRExpression(context: Context): Failable<cir.Expression> {
@@ -115,10 +95,5 @@ export class Query implements Expression {
             arguments: args,
             value: value.toCIR(),
         } satisfies cir.Expression)
-    }
-
-    _toCIRExpression(context: Context): _Failable<cir.Expression> {
-        const result = Failable.do(() => this.toCIRExpression(context))
-        return _Failable.of(result)
     }
 }

@@ -1,12 +1,13 @@
 import * as cir from '../cir'
 import { Statement, Expression, Context } from '.'
-import { UNIQUE, UNKNOWN } from './isolation-level'
+import { AnyIsolationLevel, UNIQUE, UNKNOWN } from './isolation-level'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
 import { _Failable, logSemanticError, SemanticError } from './failable'
-import { RCTypeLattice } from './lattice'
+import { Lattice, RCTypeLattice } from './lattice'
 import { Retain } from './retain'
+import { Failable, isFailure } from './gen-failable'
 
 export class Assignment implements Statement {
     private constructor(
@@ -27,131 +28,117 @@ export class Assignment implements Statement {
         return new Assignment(target, value, span)
     }
 
+    *emitStatement(context: Context): Failable {
+        const validity = yield* this.checkValidity(context)
+        if (isFailure(validity)) return validity
+        yield yield* this.emitCIRStatements(context)
+        const value: Lattice = yield yield* this.value.currentValue(context)
+        return yield* this.target.setCurrentValue(context, value)
+    }
+
     _emitStatement(context: Context) {
-        this.checkValidity(context)
-        this.emitCIRStatements(context).throwIfFailure()
-        this.target.setCurrentValue(
+        const result = Failable.do(() => this.emitStatement(context))
+        if (isFailure(result))
+            for (const error of result.errors)
+                logSemanticError(error.message, {
+                    span: error.span,
+                    errorReporter: context.errorReporter,
+                })
+
+        return _Failable.of(result)
+    }
+
+    private *emitCIRStatements(context: Context): Failable {
+        const targetLattice: Lattice =
+            yield yield* this.target.declaredLattice(context)
+        const target: cir.Expression & {
+            kind: 'VARIABLE_REF' | 'FIELD_REF'
+        } = yield yield* this.target.toCIRExpression(context)
+        const valueIsolationLevel: AnyIsolationLevel =
+            yield yield* this.value.isolationLevel(context)
+        const retainedValue: Expression = yield yield* Retain.ifStorage(
+            this.value,
             context,
-            this.value._currentValue(context).value(),
         )
-    }
+        const retainedValueCIR: cir.Expression =
+            yield yield* retainedValue.toCIRExpression(context)
+        const prelude = yield yield* this.target.assignmentPrelude(context)
+        context.scope.emitted.push(...prelude)
 
-    private emitCIRStatements(context: Context): _Failable {
-        return _Failable.pipe(
-            _Failable.collect([
-                this.target._declaredLattice(context),
-                this.target._toCIRExpression(context),
-                this.value._isolationLevel(context),
-                Retain.ifStorage(this.value, context),
-            ]),
-            ([targetLattice, target, valueIsolationLevel, retainedValue]) => {
-                return retainedValue
-                    ._toCIRExpression(context)
-                    .chaining(
-                        (retainedValueCIR) =>
-                            [
-                                targetLattice,
-                                target,
-                                valueIsolationLevel,
-                                retainedValue,
-                                retainedValueCIR,
-                            ] as const,
-                    )
-            },
-            ([
-                targetLattice,
-                target,
-                valueIsolationLevel,
-                retainedValue,
-                retainedValueCIR,
-            ]) => {
-                const prelude = this.target.assignmentPrelude(context)
-                context.scope.emitted.push(...prelude)
+        if (retainedValue instanceof Retain) {
+            const tempVar = context.scope.nextTempVar()
 
-                if (retainedValue instanceof Retain) {
-                    const tempVar = context.scope.nextTempVar()
-
-                    context.scope.emitted.push({
-                        kind: 'VARIABLE_DECL' as const,
-                        name: tempVar,
-                        lattice: targetLattice.toCIR(),
-                        initialValue: target,
-                    })
-
-                    context.scope.emitted.push(
-                        {
-                            kind: 'ASSIGN',
-                            target,
-                            value: retainedValueCIR,
-                        },
-                        {
-                            kind: 'RELEASE',
-                            object: {
-                                kind: 'VARIABLE_REF',
-                                name: tempVar,
-                            },
-                        },
-                    )
-                } else if (
-                    targetLattice instanceof RCTypeLattice &&
-                    retainedValueCIR.kind === 'CALL' &&
-                    valueIsolationLevel === UNIQUE
-                ) {
-                    context.scope.emitted.push({
-                        kind: 'ASSIGN',
-                        target,
-                        value: {
-                            kind: 'AS_SHARED',
-                            object: retainedValueCIR,
-                            value: targetLattice.toCIR(),
-                        },
-                    })
-                } else {
-                    context.scope.emitted.push({
-                        kind: 'ASSIGN',
-                        target,
-                        value: retainedValueCIR,
-                    })
-                }
-            },
-        )
-    }
-
-    private checkValidity(context: Context) {
-        const targetResult = this.target._declaredLattice(context)
-        if (targetResult.isFailure()) {
-            for (const error of targetResult.getError().errors)
-                context.errorReporter.reportError(error.message, error.span)
-        }
-
-        const targetLattice = this.target._declaredLattice(context).value()
-        const assignedValue = this.value._currentValue(context).value()
-        if (!targetLattice.isSupersetTo(assignedValue))
-            logSemanticError(
-                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
-                {
-                    ...context,
-                    span: { start: this.span.start, end: this.span.end },
-                },
-            )
-        const valueIsolationLevel = this.value._isolationLevel(context).value()
-        if (valueIsolationLevel === UNIQUE) return
-        if (valueIsolationLevel === UNKNOWN)
-            throw SemanticError.create({
-                message:
-                    'Parameter with unspecified isolation level may not be used in assignment',
-                span: this.value.span,
+            context.scope.emitted.push({
+                kind: 'VARIABLE_DECL' as const,
+                name: tempVar,
+                lattice: targetLattice.toCIR(),
+                initialValue: target,
             })
-        const targetIsolationLevel = this.target
-            ._isolationLevel(context)
-            .value()
-        if (targetIsolationLevel !== valueIsolationLevel)
-            logSemanticError(
-                `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,
+
+            context.scope.emitted.push(
                 {
-                    ...context,
-                    span: { start: this.span.start, end: this.span.end },
+                    kind: 'ASSIGN',
+                    target,
+                    value: retainedValueCIR,
+                },
+                {
+                    kind: 'RELEASE',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: tempVar,
+                    },
                 },
             )
+        } else if (
+            targetLattice instanceof RCTypeLattice &&
+            retainedValueCIR.kind === 'CALL' &&
+            valueIsolationLevel === UNIQUE
+        ) {
+            context.scope.emitted.push({
+                kind: 'ASSIGN',
+                target,
+                value: {
+                    kind: 'AS_SHARED',
+                    object: retainedValueCIR,
+                    value: targetLattice.toCIR(),
+                },
+            })
+        } else {
+            context.scope.emitted.push({
+                kind: 'ASSIGN',
+                target,
+                value: retainedValueCIR,
+            })
+        }
+        return Failable.success()
+    }
+
+    private *checkValidity(context: Context): Failable {
+        const targetLatticeResult = yield* this.target.declaredLattice(context)
+        if (isFailure(targetLatticeResult)) return targetLatticeResult
+        const targetLattice: Lattice = yield targetLatticeResult
+        const assignedValue: Lattice =
+            yield yield* this.value.currentValue(context)
+        if (!targetLattice.isSupersetTo(assignedValue))
+            yield Failable.failure(
+                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
+                this.span,
+            )
+        const valueIsolationLevel: AnyIsolationLevel =
+            yield yield* this.value.isolationLevel(context)
+        if (valueIsolationLevel === UNIQUE) return Failable.success()
+        if (valueIsolationLevel === UNKNOWN)
+            yield Failable.failure(
+                'Parameter with unspecified isolation level may not be used in assignment',
+                this.value.span,
+            )
+        const targetIsolationLevel: AnyIsolationLevel =
+            yield yield* this.target.isolationLevel(context)
+        if (targetIsolationLevel !== valueIsolationLevel)
+            yield Failable.failure(
+                `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,
+                this.span,
+            )
+        return Failable.success()
     }
 }

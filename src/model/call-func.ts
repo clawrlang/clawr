@@ -1,6 +1,9 @@
+import * as cir from '../cir'
 import { Statement, Expression, Context } from '.'
 import { mapFilter } from '../tools/map-filter'
 import { FunctionName } from './function-name'
+import { Failable } from './gen-failable'
+import { _Failable } from './failable'
 
 export class CallFunc implements Statement {
     private arguments: Expression[]
@@ -29,23 +32,32 @@ export class CallFunc implements Statement {
         )
     }
 
-    _emitStatement(context: Context) {
+    *emitStatement(context: Context): Failable {
         const _name = this.name.toCIR()
         // TODO: This name rewrite is a hack to make the print function work.
         // We need to add a `HasStringRepresentation` trait, but we don't support traits yet.
         const name = {
             baseName:
                 _name.baseName === 'print'
-                    ? `print${this.arguments[0]._currentValue(context).value().toString() === 'integer' ? 'Int64' : 'Truthvalue'}`
+                    ? `print${(yield yield* this.arguments[0].currentValue(context)).toString() === 'integer' ? 'Int64' : 'Truthvalue'}`
                     : _name.baseName,
             labels: _name.labels,
         }
+
+        const args: cir.Expression[] = yield yield* Failable.map(
+            this.arguments,
+            (arg) => arg.toCIRExpression(context),
+        )
         context.scope.emitted.push({
             kind: 'CALL',
             name,
-            arguments: this.arguments.map((arg) =>
-                arg._toCIRExpression(context).value(),
-            ),
+            arguments: args,
         })
+        return Failable.success()
+    }
+
+    _emitStatement(context: Context) {
+        const result = Failable.do(() => this.emitStatement(context))
+        return _Failable.of(result)
     }
 }

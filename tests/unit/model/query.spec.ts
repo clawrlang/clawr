@@ -10,6 +10,8 @@ import { VariableReference } from '../../../src/model/variable-reference'
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
+import { _Failable } from '../../../src/model/failable'
+import { Failable } from '../../../src/model/gen-failable'
 
 describe('Query', () => {
     it('converts to CIR', () => {
@@ -34,7 +36,11 @@ describe('Query', () => {
                 },
             }),
         )
-        expect(query._toCIRExpression(context).value()).toMatchObject({
+        expect(
+            _Failable
+                .of(Failable.do(() => query.toCIRExpression(context)))
+                .value(),
+        ).toMatchObject({
             kind: 'CALL',
             name: {
                 baseName: 'foo',
@@ -89,7 +95,11 @@ describe('Query', () => {
                 },
             }),
         )
-        expect(query._toCIRExpression(context).value()).toMatchObject({
+        expect(
+            _Failable
+                .of(Failable.do(() => query.toCIRExpression(context)))
+                .value(),
+        ).toMatchObject({
             kind: 'CALL',
             name: {
                 baseName: 'foo',
@@ -136,7 +146,11 @@ describe('Query', () => {
                 arguments: [],
                 span: someCodeSpan,
             })
-            expect(query._toCIRExpression(context).value()).toMatchObject({
+            expect(
+                _Failable
+                    .of(Failable.do(() => query.toCIRExpression(context)))
+                    .value(),
+            ).toMatchObject({
                 kind: 'CALL',
                 name: {
                     baseName: 'foo',
@@ -175,7 +189,11 @@ describe('Query', () => {
                 ],
                 span: someCodeSpan,
             })
-            expect(query._toCIRExpression(context).value()).toMatchObject({
+            expect(
+                _Failable
+                    .of(Failable.do(() => query.toCIRExpression(context)))
+                    .value(),
+            ).toMatchObject({
                 kind: 'CALL',
                 name: {
                     baseName: 'copy',

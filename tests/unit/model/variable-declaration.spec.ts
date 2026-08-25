@@ -16,6 +16,8 @@ import { TypeName } from '../../../src/model/type-name'
 import { Query } from '../../../src/model/query'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
+import { _Failable } from '../../../src/model/failable'
+import { Failable } from '../../../src/model/gen-failable'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -32,7 +34,7 @@ describe('VariableDeclaration', () => {
             }),
         })
         const context = newSemanticContext()
-        decl._emitStatement(context)
+        Failable.do(() => decl.emitStatement(context))
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'VARIABLE_DECL',
             name: 'foo',
@@ -56,7 +58,7 @@ describe('VariableDeclaration', () => {
                 }),
             })
             const context = newSemanticContext()
-            decl._emitStatement(context)
+            Failable.do(() => decl.emitStatement(context))
             expect((context.scope.emitted[0] as any).lattice).toEqual({
                 type: 'integer',
                 min: '1',
@@ -91,7 +93,7 @@ describe('VariableDeclaration', () => {
                     ],
                 }),
             )
-            decl._emitStatement(context)
+            Failable.do(() => decl.emitStatement(context))
             expect((context.scope.emitted[0] as any).lattice).toEqual({
                 type: 'integer',
             })
@@ -108,7 +110,7 @@ describe('VariableDeclaration', () => {
                 }),
             })
             const context = newSemanticContext()
-            decl._emitStatement(context)
+            Failable.do(() => decl.emitStatement(context))
             expect((context.scope.emitted[0] as any).lattice).toEqual({
                 type: 'truthvalue',
                 values: ['true'],
@@ -142,7 +144,7 @@ describe('VariableDeclaration', () => {
                     ],
                 }),
             )
-            decl._emitStatement(context)
+            Failable.do(() => decl.emitStatement(context))
             expect((context.scope.emitted[0] as any).lattice).toEqual({
                 type: 'truthvalue',
                 values: ['false', 'ambiguous', 'true'],
@@ -235,7 +237,7 @@ describe('VariableDeclaration', () => {
                     fieldSpan: someCodeSpan,
                 }),
             })
-            decl._emitStatement(context)
+            Failable.do(() => decl.emitStatement(context))
             expect(context.scope.emitted[0]).toMatchObject({
                 initialValue: {
                     kind: 'RETAIN',
@@ -304,7 +306,7 @@ describe('VariableDeclaration', () => {
                     span: someCodeSpan,
                 }),
             })
-            decl._emitStatement(context)
+            Failable.do(() => decl.emitStatement(context))
             expect(context.scope.emitted[0]).toMatchObject({
                 initialValue: {
                     kind: 'RETAIN',
@@ -372,7 +374,7 @@ describe('VariableDeclaration', () => {
                     fieldSpan: someCodeSpan,
                 }),
             })
-            decl._emitStatement(context)
+            Failable.do(() => decl.emitStatement(context))
             expect(context.scope.emitted[0]).toMatchObject({
                 initialValue: {
                     kind: 'FIELD_REF',
@@ -401,7 +403,7 @@ describe('VariableDeclaration', () => {
                 }),
             })
             const context = newSemanticContext()
-            decl._emitStatement(context)
+            Failable.do(() => decl.emitStatement(context))
             expect(context.scope.variableDeclaration('x')).toEqual({
                 isImmutable: true,
                 isolationLevel: ISOLATED,
@@ -480,7 +482,7 @@ describe('VariableDeclaration', () => {
                 }),
             })
 
-            declaration._emitStatement(context)
+            Failable.do(() => declaration.emitStatement(context))
 
             expect(context.scope.currentValue('target')).toMatchObject({
                 type: { name: 'OuterType' },
@@ -522,7 +524,7 @@ describe('VariableDeclaration', () => {
                     span: someCodeSpan,
                 }),
             })
-            decl._emitStatement(context)
+            Failable.do(() => decl.emitStatement(context))
             expect(context.scope.currentValue('foo')).toBeInstanceOf(
                 RCTypeLattice,
             )
@@ -574,7 +576,7 @@ describe('VariableDeclaration', () => {
                     span: someCodeSpan,
                 }),
             })
-            decl._emitStatement(context)
+            Failable.do(() => decl.emitStatement(context))
             expect(context.scope.currentValue('r')).toMatchObject({
                 type: { name: 'MyData' },
             })
@@ -641,7 +643,9 @@ describe('VariableDeclaration', () => {
                         },
                     }),
                 })
-                expect(() => declaration._emitStatement(context)).not.toThrow()
+                expect(() =>
+                    Failable.do(() => declaration.emitStatement(context)),
+                ).not.toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {

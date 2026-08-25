@@ -5,6 +5,7 @@ import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED } from '../../../src/model/isolation-level'
 import { IntegerLattice, Truthlattice } from '../../../src/model/lattice'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
+import { Failable } from '../../../src/model/gen-failable'
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {
@@ -30,7 +31,7 @@ describe('DataDeclaration', () => {
             ],
         })
         const context = newSemanticContext()
-        dataDecl._emitDeclaration(context)
+        Failable.do(() => dataDecl.emitDeclaration(context))
         expect(context.scope.rootScope.emitted).toEqual([
             {
                 kind: 'RC_TYPE_DECL',

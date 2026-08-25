@@ -5,7 +5,6 @@ import { LatticeDeclaration } from './lattice-declaration'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { Lattice } from './lattice'
-import { _Failable } from './failable'
 import { mapFilter } from '../tools/map-filter'
 import { Parameter } from './parameter'
 import { Scope } from './scope'
@@ -91,7 +90,7 @@ export class FunctionDeclaration implements Declaration {
                       }),
                   ]
 
-        for (const stmt of body) stmt._emitStatement(bodyContext)
+        for (const stmt of body) yield* stmt.emitStatement(bodyContext)
 
         if (
             this.implementation.kind === 'body' &&
@@ -115,11 +114,6 @@ export class FunctionDeclaration implements Declaration {
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
         return Failable.success()
-    }
-
-    _emitDeclaration(context: Context) {
-        const result = Failable.do(() => this.emitDeclaration(context))
-        return _Failable.of(result)
     }
 
     private *makeBodyContext(context: Context): Failable<Context> {

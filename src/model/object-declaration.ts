@@ -50,5 +50,4 @@ export class ObjectDeclaration implements Declaration {
     *emitDeclaration(context: Context): Failable {
         return Failable.success()
     }
-    _emitDeclaration(context: Context) {}
 }

@@ -1,6 +1,6 @@
 import * as cir from '../cir'
 import { Context, Declaration, Expression, Statement } from '.'
-import { _Failable, logSemanticError } from './failable'
+import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { LatticeDeclaration } from './lattice-declaration'
 import { Lattice } from './lattice'
@@ -43,20 +43,26 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     *emitDeclaration(context: Context): Failable {
-        this._emit(context.scope.rootScope, context)
+        const result = yield* this.emit(context.scope.rootScope, context)
+        if (isFailure(result))
+            for (const error of result.errors)
+                logSemanticError(error.message, {
+                    span: error.span,
+                    errorReporter: context.errorReporter,
+                })
         return Failable.success()
     }
 
     *emitStatement(context: Context): Failable {
-        this._emit(context.scope, context)
-        return Failable.success()
-    }
-    _emitDeclaration(context: Context): void {
-        this._emit(context.scope.rootScope, context)
-    }
+        const result = yield* this.emit(context.scope, context)
+        if (isFailure(result))
+            for (const error of result.errors)
+                logSemanticError(error.message, {
+                    span: error.span,
+                    errorReporter: context.errorReporter,
+                })
 
-    _emitStatement(context: Context) {
-        this._emit(context.scope, context)
+        return Failable.success()
     }
 
     private *emit(
@@ -77,18 +83,6 @@ export class VariableDeclaration implements Statement, Declaration {
         this.addDeclarationToScope(scope, lattice)
         this.setCurrentValue(context, initialValue)
         return Failable.success()
-    }
-
-    private _emit(scope: Scope | Scope['rootScope'], context: Context) {
-        const result = Failable.do(() => this.emit(scope, context))
-        if (isFailure(result))
-            for (const error of result.errors)
-                logSemanticError(error.message, {
-                    span: error.span,
-                    errorReporter: context.errorReporter,
-                })
-
-        return _Failable.of(result)
     }
 
     private *emitCIRDeclaration(

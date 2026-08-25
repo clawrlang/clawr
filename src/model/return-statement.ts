@@ -1,7 +1,6 @@
 import * as cir from '../cir'
 import { Context, Expression, Statement } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { _Failable } from './failable'
 import { Failable, isFailure } from './gen-failable'
 import { AnyIsolationLevel } from './isolation-level'
 import { Lattice } from './lattice'
@@ -77,12 +76,6 @@ export class ReturnStatement implements Statement {
             })
         }
         return Failable.success()
-    }
-
-    _emitStatement(context: Context) {
-        const result = Failable.do(() => this.emitStatement(context))
-        const failable = _Failable.of(result)
-        failable.throwIfFailure()
     }
 
     private *validateInput(context: Context): Failable {

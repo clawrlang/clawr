@@ -4,7 +4,6 @@ import { AnyIsolationLevel, UNIQUE, UNKNOWN } from './isolation-level'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
-import { _Failable, logSemanticError, SemanticError } from './failable'
 import { Lattice, RCTypeLattice } from './lattice'
 import { Retain } from './retain'
 import { Failable, isFailure } from './gen-failable'
@@ -34,18 +33,6 @@ export class Assignment implements Statement {
         yield yield* this.emitCIRStatements(context)
         const value: Lattice = yield yield* this.value.currentValue(context)
         return yield* this.target.setCurrentValue(context, value)
-    }
-
-    _emitStatement(context: Context) {
-        const result = Failable.do(() => this.emitStatement(context))
-        if (isFailure(result))
-            for (const error of result.errors)
-                logSemanticError(error.message, {
-                    span: error.span,
-                    errorReporter: context.errorReporter,
-                })
-
-        return _Failable.of(result)
     }
 
     private *emitCIRStatements(context: Context): Failable {

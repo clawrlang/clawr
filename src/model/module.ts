@@ -1,5 +1,7 @@
 import * as cir from '../cir'
 import { Context, Declaration, Statement } from '.'
+import { Failable } from './gen-failable'
+import { _Failable } from './failable'
 
 export class Module {
     private constructor(
@@ -18,8 +20,15 @@ export class Module {
     }
 
     toCIR(context: Context): cir.ClawrModule {
-        for (const decl of this.declarations) decl._emitDeclaration(context)
-        for (const stmt of this.main) stmt._emitStatement(context)
+        const self = this
+        const result = Failable.do(function* () {
+            for (const decl of self.declarations)
+                yield yield* decl.emitDeclaration(context)
+            for (const stmt of self.main)
+                yield yield* stmt.emitStatement(context)
+            return Failable.success(undefined)
+        })
+        _Failable.of(result).throwIfFailure()
         return {
             $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
             declarations: context.scope.rootScope.emitted,

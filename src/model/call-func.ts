@@ -3,7 +3,6 @@ import { Statement, Expression, Context } from '.'
 import { mapFilter } from '../tools/map-filter'
 import { FunctionName } from './function-name'
 import { Failable } from './gen-failable'
-import { _Failable } from './failable'
 
 export class CallFunc implements Statement {
     private arguments: Expression[]
@@ -54,10 +53,5 @@ export class CallFunc implements Statement {
             arguments: args,
         })
         return Failable.success()
-    }
-
-    _emitStatement(context: Context) {
-        const result = Failable.do(() => this.emitStatement(context))
-        return _Failable.of(result)
     }
 }

@@ -3,7 +3,6 @@ import { LatticeDeclaration } from './lattice-declaration'
 import { IsolationLevel } from './isolation-level'
 import { TypeName } from './type-name'
 import { Failable } from './gen-failable'
-import { _Failable } from './failable'
 
 export type DataField = {
     isImmutable: boolean
@@ -41,10 +40,5 @@ export class DataDeclaration implements Declaration {
             })),
         })
         return Failable.success()
-    }
-
-    _emitDeclaration(context: Context) {
-        const result = Failable.do(() => this.emitDeclaration(context))
-        return _Failable.of(result)
     }
 }

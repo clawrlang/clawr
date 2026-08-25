@@ -35,12 +35,10 @@ export interface Expression {
 
 export interface Statement {
     emitStatement(context: Context): Failable
-    _emitStatement(context: Context): void
 }
 
 export interface Declaration {
     emitDeclaration(context: Context): Failable
-    _emitDeclaration(context: Context): void
 }
 export function isStorage(
     value: any,

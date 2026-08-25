@@ -17,6 +17,7 @@ import {
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
+import { Failable } from '../../../src/model/gen-failable'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {
@@ -39,7 +40,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const context = newSemanticContext()
-        funcDecl._emitDeclaration(context)
+        Failable.do(() => funcDecl.emitDeclaration(context))
 
         const decl = context.scope.rootScope.emitted[0]
 
@@ -73,7 +74,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const context = newSemanticContext()
-        funcDecl._emitDeclaration(context)
+        Failable.do(() => funcDecl.emitDeclaration(context))
 
         const decl = context.scope.rootScope.emitted[0]
 
@@ -116,7 +117,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const context = newSemanticContext()
-        funcDecl._emitDeclaration(context)
+        Failable.do(() => funcDecl.emitDeclaration(context))
 
         const decl = context.scope.rootScope.emitted[0]
 
@@ -177,9 +178,9 @@ describe('FunctionDeclaration', () => {
             },
         })
 
-        expect(() => funcDecl._emitDeclaration(context)).not.toThrow(
-            /Cannot return a SHARED variable as UNIQUE/,
-        )
+        expect(() =>
+            Failable.do(() => funcDecl.emitDeclaration(context)),
+        ).not.toThrow(/Cannot return a SHARED variable as UNIQUE/)
     })
 
     it('throws if returning ISOLATED as SHARED', () => {
@@ -226,9 +227,9 @@ describe('FunctionDeclaration', () => {
             },
         })
 
-        expect(() => funcDecl._emitDeclaration(context)).not.toThrow(
-            /Cannot return an ISOLATED variable as ref/,
-        )
+        expect(() =>
+            Failable.do(() => funcDecl.emitDeclaration(context)),
+        ).not.toThrow(/Cannot return an ISOLATED variable as ref/)
     })
 
     it('throws if returning ISOLATED as SHARED', () => {
@@ -275,9 +276,9 @@ describe('FunctionDeclaration', () => {
             },
         })
 
-        expect(() => funcDecl._emitDeclaration(context)).not.toThrow(
-            /Cannot return an ISOLATED variable as ref/,
-        )
+        expect(() =>
+            Failable.do(() => funcDecl.emitDeclaration(context)),
+        ).not.toThrow(/Cannot return an ISOLATED variable as ref/)
     })
 
     describe('infers return value-set from implicit-return expression', () => {
@@ -296,7 +297,7 @@ describe('FunctionDeclaration', () => {
             })
 
             const context = newSemanticContext()
-            funcDecl._emitDeclaration(context)
+            Failable.do(() => funcDecl.emitDeclaration(context))
 
             const decl = context.scope.rootScope.emitted[0]
 
@@ -354,7 +355,7 @@ describe('FunctionDeclaration', () => {
                 },
             })
 
-            funcDecl._emitDeclaration(context)
+            Failable.do(() => funcDecl.emitDeclaration(context))
 
             const decl = context.scope.rootScope.emitted[0]
             expect(decl).toMatchObject({
@@ -402,7 +403,7 @@ describe('FunctionDeclaration', () => {
                 },
             })
 
-            funcDecl._emitDeclaration(context)
+            Failable.do(() => funcDecl.emitDeclaration(context))
 
             const decl = context.scope.rootScope.emitted[0]
             expect(decl).toMatchObject({
@@ -425,7 +426,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const context = newSemanticContext()
-        funcDecl._emitDeclaration(context)
+        Failable.do(() => funcDecl.emitDeclaration(context))
 
         const decl = context.scope.rootScope.functionDeclaration('myFunction()')
         expect(decl).not.toBeNil()
@@ -463,7 +464,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const context = newSemanticContext()
-        decl._emitDeclaration(context)
+        Failable.do(() => decl.emitDeclaration(context))
 
         expect((context.scope.rootScope.emitted as any)[0].body).toMatchObject([
             {
@@ -531,7 +532,7 @@ describe('FunctionDeclaration', () => {
                 },
             })
 
-            funcDecl._emitDeclaration(context)
+            Failable.do(() => funcDecl.emitDeclaration(context))
 
             const decl = context.scope.rootScope
                 .emitted[0] as cir.Declaration & {
@@ -613,7 +614,7 @@ describe('FunctionDeclaration', () => {
                 },
             })
 
-            funcDecl._emitDeclaration(context)
+            Failable.do(() => funcDecl.emitDeclaration(context))
 
             const decl = context.scope.rootScope
                 .emitted[0] as cir.Declaration & {
@@ -680,7 +681,7 @@ describe('FunctionDeclaration', () => {
                 },
             })
 
-            funcDecl._emitDeclaration(context)
+            Failable.do(() => funcDecl.emitDeclaration(context))
 
             const decl = context.scope.rootScope
                 .emitted[0] as CIRFunctionDeclaration

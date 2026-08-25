@@ -1,183 +1,135 @@
 import { SourceCodeSpan } from '../diagnostics'
 import { SemanticError, SemanticErrorCollection } from './failable'
 
-type FailableResult =
-    { errors: SemanticError[]; isFatal: boolean } | { value: any }
+type Result<T> = Success<T> | Failure
+type Success<T> = { value: T }
+type Failure = { errors: SemanticError[]; isFatal: boolean }
 type IsFatalOption = { isFatal: true }
 
-export class GeneratorFailable<T = void> {
-    private constructor(private readonly result: FailableResult) {}
+export const Failable = {
+    success,
+    undefined() {
+        return success()
+    },
+    true() {
+        return success(true)
+    },
+    false() {
+        return success(false)
+    },
+    failure,
+    collect,
+    do: _do,
+    map,
+}
 
-    static success<T>(value: T): GeneratorFailable<T> {
-        return new GeneratorFailable<T>({ value })
-    }
+function success(): Success<undefined>
+function success<T>(value: T): Success<T>
+function success<T>(value?: T): Success<T> {
+    return { value: value as T }
+}
 
-    static failure(
-        message: string,
-        span: SourceCodeSpan,
-    ): GeneratorFailable<never>
+function failure(message: string, span: SourceCodeSpan): Failure
+function failure(
+    message: string,
+    span: SourceCodeSpan,
+    option: IsFatalOption,
+): Failure
+function failure(error: SemanticError | SemanticError[]): Failure
+function failure(
+    error: SemanticError | SemanticError[],
+    option: IsFatalOption,
+): Failure
+function failure(
+    errorOrMessage: string | SemanticError | SemanticError[],
+    ...options:
+        | []
+        | [SourceCodeSpan]
+        | [SourceCodeSpan, IsFatalOption]
+        | [IsFatalOption]
+): Failure {
+    const isFatal = options.some((option) => 'isFatal' in option)
 
-    static failure(
-        message: string,
-        span: SourceCodeSpan,
-        option: IsFatalOption,
-    ): GeneratorFailable<never>
+    if (errorOrMessage instanceof SemanticError)
+        return { errors: [errorOrMessage], isFatal }
 
-    static failure(
-        error: SemanticError | SemanticError[],
-    ): GeneratorFailable<never>
+    if (Array.isArray(errorOrMessage))
+        return { errors: errorOrMessage, isFatal }
 
-    static failure(
-        error: SemanticError | SemanticError[],
-        option: IsFatalOption,
-    ): GeneratorFailable<never>
-
-    static failure(
-        errorOrMessage: string | SemanticError | SemanticError[],
-        ...options:
-            | []
-            | [SourceCodeSpan]
-            | [SourceCodeSpan, IsFatalOption]
-            | [IsFatalOption]
-    ): GeneratorFailable<never> {
-        const isFatal = options.some((option) => 'isFatal' in option)
-
-        if (errorOrMessage instanceof SemanticError) {
-            return new GeneratorFailable<never>({
-                errors: [errorOrMessage],
-                isFatal,
-            })
-        }
-
-        if (Array.isArray(errorOrMessage)) {
-            return new GeneratorFailable<never>({
-                errors: errorOrMessage,
-                isFatal,
-            })
-        }
-
-        const span = options[0]
-        if (span && 'start' in span) {
-            return new GeneratorFailable<never>({
-                errors: [
-                    SemanticError.create({
-                        message: errorOrMessage,
-                        span,
-                    }),
-                ],
-                isFatal,
-            })
-        }
-
+    const span = options[0]
+    if (!span || !('start' in span))
         throw new Error('Invalid arguments for Failable.failure')
+
+    return {
+        errors: [SemanticError.create({ message: errorOrMessage, span })],
+        isFatal,
+    }
+}
+
+function collect<T extends unknown[]>(values: {
+    [K in keyof T]: Result<T[K]>
+}): Result<T> {
+    const result: unknown[] = []
+    const errors: SemanticError[] = []
+
+    for (let i = 0; i < values.length; i++) {
+        const value = values[i]
+        if (isFailure(value)) errors.push(...value.errors)
+        else result.push(value)
     }
 
-    isSuccess(): this is { result: { value: T } } {
-        return 'value' in this.result
+    if (errors.length > 0) return failure(errors)
+
+    return success(result as T)
+}
+
+export function isSuccess<T>(value: Result<T>): value is Success<T> {
+    return 'value' in value
+}
+
+export function isFailure(value: Result<unknown>): value is Failure {
+    return 'errors' in value
+}
+
+function _do<T>(generator: () => Failable<T>): Result<T> {
+    const gen = generator()
+    let generatorResult = gen.next()
+    let result = generatorResult.value
+    const errors: SemanticError[] = []
+    if (result && 'isFatal' in result) {
+        errors.push(...result.errors)
+        if (result.isFatal) return failure(errors, { isFatal: true })
     }
 
-    isFailure(): this is GeneratorFailable<never> {
-        return !this.isSuccess()
-    }
-
-    value(): T {
-        if ('value' in this.result) return this.result.value as T
-        else throw SemanticErrorCollection.create(this.result.errors)
-    }
-
-    errors(): SemanticError[] {
-        return 'errors' in this.result ? this.result.errors : []
-    }
-
-    static do<T>(generator: () => FailableGenerator<T>): GeneratorFailable<T> {
-        const gen = generator()
-        let generatorResult = gen.next()
-        let result = generatorValue()
-        const errors: SemanticError[] = []
+    while (!generatorResult.done) {
+        generatorResult = gen.next(
+            result && isSuccess(result) ? result.value : undefined,
+        )
+        result = generatorResult.value
         if (result && 'isFatal' in result) {
             errors.push(...result.errors)
-            if (result.isFatal)
-                return GeneratorFailable.failure(errors, { isFatal: true })
-        }
-
-        while (!generatorResult.done) {
-            generatorResult = gen.next(
-                result && 'value' in result ? result.value : undefined,
-            )
-            result = generatorValue()
-            if (result && 'isFatal' in result) {
-                errors.push(...result.errors)
-                if (result.isFatal)
-                    return GeneratorFailable.failure(errors, { isFatal: true })
-            }
-        }
-
-        return errors.length
-            ? GeneratorFailable.failure(errors)
-            : (generatorResult.value as GeneratorFailable<T>)
-
-        function generatorValue(): any {
-            return generatorResult.value instanceof GeneratorFailable &&
-                generatorResult.value !== null &&
-                'result' in generatorResult.value
-                ? generatorResult.value.result
-                : generatorResult.value
+            if (result.isFatal) return failure(errors, { isFatal: true })
         }
     }
 
-    static collect<T extends unknown[]>(values: {
-        [K in keyof T]: T[K] | GeneratorFailable<T[K]>
-    }): GeneratorFailable<T> {
-        const result: unknown[] = []
-        const errors: SemanticError[] = []
+    return errors.length
+        ? failure(errors)
+        : (generatorResult.value as Result<T>)
+}
 
-        for (let i = 0; i < values.length; i++) {
-            const value = values[i]
-            if (value instanceof GeneratorFailable && value.isFailure())
-                errors.push(...value.errors())
-            else result.push(unwrap(value))
-        }
+function* map<T, U>(
+    items: T[],
+    generator: (item: T) => Failable<U>,
+): Failable<U[]> {
+    const results: U[] = []
 
-        if (errors.length > 0) return GeneratorFailable.failure(errors)
-
-        return GeneratorFailable.success(result as T)
+    for (const item of items) {
+        const result = yield* generator(item)
+        if ('errors' in result) return result
+        results.push(result.value)
     }
 
-    static *map<T, U>(
-        items: T[],
-        generator: (item: T) => FailableGenerator<U>,
-    ): FailableGenerator<U[]> {
-        const results: U[] = []
-
-        for (const item of items) {
-            const result = yield* generator(item)
-
-            if (
-                result instanceof GeneratorFailable &&
-                'errors' in result.result
-            ) {
-                return result as GeneratorFailable<never>
-            }
-
-            results.push(result as U)
-        }
-
-        return GeneratorFailable.success(results)
-    }
+    return { value: results }
 }
 
-function wrap<T>(result: T | GeneratorFailable<T>): GeneratorFailable<T> {
-    return result instanceof GeneratorFailable
-        ? result
-        : GeneratorFailable.success(result)
-}
-
-function unwrap<T>(result: T | GeneratorFailable<T>): T {
-    return result instanceof GeneratorFailable ? result.value() : result
-}
-
-export type FailableGenerator<T = void> = Generator<
-    GeneratorFailable<unknown>,
-    GeneratorFailable<T>,
-    any
->
+export type Failable<T = void> = Generator<Result<unknown>, Result<T>, any>

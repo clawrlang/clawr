@@ -1,10 +1,9 @@
 import { SourceCodeSpan } from '../diagnostics'
-import { SemanticError, SemanticErrorCollection } from './failable'
+import { SemanticError } from './failable'
 
-type Result<T> = Success<T> | Failure
+export type Result<T> = Success<T> | Failure
 type Success<T> = { value: T }
-type Failure = { errors: SemanticError[]; isFatal: boolean }
-type IsFatalOption = { isFatal: true }
+type Failure = { errors: SemanticError[] }
 
 export const Failable = {
     success,
@@ -30,31 +29,17 @@ function success<T>(value?: T): Success<T> {
 }
 
 function failure(message: string, span: SourceCodeSpan): Failure
-function failure(
-    message: string,
-    span: SourceCodeSpan,
-    option: IsFatalOption,
-): Failure
+function failure(message: string, span: SourceCodeSpan): Failure
+function failure(error: SemanticError | SemanticError[]): Failure
 function failure(error: SemanticError | SemanticError[]): Failure
 function failure(
-    error: SemanticError | SemanticError[],
-    option: IsFatalOption,
-): Failure
-function failure(
     errorOrMessage: string | SemanticError | SemanticError[],
-    ...options:
-        | []
-        | [SourceCodeSpan]
-        | [SourceCodeSpan, IsFatalOption]
-        | [IsFatalOption]
+    ...options: [] | [SourceCodeSpan]
 ): Failure {
-    const isFatal = options.some((option) => 'isFatal' in option)
-
     if (errorOrMessage instanceof SemanticError)
-        return { errors: [errorOrMessage], isFatal }
+        return { errors: [errorOrMessage] }
 
-    if (Array.isArray(errorOrMessage))
-        return { errors: errorOrMessage, isFatal }
+    if (Array.isArray(errorOrMessage)) return { errors: errorOrMessage }
 
     const span = options[0]
     if (!span || !('start' in span))
@@ -62,7 +47,6 @@ function failure(
 
     return {
         errors: [SemanticError.create({ message: errorOrMessage, span })],
-        isFatal,
     }
 }
 
@@ -95,21 +79,14 @@ function _do<T>(generator: () => Failable<T>): Result<T> {
     const gen = generator()
     let generatorResult = gen.next()
     let result = generatorResult.value
-    const errors: SemanticError[] = []
-    if (result && 'isFatal' in result) {
-        errors.push(...result.errors)
-        if (result.isFatal) return failure(errors, { isFatal: true })
-    }
+    const errors: SemanticError[] = isFailure(result) ? result.errors : []
 
     while (!generatorResult.done) {
         generatorResult = gen.next(
             result && isSuccess(result) ? result.value : undefined,
         )
         result = generatorResult.value
-        if (result && 'isFatal' in result) {
-            errors.push(...result.errors)
-            if (result.isFatal) return failure(errors, { isFatal: true })
-        }
+        if (isFailure(result)) errors.push(...result.errors)
     }
 
     return errors.length

@@ -102,7 +102,7 @@ export class Scope {
     }
 }
 
-type Variable = {
+export type Variable = {
     isImmutable: boolean
     isolationLevel: IsolationLevel | UNKNOWN
     lattice: Lattice

@@ -69,20 +69,6 @@ describe('Failable', () => {
             expect(isFailure(result)).toBeTrue()
             expect((result as any).errors).toHaveLength(3)
         })
-
-        it('returns the first fatal error', () => {
-            const result = Failable.do(function* () {
-                yield Failable.success(1)
-                yield Failable.failure('This is does not end it', someCodeSpan)
-                yield Failable.failure('This is does end it', someCodeSpan, {
-                    isFatal: true,
-                })
-                yield Failable.failure('This is not touched', someCodeSpan)
-                return Failable.success(undefined)
-            })
-            expect(isFailure(result)).toBeTrue()
-            expect((result as any).errors).toHaveLength(2)
-        })
     })
 })
 

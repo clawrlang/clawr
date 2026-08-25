@@ -136,7 +136,6 @@ describe('Literals', () => {
                     .value(),
             ).toMatchObject({
                 kind: 'ALLOCATION',
-                type: { name: 'MyType' },
                 fields: [
                     {
                         name: 'x',

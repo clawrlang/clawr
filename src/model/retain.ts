@@ -3,6 +3,7 @@ import * as cir from '../cir'
 import { SourceCodeSpan } from '../diagnostics'
 import { _Failable } from './failable'
 import { FieldReference } from './field-reference'
+import { Failable } from './gen-failable'
 import { AnyIsolationLevel } from './isolation-level'
 import { Lattice, RCTypeLattice } from './lattice'
 import { VariableReference } from './variable-reference'
@@ -29,26 +30,49 @@ export class Retain implements Expression {
         })
     }
 
+    *isEffectivelyConst(): Failable<boolean> {
+        return Failable.success(true)
+    }
     _isEffectivelyConst(): _Failable<boolean> {
-        return _Failable.success(true)
-    }
-    _isolationLevel(context: Context): _Failable<AnyIsolationLevel> {
-        return this.value._isolationLevel(context)
-    }
-    _declaredLattice(context: ContextWithLattice): _Failable<Lattice> {
-        return this.value._declaredLattice(context)
-    }
-    _currentValue(context: ContextWithLattice): _Failable<Lattice> {
-        return this.value._currentValue(context)
+        const result = Failable.do(() => this.isEffectivelyConst())
+        return _Failable.of(result)
     }
 
-    _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression> {
-        const cir = this.value._toCIRExpression(context).value()
-        return _Failable.success({
+    isolationLevel(context: Context): Failable<AnyIsolationLevel> {
+        return this.value.isolationLevel(context)
+    }
+    _isolationLevel(context: Context): _Failable<AnyIsolationLevel> {
+        const result = Failable.do(() => this.isolationLevel(context))
+        return _Failable.of(result)
+    }
+
+    declaredLattice(context: ContextWithLattice): Failable<Lattice> {
+        return this.value.declaredLattice(context)
+    }
+    _declaredLattice(context: ContextWithLattice): _Failable<Lattice> {
+        const result = Failable.do(() => this.declaredLattice(context))
+        return _Failable.of(result)
+    }
+
+    currentValue(context: ContextWithLattice): Failable<Lattice> {
+        return this.value.currentValue(context)
+    }
+    _currentValue(context: ContextWithLattice): _Failable<Lattice> {
+        const result = Failable.do(() => this.currentValue(context))
+        return _Failable.of(result)
+    }
+
+    *toCIRExpression(context: ContextWithLattice): Failable<cir.Expression> {
+        const object = yield yield* this.value.toCIRExpression(context)
+        return Failable.success({
             kind: 'RETAIN' as const,
-            object: cir,
+            object,
             value: this.lattice.toCIR(),
         })
+    }
+    _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression> {
+        const result = Failable.do(() => this.toCIRExpression(context))
+        return _Failable.of(result)
     }
 }
 

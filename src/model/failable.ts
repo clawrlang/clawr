@@ -1,7 +1,19 @@
 import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
+import { Failable, isSuccess, Result } from './gen-failable'
 
 export class _Failable<T = void> {
+    makeProper(): Result<T> {
+        if (this.isSuccess()) return Failable.success(this.value())
+        else return Failable.failure(this.getError().errors)
+    }
+
     private constructor(private result: T | SemanticErrorCollection) {}
+
+    static of<T>(failable: Result<T>): _Failable<T> {
+        return isSuccess(failable)
+            ? _Failable.success(failable.value)
+            : _Failable.failure(SemanticErrorCollection.create(failable.errors))
+    }
 
     static success<T>(value: T): _Failable<T> {
         return new _Failable<T>(value)

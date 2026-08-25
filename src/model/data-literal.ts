@@ -6,6 +6,7 @@ import { DataDeclaration } from './data-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
 import { _Failable } from './failable'
 import { TypeName } from './type-name'
+import { Failable, isFailure } from './gen-failable'
 
 export class DataLiteral implements Expression {
     private constructor(
@@ -23,69 +24,81 @@ export class DataLiteral implements Expression {
         return new DataLiteral(fields, span)
     }
 
-    _isEffectivelyConst(_: Context): _Failable<boolean> {
-        return _Failable.success(true)
+    *isEffectivelyConst(_: Context): Failable<boolean> {
+        return Failable.success(true)
+    }
+    _isEffectivelyConst(context: Context): _Failable<boolean> {
+        const result = Failable.do(() => this.isEffectivelyConst(context))
+        return _Failable.of(result)
     }
 
-    _isolationLevel(_: Context): _Failable<UNIQUE> {
-        return _Failable.success(UNIQUE)
+    *isolationLevel(_: Context): Failable<UNIQUE> {
+        return Failable.success(UNIQUE)
+    }
+    _isolationLevel(context: Context): _Failable<UNIQUE> {
+        const result = Failable.do(() => this.isolationLevel(context))
+        return _Failable.of(result)
     }
 
-    _currentValue(context: ContextWithLattice): _Failable<Lattice> {
+    *currentValue(context: ContextWithLattice): Failable<Lattice> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
-            return _Failable.failure(
+            return Failable.failure(
                 'Data Literal without explicit value set is not supported',
                 this.span,
             )
         const decl = context.scope.dataDeclaration(explicitLattice.type)
         if (!decl)
-            return _Failable.failure(
+            return Failable.failure(
                 `DataLiteral.currentValue: type ${explicitLattice.type.name} not found in scope`,
                 this.span,
             )
-        return _Failable
-            .collect(
-                this.fields.map((field) => {
-                    const fieldDeclaration = decl.fields.find(
-                        (declaredField) => declaredField.name === field.name,
+
+        const thisspan = this.span
+        const fieldValuesResult = yield* Failable.map(
+            this.fields,
+            function* (field) {
+                const fieldDeclaration = decl.fields.find(
+                    (declaredField) => declaredField.name === field.name,
+                )
+                if (!fieldDeclaration)
+                    return Failable.failure(
+                        `DataLiteral.currentValue: field ${field.name} not found on type ${explicitLattice.type.name}`,
+                        thisspan,
                     )
-                    if (!fieldDeclaration)
-                        return _Failable.failure(
-                            `DataLiteral.currentValue: field ${field.name} not found on type ${explicitLattice.type.name}`,
-                            this.span,
-                        )
-                    return field.value._currentValue({
-                        ...context,
-                        explicitLattice: fieldDeclaration.lattice,
-                    })
-                }),
-            )
-            .chaining((fieldValues) =>
-                _Failable.success(
-                    RCTypeLattice.create({
-                        type: decl.name,
-                        fields: Object.fromEntries(
-                            fieldValues.map((value, index) => [
-                                this.fields[index].name,
-                                value,
-                            ]),
-                        ),
-                    }),
+                return yield* field.value.currentValue({
+                    ...context,
+                    explicitLattice: fieldDeclaration.lattice,
+                })
+            },
+        )
+        if (isFailure(fieldValuesResult)) return fieldValuesResult
+        const fieldValues: Lattice[] = yield fieldValuesResult
+        return Failable.success(
+            RCTypeLattice.create({
+                type: decl.name,
+                fields: Object.fromEntries(
+                    fieldValues.map((value, index) => [
+                        this.fields[index].name,
+                        value,
+                    ]),
                 ),
-            )
+            }),
+        )
+    }
+    _currentValue(context: ContextWithLattice): _Failable<Lattice> {
+        const result = Failable.do(() => this.currentValue(context))
+        return _Failable.of(result)
     }
 
-    _declaredLattice(
-        context: Context & { type: TypeName },
-    ): _Failable<Lattice> {
+    *declaredLattice(context: Context & { type: TypeName }): Failable<Lattice> {
         const decl = context.scope.dataDeclaration(context.type)
         if (!decl)
-            return _Failable.failure(
+            return Failable.failure(
                 `DataLiteral.declaredLattice: type ${context.type.name} not found in scope`,
                 this.span,
             )
-        return _Failable.success(
+        return Failable.success(
             RCTypeLattice.create({
                 type: decl.name,
                 fields: Object.fromEntries(
@@ -94,16 +107,22 @@ export class DataLiteral implements Expression {
             }),
         )
     }
+    _declaredLattice(
+        context: Context & { type: TypeName },
+    ): _Failable<Lattice> {
+        const result = Failable.do(() => this.declaredLattice(context))
+        return _Failable.of(result)
+    }
 
-    _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression> {
+    *toCIRExpression(context: ContextWithLattice): Failable<cir.Expression> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
-            return _Failable.failure(
+            return Failable.failure(
                 'DataLiteral.toCIRExpression: data literal without explicit type',
                 this.span,
             )
         if (!context.isolationLevel)
-            return _Failable.failure(
+            return Failable.failure(
                 'DataLiteral.toCIRExpression: target isolation level not specified',
                 this.span,
             )
@@ -112,49 +131,57 @@ export class DataLiteral implements Expression {
             explicitLattice.type,
         ) as DataDeclaration | undefined
         if (!targetType)
-            return _Failable.failure(
+            return Failable.failure(
                 `DataLiteral.toCIRExpression: target type ${explicitLattice.type.name} not found in scope`,
                 this.span,
             )
         const fieldDeclarations = new Map(
             targetType.fields.map((field) => [field.name, field]),
         )
-        const fieldResults = this.fields.map((field) => {
-            const fieldDeclaration = fieldDeclarations.get(field.name)
-            if (!fieldDeclaration)
-                // Nested literals need the declared field type as their target.
-                // Missing fields are rejected here so we do not propagate undefined types.
-                return _Failable.failure(
-                    `DataLiteral.toCIRExpression: field ${field.name} not found on type ${explicitLattice.type.name}`,
-                    this.span,
-                )
-            const nestedContext: ContextWithLattice = {
-                ...context,
-                explicitLattice: fieldDeclaration.lattice,
-                isolationLevel: fieldDeclaration.isolationLevel,
-            }
-            return field.value
-                ._toCIRExpression(nestedContext)
-                .chaining((value) =>
-                    _Failable.success({
-                        name: field.name,
-                        value,
-                        lattice: value.value,
-                    }),
-                )
-        })
-        return _Failable.collect(fieldResults).chaining((fields) =>
-            _Failable.success({
-                kind: 'ALLOCATION',
-                type: explicitLattice.type.toCIR(),
-                isolationLevel: context.isolationLevel!,
-                fields,
-                value: {
-                    type: 'rc-type',
-                    ...explicitLattice.type.toCIR(),
-                },
-            }),
+
+        const thisspan = this.span
+        const fieldValuesResult = yield* Failable.map(
+            this.fields,
+            function* (field) {
+                const fieldDeclaration = fieldDeclarations.get(field.name)
+                if (!fieldDeclaration)
+                    return Failable.failure(
+                        `field ${field.name} not found on type ${explicitLattice.type.canonical()}`,
+                        thisspan,
+                    )
+                const nestedContext: ContextWithLattice = {
+                    ...context,
+                    explicitLattice: fieldDeclaration.lattice,
+                    isolationLevel: fieldDeclaration.isolationLevel,
+                }
+                const value: cir.Expression =
+                    yield yield* field.value.toCIRExpression(nestedContext)
+                return Failable.success({
+                    name: field.name,
+                    value,
+                    lattice: value.value,
+                })
+            },
         )
+
+        const fields: {
+            name: string
+            value: cir.Expression
+            lattice: cir.Lattice
+        }[] = yield fieldValuesResult
+        return Failable.success({
+            kind: 'ALLOCATION',
+            isolationLevel: context.isolationLevel!,
+            fields,
+            value: {
+                type: 'rc-type',
+                ...explicitLattice.type.toCIR(),
+            },
+        } satisfies cir.Expression)
+    }
+    _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression> {
+        const result = Failable.do(() => this.toCIRExpression(context))
+        return _Failable.of(result)
     }
 }
 

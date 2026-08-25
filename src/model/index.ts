@@ -1,6 +1,7 @@
 import * as cir from '../cir'
 import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
 import { _Failable } from './failable'
+import { Failable } from './gen-failable'
 import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
 import { Lattice } from './lattice'
 import { Scope } from './scope'
@@ -21,11 +22,17 @@ export type ContextWithLattice = Context & {
 
 export interface Expression {
     get span(): SourceCodeSpan
-    _isEffectivelyConst(context: Context): _Failable<boolean>
-    _isolationLevel(context: Context): _Failable<AnyIsolationLevel>
-    _declaredLattice(context: ContextWithLattice): _Failable<Lattice>
-    _currentValue(context: ContextWithLattice): _Failable<Lattice>
+
+    isEffectivelyConst(context: Context): Failable<boolean>
+    isolationLevel(context: Context): Failable<AnyIsolationLevel>
+    declaredLattice(context: ContextWithLattice): Failable<Lattice>
+    currentValue(context: ContextWithLattice): Failable<Lattice>
+    toCIRExpression(context: ContextWithLattice): Failable<cir.Expression>
+
     setCurrentValue?(context: Context, value: Lattice): void
+
+    _isolationLevel(context: Context): _Failable<AnyIsolationLevel>
+    _currentValue(context: ContextWithLattice): _Failable<Lattice>
     _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression>
 }
 

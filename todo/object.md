@@ -14,9 +14,6 @@
 - `companion` with same name as `object`/`service` is allowed access to fields and data-literal
 - `companion` with no matching type is an error
 - Add `object`/`service` type
-- Make `CALL` support methods
-
-## Advanced Features (Later)
-
-- Advanced Polymorphism
-  - Conformance witness tables
+- Make `Query`/`CallFunc` support methods
+  - inherited
+  - conformance

@@ -1,5 +1,10 @@
 # Ice Box
 
+- Parse namespace
+  - `FunctionName`
+  - `DataDeclarationParser`
+  - `FunctionDeclarationParser`
+  - `LatticeParser`
 - Do the tests perform too much setup?
 - Generate IDE diagnostics for syntax coloring
   - errors
@@ -15,6 +20,14 @@
   - Short-hand syntax for ranged
 - Handle `Integer*` when lowering
   - Add types and ranges to CIR expressions
+  - Conversion becomes complex:
+    - `Integer_increment_Integer`
+    - `Integer_increment_int64`
+    - `Integer_increment_byte`
+    - ...
+    - `int64_increment_Integer`
+    - `int64_increment_int64`
+    - ...
 - Support multi-module programs
   - Allow `@main` in one module only
   - Define library product where `@main {}` is ignored (disallowed?)
@@ -38,4 +51,13 @@
   - `concurrent` = safe to execute in `async` context
   - `async`/`await`
 - `fork()` the process
-- `trait`/`role`
+- Storage expressions should not depend on `currentValue()`
+- `Query`
+  - Mark as pure or impure
+  - Make `currentValue()` return a subset (if pure) depending on input values
+  - `declaredLattice()` should probably not return `currentValue()`
+- `VariableDeclaration` `initialValue` type mismatch
+- `DataLiteral` field type mismatch
+- Get the field values from the declared lattice when converting `SHARED` to `ISOLATED`
+  - `SHARED` values cannot know their state
+  - `ISOLATED` values can known them intimately

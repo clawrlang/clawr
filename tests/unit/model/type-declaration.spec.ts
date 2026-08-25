@@ -5,7 +5,7 @@ import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED } from '../../../src/model/isolation-level'
 import { IntegerLattice, Truthlattice } from '../../../src/model/lattice'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable } from '../../../src/model/gen-failable'
+import { Failable } from '../../../src/model/failable'
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {

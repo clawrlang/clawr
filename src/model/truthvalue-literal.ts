@@ -3,7 +3,7 @@ import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice, Truthlattice, truthvalue } from './lattice'
 import { ISOLATED } from './isolation-level'
-import { Failable } from './gen-failable'
+import { Failable } from './failable'
 
 export class TruthValueLiteral<Value extends truthvalue> implements Expression {
     private constructor(

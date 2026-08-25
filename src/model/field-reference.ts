@@ -6,11 +6,11 @@ import {
     IsolationLevel,
     SHARED,
 } from './isolation-level'
-import { logSemanticError } from './gen-failable'
+import { logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration, DataField } from './data-declaration'
 import { RCTypeLattice, Lattice } from './lattice'
-import { Failable, isFailure } from './gen-failable'
+import { Failable, isFailure } from './failable'
 
 export class FieldReference implements Expression {
     private constructor(

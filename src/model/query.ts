@@ -5,7 +5,7 @@ import { SourceCodeSpan } from '../diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice, RCTypeLattice } from './lattice'
 import { mapFilter } from '../tools/map-filter'
-import { Failable } from './gen-failable'
+import { Failable } from './failable'
 
 export class Query implements Expression {
     private arguments: Expression[]

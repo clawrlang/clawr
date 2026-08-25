@@ -1,10 +1,10 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
-import { logSemanticError } from './gen-failable'
+import { logSemanticError } from './failable'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice } from './lattice'
-import { Failable, isFailure } from './gen-failable'
+import { Failable, isFailure } from './failable'
 import { Variable } from './scope'
 
 export class VariableReference implements Expression {

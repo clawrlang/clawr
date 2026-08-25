@@ -16,7 +16,7 @@ import { TypeName } from '../../../src/model/type-name'
 import { Query } from '../../../src/model/query'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable } from '../../../src/model/gen-failable'
+import { Failable } from '../../../src/model/failable'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {

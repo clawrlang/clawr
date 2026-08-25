@@ -17,7 +17,7 @@ import {
 import { TypeName } from '../../../src/model/type-name'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable } from '../../../src/model/gen-failable'
+import { Failable } from '../../../src/model/failable'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {

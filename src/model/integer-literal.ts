@@ -3,7 +3,7 @@ import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
 import { IntegerLattice, Lattice } from './lattice'
 import { ISOLATED } from './isolation-level'
-import { Failable } from './gen-failable'
+import { Failable } from './failable'
 
 export class IntegerLiteral<Value extends bigint> implements Expression {
     get negated() {

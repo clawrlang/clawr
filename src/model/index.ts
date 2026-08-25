@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
 import { FieldReference } from './field-reference'
-import { Failable } from './gen-failable'
+import { Failable } from './failable'
 import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
 import { Lattice } from './lattice'
 import { Scope } from './scope'

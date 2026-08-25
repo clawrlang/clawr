@@ -2,7 +2,7 @@ import * as cir from '../cir'
 import { Statement, Expression, Context } from '.'
 import { mapFilter } from '../tools/map-filter'
 import { FunctionName } from './function-name'
-import { Failable } from './gen-failable'
+import { Failable } from './failable'
 
 export class CallFunc implements Statement {
     private arguments: Expression[]

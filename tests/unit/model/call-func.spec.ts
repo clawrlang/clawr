@@ -6,7 +6,7 @@ import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import { VariableReference } from '../../../src/model/variable-reference'
 import { IntegerLattice } from '../../../src/model/lattice'
 import { ISOLATED } from '../../../src/model/isolation-level'
-import { Failable } from '../../../src/model/gen-failable'
+import { Failable } from '../../../src/model/failable'
 
 describe('CallFunc', () => {
     it('converts to CIR', () => {

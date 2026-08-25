@@ -2,7 +2,7 @@ import { Context, Declaration, Expression } from '.'
 import { LatticeDeclaration } from './lattice-declaration'
 import { IsolationLevel } from './isolation-level'
 import { TypeName } from './type-name'
-import { Failable } from './gen-failable'
+import { Failable } from './failable'
 
 export type DataField = {
     isImmutable: boolean

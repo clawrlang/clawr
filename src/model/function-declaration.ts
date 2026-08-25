@@ -8,7 +8,7 @@ import { Lattice } from './lattice'
 import { mapFilter } from '../tools/map-filter'
 import { Parameter } from './parameter'
 import { Scope } from './scope'
-import { Failable, isFailure } from './gen-failable'
+import { Failable, isFailure } from './failable'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(

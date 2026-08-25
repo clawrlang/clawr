@@ -1,12 +1,12 @@
 import * as cir from '../cir'
 import { Context, Declaration, Expression, Statement } from '.'
-import { logSemanticError } from './gen-failable'
+import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { LatticeDeclaration } from './lattice-declaration'
 import { Lattice } from './lattice'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 import { Retain } from './retain'
-import { Failable, isFailure } from './gen-failable'
+import { Failable, isFailure } from './failable'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]

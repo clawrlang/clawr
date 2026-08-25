@@ -1,7 +1,7 @@
 import * as cir from '../cir'
 import { Context, Expression, Statement } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { Failable, isFailure } from './gen-failable'
+import { Failable, isFailure } from './failable'
 import { AnyIsolationLevel } from './isolation-level'
 import { Lattice } from './lattice'
 import { Retain } from './retain'

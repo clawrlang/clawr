@@ -5,7 +5,7 @@ import { SourceCodeSpan } from '../diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
 import { TypeName } from './type-name'
-import { Failable, isFailure } from './gen-failable'
+import { Failable, isFailure } from './failable'
 
 export class DataLiteral implements Expression {
     private constructor(

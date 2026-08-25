@@ -12,7 +12,7 @@ import {
     truthvalue,
 } from '../../../src/model/lattice'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable, isFailure, isSuccess } from '../../../src/model/gen-failable'
+import { Failable, isFailure, isSuccess } from '../../../src/model/failable'
 import assert from 'assert'
 
 describe('Literals', () => {

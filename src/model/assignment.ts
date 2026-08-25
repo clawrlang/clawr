@@ -6,7 +6,7 @@ import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '../diagnostics'
 import { Lattice, RCTypeLattice } from './lattice'
 import { Retain } from './retain'
-import { Failable, isFailure } from './gen-failable'
+import { Failable, isFailure } from './failable'
 
 export class Assignment implements Statement {
     private constructor(

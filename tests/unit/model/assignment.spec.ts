@@ -16,7 +16,7 @@ import {
     UNKNOWN,
 } from '../../../src/model/isolation-level'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable, isFailure } from '../../../src/model/gen-failable'
+import { Failable, isFailure } from '../../../src/model/failable'
 import assert from 'assert'
 
 describe('Assignment', () => {

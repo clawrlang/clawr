@@ -5,7 +5,7 @@ import {
     isFailure,
     isSuccess,
     SemanticError,
-} from '../../../src/model/gen-failable'
+} from '../../../src/model/failable'
 
 describe('Failable', () => {
     describe('success', () => {

@@ -45,7 +45,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.declaredLattice(context).value().toCIR().type).toBe(
+        expect(fieldRef._declaredLattice(context).value().toCIR().type).toBe(
             'integer',
         )
     })
@@ -88,7 +88,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.isolationLevel(context).value()).toEqual(SHARED)
+        expect(fieldRef._isolationLevel(context).value()).toEqual(SHARED)
     })
 
     describe('infers its type and isolation level from the context', () => {
@@ -162,14 +162,14 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                expect(fieldRef.isolationLevel(context).value()).toEqual(
+                expect(fieldRef._isolationLevel(context).value()).toEqual(
                     expected,
                 )
-                expect(fieldRef.declaredLattice(context).value()).toMatchObject(
-                    {
-                        type: { name: 'InnerType' },
-                    },
-                )
+                expect(
+                    fieldRef._declaredLattice(context).value(),
+                ).toMatchObject({
+                    type: { name: 'InnerType' },
+                })
             })
     })
 
@@ -209,7 +209,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        expect(fieldRef.toCIRExpression(context).getError().message).toMatch(
+        expect(fieldRef._toCIRExpression(context).getError().message).toMatch(
             /Field nonExistentField does not exist on type MyType/,
         )
     })
@@ -278,7 +278,7 @@ describe('Field Reference', () => {
                     },
                     fieldSpan: someCodeSpan,
                 })
-                const result = fieldRef.toCIRExpression(context)
+                const result = fieldRef._toCIRExpression(context)
                 expect(result.isFailure()).toBeTrue()
                 expect(result.getError().errors[0]).toMatchObject({
                     message: `Cannot access field myField of a ${isolationLevel} type object with "${operator}" operator`,
@@ -352,7 +352,7 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                expect(fieldRef.isEffectivelyConst(context).value()).toBe(
+                expect(fieldRef._isEffectivelyConst(context).value()).toBe(
                     expected,
                 )
             })
@@ -394,7 +394,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            expect(fieldRef.isEffectivelyConst(context).value()).toBe(true)
+            expect(fieldRef._isEffectivelyConst(context).value()).toBe(true)
         })
 
         it('returns true if the object is UNKNOWN immutable', () => {
@@ -433,7 +433,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            expect(fieldRef.isEffectivelyConst(context).value()).toBe(true)
+            expect(fieldRef._isEffectivelyConst(context).value()).toBe(true)
         })
 
         it('returns false if the object is mutable', () => {
@@ -472,7 +472,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            expect(fieldRef.isEffectivelyConst(context).value()).toBe(false)
+            expect(fieldRef._isEffectivelyConst(context).value()).toBe(false)
         })
     })
 })

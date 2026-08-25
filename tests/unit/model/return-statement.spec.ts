@@ -27,7 +27,7 @@ describe('ReturnStatement', () => {
                 isolationLevel: ISOLATED,
             },
         }
-        returnStatement.emitStatement(context)
+        returnStatement._emitStatement(context)
 
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'RETURN',
@@ -42,7 +42,7 @@ describe('ReturnStatement', () => {
         })
 
         const context = newSemanticContext()
-        expect(() => returnStatement.emitStatement(context)).toThrow()
+        expect(() => returnStatement._emitStatement(context)).toThrow()
         expect(context.scope.emitted.length).toBe(0)
     })
 
@@ -59,7 +59,7 @@ describe('ReturnStatement', () => {
                 isolationLevel: ISOLATED,
             },
         }
-        expect(() => returnStatement.emitStatement(context)).toThrow()
+        expect(() => returnStatement._emitStatement(context)).toThrow()
         expect(context.scope.emitted.length).toBe(0)
     })
 
@@ -88,7 +88,7 @@ describe('ReturnStatement', () => {
         })
 
         expect(() =>
-            returnStatement.emitStatement({
+            returnStatement._emitStatement({
                 ...context,
                 calleeResult: {
                     lattice: RCTypeLattice.create({

@@ -23,7 +23,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 expect(
-                    literal.toCIRExpression(newSemanticContext()).value(),
+                    literal._toCIRExpression(newSemanticContext()).value(),
                 ).toMatchObject({
                     kind: 'TRUTHVALUE_LITERAL',
                     value: { values: [input] },
@@ -36,7 +36,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 expect(
-                    literal.currentValue(newSemanticContext()).value(),
+                    literal._currentValue(newSemanticContext()).value(),
                 ).toMatchObject({
                     values: [input],
                 })
@@ -53,7 +53,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 expect(
-                    literal.toCIRExpression(newSemanticContext()).value(),
+                    literal._toCIRExpression(newSemanticContext()).value(),
                 ).toMatchObject({
                     kind: 'INTEGER_LITERAL',
                     value: { max: input, min: input },
@@ -66,7 +66,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 expect(
-                    literal.currentValue(newSemanticContext()).value(),
+                    literal._currentValue(newSemanticContext()).value(),
                 ).toMatchObject({
                     min: BigInt(input),
                     max: BigInt(input),
@@ -126,7 +126,7 @@ describe('Literals', () => {
 
             expect(
                 dataLiteral
-                    .toCIRExpression({
+                    ._toCIRExpression({
                         ...context,
                         explicitLattice: RCTypeLattice.create({
                             type: TypeName.create({ name: 'MyType' }),
@@ -206,7 +206,7 @@ describe('Literals', () => {
 
             expect(
                 dataLiteral
-                    .currentValue({
+                    ._currentValue({
                         ...context,
                         explicitLattice: RCTypeLattice.create({
                             type: TypeName.create({ name: 'MyType' }),
@@ -268,7 +268,7 @@ describe('Literals', () => {
 
             expect(
                 dataLiteral
-                    .currentValue({
+                    ._currentValue({
                         ...context,
                         explicitLattice: RCTypeLattice.create({
                             type: TypeName.create({ name: 'OuterType' }),

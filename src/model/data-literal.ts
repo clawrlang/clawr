@@ -23,15 +23,15 @@ export class DataLiteral implements Expression {
         return new DataLiteral(fields, span)
     }
 
-    isEffectivelyConst(_: Context): _Failable<boolean> {
+    _isEffectivelyConst(_: Context): _Failable<boolean> {
         return _Failable.success(true)
     }
 
-    isolationLevel(_: Context): _Failable<UNIQUE> {
+    _isolationLevel(_: Context): _Failable<UNIQUE> {
         return _Failable.success(UNIQUE)
     }
 
-    currentValue(context: ContextWithLattice): _Failable<Lattice> {
+    _currentValue(context: ContextWithLattice): _Failable<Lattice> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
             return _Failable.failure(
@@ -55,7 +55,7 @@ export class DataLiteral implements Expression {
                             `DataLiteral.currentValue: field ${field.name} not found on type ${explicitLattice.type.name}`,
                             this.span,
                         )
-                    return field.value.currentValue({
+                    return field.value._currentValue({
                         ...context,
                         explicitLattice: fieldDeclaration.lattice,
                     })
@@ -76,7 +76,9 @@ export class DataLiteral implements Expression {
             )
     }
 
-    declaredLattice(context: Context & { type: TypeName }): _Failable<Lattice> {
+    _declaredLattice(
+        context: Context & { type: TypeName },
+    ): _Failable<Lattice> {
         const decl = context.scope.dataDeclaration(context.type)
         if (!decl)
             return _Failable.failure(
@@ -93,7 +95,7 @@ export class DataLiteral implements Expression {
         )
     }
 
-    toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression> {
+    _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
             return _Failable.failure(
@@ -132,7 +134,7 @@ export class DataLiteral implements Expression {
                 isolationLevel: fieldDeclaration.isolationLevel,
             }
             return field.value
-                .toCIRExpression(nestedContext)
+                ._toCIRExpression(nestedContext)
                 .chaining((value) =>
                     _Failable.success({
                         name: field.name,

@@ -31,19 +31,19 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         )
     }
 
-    isolationLevel(_: Context): _Failable<ISOLATED> {
+    _isolationLevel(_: Context): _Failable<ISOLATED> {
         return _Failable.success(ISOLATED)
     }
 
-    currentValue(_: Context): _Failable<Lattice> {
+    _currentValue(_: Context): _Failable<Lattice> {
         return _Failable.success(this.value)
     }
 
-    declaredLattice(_: Context): _Failable<Lattice> {
+    _declaredLattice(_: Context): _Failable<Lattice> {
         return _Failable.success(this.value)
     }
 
-    toCIRExpression(_: Context): _Failable<cir.Expression> {
+    _toCIRExpression(_: Context): _Failable<cir.Expression> {
         return _Failable.success({
             kind: 'INTEGER_LITERAL',
             value: this.value.toCIR() as cir.Lattice & {
@@ -54,7 +54,7 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         })
     }
 
-    isEffectivelyConst(_: Context): _Failable<boolean> {
+    _isEffectivelyConst(_: Context): _Failable<boolean> {
         return _Failable.success(true)
     }
 }

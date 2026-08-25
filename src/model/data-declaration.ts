@@ -27,7 +27,7 @@ export class DataDeclaration implements Declaration {
         return new DataDeclaration(name, fields)
     }
 
-    emitDeclaration(context: Context) {
+    _emitDeclaration(context: Context) {
         context.scope.rootScope.addDataDeclaration(this)
         context.scope.rootScope.emitted.push({
             kind: 'RC_TYPE_DECL',

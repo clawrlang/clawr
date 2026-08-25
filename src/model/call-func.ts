@@ -29,14 +29,14 @@ export class CallFunc implements Statement {
         )
     }
 
-    emitStatement(context: Context) {
+    _emitStatement(context: Context) {
         const _name = this.name.toCIR()
         // TODO: This name rewrite is a hack to make the print function work.
         // We need to add a `HasStringRepresentation` trait, but we don't support traits yet.
         const name = {
             baseName:
                 _name.baseName === 'print'
-                    ? `print${this.arguments[0].currentValue(context).value().toString() === 'integer' ? 'Int64' : 'Truthvalue'}`
+                    ? `print${this.arguments[0]._currentValue(context).value().toString() === 'integer' ? 'Int64' : 'Truthvalue'}`
                     : _name.baseName,
             labels: _name.labels,
         }
@@ -44,7 +44,7 @@ export class CallFunc implements Statement {
             kind: 'CALL',
             name,
             arguments: this.arguments.map((arg) =>
-                arg.toCIRExpression(context).value(),
+                arg._toCIRExpression(context).value(),
             ),
         })
     }

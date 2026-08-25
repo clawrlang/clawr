@@ -21,18 +21,18 @@ export type ContextWithLattice = Context & {
 
 export interface Expression {
     get span(): SourceCodeSpan
-    isEffectivelyConst(context: Context): _Failable<boolean>
-    isolationLevel(context: Context): _Failable<AnyIsolationLevel>
-    declaredLattice(context: ContextWithLattice): _Failable<Lattice>
-    currentValue(context: ContextWithLattice): _Failable<Lattice>
+    _isEffectivelyConst(context: Context): _Failable<boolean>
+    _isolationLevel(context: Context): _Failable<AnyIsolationLevel>
+    _declaredLattice(context: ContextWithLattice): _Failable<Lattice>
+    _currentValue(context: ContextWithLattice): _Failable<Lattice>
     setCurrentValue?(context: Context, value: Lattice): void
-    toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression>
+    _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression>
 }
 
 export interface Statement {
-    emitStatement(context: Context): void
+    _emitStatement(context: Context): void
 }
 
 export interface Declaration {
-    emitDeclaration(context: Context): void
+    _emitDeclaration(context: Context): void
 }

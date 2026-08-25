@@ -46,5 +46,5 @@ export class ObjectDeclaration implements Declaration {
         )
     }
 
-    emitDeclaration(context: Context) {}
+    _emitDeclaration(context: Context) {}
 }

@@ -40,11 +40,11 @@ export class VariableDeclaration implements Statement, Declaration {
         )
     }
 
-    emitDeclaration(context: Context): void {
+    _emitDeclaration(context: Context): void {
         this.emit(context.scope.rootScope, context)
     }
 
-    emitStatement(context: Context) {
+    _emitStatement(context: Context) {
         this.emit(context.scope, context)
     }
 
@@ -70,7 +70,7 @@ export class VariableDeclaration implements Statement, Declaration {
         return _Failable.pipe(
             Retain.ifStorage(this.initialValue, context),
             (value) =>
-                value.toCIRExpression({
+                value._toCIRExpression({
                     ...context,
                     explicitLattice: this.lattice,
                     isolationLevel: this.isolationLevel,
@@ -109,7 +109,7 @@ export class VariableDeclaration implements Statement, Declaration {
             })
 
         const valueIsolationLevel = this.initialValue
-            .isolationLevel(context)
+            ._isolationLevel(context)
             .value()
         if (valueIsolationLevel === UNIQUE) return
         if (this.isolationLevel !== valueIsolationLevel)
@@ -125,7 +125,7 @@ export class VariableDeclaration implements Statement, Declaration {
 
     private currentValueFromInitial(context: Context) {
         return this.initialValue
-            .currentValue({
+            ._currentValue({
                 ...context,
                 explicitLattice: this.lattice,
             })

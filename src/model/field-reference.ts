@@ -33,7 +33,7 @@ export class FieldReference implements Expression {
     }
 
     assignmentPrelude(context: Context): cir.Statement[] {
-        if (this.isEffectivelyConst(context).value())
+        if (this._isEffectivelyConst(context).value())
             logSemanticError(
                 `Cannot mutate field ${this.field} of a reference type object`,
                 { ...context, span: this.span },
@@ -43,39 +43,39 @@ export class FieldReference implements Expression {
             this.object instanceof VariableReference ||
             this.object instanceof FieldReference
         ) {
-            if (this.object.isolationLevel(context).value() === ISOLATED) {
-                const object = this.object.toCIRExpression(context).value()
+            if (this.object._isolationLevel(context).value() === ISOLATED) {
+                const object = this.object._toCIRExpression(context).value()
                 return [{ kind: 'ENSURE_UNIQUE', object }]
             }
         }
         return []
     }
 
-    isEffectivelyConst(context: Context): _Failable<boolean> {
+    _isEffectivelyConst(context: Context): _Failable<boolean> {
         return this.object
-            .isolationLevel(context)
+            ._isolationLevel(context)
             .chaining((isolationLevel) =>
                 isolationLevel === SHARED
                     ? _Failable.success(false)
-                    : this.object.isEffectivelyConst(context),
+                    : this.object._isEffectivelyConst(context),
             )
     }
 
-    isolationLevel(context: Context): _Failable<IsolationLevel> {
+    _isolationLevel(context: Context): _Failable<IsolationLevel> {
         const field = this.getFieldFromContext(context).value()
         return field.lattice instanceof RCTypeLattice
             ? _Failable.success(field.isolationLevel ?? ISOLATED)
             : _Failable.success(ISOLATED)
     }
 
-    declaredLattice(context: Context): _Failable<Lattice> {
+    _declaredLattice(context: Context): _Failable<Lattice> {
         return this.getFieldFromContext(context).chaining((field) =>
             _Failable.success(field.lattice!),
         )
     }
 
-    currentValue(context: Context): _Failable<Lattice> {
-        const objectValue = this.object.currentValue(context).value()
+    _currentValue(context: Context): _Failable<Lattice> {
+        const objectValue = this.object._currentValue(context).value()
         if (!(objectValue instanceof RCTypeLattice))
             return _Failable.failure('unknown object value', this.span)
         return objectValue.fields
@@ -84,7 +84,7 @@ export class FieldReference implements Expression {
     }
 
     setCurrentValue(context: Context, value: Lattice) {
-        const objectValue = this.object.currentValue(context).value()
+        const objectValue = this.object._currentValue(context).value()
         if (objectValue instanceof RCTypeLattice) {
             if (objectValue.fields) objectValue.fields[this.field] = value
 
@@ -93,14 +93,14 @@ export class FieldReference implements Expression {
         }
     }
 
-    toCIRExpression(
+    _toCIRExpression(
         context: Context,
     ): _Failable<cir.Expression & { kind: 'FIELD_REF' }> {
         return _Failable
             .collect([
                 this.checkOperatorCompatibility(context),
                 this.getFieldFromContext(context),
-                this.object.toCIRExpression(context),
+                this.object._toCIRExpression(context),
             ])
             .chaining(([, field, object]) =>
                 _Failable.success({
@@ -115,7 +115,7 @@ export class FieldReference implements Expression {
     private getFieldFromContext(
         context: Context,
     ): _Failable<DataDeclaration['fields'][number]> {
-        const objectValue = this.object.declaredLattice(context).value()
+        const objectValue = this.object._declaredLattice(context).value()
         if (!(objectValue instanceof RCTypeLattice))
             return _Failable.failure('unknown object value', this.span)
         const type = context.scope.dataDeclaration(objectValue.type)
@@ -130,7 +130,7 @@ export class FieldReference implements Expression {
 
     private checkOperatorCompatibility(context: Context): _Failable {
         return this.object
-            .isolationLevel(context)
+            ._isolationLevel(context)
             .chaining((isolationLevel) => {
                 if ((isolationLevel === SHARED) !== (this.operator === '->')) {
                     return _Failable.failure(

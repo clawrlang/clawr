@@ -38,11 +38,11 @@ export class Query implements Expression {
         )
     }
 
-    isEffectivelyConst(_: Context): _Failable<boolean> {
+    _isEffectivelyConst(_: Context): _Failable<boolean> {
         return _Failable.success(true)
     }
 
-    isolationLevel(context: Context): _Failable<AnyIsolationLevel> {
+    _isolationLevel(context: Context): _Failable<AnyIsolationLevel> {
         if (this.name.toString() === 'copy(of:)')
             return _Failable.success(UNIQUE)
 
@@ -55,13 +55,13 @@ export class Query implements Expression {
         return decl.resultIsolationLevel(context)
     }
 
-    declaredLattice(context: Context): _Failable<Lattice> {
-        return this.currentValue(context)
+    _declaredLattice(context: Context): _Failable<Lattice> {
+        return this._currentValue(context)
     }
 
-    currentValue(context: Context): _Failable<Lattice> {
+    _currentValue(context: Context): _Failable<Lattice> {
         if (this.name.toString() === 'copy(of:)') {
-            const value = this.arguments[0].currentValue(context).value()
+            const value = this.arguments[0]._currentValue(context).value()
             return value instanceof RCTypeLattice
                 ? _Failable.success(value)
                 : _Failable.failure('not a reference-counted type', this.span)
@@ -83,11 +83,11 @@ export class Query implements Expression {
         return _Failable.success(result)
     }
 
-    toCIRExpression(context: Context): _Failable<cir.Expression> {
+    _toCIRExpression(context: Context): _Failable<cir.Expression> {
         return _Failable
             .collect([
-                this.currentValue(context),
-                ...this.arguments.map((arg) => arg.toCIRExpression(context)),
+                this._currentValue(context),
+                ...this.arguments.map((arg) => arg._toCIRExpression(context)),
             ])
             .chaining(([value, ...args]) =>
                 _Failable.success({

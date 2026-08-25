@@ -21,7 +21,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.toCIRExpression(context).value()).toMatchObject({
+        expect(variableRef._toCIRExpression(context).value()).toMatchObject({
             kind: 'VARIABLE_REF',
             name: 'myVar',
         })
@@ -35,7 +35,7 @@ describe('Variable Reference', () => {
         const variableRef = VariableReference.create({ name: 'myVar', span })
 
         const context = newSemanticContext()
-        const result = variableRef.toCIRExpression(context)
+        const result = variableRef._toCIRExpression(context)
         expect(result.isFailure()).toBeTrue()
         expect(result.getError().errors[0]).toMatchObject({
             message: `Variable myVar is not defined in the current context`,
@@ -55,7 +55,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.declaredLattice(context).value()).toEqual(
+        expect(variableRef._declaredLattice(context).value()).toEqual(
             IntegerLattice.create({ min: 10n, max: 10n }),
         )
     })
@@ -76,7 +76,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        expect(variableRef.currentValue(context).value()).toMatchObject({
+        expect(variableRef._currentValue(context).value()).toMatchObject({
             min: 10n,
             max: 10n,
         })
@@ -117,7 +117,7 @@ describe('Variable Reference', () => {
                     name: 'myVar',
                     span: someCodeSpan,
                 })
-                expect(variableRef.isolationLevel(context).value()).toEqual(
+                expect(variableRef._isolationLevel(context).value()).toEqual(
                     isolationLevel,
                 )
             })

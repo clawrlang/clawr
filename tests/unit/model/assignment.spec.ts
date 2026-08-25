@@ -33,7 +33,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        assignment.emitStatement(context)
+        assignment._emitStatement(context)
 
         expect(context.scope.emitted).toMatchObject([
             {
@@ -137,7 +137,7 @@ describe('Assignment', () => {
                 span: someCodeSpan,
             })
 
-            assignment.emitStatement(context)
+            assignment._emitStatement(context)
             expect(context.scope.emitted).toMatchObject([
                 {
                     kind: 'VARIABLE_DECL',
@@ -221,7 +221,7 @@ describe('Assignment', () => {
                 span: someCodeSpan,
             })
 
-            assignment.emitStatement(context)
+            assignment._emitStatement(context)
             expect(context.scope.emitted).toMatchObject([
                 {
                     kind: 'VARIABLE_DECL',
@@ -304,7 +304,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        assignment.emitStatement(context)
+        assignment._emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'ENSURE_UNIQUE',
@@ -380,7 +380,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        assignment.emitStatement(context)
+        assignment._emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'ASSIGN',
@@ -413,7 +413,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
-        expect(() => assignment.emitStatement(context)).toThrow()
+        expect(() => assignment._emitStatement(context)).toThrow()
         expect(context.errorReporter).toMatchObject({
             errors: [
                 {
@@ -480,7 +480,7 @@ describe('Assignment', () => {
                     }),
                     span: someCodeSpan,
                 })
-                expect(() => assignment.emitStatement(context)).not.toThrow()
+                expect(() => assignment._emitStatement(context)).not.toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
@@ -543,7 +543,7 @@ describe('Assignment', () => {
             value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
-        expect(() => assignment.emitStatement(context)).not.toThrow()
+        expect(() => assignment._emitStatement(context)).not.toThrow()
         expect(context.errorReporter).toMatchObject({
             errors: [
                 {
@@ -605,7 +605,7 @@ describe('Assignment', () => {
             value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
-        expect(() => assignment.emitStatement(context)).not.toThrow()
+        expect(() => assignment._emitStatement(context)).not.toThrow()
         expect(context.errorReporter).toMatchObject({
             errors: [
                 {
@@ -686,7 +686,7 @@ describe('Assignment', () => {
                         span: someCodeSpan,
                     }),
                 })
-                expect(() => assignment.emitStatement(context)).not.toThrow()
+                expect(() => assignment._emitStatement(context)).not.toThrow()
                 expect(context.errorReporter).toMatchObject({
                     errors: [
                         {
@@ -747,7 +747,7 @@ describe('Assignment', () => {
                     }),
                     span: someCodeSpan,
                 })
-                expect(() => assignment.emitStatement(context)).toThrow(
+                expect(() => assignment._emitStatement(context)).toThrow(
                     /Parameter with unspecified isolation level may not be used in assignment/,
                 )
             })
@@ -775,8 +775,8 @@ describe('Assignment', () => {
                 }),
                 span: someCodeSpan,
             })
-            assignment.emitStatement(context)
-            expect(() => assignment.emitStatement(context)).not.toThrow()
+            assignment._emitStatement(context)
+            expect(() => assignment._emitStatement(context)).not.toThrow()
             expect(context.scope.currentValue('x')).not.toBeNil()
             expect(context.scope.currentValue('x')).toMatchObject({
                 min: 42n,
@@ -834,7 +834,7 @@ describe('Assignment', () => {
                 }),
                 span: someCodeSpan,
             })
-            expect(() => assignment.emitStatement(context)).not.toThrow()
+            expect(() => assignment._emitStatement(context)).not.toThrow()
             expect(context.scope.currentValue('x')).not.toBeNil()
             expect(context.scope.currentValue('x')).toMatchObject({
                 fields: { field: { min: 42n, max: 42n } },

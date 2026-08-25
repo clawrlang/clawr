@@ -22,7 +22,7 @@ export class VariableReference implements Expression {
     }
 
     assignmentPrelude(context: Context): cir.Statement[] {
-        if (this.isEffectivelyConst(context).value())
+        if (this._isEffectivelyConst(context).value())
             logSemanticError(`Variable ${this.name} is not mutable`, {
                 ...context,
                 span: this.span,
@@ -30,7 +30,7 @@ export class VariableReference implements Expression {
         return []
     }
 
-    isEffectivelyConst(context: Context): _Failable<boolean> {
+    _isEffectivelyConst(context: Context): _Failable<boolean> {
         const variableResult = this.lookupInScope(context)
         if (variableResult.isFailure())
             context.errorReporter.reportError(
@@ -42,19 +42,19 @@ export class VariableReference implements Expression {
         )
     }
 
-    isolationLevel(context: Context): _Failable<IsolationLevel | UNKNOWN> {
+    _isolationLevel(context: Context): _Failable<IsolationLevel | UNKNOWN> {
         return this.lookupInScope(context).chaining((variable) =>
             _Failable.success(variable.isolationLevel),
         )
     }
 
-    declaredLattice(context: Context): _Failable<Lattice> {
+    _declaredLattice(context: Context): _Failable<Lattice> {
         return this.lookupInScope(context).chaining((variable) =>
             _Failable.success(variable.lattice),
         )
     }
 
-    currentValue(context: Context): _Failable<Lattice> {
+    _currentValue(context: Context): _Failable<Lattice> {
         const result = context.scope.currentValue(this.name)
         if (!result) {
             return _Failable.failure(
@@ -69,11 +69,11 @@ export class VariableReference implements Expression {
         context.scope.setCurrentValue(this.name, value)
     }
 
-    toCIRExpression(
+    _toCIRExpression(
         context: Context,
     ): _Failable<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
         return _Failable
-            .collect([this.lookupInScope(context), this.currentValue(context)])
+            .collect([this.lookupInScope(context), this._currentValue(context)])
             .chaining(([, value]) =>
                 _Failable.success({
                     kind: 'VARIABLE_REF' as const,

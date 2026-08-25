@@ -27,7 +27,7 @@ describe('CallFunc', () => {
             ],
         })
         const context = newSemanticContext()
-        statement.emitStatement(context)
+        statement._emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'CALL',
@@ -63,7 +63,7 @@ describe('CallFunc', () => {
             ],
         })
         const context = newSemanticContext()
-        statement.emitStatement(context)
+        statement._emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'CALL',
@@ -94,7 +94,7 @@ describe('CallFunc', () => {
             ],
         })
         const context = newSemanticContext()
-        statement.emitStatement(context)
+        statement._emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'CALL',
@@ -122,7 +122,7 @@ describe('CallFunc', () => {
             ],
         })
         const context = newSemanticContext()
-        statement.emitStatement(context)
+        statement._emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'CALL',
@@ -160,7 +160,7 @@ describe('CallFunc', () => {
                 },
             ],
         })
-        statement.emitStatement(context)
+        statement._emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'CALL',

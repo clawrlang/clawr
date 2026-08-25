@@ -19,7 +19,7 @@ export class ReturnStatement implements Statement {
         return new ReturnStatement(value, span)
     }
 
-    emitStatement(context: Context) {
+    _emitStatement(context: Context) {
         _Failable
             .pipe(this.validateInput(context), () => {
                 if (!this.value || !context.calleeResult) {
@@ -32,7 +32,7 @@ export class ReturnStatement implements Statement {
 
                 return _Failable.pipe(
                     _Failable.collect([
-                        this.value.currentValue(context),
+                        this.value._currentValue(context),
                         Retain.ifStorage(this.value, {
                             ...context,
                             ...{ isolationLevel: undefined },
@@ -40,7 +40,7 @@ export class ReturnStatement implements Statement {
                     ]),
                     ([lattice, retainedValue]) =>
                         retainedValue
-                            .toCIRExpression(context)
+                            ._toCIRExpression(context)
                             .chaining(
                                 (retainedValueCIR) =>
                                     [
@@ -54,7 +54,7 @@ export class ReturnStatement implements Statement {
                             context.scope.emitted.push({
                                 kind: 'ENSURE_UNIQUE',
                                 object: retainedValue.value
-                                    .toCIRExpression(context)
+                                    ._toCIRExpression(context)
                                     .value(),
                             })
                             const temp = context.scope.nextTempVar()
@@ -107,7 +107,7 @@ export class ReturnStatement implements Statement {
             (calleeResult) =>
                 _Failable.collect([
                     calleeResult,
-                    this.value?.currentValue(context),
+                    this.value?._currentValue(context),
                 ]),
             ([calleeResult, lattice]) => {
                 if (!lattice) {
@@ -125,11 +125,11 @@ export class ReturnStatement implements Statement {
                     : calleeResult
             },
             (calleeResult) =>
-                this.value!.isolationLevel(context).chaining(
+                this.value!._isolationLevel(context).chaining(
                     (isolationLevel) =>
                         calleeResult.isolationLevel !== isolationLevel
                             ? _Failable.failure(
-                                  `Cannot return an ${this.value?.isolationLevel(context).value()} value as ${calleeResult.isolationLevel}`,
+                                  `Cannot return an ${this.value?._isolationLevel(context).value()} value as ${calleeResult.isolationLevel}`,
                                   this.value!.span,
                               )
                             : undefined,

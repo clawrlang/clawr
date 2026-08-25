@@ -54,7 +54,7 @@ export class FunctionDeclaration implements Declaration {
     resultIsolationLevel(context: Context): _Failable<AnyIsolationLevel> {
         if (this.result) return _Failable.success(this.result.isolationLevel)
         if (this.implementation.kind === 'implicit-return')
-            return this.implementation.expression.isolationLevel(context)
+            return this.implementation.expression._isolationLevel(context)
         else
             throw new Error(
                 `unable to infer isolation level for ${this.baseName}`,
@@ -65,11 +65,11 @@ export class FunctionDeclaration implements Declaration {
         if (this.result) return this.result.lattice
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression
-                .currentValue(this.bodyContext(context))
+                ._currentValue(this.bodyContext(context))
                 .value()
     }
 
-    emitDeclaration(context: Context) {
+    _emitDeclaration(context: Context) {
         const name = FunctionName.create({
             baseName: this.baseName,
             arity: this.parameters.length,
@@ -89,7 +89,7 @@ export class FunctionDeclaration implements Declaration {
                       }),
                   ]
 
-        for (const stmt of body) stmt.emitStatement(bodyContext)
+        for (const stmt of body) stmt._emitStatement(bodyContext)
 
         if (
             this.implementation.kind === 'body' &&
@@ -126,10 +126,10 @@ export class FunctionDeclaration implements Declaration {
                   ? undefined
                   : {
                         isolationLevel: this.implementation.expression
-                            .isolationLevel(contextWithParameters)
+                            ._isolationLevel(contextWithParameters)
                             .value() as IsolationLevel,
                         lattice: this.implementation.expression
-                            .currentValue(contextWithParameters)
+                            ._currentValue(contextWithParameters)
                             .value(),
                     },
         })
@@ -143,7 +143,7 @@ export class FunctionDeclaration implements Declaration {
                 isImmutable: param.isImmutable,
                 isolationLevel: param.isolationLevel,
                 lattice:
-                    param.defaultValue?.currentValue(context).value() ??
+                    param.defaultValue?._currentValue(context).value() ??
                     param.lattice ??
                     logSemanticError(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
@@ -152,7 +152,7 @@ export class FunctionDeclaration implements Declaration {
             })
             parameterScope.setCurrentValue(
                 param.varName,
-                param.defaultValue?.currentValue(context).value() ??
+                param.defaultValue?._currentValue(context).value() ??
                     param.lattice ??
                     logSemanticError(
                         `Parameter ${param.varName} must have either a default value or an explicit value set.`,
@@ -167,7 +167,7 @@ export class FunctionDeclaration implements Declaration {
         if (this.result) return this.result.lattice.toCIR()
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression
-                .currentValue(context)
+                ._currentValue(context)
                 .value()
                 .toCIR()
     }

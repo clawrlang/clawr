@@ -27,26 +27,26 @@ export class Assignment implements Statement {
         return new Assignment(target, value, span)
     }
 
-    emitStatement(context: Context) {
+    _emitStatement(context: Context) {
         this.checkValidity(context)
         this.emitCIRStatements(context).throwIfFailure()
         this.target.setCurrentValue(
             context,
-            this.value.currentValue(context).value(),
+            this.value._currentValue(context).value(),
         )
     }
 
     private emitCIRStatements(context: Context): _Failable {
         return _Failable.pipe(
             _Failable.collect([
-                this.target.declaredLattice(context),
-                this.target.toCIRExpression(context),
-                this.value.isolationLevel(context),
+                this.target._declaredLattice(context),
+                this.target._toCIRExpression(context),
+                this.value._isolationLevel(context),
                 Retain.ifStorage(this.value, context),
             ]),
             ([targetLattice, target, valueIsolationLevel, retainedValue]) => {
                 return retainedValue
-                    .toCIRExpression(context)
+                    ._toCIRExpression(context)
                     .chaining(
                         (retainedValueCIR) =>
                             [
@@ -118,14 +118,14 @@ export class Assignment implements Statement {
     }
 
     private checkValidity(context: Context) {
-        const targetResult = this.target.declaredLattice(context)
+        const targetResult = this.target._declaredLattice(context)
         if (targetResult.isFailure()) {
             for (const error of targetResult.getError().errors)
                 context.errorReporter.reportError(error.message, error.span)
         }
 
-        const targetLattice = this.target.declaredLattice(context).value()
-        const assignedValue = this.value.currentValue(context).value()
+        const targetLattice = this.target._declaredLattice(context).value()
+        const assignedValue = this.value._currentValue(context).value()
         if (!targetLattice.isSupersetTo(assignedValue))
             logSemanticError(
                 `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
@@ -134,7 +134,7 @@ export class Assignment implements Statement {
                     span: { start: this.span.start, end: this.span.end },
                 },
             )
-        const valueIsolationLevel = this.value.isolationLevel(context).value()
+        const valueIsolationLevel = this.value._isolationLevel(context).value()
         if (valueIsolationLevel === UNIQUE) return
         if (valueIsolationLevel === UNKNOWN)
             throw SemanticError.create({
@@ -142,7 +142,9 @@ export class Assignment implements Statement {
                     'Parameter with unspecified isolation level may not be used in assignment',
                 span: this.value.span,
             })
-        const targetIsolationLevel = this.target.isolationLevel(context).value()
+        const targetIsolationLevel = this.target
+            ._isolationLevel(context)
+            .value()
         if (targetIsolationLevel !== valueIsolationLevel)
             logSemanticError(
                 `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,

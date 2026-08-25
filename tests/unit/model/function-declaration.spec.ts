@@ -39,7 +39,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const context = newSemanticContext()
-        funcDecl.emitDeclaration(context)
+        funcDecl._emitDeclaration(context)
 
         const decl = context.scope.rootScope.emitted[0]
 
@@ -73,7 +73,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const context = newSemanticContext()
-        funcDecl.emitDeclaration(context)
+        funcDecl._emitDeclaration(context)
 
         const decl = context.scope.rootScope.emitted[0]
 
@@ -116,7 +116,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const context = newSemanticContext()
-        funcDecl.emitDeclaration(context)
+        funcDecl._emitDeclaration(context)
 
         const decl = context.scope.rootScope.emitted[0]
 
@@ -177,7 +177,7 @@ describe('FunctionDeclaration', () => {
             },
         })
 
-        expect(() => funcDecl.emitDeclaration(context)).not.toThrow(
+        expect(() => funcDecl._emitDeclaration(context)).not.toThrow(
             /Cannot return a SHARED variable as UNIQUE/,
         )
     })
@@ -226,7 +226,7 @@ describe('FunctionDeclaration', () => {
             },
         })
 
-        expect(() => funcDecl.emitDeclaration(context)).not.toThrow(
+        expect(() => funcDecl._emitDeclaration(context)).not.toThrow(
             /Cannot return an ISOLATED variable as ref/,
         )
     })
@@ -275,7 +275,7 @@ describe('FunctionDeclaration', () => {
             },
         })
 
-        expect(() => funcDecl.emitDeclaration(context)).not.toThrow(
+        expect(() => funcDecl._emitDeclaration(context)).not.toThrow(
             /Cannot return an ISOLATED variable as ref/,
         )
     })
@@ -296,7 +296,7 @@ describe('FunctionDeclaration', () => {
             })
 
             const context = newSemanticContext()
-            funcDecl.emitDeclaration(context)
+            funcDecl._emitDeclaration(context)
 
             const decl = context.scope.rootScope.emitted[0]
 
@@ -354,7 +354,7 @@ describe('FunctionDeclaration', () => {
                 },
             })
 
-            funcDecl.emitDeclaration(context)
+            funcDecl._emitDeclaration(context)
 
             const decl = context.scope.rootScope.emitted[0]
             expect(decl).toMatchObject({
@@ -402,7 +402,7 @@ describe('FunctionDeclaration', () => {
                 },
             })
 
-            funcDecl.emitDeclaration(context)
+            funcDecl._emitDeclaration(context)
 
             const decl = context.scope.rootScope.emitted[0]
             expect(decl).toMatchObject({
@@ -425,7 +425,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const context = newSemanticContext()
-        funcDecl.emitDeclaration(context)
+        funcDecl._emitDeclaration(context)
 
         const decl = context.scope.rootScope.functionDeclaration('myFunction()')
         expect(decl).not.toBeNil()
@@ -463,7 +463,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const context = newSemanticContext()
-        decl.emitDeclaration(context)
+        decl._emitDeclaration(context)
 
         expect((context.scope.rootScope.emitted as any)[0].body).toMatchObject([
             {
@@ -531,7 +531,7 @@ describe('FunctionDeclaration', () => {
                 },
             })
 
-            funcDecl.emitDeclaration(context)
+            funcDecl._emitDeclaration(context)
 
             const decl = context.scope.rootScope
                 .emitted[0] as cir.Declaration & {
@@ -613,7 +613,7 @@ describe('FunctionDeclaration', () => {
                 },
             })
 
-            funcDecl.emitDeclaration(context)
+            funcDecl._emitDeclaration(context)
 
             const decl = context.scope.rootScope
                 .emitted[0] as cir.Declaration & {
@@ -680,7 +680,7 @@ describe('FunctionDeclaration', () => {
                 },
             })
 
-            funcDecl.emitDeclaration(context)
+            funcDecl._emitDeclaration(context)
 
             const decl = context.scope.rootScope
                 .emitted[0] as CIRFunctionDeclaration

@@ -18,8 +18,8 @@ export class Module {
     }
 
     toCIR(context: Context): cir.ClawrModule {
-        for (const decl of this.declarations) decl.emitDeclaration(context)
-        for (const stmt of this.main) stmt.emitStatement(context)
+        for (const decl of this.declarations) decl._emitDeclaration(context)
+        for (const stmt of this.main) stmt._emitStatement(context)
         return {
             $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
             declarations: context.scope.rootScope.emitted,

@@ -22,28 +22,28 @@ export class Retain implements Expression {
         context: Context,
     ): _Failable<T | Retain> {
         if (!isStorage(value)) return _Failable.success(value)
-        return value.currentValue(context).chaining((lattice) => {
+        return value._currentValue(context).chaining((lattice) => {
             return lattice instanceof RCTypeLattice
                 ? new Retain(value, lattice)
                 : (value as T)
         })
     }
 
-    isEffectivelyConst(): _Failable<boolean> {
+    _isEffectivelyConst(): _Failable<boolean> {
         return _Failable.success(true)
     }
-    isolationLevel(context: Context): _Failable<AnyIsolationLevel> {
-        return this.value.isolationLevel(context)
+    _isolationLevel(context: Context): _Failable<AnyIsolationLevel> {
+        return this.value._isolationLevel(context)
     }
-    declaredLattice(context: ContextWithLattice): _Failable<Lattice> {
-        return this.value.declaredLattice(context)
+    _declaredLattice(context: ContextWithLattice): _Failable<Lattice> {
+        return this.value._declaredLattice(context)
     }
-    currentValue(context: ContextWithLattice): _Failable<Lattice> {
-        return this.value.currentValue(context)
+    _currentValue(context: ContextWithLattice): _Failable<Lattice> {
+        return this.value._currentValue(context)
     }
 
-    toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression> {
-        const cir = this.value.toCIRExpression(context).value()
+    _toCIRExpression(context: ContextWithLattice): _Failable<cir.Expression> {
+        const cir = this.value._toCIRExpression(context).value()
         return _Failable.success({
             kind: 'RETAIN' as const,
             object: cir,

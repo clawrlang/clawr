@@ -13,4 +13,3 @@
   - `Identifiable`
   - `Ordered`
   - more?
-  - Create a std-lib first

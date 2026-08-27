@@ -1,13 +1,13 @@
 import * as cir from '../cir'
 import { Context, Expression } from '.'
 import { SourceCodeSpan } from '../diagnostics'
-import { Lattice, Truthlattice, truthvalue } from './lattice'
+import { Lattice, TruthvalueLattice, truthvalue } from './lattice'
 import { ISOLATED } from './isolation-level'
 import { Failable } from './failable'
 
 export class TruthValueLiteral<Value extends truthvalue> implements Expression {
     private constructor(
-        public value: Truthlattice<[Value]>,
+        public value: TruthvalueLattice<[Value]>,
         public span: SourceCodeSpan,
     ) {}
 
@@ -18,14 +18,14 @@ export class TruthValueLiteral<Value extends truthvalue> implements Expression {
         value: Value
         span: SourceCodeSpan
     }) {
-        return new TruthValueLiteral(Truthlattice.singleton(value), span)
+        return new TruthValueLiteral(TruthvalueLattice.singleton(value), span)
     }
 
     *isolationLevel(_: Context): Failable<ISOLATED> {
         return Failable.success(ISOLATED)
     }
 
-    *currentValue(_: Context): Failable<Truthlattice<[Value]>> {
+    *currentValue(_: Context): Failable<TruthvalueLattice<[Value]>> {
         return Failable.success(this.value)
     }
 

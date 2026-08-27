@@ -6,7 +6,7 @@ import { IntegerLiteral } from '../../../src/model/integer-literal'
 import { DataDeclaration } from '../../../src/model/data-declaration'
 import { VariableDeclaration } from '../../../src/model/variable-declaration'
 import { TypeName } from '../../../src/model/type-name'
-import { IntegerLattice, Truthlattice } from '../../../src/model/lattice'
+import { IntegerLattice, TruthvalueLattice } from '../../../src/model/lattice'
 import { ISOLATED } from '../../../src/model/isolation-level'
 import { decorateLattice } from '../../../src/model/lattice-declaration'
 
@@ -145,7 +145,7 @@ describe('Module', () => {
                             isImmutable: false,
                             isolationLevel: ISOLATED,
                             lattice: decorateLattice(
-                                Truthlattice.unconstrained(),
+                                TruthvalueLattice.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -169,7 +169,7 @@ describe('Module', () => {
             IntegerLattice,
         )
         expect(myDataDeclaration?.fields[1].lattice).toBeInstanceOf(
-            Truthlattice,
+            TruthvalueLattice,
         )
     })
 })

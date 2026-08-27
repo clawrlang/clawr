@@ -5,7 +5,7 @@ import {
     IntegerLattice,
     RCTypeLattice,
     StringLattice,
-    Truthlattice,
+    TruthvalueLattice,
 } from '../../../src/model/lattice'
 
 describe('Lattice', () => {
@@ -54,7 +54,7 @@ describe('Lattice', () => {
         })
 
         it('converts truthvalue to CIR correctly', () => {
-            const lattice = Truthlattice.create(['true', 'false'])
+            const lattice = TruthvalueLattice.create(['true', 'false'])
 
             expect(lattice.toCIR()).toEqual({
                 type: 'truthvalue',
@@ -63,7 +63,7 @@ describe('Lattice', () => {
         })
 
         it('converts unconstrained truthvalue to CIR correctly', () => {
-            const lattice = Truthlattice.unconstrained()
+            const lattice = TruthvalueLattice.unconstrained()
 
             expect(lattice.toCIR()).toEqual({
                 type: 'truthvalue',

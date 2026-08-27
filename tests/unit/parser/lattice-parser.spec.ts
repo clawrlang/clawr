@@ -3,7 +3,7 @@ import {
     IntegerLattice,
     RCTypeLattice,
     StringLattice,
-    Truthlattice,
+    TruthvalueLattice,
 } from '../../../src/model/lattice'
 import { TokenStream } from '../../../src/lexer'
 import { LatticeParser } from '../../../src/parser/lattice-parser'
@@ -85,7 +85,7 @@ describe('LatticeParser', () => {
 
     it('parses unconstrained truthvalue type', () => {
         const lattice = parseLattice('truthvalue')
-        expect(lattice).toBeInstanceOf(Truthlattice)
+        expect(lattice).toBeInstanceOf(TruthvalueLattice)
         expect(lattice).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
@@ -96,7 +96,7 @@ describe('LatticeParser', () => {
 
     it('parses truthvalue type with constraints', () => {
         const lattice = parseLattice('truthvalue(true, false)')
-        expect(lattice).toBeInstanceOf(Truthlattice)
+        expect(lattice).toBeInstanceOf(TruthvalueLattice)
         expect(lattice).toMatchObject({
             values: ['true', 'false'],
             span: {

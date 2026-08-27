@@ -3,7 +3,7 @@ import { TokenStream } from '../../../src/lexer'
 import { TestErrorReporter } from '../../util'
 import { DataDeclarationParser } from '../../../src/parser/data-declaration-parser'
 import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
-import { IntegerLattice, Truthlattice } from '../../../src/model/lattice'
+import { IntegerLattice, TruthvalueLattice } from '../../../src/model/lattice'
 
 describe('DataDeclarationParser', () => {
     it('parses a data declaration with default-mutability', () => {
@@ -32,7 +32,7 @@ describe('DataDeclarationParser', () => {
             ],
         })
         expect(result.fields[0].lattice).toBeInstanceOf(IntegerLattice)
-        expect(result.fields[1].lattice).toBeInstanceOf(Truthlattice)
+        expect(result.fields[1].lattice).toBeInstanceOf(TruthvalueLattice)
     })
 
     it('parses a data declaration with mixed semantics', () => {
@@ -61,6 +61,6 @@ describe('DataDeclarationParser', () => {
             ],
         })
         expect(result.fields[0].lattice).toBeInstanceOf(IntegerLattice)
-        expect(result.fields[1].lattice).toBeInstanceOf(Truthlattice)
+        expect(result.fields[1].lattice).toBeInstanceOf(TruthvalueLattice)
     })
 })

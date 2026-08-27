@@ -10,7 +10,7 @@ import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
 import {
     RCTypeLattice,
     IntegerLattice,
-    Truthlattice,
+    TruthvalueLattice,
 } from '../../../src/model/lattice'
 import { TypeName } from '../../../src/model/type-name'
 import { Query } from '../../../src/model/query'
@@ -136,7 +136,7 @@ describe('VariableDeclaration', () => {
                             isImmutable: false,
                             isolationLevel: ISOLATED,
                             lattice: decorateLattice(
-                                Truthlattice.unconstrained(),
+                                TruthvalueLattice.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },

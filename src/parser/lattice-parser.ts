@@ -12,7 +12,7 @@ import {
     IntegerLattice,
     RCTypeLattice,
     StringLattice,
-    Truthlattice,
+    TruthvalueLattice,
 } from '../model/lattice'
 
 export class LatticeParser {
@@ -108,7 +108,7 @@ export class LatticeParser {
         typeToken: IdentifierToken,
     ): LatticeDeclaration {
         if (!stream.isNext('PUNCTUATION', '('))
-            return decorateLattice(Truthlattice.unconstrained(), {
+            return decorateLattice(TruthvalueLattice.unconstrained(), {
                 span: { start: typeToken.start, end: typeToken.end },
             })
 
@@ -125,8 +125,8 @@ export class LatticeParser {
 
         return decorateLattice(
             values.length > 0
-                ? Truthlattice.create(values)
-                : Truthlattice.unconstrained(),
+                ? TruthvalueLattice.create(values)
+                : TruthvalueLattice.unconstrained(),
             { span: { start: typeToken.start, end: endToken.end } },
         )
     }

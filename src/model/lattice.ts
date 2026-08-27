@@ -65,7 +65,7 @@ export class IntegerLattice<
 }
 
 export type truthvalue = 'false' | 'ambiguous' | 'true'
-export class Truthlattice<Values extends truthvalue[]> implements Lattice {
+export class TruthvalueLattice<Values extends truthvalue[]> implements Lattice {
     private constructor(public readonly values: Values) {}
 
     static unconstrained() {
@@ -73,20 +73,20 @@ export class Truthlattice<Values extends truthvalue[]> implements Lattice {
     }
 
     static singleton<Value extends truthvalue>(value: Value) {
-        return new Truthlattice<[Value]>([value])
+        return new TruthvalueLattice<[Value]>([value])
     }
 
     static create<Values extends truthvalue[]>(values: Values) {
-        return new Truthlattice(values)
+        return new TruthvalueLattice(values)
     }
 
     unconstrained(): Lattice {
-        return Truthlattice.create(['false', 'ambiguous', 'true'])
+        return TruthvalueLattice.create(['false', 'ambiguous', 'true'])
     }
 
     isSupersetTo(lattice: Lattice): boolean {
         return (
-            lattice instanceof Truthlattice &&
+            lattice instanceof TruthvalueLattice &&
             (lattice.values as truthvalue[]).every((v) =>
                 this.values.includes(v),
             )
@@ -94,7 +94,7 @@ export class Truthlattice<Values extends truthvalue[]> implements Lattice {
     }
 
     isSameType(lattice: Lattice): boolean {
-        return lattice instanceof Truthlattice
+        return lattice instanceof TruthvalueLattice
     }
 
     toCIR(): cir.Lattice & { type: 'truthvalue'; values: Values } {

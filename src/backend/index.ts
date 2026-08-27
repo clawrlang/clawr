@@ -1,7 +1,5 @@
 import * as cir from '../cir'
-import { mapFilter } from '../tools/map-filter'
 import { validateCIR } from './generated/validate-cir.typia'
-import { TypeName } from '../model/type-name'
 
 export function lower(cir: cir.ClawrModule): string {
     const result = validateCIR(cir)
@@ -92,6 +90,14 @@ export function lowerDecl(decl: cir.Declaration): string {
         case 'FUNCTION_DECL':
             return lowerFunction(decl, mangleNameWithParameters(decl))
 
+        case 'PROTOCOL_DECL':
+            return `typedef struct ${mangleTypeName(decl)}ˇwitness {
+                    ${decl.slots.map(lowerAbstractSlot).join('\n')}
+                } ${mangleTypeName(decl)}ˇwitness;
+                __protocol_info ${mangleTypeName(decl)}ˇinfo = {
+                    .name = "${mangleTypeName(decl)}"
+                };`
+
         default:
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
     }
@@ -110,6 +116,24 @@ function lowerVtableSlot({ slot, declaredIn }: DispatchSlot) {
     const typedef = `${mangleNameWithParameters(slot, declaredIn)}ˇmethod`
     const slotName = mangleNameWithParameters(slot)
     return `${typedef} ${slotName};`
+}
+
+function lowerAbstractSlot(slot: FunctionSignature) {
+    const slotName = mangleNameWithParameters(slot)
+    const params: FunctionSignature['parameters'] = [
+        {
+            name: 'self',
+            lattice: {
+                type: 'rc-type',
+                name: 'void',
+            },
+        },
+        ...slot.parameters,
+    ]
+    const paramDecls = params
+        .map((param) => `${lowerType(param.lattice)} ${param.name}`)
+        .join(', ')
+    return `${slot.lattice ? lowerType(slot.lattice) : 'void'} (*${slotName})(${paramDecls});`
 }
 
 function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {

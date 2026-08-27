@@ -10,6 +10,12 @@ export type ClawrModule = {
 // Declarations
 // ------------
 
+type ProtocolDeclaration = {
+    kind: 'PROTOCOL_DECL'
+    name: string
+    slots: FunctionSignature[]
+}
+
 type VariableDeclaration = {
     kind: 'VARIABLE_DECL'
     name: string
@@ -71,7 +77,10 @@ type ProtocolImplementation = {
 }
 
 export type Declaration = { namespace?: string } & (
-    VariableDeclaration | FunctionDeclaration | RCTypeDeclaration
+    | VariableDeclaration
+    | FunctionDeclaration
+    | RCTypeDeclaration
+    | ProtocolDeclaration
 )
 
 // ----------

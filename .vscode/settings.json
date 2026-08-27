@@ -489,11 +489,59 @@
           },
           "Declaration": {
             "oneOf": [
+              { "$ref": "#/$defs/__typeProtocolDeclaration" },
               { "$ref": "#/$defs/__typeVariableDeclaration" },
               { "$ref": "#/$defs/__type__type" },
               { "$ref": "#/$defs/__type__typeFunctionSignature" },
               { "$ref": "#/$defs/__type__type__type.o4" }
             ]
+          },
+          "__typeProtocolDeclaration": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "PROTOCOL_DECL" },
+              "name": { "type": "string" },
+              "slots": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/FunctionSignature" }
+              },
+              "namespace": { "type": "string" }
+            },
+            "required": ["kind", "name", "slots"],
+            "additionalProperties": false
+          },
+          "FunctionSignature": {
+            "type": "object",
+            "properties": {
+              "baseName": { "type": "string" },
+              "labels": { "type": "array", "items": { "type": "string" } },
+              "parameters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "lattice": { "$ref": "#/$defs/Lattice" }
+                  },
+                  "required": ["name", "lattice"],
+                  "additionalProperties": false
+                }
+              },
+              "lattice": {
+                "oneOf": [
+                  { "$ref": "#/$defs/__type__type__type.o3" },
+                  { "$ref": "#/$defs/__type__type__type.o2" },
+                  { "$ref": "#/$defs/__type__type__type.o1" },
+                  { "$ref": "#/$defs/__type__type__type" },
+                  { "$ref": "#/$defs/RCTypeLattice" },
+                  { "$ref": "#/$defs/RealLattice" },
+                  { "$ref": "#/$defs/StringLattice" },
+                  { "$ref": "#/$defs/TruthvalueLatticetruthvalue" }
+                ]
+              }
+            },
+            "required": ["baseName", "labels", "parameters"],
+            "additionalProperties": false
           },
           "__typeVariableDeclaration": {
             "type": "object",
@@ -707,39 +755,6 @@
               }
             },
             "required": ["kind", "body", "baseName", "labels", "parameters"],
-            "additionalProperties": false
-          },
-          "FunctionSignature": {
-            "type": "object",
-            "properties": {
-              "baseName": { "type": "string" },
-              "labels": { "type": "array", "items": { "type": "string" } },
-              "parameters": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/Lattice" }
-                  },
-                  "required": ["name", "lattice"],
-                  "additionalProperties": false
-                }
-              },
-              "lattice": {
-                "oneOf": [
-                  { "$ref": "#/$defs/__type__type__type.o3" },
-                  { "$ref": "#/$defs/__type__type__type.o2" },
-                  { "$ref": "#/$defs/__type__type__type.o1" },
-                  { "$ref": "#/$defs/__type__type__type" },
-                  { "$ref": "#/$defs/RCTypeLattice" },
-                  { "$ref": "#/$defs/RealLattice" },
-                  { "$ref": "#/$defs/StringLattice" },
-                  { "$ref": "#/$defs/TruthvalueLatticetruthvalue" }
-                ]
-              }
-            },
-            "required": ["baseName", "labels", "parameters"],
             "additionalProperties": false
           }
         }

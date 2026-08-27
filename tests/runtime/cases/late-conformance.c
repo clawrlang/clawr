@@ -56,7 +56,7 @@ int main() {
         .y = 255
     );
 
-    const Describableˇwitness* describableWitness = CONFORMANCE_ENTRY(DataStructure, Describable);
+    const Describableˇwitness* describableWitness = CONFORMANCE_ENTRY(ds, Describable);
     String* description = describableWitness->describe(ds);
     printf("%s\n", description->data);
 

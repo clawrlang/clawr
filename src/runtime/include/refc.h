@@ -163,7 +163,7 @@ const void* _lookup_conformance(const __type_info* type, const __trait_info* tra
 void _register_conformance(const __type_info* type, const __trait_info* trait, const void* witness_table);
 
 #define CONFORMANCE_ENTRY(__structure__, __trait__) \
-    _lookup_conformance(&__structure__##ˇtype, &__trait__##ˇinfo)
+    _lookup_conformance(RC_HEADER(__structure__)->is_a, &__trait__##ˇinfo)
 #define ADD_CONFORMANCE_ENTRY(__structure__, __trait__) \
     _register_conformance(&__structure__##ˇtype, &__trait__##ˇinfo, &__structure__##ˇ##__trait__##ˇwitness)
 

@@ -1,6 +1,11 @@
 {
+  "[c]": { "editor.defaultFormatter": "ms-vscode.cpptools" },
+  "C_Cpp.clang_format_style": "file",
+  "C_Cpp.clang_format_fallbackStyle": "LLVM",
+  "C_Cpp.formatting": "clangFormat",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  "editor.suggest.insertMode": "replace",
   "files.associations": { "*.cir": "json" },
   "json.schemas": [
     {

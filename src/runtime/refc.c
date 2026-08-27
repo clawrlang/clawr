@@ -199,7 +199,7 @@ void _release_proxy(__rc_proxy* const proxy) {
 // ---------------
 
 __attribute__((visibility("default")))
-void _register_conformance(const __type_info* type, const __trait_info* trait, const void* witness_table) {
+void _register_conformance(const __type_info* type, const __protocol_info* protocol, const void* witness_table) {
     size_t bucket = ((uintptr_t)type >> 4) % SIDE_TABLE_BUCKETS;
 
     __side_table_entry* entry = __conformance_side_table[bucket];
@@ -217,8 +217,8 @@ void _register_conformance(const __type_info* type, const __trait_info* trait, c
 
     __conformance_node* node = malloc(sizeof(__conformance_node));
     memcpy(node, &(const __conformance_node){
-        .conformance = (const __trait_conformance_entry){
-            .trait = trait,
+        .conformance = (const __protocol_conformance_entry){
+            .protocol = protocol,
             .witness_table = witness_table
         },
         .next = entry->conformances
@@ -227,12 +227,12 @@ void _register_conformance(const __type_info* type, const __trait_info* trait, c
 }
 
 __attribute__((visibility("default")))
-const void* _lookup_conformance(const __type_info* type, const __trait_info* trait) {
+const void* _lookup_conformance(const __type_info* type, const __protocol_info* protocol) {
     // Check static conformances first (fast path)
-    const __trait_conformance_entry** pointer = type->data_type.conformances;
+    const __protocol_conformance_entry** pointer = type->data_type.conformances;
     if (pointer) {
-        while (*pointer && (*pointer)->trait) {
-            if ((*pointer)->trait == trait) return (*pointer)->witness_table;
+        while (*pointer && (*pointer)->protocol) {
+            if ((*pointer)->protocol == protocol) return (*pointer)->witness_table;
             pointer++;
         }
     }
@@ -244,7 +244,7 @@ const void* _lookup_conformance(const __type_info* type, const __trait_info* tra
         if (se->type == type) {
             __conformance_node* node = se->conformances;
             while (node) {
-                if (node->conformance.trait == trait) return node->conformance.witness_table;
+                if (node->conformance.protocol == protocol) return node->conformance.witness_table;
                 node = node->next;
             }
             return NULL;

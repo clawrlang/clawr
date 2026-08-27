@@ -13,14 +13,14 @@ enum RC_REFS_FIELDS {
     __rc_REFC_BITMASK   = ~(__rc_COPYING_FLAG | __rc_SEMANTICS_FLAG),
 };
 
-typedef const struct __trait_info {
+typedef const struct __protocol_info {
     const char* name;  // for debugging/error messages
-} __trait_info;
+} __protocol_info;
 
-typedef const struct __trait_conformance_entry {
-    const __trait_info* trait;
+typedef const struct __protocol_conformance_entry {
+    const __protocol_info* protocol;
     const void* witness_table;
-} __trait_conformance_entry;
+} __protocol_conformance_entry;
 
 /// @brief Information about an entity’s (`data` or `object`) type
 typedef const struct __data_type_info {
@@ -34,7 +34,7 @@ typedef const struct __data_type_info {
     /// Implementation should call releaseRC() on all nested structures.
     void (*release_nested_fields)(void* self);
 
-    const __trait_conformance_entry** const conformances;  // NULL-terminated array
+    const __protocol_conformance_entry** const conformances;  // NULL-terminated array
 } __data_type_info;
 
 struct __polymorphic_type_info;
@@ -73,7 +73,7 @@ typedef struct __rc_header {
 } __rc_header;
 
 typedef struct __conformance_node {
-    const __trait_conformance_entry conformance;
+    const __protocol_conformance_entry conformance;
     struct __conformance_node* next;
 } __conformance_node;
 
@@ -159,12 +159,12 @@ void _release_proxy(__rc_proxy* const proxy);
 #define VTABLE(structure, base_type) \
     ((base_type##ˇvtable*) RC_HEADER(structure)->is_a->polymorphic_type.vtable)
 
-const void* _lookup_conformance(const __type_info* type, const __trait_info* trait);
-void _register_conformance(const __type_info* type, const __trait_info* trait, const void* witness_table);
+const void* _lookup_conformance(const __type_info* type, const __protocol_info* protocol);
+void _register_conformance(const __type_info* type, const __protocol_info* protocol, const void* witness_table);
 
-#define CONFORMANCE_ENTRY(__structure__, __trait__) \
-    _lookup_conformance(RC_HEADER(__structure__)->is_a, &__trait__##ˇinfo)
-#define ADD_CONFORMANCE_ENTRY(__structure__, __trait__) \
-    _register_conformance(&__structure__##ˇtype, &__trait__##ˇinfo, &__structure__##ˇ##__trait__##ˇwitness)
+#define CONFORMANCE_ENTRY(__structure__, __protocol__) \
+    _lookup_conformance(RC_HEADER(__structure__)->is_a, &__protocol__##ˇtype)
+#define ADD_CONFORMANCE_ENTRY(__structure__, __protocol__) \
+    _register_conformance(&__structure__##ˇtype, &__protocol__##ˇtype, &__structure__##ˇ##__protocol__##ˇwitness)
 
 #endif // CLAWR_REFC_H

@@ -3,6 +3,7 @@ import { Statement, Expression, Context } from '.'
 import { mapFilter } from '../tools/map-filter'
 import { FunctionName } from './function-name'
 import { Failable } from './failable'
+import { IntegerLattice, Lattice, TruthvalueLattice } from './lattice'
 
 export class CallFunc implements Statement {
     private arguments: Expression[]
@@ -33,25 +34,84 @@ export class CallFunc implements Statement {
 
     *emitStatement(context: Context): Failable {
         const _name = this.name.toCIR()
-        // TODO: This name rewrite is a hack to make the print function work.
-        // We need to add a `HasStringRepresentation` trait, but we don't support traits yet.
-        const name = {
-            baseName:
-                _name.baseName === 'print'
-                    ? `print${(yield yield* this.arguments[0].currentValue(context)).toString() === 'integer' ? 'Int64' : 'Truthvalue'}`
-                    : _name.baseName,
-            labels: _name.labels,
-        }
-
         const args: cir.Expression[] = yield yield* Failable.map(
             this.arguments,
             (arg) => arg.toCIRExpression(context),
         )
-        context.scope.emitted.push({
-            kind: 'CALL',
-            name,
-            arguments: args,
-        })
+        if (_name.baseName === 'print') {
+            const value: Lattice =
+                yield yield* this.arguments[0].currentValue(context)
+
+            if (value instanceof IntegerLattice) {
+                // TODO: This name rewrite is a hack to make the print function work.
+                // We need to add a `HasStringRepresentation` trait, but we don't support traits yet.
+                const name = {
+                    baseName: 'printInt64',
+                    labels: [],
+                }
+
+                context.scope.emitted.push({
+                    kind: 'CALL',
+                    name,
+                    arguments: args,
+                })
+            } else if (value instanceof TruthvalueLattice) {
+                const tempName = context.scope.nextTempVar()
+                context.scope.emitted.push(
+                    {
+                        kind: 'VARIABLE_DECL',
+                        name: tempName,
+                        lattice: {
+                            type: 'rc-type',
+                            name: 'clawr¸TruthvalueBox',
+                            namespace: 'clawr',
+                        },
+                        initialValue: {
+                            kind: 'CALL',
+                            name: {
+                                baseName: 'boxTruthvalue',
+                                labels: [],
+                                // namespace: 'clawr',
+                            },
+                            arguments: args,
+                            value: {
+                                type: 'rc-type',
+                                name: 'clawr¸TruthvalueBox',
+                                namespace: 'clawr',
+                            },
+                        },
+                    },
+                    {
+                        kind: 'CALL',
+                        name: _name,
+                        arguments: [
+                            {
+                                kind: 'VARIABLE_REF',
+                                name: tempName,
+                                value: {
+                                    type: 'rc-type',
+                                    name: 'clawr¸TruthvalueBox',
+                                    namespace: 'clawr',
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        kind: 'RELEASE',
+                        object: {
+                            kind: 'VARIABLE_REF',
+                            name: tempName,
+                        },
+                    },
+                )
+            }
+        } else {
+            context.scope.emitted.push({
+                kind: 'CALL',
+                name: _name,
+                arguments: args,
+            })
+        }
         return Failable.success()
     }
 }

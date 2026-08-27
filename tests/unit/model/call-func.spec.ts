@@ -126,14 +126,42 @@ describe('CallFunc', () => {
         Failable.do(() => statement.emitStatement(context))
         expect(context.scope.emitted).toMatchObject([
             {
+                kind: 'VARIABLE_DECL',
+                name: expect.stringMatching(/^__tempˇ\d+$/),
+                lattice: { type: 'rc-type', name: 'clawr¸TruthvalueBox' },
+                initialValue: {
+                    kind: 'CALL',
+                    name: {
+                        baseName: 'boxTruthvalue',
+                    },
+                    arguments: [
+                        {
+                            kind: 'TRUTHVALUE_LITERAL',
+                            value: { type: 'truthvalue', values: ['true'] },
+                        },
+                    ],
+                    value: { type: 'rc-type', name: 'clawr¸TruthvalueBox' },
+                },
+            },
+            {
                 kind: 'CALL',
                 name: {
-                    baseName: 'printTruthvalue',
+                    baseName: 'print',
                     labels: [],
                 },
                 arguments: [
-                    { kind: 'TRUTHVALUE_LITERAL', value: { values: ['true'] } },
+                    {
+                        kind: 'VARIABLE_REF',
+                        name: expect.stringMatching(/^__tempˇ\d+$/),
+                    },
                 ],
+            },
+            {
+                kind: 'RELEASE',
+                object: {
+                    kind: 'VARIABLE_REF',
+                    name: expect.stringMatching(/^__tempˇ\d+$/),
+                },
             },
         ])
     })

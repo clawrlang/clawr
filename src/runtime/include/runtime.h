@@ -1,6 +1,7 @@
 #ifndef CLAWR_RUNTIME_H
 #define CLAWR_RUNTIME_H
 
+#include "TruthValueBox.h"
 #include "array.h"
 #include "clawr_string.h"
 #include "integer.h"
@@ -8,12 +9,21 @@
 #include "protocols.h"
 #include "real.h"
 #include "refc.h"
-#include "truthvalue.h"
+
+static void print(void *value) {
+  const clawr¸HasStringRepresentationˇwitness *witness =
+      CONFORMANCE_ENTRY(value, clawr¸HasStringRepresentation);
+  String *string = witness->stringRepresentation(value);
+  printf("%s\n", string->data);
+  releaseRC(string);
+}
 
 // Utility functions for printing values, used in test cases.
 // Remove when HasStringRepesentation is implemented for all types.
 static void printTruthvalue(truthvalue_t value) {
-  printf("%s\n", truthvalue·toCString(value));
+  clawr¸TruthvalueBox *box = boxTruthvalue(value);
+  print(box);
+  releaseRC(box);
 }
 
 static void printInt64(int64_t value) { printf("%lld\n", value); }

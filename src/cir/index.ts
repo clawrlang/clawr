@@ -13,7 +13,7 @@ export type ClawrModule = {
 type ProtocolDeclaration = {
     kind: 'PROTOCOL_DECL'
     name: string
-    slots: FunctionSignature[]
+    requirements: FunctionSignature[]
 }
 
 type VariableDeclaration = {

@@ -170,7 +170,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -178,7 +178,7 @@
               "namespace": { "type": "string" },
               "name": { "type": "string" }
             },
-            "required": ["kind", "slots", "type", "name"],
+            "required": ["kind", "requirements", "type", "name"],
             "additionalProperties": false
           },
           "FunctionSignature": {
@@ -355,7 +355,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -363,7 +363,7 @@
               "namespace": { "type": "string" },
               "name": { "type": "string" }
             },
-            "required": ["kind", "slots", "type", "name"],
+            "required": ["kind", "requirements", "type", "name"],
             "additionalProperties": false
           },
           "RealLatticeProtocolDeclaration": {
@@ -371,7 +371,7 @@
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
               "name": { "type": "string" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -379,7 +379,7 @@
               "min": { "type": "string" },
               "max": { "type": "string" }
             },
-            "required": ["kind", "name", "slots", "type"],
+            "required": ["kind", "name", "requirements", "type"],
             "additionalProperties": false
           },
           "StringLatticeProtocolDeclaration": {
@@ -387,14 +387,14 @@
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
               "name": { "type": "string" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "string" },
               "value": { "type": "string" }
             },
-            "required": ["kind", "name", "slots", "type"],
+            "required": ["kind", "name", "requirements", "type"],
             "additionalProperties": false
           },
           "TruthvalueLatticetruthvalueProtocolDeclaration": {
@@ -402,7 +402,7 @@
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
               "name": { "type": "string" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -412,7 +412,7 @@
                 "items": { "$ref": "#/$defs/truthvalue" }
               }
             },
-            "required": ["kind", "name", "slots", "type", "values"],
+            "required": ["kind", "name", "requirements", "type", "values"],
             "additionalProperties": false
           },
           "__type__type__typeProtocolDeclaration.o3": {
@@ -420,7 +420,7 @@
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
               "name": { "type": "string" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -428,7 +428,7 @@
               "min": { "type": "string", "pattern": "^-?\\d+$" },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["kind", "name", "slots", "type", "min", "max"],
+            "required": ["kind", "name", "requirements", "type", "min", "max"],
             "additionalProperties": false
           },
           "__type__type__typeProtocolDeclaration.o2": {
@@ -436,14 +436,14 @@
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
               "name": { "type": "string" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" },
               "min": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["kind", "name", "slots", "type", "min"],
+            "required": ["kind", "name", "requirements", "type", "min"],
             "additionalProperties": false
           },
           "__type__type__typeProtocolDeclaration.o1": {
@@ -451,14 +451,14 @@
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
               "name": { "type": "string" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["kind", "name", "slots", "type", "max"],
+            "required": ["kind", "name", "requirements", "type", "max"],
             "additionalProperties": false
           },
           "__type__type__typeProtocolDeclaration": {
@@ -466,13 +466,13 @@
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
               "name": { "type": "string" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" }
             },
-            "required": ["kind", "name", "slots", "type"],
+            "required": ["kind", "name", "requirements", "type"],
             "additionalProperties": false
           },
           "IntegerLiteralbigint__type.o2": {
@@ -548,7 +548,7 @@
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
               "name": { "type": "string" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -559,7 +559,7 @@
                 "additionalItems": false
               }
             },
-            "required": ["kind", "name", "slots", "type", "values"],
+            "required": ["kind", "name", "requirements", "type", "values"],
             "additionalProperties": false
           },
           "StringLiteral__type.o2": {
@@ -578,14 +578,14 @@
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
               "name": { "type": "string" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "string" },
               "value": { "type": "string" }
             },
-            "required": ["kind", "name", "slots", "type", "value"],
+            "required": ["kind", "name", "requirements", "type", "value"],
             "additionalProperties": false
           },
           "VariableReference__type.o2": {
@@ -1213,13 +1213,13 @@
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
               "name": { "type": "string" },
-              "slots": {
+              "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "namespace": { "type": "string" }
             },
-            "required": ["kind", "name", "slots"],
+            "required": ["kind", "name", "requirements"],
             "additionalProperties": false
           },
           "__typeVariableDeclaration": {

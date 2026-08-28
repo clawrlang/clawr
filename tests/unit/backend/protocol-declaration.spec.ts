@@ -7,7 +7,7 @@ describe('Protocol Declaration', () => {
         const decl: cir.Declaration = {
             kind: 'PROTOCOL_DECL',
             name: 'MyProtocol',
-            slots: [
+            requirements: [
                 {
                     baseName: 'slot',
                     labels: ['l'],

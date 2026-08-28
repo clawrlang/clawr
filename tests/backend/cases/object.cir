@@ -122,10 +122,11 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj"
-                        },
-                        "type": {
-                            "name": "Object"
+                            "name": "obj",
+                            "value": {
+                                "type": "rc-type",
+                                "name": "Object"
+                            }
                         },
                         "dispatch": "direct"
                     },

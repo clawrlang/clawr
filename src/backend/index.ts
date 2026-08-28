@@ -338,27 +338,26 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
         }
         case 'direct': {
             const args = [
-                lowerStorage(receiver.object),
+                lowerExpr(receiver.object),
                 ...call.arguments.map(lowerExpr),
             ]
-            const name = mangleNameWithLabels(call.name, receiver.type)
+            const name = mangleNameWithLabels(call.name, receiver.object.value)
             return `${name}(${args.join(', ')})`
         }
         case 'inherited': {
-            const targetName = lowerStorage(receiver.object)
-            const declarationType = mangleTypeName(receiver.declaredIn)
+            const targetName = lowerExpr(receiver.object)
+            const declarationType = mangleTypeName(receiver.object.value)
             const slotName = mangleNameWithLabels({
                 ...call.name,
                 namespace: undefined,
             })
             const args = [
-                lowerStorage(receiver.object),
+                lowerExpr(receiver.object),
                 ...call.arguments.map(lowerExpr),
             ]
             return `VTABLE(${targetName}, ${declarationType})->${slotName}(${args})`
         }
-        case 'conformance-open':
-        case 'conformance-closed':
+        case 'conformance':
         default:
             throw new Error(
                 `Dispatch mode of ${receiver?.dispatch} not yet supported`,

@@ -97,28 +97,16 @@ type Release = {
 
 type Receiver =
     | {
-          // ordinary call or proven concrete type
-          object: Storage
+          object: Expression & { value: RCTypeLattice | ProtocolLattice }
           dispatch: 'direct'
-          type: CanonicalName
       }
     | {
-          // virtual method
-          object: Storage
+          object: Expression & { value: RCTypeLattice }
           dispatch: 'inherited'
-          declaredIn: CanonicalName
       }
     | {
-          // backend MAY devirtualize via whole-program proof
-          object: Storage
-          dispatch: 'conformance-closed'
-          declaredIn: CanonicalName
-      }
-    | {
-          // role or unresolved trait - MUST NOT devirtualize
-          object: Storage
-          dispatch: 'conformance-open'
-          declaredIn: CanonicalName
+          object: Expression & { value: ProtocolDeclaration }
+          dispatch: 'conformance'
       }
 
 type FunctionCall = {
@@ -250,12 +238,19 @@ type RCTypeLattice = {
     name: string
 }
 
+type ProtocolLattice = {
+    type: 'protocol'
+    namespace?: string
+    name: string
+}
+
 export type Lattice =
     | IntegerLattice<bigint | undefined, bigint | undefined>
     | RealLattice
     | TruthvalueLattice<truthvalue[]>
     | StringLattice
     | RCTypeLattice
+    | ProtocolLattice
 
 type IsolationLevel = 'ISOLATED' | 'SHARED'
 type truthvalue = 'false' | 'ambiguous' | 'true'

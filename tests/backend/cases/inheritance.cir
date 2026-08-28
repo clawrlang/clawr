@@ -265,10 +265,11 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "__tempˇ0"
-                        },
-                        "type": {
-                            "name": "Super"
+                            "name": "__tempˇ0",
+                            "value": {
+                                "type": "rc-type",
+                                "name": "Super"
+                            }
                         },
                         "dispatch": "direct"
                     },
@@ -338,10 +339,11 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "__tempˇ0"
-                        },
-                        "type": {
-                            "name": "Super"
+                            "name": "__tempˇ0",
+                            "value": {
+                                "type": "rc-type",
+                                "name": "Super"
+                            }
                         },
                         "dispatch": "direct"
                     },
@@ -435,10 +437,11 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj1"
-                        },
-                        "type": {
-                            "name": "Sub1"
+                            "name": "obj1",
+                            "value": {
+                                "type": "rc-type",
+                                "name": "Sub1"
+                            }
                         },
                         "dispatch": "direct"
                     },
@@ -467,12 +470,13 @@
                     "receiver": {
                         "object": {
                             "kind": "VARIABLE_REF",
-                            "name": "obj2"
+                            "name": "obj2",
+                            "value": {
+                                "type": "rc-type",
+                                "name": "Super"
+                            }
                         },
-                        "dispatch": "inherited",
-                        "declaredIn": {
-                            "name": "Super"
-                        }
+                        "dispatch": "inherited"
                     },
                     "name": {
                         "baseName": "f",

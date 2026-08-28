@@ -166,8 +166,8 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: { type: 'rc-type', name: 'Object' },
                     },
-                    type: { name: 'Object' },
                     dispatch: 'direct',
                 },
                 name: {
@@ -188,8 +188,8 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: { type: 'rc-type', name: 'Object' },
                     },
-                    type: { name: 'Object' },
                     dispatch: 'direct',
                 },
                 name: {
@@ -211,12 +211,13 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: {
+                            type: 'rc-type',
+                            name: 'Super',
+                            namespace: 'ns',
+                        },
                     },
                     dispatch: 'inherited',
-                    declaredIn: {
-                        namespace: 'ns',
-                        name: 'Super',
-                    },
                 },
                 name: {
                     baseName: 'myMethod',
@@ -238,12 +239,13 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: {
+                            type: 'rc-type',
+                            name: 'Super',
+                            namespace: 'ns',
+                        },
                     },
                     dispatch: 'inherited',
-                    declaredIn: {
-                        namespace: 'ns',
-                        name: 'Super',
-                    },
                 },
                 name: {
                     baseName: 'myMethod',
@@ -266,8 +268,12 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: {
+                            type: 'rc-type',
+                            name: 'Object',
+                            namespace: 'ns',
+                        },
                     },
-                    type: { name: 'Object', namespace: 'ns' },
                     dispatch: 'direct',
                 },
                 name: {
@@ -288,8 +294,12 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
+                        value: {
+                            type: 'rc-type',
+                            name: 'Object',
+                            namespace: 'ns',
+                        },
                     },
-                    type: { name: 'Object', namespace: 'ns' },
                     dispatch: 'direct',
                 },
                 name: {

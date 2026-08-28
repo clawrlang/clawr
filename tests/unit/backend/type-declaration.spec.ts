@@ -131,7 +131,7 @@ describe('Type declaration', () => {
                         lattice: { type: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
-                    implementedBy: { name: 'MyType' },
+                    implementation: { name: 'MyType' },
                 },
             ],
         }
@@ -166,7 +166,7 @@ describe('Type declaration', () => {
                         lattice: { type: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
-                    implementedBy: { name: 'MyType' },
+                    implementation: { name: 'MyType' },
                 },
             ],
         }
@@ -200,7 +200,7 @@ describe('Type declaration', () => {
                 {
                     slot: { baseName: 'f', labels: [], parameters: [] },
                     declaredIn: { name: 'Super' },
-                    implementedBy: { name: 'Sub' },
+                    implementation: { name: 'Sub' },
                 },
             ],
         }

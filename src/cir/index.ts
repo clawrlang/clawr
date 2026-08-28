@@ -46,16 +46,22 @@ type RCTypeDeclaration = {
         name: string
         lattice: Lattice
     }[]
+    conformances?: {
+        protocol: CanonicalName
+        fulfillments: {
+            requirement: FunctionName
+            implementation: FunctionName
+        }[]
+    }[]
 } & ( // `object`/`service` add methods and optional inheritance
     | {
           base?: CanonicalName
           methods: FunctionDeclaration[]
-          implements?: ProtocolImplementation[]
           initializers?: (FunctionDeclaration & { lattice?: undefined })[]
           dispatchTable?: {
               slot: FunctionSignature
               declaredIn: CanonicalName
-              implementedBy?: CanonicalName
+              implementation?: CanonicalName
           }[]
       }
     | {}
@@ -66,14 +72,6 @@ export type CanonicalName = { name: string; namespace?: string }
 type FunctionName = {
     baseName: string
     labels: string[]
-}
-
-type ProtocolImplementation = {
-    protocol: string
-    methodMap: {
-        interfaceMethod: FunctionName
-        implementationMethod: FunctionName
-    }[]
 }
 
 export type Declaration = { namespace?: string } & (

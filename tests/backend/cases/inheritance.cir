@@ -114,7 +114,7 @@
                     "declaredIn": {
                         "name": "Super"
                     },
-                    "implementedBy": {
+                    "implementation": {
                         "name": "Super"
                     }
                 }
@@ -186,7 +186,7 @@
                     "declaredIn": {
                         "name": "Super"
                     },
-                    "implementedBy": {
+                    "implementation": {
                         "name": "Sub1"
                     }
                 }
@@ -215,7 +215,7 @@
                     "declaredIn": {
                         "name": "Super"
                     },
-                    "implementedBy": {
+                    "implementation": {
                         "name": "Super"
                     }
                 }

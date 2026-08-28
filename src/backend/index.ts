@@ -103,12 +103,12 @@ export function lowerDecl(decl: cir.Declaration): string {
     }
 }
 
-function lowerVtableMethod({ slot, declaredIn, implementedBy }: DispatchSlot) {
+function lowerVtableMethod({ slot, declaredIn, implementation }: DispatchSlot) {
     const declaredName = mangleNameWithParameters(slot, declaredIn)
-    if (!implementedBy) throw new Error(`slot ${declaredName} not implemented`)
+    if (!implementation) throw new Error(`slot ${declaredName} not implemented`)
 
     const slotName = mangleNameWithParameters(slot)
-    const implementedName = mangleNameWithParameters(slot, implementedBy)
+    const implementedName = mangleNameWithParameters(slot, implementation)
     return `.${slotName} = (${declaredName}ˇmethod)${implementedName},`
 }
 

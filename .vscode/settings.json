@@ -577,9 +577,41 @@
                   "required": ["name", "lattice"],
                   "additionalProperties": false
                 }
+              },
+              "conformances": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "protocol": { "$ref": "#/$defs/CanonicalName" },
+                    "fulfillments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "requirement": { "$ref": "#/$defs/FunctionName" },
+                          "implementation": { "$ref": "#/$defs/FunctionName" }
+                        },
+                        "required": ["requirement", "implementation"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["protocol", "fulfillments"],
+                  "additionalProperties": false
+                }
               }
             },
             "required": ["kind", "name", "fields"],
+            "additionalProperties": false
+          },
+          "FunctionName": {
+            "type": "object",
+            "properties": {
+              "baseName": { "type": "string" },
+              "labels": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["baseName", "labels"],
             "additionalProperties": false
           },
           "__type__typeFunctionSignature": {
@@ -639,14 +671,33 @@
                   "additionalProperties": false
                 }
               },
+              "conformances": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "protocol": { "$ref": "#/$defs/CanonicalName" },
+                    "fulfillments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "requirement": { "$ref": "#/$defs/FunctionName" },
+                          "implementation": { "$ref": "#/$defs/FunctionName" }
+                        },
+                        "required": ["requirement", "implementation"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["protocol", "fulfillments"],
+                  "additionalProperties": false
+                }
+              },
               "base": { "$ref": "#/$defs/CanonicalName" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionDeclaration" }
-              },
-              "implements": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/ProtocolImplementation" }
               },
               "initializers": {
                 "type": "array",
@@ -659,7 +710,7 @@
                   "properties": {
                     "slot": { "$ref": "#/$defs/FunctionSignature" },
                     "declaredIn": { "$ref": "#/$defs/CanonicalName" },
-                    "implementedBy": { "$ref": "#/$defs/CanonicalName" }
+                    "implementation": { "$ref": "#/$defs/CanonicalName" }
                   },
                   "required": ["slot", "declaredIn"],
                   "additionalProperties": false
@@ -705,35 +756,6 @@
               }
             },
             "required": ["kind", "body", "baseName", "labels", "parameters"],
-            "additionalProperties": false
-          },
-          "ProtocolImplementation": {
-            "type": "object",
-            "properties": {
-              "protocol": { "type": "string" },
-              "methodMap": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "interfaceMethod": { "$ref": "#/$defs/FunctionName" },
-                    "implementationMethod": { "$ref": "#/$defs/FunctionName" }
-                  },
-                  "required": ["interfaceMethod", "implementationMethod"],
-                  "additionalProperties": false
-                }
-              }
-            },
-            "required": ["protocol", "methodMap"],
-            "additionalProperties": false
-          },
-          "FunctionName": {
-            "type": "object",
-            "properties": {
-              "baseName": { "type": "string" },
-              "labels": { "type": "array", "items": { "type": "string" } }
-            },
-            "required": ["baseName", "labels"],
             "additionalProperties": false
           },
           "__typeFunctionSignature__type": {

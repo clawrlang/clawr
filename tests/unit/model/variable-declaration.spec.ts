@@ -16,7 +16,7 @@ import { TypeName } from '@/model/type-name'
 import { Query } from '@/model/query'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { decorateLattice } from '@/model/lattice-declaration'
-import { Failable, isFailure } from '@/model/failable'
+import { Failable, isFailure } from '@/tools/failable'
 import assert from 'assert'
 
 describe('VariableDeclaration', () => {

@@ -2,7 +2,7 @@ import * as cir from '@/cir'
 import { Statement, Expression, Context } from '.'
 import { mapFilter } from '@/tools/map-filter'
 import { FunctionName } from './function-name'
-import { Failable } from '@/model/failable'
+import { Failable } from '@/tools/failable'
 import { IntegerLattice, Lattice, TruthvalueLattice } from './lattice'
 
 export class CallFunc implements Statement {

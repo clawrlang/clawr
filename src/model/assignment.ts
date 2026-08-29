@@ -3,10 +3,10 @@ import { Statement, Expression, Context } from '.'
 import { AnyIsolationLevel, UNIQUE, UNKNOWN } from './isolation-level'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
-import { SourceCodeSpan } from '@/diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Lattice, RCTypeLattice } from './lattice'
 import { Retain } from './retain'
-import { Failable, isFailure } from '@/model/failable'
+import { Failable, isFailure } from '@/tools/failable'
 
 export class Assignment implements Statement {
     private constructor(

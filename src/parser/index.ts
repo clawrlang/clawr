@@ -1,5 +1,5 @@
 import * as cir from '@/cir'
-import { ErrorReporter } from '@/diagnostics'
+import { ErrorReporter } from '@/tools/diagnostics'
 import { TokenStream } from '@/lexer'
 import { Declaration } from '@/model'
 

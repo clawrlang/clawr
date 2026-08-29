@@ -7,7 +7,7 @@ import { TypeName } from '@/model/type-name'
 import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { ISOLATED, SHARED, UNKNOWN } from '@/model/isolation-level'
 import { decorateLattice } from '@/model/lattice-declaration'
-import { Failable, isFailure, isSuccess } from '@/model/failable'
+import { Failable, isFailure, isSuccess } from '@/tools/failable'
 import assert from 'assert'
 
 describe('Field Reference', () => {

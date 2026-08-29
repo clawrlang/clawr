@@ -13,7 +13,7 @@ import { IntegerLattice, RCTypeLattice, StringLattice } from '@/model/lattice'
 import { TypeName } from '@/model/type-name'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { decorateLattice } from '@/model/lattice-declaration'
-import { Failable } from '@/model/failable'
+import { Failable } from '@/tools/failable'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {

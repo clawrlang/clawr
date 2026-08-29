@@ -1,4 +1,4 @@
-import { ErrorReporter, SourceCodeSpan } from '@/diagnostics'
+import { ErrorReporter, SourceCodeSpan } from '@/tools/diagnostics'
 import { Context } from '@/model'
 import { Scope } from '@/model/scope'
 

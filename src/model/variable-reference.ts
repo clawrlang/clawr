@@ -1,9 +1,9 @@
 import * as cir from '@/cir'
 import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
-import { SourceCodeSpan } from '@/diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Lattice } from './lattice'
-import { Failable, isFailure } from '@/model/failable'
+import { Failable, isFailure } from '@/tools/failable'
 import { Variable } from './scope'
 
 export class VariableReference implements Expression {

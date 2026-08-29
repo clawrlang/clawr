@@ -6,10 +6,10 @@ import {
     IsolationLevel,
     SHARED,
 } from './isolation-level'
-import { SourceCodeSpan } from '@/diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { DataDeclaration, DataField } from './data-declaration'
 import { RCTypeLattice, Lattice } from './lattice'
-import { Failable, isFailure } from '@/model/failable'
+import { Failable, isFailure } from '@/tools/failable'
 
 export class FieldReference implements Expression {
     private constructor(

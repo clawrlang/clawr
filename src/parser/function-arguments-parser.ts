@@ -1,5 +1,5 @@
 import { Context } from '.'
-import { Position } from '@/diagnostics'
+import { Position } from '@/tools/diagnostics'
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { ExpressionParser } from './expression-parser'

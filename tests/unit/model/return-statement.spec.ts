@@ -12,7 +12,7 @@ import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { TypeName } from '@/model/type-name'
 import { DataDeclaration } from '@/model/data-declaration'
 import { VariableReference } from '@/model/variable-reference'
-import { Failable, isFailure } from '@/model/failable'
+import { Failable, isFailure } from '@/tools/failable'
 import assert from 'assert'
 
 describe('ReturnStatement', () => {

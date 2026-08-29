@@ -11,7 +11,7 @@ import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { TypeName } from '@/model/type-name'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { decorateLattice } from '@/model/lattice-declaration'
-import { Failable, isFailure } from '@/model/failable'
+import { Failable, isFailure } from '@/tools/failable'
 import assert from 'assert'
 
 describe('Assignment', () => {

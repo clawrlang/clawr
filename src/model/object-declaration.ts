@@ -1,8 +1,8 @@
-import { SourceCodeSpan } from '@/diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { FunctionDeclaration } from './function-declaration'
 import { DataField } from './data-declaration'
 import { Context, Declaration } from '.'
-import { Failable } from '@/model/failable'
+import { Failable } from '@/tools/failable'
 
 export class ObjectDeclaration implements Declaration {
     private constructor(

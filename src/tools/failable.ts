@@ -1,4 +1,4 @@
-import { SourceCodeSpan } from '../diagnostics'
+import { SourceCodeSpan } from './diagnostics'
 
 export type Result<T> = Success<T> | Failure
 type Success<T> = { value: T }

@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { Context, Declaration, Statement } from '.'
-import { Failable, isFailure, SemanticErrorCollection } from '@/model/failable'
+import { Failable, isFailure, SemanticErrorCollection } from '@/tools/failable'
 
 export class Module {
     private constructor(

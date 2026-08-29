@@ -1,11 +1,11 @@
 import * as cir from '@/cir'
 import { ContextWithLattice, Context, Expression } from '.'
 import { UNIQUE } from './isolation-level'
-import { SourceCodeSpan } from '@/diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { DataDeclaration } from './data-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
 import { TypeName } from './type-name'
-import { Failable, isFailure } from '@/model/failable'
+import { Failable, isFailure } from '@/tools/failable'
 
 export class DataLiteral implements Expression {
     private constructor(

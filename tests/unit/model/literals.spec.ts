@@ -8,7 +8,7 @@ import { TypeName } from '@/model/type-name'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { IntegerLattice, RCTypeLattice, truthvalue } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
-import { Failable, isFailure, isSuccess } from '@/model/failable'
+import { Failable, isFailure, isSuccess } from '@/tools/failable'
 import assert from 'assert'
 
 describe('Literals', () => {

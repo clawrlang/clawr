@@ -1,9 +1,9 @@
 import * as cir from '@/cir'
 import { Context, Expression } from '.'
-import { SourceCodeSpan } from '@/diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Lattice, TruthvalueLattice, truthvalue } from './lattice'
 import { ISOLATED } from './isolation-level'
-import { Failable } from '@/model/failable'
+import { Failable } from '@/tools/failable'
 
 export class TruthValueLiteral<Value extends truthvalue> implements Expression {
     private constructor(

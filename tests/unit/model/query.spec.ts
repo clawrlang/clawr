@@ -10,7 +10,7 @@ import { VariableReference } from '@/model/variable-reference'
 import { TypeName } from '@/model/type-name'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { decorateLattice } from '@/model/lattice-declaration'
-import { Failable, isSuccess } from '@/model/failable'
+import { Failable, isSuccess } from '@/tools/failable'
 import assert from 'assert'
 
 describe('Query', () => {

@@ -1,5 +1,5 @@
 import { Expression } from '.'
-import { SourceCodeSpan } from '@/diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { LatticeDeclaration } from './lattice-declaration'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 

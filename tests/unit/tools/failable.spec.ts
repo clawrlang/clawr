@@ -1,6 +1,6 @@
 import { describe, it, expect, test } from 'bun:test'
 import { someCodeSpan } from '@@/util'
-import { Failable, isFailure, isSuccess, SemanticError } from '@/model/failable'
+import { Failable, isFailure, isSuccess, SemanticError } from '@/tools/failable'
 
 describe('Failable', () => {
     describe('success', () => {

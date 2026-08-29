@@ -1,4 +1,4 @@
-import { SourceCodeSpan } from '@/diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import type {
     Annotation,
     Keyword,

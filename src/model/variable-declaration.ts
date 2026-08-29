@@ -5,7 +5,7 @@ import { LatticeDeclaration } from './lattice-declaration'
 import { Lattice } from './lattice'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 import { Retain } from './retain'
-import { Failable, isFailure } from '@/model/failable'
+import { Failable, isFailure } from '@/tools/failable'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]

@@ -6,7 +6,7 @@ import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { TypeName } from '@/model/type-name'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { decorateLattice } from '@/model/lattice-declaration'
-import { Failable, isFailure, isSuccess } from '@/model/failable'
+import { Failable, isFailure, isSuccess } from '@/tools/failable'
 import assert from 'assert'
 
 describe('Variable Reference', () => {

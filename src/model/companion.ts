@@ -1,5 +1,5 @@
 import { Declaration } from '.'
-import { SourceCodeSpan } from '@/diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { VariableDeclaration } from './variable-declaration'
 
 export class Companion {

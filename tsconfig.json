@@ -14,8 +14,8 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "paths": {
+      "#*": ["./generated/*", "./placeholders/*"],
       "@/*": ["./src/*"],
-      "#/*": ["./generated/*", "./placeholders/*"],
       "@@/*": ["./tests/*"]
     }
   },

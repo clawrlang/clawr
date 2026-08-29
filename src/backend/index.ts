@@ -1,14 +1,8 @@
 import * as cir from '@/cir'
-import { validateCIR } from '#/typia/validate-cir'
+import CIRParser from '#cir-parser'
 
-export function lower(cir: cir.ClawrModule): string {
-    const result = validateCIR(cir)
-    if (!result.success) {
-        const details = result.errors
-            .map((error) => `${error.path} expected ${error.expected}`)
-            .join('; ')
-        throw new Error(`Invalid CIR: ${details}`)
-    }
+export function lower(json: string): string {
+    const cir = CIRParser.parse(json).module()
 
     const variableDecls =
         cir.declarations?.filter((decl) => decl.kind === 'VARIABLE_DECL') ?? []

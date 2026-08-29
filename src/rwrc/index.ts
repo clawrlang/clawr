@@ -8,7 +8,6 @@ import { Command } from 'commander'
 import * as backend from '@/backend'
 import { ModuleParser } from '@/parser'
 import { TokenStream } from '@/lexer'
-import { ClawrModule } from '@/cir'
 import { RWRCErrorReporter } from './error-reporter'
 import { Scope } from '@/model/scope'
 
@@ -59,11 +58,7 @@ async function parseToCIR({
 async function compileCIR(cirFilePath: string) {
     const exePath = `${cirFilePath.replace(/\.[^/.]+$/, '')}`
     const cFilePath = `${exePath}.c`
-
-    const cir = JSON.parse(
-        await fs.readFile(cirFilePath, 'utf-8'),
-    ) as ClawrModule
-    const cCode = backend.lower(cir)
+    const cCode = backend.lower(await fs.readFile(cirFilePath, 'utf-8'))
 
     await fs.writeFile(cFilePath, cCode)
 

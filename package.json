@@ -17,7 +17,7 @@
     "build": "tsc --noEmit && npm run build:runtime && npm run build:rwrc",
     "build:schema": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && node .typia-temp/tools/generate-cir-schema.js && npx prettier --write .vscode/settings.json",
     "build:rwrc": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && bun build .typia-temp/rwrc/index.js --compile --outfile dist/rwrc",
-    "build:typia": "rm -rf generated/typia && npx typia generate --output generated/typia --project tsconfig.json placeholders/typia/validate-cir.ts",
+    "build:typia": "rm -rf generated/cir-parser && npx typia generate --output generated/cir-parser --project tsconfig.json placeholders/cir-parser/index.ts",
     "test:backend": "npm run build:runtime && npm run build:typia && bun test ./tests/backend/*.test.ts",
     "test:e2e": "npm run build && bun test ./tests/e2e/*.test.ts",
     "build:runtime": "mkdir -p dist && rm -rf dist/include && bun run cp -R src/runtime/include dist/include && clang -I dist/include src/runtime/*.c -dynamiclib -fvisibility=hidden -current_version 0.0.1 -compatibility_version 0.0.1 -o dist/libClawr.A.dylib",

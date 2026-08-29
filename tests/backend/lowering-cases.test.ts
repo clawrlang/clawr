@@ -69,8 +69,7 @@ async function lower(fileName: string) {
         `${fileName.replace(/.cir$/, '')}.c`,
     )
 
-    const cirData = fs.readFileSync(inputFilePath, 'utf-8')
-    const cir = JSON.parse(cirData)
+    const cir = fs.readFileSync(inputFilePath, 'utf-8')
     const code = backend.lower(cir)
     await fs.promises.mkdir(OUTPUT_DIR, { recursive: true })
     await fs.promises.writeFile(outputFilePath, code)

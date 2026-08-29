@@ -15,9 +15,10 @@
     "resolveJsonModule": true,
     "paths": {
       "@/*": ["./src/*"],
+      "#/*": ["./generated/*", "./placeholders/*"],
       "@@/*": ["./tests/*"]
     }
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "generated"]
 }

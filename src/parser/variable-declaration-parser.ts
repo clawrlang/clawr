@@ -1,14 +1,14 @@
 import { ExpressionParser } from './expression-parser'
-import { TokenStream } from '../lexer'
+import { TokenStream } from '@/lexer'
 import {
     VARIABLE_SEMANTICS,
     VariableDeclaration,
-} from '../model/variable-declaration'
+} from '@/model/variable-declaration'
 import { StatementParser } from './statement-parser'
 import { Context } from '.'
 import { LatticeParser } from './lattice-parser'
 import { SemanticsKeyword } from './semantics-keyword-parser'
-import { LatticeDeclaration } from '../model/lattice-declaration'
+import { LatticeDeclaration } from '@/model/lattice-declaration'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser

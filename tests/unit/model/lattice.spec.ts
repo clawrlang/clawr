@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'bun:test'
-import { newSemanticContext } from '../../util'
-import { TypeName } from '../../../src/model/type-name'
+import { newSemanticContext } from '@@/util'
+import { TypeName } from '@/model/type-name'
 import {
     IntegerLattice,
     RCTypeLattice,
     StringLattice,
     TruthvalueLattice,
-} from '../../../src/model/lattice'
+} from '@/model/lattice'
 
 describe('Lattice', () => {
     describe('toCIR', () => {

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'bun:test'
-import { TokenStream } from '../../../src/lexer'
-import { TestErrorReporter } from '../../util'
-import { Context } from '../../../src/parser'
-import { FunctionDeclarationParser } from '../../../src/parser/function-declaration-parser'
-import { Companion } from '../../../src/model/companion'
-import { VariableDeclaration } from '../../../src/model/variable-declaration'
-import { FunctionDeclaration } from '../../../src/model/function-declaration'
-import { VariableDeclarationParser } from '../../../src/parser/variable-declaration-parser'
+import { TokenStream } from '@/lexer'
+import { TestErrorReporter } from '@@/util'
+import { Context } from '@/parser'
+import { FunctionDeclarationParser } from '@/parser/function-declaration-parser'
+import { Companion } from '@/model/companion'
+import { VariableDeclaration } from '@/model/variable-declaration'
+import { FunctionDeclaration } from '@/model/function-declaration'
+import { VariableDeclarationParser } from '@/parser/variable-declaration-parser'
 
 describe('Companion Parser', () => {
     it('parses an empty companion', () => {

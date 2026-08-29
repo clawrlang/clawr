@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'bun:test'
-import { newSemanticContext, someCodeSpan } from '../../util'
-import { CallFunc } from '../../../src/model/call-func'
-import { IntegerLiteral } from '../../../src/model/integer-literal'
-import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
-import { VariableReference } from '../../../src/model/variable-reference'
-import { IntegerLattice } from '../../../src/model/lattice'
-import { ISOLATED } from '../../../src/model/isolation-level'
-import { Failable } from '../../../src/model/failable'
+import { newSemanticContext, someCodeSpan } from '@@/util'
+import { CallFunc } from '@/model/call-func'
+import { IntegerLiteral } from '@/model/integer-literal'
+import { TruthValueLiteral } from '@/model/truthvalue-literal'
+import { VariableReference } from '@/model/variable-reference'
+import { IntegerLattice } from '@/model/lattice'
+import { ISOLATED } from '@/model/isolation-level'
+import { Failable } from '@/model/failable'
 
 describe('CallFunc', () => {
     it('converts to CIR', () => {

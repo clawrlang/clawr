@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'bun:test'
-import { TokenStream } from '../../../src/lexer'
-import { ExpressionParser } from '../../../src/parser/expression-parser'
-import { TestErrorReporter } from '../../util'
-import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
-import { IntegerLiteral } from '../../../src/model/integer-literal'
-import { VariableReference } from '../../../src/model/variable-reference'
-import { FieldReference } from '../../../src/model/field-reference'
-import { Expression } from '../../../src/model'
-import { Query } from '../../../src/model/query'
+import { TokenStream } from '@/lexer'
+import { ExpressionParser } from '@/parser/expression-parser'
+import { TestErrorReporter } from '@@/util'
+import { TruthValueLiteral } from '@/model/truthvalue-literal'
+import { IntegerLiteral } from '@/model/integer-literal'
+import { VariableReference } from '@/model/variable-reference'
+import { FieldReference } from '@/model/field-reference'
+import { Expression } from '@/model'
+import { Query } from '@/model/query'
 
 describe('Expression Parser', () => {
     describe('truthvalue literals', () => {

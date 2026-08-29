@@ -1,7 +1,7 @@
 import { Context } from '.'
-import { TokenStream } from '../lexer'
-import { Expression } from '../model'
-import { DataField } from '../model/data-declaration'
+import { TokenStream } from '@/lexer'
+import { Expression } from '@/model'
+import { DataField } from '@/model/data-declaration'
 import { ExpressionParser } from './expression-parser'
 import {
     SemanticsKeyword,

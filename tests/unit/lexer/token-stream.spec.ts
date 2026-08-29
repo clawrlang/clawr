@@ -1,7 +1,7 @@
 import { describe, expect, it, test } from 'bun:test'
-import { Token, TokenStream } from '../../../src/lexer'
+import { Token, TokenStream } from '@/lexer'
 import { decimal } from 'decimalish'
-import { TestErrorReporter } from '../../util'
+import { TestErrorReporter } from '@@/util'
 
 describe('TokenStream', () => {
     describe('INTEGER_LITERAL', () => {

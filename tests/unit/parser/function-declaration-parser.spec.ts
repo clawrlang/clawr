@@ -1,13 +1,8 @@
 import { describe, expect, it } from 'bun:test'
-import { TestErrorReporter } from '../../util'
-import { TokenStream } from '../../../src/lexer'
-import { FunctionDeclarationParser } from '../../../src/parser/function-declaration-parser'
-import {
-    ISOLATED,
-    SHARED,
-    UNIQUE,
-    UNKNOWN,
-} from '../../../src/model/isolation-level'
+import { TestErrorReporter } from '@@/util'
+import { TokenStream } from '@/lexer'
+import { FunctionDeclarationParser } from '@/parser/function-declaration-parser'
+import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 
 describe('Function Declaration Parser', () => {
     it('parses a function with no parameters and no return type', () => {

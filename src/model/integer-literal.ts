@@ -1,9 +1,9 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 import { Context, Expression } from '.'
-import { SourceCodeSpan } from '../diagnostics'
+import { SourceCodeSpan } from '@/diagnostics'
 import { IntegerLattice, Lattice } from './lattice'
 import { ISOLATED } from './isolation-level'
-import { Failable } from './failable'
+import { Failable } from '@/model/failable'
 
 export class IntegerLiteral<Value extends bigint> implements Expression {
     get negated() {

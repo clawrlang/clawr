@@ -1,6 +1,6 @@
 import { Context } from '.'
-import { TokenStream } from '../lexer'
-import { ReturnStatement } from '../model/return-statement'
+import { TokenStream } from '@/lexer'
+import { ReturnStatement } from '@/model/return-statement'
 import { ExpressionParser } from './expression-parser'
 import { StatementParser } from './statement-parser'
 

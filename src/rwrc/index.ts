@@ -5,12 +5,12 @@ import path from 'path'
 import Bun from 'bun'
 import { Command } from 'commander'
 
-import * as backend from '../backend'
-import { ModuleParser } from '../parser'
-import { TokenStream } from '../lexer'
-import { ClawrModule } from '../cir'
+import * as backend from '@/backend'
+import { ModuleParser } from '@/parser'
+import { TokenStream } from '@/lexer'
+import { ClawrModule } from '@/cir'
 import { RWRCErrorReporter } from './error-reporter'
-import { Scope } from '../model/scope'
+import { Scope } from '@/model/scope'
 
 const exeDir = path.dirname(process.execPath)
 const program = new Command()

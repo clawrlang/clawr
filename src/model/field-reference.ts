@@ -1,4 +1,4 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 import { Context, Expression, isStorage } from '.'
 import {
     AnyIsolationLevel,
@@ -6,11 +6,10 @@ import {
     IsolationLevel,
     SHARED,
 } from './isolation-level'
-import { logSemanticError } from './failable'
-import { SourceCodeSpan } from '../diagnostics'
+import { SourceCodeSpan } from '@/diagnostics'
 import { DataDeclaration, DataField } from './data-declaration'
 import { RCTypeLattice, Lattice } from './lattice'
-import { Failable, isFailure } from './failable'
+import { Failable, isFailure } from '@/model/failable'
 
 export class FieldReference implements Expression {
     private constructor(
@@ -39,9 +38,9 @@ export class FieldReference implements Expression {
 
     *assignmentPrelude(context: Context): Failable<cir.Statement[]> {
         if (yield yield* this.isEffectivelyConst(context))
-            logSemanticError(
+            yield Failable.failure(
                 `Cannot mutate field ${this.field} of a reference type object`,
-                { ...context, span: this.span },
+                this.span,
             )
 
         if (isStorage(this.object)) {

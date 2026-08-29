@@ -4,10 +4,10 @@ import {
     RCTypeLattice,
     StringLattice,
     TruthvalueLattice,
-} from '../../../src/model/lattice'
-import { TokenStream } from '../../../src/lexer'
-import { LatticeParser } from '../../../src/parser/lattice-parser'
-import { TestErrorReporter } from '../../util'
+} from '@/model/lattice'
+import { TokenStream } from '@/lexer'
+import { LatticeParser } from '@/parser/lattice-parser'
+import { TestErrorReporter } from '@@/util'
 
 describe('LatticeParser', () => {
     it('parses unconstrained integer type', () => {

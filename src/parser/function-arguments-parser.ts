@@ -1,7 +1,7 @@
 import { Context } from '.'
-import { Position } from '../diagnostics'
-import { TokenStream } from '../lexer'
-import { Expression } from '../model'
+import { Position } from '@/diagnostics'
+import { TokenStream } from '@/lexer'
+import { Expression } from '@/model'
 import { ExpressionParser } from './expression-parser'
 
 export class FunctionArgumentsParser {

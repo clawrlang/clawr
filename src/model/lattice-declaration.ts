@@ -1,4 +1,4 @@
-import { SourceCodeSpan } from '../diagnostics'
+import { SourceCodeSpan } from '@/diagnostics'
 import { Lattice } from './lattice'
 
 export type LatticeDeclaration = Lattice & { span: SourceCodeSpan }

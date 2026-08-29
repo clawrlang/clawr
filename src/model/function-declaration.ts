@@ -1,14 +1,14 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 import { Context, Declaration, Expression, Statement } from '.'
 import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
 import { LatticeDeclaration } from './lattice-declaration'
 import { ReturnStatement } from './return-statement'
 import { FunctionName } from './function-name'
 import { Lattice } from './lattice'
-import { mapFilter } from '../tools/map-filter'
+import { mapFilter } from '@/tools/map-filter'
 import { Parameter } from './parameter'
 import { Scope } from './scope'
-import { Failable, isFailure } from './failable'
+import { Failable, isFailure } from '@/model/failable'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(

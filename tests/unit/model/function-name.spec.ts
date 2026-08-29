@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { FunctionName } from '../../../src/model/function-name'
+import { FunctionName } from '@/model/function-name'
 
 describe('FunctionName', () => {
     describe('toString', () => {

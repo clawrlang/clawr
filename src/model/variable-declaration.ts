@@ -1,12 +1,11 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 import { Context, Declaration, Expression, Statement } from '.'
-import { logSemanticError } from './failable'
 import { Scope } from './scope'
 import { LatticeDeclaration } from './lattice-declaration'
 import { Lattice } from './lattice'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 import { Retain } from './retain'
-import { Failable, isFailure } from './failable'
+import { Failable, isFailure } from '@/model/failable'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -42,27 +41,12 @@ export class VariableDeclaration implements Statement, Declaration {
         )
     }
 
-    *emitDeclaration(context: Context): Failable {
-        const result = yield* this.emit(context.scope.rootScope, context)
-        if (isFailure(result))
-            for (const error of result.errors)
-                logSemanticError(error.message, {
-                    span: error.span,
-                    errorReporter: context.errorReporter,
-                })
-        return Failable.success()
+    emitDeclaration(context: Context): Failable {
+        return this.emit(context.scope.rootScope, context)
     }
 
-    *emitStatement(context: Context): Failable {
-        const result = yield* this.emit(context.scope, context)
-        if (isFailure(result))
-            for (const error of result.errors)
-                logSemanticError(error.message, {
-                    span: error.span,
-                    errorReporter: context.errorReporter,
-                })
-
-        return Failable.success()
+    emitStatement(context: Context): Failable {
+        return this.emit(context.scope, context)
     }
 
     private *emit(

@@ -1,7 +1,7 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 import { Context, Expression, Statement } from '.'
-import { SourceCodeSpan } from '../diagnostics'
-import { Failable, isFailure } from './failable'
+import { SourceCodeSpan } from '@/diagnostics'
+import { Failable, isFailure } from '@/model/failable'
 import { AnyIsolationLevel } from './isolation-level'
 import { Lattice } from './lattice'
 import { Retain } from './retain'
@@ -46,6 +46,7 @@ export class ReturnStatement implements Statement {
             yield yield* retainedValue.toCIRExpression(context)
 
         if (retainedValue instanceof Retain) {
+            // && isolationLevel === ISOLATED
             const object =
                 yield yield* retainedValue.value.toCIRExpression(context)
             context.scope.emitted.push({

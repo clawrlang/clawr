@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
-import { TestErrorReporter } from '../../util'
-import { TokenStream } from '../../../src/lexer'
-import { ReturnStatementParser } from '../../../src/parser/return-statement-parser'
+import { TestErrorReporter } from '@@/util'
+import { TokenStream } from '@/lexer'
+import { ReturnStatementParser } from '@/parser/return-statement-parser'
 
 describe('Return Statement Parser', () => {
     it('parses a return statement with an expression', () => {

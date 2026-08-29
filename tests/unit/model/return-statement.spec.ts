@@ -1,18 +1,18 @@
 import { describe, it, expect } from 'bun:test'
-import { ReturnStatement } from '../../../src/model/return-statement'
-import { newSemanticContext, someCodeSpan } from '../../util'
-import { IntegerLiteral } from '../../../src/model/integer-literal'
-import { Context } from '../../../src/model'
+import { ReturnStatement } from '@/model/return-statement'
+import { newSemanticContext, someCodeSpan } from '@@/util'
+import { IntegerLiteral } from '@/model/integer-literal'
+import { Context } from '@/model'
 import {
     IntegerLattice,
     RCTypeLattice,
     TruthvalueLattice,
-} from '../../../src/model/lattice'
-import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
-import { TypeName } from '../../../src/model/type-name'
-import { DataDeclaration } from '../../../src/model/data-declaration'
-import { VariableReference } from '../../../src/model/variable-reference'
-import { Failable, isFailure } from '../../../src/model/failable'
+} from '@/model/lattice'
+import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { TypeName } from '@/model/type-name'
+import { DataDeclaration } from '@/model/data-declaration'
+import { VariableReference } from '@/model/variable-reference'
+import { Failable, isFailure } from '@/model/failable'
 import assert from 'assert'
 
 describe('ReturnStatement', () => {

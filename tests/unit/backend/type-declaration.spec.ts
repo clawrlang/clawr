@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'bun:test'
 
-import type * as cir from '../../../src/cir'
-import { lowerDecl } from '../../../src/backend'
-import { SHARED } from '../../../src/model/isolation-level'
+import type * as cir from '@/cir'
+import { lowerDecl } from '@/backend'
+import { SHARED } from '@/model/isolation-level'
 
 describe('Type declaration', () => {
     describe('fields', () => {

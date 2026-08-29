@@ -1,4 +1,4 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 import { Declaration } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { DataDeclaration } from './data-declaration'

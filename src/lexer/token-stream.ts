@@ -27,7 +27,7 @@ import type {
     TruthvalueLiteral,
 } from './kinds'
 import { decimal } from 'decimalish'
-import { ErrorReporter, Position } from '../diagnostics'
+import { ErrorReporter, Position } from '@/diagnostics'
 
 export class TokenStream {
     private source: Source

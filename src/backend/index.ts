@@ -1,4 +1,4 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 import { validateCIR } from './generated/validate-cir.typia'
 
 export function lower(cir: cir.ClawrModule): string {

@@ -1,18 +1,14 @@
 import { describe, expect, it } from 'bun:test'
-import { newSemanticContext, someCodeSpan } from '../../util'
-import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
-import { IntegerLiteral } from '../../../src/model/integer-literal'
-import { DataLiteral } from '../../../src/model/data-literal'
-import { DataDeclaration } from '../../../src/model/data-declaration'
-import { TypeName } from '../../../src/model/type-name'
-import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
-import {
-    IntegerLattice,
-    RCTypeLattice,
-    truthvalue,
-} from '../../../src/model/lattice'
-import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable, isFailure, isSuccess } from '../../../src/model/failable'
+import { newSemanticContext, someCodeSpan } from '@@/util'
+import { TruthValueLiteral } from '@/model/truthvalue-literal'
+import { IntegerLiteral } from '@/model/integer-literal'
+import { DataLiteral } from '@/model/data-literal'
+import { DataDeclaration } from '@/model/data-declaration'
+import { TypeName } from '@/model/type-name'
+import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { IntegerLattice, RCTypeLattice, truthvalue } from '@/model/lattice'
+import { decorateLattice } from '@/model/lattice-declaration'
+import { Failable, isFailure, isSuccess } from '@/model/failable'
 import assert from 'assert'
 
 describe('Literals', () => {

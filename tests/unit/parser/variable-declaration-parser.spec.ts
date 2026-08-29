@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'bun:test'
-import { TokenStream } from '../../../src/lexer'
-import { VariableDeclarationParser } from '../../../src/parser/variable-declaration-parser'
-import { TestErrorReporter } from '../../util'
-import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
+import { TokenStream } from '@/lexer'
+import { VariableDeclarationParser } from '@/parser/variable-declaration-parser'
+import { TestErrorReporter } from '@@/util'
+import { ISOLATED, SHARED } from '@/model/isolation-level'
 
 describe('VariableDeclarationParser', () => {
     it('parses const integer variable declaration', () => {

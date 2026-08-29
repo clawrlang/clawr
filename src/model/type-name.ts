@@ -1,4 +1,4 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 
 export class TypeName {
     private constructor(

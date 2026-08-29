@@ -1,7 +1,7 @@
-import * as cir from '../cir'
-import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
+import * as cir from '@/cir'
+import { SourceCodeSpan } from '@/diagnostics'
 import { FieldReference } from './field-reference'
-import { Failable } from './failable'
+import { Failable } from '@/model/failable'
 import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
 import { Lattice } from './lattice'
 import { Scope } from './scope'
@@ -9,7 +9,6 @@ import { VariableReference } from './variable-reference'
 
 export type Context = {
     scope: Scope
-    errorReporter: ErrorReporter
     calleeResult?: {
         lattice: Lattice
         isolationLevel: IsolationLevel | UNIQUE

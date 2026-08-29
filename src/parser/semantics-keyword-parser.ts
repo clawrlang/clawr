@@ -1,10 +1,10 @@
-import { TokenStream } from '../lexer'
-import { KeywordToken } from '../lexer/token'
-import { ISOLATED, IsolationLevel, SHARED } from '../model/isolation-level'
+import { TokenStream } from '@/lexer'
+import { KeywordToken } from '@/lexer/token'
+import { ISOLATED, IsolationLevel, SHARED } from '@/model/isolation-level'
 import {
     VARIABLE_SEMANTICS,
     VariableSemantics,
-} from '../model/variable-declaration'
+} from '@/model/variable-declaration'
 
 export class SemanticsKeywordParser {
     static readToken(

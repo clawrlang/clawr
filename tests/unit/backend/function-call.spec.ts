@@ -1,7 +1,7 @@
-import * as cir from '../../../src/cir'
+import * as cir from '@/cir'
 import { describe, expect, test } from 'bun:test'
-import { Expression, Statement } from '../../../src/cir'
-import { lowerExpr, lowerStmt } from '../../../src/backend'
+import { Expression, Statement } from '@/cir'
+import { lowerExpr, lowerStmt } from '@/backend'
 
 describe('Function Calls', () => {
     describe('includes parameter labels in the function name', () => {

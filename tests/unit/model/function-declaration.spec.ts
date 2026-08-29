@@ -1,23 +1,19 @@
-import * as cir from '../../../src/cir'
+import * as cir from '@/cir'
 import { describe, it, expect, test } from 'bun:test'
-import { FunctionDeclaration } from '../../../src/model/function-declaration'
-import { Parameter } from '../../../src/model/parameter'
-import { newSemanticContext, someCodeSpan } from '../../util'
-import { IntegerLiteral } from '../../../src/model/integer-literal'
-import { ReturnStatement } from '../../../src/model/return-statement'
-import { DataDeclaration } from '../../../src/model/data-declaration'
-import { VariableDeclaration } from '../../../src/model/variable-declaration'
-import { DataLiteral } from '../../../src/model/data-literal'
-import { VariableReference } from '../../../src/model/variable-reference'
-import {
-    IntegerLattice,
-    RCTypeLattice,
-    StringLattice,
-} from '../../../src/model/lattice'
-import { TypeName } from '../../../src/model/type-name'
-import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
-import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable } from '../../../src/model/failable'
+import { FunctionDeclaration } from '@/model/function-declaration'
+import { Parameter } from '@/model/parameter'
+import { newSemanticContext, someCodeSpan } from '@@/util'
+import { IntegerLiteral } from '@/model/integer-literal'
+import { ReturnStatement } from '@/model/return-statement'
+import { DataDeclaration } from '@/model/data-declaration'
+import { VariableDeclaration } from '@/model/variable-declaration'
+import { DataLiteral } from '@/model/data-literal'
+import { VariableReference } from '@/model/variable-reference'
+import { IntegerLattice, RCTypeLattice, StringLattice } from '@/model/lattice'
+import { TypeName } from '@/model/type-name'
+import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { decorateLattice } from '@/model/lattice-declaration'
+import { Failable } from '@/model/failable'
 
 describe('FunctionDeclaration', () => {
     it('converts to CIR with function body', () => {

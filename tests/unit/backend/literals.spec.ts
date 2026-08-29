@@ -1,8 +1,8 @@
 import { describe, expect, it, test } from 'bun:test'
-import { Expression } from '../../../src/cir'
-import { lowerExpr } from '../../../src/backend'
-import { ISOLATED } from '../../../src/model/isolation-level'
-import { truthvalue } from '../../../src/model/lattice'
+import { Expression } from '@/cir'
+import { lowerExpr } from '@/backend'
+import { ISOLATED } from '@/model/isolation-level'
+import { truthvalue } from '@/model/lattice'
 
 describe('Lowering Literals', () => {
     it('lowers string literals correctly', () => {

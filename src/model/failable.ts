@@ -1,4 +1,4 @@
-import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
+import { SourceCodeSpan } from '../diagnostics'
 
 export type Result<T> = Success<T> | Failure
 type Success<T> = { value: T }
@@ -142,42 +142,4 @@ export class SemanticErrorCollection extends Error {
         this.errors.push(...errors)
         this.message = this.errors.map((e) => e.message).join('\n')
     }
-}
-export function logSemanticError(
-    message: string,
-    {
-        span,
-        errorReporter,
-    }: {
-        span: SourceCodeSpan
-        errorReporter: ErrorReporter
-        fatal?: false
-    },
-): void
-export function logSemanticError(
-    message: string,
-    {
-        span,
-        errorReporter,
-        fatal,
-    }: {
-        span: SourceCodeSpan
-        errorReporter: ErrorReporter
-        fatal: true
-    },
-): never
-export function logSemanticError(
-    message: string,
-    {
-        span,
-        errorReporter,
-        fatal,
-    }: {
-        span: SourceCodeSpan
-        errorReporter: ErrorReporter
-        fatal?: boolean
-    },
-): void {
-    errorReporter.reportError(message, span)
-    if (fatal) throw SemanticError.create({ message, span })
 }

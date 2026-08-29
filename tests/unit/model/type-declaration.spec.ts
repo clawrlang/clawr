@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'bun:test'
-import { newSemanticContext, someCodeSpan } from '../../util'
-import { DataDeclaration } from '../../../src/model/data-declaration'
-import { TypeName } from '../../../src/model/type-name'
-import { ISOLATED } from '../../../src/model/isolation-level'
-import { IntegerLattice, TruthvalueLattice } from '../../../src/model/lattice'
-import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable } from '../../../src/model/failable'
+import { newSemanticContext, someCodeSpan } from '@@/util'
+import { DataDeclaration } from '@/model/data-declaration'
+import { TypeName } from '@/model/type-name'
+import { ISOLATED } from '@/model/isolation-level'
+import { IntegerLattice, TruthvalueLattice } from '@/model/lattice'
+import { decorateLattice } from '@/model/lattice-declaration'
+import { Failable } from '@/model/failable'
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {

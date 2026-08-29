@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test'
-import { TokenStream } from '../../../src/lexer'
-import { TestErrorReporter } from '../../util'
-import { CallFuncParser } from '../../../src/parser/call-func-parser'
+import { TokenStream } from '@/lexer'
+import { TestErrorReporter } from '@@/util'
+import { CallFuncParser } from '@/parser/call-func-parser'
 
 describe('CallFunc Parser', () => {
     it('parses a simple function call', () => {

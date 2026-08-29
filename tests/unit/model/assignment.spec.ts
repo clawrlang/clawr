@@ -1,22 +1,17 @@
 import { describe, expect, it, test } from 'bun:test'
-import { Assignment } from '../../../src/model/assignment'
-import { newSemanticContext, someCodeSpan } from '../../util'
-import { VariableReference } from '../../../src/model/variable-reference'
-import { IntegerLiteral } from '../../../src/model/integer-literal'
-import { FieldReference } from '../../../src/model/field-reference'
-import { DataDeclaration } from '../../../src/model/data-declaration'
-import { FunctionDeclaration } from '../../../src/model/function-declaration'
-import { Query } from '../../../src/model/query'
-import { IntegerLattice, RCTypeLattice } from '../../../src/model/lattice'
-import { TypeName } from '../../../src/model/type-name'
-import {
-    ISOLATED,
-    SHARED,
-    UNIQUE,
-    UNKNOWN,
-} from '../../../src/model/isolation-level'
-import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable, isFailure } from '../../../src/model/failable'
+import { Assignment } from '@/model/assignment'
+import { newSemanticContext, someCodeSpan } from '@@/util'
+import { VariableReference } from '@/model/variable-reference'
+import { IntegerLiteral } from '@/model/integer-literal'
+import { FieldReference } from '@/model/field-reference'
+import { DataDeclaration } from '@/model/data-declaration'
+import { FunctionDeclaration } from '@/model/function-declaration'
+import { Query } from '@/model/query'
+import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
+import { TypeName } from '@/model/type-name'
+import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
+import { decorateLattice } from '@/model/lattice-declaration'
+import { Failable, isFailure } from '@/model/failable'
 import assert from 'assert'
 
 describe('Assignment', () => {
@@ -475,20 +470,19 @@ describe('Assignment', () => {
                     }),
                     span: someCodeSpan,
                 })
-                expect(() =>
-                    Failable.do(() => assignment.emitStatement(context)),
-                ).not.toThrow()
-                expect(context.errorReporter).toMatchObject({
-                    errors: [
-                        {
-                            message: `Variable target is not mutable`,
-                            location: {
-                                start: { line: 1, column: 1 },
-                                end: { line: 1, column: 2 },
-                            },
+                const result = Failable.do(() =>
+                    assignment.emitStatement(context),
+                )
+                assert(isFailure(result))
+                expect(result.errors).toMatchObject([
+                    {
+                        message: `Variable target is not mutable`,
+                        span: {
+                            start: { line: 1, column: 1 },
+                            end: { line: 1, column: 2 },
                         },
-                    ],
-                })
+                    },
+                ])
             })
         }
     })
@@ -540,21 +534,19 @@ describe('Assignment', () => {
             value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
-        expect(() =>
-            Failable.do(() => assignment.emitStatement(context)),
-        ).not.toThrow()
-        expect(context.errorReporter).toMatchObject({
-            errors: [
-                {
-                    message:
-                        'Cannot mutate field myField of a reference type object',
-                    location: {
-                        start: { line: 1, column: 3 },
-                        end: { line: 1, column: 4 },
-                    },
+        const result = Failable.do(() => assignment.emitStatement(context))
+
+        assert(isFailure(result))
+        expect(result.errors).toMatchObject([
+            {
+                message:
+                    'Cannot mutate field myField of a reference type object',
+                span: {
+                    start: { line: 1, column: 3 },
+                    end: { line: 1, column: 4 },
                 },
-            ],
-        })
+            },
+        ])
     })
 
     it('throws if the target field is effectively const (UNKNOWN isolation level)', () => {
@@ -604,21 +596,19 @@ describe('Assignment', () => {
             value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
-        expect(() =>
-            Failable.do(() => assignment.emitStatement(context)),
-        ).not.toThrow()
-        expect(context.errorReporter).toMatchObject({
-            errors: [
-                {
-                    message:
-                        'Cannot mutate field myField of a reference type object',
-                    location: {
-                        start: { line: 1, column: 3 },
-                        end: { line: 1, column: 4 },
-                    },
+
+        const result = Failable.do(() => assignment.emitStatement(context))
+        assert(isFailure(result))
+        expect(result.errors).toMatchObject([
+            {
+                message:
+                    'Cannot mutate field myField of a reference type object',
+                span: {
+                    start: { line: 1, column: 3 },
+                    end: { line: 1, column: 4 },
                 },
-            ],
-        })
+            },
+        ])
     })
 
     describe('throws if the value and target have incompatible isolation-levels', () => {

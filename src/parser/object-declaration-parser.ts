@@ -1,8 +1,8 @@
-import { TokenStream } from '../lexer'
+import { TokenStream } from '@/lexer'
 import { Context } from '.'
-import { DataField } from '../model/data-declaration'
-import { FunctionDeclaration } from '../model/function-declaration'
-import { ObjectDeclaration } from '../model/object-declaration'
+import { DataField } from '@/model/data-declaration'
+import { FunctionDeclaration } from '@/model/function-declaration'
+import { ObjectDeclaration } from '@/model/object-declaration'
 import { DataFieldParser } from './data-field-parser'
 import { FunctionDeclarationParser } from './function-declaration-parser'
 

@@ -1,22 +1,23 @@
 import { describe, expect, it, test } from 'bun:test'
-import { IntegerLiteral } from '../../../src/model/integer-literal'
-import { VariableDeclaration } from '../../../src/model/variable-declaration'
-import { newSemanticContext, someCodeSpan } from '../../util'
-import { DataDeclaration } from '../../../src/model/data-declaration'
-import { VariableReference } from '../../../src/model/variable-reference'
-import { DataLiteral } from '../../../src/model/data-literal'
-import { FieldReference } from '../../../src/model/field-reference'
-import { TruthValueLiteral } from '../../../src/model/truthvalue-literal'
+import { IntegerLiteral } from '@/model/integer-literal'
+import { VariableDeclaration } from '@/model/variable-declaration'
+import { newSemanticContext, someCodeSpan } from '@@/util'
+import { DataDeclaration } from '@/model/data-declaration'
+import { VariableReference } from '@/model/variable-reference'
+import { DataLiteral } from '@/model/data-literal'
+import { FieldReference } from '@/model/field-reference'
+import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import {
     RCTypeLattice,
     IntegerLattice,
     TruthvalueLattice,
-} from '../../../src/model/lattice'
-import { TypeName } from '../../../src/model/type-name'
-import { Query } from '../../../src/model/query'
-import { ISOLATED, SHARED } from '../../../src/model/isolation-level'
-import { decorateLattice } from '../../../src/model/lattice-declaration'
-import { Failable } from '../../../src/model/failable'
+} from '@/model/lattice'
+import { TypeName } from '@/model/type-name'
+import { Query } from '@/model/query'
+import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { decorateLattice } from '@/model/lattice-declaration'
+import { Failable, isFailure } from '@/model/failable'
+import assert from 'assert'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -642,20 +643,19 @@ describe('VariableDeclaration', () => {
                         },
                     }),
                 })
-                expect(() =>
-                    Failable.do(() => declaration.emitStatement(context)),
-                ).not.toThrow()
-                expect(context.errorReporter).toMatchObject({
-                    errors: [
-                        {
-                            message: `Cannot assign SHARED value to ISOLATED target`,
-                            location: {
-                                start: { line: 1, column: 3 },
-                                end: { line: 1, column: 4 },
-                            },
+                const result = Failable.do(() =>
+                    declaration.emitStatement(context),
+                )
+                assert(isFailure(result))
+                expect(result.errors).toMatchObject([
+                    {
+                        message: `Cannot assign SHARED value to ISOLATED target`,
+                        span: {
+                            start: { line: 1, column: 3 },
+                            end: { line: 1, column: 4 },
                         },
-                    ],
-                })
+                    },
+                ])
             })
         })
     })

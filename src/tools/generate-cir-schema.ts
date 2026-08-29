@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import typia from 'typia'
-import type { ClawrModule } from '../cir'
+import type { ClawrModule } from '@/cir'
 
 type JsonSchema = {
     [key: string]: unknown

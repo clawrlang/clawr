@@ -1,5 +1,5 @@
-import { ErrorReporter, SourceCodeSpan } from '../diagnostics'
-import { SemanticError } from '../model/failable'
+import { ErrorReporter, SourceCodeSpan } from '@/diagnostics'
+import { SemanticError } from '@/model/failable'
 
 export class RWRCErrorReporter implements ErrorReporter {
     constructor(private file: string) {}

@@ -1,12 +1,12 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 import { Statement, Expression, Context } from '.'
 import { AnyIsolationLevel, UNIQUE, UNKNOWN } from './isolation-level'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
-import { SourceCodeSpan } from '../diagnostics'
+import { SourceCodeSpan } from '@/diagnostics'
 import { Lattice, RCTypeLattice } from './lattice'
 import { Retain } from './retain'
-import { Failable, isFailure } from './failable'
+import { Failable, isFailure } from '@/model/failable'
 
 export class Assignment implements Statement {
     private constructor(

@@ -1,7 +1,7 @@
-import { TokenStream } from '../lexer'
-import { Statement } from '../model'
+import { TokenStream } from '@/lexer'
+import { Statement } from '@/model'
 import { StatementParser } from './statement-parser'
-import { CallFunc } from '../model/call-func'
+import { CallFunc } from '@/model/call-func'
 import { Context } from '.'
 import { FunctionArgumentsParser } from './function-arguments-parser'
 

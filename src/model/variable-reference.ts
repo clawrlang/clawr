@@ -1,10 +1,9 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
-import { logSemanticError } from './failable'
-import { SourceCodeSpan } from '../diagnostics'
+import { SourceCodeSpan } from '@/diagnostics'
 import { Lattice } from './lattice'
-import { Failable, isFailure } from './failable'
+import { Failable, isFailure } from '@/model/failable'
 import { Variable } from './scope'
 
 export class VariableReference implements Expression {
@@ -25,10 +24,10 @@ export class VariableReference implements Expression {
 
     *assignmentPrelude(context: Context): Failable<cir.Statement[]> {
         if (yield yield* this.isEffectivelyConst(context))
-            logSemanticError(`Variable ${this.name} is not mutable`, {
-                ...context,
-                span: this.span,
-            })
+            yield Failable.failure(
+                `Variable ${this.name} is not mutable`,
+                this.span,
+            )
         return Failable.success([])
     }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
-import type * as cir from '../../../src/cir'
-import { lowerDecl } from '../../../src/backend'
+import type * as cir from '@/cir'
+import { lowerDecl } from '@/backend'
 
 describe('Protocol Declaration', () => {
     it('is output correctly', () => {

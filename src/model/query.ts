@@ -1,11 +1,11 @@
-import * as cir from '../cir'
+import * as cir from '@/cir'
 import { Context, Expression } from '.'
 import { AnyIsolationLevel, UNIQUE } from './isolation-level'
-import { SourceCodeSpan } from '../diagnostics'
+import { SourceCodeSpan } from '@/diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice, RCTypeLattice } from './lattice'
-import { mapFilter } from '../tools/map-filter'
-import { Failable } from './failable'
+import { mapFilter } from '@/tools/map-filter'
+import { Failable } from '@/model/failable'
 
 export class Query implements Expression {
     private arguments: Expression[]

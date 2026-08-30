@@ -26,4 +26,6 @@ Records so far:
 - [ADR-001](./adr-001.md): Per-Variable Semantics
 - [ADR-002](./adr-002.md): Encapsulation vs Data
 - [ADR-003](./adr-003.md): Ternary Fields on Binary Hardware
-- [ADR-004](./adr-004.md):  Syntax, Semantics and CIR
+- [ADR-004](./adr-004.md): Syntax, Semantics and CIR
+- [ADR-005](./adr-005.md): Unions and Enumerated Types
+- [ADR-006](./adr-006.md): Ad Hoc Data Structures

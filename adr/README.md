@@ -31,3 +31,5 @@ Records so far:
 - [ADR-004](./adr-004.md): Syntax, Semantics and CIR
 - [ADR-005](./adr-005.md): Unions and Enumerated Types
 - [ADR-006](./adr-006.md): Ad Hoc Data Structures
+- [ADR-007](./adr-007.md): Serializable `data`
+- [ADR-008](./adr-008.md): Protocol Types

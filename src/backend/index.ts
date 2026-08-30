@@ -293,6 +293,15 @@ export function lowerExpr(expr: cir.Expression): string {
             return `${lowerExpr(expr.object)}->fields.${expr.field}`
         case 'AS_SHARED':
             return `shareRC(${lowerExpr(expr.object)})`
+        case 'BOX':
+            switch (expr.value.type) {
+                case 'truthvalue':
+                    return `boxTruthvalue(${lowerExpr(expr.expression)})`
+                default:
+                    throw new Error(
+                        `Unknown box type: ${expr.expression.value.type}`,
+                    )
+            }
         case 'ALLOCATION':
             const mangledTypeName = mangleTypeName(expr.value)
             if (expr.base) {

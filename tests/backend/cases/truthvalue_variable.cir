@@ -23,13 +23,16 @@
     ],
     "startBlock": [
         {
-            "kind": "CALL",
-            "name": {
-                "baseName": "printTruthvalue",
-                "labels": []
+            "kind": "VARIABLE_DECL",
+            "name": "__tempˇ0",
+            "lattice": {
+                "type": "rc-type",
+                "name": "clawr¸TruthvalueBox",
+                "namespace": "clawr"
             },
-            "arguments": [
-                {
+            "initialValue": {
+                "kind": "BOX",
+                "expression": {
                     "kind": "VARIABLE_REF",
                     "name": "foo",
                     "value": {
@@ -40,8 +43,41 @@
                             "true"
                         ]
                     }
+                },
+                "value": {
+                    "type": "truthvalue",
+                    "values": [
+                        "false",
+                        "ambiguous",
+                        "true"
+                    ]
+                }
+            }
+        },
+        {
+            "kind": "CALL",
+            "name": {
+                "baseName": "print",
+                "labels": []
+            },
+            "arguments": [
+                {
+                    "kind": "VARIABLE_REF",
+                    "name": "__tempˇ0",
+                    "value": {
+                        "type": "rc-type",
+                        "name": "TruthvalueBox",
+                        "namespace": "clawr"
+                    }
                 }
             ]
+        },
+        {
+            "kind": "RELEASE",
+            "object": {
+                "kind": "VARIABLE_REF",
+                "name": "__tempˇ0"
+            }
         }
     ]
 }

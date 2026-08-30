@@ -179,6 +179,12 @@ type AsShared = {
     value: RCTypeLattice
 }
 
+type Box = {
+    kind: 'BOX'
+    expression: Expression
+    value: Lattice & { type: 'truthvalue' | 'integer' | 'real' }
+}
+
 type VariableReference = {
     kind: 'VARIABLE_REF'
     name: string
@@ -199,6 +205,7 @@ export type Expression =
     | MemoryAllocation
     | MemoryRetention
     | AsShared
+    | Box
     | VariableReference
     | FieldReference
     | (FunctionCall & { value: Lattice })

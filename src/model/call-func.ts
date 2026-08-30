@@ -67,18 +67,9 @@ export class CallFunc implements Statement {
                             namespace: 'clawr',
                         },
                         initialValue: {
-                            kind: 'CALL',
-                            name: {
-                                baseName: 'boxTruthvalue',
-                                labels: [],
-                                // namespace: 'clawr',
-                            },
-                            arguments: args,
-                            value: {
-                                type: 'rc-type',
-                                name: 'TruthvalueBox',
-                                namespace: 'clawr',
-                            },
+                            kind: 'BOX',
+                            expression: args[0],
+                            value: args[0].value as any,
                         },
                     },
                     {

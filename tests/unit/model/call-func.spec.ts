@@ -110,7 +110,7 @@ describe('CallFunc', () => {
         ])
     })
 
-    it('converts print(truthvalue) to printTruthvalue()', () => {
+    it('boxes truthvalue for printing', () => {
         const statement = CallFunc.create({
             baseName: 'print',
             arguments: [
@@ -130,16 +130,12 @@ describe('CallFunc', () => {
                 name: expect.stringMatching(/^__tempˇ\d+$/),
                 lattice: { type: 'rc-type', name: 'clawr¸TruthvalueBox' },
                 initialValue: {
-                    kind: 'CALL',
-                    name: {
-                        baseName: 'boxTruthvalue',
+                    kind: 'BOX',
+                    expression: {
+                        kind: 'TRUTHVALUE_LITERAL',
+                        value: { type: 'truthvalue', values: ['true'] },
                     },
-                    arguments: [
-                        {
-                            kind: 'TRUTHVALUE_LITERAL',
-                            value: { type: 'truthvalue', values: ['true'] },
-                        },
-                    ],
+
                     value: {
                         type: 'rc-type',
                         name: 'TruthvalueBox',

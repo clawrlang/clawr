@@ -182,7 +182,7 @@ type AsShared = {
 type Box = {
     kind: 'BOX'
     expression: Expression
-    value: Lattice & { type: 'truthvalue' | 'integer' | 'real' }
+    value: Lattice & { boxed: true }
 }
 
 type VariableReference = {
@@ -219,6 +219,7 @@ type IntegerLattice<
     Max extends bigint | undefined,
 > = {
     type: 'integer'
+    boxed?: true
 } & (Min extends undefined
     ? { min?: undefined }
     : { min: `${Min}` & tags.Pattern<'^-?\\d+$'> }) &
@@ -234,6 +235,7 @@ type RealLattice = {
 
 type TruthvalueLattice<Values extends truthvalue[]> = {
     type: 'truthvalue'
+    boxed?: true
     values: Values
 }
 

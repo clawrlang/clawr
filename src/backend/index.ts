@@ -228,9 +228,9 @@ function lowerInit(
 function lowerType(lattice: cir.Lattice): string {
     switch (lattice.type) {
         case 'integer':
-            return 'int64_t'
+            return lattice.boxed ? 'Integer*' : 'int64_t'
         case 'truthvalue':
-            return 'truthvalue_t'
+            return lattice.boxed ? 'clawr¸TruthvalueBox*' : 'truthvalue_t'
         case 'rc-type':
             return `${lattice.name}*`
         default:
@@ -297,6 +297,8 @@ export function lowerExpr(expr: cir.Expression): string {
             switch (expr.value.type) {
                 case 'truthvalue':
                     return `boxTruthvalue(${lowerExpr(expr.expression)})`
+                case 'integer':
+                    return `integerWithDigits(1, ${lowerExpr(expr.expression)})`
                 default:
                     throw new Error(
                         `Unknown box type: ${expr.expression.value.type}`,

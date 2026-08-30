@@ -22,6 +22,7 @@
                 },
                 "value": {
                     "type": "truthvalue",
+                    "boxed": true,
                     "values": [
                         "ambiguous"
                     ]

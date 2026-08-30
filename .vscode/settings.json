@@ -233,7 +233,10 @@
           },
           "__type__type__type": {
             "type": "object",
-            "properties": { "type": { "const": "integer" } },
+            "properties": {
+              "type": { "const": "integer" },
+              "boxed": { "const": true }
+            },
             "required": ["type"],
             "additionalProperties": false
           },
@@ -241,6 +244,7 @@
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
             "required": ["type", "max"],
@@ -250,6 +254,7 @@
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" }
             },
             "required": ["type", "min"],
@@ -259,6 +264,7 @@
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
@@ -308,6 +314,7 @@
             "type": "object",
             "properties": {
               "type": { "const": "truthvalue" },
+              "boxed": { "const": true },
               "values": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/truthvalue" }
@@ -330,7 +337,12 @@
               "expression": { "$ref": "#/$defs/Expression" },
               "value": {
                 "oneOf": [
+                  { "$ref": "#/$defs/RCTypeLattice__typeProtocolDeclaration" },
+                  {
+                    "$ref": "#/$defs/ProtocolLattice__typeProtocolDeclaration"
+                  },
                   { "$ref": "#/$defs/RealLattice__typeProtocolDeclaration" },
+                  { "$ref": "#/$defs/StringLattice__typeProtocolDeclaration" },
                   {
                     "$ref": "#/$defs/TruthvalueLatticetruthvalue__typeProtocolDeclaration"
                   },
@@ -352,6 +364,38 @@
             "required": ["kind", "expression", "value"],
             "additionalProperties": false
           },
+          "RCTypeLattice__typeProtocolDeclaration": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "PROTOCOL_DECL" },
+              "requirements": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/FunctionSignature" }
+              },
+              "boxed": { "const": true },
+              "type": { "const": "rc-type" },
+              "namespace": { "type": "string" },
+              "name": { "type": "string" }
+            },
+            "required": ["kind", "requirements", "boxed", "type", "name"],
+            "additionalProperties": false
+          },
+          "ProtocolLattice__typeProtocolDeclaration": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "PROTOCOL_DECL" },
+              "requirements": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/FunctionSignature" }
+              },
+              "boxed": { "const": true },
+              "type": { "const": "protocol" },
+              "namespace": { "type": "string" },
+              "name": { "type": "string" }
+            },
+            "required": ["kind", "requirements", "boxed", "type", "name"],
+            "additionalProperties": false
+          },
           "RealLattice__typeProtocolDeclaration": {
             "type": "object",
             "properties": {
@@ -361,11 +405,28 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
+              "boxed": { "const": true },
               "type": { "const": "real" },
               "min": { "type": "string" },
               "max": { "type": "string" }
             },
-            "required": ["kind", "name", "requirements", "type"],
+            "required": ["kind", "name", "requirements", "boxed", "type"],
+            "additionalProperties": false
+          },
+          "StringLattice__typeProtocolDeclaration": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "PROTOCOL_DECL" },
+              "name": { "type": "string" },
+              "requirements": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/FunctionSignature" }
+              },
+              "boxed": { "const": true },
+              "type": { "const": "string" },
+              "value": { "type": "string" }
+            },
+            "required": ["kind", "name", "requirements", "boxed", "type"],
             "additionalProperties": false
           },
           "TruthvalueLatticetruthvalue__typeProtocolDeclaration": {
@@ -378,12 +439,20 @@
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "truthvalue" },
+              "boxed": { "const": true },
               "values": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/truthvalue" }
               }
             },
-            "required": ["kind", "name", "requirements", "type", "values"],
+            "required": [
+              "kind",
+              "name",
+              "requirements",
+              "type",
+              "boxed",
+              "values"
+            ],
             "additionalProperties": false
           },
           "__type__type__type__typeProtocolDeclaration.o3": {
@@ -396,10 +465,19 @@
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["kind", "name", "requirements", "type", "min", "max"],
+            "required": [
+              "kind",
+              "name",
+              "requirements",
+              "type",
+              "boxed",
+              "min",
+              "max"
+            ],
             "additionalProperties": false
           },
           "__type__type__type__typeProtocolDeclaration.o2": {
@@ -412,9 +490,17 @@
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["kind", "name", "requirements", "type", "min"],
+            "required": [
+              "kind",
+              "name",
+              "requirements",
+              "type",
+              "boxed",
+              "min"
+            ],
             "additionalProperties": false
           },
           "__type__type__type__typeProtocolDeclaration.o1": {
@@ -427,9 +513,17 @@
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["kind", "name", "requirements", "type", "max"],
+            "required": [
+              "kind",
+              "name",
+              "requirements",
+              "type",
+              "boxed",
+              "max"
+            ],
             "additionalProperties": false
           },
           "__type__type__type__typeProtocolDeclaration": {
@@ -441,9 +535,10 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
-              "type": { "const": "integer" }
+              "type": { "const": "integer" },
+              "boxed": { "const": true }
             },
-            "required": ["kind", "name", "requirements", "type"],
+            "required": ["kind", "name", "requirements", "type", "boxed"],
             "additionalProperties": false
           },
           "FieldReference__type.o2": {
@@ -533,6 +628,7 @@
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "truthvalue" },
+              "boxed": { "const": true },
               "values": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/truthvalue" }
@@ -551,6 +647,7 @@
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
@@ -567,6 +664,7 @@
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" }
             },
             "required": ["kind", "name", "requirements", "type", "min"],
@@ -582,6 +680,7 @@
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
             "required": ["kind", "name", "requirements", "type", "max"],
@@ -596,7 +695,8 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
-              "type": { "const": "integer" }
+              "type": { "const": "integer" },
+              "boxed": { "const": true }
             },
             "required": ["kind", "name", "requirements", "type"],
             "additionalProperties": false
@@ -679,6 +779,7 @@
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "truthvalue" },
+              "boxed": { "const": true },
               "values": {
                 "type": "array",
                 "prefixItems": [{ "$ref": "#/$defs/truthvalue" }],
@@ -693,13 +794,13 @@
             "properties": {
               "kind": { "const": "STRING_LITERAL" },
               "value": {
-                "$ref": "#/$defs/StringLattice__typeProtocolDeclaration"
+                "$ref": "#/$defs/StringLattice__typeProtocolDeclaration.o1"
               }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "StringLattice__typeProtocolDeclaration": {
+          "StringLattice__typeProtocolDeclaration.o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "PROTOCOL_DECL" },
@@ -844,9 +945,21 @@
             "type": "object",
             "properties": {
               "kind": { "const": "BOX" },
-              "expression": { "$ref": "#/$defs/Expression" }
+              "expression": { "$ref": "#/$defs/Expression" },
+              "value": { "$ref": "#/$defs/RCTypeLattice__type" }
             },
-            "required": ["kind", "expression"],
+            "required": ["kind", "expression", "value"],
+            "additionalProperties": false
+          },
+          "RCTypeLattice__type": {
+            "type": "object",
+            "properties": {
+              "boxed": { "const": true },
+              "type": { "const": "rc-type" },
+              "namespace": { "type": "string" },
+              "name": { "type": "string" }
+            },
+            "required": ["boxed", "type", "name"],
             "additionalProperties": false
           },
           "FieldReference__type.o1": {
@@ -1022,9 +1135,33 @@
             "type": "object",
             "properties": {
               "kind": { "const": "BOX" },
-              "expression": { "$ref": "#/$defs/Expression" }
+              "expression": { "$ref": "#/$defs/Expression" },
+              "value": {
+                "oneOf": [
+                  { "$ref": "#/$defs/RCTypeLattice__type" },
+                  { "$ref": "#/$defs/ProtocolLattice__type" }
+                ],
+                "discriminator": {
+                  "mapping": {
+                    "protocol": "#/components/schemas/ProtocolLattice__type",
+                    "rc-type": "#/components/schemas/RCTypeLattice__type"
+                  },
+                  "propertyName": "type"
+                }
+              }
             },
-            "required": ["kind", "expression"],
+            "required": ["kind", "expression", "value"],
+            "additionalProperties": false
+          },
+          "ProtocolLattice__type": {
+            "type": "object",
+            "properties": {
+              "boxed": { "const": true },
+              "type": { "const": "protocol" },
+              "namespace": { "type": "string" },
+              "name": { "type": "string" }
+            },
+            "required": ["boxed", "type", "name"],
             "additionalProperties": false
           },
           "FieldReference__type": {
@@ -1162,7 +1299,10 @@
               "expression": { "$ref": "#/$defs/Expression" },
               "value": {
                 "oneOf": [
+                  { "$ref": "#/$defs/RCTypeLattice__type" },
+                  { "$ref": "#/$defs/ProtocolLattice__type" },
                   { "$ref": "#/$defs/RealLattice__type" },
+                  { "$ref": "#/$defs/StringLattice__type" },
                   { "$ref": "#/$defs/TruthvalueLatticetruthvalue__type" },
                   { "$ref": "#/$defs/__type__type__type__type.o3" },
                   { "$ref": "#/$defs/__type__type__type__type.o2" },
@@ -1177,57 +1317,75 @@
           "RealLattice__type": {
             "type": "object",
             "properties": {
+              "boxed": { "const": true },
               "type": { "const": "real" },
               "min": { "type": "string" },
               "max": { "type": "string" }
             },
-            "required": ["type"],
+            "required": ["boxed", "type"],
+            "additionalProperties": false
+          },
+          "StringLattice__type": {
+            "type": "object",
+            "properties": {
+              "boxed": { "const": true },
+              "type": { "const": "string" },
+              "value": { "type": "string" }
+            },
+            "required": ["boxed", "type"],
             "additionalProperties": false
           },
           "TruthvalueLatticetruthvalue__type": {
             "type": "object",
             "properties": {
               "type": { "const": "truthvalue" },
+              "boxed": { "const": true },
               "values": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/truthvalue" }
               }
             },
-            "required": ["type", "values"],
+            "required": ["type", "boxed", "values"],
             "additionalProperties": false
           },
           "__type__type__type__type.o3": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["type", "min", "max"],
+            "required": ["type", "boxed", "min", "max"],
             "additionalProperties": false
           },
           "__type__type__type__type.o2": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["type", "min"],
+            "required": ["type", "boxed", "min"],
             "additionalProperties": false
           },
           "__type__type__type__type.o1": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["type", "max"],
+            "required": ["type", "boxed", "max"],
             "additionalProperties": false
           },
           "__type__type__type__type": {
             "type": "object",
-            "properties": { "type": { "const": "integer" } },
-            "required": ["type"],
+            "properties": {
+              "type": { "const": "integer" },
+              "boxed": { "const": true }
+            },
+            "required": ["type", "boxed"],
             "additionalProperties": false
           },
           "FieldReference": {
@@ -1254,6 +1412,7 @@
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
+              "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
@@ -1289,12 +1448,12 @@
             "type": "object",
             "properties": {
               "kind": { "const": "STRING_LITERAL" },
-              "value": { "$ref": "#/$defs/StringLattice__type" }
+              "value": { "$ref": "#/$defs/StringLattice__type.o1" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "StringLattice__type": {
+          "StringLattice__type.o1": {
             "type": "object",
             "properties": {
               "type": { "const": "string" },
@@ -1316,6 +1475,7 @@
             "type": "object",
             "properties": {
               "type": { "const": "truthvalue" },
+              "boxed": { "const": true },
               "values": {
                 "type": "array",
                 "prefixItems": [{ "$ref": "#/$defs/truthvalue" }],

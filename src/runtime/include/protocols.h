@@ -14,7 +14,7 @@
 typedef struct {
   truthvalue_t (*equal)(void *left, void *right);
 } clawr¸Equatableˇwitness;
-__protocol_info clawr¸Equatableˇtype = {.name = "clawr.Equatable"};
+extern const __protocol_info clawr¸Equatableˇtype;
 
 // ```clawr
 // trait HasStringRepresentation {
@@ -24,7 +24,6 @@ __protocol_info clawr¸Equatableˇtype = {.name = "clawr.Equatable"};
 typedef struct {
   String *(*stringRepresentation)(void *self);
 } clawr¸HasStringRepresentationˇwitness;
-__protocol_info clawr¸HasStringRepresentationˇtype = {
-    .name = "clawr.HasStringRepresentation"};
+extern const __protocol_info clawr¸HasStringRepresentationˇtype;
 
 #endif

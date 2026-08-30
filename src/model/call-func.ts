@@ -3,7 +3,6 @@ import { Statement, Expression, Context } from '.'
 import { mapFilter } from '@/tools/map-filter'
 import { FunctionName } from './function-name'
 import { Failable } from '@/tools/failable'
-import { IntegerLattice, Lattice, TruthvalueLattice } from './lattice'
 
 export class CallFunc implements Statement {
     private arguments: Expression[]
@@ -39,63 +38,38 @@ export class CallFunc implements Statement {
             (arg) => arg.toCIRExpression(context),
         )
         if (_name.baseName === 'print') {
-            const value: Lattice =
-                yield yield* this.arguments[0].currentValue(context)
-
-            if (value instanceof IntegerLattice) {
-                // TODO: This name rewrite is a hack to make the print function work.
-                // We need to add a `HasStringRepresentation` trait, but we don't support traits yet.
-                const name = {
-                    baseName: 'printInt64',
-                    labels: [],
-                }
-
-                context.scope.emitted.push({
+            const tempName = context.scope.nextTempVar()
+            const boxedLattice = { ...args[0].value, boxed: true as const }
+            context.scope.emitted.push(
+                {
+                    kind: 'VARIABLE_DECL',
+                    name: tempName,
+                    lattice: boxedLattice,
+                    initialValue: {
+                        kind: 'BOX',
+                        expression: args[0],
+                        value: boxedLattice,
+                    },
+                },
+                {
                     kind: 'CALL',
-                    name,
-                    arguments: args,
-                })
-            } else if (value instanceof TruthvalueLattice) {
-                const tempName = context.scope.nextTempVar()
-                context.scope.emitted.push(
-                    {
-                        kind: 'VARIABLE_DECL',
-                        name: tempName,
-                        lattice: {
-                            type: 'rc-type',
-                            name: 'clawr¸TruthvalueBox',
-                            namespace: 'clawr',
-                        },
-                        initialValue: {
-                            kind: 'BOX',
-                            expression: args[0],
-                            value: args[0].value as any,
-                        },
-                    },
-                    {
-                        kind: 'CALL',
-                        name: _name,
-                        arguments: [
-                            {
-                                kind: 'VARIABLE_REF',
-                                name: tempName,
-                                value: {
-                                    type: 'rc-type',
-                                    name: 'TruthvalueBox',
-                                    namespace: 'clawr',
-                                },
-                            },
-                        ],
-                    },
-                    {
-                        kind: 'RELEASE',
-                        object: {
+                    name: _name,
+                    arguments: [
+                        {
                             kind: 'VARIABLE_REF',
                             name: tempName,
+                            value: boxedLattice,
                         },
+                    ],
+                },
+                {
+                    kind: 'RELEASE',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: tempName,
                     },
-                )
-            }
+                },
+            )
         } else {
             context.scope.emitted.push({
                 kind: 'CALL',

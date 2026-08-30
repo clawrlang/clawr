@@ -46,6 +46,7 @@
                 },
                 "value": {
                     "type": "truthvalue",
+                    "boxed": true,
                     "values": [
                         "false",
                         "ambiguous",

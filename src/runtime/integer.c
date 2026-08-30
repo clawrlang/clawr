@@ -1,6 +1,7 @@
 #include "integer.h"
 #include "array.h"
 #include "panic.h"
+#include "protocols.h"
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -18,12 +19,26 @@ void releaseNestedFields(void* self) {
 }
 
 __attribute__((visibility("default")))
+const clawr¸HasStringRepresentationˇwitness Integerˇclawr¸HasStringRepresentationˇwitness = {
+    .stringRepresentation = (String * (*)(void *)) Integer·toStringRC,
+};
+__protocol_conformance_entry Integerˇclawr¸HasStringRepresentationˇconformance = {
+    .protocol = &clawr¸HasStringRepresentationˇtype,
+    .witness_table = &Integerˇclawr¸HasStringRepresentationˇwitness,
+};
+
+__attribute__((visibility("default")))
 const __type_info Integerˇtype = {
     .data_type = {
         .size = sizeof(Integer),
         .retain_nested_fields = retainNestedFields,
         .release_nested_fields = releaseNestedFields,
-    }
+        .conformances =
+            (const __protocol_conformance_entry *[]){
+                &Integerˇclawr¸HasStringRepresentationˇconformance,
+                NULL,
+            },
+    },
 };
 
 /// @brief A ternary digit is one of {-1, 0, +1}

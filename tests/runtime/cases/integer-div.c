@@ -1,4 +1,4 @@
-#include "integer-va.h"
+#include "runtime.h"
 #include <stdio.h>
 
 int main() {

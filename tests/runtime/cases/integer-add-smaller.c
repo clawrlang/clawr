@@ -1,4 +1,4 @@
-#include "integer-va.h"
+#include "runtime.h"
 
 int main() {
   Integer *bigInt = integerWithDigits(2, DIGIT_MAX, DIGIT_MAX);

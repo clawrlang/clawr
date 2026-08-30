@@ -98,14 +98,35 @@ describe('CallFunc', () => {
         Failable.do(() => statement.emitStatement(context))
         expect(context.scope.emitted).toMatchObject([
             {
+                kind: 'VARIABLE_DECL',
+                name: expect.stringMatching(/^__tempˇ\d+$/),
+                initialValue: {
+                    kind: 'BOX',
+                    expression: {
+                        kind: 'INTEGER_LITERAL',
+                        value: { max: '1', min: '1' },
+                    },
+                },
+            },
+            {
                 kind: 'CALL',
                 name: {
-                    baseName: 'printInt64',
+                    baseName: 'print',
                     labels: [],
                 },
                 arguments: [
-                    { kind: 'INTEGER_LITERAL', value: { max: '1', min: '1' } },
+                    {
+                        kind: 'VARIABLE_REF',
+                        name: expect.stringMatching(/^__tempˇ\d+$/),
+                    },
                 ],
+            },
+            {
+                kind: 'RELEASE',
+                object: {
+                    kind: 'VARIABLE_REF',
+                    name: expect.stringMatching(/^__tempˇ\d+$/),
+                },
             },
         ])
     })
@@ -128,19 +149,14 @@ describe('CallFunc', () => {
             {
                 kind: 'VARIABLE_DECL',
                 name: expect.stringMatching(/^__tempˇ\d+$/),
-                lattice: { type: 'rc-type', name: 'clawr¸TruthvalueBox' },
+                lattice: { type: 'truthvalue', values: ['true'] },
                 initialValue: {
                     kind: 'BOX',
                     expression: {
                         kind: 'TRUTHVALUE_LITERAL',
                         value: { type: 'truthvalue', values: ['true'] },
                     },
-
-                    value: {
-                        type: 'rc-type',
-                        name: 'TruthvalueBox',
-                        namespace: 'clawr',
-                    },
+                    value: { type: 'truthvalue', values: ['true'] },
                 },
             },
             {
@@ -192,12 +208,32 @@ describe('CallFunc', () => {
         Failable.do(() => statement.emitStatement(context))
         expect(context.scope.emitted).toMatchObject([
             {
+                kind: 'VARIABLE_DECL',
+                name: expect.stringMatching(/^__tempˇ\d+$/),
+                initialValue: {
+                    kind: 'BOX',
+                    expression: { kind: 'VARIABLE_REF', name: 'x' },
+                },
+            },
+            {
                 kind: 'CALL',
                 name: {
-                    baseName: 'printInt64',
+                    baseName: 'print',
                     labels: [],
                 },
-                arguments: [{ kind: 'VARIABLE_REF', name: 'x' }],
+                arguments: [
+                    {
+                        kind: 'VARIABLE_REF',
+                        name: expect.stringMatching(/^__tempˇ\d+$/),
+                    },
+                ],
+            },
+            {
+                kind: 'RELEASE',
+                object: {
+                    kind: 'VARIABLE_REF',
+                    name: expect.stringMatching(/^__tempˇ\d+$/),
+                },
             },
         ])
     })

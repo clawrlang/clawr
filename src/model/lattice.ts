@@ -4,7 +4,6 @@ import { TypeName } from './type-name'
 export interface Lattice {
     unconstrained(): Lattice
     isSupersetTo(lattice: Lattice): boolean
-    isSameType(lattice: Lattice): boolean
     toCIR(): cir.Lattice
     toString(): string
 }
@@ -45,10 +44,6 @@ export class IntegerLattice<
             (this.max === undefined ||
                 (lattice.max !== undefined && lattice.max <= this.max))
         )
-    }
-
-    isSameType(lattice: Lattice): boolean {
-        return lattice instanceof IntegerLattice
     }
 
     toCIR(): cir.Lattice & { type: 'integer' } {
@@ -93,10 +88,6 @@ export class TruthvalueLattice<Values extends truthvalue[]> implements Lattice {
         )
     }
 
-    isSameType(lattice: Lattice): boolean {
-        return lattice instanceof TruthvalueLattice
-    }
-
     toCIR(): cir.Lattice & { type: 'truthvalue'; values: Values } {
         return {
             type: 'truthvalue',
@@ -121,10 +112,6 @@ export class StringLattice implements Lattice {
     }
 
     isSupersetTo(lattice: Lattice): boolean {
-        return lattice instanceof StringLattice
-    }
-
-    isSameType(lattice: Lattice): boolean {
         return lattice instanceof StringLattice
     }
 
@@ -166,13 +153,6 @@ export class RCTypeLattice implements Lattice {
     }
 
     isSupersetTo(lattice: Lattice): boolean {
-        return (
-            lattice instanceof RCTypeLattice &&
-            this.type.canonical() === lattice.type.canonical()
-        )
-    }
-
-    isSameType(lattice: Lattice): boolean {
         return (
             lattice instanceof RCTypeLattice &&
             this.type.canonical() === lattice.type.canonical()

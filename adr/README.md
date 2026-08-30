@@ -15,10 +15,10 @@ Many design decisions are made implicitly by the TDD principle “make it work.�
 
 Statuses used in this documentation:
 
-- **Proposed**: A proposed idea
-- **Adopted**: Principle is in use in the ecosystem, or the feature has been implemented in the example implementation
-- **Rejected**: Not considered a good fit for Clawr
-- **Superseded**: Another decision has made it obsolete
+- 💡 **Proposed**: A proposed idea
+- ✅ **Adopted**: Principle is in use in the ecosystem, or the feature has been implemented in the example implementation
+- ❌ **Rejected**: Not considered a good fit for Clawr
+- 🔄 **Superseded**: Another decision has made it obsolete
 
 Records so far:
 

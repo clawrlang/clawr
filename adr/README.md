@@ -11,7 +11,9 @@
 - **The consequences or implications** of that choice
 - **The status** (proposed, accepted, deprecated, etc.)
 
-Many design decisions are made implicitly by the TDD principle “make it work.” Those decisions are not documented here. When something interesting is learned requiring the design to change, that’s when the decision should be documented. The old solution should be listed under *Alternatives Considered* if not in the earlier sections.
+Many design decisions are made implicitly by the TDD principle “make it work.” [^make-it-work] Those decisions are not documented here. When something interesting is learned requiring the design to change, that’s when the decision should be documented. The old solution should be listed under *Alternatives Considered* if not in the earlier sections.
+
+[^make-it-work]: “Make it work. Make it right. Make it fast.” The principle indicates a priority: if it does not work, efficiency is moot, so the first priority must be to make “it” work. (It also says that designing for readability and maintainability is more important than designing for runtime performance.)
 
 Statuses used in this documentation:
 

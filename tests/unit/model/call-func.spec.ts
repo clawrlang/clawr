@@ -140,7 +140,11 @@ describe('CallFunc', () => {
                             value: { type: 'truthvalue', values: ['true'] },
                         },
                     ],
-                    value: { type: 'rc-type', name: 'clawr¸TruthvalueBox' },
+                    value: {
+                        type: 'rc-type',
+                        name: 'TruthvalueBox',
+                        namespace: 'clawr',
+                    },
                 },
             },
             {

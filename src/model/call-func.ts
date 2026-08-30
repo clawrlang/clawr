@@ -76,7 +76,7 @@ export class CallFunc implements Statement {
                             arguments: args,
                             value: {
                                 type: 'rc-type',
-                                name: 'clawr¸TruthvalueBox',
+                                name: 'TruthvalueBox',
                                 namespace: 'clawr',
                             },
                         },
@@ -90,7 +90,7 @@ export class CallFunc implements Statement {
                                 name: tempName,
                                 value: {
                                     type: 'rc-type',
-                                    name: 'clawr¸TruthvalueBox',
+                                    name: 'TruthvalueBox',
                                     namespace: 'clawr',
                                 },
                             },

@@ -1,7 +1,5 @@
 <!-- markdownlint-disable MD041 MD033 -->
-<a href="./users/rawry.md">
 <img src="./images/rawry-150.png" alt="Rawry" style="float: right; margin: 10px;">
-</a>
 
 # Clawr Semantic Library
 

@@ -230,7 +230,7 @@ function lowerType(lattice: cir.Lattice): string {
         case 'integer':
             return lattice.boxed ? 'Integer*' : 'int64_t'
         case 'truthvalue':
-            return lattice.boxed ? 'clawr¸TruthvalueBox*' : 'truthvalue_t'
+            return lattice.boxed ? 'TruthvalueBox*' : 'truthvalue_t'
         case 'rc-type':
             return `${lattice.name}*`
         default:

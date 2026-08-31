@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void retainNestedFields(void *self) {}
-
 static void releaseNestedFields(void *self) {
   String *s = (String *)self;
   if (s->data) {
@@ -20,7 +18,6 @@ __attribute__((visibility("default"))) const __type_info Stringˇtype = {
     .data_type =
         {
             .size = sizeof(String),
-            .retain_nested_fields = retainNestedFields,
             .release_nested_fields = releaseNestedFields,
         },
 };

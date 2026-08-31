@@ -5,9 +5,11 @@
             "kind": "VARIABLE_DECL",
             "name": "__tempˇ0",
             "lattice": {
-                "type": "rc-type",
-                "name": "clawr¸TruthvalueBox",
-                "namespace": "clawr"
+                "type": "truthvalue",
+                "boxed": true,
+                "values": [
+                    "ambiguous"
+                ]
             },
             "initialValue": {
                 "kind": "BOX",

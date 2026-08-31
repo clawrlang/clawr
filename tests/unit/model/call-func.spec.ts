@@ -182,7 +182,7 @@ describe('CallFunc', () => {
         ])
     })
 
-    it('converts print(intvar) to printInt64()', () => {
+    it('boxes integer for printing', () => {
         const context = newSemanticContext()
         context.scope.variables.set('x', {
             isImmutable: true,

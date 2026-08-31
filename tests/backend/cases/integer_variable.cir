@@ -21,13 +21,11 @@
     ],
     "startBlock": [
         {
-            "kind": "CALL",
-            "name": {
-                "baseName": "printInt64",
-                "labels": []
-            },
-            "arguments": [
-                {
+            "kind": "VARIABLE_DECL",
+            "name": "__tempˇ0",
+            "initialValue": {
+                "kind": "BOX",
+                "expression": {
                     "kind": "VARIABLE_REF",
                     "name": "foo",
                     "value": {
@@ -35,8 +33,40 @@
                         "max": "1",
                         "min": "1"
                     }
+                },
+                "value": {
+                    "type": "integer",
+                    "boxed": true
+                }
+            },
+            "lattice": {
+                "type": "integer",
+                "boxed": true
+            }
+        },
+        {
+            "kind": "CALL",
+            "name": {
+                "baseName": "print",
+                "labels": []
+            },
+            "arguments": [
+                {
+                    "kind": "VARIABLE_REF",
+                    "name": "__tempˇ0",
+                    "value": {
+                        "type": "integer",
+                        "boxed": true
+                    }
                 }
             ]
+        },
+        {
+            "kind": "RELEASE",
+            "object": {
+                "kind": "VARIABLE_REF",
+                "name": "__tempˇ0"
+            }
         }
     ]
 }

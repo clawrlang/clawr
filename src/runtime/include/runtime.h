@@ -23,12 +23,10 @@ static void print(void *value) {
 // Utility functions for printing values, used in test cases.
 // Remove when HasStringRepesentation is implemented for all types.
 static void printTruthvalue(truthvalue_t value) {
-  clawr¸TruthvalueBox *box = boxTruthvalue(value);
+  TruthvalueBox *box = boxTruthvalue(value);
   print(box);
   releaseRC(box);
 }
-
-static void printInt64(int64_t value) { printf("%lld\n", value); }
 
 static void *copy˛of(void *value) { return copyRC(value, __rc_SHARED); }
 

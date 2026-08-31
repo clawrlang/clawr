@@ -426,13 +426,11 @@
             }
         },
         {
-            "kind": "CALL",
-            "name": {
-                "baseName": "printInt64",
-                "labels": []
-            },
-            "arguments": [
-                {
+            "kind": "VARIABLE_DECL",
+            "name": "__tempˇ0",
+            "initialValue": {
+                "kind": "BOX",
+                "expression": {
                     "kind": "CALL",
                     "receiver": {
                         "object": {
@@ -455,17 +453,47 @@
                         "min": "0",
                         "max": "100"
                     }
+                },
+                "value": {
+                    "type": "integer",
+                    "boxed": true
                 }
-            ]
+            },
+            "lattice": {
+                "type": "integer",
+                "boxed": true
+            }
         },
         {
             "kind": "CALL",
             "name": {
-                "baseName": "printInt64",
+                "baseName": "print",
                 "labels": []
             },
             "arguments": [
                 {
+                    "kind": "VARIABLE_REF",
+                    "name": "__tempˇ0",
+                    "value": {
+                        "type": "integer",
+                        "boxed": true
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "RELEASE",
+            "object": {
+                "kind": "VARIABLE_REF",
+                "name": "__tempˇ0"
+            }
+        },
+        {
+            "kind": "VARIABLE_DECL",
+            "name": "__tempˇ1",
+            "initialValue": {
+                "kind": "BOX",
+                "expression": {
                     "kind": "CALL",
                     "receiver": {
                         "object": {
@@ -488,8 +516,40 @@
                         "min": "0",
                         "max": "100"
                     }
+                },
+                "value": {
+                    "type": "integer",
+                    "boxed": true
+                }
+            },
+            "lattice": {
+                "type": "integer",
+                "boxed": true
+            }
+        },
+        {
+            "kind": "CALL",
+            "name": {
+                "baseName": "print",
+                "labels": []
+            },
+            "arguments": [
+                {
+                    "kind": "VARIABLE_REF",
+                    "name": "__tempˇ1",
+                    "value": {
+                        "type": "integer",
+                        "boxed": true
+                    }
                 }
             ]
+        },
+        {
+            "kind": "RELEASE",
+            "object": {
+                "kind": "VARIABLE_REF",
+                "name": "__tempˇ1"
+            }
         }
     ]
 }

@@ -51,6 +51,14 @@ export class FunctionDeclaration implements Declaration {
         )
     }
 
+    name() {
+        return FunctionName.create({
+            baseName: this.baseName,
+            arity: this.parameters.length,
+            labels: mapFilter(this.parameters, (p) => p.label),
+        })
+    }
+
     *resultIsolationLevel(context: Context): Failable<AnyIsolationLevel> {
         if (this.result) return Failable.success(this.result.isolationLevel)
         if (this.implementation.kind === 'implicit-return')
@@ -71,12 +79,7 @@ export class FunctionDeclaration implements Declaration {
     }
 
     *emitDeclaration(context: Context): Failable {
-        const name = FunctionName.create({
-            baseName: this.baseName,
-            arity: this.parameters.length,
-            labels: mapFilter(this.parameters, (param) => param.label),
-        })
-        context.scope.rootScope.addFunctionDeclaration(name.toString(), this)
+        context.scope.rootScope.addFunctionDeclaration(this)
 
         const bodyContext: Context = yield yield* this.makeBodyContext(context)
 

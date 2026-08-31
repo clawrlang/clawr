@@ -323,7 +323,6 @@ describe('Assignment', () => {
             }),
         )
         context.scope.rootScope.addFunctionDeclaration(
-            'myFunction()',
             FunctionDeclaration.create({
                 baseName: 'myFunction',
                 result: {

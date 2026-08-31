@@ -22,7 +22,6 @@ describe('Query', () => {
         })
         const context = newSemanticContext()
         context.scope.rootScope.addFunctionDeclaration(
-            'foo()',
             FunctionDeclaration.create({
                 baseName: 'foo',
                 parameters: [],
@@ -64,7 +63,6 @@ describe('Query', () => {
         })
         const context = newSemanticContext()
         context.scope.rootScope.addFunctionDeclaration(
-            'foo(x:)',
             FunctionDeclaration.create({
                 baseName: 'foo',
                 parameters: [
@@ -114,7 +112,6 @@ describe('Query', () => {
         test('for custom function', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addFunctionDeclaration(
-                'foo()',
                 FunctionDeclaration.create({
                     baseName: 'foo',
                     parameters: [],

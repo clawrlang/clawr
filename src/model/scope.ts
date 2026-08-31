@@ -1,34 +1,35 @@
 import * as cir from '@/cir'
-import { Declaration } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
 import { TypeName } from './type-name'
+import { FunctionName } from './function-name'
 
 class RootScope {
-    public variables: Map<string, Variable> = new Map()
-    private declarations: Map<string, Declaration> = new Map()
-    public emitted: cir.Declaration[] = []
+    public readonly variables: Map<string, Variable> = new Map()
+    private readonly functions: Map<string, FunctionDeclaration> = new Map()
+    private readonly types: Map<string, DataDeclaration> = new Map()
+    public readonly emitted: cir.Declaration[] = []
 
     dataDeclaration(name: TypeName): DataDeclaration | undefined {
-        const decl = this.declarations.get(name.canonical())
+        const decl = this.types.get(name.canonical())
         if (decl instanceof DataDeclaration) return decl
         return undefined
     }
 
     addDataDeclaration(decl: DataDeclaration) {
-        this.declarations.set(decl.name.canonical(), decl)
+        this.types.set(decl.name.canonical(), decl)
     }
 
     functionDeclaration(name: string): FunctionDeclaration | undefined {
-        const decl = this.declarations.get(name)
+        const decl = this.functions.get(name)
         if (decl instanceof FunctionDeclaration) return decl
         return undefined
     }
 
-    addFunctionDeclaration(name: string, decl: FunctionDeclaration) {
-        this.declarations.set(name, decl)
+    addFunctionDeclaration(decl: FunctionDeclaration) {
+        this.functions.set(decl.name().toString(), decl)
     }
 
     variableDeclaration(name: string): Variable | undefined {
@@ -63,8 +64,8 @@ export class Scope {
         return this.rootScope.dataDeclaration(name)
     }
 
-    functionDeclaration(name: string): FunctionDeclaration | undefined {
-        return this.rootScope.functionDeclaration(name)
+    functionDeclaration(name: FunctionName): FunctionDeclaration | undefined {
+        return this.rootScope.functionDeclaration(name.toString())
     }
 
     variableDeclaration(name: string): Variable | undefined {

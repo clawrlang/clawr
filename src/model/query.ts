@@ -46,7 +46,7 @@ export class Query implements Expression {
         if (this.name.toString() === 'copy(of:)')
             return Failable.success(UNIQUE)
 
-        const decl = context.scope.functionDeclaration(this.name.toString())
+        const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
             return Failable.failure(
                 `unknown function ${this.name.toString()}`,
@@ -67,7 +67,7 @@ export class Query implements Expression {
                 : Failable.failure('not a reference-counted type', this.span)
         }
 
-        const decl = context.scope.functionDeclaration(this.name.toString())
+        const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
             return Failable.failure(
                 `Function declaration not found: ${this.name.toString()}`,

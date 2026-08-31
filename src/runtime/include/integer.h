@@ -1,9 +1,9 @@
 #ifndef BIG_INTEGER_H
 #define BIG_INTEGER_H
 
-#include "refc.h"
 #include "array.h"
 #include "clawr_string.h"
+#include "refc.h"
 #include "truthvalue.h"
 #include <stdlib.h>
 
@@ -25,11 +25,11 @@ typedef int64_t digit_t;
  * arithmetic operations.
  */
 typedef struct Integer {
-    __rc_header header;
-    Array* digits;
+  __rc_header header;
+  Array *digits;
 } Integer;
 typedef struct Integerˇfields {
-    Array* digits;
+  Array *digits;
 } Integerˇfields;
 extern const __type_info Integerˇtype;
 
@@ -41,73 +41,74 @@ extern Integer Integer¸zero;
 /// @param count the number of digits
 /// @param digits balanced digits in big-endian order
 /// @return
-Integer* Integer¸withDigits(Array* const digits);
+Integer *Integer¸withDigits(Array *const digits);
 
 // mutating: func increment(Integer addend)
 /// @brief Increment a Integer by another Integer
 /// @param self The Integer to be incremented
 /// @param addend The Integer to add to the first
-void Integer·increment(Integer* const self, Integer* const addend);
+void Integer·increment(Integer *const self, Integer *const addend);
 
 // mutating: func decrement(Integer subtrahend)
 /// @brief Decrement a Integer by another Integer
 /// @param self The Integer to be decremented
 /// @param subtrahend The Integer to add to the first
-void Integer·decrement(Integer* const self, Integer* const subtrahend);
+void Integer·decrement(Integer *const self, Integer *const subtrahend);
 
 /// @brief Convert Integer to its decimal representation
 /// @param self the integer to convert
 /// @return an owned String object
-String* Integer·toStringRC(Integer* self);
+String *Integer·toStringRC(Integer *self);
 
 /// @brief Parse a decimal string into an Integer (owned result)
 /// @param str the String* containing the decimal representation
 /// @return an owned Integer object
-Integer* Integer¸fromStringRC(String* str);
+Integer *Integer¸fromStringRC(String *str);
 
 /// @brief Parse a decimal C string into an Integer (owned result)
 /// @param str decimal representation as C string
 /// @return an owned Integer object
-Integer* Integer¸fromCString(const char* str);
+Integer *Integer¸fromCString(const char *str);
 
 /// @brief Compatibility wrapper returning a caller-owned C string.
 /// Prefer Integer·toStringRC for new code.
 /// @param self the integer to convert
 /// @return the decimal representation
-const char* Integer·toString(Integer* self);
+const char *Integer·toString(Integer *self);
 
 // mutating: func toggleSign()
-void Integer·toggleSign(Integer* const self);
+void Integer·toggleSign(Integer *const self);
 
-void printDigits(Integer* integer);
+void printDigits(Integer *integer);
 
 digit_t Integer·divide(Integer *dividend, digit_t divisor);
 
 /// @brief Add two integers, returning a new owned result
-Integer* Integer¸add(Integer* left, Integer* right);
+Integer *Integer¸add(Integer *left, Integer *right);
 
 /// @brief Subtract right from left, returning a new owned result
-Integer* Integer¸subtract(Integer* left, Integer* right);
+Integer *Integer¸subtract(Integer *left, Integer *right);
 
 /// @brief Multiply two integers using grade-school algorithm
-Integer* Integer¸multiply(Integer* left, Integer* right);
+Integer *Integer¸multiply(Integer *left, Integer *right);
 
-/// @brief Divide dividend by divisor (truncated toward zero), returning quotient.
-/// Panics on division by zero.
-Integer* Integer¸divide(Integer* dividend, Integer* divisor);
+/// @brief Divide dividend by divisor (truncated toward zero), returning
+/// quotient. Panics on division by zero.
+Integer *Integer¸divide(Integer *dividend, Integer *divisor);
 
-/// @brief Raise base to a non-negative integer exponent using binary exponentiation.
-/// Panics if exponent is negative.
-Integer* Integer¸power(Integer* base, Integer* exponent);
+/// @brief Raise base to a non-negative integer exponent using binary
+/// exponentiation. Panics if exponent is negative.
+Integer *Integer¸power(Integer *base, Integer *exponent);
 
-/// @brief Compare two integers. Returns -1 if left < right, 0 if equal, 1 if left > right.
-int Integer¸compare(Integer* left, Integer* right);
+/// @brief Compare two integers. Returns -1 if left < right, 0 if equal, 1 if
+/// left > right.
+int Integer¸compare(Integer *left, Integer *right);
 
-truthvalue_t Integer¸eq(Integer* left, Integer* right);
-truthvalue_t Integer¸ne(Integer* left, Integer* right);
-truthvalue_t Integer¸lt(Integer* left, Integer* right);
-truthvalue_t Integer¸le(Integer* left, Integer* right);
-truthvalue_t Integer¸gt(Integer* left, Integer* right);
-truthvalue_t Integer¸ge(Integer* left, Integer* right);
+truthvalue_t Integer¸eq(Integer *left, Integer *right);
+truthvalue_t Integer¸ne(Integer *left, Integer *right);
+truthvalue_t Integer¸lt(Integer *left, Integer *right);
+truthvalue_t Integer¸le(Integer *left, Integer *right);
+truthvalue_t Integer¸gt(Integer *left, Integer *right);
+truthvalue_t Integer¸ge(Integer *left, Integer *right);
 
 #endif // BIG_INTEGER_H

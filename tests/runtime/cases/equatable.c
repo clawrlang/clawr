@@ -52,8 +52,12 @@ int main() {
       CONFORMANCE_ENTRY(a, clawr¸Equatable);
   truthvalue_t aIsB = witness->equal(a, b);
   truthvalue_t aIsC = witness->equal(a, c);
-  printTruthvalue(aIsB);
-  printTruthvalue(aIsC);
+  TruthvalueBox *box1 = boxTruthvalue(aIsB);
+  print(box1);
+  releaseRC(box1);
+  TruthvalueBox *box2 = boxTruthvalue(aIsC);
+  print(box2);
+  releaseRC(box2);
 
   releaseRC(a);
   releaseRC(b);

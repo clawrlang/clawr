@@ -20,14 +20,6 @@ static void print(void *value) {
   releaseRC(string);
 }
 
-// Utility functions for printing values, used in test cases.
-// Remove when HasStringRepesentation is implemented for all types.
-static void printTruthvalue(truthvalue_t value) {
-  TruthvalueBox *box = boxTruthvalue(value);
-  print(box);
-  releaseRC(box);
-}
-
 static void *copy˛of(void *value) { return copyRC(value, __rc_SHARED); }
 
 Integer *integerWithDigits(const size_t count, ...) {

@@ -11,7 +11,7 @@
 - **The consequences or implications** of that choice
 - **The status** (proposed, accepted, deprecated, etc.)
 
-In the case of Clawr, the language itself is considered architecture. [ADR-004](./adr-004.md) defines the Clawr architecture as being made up of a frontend, a backend and a protocol (the CIR) for communicating between them. The syntax and semantics of the language is important for this architecture. There is other documentation for [learning](../tutorials/README.md) and a [language reference](../lang-reference/README.md), but they do not explain _why_ the language works as it does.
+In the case of Clawr, the language itself is considered architecture. [ADR-004](adr-001.md) defines the Clawr architecture as being made up of a frontend, a backend and a protocol (the CIR) for communicating between them. The syntax and semantics of the language is important for this architecture. There is other documentation for [learning](../tutorials/README.md) and a [language reference](../lang-reference/README.md), but they do not explain _why_ the language works as it does.
 
 Many design decisions are made implicitly by the TDD principle “make it work.” [^make-it-work] Those decisions are not documented here. When something interesting is learned requiring the design to change, that’s when the decision should be documented. The old solution should be listed under _Alternatives Considered_ if not in the earlier sections.
 
@@ -28,23 +28,34 @@ Statuses used in this documentation:
 Records so far:
 
 - [ADR-000](./adr-000.md): Platform Agnostic Language
-- [ADR-001](./adr-001.md): Per-Variable Semantics
-- [ADR-002](./adr-002.md): Encapsulation vs Data
-- [ADR-003](./adr-003.md): Ternary Fields on Binary Hardware
-- [ADR-004](./adr-004.md): Syntax, Semantics and CIR
-- [ADR-005](./adr-005.md): Unions and Enumerated Types
-- [ADR-006](./adr-006.md): Ad Hoc Data Structures
-- [ADR-007](./adr-007.md): Serializable `data`
-- [ADR-008](./adr-008.md): Protocol Types
-- [ADR-009](./adr-009.md): Real Numbers
+- [ADR-001](./adr-001.md): Syntax, Semantics and CIR
+- [ADR-002](./adr-002.md): Per-Variable Isolation
+- [ADR-003](./adr-003.md): `UNIQUE` Return Values
+- [ADR-004](./adr-004.md): `UNKNOWN` Parameters
+- [ADR-005](./adr-005.md): Type Lattices
+- [ADR-006](./adr-006.md): Three-valued Truth
+- [ADR-007](./adr-007.md): Three-valued Logic Operators
+- [ADR-008](./adr-008.md): Encapsulation vs Data
+- [ADR-009](./adr-009.md): Protocol Types
+- [ADR-010](./adr-010.md): Serializable `data`
+- [ADR-011](./adr-011.md): Ad Hoc Data Structures
 
-Other ideas with minimum detail:
+Draft ideas with minimum detail:
 
-- [XXX-X01](./x-1.md): `subset`
-- [XXX-X02](./x-2.md): Multi-Module Programs and Libraries
-- [XXX-X03](./x-3.md): Nested Functions and Lambdas
-- [XXX-X04](./x-4.md): Discard Label `_`
-- [XXX-X05](./x-5.md): Spread Operator
-- [XXX-X06](./x-6.md): Varargs Functions
-- [XXX-X07](./x-7.md): Threads and Processes
-- [XXX-X08](./x-8.md): Purity
+- [XXX-X01](./drafts/x-1.md): `subset`
+- [XXX-X02](./drafts/x-2.md): Multi-Module Programs and Libraries
+- [XXX-X03](./drafts/x-3.md): Nested Functions and Lambdas
+- [XXX-X04](./drafts/x-4.md): Discard Label `_`
+- [XXX-X05](./drafts/x-5.md): Spread Operator
+- [XXX-X06](./drafts/x-6.md): Varargs Functions
+- [XXX-X07](./drafts/x-7.md): Threads and Processes
+- [XXX-X08](./drafts/x-8.md): Purity
+- [XXX-X09](./drafts/x-9.md): Types as Sets
+- [XXX-X10](./drafts/x-10.md): Unions and Enumerated Types
+- [XXX-X11](./drafts/x-11.md): Ternary Fields on Binary Hardware
+- [XXX-X12](./drafts/x-12.md): Real Numbers
+- [XXX-X13](./drafts/x-13.md): List Comprehensions and Generators
+- [Currying on Labels](./drafts/currying.md)
+- [ADA Inspirations](./drafts/clawr-ada.md)
+- [Visibility](./drafts/visibility.md)
+- [Miscellaneous](./drafts/misc.md)

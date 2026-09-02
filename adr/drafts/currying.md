@@ -37,7 +37,7 @@ let doubledList = map([1, 2, 3]) {$0 * 2}
 // (But Swift doesn't have syntax for currying.)
 ```
 
-When parameters are labelled, it becomes very awkward to place the transformation function before the list (and it completely removes the option to use Swift’s training closure syntax), but it is necessary if currying can only fix the initial parameters.
+When parameters are labelled, it becomes very awkward to place the transformation function before the list (and it completely removes the option to use Swift’s trailing-closure syntax), but it is necessary if currying can only fix the initial parameters.
 
 Requiring curried parameters to be positioned first limits expressibility. It means that defining curried functions often becomes awkward. Or that using the same function *without* currying does.
 

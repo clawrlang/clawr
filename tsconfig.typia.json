@@ -7,9 +7,8 @@
     "declarationMap": false,
     "sourceMap": false,
     "plugins": [
-      {
-        "transform": "typia/lib/transform"
-      }
+      { "transform": "typia/lib/transform" },
+      { "transform": "@ttsc/paths" }
     ]
   },
   "include": ["src/**/*.ts"],

@@ -40,6 +40,7 @@ Records so far:
 - [ADR-010](./adr-010.md): Serializable `data`
 - [ADR-011](./adr-011.md): Ad Hoc Data Structures
 - [ADR-012](./adr-012.md): Parameters Labels and Ordering
+- [ADR-013](./adr-013.md): Currying on Labels
 
 Draft ideas with minimum detail:
 
@@ -56,7 +57,6 @@ Draft ideas with minimum detail:
 - [XXX-X11](./drafts/x-11.md): Ternary Fields on Binary Hardware
 - [XXX-X12](./drafts/x-12.md): Real Numbers
 - [XXX-X13](./drafts/x-13.md): List Comprehensions and Generators
-- [Currying on Labels](./drafts/currying.md)
 - [ADA Inspirations](./drafts/clawr-ada.md)
 - [Visibility](./drafts/visibility.md)
 - [Miscellaneous](./drafts/misc.md)

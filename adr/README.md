@@ -39,6 +39,7 @@ Records so far:
 - [ADR-009](./adr-009.md): Protocol Types
 - [ADR-010](./adr-010.md): Serializable `data`
 - [ADR-011](./adr-011.md): Ad Hoc Data Structures
+- [ADR-012](./adr-012.md): Parameters Labels and Ordering
 
 Draft ideas with minimum detail:
 

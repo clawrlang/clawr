@@ -1,0 +1,11 @@
+// tsconfig.generate.json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./placeholders",
+    "outDir": "./generated",
+    "declaration": true
+  },
+  "include": ["placeholders/cir-parser/index.ts"],
+  "exclude": ["node_modules", "dist", "generated"]
+}

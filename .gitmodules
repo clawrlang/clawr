@@ -1,0 +1,3 @@
+[submodule "adr"]
+	path = adr
+	url = git@github.com:clawrlang/clawr-adr.git

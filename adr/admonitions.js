@@ -10,6 +10,7 @@ function formatAdmonitions() {
             p.textContent = p.textContent.replace(/^\[!(.*)\]/, $1)
         else p.textContent = p.textContent.replace(/^\[!(.*)\]\s*/, '')
 
+        p.classList.add('admonition-title', type)
         bq.classList.add('admonition', type)
 
         const icon = document.createElement('i')

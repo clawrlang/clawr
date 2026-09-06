@@ -7,7 +7,12 @@ function formatAdmonitions() {
         const type = p.textContent.match(/^\[!(.*)\]/)[1]
 
         if (/^\[!(.*)\]$/.test(p.textContent))
-            p.textContent = p.textContent.replace(/^\[!(.*)\]/, $1)
+            p.textContent = p.textContent.replace(
+                /^\[!(.*)\]$/,
+                (_, [i, ...tag]) =>
+                    i.toUpperCase() + tag.join('').toLowerCase(),
+            )
+        // .replace(/^\[!(.*)\]/, $1)
         else p.textContent = p.textContent.replace(/^\[!(.*)\]\s*/, '')
 
         p.classList.add('admonition-title', type)

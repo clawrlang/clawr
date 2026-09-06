@@ -18,7 +18,10 @@
 }
 
 .admonition > .admonition-title > .lucide {
-    vertical-align: middle;
+    vertical-align: text-top;
+    margin-right: 5px;
+    width: 18px;
+    height: auto;
 }
 
 .admonition.note {

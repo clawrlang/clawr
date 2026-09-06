@@ -9,9 +9,24 @@ function formatAdmonitions() {
         else p.textContent = p.textContent.replace(/^\[!(.*)\]/, '')
         bq.classList.add('admonition', type)
 
-        const icon = document.createElement('span')
+        const icon = document.createElement('i')
+        icon.setAttribute('data-lucide', ICONS[type.toUpperCase()])
         icon.classList.add('admonition-icon', type)
+        bq.appendChild(icon)
+        icon.moveBefore(bq.firstChild)
     }
 }
 
-document.addEventListener('DOMContentLoaded', formatAdmonitions)
+document.addEventListener('DOMContentLoaded', () => {
+    formatAdmonitions()
+    lucide.createIcons()
+})
+
+const ICONS = {
+    NOTE: 'pencil',
+    INFO: 'info',
+    QUESTION: 'circle-question-mark',
+    WARNING: 'circle-alert',
+    TODO: 'check-check',
+    TIP: 'flame',
+}

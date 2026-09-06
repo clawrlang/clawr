@@ -1,0 +1,39 @@
+.admonition {
+    border-left: none;
+    border: 1px solid;
+    border-radius: 7px;
+    padding: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 800px;
+    min-width: 300px;
+}
+
+.admonition > .admonition-icon {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.admonition.note {
+    background-color: aliceblue;
+}
+
+.admonition.note > .admonition-icon::before {
+    content: 'NOTE: ';
+}
+
+.admonition.tip {
+    background-color: honeydew;
+}
+
+.admonition.tip > .admonition-icon::before {
+    content: 'TIP: ';
+}
+
+.admonition.warning {
+    background-color: lightyellow;
+}
+
+.admonition.warning > .admonition-icon::before {
+    content: 'WARNING: ';
+}

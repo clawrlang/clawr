@@ -9,31 +9,50 @@
     min-width: 300px;
 }
 
-.admonition > .admonition-icon {
-    font-weight: bold;
-    margin-right: 5px;
+.admonition > .admonition-title {
+    margin-left: -16px;
+    border-top-left-radius: 5px;
+    margin-right: -16px;
+    border-top-right-radius: 5px;
+    padding: 4px;
+}
+
+.admonition > .admonition-title > .lucide {
+    vertical-align: middle;
 }
 
 .admonition.note {
-    background-color: aliceblue;
+    background-color: lavender;
 }
 
-.admonition.note > .admonition-icon::before {
-    content: 'NOTE: ';
+.admonition.note > .admonition-title {
+    background-color: navy;
+    color: white;
+}
+
+.admonition.question {
+    background-color: blanchedalmond;
+}
+
+.admonition.question > .admonition-title {
+    background-color: peru;
+    color: white;
 }
 
 .admonition.tip {
-    background-color: honeydew;
+    background-color: navy;
 }
 
-.admonition.tip > .admonition-icon::before {
-    content: 'TIP: ';
+.admonition.tip > .admonition-title {
+    background-color: lavender;
+    color: white;
 }
 
 .admonition.warning {
-    background-color: lightyellow;
+    background-color: lemonchiffon;
 }
 
-.admonition.warning > .admonition-icon::before {
-    content: 'WARNING: ';
+.admonition.warning > .admonition-title {
+    background-color: firebrick;
+    color: white;
 }

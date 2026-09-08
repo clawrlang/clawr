@@ -33,6 +33,15 @@
     color: white;
 }
 
+.admonition.info {
+    background-color: lavender;
+}
+
+.admonition.info > .admonition-title {
+    background-color: navy;
+    color: white;
+}
+
 .admonition.question {
     background-color: blanchedalmond;
 }

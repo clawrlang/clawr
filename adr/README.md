@@ -13,7 +13,7 @@
 
 In the case of Clawr, the language itself is considered architecture. [ADR-001](adr-001.md) defines the Clawr architecture as being made up of a frontend and a backend, with a data structure (the CIR) for communicating between them. The syntax and semantics of the language is important for this architecture. There is other documentation for [learning](../tutorials/README.md) and a [language reference](../lang-reference/README.md), but they do not explain _why_ the language works as it does.
 
-Many design decisions are made implicitly by the TDD principle “make it work.” [^make-it-work] Those decisions are not documented here. When something interesting is learned requiring the design to change, that’s when the decision should be documented. The old solution should be listed under _Alternatives Considered_ and/or in the earlier sections.
+Many design decisions are made implicitly by the TDD principle “make it work.” [^make-it-work] Those decisions are not documented here. When something interesting is learned requiring the design to change, that’s when the decision should be documented. The old solution should be listed under _Alternatives Considered_ and/or in the earlier sections.
 
 [^make-it-work]: “Make it work. Make it right. Make it fast.” The principle indicates a priority: if “it” does not work, efficiency is moot, so the first priority must be to “make it work.” [But this principle is not an excuse to be neglectful.](https://www.javacodegeeks.com/2026/05/why-make-it-work-then-make-it-right-then-make-it-fast-produces-bad-systems-at-scale.html)
 

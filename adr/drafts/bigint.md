@@ -21,13 +21,13 @@ The backend tracks how it has chosen to lower each variable and function. The CI
 
 The backend has four (ish) implementations of each operator: `Integer* + Integer*`, `Integer* + int64_t`, `int64_t + Integer*` and `int64_t + int64_t`, where `int64_t` is a placeholder for any fixed size.
 
-C already knows how to add `int64_t` and `byte`. It can handle whatever size the two inputs have. When involving `Integer*`, it can use `int64_t` or `uint64_t`. For commutative operators (like `+` and `*`), it only needs one implementation — in can simply swap the operands as necessary. For other operations four implementations might be needed, unless the fourth variation is trivial.
+C already knows how to add `int64_t` and `byte`. It can handle whatever size the two inputs have. When involving `Integer*`, it can use `int64_t` or `uint64_t`. For commutative operators (like `+` and `*`), it only needs one implementation — in can simply swap the operands as necessary. For other operations four implementations might be needed, unless the fourth variation is trivial.
 
 Dividing a smaller number with a larger number is trivial for example. The result is zero. So `int64_t / Integer*` will not need its own implementation.
 
 The `Integer*` could still be implemented as a `union` type. If the value is small, the value is just an `int64_t`. If it is too big to fit in `int64_t`, it is converted to a list of `uint64_t` digits.
 
-When a variable, function etc is lowered, it should have a type that fits the entire declared range. If that range is small, the type should just be a simple fixed-width type. If it is too wide to fit in `int64_t` or `uint64_`, it should be a `union` type such that if the *actual* value is small, it is limited to `int64_t` plus a discriminator symbol. If it is too large to fit, it becomes a pointer to an `Integer`. (Actually: the `Integer` type itself could be redesigned as a `union`.)
+When a variable, function etc is lowered, it should have a type that fits the entire declared range. If that range is small, the type should just be a simple fixed-width type. If it is too wide to fit in `int64_t` or `uint64_`, it should be a `union` type such that if the _actual_ value is small, it is limited to `int64_t` plus a discriminator symbol. If it is too large to fit, it becomes a pointer to an `Integer`. (Actually: the `Integer` type itself could be redesigned as a `union`.)
 
 ## Rationale
 
@@ -37,7 +37,6 @@ When a variable, function etc is lowered, it should have a type that fits the en
 - Polluting the CIR with multiple lattices for each expression.
 
 ## Related ADRs
-
 
 ---
 

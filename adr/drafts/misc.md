@@ -1,3 +1,6 @@
+<!-- markdownlint-disable MD041 MD033 -->
+<img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
+
 # Miscellaneous Ideas
 
 ## Pipeline
@@ -24,6 +27,7 @@ get(partnerId: string) -> [Atom]
 const x: real[,]  // 2D matrix
 const y: real[,,] // 3D matrix
 ```
+
 Is a 3D matrix meaningful?
 
 We could define matrices by their size. If the second size parameter is 1 it is a column vector, if the first is one it is a row vector. (Are row vectors meaningful?)
@@ -50,6 +54,7 @@ Same-size column vectors can be dot multiplied (with a scalar result) and cross 
 | **3**  | **Logical OR**            | `\|\|`                                      | bool                 |
 | **2**  | **Conditional**           | `a if cond else b`                          | all                  |
 | **1**  | **Assignment**            | `=`, `*=`, `+=`, `-=`, `<<=`…               | all                  |
+
 ## String Interpolation
 
 Optimisation: String interpolation of simple values should be inlined as if they were not interpolated.

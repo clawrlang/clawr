@@ -1,3 +1,6 @@
+<!-- markdownlint-disable MD041 MD033 -->
+<img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
+
 # Visibility Modifiers in Clawr
 
 There are no visibility modifiers. Well, okay there is one: `helper`.
@@ -30,14 +33,14 @@ object User {
         guard self.validateEmailFormat(email) or return
         self.email = email
     }
-    
+
     func name() -> string => self.name
-    
+
     // Private to User type
     helper func validateEmailFormat(email: EmailAddress) -> boolean {
         return email.value().matches(/.+@.+\..+/)
     }
-    
+
     helper func computeHashKey() -> string {
         return "\(self.id):\(self.version)"
     }
@@ -163,7 +166,7 @@ helper service CacheStorage {
     func lookup(key: EntityId) -> ref User? {
         // Implementation...
     }
-    
+
     func evict(key: EntityId) {
         // Implementation...
     }
@@ -181,23 +184,23 @@ data:
 
 // Public API
 service EntityStore {
-    async func reconstitute<TEntity: Entity>(id: TypedEntityId) 
+    async func reconstitute<TEntity: Entity>(id: TypedEntityId)
         -> TEntity | EntityNotFound {
-        
+
         const history = await self.loadHistory(id)
             or return entityNotFound(id)
-        
+
         return TEntity.reconstituted(
-            id.entityId, 
-            at: history.version, 
+            id.entityId,
+            at: history.version,
             from: history.events
         )
     }
-    
+
     // Private helper method
-    helper func loadHistory(id: TypedEntityId) async 
+    helper func loadHistory(id: TypedEntityId) async
         -> (PersistedEntityVersion, [PublishedEvent])? {
-        
+
         return await self.repository.query(
             "SELECT version, events FROM entities WHERE id = ?",
             id.entityId
@@ -220,7 +223,7 @@ helper service HistoryCache {
     func get(id: EntityId) -> EntityHistory? {
         return self.cache[id]
     }
-    
+
     func set(id: EntityId, history: EntityHistory) {
         self.cache[id] = history
     }

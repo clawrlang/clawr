@@ -52,7 +52,6 @@ Draft ideas with minimum detail:
 - [XXX-X06](./drafts/x-6.md): Varargs Functions
 - [XXX-X07](./drafts/x-7.md): Threads and Processes
 - [XXX-X08](./drafts/x-8.md): Purity
-- [XXX-X09](./drafts/x-9.md): Types as Sets
 - [XXX-X10](./drafts/x-10.md): Unions and Enumerated Types
 - [XXX-X11](./drafts/x-11.md): Ternary Fields on Binary Hardware
 - [XXX-X12](./drafts/x-12.md): Real Numbers

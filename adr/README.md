@@ -17,6 +17,8 @@ Many design decisions are made implicitly by the TDD principle “make it work.�
 
 [^make-it-work]: “Make it work. Make it right. Make it fast.” The principle indicates a priority: if “it” does not work, efficiency is moot, so the first priority must be to “make it work.” [But this principle is not an excuse to be neglectful.](https://www.javacodegeeks.com/2026/05/why-make-it-work-then-make-it-right-then-make-it-fast-produces-bad-systems-at-scale.html)
 
+[Tenets](./tenets.md)
+
 Statuses used in this documentation:
 
 - ✍🏼 **Draft**: A rough sketch of an idea

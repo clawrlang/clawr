@@ -43,6 +43,7 @@ Records so far:
 - [ADR-011](./adr-011.md): Ad Hoc Data Structures
 - [ADR-012](./adr-012.md): Parameters Labels and Ordering
 - [ADR-013](./adr-013.md): Currying on Labels
+- [ADR-014](./adr-014.md): Traits and Static
 
 Draft ideas with minimum detail:
 

@@ -10,12 +10,14 @@ import { DataLiteralParser } from './data-literal-parser'
 import { FunctionArgumentsParser } from './function-arguments-parser'
 
 export class ExpressionParser {
-    readonly dataLiteralParser: DataLiteralParser
+    private readonly dataLiteralParser: DataLiteralParser
+    private readonly argsParser: FunctionArgumentsParser
 
     private constructor(private context: Context) {
         this.dataLiteralParser = DataLiteralParser.create(this.context, {
             expressionParser: this,
         })
+        this.argsParser = FunctionArgumentsParser.create(this.context)
     }
 
     static create(context: Context): ExpressionParser {
@@ -40,9 +42,7 @@ export class ExpressionParser {
                 )
             }
 
-            const { arguments: args, end } = FunctionArgumentsParser.create(
-                this.context,
-            ).parse(stream)
+            const { arguments: args, end } = this.argsParser.parse(stream)
             return Query.create({
                 baseName: expression.name,
                 arguments: args,

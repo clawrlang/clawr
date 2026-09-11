@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'bun:test'
 import { TokenStream } from '@/lexer'
 import { TestErrorReporter } from '@@/util'
-import { CallFuncParser } from '@/parser/call-func-parser'
+import { FunctionCallParser } from '@/parser/function-call-parser'
 
-describe('CallFunc Parser', () => {
+describe('FunctionCall Parser', () => {
     it('parses a simple function call', () => {
         const input = 'foo(42, ambiguous)'
         const errorReporter = new TestErrorReporter()
         const tokenStream = TokenStream.read(input, errorReporter)
-        const parser = CallFuncParser.create({ errorReporter })
+        const parser = FunctionCallParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             name: { baseName: 'foo', labels: [] },
@@ -23,7 +23,7 @@ describe('CallFunc Parser', () => {
         const input = 'foo(x: 42, y: ambiguous)'
         const errorReporter = new TestErrorReporter()
         const tokenStream = TokenStream.read(input, errorReporter)
-        const parser = CallFuncParser.create({ errorReporter })
+        const parser = FunctionCallParser.create({ errorReporter })
         const result = parser.parse(tokenStream)
         expect(result).toMatchObject({
             name: { baseName: 'foo', labels: ['x', 'y'] },

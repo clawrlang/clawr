@@ -22,7 +22,7 @@
     - ...
 - Publish the JSON schema to <http://clawr.lang/schema/cir/DRAFT-0> (preliminary URL)
 - Storage expressions should not depend on `currentValue()`
-- `Query`
+- `FunctionCall`
   - `declaredLattice()` should probably not return `currentValue()`
 - `VariableDeclaration` `initialValue` type mismatch
 - `DataLiteral` field type mismatch

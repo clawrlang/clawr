@@ -3,7 +3,7 @@ import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { FieldReference } from '@/model/field-reference'
 import { IntegerLiteral } from '@/model/integer-literal'
-import { Query } from '@/model/query'
+import { FunctionCall } from '@/model/function-call'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { VariableReference } from '@/model/variable-reference'
 import { DataLiteralParser } from './data-literal-parser'
@@ -50,7 +50,7 @@ export class ExpressionParser {
                 if (expression instanceof VariableReference) {
                     const { arguments: args, end } =
                         this.argsParser.parse(stream)
-                    expression = Query.create({
+                    expression = FunctionCall.create({
                         baseName: expression.name,
                         arguments: args,
                         span: {
@@ -64,7 +64,7 @@ export class ExpressionParser {
                 if (expression instanceof FieldReference) {
                     const { arguments: args, end } =
                         this.argsParser.parse(stream)
-                    expression = Query.create({
+                    expression = FunctionCall.create({
                         baseName: expression.field,
                         recipient: expression.object,
                         arguments: args,

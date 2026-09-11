@@ -6,7 +6,7 @@ import { IntegerLiteral } from '@/model/integer-literal'
 import { FieldReference } from '@/model/field-reference'
 import { DataDeclaration } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
-import { Query } from '@/model/query'
+import { FunctionCall } from '@/model/function-call'
 import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { TypeName } from '@/model/type-name'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
@@ -368,7 +368,7 @@ describe('Assignment', () => {
                 name: 'refVar',
                 span: someCodeSpan,
             }),
-            value: Query.create({
+            value: FunctionCall.create({
                 baseName: 'myFunction',
                 arguments: [],
                 span: someCodeSpan,

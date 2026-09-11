@@ -13,7 +13,7 @@ import {
     TruthvalueLattice,
 } from '@/model/lattice'
 import { TypeName } from '@/model/type-name'
-import { Query } from '@/model/query'
+import { FunctionCall } from '@/model/function-call'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { decorateLattice } from '@/model/lattice-declaration'
 import { Failable, isFailure } from '@/tools/failable'
@@ -562,7 +562,7 @@ describe('VariableDeclaration', () => {
                     }),
                     { span: someCodeSpan },
                 ),
-                initialValue: Query.create({
+                initialValue: FunctionCall.create({
                     baseName: 'copy',
                     arguments: [
                         {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { Module } from '@/model/module'
-import { CallFunc } from '@/model/call-func'
+import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { DataDeclaration } from '@/model/data-declaration'
 import { VariableDeclaration } from '@/model/variable-declaration'
@@ -14,7 +14,7 @@ describe('Module', () => {
     it('outputs the main block in CIR', () => {
         const module = Module.create({
             main: [
-                CallFunc.create({
+                FunctionCall.create({
                     baseName: 'add',
                     arguments: [
                         {
@@ -30,6 +30,7 @@ describe('Module', () => {
                             }),
                         },
                     ],
+                    span: someCodeSpan,
                 }),
             ],
         })

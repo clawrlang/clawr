@@ -2,7 +2,7 @@ import { Context } from '.'
 import { TokenStream } from '@/lexer'
 import { Statement } from '@/model'
 import { AssignmentParser } from './assignment-parser'
-import { CallFuncParser } from './call-func-parser'
+import { FunctionCallParser } from './function-call-parser'
 import { ReturnStatementParser } from './return-statement-parser'
 import { StatementParser } from './statement-parser'
 import { VariableDeclarationParser } from './variable-declaration-parser'
@@ -14,7 +14,7 @@ export class BlockParser {
     private constructor(context: Context) {
         this.context = context
         this.statementParsers = [
-            CallFuncParser.create(context),
+            FunctionCallParser.create(context),
             VariableDeclarationParser.create(context),
             AssignmentParser.create(context),
             ReturnStatementParser.create(context),

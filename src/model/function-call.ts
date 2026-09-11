@@ -1,5 +1,5 @@
 import * as cir from '@/cir'
-import { Context, Expression } from '.'
+import { Context, Expression, Statement } from '.'
 import { AnyIsolationLevel, UNIQUE } from './isolation-level'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { FunctionName } from './function-name'
@@ -7,7 +7,7 @@ import { Lattice, RCTypeLattice } from './lattice'
 import { mapFilter } from '@/tools/map-filter'
 import { Failable } from '@/tools/failable'
 
-export class Query implements Expression {
+export class FunctionCall implements Expression, Statement {
     private arguments: Expression[]
 
     private constructor(
@@ -29,8 +29,8 @@ export class Query implements Expression {
         recipient?: Expression
         arguments: { label?: string; value: Expression }[]
         span: SourceCodeSpan
-    }): Query {
-        return new Query(
+    }): FunctionCall {
+        return new FunctionCall(
             FunctionName.create({
                 baseName,
                 labels: mapFilter(args, (arg) => arg.label),
@@ -99,5 +99,54 @@ export class Query implements Expression {
             arguments: args,
             value: value.toCIR(),
         } satisfies cir.Expression)
+    }
+
+    *emitStatement(context: Context): Failable {
+        const _name = this.name.toCIR()
+        const args: cir.Expression[] = yield yield* Failable.map(
+            this.arguments,
+            (arg) => arg.toCIRExpression(context),
+        )
+        if (_name.baseName === 'print') {
+            const tempName = context.scope.nextTempVar()
+            const boxedLattice = { ...args[0].value, boxed: true as const }
+            context.scope.emitted.push(
+                {
+                    kind: 'VARIABLE_DECL',
+                    name: tempName,
+                    lattice: boxedLattice,
+                    initialValue: {
+                        kind: 'BOX',
+                        expression: args[0],
+                        value: boxedLattice,
+                    },
+                },
+                {
+                    kind: 'CALL',
+                    name: _name,
+                    arguments: [
+                        {
+                            kind: 'VARIABLE_REF',
+                            name: tempName,
+                            value: boxedLattice,
+                        },
+                    ],
+                },
+                {
+                    kind: 'RELEASE',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: tempName,
+                    },
+                },
+            )
+        } else {
+            context.scope.emitted.push({
+                kind: 'CALL',
+                name: _name,
+                arguments: args,
+            })
+        }
+        return Failable.success()
     }
 }

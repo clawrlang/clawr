@@ -4,7 +4,7 @@
 
 - Refactoring: improve encapsulation; `Parameter` does nothing
   - Ensure that `lattice` and `defaultValue` are compatible
-  - `CallFunc` / `Query` : Check `isolationLevel` and value/lattices of arguments
+  - `FunctionCall`: Check `isolationLevel` and value/lattices of arguments
 
 - Ensure that variables with `undefined` `isolationLevel` are not modified
 - Ensure that variables with `undefined` `isolationLevel` are not assigned without `copy(of:)`

@@ -13,11 +13,11 @@ import { Failable, isFailure } from '@/tools/failable'
 
 export class FieldReference implements Expression {
     private constructor(
-        public object: Expression,
-        private operator: '.' | '->',
-        private field: string,
-        public span: SourceCodeSpan,
-        private fieldSpan: SourceCodeSpan,
+        public readonly object: Expression,
+        private readonly operator: '.' | '->',
+        public readonly field: string,
+        public readonly span: SourceCodeSpan,
+        private readonly fieldSpan: SourceCodeSpan,
     ) {}
 
     static create({

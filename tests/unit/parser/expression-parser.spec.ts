@@ -88,6 +88,20 @@ describe('Expression Parser', () => {
             ],
         })
     })
+
+    it('parses a method call', () => {
+        const code = 'x.add(1, 2)'
+        const result = parseExpression(code)
+        expect(result).toBeInstanceOf(Query)
+        expect(result).toMatchObject({
+            name: { baseName: 'add', labels: [] },
+            arguments: [
+                { value: { min: 1n, max: 1n } },
+                { value: { min: 2n, max: 2n } },
+            ],
+            recipient: { name: 'x' },
+        })
+    })
 })
 
 function parseExpression(input: string): Expression {

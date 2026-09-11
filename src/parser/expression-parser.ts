@@ -27,46 +27,79 @@ export class ExpressionParser {
     }
 
     parse(stream: TokenStream): Expression {
+        return this.parsePrefixExpression(stream)
+    }
+
+    parsePrefixExpression(stream: TokenStream): Expression {
         if (stream.isNext('OPERATOR', '-')) {
             stream.next() // Consume the '-'
-            const expression = this.parsePrimaryExpression(stream)
+            const expression = this.parsePostfixOperation(stream)
             if (expression instanceof IntegerLiteral) return expression.negated
             throw new Error(
                 'Unary negation is so far only supported for integer literals',
             )
         }
+        return this.parsePostfixOperation(stream)
+    }
+
+    parsePostfixOperation(stream: TokenStream): Expression {
         let expression = this.parsePrimaryExpression(stream)
 
-        if (stream.isNext('PUNCTUATION', '(')) {
-            if (!(expression instanceof VariableReference)) {
-                throw new Error(
-                    'Function calls can only be made on variable references',
-                )
+        while (true) {
+            if (stream.isNext('PUNCTUATION', '(')) {
+                if (expression instanceof VariableReference) {
+                    const { arguments: args, end } =
+                        this.argsParser.parse(stream)
+                    expression = Query.create({
+                        baseName: expression.name,
+                        arguments: args,
+                        span: {
+                            start: expression.span.start,
+                            end,
+                        },
+                    })
+                    continue
+                }
+
+                if (expression instanceof FieldReference) {
+                    const { arguments: args, end } =
+                        this.argsParser.parse(stream)
+                    expression = Query.create({
+                        baseName: expression.field,
+                        recipient: expression.object,
+                        arguments: args,
+                        span: {
+                            start: expression.span.start,
+                            end,
+                        },
+                    })
+                    continue
+                }
+
+                throw new Error('Function calls can only be made on names')
             }
 
-            const { arguments: args, end } = this.argsParser.parse(stream)
-            return Query.create({
-                baseName: expression.name,
-                arguments: args,
-                span: {
-                    start: expression.span.start,
-                    end,
-                },
-            })
-        }
+            if (stream.isNext('OPERATOR', '.', '->')) {
+                const operator = stream.expect('OPERATOR', '.', '->').operator
+                const fieldToken = stream.expect('IDENTIFIER')
+                expression = FieldReference.create({
+                    object: expression,
+                    operator,
+                    field: fieldToken.identifier,
+                    span: {
+                        start: expression.span.start,
+                        end: fieldToken.end,
+                    },
+                    fieldSpan: {
+                        start: fieldToken.start,
+                        end: fieldToken.end,
+                    },
+                })
+                continue
+            }
 
-        while (stream.isNext('OPERATOR', '.', '->')) {
-            const operator = stream.expect('OPERATOR', '.', '->').operator
-            const fieldToken = stream.expect('IDENTIFIER')
-            expression = FieldReference.create({
-                object: expression,
-                operator,
-                field: fieldToken.identifier,
-                span: { start: expression.span.start, end: fieldToken.end },
-                fieldSpan: { start: fieldToken.start, end: fieldToken.end },
-            })
+            return expression
         }
-        return expression
     }
 
     private parsePrimaryExpression(stream: TokenStream): Expression {

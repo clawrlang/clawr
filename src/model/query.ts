@@ -11,19 +11,22 @@ export class Query implements Expression {
     private arguments: Expression[]
 
     private constructor(
-        private name: FunctionName,
+        private readonly name: FunctionName,
+        private readonly recipient: Expression | undefined,
         args: Expression[],
-        public span: SourceCodeSpan,
+        public readonly span: SourceCodeSpan,
     ) {
         this.arguments = args
     }
 
     static create({
         baseName,
+        recipient,
         arguments: args,
         span,
     }: {
         baseName: string
+        recipient?: Expression
         arguments: { label?: string; value: Expression }[]
         span: SourceCodeSpan
     }): Query {
@@ -33,6 +36,7 @@ export class Query implements Expression {
                 labels: mapFilter(args, (arg) => arg.label),
                 arity: args.length,
             }),
+            recipient,
             args.map((arg) => arg.value),
             span,
         )

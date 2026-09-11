@@ -17,7 +17,9 @@ export class ExpressionParser {
         this.dataLiteralParser = DataLiteralParser.create(this.context, {
             expressionParser: this,
         })
-        this.argsParser = FunctionArgumentsParser.create(this.context)
+        this.argsParser = FunctionArgumentsParser.create(this.context, {
+            expressionParser: this,
+        })
     }
 
     static create(context: Context): ExpressionParser {

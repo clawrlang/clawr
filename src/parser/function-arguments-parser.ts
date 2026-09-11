@@ -5,10 +5,17 @@ import { Expression } from '@/model'
 import { ExpressionParser } from './expression-parser'
 
 export class FunctionArgumentsParser {
-    private constructor(private context: Context) {}
+    private constructor(private readonly expressionParser: ExpressionParser) {}
 
-    static create(context: Context): FunctionArgumentsParser {
-        return new FunctionArgumentsParser(context)
+    static create(
+        context: Context,
+        options?: {
+            expressionParser: ExpressionParser
+        },
+    ): FunctionArgumentsParser {
+        return new FunctionArgumentsParser(
+            options?.expressionParser ?? ExpressionParser.create(context),
+        )
     }
 
     parse(stream: TokenStream): {
@@ -28,7 +35,7 @@ export class FunctionArgumentsParser {
                     return null
                 }
             })
-            const arg = ExpressionParser.create(this.context).parse(stream)
+            const arg = this.expressionParser.parse(stream)
             args.push({ label: label?.label, value: arg })
 
             if (stream.isNext('PUNCTUATION', ')')) break

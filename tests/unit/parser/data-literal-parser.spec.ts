@@ -29,6 +29,22 @@ describe('DataLiteralParser', () => {
             ],
         })
     })
+
+    it('parses an initializer call', () => {
+        const code = '{ Super.init() }'
+        const result = parseDataLiteral(code)
+        expect(result).toMatchObject({
+            initializerCall: {
+                name: {
+                    baseName: 'init',
+                    arity: 0,
+                    labels: [],
+                },
+                arguments: [],
+                recipient: { name: 'Super' },
+            },
+        })
+    })
 })
 
 function parseDataLiteral(code: string) {

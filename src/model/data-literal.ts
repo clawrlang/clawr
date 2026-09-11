@@ -6,21 +6,25 @@ import { DataDeclaration } from './data-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
 import { TypeName } from './type-name'
 import { Failable, isFailure } from '@/tools/failable'
+import { FunctionCall } from './function-call'
 
 export class DataLiteral implements Expression {
     private constructor(
-        private fields: FieldValue[],
-        public span: SourceCodeSpan,
+        private readonly initializerCall: FunctionCall | undefined,
+        private readonly fields: FieldValue[],
+        public readonly span: SourceCodeSpan,
     ) {}
 
     static create({
+        initializerCall,
         fields,
         span,
     }: {
+        initializerCall?: FunctionCall
         fields: FieldValue[]
         span: SourceCodeSpan
     }): DataLiteral {
-        return new DataLiteral(fields, span)
+        return new DataLiteral(initializerCall, fields, span)
     }
 
     *isEffectivelyConst(_: Context): Failable<boolean> {

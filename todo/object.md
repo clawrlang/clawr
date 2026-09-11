@@ -1,6 +1,5 @@
 # `object`/`service`
 
-- Parse `{ Super.init() }` data literal
 - Dispose `service` (e.g. close file handle) when deallocated
 
 ## Enforce on Frontend

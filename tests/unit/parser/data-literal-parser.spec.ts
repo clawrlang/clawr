@@ -2,7 +2,6 @@ import { describe, expect, it } from 'bun:test'
 import { TestErrorReporter } from '@@/util'
 import { TokenStream } from '@/lexer'
 import { DataLiteralParser } from '@/parser/data-literal-parser'
-import { ExpressionParser } from '@/parser/expression-parser'
 
 describe('DataLiteralParser', () => {
     it('parses a data literal', () => {
@@ -11,15 +10,7 @@ describe('DataLiteralParser', () => {
                 x: 42
                 y: 17
             }`
-        const errorReporter = new TestErrorReporter()
-        const tokenStream = TokenStream.read(code, errorReporter)
-        const parser = DataLiteralParser.create(
-            { errorReporter },
-            {
-                expressionParser: ExpressionParser.create({ errorReporter }),
-            },
-        )
-        const result = parser.parse(tokenStream)
+        const result = parseDataLiteral(code)
         expect(result).toMatchObject({
             fields: [
                 { name: 'x', value: { value: { min: 42n, max: 42n } } },
@@ -30,13 +21,7 @@ describe('DataLiteralParser', () => {
 
     it('parses a comma-separated data literal', () => {
         const code = '{ x: 42, y: 17 }'
-        const errorReporter = new TestErrorReporter()
-        const tokenStream = TokenStream.read(code, errorReporter)
-        const parser = DataLiteralParser.create(
-            { errorReporter },
-            { expressionParser: ExpressionParser.create({ errorReporter }) },
-        )
-        const result = parser.parse(tokenStream)
+        const result = parseDataLiteral(code)
         expect(result).toMatchObject({
             fields: [
                 { name: 'x', value: { value: { min: 42n, max: 42n } } },
@@ -45,3 +30,10 @@ describe('DataLiteralParser', () => {
         })
     })
 })
+
+function parseDataLiteral(code: string) {
+    const errorReporter = new TestErrorReporter()
+    const tokenStream = TokenStream.read(code, errorReporter)
+    const parser = DataLiteralParser.create({ errorReporter })
+    return parser.parse(tokenStream)
+}

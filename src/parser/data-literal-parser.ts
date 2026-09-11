@@ -4,20 +4,17 @@ import { DataLiteral } from '@/model/data-literal'
 import { Context } from '.'
 
 export class DataLiteralParser {
-    private constructor(
-        _: Context,
-        private expressionParser: ExpressionParser,
-    ) {}
+    private constructor(private expressionParser: ExpressionParser) {}
 
     static create(
         context: Context,
-        {
-            expressionParser,
-        }: {
+        options?: {
             expressionParser: ExpressionParser
         },
     ) {
-        return new DataLiteralParser(context, expressionParser)
+        return new DataLiteralParser(
+            options?.expressionParser ?? ExpressionParser.create(context),
+        )
     }
 
     parse(stream: TokenStream): DataLiteral {

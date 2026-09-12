@@ -1,5 +1,5 @@
-#ifndef CLAWR_PROTOCOLS_H
-#define CLAWR_PROTOCOLS_H
+#ifndef CLAWR_INTERFACES_H
+#define CLAWR_INTERFACES_H
 
 #include "clawr_string.h"
 #include "refc.h"
@@ -14,7 +14,7 @@
 typedef struct {
   truthvalue_t (*equal)(void *left, void *right);
 } clawr¸Equatableˇwitness;
-extern const __protocol_info clawr¸Equatableˇtype;
+extern const __interface_info clawr¸Equatableˇtype;
 
 // ```clawr
 // trait HasStringRepresentation {
@@ -24,6 +24,6 @@ extern const __protocol_info clawr¸Equatableˇtype;
 typedef struct {
   String *(*stringRepresentation)(void *self);
 } clawr¸HasStringRepresentationˇwitness;
-extern const __protocol_info clawr¸HasStringRepresentationˇtype;
+extern const __interface_info clawr¸HasStringRepresentationˇtype;
 
-#endif
+#endif // CLAWR_INTERFACES_H

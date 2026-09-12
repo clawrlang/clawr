@@ -10,8 +10,8 @@ export type ClawrModule = {
 // Declarations
 // ------------
 
-type ProtocolDeclaration = {
-    kind: 'PROTOCOL_DECL'
+type InterfaceDeclaration = {
+    kind: 'INTERFACE_DECL'
     name: string
     requirements: FunctionSignature[]
 }
@@ -47,7 +47,7 @@ type RCTypeDeclaration = {
         lattice: Lattice
     }[]
     conformances?: {
-        protocol: CanonicalName
+        interface: CanonicalName
         fulfillments: {
             requirement: FunctionName
             implementation: FunctionName
@@ -78,7 +78,7 @@ export type Declaration = { namespace?: string } & (
     | VariableDeclaration
     | FunctionDeclaration
     | RCTypeDeclaration
-    | ProtocolDeclaration
+    | InterfaceDeclaration
 )
 
 // ----------
@@ -97,7 +97,7 @@ type Release = {
 
 type Receiver =
     | {
-          object: Expression & { value: RCTypeLattice | ProtocolLattice }
+          object: Expression & { value: RCTypeLattice | InterfaceLattice }
           dispatch: 'direct'
       }
     | {
@@ -105,7 +105,7 @@ type Receiver =
           dispatch: 'inherited'
       }
     | {
-          object: Expression & { value: ProtocolDeclaration }
+          object: Expression & { value: InterfaceDeclaration }
           dispatch: 'conformance'
       }
 
@@ -247,8 +247,8 @@ type RCTypeLattice = {
     name: string
 }
 
-type ProtocolLattice = {
-    type: 'protocol'
+type InterfaceLattice = {
+    type: 'interface'
     namespace?: string
     name: string
 }
@@ -259,7 +259,7 @@ export type Lattice =
     | TruthvalueLattice<truthvalue[]>
     | StringLattice
     | RCTypeLattice
-    | ProtocolLattice
+    | InterfaceLattice
 
 type IsolationLevel = 'ISOLATED' | 'SHARED'
 type truthvalue = 'false' | 'ambiguous' | 'true'

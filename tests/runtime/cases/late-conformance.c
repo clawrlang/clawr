@@ -10,7 +10,7 @@
 typedef struct Describableˇwitness {
   String *(*describe)(void *self);
 } Describableˇwitness;
-__protocol_info Describableˇtype = {.name = "Describable"};
+__interface_info Describableˇtype = {.name = "Describable"};
 
 static String *DataStructure·describe(void *self) {
   DataStructure *fields = (DataStructure *)self;
@@ -20,8 +20,8 @@ static String *DataStructure·describe(void *self) {
 static const Describableˇwitness DataStructureˇDescribableˇwitness = {
     .describe = DataStructure·describe,
 };
-__protocol_conformance_entry Describableˇconformance = {
-    .protocol = &Describableˇtype,
+__interface_conformance_entry Describableˇconformance = {
+    .interface = &Describableˇtype,
     .witness_table = &DataStructureˇDescribableˇwitness};
 
 __attribute__((constructor)) static void

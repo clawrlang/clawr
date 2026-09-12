@@ -2,7 +2,7 @@
 #define CLAWR_TRUTHVALUE_BOX_H
 
 #include "clawr_string.h"
-#include "protocols.h"
+#include "interfaces.h"
 #include "truthvalue.h"
 
 typedef struct {
@@ -24,9 +24,9 @@ static const clawr¸HasStringRepresentationˇwitness
         .stringRepresentation =
             (String * (*)(void *)) TruthvalueBoxˇstringRepresentation,
 };
-__protocol_conformance_entry
+__interface_conformance_entry
     TruthvalueBoxˇclawr¸HasStringRepresentationˇconformance = {
-        .protocol = &clawr¸HasStringRepresentationˇtype,
+        .interface = &clawr¸HasStringRepresentationˇtype,
         .witness_table = &TruthvalueBoxˇclawr¸HasStringRepresentationˇwitness,
 };
 
@@ -36,7 +36,7 @@ const __type_info TruthvalueBoxˇtype = {
             {
                 .size = sizeof(TruthvalueBox),
                 .conformances =
-                    (const __protocol_conformance_entry *[]){
+                    (const __interface_conformance_entry *[]){
                         &TruthvalueBoxˇclawr¸HasStringRepresentationˇconformance,
                         NULL,
                     },

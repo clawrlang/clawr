@@ -24,8 +24,8 @@ static truthvalue_t DataStructure·equals(void *left, void *right) {
 static const clawr¸Equatableˇwitness DataStructureˇclawr¸Equatableˇwitness = {
     .equal = DataStructure·equals,
 };
-__protocol_conformance_entry DataStructureˇclawr¸Equatableˇconformance = {
-    .protocol = &clawr¸Equatableˇtype,
+__interface_conformance_entry DataStructureˇclawr¸Equatableˇconformance = {
+    .interface = &clawr¸Equatableˇtype,
     .witness_table = &DataStructureˇclawr¸Equatableˇwitness,
 };
 static __type_info DataStructureˇtype = {
@@ -33,7 +33,7 @@ static __type_info DataStructureˇtype = {
         {
             .size = sizeof(DataStructure),
             .conformances =
-                (const __protocol_conformance_entry *[]){
+                (const __interface_conformance_entry *[]){
                     &DataStructureˇclawr¸Equatableˇconformance,
                     NULL,
                 },

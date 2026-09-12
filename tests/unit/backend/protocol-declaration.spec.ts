@@ -2,11 +2,11 @@ import { describe, expect, it } from 'bun:test'
 import type * as cir from '@/cir'
 import { lowerDecl } from '@/backend'
 
-describe('Protocol Declaration', () => {
+describe('Interface Declaration', () => {
     it('is output correctly', () => {
         const decl: cir.Declaration = {
-            kind: 'PROTOCOL_DECL',
-            name: 'MyProtocol',
+            kind: 'INTERFACE_DECL',
+            name: 'MyInterface',
             requirements: [
                 {
                     baseName: 'slot',
@@ -22,11 +22,11 @@ describe('Protocol Declaration', () => {
             ],
         }
         const result = lowerDecl(decl)
-        expect(result).toContain('} MyProtocolˇwitness;')
+        expect(result).toContain('} MyInterfaceˇwitness;')
         expect(result).toContain(
             'int64_t (*slot˛l)(void* self, truthvalue_t p);',
         )
-        expect(result).toContain('__protocol_info MyProtocolˇinfo ')
-        expect(result).toContain('.name = "MyProtocol"')
+        expect(result).toContain('__interface_info MyInterfaceˇinfo ')
+        expect(result).toContain('.name = "MyInterface"')
     })
 })

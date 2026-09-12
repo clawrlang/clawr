@@ -38,7 +38,7 @@ Records so far:
 - [ADR-006](./adr-006.md): Three-valued Truth
 - [ADR-007](./adr-007.md): Three-valued Logic Operators
 - [ADR-008](./adr-008.md): Encapsulation vs Data
-- [ADR-009](./adr-009.md): Protocol Types
+- [ADR-009](./adr-009.md): Interface Types
 - [ADR-010](./adr-010.md): Serializable `data`
 - [ADR-011](./adr-011.md): Ad Hoc Data Structures
 - [ADR-012](./adr-012.md): Parameters Labels and Ordering

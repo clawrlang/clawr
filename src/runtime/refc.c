@@ -221,7 +221,8 @@ _release_proxy(__rc_proxy *const proxy) {
 // ---------------
 
 __attribute__((visibility("default"))) void
-_register_conformance(const __type_info *type, const __protocol_info *protocol,
+_register_conformance(const __type_info *type,
+                      const __interface_info *interface,
                       const void *witness_table) {
   size_t bucket = ((uintptr_t)type >> 4) % SIDE_TABLE_BUCKETS;
 
@@ -243,20 +244,21 @@ _register_conformance(const __type_info *type, const __protocol_info *protocol,
   memcpy(node,
          &(const __conformance_node){
              .conformance =
-                 (const __protocol_conformance_entry){
-                     .protocol = protocol, .witness_table = witness_table},
+                 (const __interface_conformance_entry){
+                     .interface = interface, .witness_table = witness_table},
              .next = entry->conformances},
          sizeof(__conformance_node));
   entry->conformances = node;
 }
 
 __attribute__((visibility("default"))) const void *
-_lookup_conformance(const __type_info *type, const __protocol_info *protocol) {
+_lookup_conformance(const __type_info *type,
+                    const __interface_info *interface) {
   // Check static conformances first (fast path)
-  const __protocol_conformance_entry **pointer = type->data_type.conformances;
+  const __interface_conformance_entry **pointer = type->data_type.conformances;
   if (pointer) {
-    while (*pointer && (*pointer)->protocol) {
-      if ((*pointer)->protocol == protocol)
+    while (*pointer && (*pointer)->interface) {
+      if ((*pointer)->interface == interface)
         return (*pointer)->witness_table;
       pointer++;
     }
@@ -269,7 +271,7 @@ _lookup_conformance(const __type_info *type, const __protocol_info *protocol) {
     if (se->type == type) {
       __conformance_node *node = se->conformances;
       while (node) {
-        if (node->conformance.protocol == protocol)
+        if (node->conformance.interface == interface)
           return node->conformance.witness_table;
         node = node->next;
       }

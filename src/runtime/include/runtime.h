@@ -7,8 +7,8 @@
 #include "array.h"
 #include "clawr_string.h"
 #include "integer.h"
+#include "interfaces.h"
 #include "lanes.h"
-#include "protocols.h"
 #include "real.h"
 #include "refc.h"
 
@@ -23,7 +23,7 @@ static void print(void *value) {
 static void *copy˛of(void *value) { return copyRC(value, __rc_SHARED); }
 
 Integer *integerWithDigits(const size_t count, ...) {
-  Array *digits = Array¸new(count, sizeof(digit_t));
+  Array *digits = Array¸new (count, sizeof(digit_t));
 
   va_list ap;
   va_start(ap, count);

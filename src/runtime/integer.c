@@ -1,7 +1,7 @@
 #include "integer.h"
 #include "array.h"
+#include "interfaces.h"
 #include "panic.h"
-#include "protocols.h"
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -19,9 +19,9 @@ const clawr¸HasStringRepresentationˇwitness
     Integerˇclawr¸HasStringRepresentationˇwitness = {
         .stringRepresentation = (String * (*)(void *)) Integer·toStringRC,
 };
-__protocol_conformance_entry Integerˇclawr¸HasStringRepresentationˇconformance =
-    {
-        .protocol = &clawr¸HasStringRepresentationˇtype,
+__interface_conformance_entry
+    Integerˇclawr¸HasStringRepresentationˇconformance = {
+        .interface = &clawr¸HasStringRepresentationˇtype,
         .witness_table = &Integerˇclawr¸HasStringRepresentationˇwitness,
 };
 
@@ -32,7 +32,7 @@ __attribute__((visibility("default"))) const __type_info Integerˇtype = {
             .retain_nested_fields = retainNestedFields,
             .release_nested_fields = releaseNestedFields,
             .conformances =
-                (const __protocol_conformance_entry *[]){
+                (const __interface_conformance_entry *[]){
                     &Integerˇclawr¸HasStringRepresentationˇconformance,
                     NULL,
                 },
@@ -253,8 +253,8 @@ Integer·toggleSign(Integer *const self) {
   }
 }
 
-__attribute__((visibility("default"))) Integer *
-Integer¸withDigits(Array *const digits) {
+__attribute__((visibility("default")))
+Integer *Integer¸withDigits(Array *const digits) {
   Integer *integer =
       allocInitRC(Integer, 0, __rc_ISOLATED,
                   .digits = Array¸new(digits->count, sizeof(digit_t)));
@@ -630,24 +630,24 @@ static void balancedDecompose(__int128_t value, digit_t *digit_out,
 // Non-mutating binary operations
 // ---------------------------------------------------------------------------
 
-__attribute__((visibility("default"))) Integer *Integer¸add(Integer *left,
-                                                            Integer *right) {
+__attribute__((visibility("default")))
+Integer *Integer¸add(Integer *left, Integer *right) {
   Integer *result = copyInteger(left);
   Integer·increment(result, right);
   trimLeadingZeros(result);
   return result;
 }
 
-__attribute__((visibility("default"))) Integer *
-Integer¸subtract(Integer *left, Integer *right) {
+__attribute__((visibility("default")))
+Integer *Integer¸subtract(Integer *left, Integer *right) {
   Integer *result = copyInteger(left);
   Integer·decrement(result, right);
   trimLeadingZeros(result);
   return result;
 }
 
-__attribute__((visibility("default"))) Integer *
-Integer¸multiply(Integer *left, Integer *right) {
+__attribute__((visibility("default")))
+Integer *Integer¸multiply(Integer *left, Integer *right) {
   size_t n = effectiveLength(left);
   size_t m = effectiveLength(right);
   if (n == 0 || m == 0)
@@ -684,8 +684,8 @@ Integer¸multiply(Integer *left, Integer *right) {
   return result;
 }
 
-__attribute__((visibility("default"))) Integer *
-Integer¸divide(Integer *dividend, Integer *divisor) {
+__attribute__((visibility("default")))
+Integer *Integer¸divide(Integer *dividend, Integer *divisor) {
   size_t m = effectiveLength(divisor);
   if (m == 0)
     panic("Division by zero!");
@@ -725,8 +725,8 @@ Integer¸divide(Integer *dividend, Integer *divisor) {
   return quotient;
 }
 
-__attribute__((visibility("default"))) Integer *
-Integer¸power(Integer *base, Integer *exponent) {
+__attribute__((visibility("default")))
+Integer *Integer¸power(Integer *base, Integer *exponent) {
   if (integerSign(exponent) < 0)
     panic("Integer exponentiation requires a non-negative exponent");
 
@@ -827,8 +827,8 @@ __attribute__((visibility("default"))) truthvalue_t Integer¸ge(Integer *left,
 }
 
 // Helper: parse decimal string to Integer*
-__attribute__((visibility("default"))) Integer *
-Integer¸fromStringRC(String *str) {
+__attribute__((visibility("default")))
+Integer *Integer¸fromStringRC(String *str) {
   if (!str || !str->data)
     return NULL;
   const char *s = str->data;
@@ -869,8 +869,8 @@ Integer¸fromStringRC(String *str) {
   return result;
 }
 
-__attribute__((visibility("default"))) Integer *
-Integer¸fromCString(const char *str) {
+__attribute__((visibility("default")))
+Integer *Integer¸fromCString(const char *str) {
   String *value = String¸fromCString(str);
   Integer *result = Integer¸fromStringRC(value);
   releaseRC(value);

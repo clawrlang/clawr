@@ -84,11 +84,11 @@ export function lowerDecl(decl: cir.Declaration): string {
         case 'FUNCTION_DECL':
             return lowerFunction(decl, mangleNameWithParameters(decl))
 
-        case 'PROTOCOL_DECL':
+        case 'INTERFACE_DECL':
             return `typedef struct ${mangleTypeName(decl)}ˇwitness {
                     ${decl.requirements.map(lowerAbstractSlot).join('\n')}
                 } ${mangleTypeName(decl)}ˇwitness;
-                __protocol_info ${mangleTypeName(decl)}ˇinfo = {
+                __interface_info ${mangleTypeName(decl)}ˇinfo = {
                     .name = "${mangleTypeName(decl)}"
                 };`
 

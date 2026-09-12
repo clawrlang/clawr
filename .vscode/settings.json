@@ -51,7 +51,18 @@
               { "$ref": "#/$defs/Release" },
               { "$ref": "#/$defs/Return" },
               { "$ref": "#/$defs/VariableDeclaration" }
-            ]
+            ],
+            "discriminator": {
+              "mapping": {
+                "ASSIGN": "#/components/schemas/Assign",
+                "CALL": "#/components/schemas/FunctionCall",
+                "ENSURE_UNIQUE": "#/components/schemas/EnsureUnique",
+                "RELEASE": "#/components/schemas/Release",
+                "RETURN": "#/components/schemas/Return",
+                "VARIABLE_DECL": "#/components/schemas/VariableDeclaration"
+              },
+              "propertyName": "kind"
+            }
           },
           "Assign": {
             "type": "object",
@@ -67,7 +78,14 @@
             "oneOf": [
               { "$ref": "#/$defs/OmitFieldReferencevalue" },
               { "$ref": "#/$defs/OmitVariableReferencevalue" }
-            ]
+            ],
+            "discriminator": {
+              "mapping": {
+                "FIELD_REF": "#/components/schemas/OmitFieldReferencevalue",
+                "VARIABLE_REF": "#/components/schemas/OmitVariableReferencevalue"
+              },
+              "propertyName": "kind"
+            }
           },
           "OmitFieldReferencevalue": {
             "type": "object",
@@ -91,7 +109,22 @@
               { "$ref": "#/$defs/StringLiteral" },
               { "$ref": "#/$defs/TruthLiteraltruthvalue" },
               { "$ref": "#/$defs/VariableReference" }
-            ]
+            ],
+            "discriminator": {
+              "mapping": {
+                "ALLOCATION": "#/components/schemas/MemoryAllocation",
+                "AS_SHARED": "#/components/schemas/AsShared",
+                "BOX": "#/components/schemas/Box",
+                "CALL": "#/components/schemas/FunctionCall__type",
+                "FIELD_REF": "#/components/schemas/FieldReference",
+                "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint",
+                "RETAIN": "#/components/schemas/MemoryRetention",
+                "STRING_LITERAL": "#/components/schemas/StringLiteral",
+                "TRUTHVALUE_LITERAL": "#/components/schemas/TruthLiteraltruthvalue",
+                "VARIABLE_REF": "#/components/schemas/VariableReference"
+              },
+              "propertyName": "kind"
+            }
           },
           "FunctionCall__type": {
             "type": "object",
@@ -99,15 +132,15 @@
               "kind": { "const": "CALL" },
               "receiver": {
                 "oneOf": [
-                  { "$ref": "#/$defs/__type.o3" },
-                  { "$ref": "#/$defs/__type.o2" },
+                  { "$ref": "#/$defs/__type-o3" },
+                  { "$ref": "#/$defs/__type-o2" },
                   { "$ref": "#/$defs/__type" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "conformance": "#/components/schemas/__type.o3",
+                    "conformance": "#/components/schemas/__type-o3",
                     "direct": "#/components/schemas/__type",
-                    "inherited": "#/components/schemas/__type.o2"
+                    "inherited": "#/components/schemas/__type-o2"
                   },
                   "propertyName": "dispatch"
                 }
@@ -122,34 +155,34 @@
             "required": ["kind", "name", "arguments", "value"],
             "additionalProperties": false
           },
-          "__type.o3": {
+          "__type-o3": {
             "type": "object",
             "properties": {
               "object": {
                 "oneOf": [
-                  { "$ref": "#/$defs/AsShared__type.o2" },
-                  { "$ref": "#/$defs/Box__type.o2" },
-                  { "$ref": "#/$defs/FieldReference__type.o2" },
-                  { "$ref": "#/$defs/IntegerLiteralbigint__type.o2" },
-                  { "$ref": "#/$defs/MemoryAllocation__type.o2" },
-                  { "$ref": "#/$defs/MemoryRetention__type.o2" },
-                  { "$ref": "#/$defs/TruthLiteraltruthvalue__type.o2" },
-                  { "$ref": "#/$defs/StringLiteral__type.o2" },
-                  { "$ref": "#/$defs/VariableReference__type.o2" },
-                  { "$ref": "#/$defs/FunctionCall__type__type.o2" }
+                  { "$ref": "#/$defs/AsShared__type-o2" },
+                  { "$ref": "#/$defs/Box__type-o2" },
+                  { "$ref": "#/$defs/FieldReference__type-o2" },
+                  { "$ref": "#/$defs/IntegerLiteralbigint__type-o2" },
+                  { "$ref": "#/$defs/MemoryAllocation__type-o2" },
+                  { "$ref": "#/$defs/MemoryRetention__type-o2" },
+                  { "$ref": "#/$defs/TruthLiteraltruthvalue__type-o2" },
+                  { "$ref": "#/$defs/StringLiteral__type-o2" },
+                  { "$ref": "#/$defs/VariableReference__type-o2" },
+                  { "$ref": "#/$defs/FunctionCall__type__type-o2" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "ALLOCATION": "#/components/schemas/MemoryAllocation__type.o2",
-                    "AS_SHARED": "#/components/schemas/AsShared__type.o2",
-                    "BOX": "#/components/schemas/Box__type.o2",
-                    "CALL": "#/components/schemas/FunctionCall__type__type.o2",
-                    "FIELD_REF": "#/components/schemas/FieldReference__type.o2",
-                    "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint__type.o2",
-                    "RETAIN": "#/components/schemas/MemoryRetention__type.o2",
-                    "STRING_LITERAL": "#/components/schemas/StringLiteral__type.o2",
-                    "TRUTHVALUE_LITERAL": "#/components/schemas/TruthLiteraltruthvalue__type.o2",
-                    "VARIABLE_REF": "#/components/schemas/VariableReference__type.o2"
+                    "ALLOCATION": "#/components/schemas/MemoryAllocation__type-o2",
+                    "AS_SHARED": "#/components/schemas/AsShared__type-o2",
+                    "BOX": "#/components/schemas/Box__type-o2",
+                    "CALL": "#/components/schemas/FunctionCall__type__type-o2",
+                    "FIELD_REF": "#/components/schemas/FieldReference__type-o2",
+                    "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint__type-o2",
+                    "RETAIN": "#/components/schemas/MemoryRetention__type-o2",
+                    "STRING_LITERAL": "#/components/schemas/StringLiteral__type-o2",
+                    "TRUTHVALUE_LITERAL": "#/components/schemas/TruthLiteraltruthvalue__type-o2",
+                    "VARIABLE_REF": "#/components/schemas/VariableReference__type-o2"
                   },
                   "propertyName": "kind"
                 }
@@ -159,20 +192,20 @@
             "required": ["object", "dispatch"],
             "additionalProperties": false
           },
-          "AsShared__type.o2": {
+          "AsShared__type-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "AS_SHARED" },
               "object": { "$ref": "#/$defs/FunctionCall__type" },
-              "value": { "$ref": "#/$defs/RCTypeLatticeProtocolDeclaration" }
+              "value": { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" }
             },
             "required": ["kind", "object", "value"],
             "additionalProperties": false
           },
-          "RCTypeLatticeProtocolDeclaration": {
+          "RCTypeLatticeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -203,11 +236,11 @@
               },
               "lattice": {
                 "oneOf": [
-                  { "$ref": "#/$defs/__type__type__type.o3" },
-                  { "$ref": "#/$defs/__type__type__type.o2" },
-                  { "$ref": "#/$defs/__type__type__type.o1" },
+                  { "$ref": "#/$defs/__type__type__type-o3" },
+                  { "$ref": "#/$defs/__type__type__type-o2" },
+                  { "$ref": "#/$defs/__type__type__type-o1" },
                   { "$ref": "#/$defs/__type__type__type" },
-                  { "$ref": "#/$defs/ProtocolLattice" },
+                  { "$ref": "#/$defs/InterfaceLattice" },
                   { "$ref": "#/$defs/RCTypeLattice" },
                   { "$ref": "#/$defs/RealLattice" },
                   { "$ref": "#/$defs/StringLattice" },
@@ -221,10 +254,10 @@
           "Lattice": {
             "oneOf": [
               { "$ref": "#/$defs/__type__type__type" },
-              { "$ref": "#/$defs/__type__type__type.o1" },
-              { "$ref": "#/$defs/__type__type__type.o2" },
-              { "$ref": "#/$defs/__type__type__type.o3" },
-              { "$ref": "#/$defs/ProtocolLattice" },
+              { "$ref": "#/$defs/__type__type__type-o1" },
+              { "$ref": "#/$defs/__type__type__type-o2" },
+              { "$ref": "#/$defs/__type__type__type-o3" },
+              { "$ref": "#/$defs/InterfaceLattice" },
               { "$ref": "#/$defs/RCTypeLattice" },
               { "$ref": "#/$defs/RealLattice" },
               { "$ref": "#/$defs/StringLattice" },
@@ -240,7 +273,7 @@
             "required": ["type"],
             "additionalProperties": false
           },
-          "__type__type__type.o1": {
+          "__type__type__type-o1": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
@@ -250,7 +283,7 @@
             "required": ["type", "max"],
             "additionalProperties": false
           },
-          "__type__type__type.o2": {
+          "__type__type__type-o2": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
@@ -260,7 +293,7 @@
             "required": ["type", "min"],
             "additionalProperties": false
           },
-          "__type__type__type.o3": {
+          "__type__type__type-o3": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
@@ -271,10 +304,10 @@
             "required": ["type", "min", "max"],
             "additionalProperties": false
           },
-          "ProtocolLattice": {
+          "InterfaceLattice": {
             "type": "object",
             "properties": {
-              "type": { "const": "protocol" },
+              "type": { "const": "interface" },
               "namespace": { "type": "string" },
               "name": { "type": "string" }
             },
@@ -330,33 +363,33 @@
               { "const": "true" }
             ]
           },
-          "Box__type.o2": {
+          "Box__type-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "BOX" },
               "expression": { "$ref": "#/$defs/Expression" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/RCTypeLattice__typeProtocolDeclaration" },
+                  { "$ref": "#/$defs/RCTypeLattice__typeInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/ProtocolLattice__typeProtocolDeclaration"
+                    "$ref": "#/$defs/InterfaceLattice__typeInterfaceDeclaration"
                   },
-                  { "$ref": "#/$defs/RealLattice__typeProtocolDeclaration" },
-                  { "$ref": "#/$defs/StringLattice__typeProtocolDeclaration" },
+                  { "$ref": "#/$defs/RealLattice__typeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/StringLattice__typeInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/TruthvalueLatticetruthvalue__typeProtocolDeclaration"
-                  },
-                  {
-                    "$ref": "#/$defs/__type__type__type__typeProtocolDeclaration.o3"
+                    "$ref": "#/$defs/TruthvalueLatticetruthvalue__typeInterfaceDeclaration"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__type__typeProtocolDeclaration.o2"
+                    "$ref": "#/$defs/__type__type__type__typeInterfaceDeclaration-o3"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__type__typeProtocolDeclaration.o1"
+                    "$ref": "#/$defs/__type__type__type__typeInterfaceDeclaration-o2"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__type__typeProtocolDeclaration"
+                    "$ref": "#/$defs/__type__type__type__typeInterfaceDeclaration-o1"
+                  },
+                  {
+                    "$ref": "#/$defs/__type__type__type__typeInterfaceDeclaration"
                   }
                 ]
               }
@@ -364,10 +397,10 @@
             "required": ["kind", "expression", "value"],
             "additionalProperties": false
           },
-          "RCTypeLattice__typeProtocolDeclaration": {
+          "RCTypeLattice__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -380,26 +413,26 @@
             "required": ["kind", "requirements", "boxed", "type", "name"],
             "additionalProperties": false
           },
-          "ProtocolLattice__typeProtocolDeclaration": {
+          "InterfaceLattice__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "boxed": { "const": true },
-              "type": { "const": "protocol" },
+              "type": { "const": "interface" },
               "namespace": { "type": "string" },
               "name": { "type": "string" }
             },
             "required": ["kind", "requirements", "boxed", "type", "name"],
             "additionalProperties": false
           },
-          "RealLattice__typeProtocolDeclaration": {
+          "RealLattice__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -413,10 +446,10 @@
             "required": ["kind", "name", "requirements", "boxed", "type"],
             "additionalProperties": false
           },
-          "StringLattice__typeProtocolDeclaration": {
+          "StringLattice__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -429,10 +462,10 @@
             "required": ["kind", "name", "requirements", "boxed", "type"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalue__typeProtocolDeclaration": {
+          "TruthvalueLatticetruthvalue__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -455,10 +488,10 @@
             ],
             "additionalProperties": false
           },
-          "__type__type__type__typeProtocolDeclaration.o3": {
+          "__type__type__type__typeInterfaceDeclaration-o3": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -480,10 +513,10 @@
             ],
             "additionalProperties": false
           },
-          "__type__type__type__typeProtocolDeclaration.o2": {
+          "__type__type__type__typeInterfaceDeclaration-o2": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -503,10 +536,10 @@
             ],
             "additionalProperties": false
           },
-          "__type__type__type__typeProtocolDeclaration.o1": {
+          "__type__type__type__typeInterfaceDeclaration-o1": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -526,10 +559,10 @@
             ],
             "additionalProperties": false
           },
-          "__type__type__type__typeProtocolDeclaration": {
+          "__type__type__type__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -541,7 +574,7 @@
             "required": ["kind", "name", "requirements", "type", "boxed"],
             "additionalProperties": false
           },
-          "FieldReference__type.o2": {
+          "FieldReference__type-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "FIELD_REF" },
@@ -549,48 +582,48 @@
               "field": { "type": "string" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/RCTypeLatticeProtocolDeclaration" },
-                  { "$ref": "#/$defs/ProtocolLatticeProtocolDeclaration" },
-                  { "$ref": "#/$defs/RealLatticeProtocolDeclaration" },
-                  { "$ref": "#/$defs/StringLatticeProtocolDeclaration" },
+                  { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/InterfaceLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/RealLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/StringLatticeInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/TruthvalueLatticetruthvalueProtocolDeclaration"
+                    "$ref": "#/$defs/TruthvalueLatticetruthvalueInterfaceDeclaration"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__typeProtocolDeclaration.o3"
+                    "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o3"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__typeProtocolDeclaration.o2"
+                    "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o2"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__typeProtocolDeclaration.o1"
+                    "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o1"
                   },
-                  { "$ref": "#/$defs/__type__type__typeProtocolDeclaration" }
+                  { "$ref": "#/$defs/__type__type__typeInterfaceDeclaration" }
                 ]
               }
             },
             "required": ["kind", "object", "field", "value"],
             "additionalProperties": false
           },
-          "ProtocolLatticeProtocolDeclaration": {
+          "InterfaceLatticeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "requirements": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
-              "type": { "const": "protocol" },
+              "type": { "const": "interface" },
               "namespace": { "type": "string" },
               "name": { "type": "string" }
             },
             "required": ["kind", "requirements", "type", "name"],
             "additionalProperties": false
           },
-          "RealLatticeProtocolDeclaration": {
+          "RealLatticeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -603,10 +636,10 @@
             "required": ["kind", "name", "requirements", "type"],
             "additionalProperties": false
           },
-          "StringLatticeProtocolDeclaration": {
+          "StringLatticeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -618,10 +651,10 @@
             "required": ["kind", "name", "requirements", "type"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalueProtocolDeclaration": {
+          "TruthvalueLatticetruthvalueInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -637,10 +670,10 @@
             "required": ["kind", "name", "requirements", "type", "values"],
             "additionalProperties": false
           },
-          "__type__type__typeProtocolDeclaration.o3": {
+          "__type__type__typeInterfaceDeclaration-o3": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -654,10 +687,10 @@
             "required": ["kind", "name", "requirements", "type", "min", "max"],
             "additionalProperties": false
           },
-          "__type__type__typeProtocolDeclaration.o2": {
+          "__type__type__typeInterfaceDeclaration-o2": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -670,10 +703,10 @@
             "required": ["kind", "name", "requirements", "type", "min"],
             "additionalProperties": false
           },
-          "__type__type__typeProtocolDeclaration.o1": {
+          "__type__type__typeInterfaceDeclaration-o1": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -686,10 +719,10 @@
             "required": ["kind", "name", "requirements", "type", "max"],
             "additionalProperties": false
           },
-          "__type__type__typeProtocolDeclaration": {
+          "__type__type__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -701,18 +734,18 @@
             "required": ["kind", "name", "requirements", "type"],
             "additionalProperties": false
           },
-          "IntegerLiteralbigint__type.o2": {
+          "IntegerLiteralbigint__type-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTEGER_LITERAL" },
               "value": {
-                "$ref": "#/$defs/__type__type__typeProtocolDeclaration.o3"
+                "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o3"
               }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "MemoryAllocation__type.o2": {
+          "MemoryAllocation__type-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "ALLOCATION" },
@@ -720,9 +753,9 @@
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
               "fields": {
                 "type": "array",
-                "items": { "$ref": "#/$defs/__type.o1" }
+                "items": { "$ref": "#/$defs/__type-o1" }
               },
-              "value": { "$ref": "#/$defs/RCTypeLatticeProtocolDeclaration" }
+              "value": { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" }
             },
             "required": ["kind", "isolationLevel", "fields", "value"],
             "additionalProperties": false
@@ -739,7 +772,7 @@
           "IsolationLevel": {
             "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
           },
-          "__type.o1": {
+          "__type-o1": {
             "type": "object",
             "properties": {
               "name": { "type": "string" },
@@ -748,31 +781,31 @@
             "required": ["name", "value"],
             "additionalProperties": false
           },
-          "MemoryRetention__type.o2": {
+          "MemoryRetention__type-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "RETAIN" },
               "object": { "$ref": "#/$defs/Storage" },
-              "value": { "$ref": "#/$defs/RCTypeLatticeProtocolDeclaration" }
+              "value": { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" }
             },
             "required": ["kind", "object", "value"],
             "additionalProperties": false
           },
-          "TruthLiteraltruthvalue__type.o2": {
+          "TruthLiteraltruthvalue__type-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "TRUTHVALUE_LITERAL" },
               "value": {
-                "$ref": "#/$defs/TruthvalueLatticetruthvalueProtocolDeclaration.o1"
+                "$ref": "#/$defs/TruthvalueLatticetruthvalueInterfaceDeclaration-o1"
               }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalueProtocolDeclaration.o1": {
+          "TruthvalueLatticetruthvalueInterfaceDeclaration-o1": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -789,21 +822,21 @@
             "required": ["kind", "name", "requirements", "type", "values"],
             "additionalProperties": false
           },
-          "StringLiteral__type.o2": {
+          "StringLiteral__type-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "STRING_LITERAL" },
               "value": {
-                "$ref": "#/$defs/StringLattice__typeProtocolDeclaration.o1"
+                "$ref": "#/$defs/StringLattice__typeInterfaceDeclaration-o1"
               }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "StringLattice__typeProtocolDeclaration.o1": {
+          "StringLattice__typeInterfaceDeclaration-o1": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -815,51 +848,51 @@
             "required": ["kind", "name", "requirements", "type", "value"],
             "additionalProperties": false
           },
-          "VariableReference__type.o2": {
+          "VariableReference__type-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "VARIABLE_REF" },
               "name": { "type": "string" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/RCTypeLatticeProtocolDeclaration" },
-                  { "$ref": "#/$defs/ProtocolLatticeProtocolDeclaration" },
-                  { "$ref": "#/$defs/RealLatticeProtocolDeclaration" },
-                  { "$ref": "#/$defs/StringLatticeProtocolDeclaration" },
+                  { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/InterfaceLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/RealLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/StringLatticeInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/TruthvalueLatticetruthvalueProtocolDeclaration"
+                    "$ref": "#/$defs/TruthvalueLatticetruthvalueInterfaceDeclaration"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__typeProtocolDeclaration.o3"
+                    "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o3"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__typeProtocolDeclaration.o2"
+                    "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o2"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__typeProtocolDeclaration.o1"
+                    "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o1"
                   },
-                  { "$ref": "#/$defs/__type__type__typeProtocolDeclaration" }
+                  { "$ref": "#/$defs/__type__type__typeInterfaceDeclaration" }
                 ]
               }
             },
             "required": ["kind", "name", "value"],
             "additionalProperties": false
           },
-          "FunctionCall__type__type.o2": {
+          "FunctionCall__type__type-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "CALL" },
               "receiver": {
                 "oneOf": [
-                  { "$ref": "#/$defs/__type.o3" },
-                  { "$ref": "#/$defs/__type.o2" },
+                  { "$ref": "#/$defs/__type-o3" },
+                  { "$ref": "#/$defs/__type-o2" },
                   { "$ref": "#/$defs/__type" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "conformance": "#/components/schemas/__type.o3",
+                    "conformance": "#/components/schemas/__type-o3",
                     "direct": "#/components/schemas/__type",
-                    "inherited": "#/components/schemas/__type.o2"
+                    "inherited": "#/components/schemas/__type-o2"
                   },
                   "propertyName": "dispatch"
                 }
@@ -871,57 +904,57 @@
               },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/RCTypeLatticeProtocolDeclaration" },
-                  { "$ref": "#/$defs/ProtocolLatticeProtocolDeclaration" },
-                  { "$ref": "#/$defs/RealLatticeProtocolDeclaration" },
-                  { "$ref": "#/$defs/StringLatticeProtocolDeclaration" },
+                  { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/InterfaceLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/RealLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/StringLatticeInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/TruthvalueLatticetruthvalueProtocolDeclaration"
+                    "$ref": "#/$defs/TruthvalueLatticetruthvalueInterfaceDeclaration"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__typeProtocolDeclaration.o3"
+                    "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o3"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__typeProtocolDeclaration.o2"
+                    "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o2"
                   },
                   {
-                    "$ref": "#/$defs/__type__type__typeProtocolDeclaration.o1"
+                    "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o1"
                   },
-                  { "$ref": "#/$defs/__type__type__typeProtocolDeclaration" }
+                  { "$ref": "#/$defs/__type__type__typeInterfaceDeclaration" }
                 ]
               }
             },
             "required": ["kind", "name", "arguments", "value"],
             "additionalProperties": false
           },
-          "__type.o2": {
+          "__type-o2": {
             "type": "object",
             "properties": {
               "object": {
                 "oneOf": [
-                  { "$ref": "#/$defs/AsShared__type.o1" },
-                  { "$ref": "#/$defs/Box__type.o1" },
-                  { "$ref": "#/$defs/FieldReference__type.o1" },
-                  { "$ref": "#/$defs/IntegerLiteralbigint__type.o1" },
-                  { "$ref": "#/$defs/MemoryAllocation__type.o1" },
-                  { "$ref": "#/$defs/MemoryRetention__type.o1" },
-                  { "$ref": "#/$defs/TruthLiteraltruthvalue__type.o1" },
-                  { "$ref": "#/$defs/StringLiteral__type.o1" },
-                  { "$ref": "#/$defs/VariableReference__type.o1" },
-                  { "$ref": "#/$defs/FunctionCall__type__type.o1" }
+                  { "$ref": "#/$defs/AsShared__type-o1" },
+                  { "$ref": "#/$defs/Box__type-o1" },
+                  { "$ref": "#/$defs/FieldReference__type-o1" },
+                  { "$ref": "#/$defs/IntegerLiteralbigint__type-o1" },
+                  { "$ref": "#/$defs/MemoryAllocation__type-o1" },
+                  { "$ref": "#/$defs/MemoryRetention__type-o1" },
+                  { "$ref": "#/$defs/TruthLiteraltruthvalue__type-o1" },
+                  { "$ref": "#/$defs/StringLiteral__type-o1" },
+                  { "$ref": "#/$defs/VariableReference__type-o1" },
+                  { "$ref": "#/$defs/FunctionCall__type__type-o1" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "ALLOCATION": "#/components/schemas/MemoryAllocation__type.o1",
-                    "AS_SHARED": "#/components/schemas/AsShared__type.o1",
-                    "BOX": "#/components/schemas/Box__type.o1",
-                    "CALL": "#/components/schemas/FunctionCall__type__type.o1",
-                    "FIELD_REF": "#/components/schemas/FieldReference__type.o1",
-                    "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint__type.o1",
-                    "RETAIN": "#/components/schemas/MemoryRetention__type.o1",
-                    "STRING_LITERAL": "#/components/schemas/StringLiteral__type.o1",
-                    "TRUTHVALUE_LITERAL": "#/components/schemas/TruthLiteraltruthvalue__type.o1",
-                    "VARIABLE_REF": "#/components/schemas/VariableReference__type.o1"
+                    "ALLOCATION": "#/components/schemas/MemoryAllocation__type-o1",
+                    "AS_SHARED": "#/components/schemas/AsShared__type-o1",
+                    "BOX": "#/components/schemas/Box__type-o1",
+                    "CALL": "#/components/schemas/FunctionCall__type__type-o1",
+                    "FIELD_REF": "#/components/schemas/FieldReference__type-o1",
+                    "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint__type-o1",
+                    "RETAIN": "#/components/schemas/MemoryRetention__type-o1",
+                    "STRING_LITERAL": "#/components/schemas/StringLiteral__type-o1",
+                    "TRUTHVALUE_LITERAL": "#/components/schemas/TruthLiteraltruthvalue__type-o1",
+                    "VARIABLE_REF": "#/components/schemas/VariableReference__type-o1"
                   },
                   "propertyName": "kind"
                 }
@@ -931,7 +964,7 @@
             "required": ["object", "dispatch"],
             "additionalProperties": false
           },
-          "AsShared__type.o1": {
+          "AsShared__type-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "AS_SHARED" },
@@ -941,7 +974,7 @@
             "required": ["kind", "object", "value"],
             "additionalProperties": false
           },
-          "Box__type.o1": {
+          "Box__type-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "BOX" },
@@ -962,7 +995,7 @@
             "required": ["boxed", "type", "name"],
             "additionalProperties": false
           },
-          "FieldReference__type.o1": {
+          "FieldReference__type-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "FIELD_REF" },
@@ -973,7 +1006,7 @@
             "required": ["kind", "object", "field", "value"],
             "additionalProperties": false
           },
-          "IntegerLiteralbigint__type.o1": {
+          "IntegerLiteralbigint__type-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTEGER_LITERAL" },
@@ -988,7 +1021,7 @@
             "required": [],
             "additionalProperties": false
           },
-          "MemoryAllocation__type.o1": {
+          "MemoryAllocation__type-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "ALLOCATION" },
@@ -996,14 +1029,14 @@
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
               "fields": {
                 "type": "array",
-                "items": { "$ref": "#/$defs/__type.o1" }
+                "items": { "$ref": "#/$defs/__type-o1" }
               },
               "value": { "$ref": "#/$defs/RCTypeLattice" }
             },
             "required": ["kind", "isolationLevel", "fields", "value"],
             "additionalProperties": false
           },
-          "MemoryRetention__type.o1": {
+          "MemoryRetention__type-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "RETAIN" },
@@ -1013,7 +1046,7 @@
             "required": ["kind", "object", "value"],
             "additionalProperties": false
           },
-          "TruthLiteraltruthvalue__type.o1": {
+          "TruthLiteraltruthvalue__type-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "TRUTHVALUE_LITERAL" },
@@ -1030,7 +1063,7 @@
             "required": [],
             "additionalProperties": false
           },
-          "StringLiteral__type.o1": {
+          "StringLiteral__type-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "STRING_LITERAL" },
@@ -1045,7 +1078,7 @@
             "required": [],
             "additionalProperties": false
           },
-          "VariableReference__type.o1": {
+          "VariableReference__type-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "VARIABLE_REF" },
@@ -1055,21 +1088,21 @@
             "required": ["kind", "name", "value"],
             "additionalProperties": false
           },
-          "FunctionCall__type__type.o1": {
+          "FunctionCall__type__type-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "CALL" },
               "receiver": {
                 "oneOf": [
-                  { "$ref": "#/$defs/__type.o3" },
-                  { "$ref": "#/$defs/__type.o2" },
+                  { "$ref": "#/$defs/__type-o3" },
+                  { "$ref": "#/$defs/__type-o2" },
                   { "$ref": "#/$defs/__type" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "conformance": "#/components/schemas/__type.o3",
+                    "conformance": "#/components/schemas/__type-o3",
                     "direct": "#/components/schemas/__type",
-                    "inherited": "#/components/schemas/__type.o2"
+                    "inherited": "#/components/schemas/__type-o2"
                   },
                   "propertyName": "dispatch"
                 }
@@ -1139,11 +1172,11 @@
               "value": {
                 "oneOf": [
                   { "$ref": "#/$defs/RCTypeLattice__type" },
-                  { "$ref": "#/$defs/ProtocolLattice__type" }
+                  { "$ref": "#/$defs/InterfaceLattice__type" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "protocol": "#/components/schemas/ProtocolLattice__type",
+                    "interface": "#/components/schemas/InterfaceLattice__type",
                     "rc-type": "#/components/schemas/RCTypeLattice__type"
                   },
                   "propertyName": "type"
@@ -1153,11 +1186,11 @@
             "required": ["kind", "expression", "value"],
             "additionalProperties": false
           },
-          "ProtocolLattice__type": {
+          "InterfaceLattice__type": {
             "type": "object",
             "properties": {
               "boxed": { "const": true },
-              "type": { "const": "protocol" },
+              "type": { "const": "interface" },
               "namespace": { "type": "string" },
               "name": { "type": "string" }
             },
@@ -1172,9 +1205,16 @@
               "field": { "type": "string" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/ProtocolLattice" },
+                  { "$ref": "#/$defs/InterfaceLattice" },
                   { "$ref": "#/$defs/RCTypeLattice" }
-                ]
+                ],
+                "discriminator": {
+                  "mapping": {
+                    "interface": "#/components/schemas/InterfaceLattice",
+                    "rc-type": "#/components/schemas/RCTypeLattice"
+                  },
+                  "propertyName": "type"
+                }
               }
             },
             "required": ["kind", "object", "field", "value"],
@@ -1194,7 +1234,7 @@
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
               "fields": {
                 "type": "array",
-                "items": { "$ref": "#/$defs/__type.o1" }
+                "items": { "$ref": "#/$defs/__type-o1" }
               },
               "value": { "$ref": "#/$defs/RCTypeLattice" }
             },
@@ -1230,9 +1270,16 @@
               "name": { "type": "string" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/ProtocolLattice" },
+                  { "$ref": "#/$defs/InterfaceLattice" },
                   { "$ref": "#/$defs/RCTypeLattice" }
-                ]
+                ],
+                "discriminator": {
+                  "mapping": {
+                    "interface": "#/components/schemas/InterfaceLattice",
+                    "rc-type": "#/components/schemas/RCTypeLattice"
+                  },
+                  "propertyName": "type"
+                }
               }
             },
             "required": ["kind", "name", "value"],
@@ -1244,15 +1291,15 @@
               "kind": { "const": "CALL" },
               "receiver": {
                 "oneOf": [
-                  { "$ref": "#/$defs/__type.o3" },
-                  { "$ref": "#/$defs/__type.o2" },
+                  { "$ref": "#/$defs/__type-o3" },
+                  { "$ref": "#/$defs/__type-o2" },
                   { "$ref": "#/$defs/__type" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "conformance": "#/components/schemas/__type.o3",
+                    "conformance": "#/components/schemas/__type-o3",
                     "direct": "#/components/schemas/__type",
-                    "inherited": "#/components/schemas/__type.o2"
+                    "inherited": "#/components/schemas/__type-o2"
                   },
                   "propertyName": "dispatch"
                 }
@@ -1264,9 +1311,16 @@
               },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/ProtocolLattice" },
+                  { "$ref": "#/$defs/InterfaceLattice" },
                   { "$ref": "#/$defs/RCTypeLattice" }
-                ]
+                ],
+                "discriminator": {
+                  "mapping": {
+                    "interface": "#/components/schemas/InterfaceLattice",
+                    "rc-type": "#/components/schemas/RCTypeLattice"
+                  },
+                  "propertyName": "type"
+                }
               }
             },
             "required": ["kind", "name", "arguments", "value"],
@@ -1300,13 +1354,13 @@
               "value": {
                 "oneOf": [
                   { "$ref": "#/$defs/RCTypeLattice__type" },
-                  { "$ref": "#/$defs/ProtocolLattice__type" },
+                  { "$ref": "#/$defs/InterfaceLattice__type" },
                   { "$ref": "#/$defs/RealLattice__type" },
                   { "$ref": "#/$defs/StringLattice__type" },
                   { "$ref": "#/$defs/TruthvalueLatticetruthvalue__type" },
-                  { "$ref": "#/$defs/__type__type__type__type.o3" },
-                  { "$ref": "#/$defs/__type__type__type__type.o2" },
-                  { "$ref": "#/$defs/__type__type__type__type.o1" },
+                  { "$ref": "#/$defs/__type__type__type__type-o3" },
+                  { "$ref": "#/$defs/__type__type__type__type-o2" },
+                  { "$ref": "#/$defs/__type__type__type__type-o1" },
                   { "$ref": "#/$defs/__type__type__type__type" }
                 ]
               }
@@ -1348,7 +1402,7 @@
             "required": ["type", "boxed", "values"],
             "additionalProperties": false
           },
-          "__type__type__type__type.o3": {
+          "__type__type__type__type-o3": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
@@ -1359,7 +1413,7 @@
             "required": ["type", "boxed", "min", "max"],
             "additionalProperties": false
           },
-          "__type__type__type__type.o2": {
+          "__type__type__type__type-o2": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
@@ -1369,7 +1423,7 @@
             "required": ["type", "boxed", "min"],
             "additionalProperties": false
           },
-          "__type__type__type__type.o1": {
+          "__type__type__type__type-o1": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
@@ -1427,7 +1481,7 @@
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
               "fields": {
                 "type": "array",
-                "items": { "$ref": "#/$defs/__type.o1" }
+                "items": { "$ref": "#/$defs/__type-o1" }
               },
               "value": { "$ref": "#/$defs/RCTypeLattice" }
             },
@@ -1448,12 +1502,12 @@
             "type": "object",
             "properties": {
               "kind": { "const": "STRING_LITERAL" },
-              "value": { "$ref": "#/$defs/StringLattice__type.o1" }
+              "value": { "$ref": "#/$defs/StringLattice__type-o1" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "StringLattice__type.o1": {
+          "StringLattice__type-o1": {
             "type": "object",
             "properties": {
               "type": { "const": "string" },
@@ -1466,12 +1520,12 @@
             "type": "object",
             "properties": {
               "kind": { "const": "TRUTHVALUE_LITERAL" },
-              "value": { "$ref": "#/$defs/TruthvalueLatticetruthvalue.o1" }
+              "value": { "$ref": "#/$defs/TruthvalueLatticetruthvalue-o1" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalue.o1": {
+          "TruthvalueLatticetruthvalue-o1": {
             "type": "object",
             "properties": {
               "type": { "const": "truthvalue" },
@@ -1519,15 +1573,15 @@
               "kind": { "const": "CALL" },
               "receiver": {
                 "oneOf": [
-                  { "$ref": "#/$defs/__type.o3" },
-                  { "$ref": "#/$defs/__type.o2" },
+                  { "$ref": "#/$defs/__type-o3" },
+                  { "$ref": "#/$defs/__type-o2" },
                   { "$ref": "#/$defs/__type" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "conformance": "#/components/schemas/__type.o3",
+                    "conformance": "#/components/schemas/__type-o3",
                     "direct": "#/components/schemas/__type",
-                    "inherited": "#/components/schemas/__type.o2"
+                    "inherited": "#/components/schemas/__type-o2"
                   },
                   "propertyName": "dispatch"
                 }
@@ -1566,7 +1620,22 @@
                   { "$ref": "#/$defs/StringLiteral" },
                   { "$ref": "#/$defs/TruthLiteraltruthvalue" },
                   { "$ref": "#/$defs/VariableReference" }
-                ]
+                ],
+                "discriminator": {
+                  "mapping": {
+                    "ALLOCATION": "#/components/schemas/MemoryAllocation",
+                    "AS_SHARED": "#/components/schemas/AsShared",
+                    "BOX": "#/components/schemas/Box",
+                    "CALL": "#/components/schemas/FunctionCall__type",
+                    "FIELD_REF": "#/components/schemas/FieldReference",
+                    "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint",
+                    "RETAIN": "#/components/schemas/MemoryRetention",
+                    "STRING_LITERAL": "#/components/schemas/StringLiteral",
+                    "TRUTHVALUE_LITERAL": "#/components/schemas/TruthLiteraltruthvalue",
+                    "VARIABLE_REF": "#/components/schemas/VariableReference"
+                  },
+                  "propertyName": "kind"
+                }
               }
             },
             "required": ["kind"],
@@ -1585,17 +1654,17 @@
           },
           "Declaration": {
             "oneOf": [
-              { "$ref": "#/$defs/__typeProtocolDeclaration" },
+              { "$ref": "#/$defs/__typeInterfaceDeclaration" },
               { "$ref": "#/$defs/__typeVariableDeclaration" },
               { "$ref": "#/$defs/__type__type" },
               { "$ref": "#/$defs/__type__typeFunctionSignature" },
-              { "$ref": "#/$defs/__type__type__type.o4" }
+              { "$ref": "#/$defs/__type__type__type-o4" }
             ]
           },
-          "__typeProtocolDeclaration": {
+          "__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
-              "kind": { "const": "PROTOCOL_DECL" },
+              "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
               "requirements": {
                 "type": "array",
@@ -1641,7 +1710,7 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "protocol": { "$ref": "#/$defs/CanonicalName" },
+                    "interface": { "$ref": "#/$defs/CanonicalName" },
                     "fulfillments": {
                       "type": "array",
                       "items": {
@@ -1655,7 +1724,7 @@
                       }
                     }
                   },
-                  "required": ["protocol", "fulfillments"],
+                  "required": ["interface", "fulfillments"],
                   "additionalProperties": false
                 }
               }
@@ -1696,11 +1765,11 @@
               },
               "lattice": {
                 "oneOf": [
-                  { "$ref": "#/$defs/__type__type__type.o3" },
-                  { "$ref": "#/$defs/__type__type__type.o2" },
-                  { "$ref": "#/$defs/__type__type__type.o1" },
+                  { "$ref": "#/$defs/__type__type__type-o3" },
+                  { "$ref": "#/$defs/__type__type__type-o2" },
+                  { "$ref": "#/$defs/__type__type__type-o1" },
                   { "$ref": "#/$defs/__type__type__type" },
-                  { "$ref": "#/$defs/ProtocolLattice" },
+                  { "$ref": "#/$defs/InterfaceLattice" },
                   { "$ref": "#/$defs/RCTypeLattice" },
                   { "$ref": "#/$defs/RealLattice" },
                   { "$ref": "#/$defs/StringLattice" },
@@ -1712,7 +1781,7 @@
             "required": ["kind", "body", "baseName", "labels", "parameters"],
             "additionalProperties": false
           },
-          "__type__type__type.o4": {
+          "__type__type__type-o4": {
             "type": "object",
             "properties": {
               "namespace": { "type": "string" },
@@ -1735,7 +1804,7 @@
                 "items": {
                   "type": "object",
                   "properties": {
-                    "protocol": { "$ref": "#/$defs/CanonicalName" },
+                    "interface": { "$ref": "#/$defs/CanonicalName" },
                     "fulfillments": {
                       "type": "array",
                       "items": {
@@ -1749,7 +1818,7 @@
                       }
                     }
                   },
-                  "required": ["protocol", "fulfillments"],
+                  "required": ["interface", "fulfillments"],
                   "additionalProperties": false
                 }
               },
@@ -1803,11 +1872,11 @@
               },
               "lattice": {
                 "oneOf": [
-                  { "$ref": "#/$defs/__type__type__type.o3" },
-                  { "$ref": "#/$defs/__type__type__type.o2" },
-                  { "$ref": "#/$defs/__type__type__type.o1" },
+                  { "$ref": "#/$defs/__type__type__type-o3" },
+                  { "$ref": "#/$defs/__type__type__type-o2" },
+                  { "$ref": "#/$defs/__type__type__type-o1" },
                   { "$ref": "#/$defs/__type__type__type" },
-                  { "$ref": "#/$defs/ProtocolLattice" },
+                  { "$ref": "#/$defs/InterfaceLattice" },
                   { "$ref": "#/$defs/RCTypeLattice" },
                   { "$ref": "#/$defs/RealLattice" },
                   { "$ref": "#/$defs/StringLattice" },

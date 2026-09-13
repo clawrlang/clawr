@@ -44,8 +44,10 @@ Records so far:
 - [ADR-012](./adr-012.md): Parameters Labels and Ordering
 - [ADR-013](./adr-013.md): Currying on Labels
 - [ADR-014](./adr-014.md): Traits and Static
+- [ADR-015](./adr-015.md): Basic ARC Rules
+- [ADR-016](./adr-016.md): Backend-Managed Boxing of Unboxed Primitives
 
-Draft ideas with minimum detail:
+Draft ideas with no ADR number:
 
 - [XXX-X01](./drafts/x-1.md): `subset`
 - [XXX-X02](./drafts/x-2.md): Multi-Module Programs and Libraries
@@ -61,4 +63,7 @@ Draft ideas with minimum detail:
 - [XXX-X13](./drafts/x-13.md): List Comprehensions and Generators
 - [ADA Inspirations](./drafts/clawr-ada.md)
 - [Visibility](./drafts/visibility.md)
+- [The `integer` Combinatorial Explosion](./drafts/bigint.md)
+- [Debug Information in the CIR](./drafts/debug.md)
+- [Weak References](./drafts/weak-ref.md)
 - [Miscellaneous](./drafts/misc.md)

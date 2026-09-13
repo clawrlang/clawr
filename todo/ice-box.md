@@ -1,6 +1,7 @@
 # Ice Box
 
 - Parse namespace
+  - Decide the syntax. How/where are namespaces defined?
   - `FunctionName`
   - `DataDeclarationParser`
   - `FunctionDeclarationParser`
@@ -10,22 +11,11 @@
   - errors
   - did-you-mean suggestions
   - fixits
-- Handle `Integer*` when lowering
-  - Add types and ranges to CIR expressions
-  - Conversion becomes complex:
-    - `Integer_increment_Integer`
-    - `Integer_increment_int64`
-    - `Integer_increment_byte`
-    - ...
-    - `int64_increment_Integer`
-    - `int64_increment_int64`
-    - ...
+- Lower to `Integer*` if unbounded [See bigint.md](../adr/drafts/bigint.md)
 - Publish the JSON schema to <http://clawr.lang/schema/cir/DRAFT-0> (preliminary URL)
-- Storage expressions should not depend on `currentValue()`
-- `FunctionCall`
-  - `declaredLattice()` should probably not return `currentValue()`
-- `VariableDeclaration` `initialValue` type mismatch
-- `DataLiteral` field type mismatch
+- `FunctionCall.declaredLattice()` should probably not return `currentValue()`
+- `VariableDeclaration.initialValue` — handle type mismatch
+- `DataLiteral` – handle field type mismatch
 - Get the field values from the declared lattice when converting `SHARED` to `ISOLATED`
   - `SHARED` values cannot know their state
   - `ISOLATED` values can known them intimately

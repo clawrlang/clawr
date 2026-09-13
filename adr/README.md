@@ -65,5 +65,7 @@ Draft ideas with no ADR number:
 - [Visibility](./drafts/visibility.md)
 - [The `integer` Combinatorial Explosion](./drafts/bigint.md)
 - [Debug Information in the CIR](./drafts/debug.md)
+- [Disposing `service`](./drafts/deinit.md)
+- [External Access Only Through `service`](./drafts/services.md)
 - [Weak References](./drafts/weak-ref.md)
 - [Miscellaneous](./drafts/misc.md)

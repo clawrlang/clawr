@@ -1,10 +1,5 @@
-# Project Planning
+# TODO
 
-## In Progress
-
-- [Object](./todo/object.md)
-- `trait`/`role`
-
-## Incomplete/Postponed Functionality
-
-- [Function parameters and return values](./todo/params.md)
+- Parse `trait`/`role` types (method signatures without body)
+- Implement `toCIR` for `object`/`service`
+- Begin static analysis for `object`/`service`/`trait`/`role`

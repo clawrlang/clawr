@@ -1,7 +1,5 @@
 # `object`/`service`
 
-- Dispose `service` (e.g. close file handle) when deallocated
-
 ## Enforce on Frontend
 
 - `object` may not reach outside itself (its fields) except for calling `service` through a parameter
@@ -12,6 +10,7 @@
 - fields with initial value should be able to skip/infer value-set
 - `companion` with same name as `object`/`service` is allowed access to fields and data-literal
 - `companion` with no matching type is an error
+  - or is it a singleton? but then “companion” may be the wrong term?
 - Add `object`/`service` type
 - Make `FunctionCall` support methods
   - direct

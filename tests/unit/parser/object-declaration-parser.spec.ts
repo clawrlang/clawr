@@ -4,7 +4,7 @@ import { TestErrorReporter } from '@@/util'
 import { ObjectDeclarationParser } from '@/parser/object-declaration-parser'
 import { ISOLATED } from '@/model/isolation-level'
 
-describe('Object Parser', () => {
+describe('ObjectDeclaration Parser', () => {
     it('parses an empty object', () => {
         const code = 'object O {}'
 

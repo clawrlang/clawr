@@ -1841,7 +1841,7 @@
                 }
               }
             },
-            "required": ["kind", "name", "fields", "methods"],
+            "required": ["kind", "name", "fields", "methods", "initializers"],
             "additionalProperties": false
           },
           "FunctionDeclaration": {

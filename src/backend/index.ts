@@ -72,10 +72,10 @@ export function lowerDecl(decl: cir.Declaration): string {
             ${vtableTypedefs.join('\n')}
             ${vtableStruct}
             ${decl.methods?.map((m) => lowerMethod(m, decl)).join('\n') ?? ''}
-            ${decl.initializers?.map((m) => lowerInitializer(m, decl)).join('\n') ?? ''}
             static const __type_info ${mangledTypeName}ˇtype = {
                 ${typeInfo}
             };
+            ${decl.initializers?.map((m) => lowerInitializer(m, decl)).join('\n') ?? ''}
             `
         }
         case 'VARIABLE_DECL':
@@ -259,11 +259,10 @@ export function lowerStmt(stmt: cir.Statement): string {
         case 'ASSIGN':
             if (
                 stmt.target.kind === 'VARIABLE_REF' &&
-                stmt.value.kind === 'ALLOCATION' &&
-                stmt.value.fields
+                stmt.value.kind === 'ALLOCATION'
             )
                 return `memcpy(&${lowerStorage(stmt.target)}->fields, &(${mangleTypeName(stmt.value.value)}ˇfields){
-                        ${stmt.value.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')}
+                        ${stmt.value.fields?.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ') ?? ''}
                     },
                     sizeof(${mangleTypeName(stmt.value.value)}ˇfields));`
             else

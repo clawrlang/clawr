@@ -171,6 +171,74 @@
                     ]
                 }
             ],
+            "initializers": [
+                {
+                    "kind": "FUNCTION_DECL",
+                    "baseName": "new",
+                    "labels": [],
+                    "parameters": [],
+                    "body": [
+                        {
+                            "kind": "ASSIGN",
+                            "target": {
+                                "kind": "VARIABLE_REF",
+                                "name": "self"
+                            },
+                            "value": {
+                                "kind": "ALLOCATION",
+                                "isolationLevel": "ISOLATED",
+                                "fields": [
+                                    {
+                                        "name": "field",
+                                        "value": {
+                                            "kind": "INTEGER_LITERAL",
+                                            "value": {
+                                                "type": "integer",
+                                                "min": "43",
+                                                "max": "43"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "value": {
+                                    "type": "rc-type",
+                                    "name": "Sub1"
+                                }
+                            }
+                        },
+                        {
+                            "kind": "CALL",
+                            "receiver": {
+                                "object": {
+                                    "kind": "VARIABLE_REF",
+                                    "name": "self",
+                                    "value": {
+                                        "type": "rc-type",
+                                        "name": "Super"
+                                    }
+                                },
+                                "dispatch": "direct"
+                            },
+                            "name": {
+                                "baseName": "init",
+                                "labels": [
+                                    "field"
+                                ]
+                            },
+                            "arguments": [
+                                {
+                                    "kind": "INTEGER_LITERAL",
+                                    "value": {
+                                        "type": "integer",
+                                        "min": "42",
+                                        "max": "42"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
             "dispatchTable": [
                 {
                     "slot": {
@@ -200,6 +268,61 @@
             },
             "fields": [],
             "methods": [],
+            "initializers": [
+                {
+                    "kind": "FUNCTION_DECL",
+                    "baseName": "new",
+                    "labels": [],
+                    "parameters": [],
+                    "body": [
+                        {
+                            "kind": "ASSIGN",
+                            "target": {
+                                "kind": "VARIABLE_REF",
+                                "name": "self"
+                            },
+                            "value": {
+                                "kind": "ALLOCATION",
+                                "isolationLevel": "ISOLATED",
+                                "value": {
+                                    "type": "rc-type",
+                                    "name": "Sub2"
+                                }
+                            }
+                        },
+                        {
+                            "kind": "CALL",
+                            "receiver": {
+                                "object": {
+                                    "kind": "VARIABLE_REF",
+                                    "name": "self",
+                                    "value": {
+                                        "type": "rc-type",
+                                        "name": "Super"
+                                    }
+                                },
+                                "dispatch": "direct"
+                            },
+                            "name": {
+                                "baseName": "init",
+                                "labels": [
+                                    "field"
+                                ]
+                            },
+                            "arguments": [
+                                {
+                                    "kind": "INTEGER_LITERAL",
+                                    "value": {
+                                        "type": "integer",
+                                        "max": "42",
+                                        "min": "42"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
             "dispatchTable": [
                 {
                     "slot": {
@@ -220,190 +343,6 @@
                     }
                 }
             ]
-        },
-        {
-            "kind": "FUNCTION_DECL",
-            "namespace": "Sub1",
-            "baseName": "new",
-            "labels": [],
-            "parameters": [],
-            "body": [
-                {
-                    "kind": "VARIABLE_DECL",
-                    "name": "__tempˇ0",
-                    "initialValue": {
-                        "kind": "ALLOCATION",
-                        "isolationLevel": "ISOLATED",
-                        "value": {
-                            "type": "rc-type",
-                            "name": "Sub1"
-                        }
-                    },
-                    "lattice": {
-                        "type": "rc-type",
-                        "name": "Sub1"
-                    }
-                },
-                {
-                    "kind": "ASSIGN",
-                    "target": {
-                        "kind": "VARIABLE_REF",
-                        "name": "__tempˇ0"
-                    },
-                    "value": {
-                        "kind": "ALLOCATION",
-                        "isolationLevel": "ISOLATED",
-                        "fields": [
-                            {
-                                "name": "field",
-                                "value": {
-                                    "kind": "INTEGER_LITERAL",
-                                    "value": {
-                                        "type": "integer",
-                                        "min": "43",
-                                        "max": "43"
-                                    }
-                                }
-                            }
-                        ],
-                        "value": {
-                            "type": "rc-type",
-                            "name": "Sub1"
-                        }
-                    }
-                },
-                {
-                    "kind": "CALL",
-                    "receiver": {
-                        "object": {
-                            "kind": "VARIABLE_REF",
-                            "name": "__tempˇ0",
-                            "value": {
-                                "type": "rc-type",
-                                "name": "Super"
-                            }
-                        },
-                        "dispatch": "direct"
-                    },
-                    "name": {
-                        "baseName": "init",
-                        "labels": [
-                            "field"
-                        ]
-                    },
-                    "arguments": [
-                        {
-                            "kind": "INTEGER_LITERAL",
-                            "value": {
-                                "type": "integer",
-                                "min": "42",
-                                "max": "42"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "kind": "RETURN",
-                    "value": {
-                        "kind": "VARIABLE_REF",
-                        "name": "__tempˇ0",
-                        "value": {
-                            "type": "rc-type",
-                            "name": "Super"
-                        }
-                    }
-                }
-            ],
-            "lattice": {
-                "type": "rc-type",
-                "name": "Sub1"
-            }
-        },
-        {
-            "kind": "FUNCTION_DECL",
-            "namespace": "Sub2",
-            "baseName": "new",
-            "labels": [],
-            "parameters": [],
-            "body": [
-                {
-                    "kind": "VARIABLE_DECL",
-                    "name": "__tempˇ0",
-                    "initialValue": {
-                        "kind": "ALLOCATION",
-                        "isolationLevel": "ISOLATED",
-                        "value": {
-                            "type": "rc-type",
-                            "name": "Sub2"
-                        }
-                    },
-                    "lattice": {
-                        "type": "rc-type",
-                        "name": "Sub2"
-                    }
-                },
-                {
-                    "kind": "ASSIGN",
-                    "target": {
-                        "kind": "VARIABLE_REF",
-                        "name": "__tempˇ0"
-                    },
-                    "value": {
-                        "kind": "ALLOCATION",
-                        "isolationLevel": "ISOLATED",
-                        "fields": [],
-                        "value": {
-                            "type": "rc-type",
-                            "name": "Sub2"
-                        }
-                    }
-                },
-                {
-                    "kind": "CALL",
-                    "receiver": {
-                        "object": {
-                            "kind": "VARIABLE_REF",
-                            "name": "__tempˇ0",
-                            "value": {
-                                "type": "rc-type",
-                                "name": "Super"
-                            }
-                        },
-                        "dispatch": "direct"
-                    },
-                    "name": {
-                        "baseName": "init",
-                        "labels": [
-                            "field"
-                        ]
-                    },
-                    "arguments": [
-                        {
-                            "kind": "INTEGER_LITERAL",
-                            "value": {
-                                "type": "integer",
-                                "max": "42",
-                                "min": "42"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "kind": "RETURN",
-                    "value": {
-                        "kind": "VARIABLE_REF",
-                        "name": "__tempˇ0",
-                        "value": {
-                            "type": "rc-type",
-                            "name": "Super"
-                        }
-                    }
-                }
-            ],
-            "lattice": {
-                "type": "rc-type",
-                "name": "Sub2"
-            }
         }
     ],
     "startBlock": [
@@ -415,16 +354,30 @@
                 "name": "Sub1"
             },
             "initialValue": {
-                "kind": "CALL",
-                "name": {
-                    "namespace": "Sub1",
-                    "baseName": "new",
-                    "labels": []
-                },
-                "arguments": [],
+                "kind": "ALLOCATION",
+                "isolationLevel": "ISOLATED",
                 "value": {
                     "type": "rc-type",
                     "name": "Sub1"
+                }
+            }
+        },
+        {
+            "kind": "CALL",
+            "name": {
+                "baseName": "new",
+                "labels": []
+            },
+            "arguments": [],
+            "receiver": {
+                "dispatch": "direct",
+                "object": {
+                    "kind": "VARIABLE_REF",
+                    "name": "obj1",
+                    "value": {
+                        "type": "rc-type",
+                        "name": "Sub1"
+                    }
                 }
             }
         },
@@ -436,16 +389,30 @@
                 "name": "Sub2"
             },
             "initialValue": {
-                "kind": "CALL",
-                "name": {
-                    "namespace": "Sub2",
-                    "baseName": "new",
-                    "labels": []
-                },
-                "arguments": [],
+                "kind": "ALLOCATION",
+                "isolationLevel": "ISOLATED",
                 "value": {
                     "type": "rc-type",
                     "name": "Sub2"
+                }
+            }
+        },
+        {
+            "kind": "CALL",
+            "name": {
+                "baseName": "new",
+                "labels": []
+            },
+            "arguments": [],
+            "receiver": {
+                "dispatch": "direct",
+                "object": {
+                    "kind": "VARIABLE_REF",
+                    "name": "obj2",
+                    "value": {
+                        "type": "rc-type",
+                        "name": "Sub2"
+                    }
                 }
             }
         },

@@ -57,7 +57,7 @@ type RCTypeDeclaration = {
     | {
           base?: CanonicalName
           methods: FunctionDeclaration[]
-          initializers?: (FunctionDeclaration & { lattice?: undefined })[]
+          initializers: (FunctionDeclaration & { lattice?: undefined })[]
           dispatchTable?: {
               slot: FunctionSignature
               declaredIn: CanonicalName

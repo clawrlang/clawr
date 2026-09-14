@@ -48,6 +48,44 @@
                         }
                     ]
                 }
+            ],
+            "initializers": [
+                {
+                    "kind": "FUNCTION_DECL",
+                    "baseName": "new",
+                    "labels": [],
+                    "parameters": [],
+                    "body": [
+                        {
+                            "kind": "ASSIGN",
+                            "target": {
+                                "kind": "VARIABLE_REF",
+                                "name": "self"
+                            },
+                            "value": {
+                                "kind": "ALLOCATION",
+                                "isolationLevel": "ISOLATED",
+                                "fields": [
+                                    {
+                                        "name": "field",
+                                        "value": {
+                                            "kind": "INTEGER_LITERAL",
+                                            "value": {
+                                                "type": "integer",
+                                                "min": "42",
+                                                "max": "42"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "value": {
+                                    "type": "rc-type",
+                                    "name": "Object"
+                                }
+                            }
+                        }
+                    ]
+                }
             ]
         },
         {
@@ -128,16 +166,30 @@
                 "name": "Object"
             },
             "initialValue": {
-                "kind": "CALL",
-                "name": {
-                    "namespace": "Object",
-                    "baseName": "new",
-                    "labels": []
-                },
-                "arguments": [],
+                "kind": "ALLOCATION",
+                "isolationLevel": "ISOLATED",
                 "value": {
                     "type": "rc-type",
                     "name": "Object"
+                }
+            }
+        },
+        {
+            "kind": "CALL",
+            "name": {
+                "baseName": "new",
+                "labels": []
+            },
+            "arguments": [],
+            "receiver": {
+                "dispatch": "direct",
+                "object": {
+                    "kind": "VARIABLE_REF",
+                    "name": "obj",
+                    "value": {
+                        "type": "rc-type",
+                        "name": "Object"
+                    }
                 }
             }
         },

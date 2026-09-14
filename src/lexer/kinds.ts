@@ -89,7 +89,7 @@ const ALL_KW = [
     `super`,
 
     // Object sections
-    'inheritance',
+    'init',
     `mutating`,
     `state`,
 

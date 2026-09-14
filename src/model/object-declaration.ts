@@ -11,7 +11,7 @@ export class ObjectDeclaration implements Declaration {
         private superType: string | undefined,
         private readonly: FunctionDeclaration[],
         private mutating: FunctionDeclaration[],
-        private inheritance: FunctionDeclaration[],
+        private initializers: FunctionDeclaration[],
         private fields: DataField[],
         private span: SourceCodeSpan,
     ) {}
@@ -22,7 +22,7 @@ export class ObjectDeclaration implements Declaration {
         superType,
         readonly,
         mutating,
-        inheritance,
+        initializers,
         fields,
         span,
     }: {
@@ -31,7 +31,7 @@ export class ObjectDeclaration implements Declaration {
         superType?: string
         readonly: FunctionDeclaration[]
         mutating: FunctionDeclaration[]
-        inheritance: FunctionDeclaration[]
+        initializers: FunctionDeclaration[]
         fields: DataField[]
         span: SourceCodeSpan
     }) {
@@ -41,7 +41,7 @@ export class ObjectDeclaration implements Declaration {
             superType,
             readonly,
             mutating,
-            inheritance,
+            initializers,
             fields,
             span,
         )

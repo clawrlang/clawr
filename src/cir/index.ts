@@ -53,7 +53,7 @@ type RCTypeDeclaration = {
             implementation: FunctionName
         }[]
     }[]
-} & ( // `object`/`service` add methods and optional inheritance
+} & ( // `object`/`service` add methods and initializers
     | {
           base?: CanonicalName
           methods: FunctionDeclaration[]

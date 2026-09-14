@@ -221,7 +221,7 @@ describe('Type declaration', () => {
             initializers: [
                 {
                     kind: 'FUNCTION_DECL',
-                    baseName: 'init',
+                    baseName: 'setup',
                     labels: ['field'],
                     parameters: [
                         {
@@ -263,7 +263,7 @@ describe('Type declaration', () => {
 
         const result = lowerDecl(typeDecl)
         expect(result).toContain(
-            'void* Super·init˛field(void* cˇself, int64_t field) {',
+            'void* Super·setup˛field(void* cˇself, int64_t field) {',
         )
         expect(result).toContain('Super* self = cˇself;')
         expect(result).toContain('memcpy(&self->fields, &(Superˇfields){')

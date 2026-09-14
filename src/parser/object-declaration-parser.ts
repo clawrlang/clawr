@@ -36,7 +36,7 @@ export class ObjectDeclarationParser {
 
         const readonly = this.parseMethods(stream)
         let mutating: FunctionDeclaration[] | undefined
-        let inheritance: FunctionDeclaration[] | undefined
+        let initializers: FunctionDeclaration[] | undefined
         let fields: DataField[] | undefined
 
         while (!stream.isNext('PUNCTUATION', '}')) {
@@ -50,15 +50,15 @@ export class ObjectDeclarationParser {
                     )
                 fields = this.parseFields(stream)
             }
-            if (stream.isNext('KEYWORD', 'inheritance')) {
-                const inheritanceToken = stream.expect('KEYWORD', 'inheritance')
+            if (stream.isNext('KEYWORD', 'init')) {
+                const inheritanceToken = stream.expect('KEYWORD', 'init')
                 stream.expect('PUNCTUATION', ':')
-                if (inheritance)
+                if (initializers)
                     this.context.errorReporter.reportFatalError(
-                        `Repeated inheritance section`,
+                        `Repeated init section`,
                         { ...inheritanceToken },
                     )
-                inheritance = this.parseMethods(stream)
+                initializers = this.parseMethods(stream)
             }
             if (stream.isNext('KEYWORD', 'mutating')) {
                 const mutatingToken = stream.expect('KEYWORD', 'mutating')
@@ -79,7 +79,7 @@ export class ObjectDeclarationParser {
             superType,
             readonly,
             mutating: mutating ?? [],
-            inheritance: inheritance ?? [],
+            initializers: initializers ?? [],
             fields: fields ?? [],
             span: {
                 start: startToken.start,
@@ -114,7 +114,7 @@ export class ObjectDeclarationParser {
             stream.isNext('PUNCTUATION', '}') ||
             stream.isNext('KEYWORD', 'state') ||
             stream.isNext('KEYWORD', 'mutating') ||
-            stream.isNext('KEYWORD', 'inheritance')
+            stream.isNext('KEYWORD', 'init')
         )
     }
 }

@@ -13,7 +13,7 @@ describe('ObjectDeclaration Parser', () => {
             kind: 'object',
             readonly: [],
             mutating: [],
-            inheritance: [],
+            initializers: [],
             fields: [],
             span: {
                 start: { line: 1, column: 1 },
@@ -22,7 +22,7 @@ describe('ObjectDeclaration Parser', () => {
         })
     })
 
-    it('parses object with inheritance', () => {
+    it('parses object with supertype', () => {
         const code = 'object Sub: Super {}'
 
         expect(parseObject(code)).toMatchObject({
@@ -31,7 +31,7 @@ describe('ObjectDeclaration Parser', () => {
             superType: 'Super',
             readonly: [],
             mutating: [],
-            inheritance: [],
+            initializers: [],
             fields: [],
             span: {
                 start: { line: 1, column: 1 },
@@ -47,7 +47,7 @@ describe('ObjectDeclaration Parser', () => {
             kind: 'service',
             readonly: [],
             mutating: [],
-            inheritance: [],
+            initializers: [],
             fields: [],
             span: {
                 start: { line: 1, column: 1 },
@@ -89,16 +89,16 @@ describe('ObjectDeclaration Parser', () => {
         })
     })
 
-    it('parses inheritance initializers', () => {
+    it('parses initializers', () => {
         const code = `
             object O {
-            inheritance:
+            init:
                 func init1() => {}
                 func init2() => {}
             }`
 
         expect(parseObject(code)).toMatchObject({
-            inheritance: [{ baseName: 'init1' }, { baseName: 'init2' }],
+            initializers: [{ baseName: 'init1' }, { baseName: 'init2' }],
             span: {
                 start: { line: 2, column: 13 },
                 end: { line: 6, column: 14 },
@@ -159,15 +159,15 @@ describe('ObjectDeclaration Parser', () => {
             state:
                 field1: integer
                 field2: truthvalue
-            inheritance:
-                func init() => {}
+            init:
+                func setup() => {}
             mutating:
                 func method() {}
             }`
 
         expect(parseObject(code)).toMatchObject({
             fields: [{ name: 'field1' }, { name: 'field2' }],
-            inheritance: [{ baseName: 'init' }],
+            initializers: [{ baseName: 'setup' }],
             mutating: [{ baseName: 'method' }],
             span: {
                 start: { line: 2, column: 13 },
@@ -178,12 +178,12 @@ describe('ObjectDeclaration Parser', () => {
 
     describe('parses sections in arbitrary order', () => {
         test.each([
-            ['state', 'mutating', 'inheritance'],
-            ['state', 'inheritance', 'mutating'],
-            ['mutating', 'state', 'inheritance'],
-            ['mutating', 'inheritance', 'state'],
-            ['inheritance', 'state', 'mutating'],
-            ['inheritance', 'mutating', 'state'],
+            ['state', 'mutating', 'init'],
+            ['state', 'init', 'mutating'],
+            ['mutating', 'state', 'init'],
+            ['mutating', 'init', 'state'],
+            ['init', 'state', 'mutating'],
+            ['init', 'mutating', 'state'],
         ])('%s:%s:%s:', (first, second, third) => {
             const code = `object O {${first}:${second}:${third}:}`
             expect(() => parseObject(code)).not.toThrow()
@@ -191,7 +191,7 @@ describe('ObjectDeclaration Parser', () => {
     })
 
     describe('throws if section names are repeated', () => {
-        test.each(['state', 'mutating', 'inheritance'])('%s:', (section) => {
+        test.each(['state', 'mutating', 'init'])('%s:', (section) => {
             const code = `object O {${section}:${section}:}`
             expect(() => parseObject(code)).toThrow(
                 `Repeated ${section} section`,

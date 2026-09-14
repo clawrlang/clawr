@@ -5,7 +5,7 @@
 // object Prism {
 //     abstract func area() -> integer
 //     func volume() -> integer
-// inheritance:
+// init:
 //     func new(height: integer @range(0..20))
 // state:
 //     height: integer
@@ -28,7 +28,7 @@ typedef struct Prismˇvtable {
   Prism·areaˇmethod area;
 } Prismˇvtable;
 
-// Clawr: `inheritance: func new(height: integer @range(0..20))`
+// Clawr: `init: func new(height: integer @range(0..20))`
 Prism *Prism˛new_height(void *self, int height) {
   // Clawr: `self = { height }`
   memcpy(((__rc_header *)self) + 1,

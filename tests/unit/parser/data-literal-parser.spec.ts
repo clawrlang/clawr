@@ -31,12 +31,12 @@ describe('DataLiteralParser', () => {
     })
 
     it('parses an initializer call', () => {
-        const code = '{ Super.init() }'
+        const code = '{ Super.setup() }'
         const result = parseDataLiteral(code)
         expect(result).toMatchObject({
             initializerCall: {
                 name: {
-                    baseName: 'init',
+                    baseName: 'setup',
                     arity: 0,
                     labels: [],
                 },

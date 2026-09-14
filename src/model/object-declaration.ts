@@ -1,3 +1,4 @@
+import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { FunctionDeclaration } from './function-declaration'
 import { DataField } from './data-declaration'
@@ -50,10 +51,24 @@ export class ObjectDeclaration implements Declaration {
 
     *emitDeclaration(context: Context): Failable {
         context.scope.rootScope.addObjectDeclaration(this)
+        const self = this.name
+        const methods: (cir.Declaration & { kind: 'FUNCTION_DECL' })[] =
+            yield yield* Failable.map(
+                [...this.readonly, ...this.mutating],
+                function* (item) {
+                    const methodCIRResult = yield* item.emitMethod({
+                        ...context,
+                        self,
+                    })
+                    return methodCIRResult
+                },
+            )
+
         context.scope.rootScope.emitted.push({
             kind: 'RC_TYPE_DECL',
             name: this.name.name,
             namespace: this.name.namespace,
+            methods: methods,
             fields: this.fields.map((field) => ({
                 name: field.name,
                 lattice: field.lattice!.toCIR(),

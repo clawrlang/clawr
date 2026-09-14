@@ -5,6 +5,7 @@ import { FunctionDeclaration } from '@/model/function-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { DataFieldParser } from './data-field-parser'
 import { FunctionDeclarationParser } from './function-declaration-parser'
+import { TypeName } from '@/model/type-name'
 
 export class ObjectDeclarationParser {
     private readonly functionParser: FunctionDeclarationParser
@@ -75,7 +76,7 @@ export class ObjectDeclarationParser {
         const endToken = stream.expect('PUNCTUATION', '}')
         return ObjectDeclaration.create({
             kind: startToken.keyword as 'object' | 'service',
-            name: nameToken.identifier,
+            name: TypeName.create({ name: nameToken.identifier }),
             superType,
             readonly,
             mutating: mutating ?? [],

@@ -3,17 +3,18 @@ import { FunctionDeclaration } from './function-declaration'
 import { DataField } from './data-declaration'
 import { Context, Declaration } from '.'
 import { Failable } from '@/tools/failable'
+import { TypeName } from './type-name'
 
 export class ObjectDeclaration implements Declaration {
     private constructor(
-        private kind: 'object' | 'service',
-        private name: string,
-        private superType: string | undefined,
-        private readonly: FunctionDeclaration[],
-        private mutating: FunctionDeclaration[],
-        private initializers: FunctionDeclaration[],
-        private fields: DataField[],
-        private span: SourceCodeSpan,
+        private readonly kind: 'object' | 'service',
+        public readonly name: TypeName,
+        private readonly superType: string | undefined,
+        private readonly readonly: FunctionDeclaration[],
+        private readonly mutating: FunctionDeclaration[],
+        private readonly initializers: FunctionDeclaration[],
+        private readonly fields: DataField[],
+        private readonly span: SourceCodeSpan,
     ) {}
 
     static create({
@@ -27,7 +28,7 @@ export class ObjectDeclaration implements Declaration {
         span,
     }: {
         kind: 'object' | 'service'
-        name: string
+        name: TypeName
         superType?: string
         readonly: FunctionDeclaration[]
         mutating: FunctionDeclaration[]

@@ -9,8 +9,8 @@ describe('ObjectDeclaration Parser', () => {
         const code = 'object O {}'
 
         expect(parseObject(code)).toMatchObject({
-            name: 'O',
             kind: 'object',
+            name: { name: 'O' },
             readonly: [],
             mutating: [],
             initializers: [],
@@ -26,8 +26,8 @@ describe('ObjectDeclaration Parser', () => {
         const code = 'object Sub: Super {}'
 
         expect(parseObject(code)).toMatchObject({
-            name: 'Sub',
             kind: 'object',
+            name: { name: 'Sub' },
             superType: 'Super',
             readonly: [],
             mutating: [],
@@ -43,7 +43,7 @@ describe('ObjectDeclaration Parser', () => {
     it('parses service', () => {
         const code = 'service S {}'
         expect(parseObject(code)).toMatchObject({
-            name: 'S',
+            name: { name: 'S' },
             kind: 'service',
             readonly: [],
             mutating: [],

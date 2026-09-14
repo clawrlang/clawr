@@ -158,9 +158,8 @@ type TruthLiteral<Value extends truthvalue> = {
 
 type MemoryAllocation = {
     kind: 'ALLOCATION'
-    base?: CanonicalName
     isolationLevel: IsolationLevel
-    fields: {
+    fields?: {
         name: string
         value: Expression
     }[]

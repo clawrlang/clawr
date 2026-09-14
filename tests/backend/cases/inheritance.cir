@@ -233,9 +233,25 @@
                     "name": "__tempˇ0",
                     "initialValue": {
                         "kind": "ALLOCATION",
-                        "base": {
-                            "name": "Super"
-                        },
+                        "isolationLevel": "ISOLATED",
+                        "value": {
+                            "type": "rc-type",
+                            "name": "Sub1"
+                        }
+                    },
+                    "lattice": {
+                        "type": "rc-type",
+                        "name": "Sub1"
+                    }
+                },
+                {
+                    "kind": "ASSIGN",
+                    "target": {
+                        "kind": "VARIABLE_REF",
+                        "name": "__tempˇ0"
+                    },
+                    "value": {
+                        "kind": "ALLOCATION",
                         "isolationLevel": "ISOLATED",
                         "fields": [
                             {
@@ -254,10 +270,6 @@
                             "type": "rc-type",
                             "name": "Sub1"
                         }
-                    },
-                    "lattice": {
-                        "type": "rc-type",
-                        "name": "void"
                     }
                 },
                 {
@@ -319,19 +331,31 @@
                     "name": "__tempˇ0",
                     "initialValue": {
                         "kind": "ALLOCATION",
-                        "base": {
-                            "name": "Super"
-                        },
                         "isolationLevel": "ISOLATED",
                         "value": {
                             "type": "rc-type",
                             "name": "Sub2"
-                        },
-                        "fields": []
+                        }
                     },
                     "lattice": {
                         "type": "rc-type",
-                        "name": "void"
+                        "name": "Sub2"
+                    }
+                },
+                {
+                    "kind": "ASSIGN",
+                    "target": {
+                        "kind": "VARIABLE_REF",
+                        "name": "__tempˇ0"
+                    },
+                    "value": {
+                        "kind": "ALLOCATION",
+                        "isolationLevel": "ISOLATED",
+                        "fields": [],
+                        "value": {
+                            "type": "rc-type",
+                            "name": "Sub2"
+                        }
                     }
                 },
                 {

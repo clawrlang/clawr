@@ -749,7 +749,6 @@
             "type": "object",
             "properties": {
               "kind": { "const": "ALLOCATION" },
-              "base": { "$ref": "#/$defs/CanonicalName" },
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
               "fields": {
                 "type": "array",
@@ -757,16 +756,7 @@
               },
               "value": { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" }
             },
-            "required": ["kind", "isolationLevel", "fields", "value"],
-            "additionalProperties": false
-          },
-          "CanonicalName": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string" },
-              "namespace": { "type": "string" }
-            },
-            "required": ["name"],
+            "required": ["kind", "isolationLevel", "value"],
             "additionalProperties": false
           },
           "IsolationLevel": {
@@ -1025,7 +1015,6 @@
             "type": "object",
             "properties": {
               "kind": { "const": "ALLOCATION" },
-              "base": { "$ref": "#/$defs/CanonicalName" },
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
               "fields": {
                 "type": "array",
@@ -1033,7 +1022,7 @@
               },
               "value": { "$ref": "#/$defs/RCTypeLattice" }
             },
-            "required": ["kind", "isolationLevel", "fields", "value"],
+            "required": ["kind", "isolationLevel", "value"],
             "additionalProperties": false
           },
           "MemoryRetention__type-o1": {
@@ -1230,7 +1219,6 @@
             "type": "object",
             "properties": {
               "kind": { "const": "ALLOCATION" },
-              "base": { "$ref": "#/$defs/CanonicalName" },
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
               "fields": {
                 "type": "array",
@@ -1238,7 +1226,7 @@
               },
               "value": { "$ref": "#/$defs/RCTypeLattice" }
             },
-            "required": ["kind", "isolationLevel", "fields", "value"],
+            "required": ["kind", "isolationLevel", "value"],
             "additionalProperties": false
           },
           "MemoryRetention__type": {
@@ -1477,7 +1465,6 @@
             "type": "object",
             "properties": {
               "kind": { "const": "ALLOCATION" },
-              "base": { "$ref": "#/$defs/CanonicalName" },
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
               "fields": {
                 "type": "array",
@@ -1485,7 +1472,7 @@
               },
               "value": { "$ref": "#/$defs/RCTypeLattice" }
             },
-            "required": ["kind", "isolationLevel", "fields", "value"],
+            "required": ["kind", "isolationLevel", "value"],
             "additionalProperties": false
           },
           "MemoryRetention": {
@@ -1730,6 +1717,15 @@
               }
             },
             "required": ["kind", "name", "fields"],
+            "additionalProperties": false
+          },
+          "CanonicalName": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "namespace": { "type": "string" }
+            },
+            "required": ["name"],
             "additionalProperties": false
           },
           "FunctionName": {

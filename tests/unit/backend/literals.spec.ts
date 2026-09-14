@@ -66,7 +66,7 @@ describe('Lowering Literals', () => {
             expect(result).toContain('.field = var')
         })
 
-        it('lowers as allocInitInheritedRC', () => {
+        it('lowers as allocInitRC', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
                 isolationLevel: ISOLATED,
@@ -80,11 +80,10 @@ describe('Lowering Literals', () => {
                         },
                     },
                 ],
-                base: { name: 'Super' },
                 value: { type: 'rc-type', name: 'MyObject' },
             }
             const result = lowerExpr(expr)
-            expect(result).toContain('allocInitInheritedRC(MyObject, 0, Super')
+            expect(result).toContain('allocInitRC(MyObject, 0')
             expect(result).toContain('.field = var')
         })
     })

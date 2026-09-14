@@ -259,13 +259,13 @@ export function lowerStmt(stmt: cir.Statement): string {
         case 'ASSIGN':
             if (
                 stmt.target.kind === 'VARIABLE_REF' &&
-                stmt.target.name === 'self' &&
-                stmt.value.kind === 'ALLOCATION'
+                stmt.value.kind === 'ALLOCATION' &&
+                stmt.value.fields
             )
-                return `memcpy(&self->fields, &(Superˇfields){
+                return `memcpy(&${lowerStorage(stmt.target)}->fields, &(${mangleTypeName(stmt.value.value)}ˇfields){
                         ${stmt.value.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')}
                     },
-                    sizeof(Superˇfields));`
+                    sizeof(${mangleTypeName(stmt.value.value)}ˇfields));`
             else
                 return `${lowerStorage(stmt.target)} = ${lowerExpr(stmt.value)};`
         case 'ENSURE_UNIQUE':
@@ -319,13 +319,9 @@ export function lowerExpr(expr: cir.Expression): string {
             }
         case 'ALLOCATION':
             const mangledTypeName = mangleTypeName(expr.value)
-            if (expr.base) {
-                const mangledSuperTypeName = mangleTypeName(expr.base)
-                return `allocInitInheritedRC(${mangledTypeName}, 0, ${mangledSuperTypeName}, ${`__rc_${expr.isolationLevel}`},
-                    ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
-            } else
-                return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
-                    ${expr.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')})`
+            return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
+                ${expr.fields?.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ') ?? ''}
+            )`
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
     }
@@ -348,19 +344,15 @@ export function lowerStorage(
 
 function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
     const receiver = call.receiver
+    const args = call.arguments.map(lowerExpr)
     switch (receiver?.dispatch) {
         case undefined: {
             const name = mangleNameWithLabels(call.name)
-            const args = call.arguments.map(lowerExpr)
             return `${name}(${args.join(', ')})`
         }
         case 'direct': {
-            const args = [
-                lowerExpr(receiver.object),
-                ...call.arguments.map(lowerExpr),
-            ]
             const name = mangleNameWithLabels(call.name, receiver.object.value)
-            return `${name}(${args.join(', ')})`
+            return `${name}(${[lowerExpr(receiver.object), ...args].join(', ')})`
         }
         case 'inherited': {
             const targetName = lowerExpr(receiver.object)
@@ -369,11 +361,7 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
                 ...call.name,
                 namespace: undefined,
             })
-            const args = [
-                lowerExpr(receiver.object),
-                ...call.arguments.map(lowerExpr),
-            ]
-            return `VTABLE(${targetName}, ${declarationType})->${slotName}(${args})`
+            return `VTABLE(${targetName}, ${declarationType})->${slotName}(${[lowerExpr(receiver.object), ...args]})`
         }
         case 'conformance':
         default:

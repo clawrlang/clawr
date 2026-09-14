@@ -1,6 +1,7 @@
 import * as cir from '@/cir'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { DataDeclaration } from './data-declaration'
+import { ObjectDeclaration } from './object-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { Lattice, RCTypeLattice } from './lattice'
 import { TypeName } from './type-name'
@@ -9,16 +10,25 @@ import { FunctionName } from './function-name'
 class RootScope {
     public readonly variables: Map<string, Variable> = new Map()
     private readonly functions: Map<string, FunctionDeclaration> = new Map()
-    private readonly types: Map<string, DataDeclaration> = new Map()
+    private readonly types: Map<string, DataDeclaration | ObjectDeclaration> =
+        new Map()
     public readonly emitted: cir.Declaration[] = []
 
     dataDeclaration(name: TypeName): DataDeclaration | undefined {
         const decl = this.types.get(name.canonical())
-        if (decl instanceof DataDeclaration) return decl
-        return undefined
+        return decl instanceof DataDeclaration ? decl : undefined
+    }
+
+    objectDeclaration(name: TypeName): ObjectDeclaration | undefined {
+        const decl = this.types.get(name.canonical())
+        return decl instanceof ObjectDeclaration ? decl : undefined
     }
 
     addDataDeclaration(decl: DataDeclaration) {
+        this.types.set(decl.name.canonical(), decl)
+    }
+
+    addObjectDeclaration(decl: ObjectDeclaration) {
         this.types.set(decl.name.canonical(), decl)
     }
 
@@ -62,6 +72,10 @@ export class Scope {
 
     dataDeclaration(name: TypeName): DataDeclaration | undefined {
         return this.rootScope.dataDeclaration(name)
+    }
+
+    objectDeclaration(name: TypeName): ObjectDeclaration | undefined {
+        return this.rootScope.objectDeclaration(name)
     }
 
     functionDeclaration(name: FunctionName): FunctionDeclaration | undefined {

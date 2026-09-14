@@ -49,6 +49,16 @@ export class ObjectDeclaration implements Declaration {
     }
 
     *emitDeclaration(context: Context): Failable {
+        context.scope.rootScope.addObjectDeclaration(this)
+        context.scope.rootScope.emitted.push({
+            kind: 'RC_TYPE_DECL',
+            name: this.name.name,
+            namespace: this.name.namespace,
+            fields: this.fields.map((field) => ({
+                name: field.name,
+                lattice: field.lattice!.toCIR(),
+            })),
+        })
         return Failable.success()
     }
 }

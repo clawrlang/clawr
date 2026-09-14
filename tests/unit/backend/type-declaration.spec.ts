@@ -241,7 +241,16 @@ describe('Type declaration', () => {
                             value: {
                                 kind: 'ALLOCATION',
                                 isolationLevel: SHARED,
-                                fields: [],
+                                fields: [
+                                    {
+                                        name: 'field',
+                                        value: {
+                                            kind: 'VARIABLE_REF',
+                                            name: 'field',
+                                            value: { type: 'integer' },
+                                        },
+                                    },
+                                ],
                                 value: { type: 'rc-type', name: 'Super' },
                             },
                         },
@@ -255,7 +264,7 @@ describe('Type declaration', () => {
             'void* Super·init˛field(Super* self, int64_t field) {',
         )
         expect(result).toContain('memcpy(&self->fields, &(Superˇfields){')
-        expect(result).toContain('.field = field,')
+        expect(result).toContain('.field = field')
         expect(result).toContain('return self;')
     })
 })

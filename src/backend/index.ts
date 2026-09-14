@@ -247,10 +247,11 @@ export function lowerStmt(stmt: cir.Statement): string {
         case 'ASSIGN':
             if (
                 stmt.target.kind === 'VARIABLE_REF' &&
-                stmt.target.name === 'self'
+                stmt.target.name === 'self' &&
+                stmt.value.kind === 'ALLOCATION'
             )
                 return `memcpy(&self->fields, &(Superˇfields){
-                        .field = field,
+                        ${stmt.value.fields.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ')}
                     },
                     sizeof(Superˇfields));`
             else

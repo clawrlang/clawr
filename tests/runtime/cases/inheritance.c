@@ -58,12 +58,13 @@ typedef struct RectBlockˇfields {
 } RectBlockˇfields;
 typedef struct RectBlock {
   Prism super;
-  int width;
-  int depth;
+  RectBlockˇfields fields;
 } RectBlock;
 
 // Clawr: `func area() => self.width * self.depth`
-int RectBlock·area(RectBlock *self) { return self->width * self->depth; }
+int RectBlock·area(RectBlock *self) {
+  return self->fields.width * self->fields.depth;
+}
 
 static __type_info RectBlockˇtype = {
     .polymorphic_type = {
@@ -78,10 +79,16 @@ static __type_info RectBlockˇtype = {
 // Clawr: `func new(width: integer, depth: integer, height: integer) ->
 // RectBlock`
 RectBlock *RectBlock¸new_width_depth_height(int width, int depth, int height) {
-  return (RectBlock *)Prism˛new_height(
-      allocInitInheritedRC(RectBlock, 0, Prism, __rc_ISOLATED, .width = width,
-                           .depth = depth),
-      height);
+  RectBlock *result = allocInitRC(RectBlock, 0, __rc_ISOLATED);
+  memcpy(&result->fields,
+         &(RectBlockˇfields){
+             .width = width,
+             .depth = depth,
+
+         },
+         sizeof(RectBlockˇfields));
+  Prism˛new_height(result, height);
+  return result;
 }
 
 int main() {

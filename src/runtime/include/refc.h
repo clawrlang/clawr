@@ -91,14 +91,7 @@ static __side_table_entry *__conformance_side_table[SIDE_TABLE_BUCKETS] = {0};
 
 void *_alloc_init_rc_structure(const __type_info *const type,
                                size_t extendedSize, refs_t semantics,
-                               const void *initData, size_t initSize,
-                               size_t initOffset);
-#define _alloc_init_with_offset(__structure__, __ext_size__, __semantics__,    \
-                                __offset_struct__, ...)                        \
-  _alloc_init_rc_structure(                                                    \
-      &__structure__##ˇtype, __ext_size__, (__semantics__),                    \
-      &(__structure__##ˇfields){__VA_ARGS__}, sizeof(__structure__##ˇfields),  \
-      sizeof(__offset_struct__))
+                               const void *initData, size_t initSize);
 
 /// @brief Allocate a new reference-counted structure in memory
 /// @param __structure__ an RC_DATA type
@@ -106,17 +99,9 @@ void *_alloc_init_rc_structure(const __type_info *const type,
 /// flexible array members
 /// @param __semantics__ either __rc_ISOLATED or __rc_SHARED
 #define allocInitRC(__structure__, __ext_size__, __semantics__, ...)           \
-  _alloc_init_with_offset(__structure__, __ext_size__, __semantics__,          \
-                          __rc_header, __VA_ARGS__)
-
-/// @brief Allocate a new inherited reference-counted structure in memory
-/// @param __structure__ an RC_DATA type
-/// @param __super__ the super type of the structure
-/// @param __semantics__ either __rc_ISOLATED or __rc_SHARED
-#define allocInitInheritedRC(__structure__, __ext_size__, __super__,           \
-                             __semantics__, ...)                               \
-  _alloc_init_with_offset(__structure__, __ext_size__, __semantics__,          \
-                          __super__, __VA_ARGS__)
+  _alloc_init_rc_structure(                                                    \
+      &__structure__##ˇtype, __ext_size__, (__semantics__),                    \
+      &(__structure__##ˇfields){__VA_ARGS__}, sizeof(__structure__##ˇfields))
 
 /// @brief Retain a memory allocation (assign to a new variable)
 /// @param structure the memory structure

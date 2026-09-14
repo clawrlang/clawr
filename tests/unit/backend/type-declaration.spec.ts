@@ -67,7 +67,8 @@ describe('Type declaration', () => {
         }
 
         const result = lowerDecl(typeDecl)
-        expect(result).toContain('void MyType·myMethod(MyType* self) {')
+        expect(result).toContain('void MyType·myMethod(void* cˇself) {')
+        expect(result).toContain('MyType* self = cˇself;')
     })
 
     it('includes namespace in mangled method names', () => {
@@ -89,8 +90,9 @@ describe('Type declaration', () => {
 
         const result = lowerDecl(typeDecl)
         expect(result).toContain(
-            'void my_namespace¸MyType·myMethod(MyType* self) {',
+            'void my_namespace¸MyType·myMethod(void* cˇself) {',
         )
+        expect(result).toContain('MyType* self = cˇself;')
     })
 
     it('includes namespace in mangled free-function names', () => {
@@ -261,8 +263,9 @@ describe('Type declaration', () => {
 
         const result = lowerDecl(typeDecl)
         expect(result).toContain(
-            'void* Super·init˛field(Super* self, int64_t field) {',
+            'void* Super·init˛field(void* cˇself, int64_t field) {',
         )
+        expect(result).toContain('Super* self = cˇself;')
         expect(result).toContain('memcpy(&self->fields, &(Superˇfields){')
         expect(result).toContain('.field = field')
         expect(result).toContain('return self;')

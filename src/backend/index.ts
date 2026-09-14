@@ -208,12 +208,24 @@ function lowerFunction(
     mangledName: string,
 ) {
     const params = decl.parameters
-        .map((param) => `${lowerType(param.lattice)} ${param.name}`)
+        .map((param) => {
+            return param.lattice.type === 'rc-type'
+                ? `void* cˇ${param.name}`
+                : `${lowerType(param.lattice)} ${param.name}`
+        })
         .join(', ')
     const returnType = decl.lattice ? lowerType(decl.lattice) : 'void'
 
     return `${returnType} ${mangledName}(${params}) {
-        ${decl.body.map(lowerStmt).join('\n')}
+        ${[
+            ...decl.parameters
+                .filter((param) => param.lattice.type === 'rc-type')
+                .map(
+                    (param) =>
+                        `${lowerType(param.lattice)} ${param.name} = cˇ${param.name};\n`,
+                ),
+            ...decl.body.map(lowerStmt),
+        ].join('\n')}
     }`
 }
 

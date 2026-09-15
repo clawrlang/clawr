@@ -42,7 +42,9 @@ export class DataLiteral implements Expression {
                 'Data Literal without explicit value set is not supported',
                 this.span,
             )
-        const decl = context.scope.dataDeclaration(explicitLattice.type)
+        const dataDecl = context.scope.dataDeclaration(explicitLattice.type)
+        const objectDecl = context.scope.objectDeclaration(explicitLattice.type)
+        const decl = dataDecl ?? objectDecl
         if (!decl)
             return Failable.failure(
                 `DataLiteral.currentValue: type ${explicitLattice.type.name} not found in scope`,
@@ -112,9 +114,9 @@ export class DataLiteral implements Expression {
                 this.span,
             )
 
-        const targetType = context.scope.dataDeclaration(
-            explicitLattice.type,
-        ) as DataDeclaration | undefined
+        const targetType =
+            context.scope.dataDeclaration(explicitLattice.type) ??
+            context.scope.objectDeclaration(explicitLattice.type)
         if (!targetType)
             return Failable.failure(
                 `DataLiteral.toCIRExpression: target type ${explicitLattice.type.name} not found in scope`,

@@ -5,6 +5,8 @@ import { DataField } from './data-declaration'
 import { Context, Declaration } from '.'
 import { Failable } from '@/tools/failable'
 import { TypeName } from './type-name'
+import { RCTypeLattice } from './lattice'
+import { SHARED } from './isolation-level'
 
 export class ObjectDeclaration implements Declaration {
     private constructor(
@@ -14,7 +16,7 @@ export class ObjectDeclaration implements Declaration {
         private readonly readonly: FunctionDeclaration[],
         private readonly mutating: FunctionDeclaration[],
         private readonly initializers: FunctionDeclaration[],
-        private readonly fields: DataField[],
+        public readonly fields: DataField[],
         private readonly span: SourceCodeSpan,
     ) {}
 
@@ -51,24 +53,49 @@ export class ObjectDeclaration implements Declaration {
 
     *emitDeclaration(context: Context): Failable {
         context.scope.rootScope.addObjectDeclaration(this)
-        const self = this.name
+
+        const objectContext = {
+            ...context,
+            scope: context.scope.createChildScope(),
+            self: this.name,
+        }
+        objectContext.scope.addObjectDeclaration(this)
+        objectContext.scope.variables.set('self', {
+            isImmutable: false,
+            isolationLevel: SHARED,
+            lattice: RCTypeLattice.create({ type: this.name }),
+        })
+        objectContext.scope.setCurrentValue(
+            'self',
+            RCTypeLattice.create({ type: this.name }),
+        )
+
         const methods: (cir.Declaration & { kind: 'FUNCTION_DECL' })[] =
             yield yield* Failable.map(
                 [...this.readonly, ...this.mutating],
                 function* (item) {
-                    const methodCIRResult = yield* item.emitMethod({
-                        ...context,
-                        self,
-                    })
+                    const methodCIRResult =
+                        yield* item.emitMethod(objectContext)
                     return methodCIRResult
                 },
             )
+
+        const initializers: (cir.Declaration & {
+            kind: 'FUNCTION_DECL'
+            lattice: undefined
+        })[] = yield yield* Failable.map(
+            [...this.initializers],
+            function* (item) {
+                return yield* item.emitInitializer(objectContext)
+            },
+        )
 
         context.scope.rootScope.emitted.push({
             kind: 'RC_TYPE_DECL',
             name: this.name.name,
             namespace: this.name.namespace,
-            methods: methods,
+            methods,
+            initializers,
             fields: this.fields.map((field) => ({
                 name: field.name,
                 lattice: field.lattice!.toCIR(),

@@ -49,6 +49,8 @@ class RootScope {
 
 export class Scope {
     public variables: Map<string, Variable> = new Map()
+    private readonly types: Map<string, DataDeclaration | ObjectDeclaration> =
+        new Map()
     private currentValues: Map<string, Lattice> = new Map()
     public emitted: cir.Statement[] = []
     private nextTempVarCounter = 0
@@ -71,10 +73,20 @@ export class Scope {
     }
 
     dataDeclaration(name: TypeName): DataDeclaration | undefined {
+        const decl = this.types.get(name.canonical())
+        if (decl instanceof DataDeclaration) return decl
+        if (this.parentScope) return this.parentScope.dataDeclaration(name)
         return this.rootScope.dataDeclaration(name)
     }
 
+    addObjectDeclaration(decl: ObjectDeclaration) {
+        this.types.set(decl.name.canonical(), decl)
+    }
+
     objectDeclaration(name: TypeName): ObjectDeclaration | undefined {
+        const decl = this.types.get(name.canonical())
+        if (decl instanceof ObjectDeclaration) return decl
+        if (this.parentScope) return this.parentScope.objectDeclaration(name)
         return this.rootScope.objectDeclaration(name)
     }
 

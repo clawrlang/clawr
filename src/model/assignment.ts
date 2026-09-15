@@ -30,8 +30,17 @@ export class Assignment implements Statement {
     *emitStatement(context: Context): Failable {
         const validity = yield* this.checkValidity(context)
         if (isFailure(validity)) return validity
+        const targetLattice: Lattice =
+            yield yield* this.target.declaredLattice(context)
+        const explicitLatticeContext = {
+            ...context,
+            isolationLevel: yield yield* this.target.isolationLevel(context),
+            explicitLattice: targetLattice,
+        }
         yield yield* this.emitCIRStatements(context)
-        const value: Lattice = yield yield* this.value.currentValue(context)
+        const value: Lattice = yield yield* this.value.currentValue(
+            explicitLatticeContext,
+        )
         return yield* this.target.setCurrentValue(context, value)
     }
 
@@ -53,8 +62,11 @@ export class Assignment implements Statement {
             this.value,
             context,
         )
-        const retainedValueCIR: cir.Expression =
-            yield yield* retainedValue.toCIRExpression(explicitLatticeContext)
+        const retainedValueCIRResult = yield* retainedValue.toCIRExpression(
+            explicitLatticeContext,
+        )
+        if (isFailure(retainedValueCIRResult)) return retainedValueCIRResult
+        const retainedValueCIR: cir.Expression = yield retainedValueCIRResult
         const prelude = yield yield* this.target.assignmentPrelude(context)
         context.scope.emitted.push(...prelude)
 
@@ -84,7 +96,7 @@ export class Assignment implements Statement {
             )
         } else if (
             targetLattice instanceof RCTypeLattice &&
-            retainedValueCIR.kind === 'CALL' &&
+            retainedValueCIR?.kind === 'CALL' &&
             valueIsolationLevel === UNIQUE
         ) {
             context.scope.emitted.push({
@@ -120,7 +132,7 @@ export class Assignment implements Statement {
         )
         if (!targetLattice.isSupersetTo(assignedValue))
             yield Failable.failure(
-                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
+                `Cannot assign value of type ${assignedValue?.toString() ?? this.value.constructor.name} to target of type ${targetLattice.toString()}`,
                 this.span,
             )
         const valueIsolationLevel: AnyIsolationLevel =

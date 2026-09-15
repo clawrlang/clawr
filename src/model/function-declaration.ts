@@ -1,5 +1,11 @@
 import * as cir from '@/cir'
-import { Context, Declaration, Expression, Statement } from '.'
+import {
+    Context,
+    ContextWithLattice,
+    Declaration,
+    Expression,
+    Statement,
+} from '.'
 import {
     AnyIsolationLevel,
     IsolationLevel,
@@ -15,6 +21,8 @@ import { Parameter } from './parameter'
 import { Scope } from './scope'
 import { Failable, isFailure } from '@/tools/failable'
 import { TypeName } from './type-name'
+import { Assignment } from './assignment'
+import { VariableReference } from './variable-reference'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -128,8 +136,7 @@ export class FunctionDeclaration implements Declaration {
     *emitMethod(
         context: Context & { self: TypeName },
     ): Failable<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
-        const bodyContext: Context =
-            yield yield* this.makeObjectContext(context)
+        const bodyContext: Context = yield yield* this.makeBodyContext(context)
 
         const body =
             this.implementation.kind === 'body'
@@ -137,7 +144,7 @@ export class FunctionDeclaration implements Declaration {
                 : [
                       ReturnStatement.create({
                           value: this.implementation.expression,
-                          span: undefined as any,
+                          span: this.implementation.expression.span,
                       }),
                   ]
 
@@ -167,46 +174,57 @@ export class FunctionDeclaration implements Declaration {
         return Failable.success(cirFuncDecl)
     }
 
-    private *makeObjectContext(
+    *emitInitializer(
         context: Context & { self: TypeName },
-    ): Failable<Context> {
-        const self = RCTypeLattice.create({ type: context.self })
-        const objectScope = context.scope.createChildScope()
-        objectScope.variables.set('self', {
-            isImmutable: true,
-            isolationLevel: SHARED,
-            lattice: self,
-        })
-        objectScope.setCurrentValue('self', self)
-        const objectContext = {
-            ...context,
-            scope: objectScope,
+    ): Failable<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
+        const bodyContext: Context = yield yield* this.makeBodyContext(context)
+
+        const body =
+            this.implementation.kind === 'body'
+                ? this.implementation.statements
+                : [
+                      Assignment.create({
+                          target: VariableReference.create({
+                              name: 'self',
+                              span: this.implementation.expression.span,
+                          }),
+                          value: this.implementation.expression,
+                          span: this.implementation.expression.span,
+                      }),
+                  ]
+
+        for (const stmt of body) yield* stmt.emitStatement(bodyContext)
+
+        if (
+            this.implementation.kind === 'body' &&
+            !body.some((stmt) => stmt instanceof ReturnStatement)
+        )
+            bodyContext.scope.releaseVariables()
+
+        const cirFuncDecl: cir.Declaration = {
+            kind: 'FUNCTION_DECL',
+            baseName: this.baseName,
+            labels: mapFilter(this.parameters, (p) => p.label),
+            parameters: this.parameters.map((param) => ({
+                name: param.varName,
+                lattice: param.lattice!.toCIR(),
+            })),
+            lattice: undefined,
+            body: bodyContext.scope.emitted,
         }
-        const calleeResult = this.result
-            ? this.result
-            : this.implementation.kind === 'body'
-              ? undefined
-              : {
-                    isolationLevel:
-                        yield yield* this.implementation.expression.isolationLevel(
-                            objectContext,
-                        ),
-                    lattice:
-                        yield yield* this.implementation.expression.currentValue(
-                            objectContext,
-                        ),
-                }
-        const bodyContext = this.bodyContext({
-            ...context,
-            scope: objectScope,
-            calleeResult,
-        })
-        return Failable.success(bodyContext)
+
+        return Failable.success(cirFuncDecl)
     }
 
-    private *makeBodyContext(context: Context): Failable<Context> {
+    private *makeBodyContext(
+        context: Context & { self?: TypeName },
+    ): Failable<Context> {
         const parameterScope = yield yield* this.scopeAddingParameters(context)
         const contextWithParameters = { ...context, scope: parameterScope }
+        const explicitLattice =
+            this.implementation.kind === 'implicit-return' && context.self
+                ? RCTypeLattice.create({ type: context.self })
+                : undefined
         const calleeResult = this.result
             ? this.result
             : this.implementation.kind === 'body'
@@ -218,7 +236,10 @@ export class FunctionDeclaration implements Declaration {
                         ),
                     lattice:
                         yield yield* this.implementation.expression.currentValue(
-                            contextWithParameters,
+                            {
+                                ...contextWithParameters,
+                                explicitLattice,
+                            },
                         ),
                 }
         const bodyContext = this.bodyContext({

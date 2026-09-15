@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { Statement, Expression, Context } from '.'
-import { AnyIsolationLevel, UNIQUE, UNKNOWN } from './isolation-level'
+import { AnyIsolationLevel, ISOLATED, UNIQUE, UNKNOWN } from './isolation-level'
 import { FieldReference } from './field-reference'
 import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
@@ -41,14 +41,20 @@ export class Assignment implements Statement {
         const target: cir.Expression & {
             kind: 'VARIABLE_REF' | 'FIELD_REF'
         } = yield yield* this.target.toCIRExpression(context)
+        const explicitLatticeContext = {
+            ...context,
+            isolationLevel: yield yield* this.target.isolationLevel(context),
+            explicitLattice: targetLattice,
+        }
+
         const valueIsolationLevel: AnyIsolationLevel =
-            yield yield* this.value.isolationLevel(context)
+            yield yield* this.value.isolationLevel(explicitLatticeContext)
         const retainedValue: Expression = yield yield* Retain.ifStorage(
             this.value,
             context,
         )
         const retainedValueCIR: cir.Expression =
-            yield yield* retainedValue.toCIRExpression(context)
+            yield yield* retainedValue.toCIRExpression(explicitLatticeContext)
         const prelude = yield yield* this.target.assignmentPrelude(context)
         context.scope.emitted.push(...prelude)
 
@@ -104,8 +110,14 @@ export class Assignment implements Statement {
         const targetLatticeResult = yield* this.target.declaredLattice(context)
         if (isFailure(targetLatticeResult)) return targetLatticeResult
         const targetLattice: Lattice = yield targetLatticeResult
-        const assignedValue: Lattice =
-            yield yield* this.value.currentValue(context)
+        const explicitLatticeContext = {
+            ...context,
+            isolationLevel: yield yield* this.target.isolationLevel(context),
+            explicitLattice: targetLattice,
+        }
+        const assignedValue: Lattice = yield yield* this.value.currentValue(
+            explicitLatticeContext,
+        )
         if (!targetLattice.isSupersetTo(assignedValue))
             yield Failable.failure(
                 `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,

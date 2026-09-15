@@ -13,6 +13,7 @@ import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { decorateLattice } from '@/model/lattice-declaration'
 import { Failable, isFailure } from '@/tools/failable'
 import assert from 'assert'
+import { DataLiteral } from '@/model/data-literal'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
@@ -39,6 +40,73 @@ describe('Assignment', () => {
                 value: {
                     kind: 'INTEGER_LITERAL',
                     value: { min: '42', max: '42' },
+                },
+            },
+        ])
+    })
+
+    it('accepts data-literal as value', () => {
+        const context = newSemanticContext()
+        context.scope.rootScope.addDataDeclaration(
+            DataDeclaration.create({
+                name: TypeName.create({ name: 'MyData' }),
+                fields: [
+                    {
+                        name: 'field',
+                        isImmutable: false,
+                        isolationLevel: ISOLATED,
+                        lattice: decorateLattice(
+                            IntegerLattice.unconstrained(),
+                            { span: someCodeSpan },
+                        ),
+                    },
+                ],
+            }),
+        )
+        context.scope.variables.set('x', {
+            isImmutable: false,
+            isolationLevel: ISOLATED,
+            lattice: RCTypeLattice.create({
+                type: TypeName.create({ name: 'MyData' }),
+                fields: { field: IntegerLattice.singleton(12n) },
+            }),
+        })
+        context.scope.setCurrentValue('x', IntegerLattice.singleton(0n))
+
+        const assignment = Assignment.create({
+            target: VariableReference.create({ name: 'x', span: someCodeSpan }),
+            value: DataLiteral.create({
+                fields: [
+                    {
+                        name: 'field',
+                        value: IntegerLiteral.create({
+                            value: 1n,
+                            span: someCodeSpan,
+                        }),
+                    },
+                ],
+                span: someCodeSpan,
+            }),
+            span: someCodeSpan,
+        })
+
+        Failable.do(() => assignment.emitStatement(context))
+
+        expect(context.scope.emitted).toMatchObject([
+            {
+                kind: 'ASSIGN',
+                target: { kind: 'VARIABLE_REF', name: 'x' },
+                value: {
+                    fields: [
+                        {
+                            name: 'field',
+                            lattice: { min: '1', max: '1' },
+                            value: {
+                                kind: 'INTEGER_LITERAL',
+                                value: { min: '1', max: '1' },
+                            },
+                        },
+                    ],
                 },
             },
         ])

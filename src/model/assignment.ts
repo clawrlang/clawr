@@ -1,9 +1,8 @@
-import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Failable, isFailure, Result } from '@/tools/failable'
 import { Context, Expression, Statement } from '.'
 import { FieldReference } from './field-reference'
-import { AnyIsolationLevel, UNIQUE, UNKNOWN } from './isolation-level'
+import { UNIQUE, UNKNOWN } from './isolation-level'
 import { Lattice, RCTypeLattice } from './lattice'
 import { Retain } from './retain'
 import { VariableReference } from './variable-reference'
@@ -39,7 +38,7 @@ export class Assignment implements Statement {
                 isolationLevel: yield self.target.isolationLevel(context),
                 explicitLattice: targetLattice,
             }
-            yield yield* self.emitCIRStatements(context)
+            yield self.emitCIRStatements(context)
             const value: Lattice = yield self.value.currentValue(
                 explicitLatticeContext,
             )
@@ -47,28 +46,48 @@ export class Assignment implements Statement {
         })
     }
 
-    private *emitCIRStatements(context: Context): Failable {
-        const targetLattice: Lattice =
-            yield this.target.declaredLattice(context)
-        const target: cir.Expression & {
-            kind: 'VARIABLE_REF' | 'FIELD_REF'
-        } = yield this.target.toCIRExpression(context)
+    private emitCIRStatements(context: Context): Result {
+        const collectedTargetResults = Failable.collect([
+            this.target.isolationLevel(context),
+            this.target.declaredLattice(context),
+            this.target.toCIRExpression(context),
+        ])
+        if (isFailure(collectedTargetResults)) return collectedTargetResults
+        const [targetIsolationLevel, targetLattice, target] =
+            collectedTargetResults.value
+
         const explicitLatticeContext = {
             ...context,
-            isolationLevel: yield this.target.isolationLevel(context),
+            isolationLevel: targetIsolationLevel,
             explicitLattice: targetLattice,
         }
+        const collectedValueResults = Failable.collect([
+            this.value.isolationLevel(explicitLatticeContext),
+            Retain.ifStorage(this.value, context),
+        ])
+        if (isFailure(collectedValueResults)) return collectedValueResults
 
-        const valueIsolationLevel: AnyIsolationLevel =
-            yield this.value.isolationLevel(explicitLatticeContext)
-        const retainedValue = yield Retain.ifStorage(this.value, context)
-        const retainedValueCIRResult = retainedValue.toCIRExpression(
-            explicitLatticeContext,
-        )
+        const [valueIsolationLevel, retainedValue] = collectedValueResults.value
+        if (explicitLatticeContext.isolationLevel === UNKNOWN)
+            return Result.failure(
+                'Cannot assign to parameter with UNKNOWN isolationLevel',
+                this.span,
+            )
+        const retainedValueCIRResult = retainedValue.toCIRExpression({
+            ...explicitLatticeContext,
+            isolationLevel: explicitLatticeContext.isolationLevel,
+        })
         if (isFailure(retainedValueCIRResult)) return retainedValueCIRResult
-        const retainedValueCIR: cir.Expression = yield retainedValueCIRResult
-        const prelude = yield yield* this.target.assignmentPrelude(context)
-        context.scope.emitted.push(...prelude)
+
+        const retainedValueCIR = retainedValueCIRResult.value
+
+        const self = this
+        const preludeResult = Failable.do(function* () {
+            return yield* self.target.assignmentPrelude(context)
+        })
+        if (isFailure(preludeResult)) return preludeResult
+
+        context.scope.emitted.push(...preludeResult.value)
 
         if (retainedValue instanceof Retain) {
             const tempVar = context.scope.nextTempVar()

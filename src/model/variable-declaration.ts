@@ -1,5 +1,5 @@
 import * as cir from '@/cir'
-import { Failable, isFailure, Result } from '@/tools/failable'
+import { isFailure, Result } from '@/tools/failable'
 import { Context, Declaration, Expression, Statement } from '.'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 import { Lattice } from './lattice'
@@ -42,53 +42,48 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     emitDeclaration(context: Context): Result {
-        const self = this
-        return Failable.do(function* () {
-            return yield* self.emit(context.scope.rootScope, context)
-        }) as Result
+        return this.emit(context.scope.rootScope, context)
     }
 
     emitStatement(context: Context): Result {
-        const self = this
-        return Failable.do(function* () {
-            return yield* self.emit(context.scope, context)
-        }) as Result
+        return this.emit(context.scope, context)
     }
 
-    private *emit(
-        scope: Scope | Scope['rootScope'],
-        context: Context,
-    ): Failable {
-        const initialValue = yield this.currentValueFromInitial(context)
-        const validity = yield* this.checkValidity(initialValue, context)
-        if (isFailure(validity)) return validity
+    private emit(scope: Scope | Scope['rootScope'], context: Context): Result {
+        const initialValueResult = this.currentValueFromInitial(context)
+        if (isFailure(initialValueResult)) return initialValueResult
+        const initialValue = initialValueResult.value
+        const validityResult = this.checkValidity(initialValue, context)
+        if (isFailure(validityResult)) return validityResult
 
         const lattice =
             this.isImmutable && this.isolationLevel === ISOLATED
                 ? initialValue
                 : (this.lattice ?? initialValue.unconstrained())
 
-        const emission = yield* this.emitCIRDeclaration(context, lattice, scope)
-        if (isFailure(emission)) return emission
+        const emissionResult = this.emitCIRDeclaration(context, lattice, scope)
+        if (isFailure(emissionResult)) return emissionResult
         this.addDeclarationToScope(scope, lattice)
         this.setCurrentValue(context, initialValue)
         return Result.success
     }
 
-    private *emitCIRDeclaration(
+    private emitCIRDeclaration(
         context: Context,
         lattice: Lattice,
         scope: Scope | Scope['rootScope'],
-    ): Failable {
+    ): Result {
         const valueResult = Retain.ifStorage(this.initialValue, context)
-        const value: Expression = yield valueResult
+        if (isFailure(valueResult)) return valueResult
+        const value = valueResult.value
 
         const initialValueResult = value.toCIRExpression({
             ...context,
             explicitLattice: this.lattice,
             isolationLevel: this.isolationLevel,
         })
-        const initialValue: cir.Expression = yield initialValueResult
+        if (isFailure(initialValueResult)) return initialValueResult
+        const initialValue: cir.Expression = initialValueResult.value
 
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,
@@ -114,15 +109,18 @@ export class VariableDeclaration implements Statement, Declaration {
         context.scope.setCurrentValue(this.name, currentValue)
     }
 
-    private *checkValidity(currentValue: Lattice, context: Context): Failable {
+    private checkValidity(currentValue: Lattice, context: Context): Result {
         if (!this.isValidValue(currentValue))
-            yield Result.failure(
+            return Result.failure(
                 'Incompatible initial value',
                 this.initialValue.span,
             )
 
-        const valueIsolationLevel =
-            yield this.initialValue.isolationLevel(context)
+        const valueIsolationLevelResult =
+            this.initialValue.isolationLevel(context)
+        if (isFailure(valueIsolationLevelResult))
+            return valueIsolationLevelResult
+        const valueIsolationLevel = valueIsolationLevelResult.value
         if (valueIsolationLevel === UNIQUE) return Result.success
         if (this.isolationLevel !== valueIsolationLevel)
             return Result.failure(

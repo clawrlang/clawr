@@ -32,19 +32,19 @@ export class VariableReference implements Expression {
     }
 
     *isEffectivelyConst(context: Context): Failable<boolean> {
-        const variableResult = yield* this.lookupInScope(context)
+        const variableResult = this.lookupInScope(context)
         const variable: Variable = yield variableResult
         return Result.value(variable.isImmutable)
     }
 
     *isolationLevel(context: Context): Failable<IsolationLevel | UNKNOWN> {
-        const variableResult = yield* this.lookupInScope(context)
+        const variableResult = this.lookupInScope(context)
         const variable: Variable = yield variableResult
         return Result.value(variable.isolationLevel)
     }
 
     *declaredLattice(context: Context): Failable<Lattice> {
-        const variableResult = yield* this.lookupInScope(context)
+        const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
         const variable: Variable = yield variableResult
         return Result.value(variable.lattice)
@@ -69,7 +69,7 @@ export class VariableReference implements Expression {
     *toCIRExpression(
         context: Context,
     ): Failable<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
-        const variableResult = yield* this.lookupInScope(context)
+        const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
         const valueResult = yield* this.currentValue(context)
         if (isFailure(valueResult)) return valueResult
@@ -80,7 +80,7 @@ export class VariableReference implements Expression {
         })
     }
 
-    *lookupInScope(context: Context) {
+    private lookupInScope(context: Context) {
         const variable = context.scope.variableDeclaration(this.name)
         if (!variable)
             return Result.failure(

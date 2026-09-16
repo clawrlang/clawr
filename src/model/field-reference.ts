@@ -57,34 +57,59 @@ export class FieldReference implements Expression {
     }
 
     *isEffectivelyConst_obsolete(context: Context): Failable<boolean> {
-        const isolationLevelResult =
-            yield* this.object.isolationLevel_obsolete(context)
+        return this.isEffectivelyConst(context)
+    }
+    isEffectivelyConst(context: Context): Result<boolean> {
+        const self = this
+        return Failable.do(function* () {
+            const isolationLevelResult =
+                yield* self.object.isolationLevel_obsolete(context)
 
-        if ((yield isolationLevelResult) === SHARED) return Result.false
+            if ((yield isolationLevelResult) === SHARED) return Result.false
 
-        return yield* this.object.isEffectivelyConst_obsolete(context)
+            return yield* self.object.isEffectivelyConst_obsolete(context)
+        })
     }
 
     *isolationLevel_obsolete(context: Context): Failable<IsolationLevel> {
-        const field: DataField = yield yield* this.getFieldFromContext(context)
-        return field.lattice instanceof RCTypeLattice
-            ? Result.value(field.isolationLevel ?? ISOLATED)
-            : Result.value(ISOLATED)
+        return this.isolationLevel(context)
+    }
+    isolationLevel(context: Context): Result<IsolationLevel> {
+        const self = this
+        return Failable.do(function* () {
+            const field: DataField =
+                yield yield* self.getFieldFromContext(context)
+            return field.lattice instanceof RCTypeLattice
+                ? Result.value(field.isolationLevel ?? ISOLATED)
+                : Result.value(ISOLATED)
+        })
     }
 
     *declaredLattice_obsolete(context: Context): Failable<Lattice> {
-        const field = yield yield* this.getFieldFromContext(context)
-        return Result.value(field.lattice!)
+        return this.declaredLattice(context)
+    }
+    declaredLattice(context: Context): Result<Lattice> {
+        const self = this
+        return Failable.do(function* () {
+            const field = yield yield* self.getFieldFromContext(context)
+            return Result.value(field.lattice!)
+        })
     }
 
     *currentValue_obsolete(context: Context): Failable<Lattice> {
-        const objectValue =
-            yield yield* this.object.currentValue_obsolete(context)
-        if (!(objectValue instanceof RCTypeLattice))
-            return Result.failure('unknown object value', this.span)
-        return objectValue.fields
-            ? Result.value(objectValue.fields[this.field])
-            : Result.failure(`unknown field value ${this.field}`, this.span)
+        return this.currentValue(context)
+    }
+    currentValue(context: Context): Result<Lattice> {
+        const self = this
+        return Failable.do(function* () {
+            const objectValue =
+                yield yield* self.object.currentValue_obsolete(context)
+            if (!(objectValue instanceof RCTypeLattice))
+                return Result.failure('unknown object value', self.span)
+            return objectValue.fields
+                ? Result.value(objectValue.fields[self.field])
+                : Result.failure(`unknown field value ${self.field}`, self.span)
+        })
     }
 
     *setCurrentValue_obsolete(context: Context, value: Lattice): Failable {
@@ -102,23 +127,49 @@ export class FieldReference implements Expression {
         }
         return Result.success
     }
+    setCurrentValue(context: Context, value: Lattice): Result {
+        const self = this
+        return Failable.do(function* () {
+            const objectValue =
+                yield yield* self.object.currentValue_obsolete(context)
+            if (objectValue instanceof RCTypeLattice) {
+                if (objectValue.fields) objectValue.fields[self.field] = value
+
+                const object: Expression = self.object
+                const result = object.setCurrentValue_obsolete?.(
+                    context,
+                    objectValue,
+                )
+                if (result) return yield* result
+            }
+            return Result.success
+        }) as Result
+    }
 
     *toCIRExpression_obsolete(
         context: Context,
     ): Failable<cir.Expression & { kind: 'FIELD_REF' }> {
-        yield yield* this.checkOperatorCompatibility(context)
-        const fieldResult = yield* this.getFieldFromContext(context)
-        if (isFailure(fieldResult)) return fieldResult
-        const field: DataField = yield fieldResult
-        const object: cir.Expression =
-            yield yield* this.object.toCIRExpression_obsolete(context)
+        return this.toCIRExpression(context)
+    }
+    toCIRExpression(
+        context: Context,
+    ): Result<cir.Expression & { kind: 'FIELD_REF' }> {
+        const self = this
+        return Failable.do(function* () {
+            yield yield* self.checkOperatorCompatibility(context)
+            const fieldResult = yield* self.getFieldFromContext(context)
+            if (isFailure(fieldResult)) return fieldResult
+            const field: DataField = yield fieldResult
+            const object: cir.Expression =
+                yield yield* self.object.toCIRExpression_obsolete(context)
 
-        return Result.value({
-            kind: 'FIELD_REF',
-            object,
-            field: this.field,
-            value: field.lattice.toCIR(),
-        } satisfies cir.Expression)
+            return Result.value({
+                kind: 'FIELD_REF',
+                object,
+                field: self.field,
+                value: field.lattice.toCIR(),
+            } satisfies cir.Expression)
+        })
     }
 
     private *getFieldFromContext(

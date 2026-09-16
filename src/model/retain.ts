@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, Result } from '@/tools/failable'
+import { Failable, Result, Success } from '@/tools/failable'
 import { Context, ContextWithLattice, Expression, isStorage } from '.'
 import { FieldReference } from './field-reference'
 import { AnyIsolationLevel } from './isolation-level'
@@ -30,29 +30,48 @@ export class Retain implements Expression {
     }
 
     *isEffectivelyConst_obsolete(): Failable<boolean> {
+        return this.isEffectivelyConst()
+    }
+    isEffectivelyConst(): Success<true> {
         return Result.true
     }
 
-    isolationLevel_obsolete(context: Context): Failable<AnyIsolationLevel> {
-        return this.value.isolationLevel_obsolete(context)
+    *isolationLevel_obsolete(context: Context): Failable<AnyIsolationLevel> {
+        return this.isolationLevel(context)
+    }
+    isolationLevel(context: Context): Result<AnyIsolationLevel> {
+        return this.value.isolationLevel(context)
     }
 
-    declaredLattice_obsolete(context: ContextWithLattice): Failable<Lattice> {
-        return this.value.declaredLattice_obsolete(context)
+    *declaredLattice_obsolete(context: ContextWithLattice): Failable<Lattice> {
+        return this.declaredLattice(context)
+    }
+    declaredLattice(context: ContextWithLattice): Result<Lattice> {
+        return this.value.declaredLattice(context)
     }
 
-    currentValue_obsolete(context: ContextWithLattice): Failable<Lattice> {
-        return this.value.currentValue_obsolete(context)
+    *currentValue_obsolete(context: ContextWithLattice): Failable<Lattice> {
+        return this.currentValue(context)
+    }
+    currentValue(context: ContextWithLattice): Result<Lattice> {
+        return this.value.currentValue(context)
     }
 
     *toCIRExpression_obsolete(
         context: ContextWithLattice,
     ): Failable<cir.Expression> {
-        const object = yield yield* this.value.toCIRExpression_obsolete(context)
-        return Result.value({
-            kind: 'RETAIN' as const,
-            object,
-            value: this.lattice.toCIR(),
+        return this.toCIRExpression(context)
+    }
+    toCIRExpression(context: ContextWithLattice): Result<cir.Expression> {
+        const self = this
+        return Failable.do(function* () {
+            const object =
+                yield yield* self.value.toCIRExpression_obsolete(context)
+            return Result.value({
+                kind: 'RETAIN' as const,
+                object,
+                value: self.lattice.toCIR(),
+            })
         })
     }
 }

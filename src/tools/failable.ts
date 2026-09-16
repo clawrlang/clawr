@@ -1,6 +1,6 @@
 import { SourceCodeSpan } from './diagnostics'
 
-export type Result<T> = Success<T> | Failure
+export type Result<T = undefined> = Success<T> | Failure
 export type Success<T = undefined> = { value: T }
 export type Failure = { errors: SemanticError[] }
 

@@ -41,52 +41,60 @@ export class DataLiteral implements Expression {
     }
 
     *currentValue_obsolete(context: ContextWithLattice): Failable<Lattice> {
-        const explicitLattice = context.explicitLattice
-        if (!(explicitLattice instanceof RCTypeLattice))
-            return Result.failure(
-                'Data Literal without explicit value set is not supported',
-                this.span,
-            )
-        const dataDecl = context.scope.dataDeclaration(explicitLattice.type)
-        const objectDecl = context.scope.objectDeclaration(explicitLattice.type)
-        const decl = dataDecl ?? objectDecl
-        if (!decl)
-            return Result.failure(
-                `DataLiteral.currentValue: type ${explicitLattice.type.name} not found in scope`,
-                this.span,
-            )
-
-        const thisspan = this.span
-        const fieldValuesResult = yield* Failable.map(
-            this.fields,
-            function* (field) {
-                const fieldDeclaration = decl.fields.find(
-                    (declaredField) => declaredField.name === field.name,
+        return this.currentValue(context)
+    }
+    currentValue(context: ContextWithLattice): Result<Lattice> {
+        const self = this
+        return Failable.do(function* () {
+            const explicitLattice = context.explicitLattice
+            if (!(explicitLattice instanceof RCTypeLattice))
+                return Result.failure(
+                    'Data Literal without explicit value set is not supported',
+                    self.span,
                 )
-                if (!fieldDeclaration)
-                    return Result.failure(
-                        `DataLiteral.currentValue: field ${field.name} not found on type ${explicitLattice.type.name}`,
-                        thisspan,
+            const dataDecl = context.scope.dataDeclaration(explicitLattice.type)
+            const objectDecl = context.scope.objectDeclaration(
+                explicitLattice.type,
+            )
+            const decl = dataDecl ?? objectDecl
+            if (!decl)
+                return Result.failure(
+                    `DataLiteral.currentValue: type ${explicitLattice.type.name} not found in scope`,
+                    self.span,
+                )
+
+            const thisspan = self.span
+            const fieldValuesResult = yield* Failable.map(
+                self.fields,
+                function* (field) {
+                    const fieldDeclaration = decl.fields.find(
+                        (declaredField) => declaredField.name === field.name,
                     )
-                return yield* field.value.currentValue_obsolete({
-                    ...context,
-                    explicitLattice: fieldDeclaration.lattice,
-                })
-            },
-        )
-        if (isFailure(fieldValuesResult)) return fieldValuesResult
-        const fieldValues: Lattice[] = yield fieldValuesResult
-        return Result.value(
-            RCTypeLattice.create({
-                type: decl.name,
-                fields: Object.fromEntries(
-                    fieldValues.map((value, index) => [
-                        this.fields[index].name,
-                        value,
-                    ]),
-                ),
-            }),
-        )
+                    if (!fieldDeclaration)
+                        return Result.failure(
+                            `DataLiteral.currentValue: field ${field.name} not found on type ${explicitLattice.type.name}`,
+                            thisspan,
+                        )
+                    return yield* field.value.currentValue_obsolete({
+                        ...context,
+                        explicitLattice: fieldDeclaration.lattice,
+                    })
+                },
+            )
+            if (isFailure(fieldValuesResult)) return fieldValuesResult
+            const fieldValues: Lattice[] = yield fieldValuesResult
+            return Result.value(
+                RCTypeLattice.create({
+                    type: decl.name,
+                    fields: Object.fromEntries(
+                        fieldValues.map((value, index) => [
+                            self.fields[index].name,
+                            value,
+                        ]),
+                    ),
+                }),
+            )
+        })
     }
 
     *declaredLattice_obsolete(
@@ -114,71 +122,77 @@ export class DataLiteral implements Expression {
     *toCIRExpression_obsolete(
         context: ContextWithLattice,
     ): Failable<cir.Expression> {
-        const explicitLattice = context.explicitLattice
-        if (!(explicitLattice instanceof RCTypeLattice))
-            return Result.failure(
-                'DataLiteral.toCIRExpression: data literal without explicit type',
-                this.span,
-            )
-        if (!context.isolationLevel)
-            return Result.failure(
-                'DataLiteral.toCIRExpression: target isolation level not specified',
-                this.span,
+        return this.toCIRExpression(context)
+    }
+    toCIRExpression(context: ContextWithLattice): Result<cir.Expression> {
+        const self = this
+        return Failable.do(function* () {
+            const explicitLattice = context.explicitLattice
+            if (!(explicitLattice instanceof RCTypeLattice))
+                return Result.failure(
+                    'DataLiteral.toCIRExpression: data literal without explicit type',
+                    self.span,
+                )
+            if (!context.isolationLevel)
+                return Result.failure(
+                    'DataLiteral.toCIRExpression: target isolation level not specified',
+                    self.span,
+                )
+
+            const targetType =
+                context.scope.dataDeclaration(explicitLattice.type) ??
+                context.scope.objectDeclaration(explicitLattice.type)
+            if (!targetType)
+                return Result.failure(
+                    `DataLiteral.toCIRExpression: target type ${explicitLattice.type.name} not found in scope`,
+                    self.span,
+                )
+            const fieldDeclarations = new Map(
+                targetType.fields.map((field) => [field.name, field]),
             )
 
-        const targetType =
-            context.scope.dataDeclaration(explicitLattice.type) ??
-            context.scope.objectDeclaration(explicitLattice.type)
-        if (!targetType)
-            return Result.failure(
-                `DataLiteral.toCIRExpression: target type ${explicitLattice.type.name} not found in scope`,
-                this.span,
+            const thisspan = self.span
+            const fieldValuesResult = yield* Failable.map(
+                self.fields,
+                function* (field) {
+                    const fieldDeclaration = fieldDeclarations.get(field.name)
+                    if (!fieldDeclaration)
+                        return Result.failure(
+                            `field ${field.name} not found on type ${explicitLattice.type.canonical()}`,
+                            thisspan,
+                        )
+                    const nestedContext: ContextWithLattice = {
+                        ...context,
+                        explicitLattice: fieldDeclaration.lattice,
+                        isolationLevel: fieldDeclaration.isolationLevel,
+                    }
+                    const value: cir.Expression =
+                        yield yield* field.value.toCIRExpression_obsolete(
+                            nestedContext,
+                        )
+                    return Result.value({
+                        name: field.name,
+                        value,
+                        lattice: value.value,
+                    })
+                },
             )
-        const fieldDeclarations = new Map(
-            targetType.fields.map((field) => [field.name, field]),
-        )
 
-        const thisspan = this.span
-        const fieldValuesResult = yield* Failable.map(
-            this.fields,
-            function* (field) {
-                const fieldDeclaration = fieldDeclarations.get(field.name)
-                if (!fieldDeclaration)
-                    return Result.failure(
-                        `field ${field.name} not found on type ${explicitLattice.type.canonical()}`,
-                        thisspan,
-                    )
-                const nestedContext: ContextWithLattice = {
-                    ...context,
-                    explicitLattice: fieldDeclaration.lattice,
-                    isolationLevel: fieldDeclaration.isolationLevel,
-                }
-                const value: cir.Expression =
-                    yield yield* field.value.toCIRExpression_obsolete(
-                        nestedContext,
-                    )
-                return Result.value({
-                    name: field.name,
-                    value,
-                    lattice: value.value,
-                })
-            },
-        )
-
-        const fields: {
-            name: string
-            value: cir.Expression
-            lattice: cir.Lattice
-        }[] = yield fieldValuesResult
-        return Result.value({
-            kind: 'ALLOCATION',
-            isolationLevel: context.isolationLevel!,
-            fields,
-            value: {
-                type: 'rc-type',
-                ...explicitLattice.type.toCIR(),
-            },
-        } satisfies cir.Expression)
+            const fields: {
+                name: string
+                value: cir.Expression
+                lattice: cir.Lattice
+            }[] = yield fieldValuesResult
+            return Result.value({
+                kind: 'ALLOCATION',
+                isolationLevel: context.isolationLevel!,
+                fields,
+                value: {
+                    type: 'rc-type',
+                    ...explicitLattice.type.toCIR(),
+                },
+            } satisfies cir.Expression)
+        })
     }
 }
 

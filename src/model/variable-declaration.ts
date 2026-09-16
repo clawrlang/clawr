@@ -5,7 +5,7 @@ import { LatticeDeclaration } from './lattice-declaration'
 import { Lattice } from './lattice'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 import { Retain } from './retain'
-import { Failable, isFailure } from '@/tools/failable'
+import { Failable, isFailure, Result } from '@/tools/failable'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -66,7 +66,7 @@ export class VariableDeclaration implements Statement, Declaration {
         if (isFailure(emission)) return emission
         this.addDeclarationToScope(scope, lattice)
         this.setCurrentValue(context, initialValue)
-        return Failable.success()
+        return Result.success
     }
 
     private *emitCIRDeclaration(
@@ -90,7 +90,7 @@ export class VariableDeclaration implements Statement, Declaration {
             lattice: lattice.toCIR(),
             initialValue: initialValue,
         })
-        return Failable.success()
+        return Result.success
     }
 
     private addDeclarationToScope(
@@ -110,20 +110,20 @@ export class VariableDeclaration implements Statement, Declaration {
 
     private *checkValidity(currentValue: Lattice, context: Context): Failable {
         if (!this.isValidValue(currentValue))
-            yield Failable.failure(
+            yield Result.failure(
                 'Incompatible initial value',
                 this.initialValue.span,
             )
 
         const valueIsolationLevel =
             yield yield* this.initialValue.isolationLevel(context)
-        if (valueIsolationLevel === UNIQUE) return Failable.success()
+        if (valueIsolationLevel === UNIQUE) return Result.success
         if (this.isolationLevel !== valueIsolationLevel)
-            return Failable.failure(
+            return Result.failure(
                 `Cannot assign ${valueIsolationLevel} value to ${this.isolationLevel} target`,
                 this.initialValue.span,
             )
-        return Failable.success()
+        return Result.success
     }
 
     private isValidValue(currentValue: Lattice) {

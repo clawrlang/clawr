@@ -2,7 +2,7 @@ import * as cir from '@/cir'
 import { Expression, Context, ContextWithLattice, isStorage } from '.'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { FieldReference } from './field-reference'
-import { Failable } from '@/tools/failable'
+import { Failable, Result } from '@/tools/failable'
 import { AnyIsolationLevel } from './isolation-level'
 import { Lattice, RCTypeLattice } from './lattice'
 import { VariableReference } from './variable-reference'
@@ -21,15 +21,15 @@ export class Retain implements Expression {
         value: T,
         context: Context,
     ): Failable<T | Retain> {
-        if (!isStorage(value)) return Failable.success(value)
+        if (!isStorage(value)) return Result.value(value)
         const lattice: Lattice = yield yield* value.currentValue(context)
         return lattice instanceof RCTypeLattice
-            ? Failable.success(new Retain(value, lattice))
-            : Failable.success(value as T)
+            ? Result.value(new Retain(value, lattice))
+            : Result.value(value as T)
     }
 
     *isEffectivelyConst(): Failable<boolean> {
-        return Failable.success(true)
+        return Result.true
     }
 
     isolationLevel(context: Context): Failable<AnyIsolationLevel> {
@@ -46,7 +46,7 @@ export class Retain implements Expression {
 
     *toCIRExpression(context: ContextWithLattice): Failable<cir.Expression> {
         const object = yield yield* this.value.toCIRExpression(context)
-        return Failable.success({
+        return Result.value({
             kind: 'RETAIN' as const,
             object,
             value: this.lattice.toCIR(),

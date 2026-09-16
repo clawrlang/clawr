@@ -6,7 +6,7 @@ import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Lattice, RCTypeLattice } from './lattice'
 import { Retain } from './retain'
-import { Failable, isFailure } from '@/tools/failable'
+import { Failable, isFailure, Result } from '@/tools/failable'
 
 export class Assignment implements Statement {
     private constructor(
@@ -115,7 +115,7 @@ export class Assignment implements Statement {
                 value: retainedValueCIR,
             })
         }
-        return Failable.success()
+        return Result.success
     }
 
     private *checkValidity(context: Context): Failable {
@@ -131,25 +131,25 @@ export class Assignment implements Statement {
             explicitLatticeContext,
         )
         if (!targetLattice.isSupersetTo(assignedValue))
-            yield Failable.failure(
+            yield Result.failure(
                 `Cannot assign value of type ${assignedValue?.toString() ?? this.value.constructor.name} to target of type ${targetLattice.toString()}`,
                 this.span,
             )
         const valueIsolationLevel: AnyIsolationLevel =
             yield yield* this.value.isolationLevel(context)
-        if (valueIsolationLevel === UNIQUE) return Failable.success()
+        if (valueIsolationLevel === UNIQUE) return Result.success
         if (valueIsolationLevel === UNKNOWN)
-            yield Failable.failure(
+            yield Result.failure(
                 'Parameter with unspecified isolation level may not be used in assignment',
                 this.value.span,
             )
         const targetIsolationLevel: AnyIsolationLevel =
             yield yield* this.target.isolationLevel(context)
         if (targetIsolationLevel !== valueIsolationLevel)
-            yield Failable.failure(
+            yield Result.failure(
                 `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,
                 this.span,
             )
-        return Failable.success()
+        return Result.success
     }
 }

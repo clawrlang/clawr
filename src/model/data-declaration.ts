@@ -2,7 +2,7 @@ import { Context, Declaration, Expression } from '.'
 import { LatticeDeclaration } from './lattice-declaration'
 import { IsolationLevel } from './isolation-level'
 import { TypeName } from './type-name'
-import { Failable } from '@/tools/failable'
+import { Failable, Result } from '@/tools/failable'
 
 export type DataField = {
     isImmutable: boolean
@@ -39,6 +39,6 @@ export class DataDeclaration implements Declaration {
                 lattice: field.lattice!.toCIR(),
             })),
         })
-        return Failable.success()
+        return Result.success
     }
 }

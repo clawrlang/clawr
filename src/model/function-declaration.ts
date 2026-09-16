@@ -19,7 +19,7 @@ import { Lattice, RCTypeLattice } from './lattice'
 import { mapFilter } from '@/tools/map-filter'
 import { Parameter } from './parameter'
 import { Scope } from './scope'
-import { Failable, isFailure } from '@/tools/failable'
+import { Failable, isFailure, Result } from '@/tools/failable'
 import { TypeName } from './type-name'
 import { Assignment } from './assignment'
 import { VariableReference } from './variable-reference'
@@ -74,7 +74,7 @@ export class FunctionDeclaration implements Declaration {
     }
 
     *resultIsolationLevel(context: Context): Failable<AnyIsolationLevel> {
-        if (this.result) return Failable.success(this.result.isolationLevel)
+        if (this.result) return Result.value(this.result.isolationLevel)
         if (this.implementation.kind === 'implicit-return')
             return yield* this.implementation.expression.isolationLevel(context)
         else
@@ -84,12 +84,12 @@ export class FunctionDeclaration implements Declaration {
     }
 
     *lattice(context: Context): Failable<Lattice | undefined> {
-        if (this.result) return Failable.success(this.result.lattice)
+        if (this.result) return Result.value(this.result.lattice)
         if (this.implementation.kind === 'implicit-return')
             return yield* this.implementation.expression.currentValue(
                 this.bodyContext(context),
             )
-        return Failable.undefined()
+        return Result.success
     }
 
     *emitDeclaration(context: Context): Failable {
@@ -130,7 +130,7 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
-        return Failable.success()
+        return Result.success
     }
 
     *emitMethod(
@@ -171,7 +171,7 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
 
-        return Failable.success(cirFuncDecl)
+        return Result.value(cirFuncDecl)
     }
 
     *emitInitializer(
@@ -213,7 +213,7 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
 
-        return Failable.success(cirFuncDecl)
+        return Result.value(cirFuncDecl)
     }
 
     private *makeBodyContext(
@@ -247,7 +247,7 @@ export class FunctionDeclaration implements Declaration {
             scope: parameterScope,
             calleeResult,
         })
-        return Failable.success(bodyContext)
+        return Result.value(bodyContext)
     }
 
     private *scopeAddingParameters(context: Context): Failable<Scope> {
@@ -256,8 +256,8 @@ export class FunctionDeclaration implements Declaration {
             const latticeResult = param.defaultValue
                 ? yield* param.defaultValue.currentValue(context)
                 : param.lattice
-                  ? Failable.success(param.lattice)
-                  : Failable.failure(
+                  ? Result.value(param.lattice)
+                  : Result.failure(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
                         param.span,
                     )
@@ -270,17 +270,17 @@ export class FunctionDeclaration implements Declaration {
             })
             parameterScope.setCurrentValue(param.varName, lattice)
         }
-        return Failable.success(parameterScope)
+        return Result.value(parameterScope)
     }
 
     private *resultLattice(
         context: Context,
     ): Failable<cir.Lattice | undefined> {
-        if (this.result) return Failable.success(this.result.lattice.toCIR())
-        if (this.implementation.kind === 'body') return Failable.success()
+        if (this.result) return Result.value(this.result.lattice.toCIR())
+        if (this.implementation.kind === 'body') return Result.value(undefined)
         const lattice: Lattice =
             yield yield* this.implementation.expression.currentValue(context)
-        return Failable.success(lattice.toCIR())
+        return Result.value(lattice.toCIR())
     }
 
     private bodyContext(context: Context): Context {

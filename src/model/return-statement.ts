@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
 import { Context, Expression, Statement } from '.'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, isFailure } from '@/tools/failable'
+import { Failable, isFailure, Result } from '@/tools/failable'
 import { AnyIsolationLevel } from './isolation-level'
 import { Lattice } from './lattice'
 import { Retain } from './retain'
@@ -30,7 +30,7 @@ export class ReturnStatement implements Statement {
             context.scope.emitted.push({
                 kind: 'RETURN',
             })
-            return Failable.success()
+            return Result.success
         }
 
         const lattice: Lattice = yield yield* this.value.currentValue(context)
@@ -76,40 +76,37 @@ export class ReturnStatement implements Statement {
                 value: retainedValueCIR,
             })
         }
-        return Failable.success()
+        return Result.success
     }
 
     private *validateInput(context: Context): Failable {
         if (!this.value) {
             return context.calleeResult
-                ? Failable.failure(
+                ? Result.failure(
                       `Must return a ${context.calleeResult.lattice.toString()} value`,
                       this.span,
                   )
-                : Failable.success(undefined)
+                : Result.success
         }
 
         const calleeResult = context.calleeResult
         if (!calleeResult)
-            return Failable.failure(
+            return Result.failure(
                 'Called function has no return value',
                 this.value!.span,
             )
         const lattice: Lattice = yield yield* this.value.currentValue(context)
         if (!calleeResult.lattice.isSupersetTo(lattice))
-            yield Failable.failure(
-                'Return value type mismatch',
-                this.value!.span,
-            )
+            yield Result.failure('Return value type mismatch', this.value!.span)
 
         const isolationLevel: AnyIsolationLevel =
             yield yield* this.value.isolationLevel(context)
 
         return calleeResult.isolationLevel !== isolationLevel
-            ? Failable.failure(
+            ? Result.failure(
                   `Cannot return an ${isolationLevel} value as ${calleeResult.isolationLevel}`,
                   this.value!.span,
               )
-            : Failable.success()
+            : Result.success
     }
 }

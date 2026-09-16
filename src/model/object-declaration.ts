@@ -3,7 +3,7 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { FunctionDeclaration } from './function-declaration'
 import { DataField } from './data-declaration'
 import { Context, Declaration } from '.'
-import { Failable } from '@/tools/failable'
+import { Failable, Result } from '@/tools/failable'
 import { TypeName } from './type-name'
 import { RCTypeLattice } from './lattice'
 import { SHARED } from './isolation-level'
@@ -101,6 +101,6 @@ export class ObjectDeclaration implements Declaration {
                 lattice: field.lattice!.toCIR(),
             })),
         })
-        return Failable.success()
+        return Result.success
     }
 }

@@ -5,7 +5,7 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { FunctionName } from './function-name'
 import { Lattice, RCTypeLattice } from './lattice'
 import { mapFilter } from '@/tools/map-filter'
-import { Failable } from '@/tools/failable'
+import { Failable, Result } from '@/tools/failable'
 
 export class FunctionCall implements Expression, Statement {
     private arguments: Expression[]
@@ -43,16 +43,15 @@ export class FunctionCall implements Expression, Statement {
     }
 
     *isEffectivelyConst(_: Context): Failable<boolean> {
-        return Failable.success(true)
+        return Result.true
     }
 
     *isolationLevel(context: Context): Failable<AnyIsolationLevel> {
-        if (this.name.toString() === 'copy(of:)')
-            return Failable.success(UNIQUE)
+        if (this.name.toString() === 'copy(of:)') return Result.value(UNIQUE)
 
         const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
-            return Failable.failure(
+            return Result.failure(
                 `unknown function ${this.name.toString()}`,
                 this.span,
             )
@@ -67,24 +66,24 @@ export class FunctionCall implements Expression, Statement {
         if (this.name.toString() === 'copy(of:)') {
             const value = yield yield* this.arguments[0].currentValue(context)
             return value instanceof RCTypeLattice
-                ? Failable.success(value)
-                : Failable.failure('not a reference-counted type', this.span)
+                ? Result.value(value)
+                : Result.failure('not a reference-counted type', this.span)
         }
 
         const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
-            return Failable.failure(
+            return Result.failure(
                 `Function declaration not found: ${this.name.toString()}`,
                 this.span,
             )
 
         const lattice: Lattice | undefined = yield yield* decl.lattice(context)
         if (!lattice)
-            return Failable.failure(
+            return Result.failure(
                 `Function declaration has no result lattice: ${this.name.toString()}`,
                 this.span,
             )
-        return Failable.success(lattice)
+        return Result.value(lattice)
     }
 
     *toCIRExpression(context: Context): Failable<cir.Expression> {
@@ -93,7 +92,7 @@ export class FunctionCall implements Expression, Statement {
             this.arguments,
             (arg) => arg.toCIRExpression(context),
         )
-        return Failable.success({
+        return Result.value({
             kind: 'CALL',
             name: this.name.toCIR(),
             arguments: args,
@@ -147,6 +146,6 @@ export class FunctionCall implements Expression, Statement {
                 arguments: args,
             })
         }
-        return Failable.success()
+        return Result.success
     }
 }

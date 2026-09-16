@@ -3,7 +3,7 @@ import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Lattice } from './lattice'
-import { Failable, isFailure } from '@/tools/failable'
+import { Failable, isFailure, Result } from '@/tools/failable'
 import { Variable } from './scope'
 
 export class VariableReference implements Expression {
@@ -24,46 +24,46 @@ export class VariableReference implements Expression {
 
     *assignmentPrelude(context: Context): Failable<cir.Statement[]> {
         if (yield yield* this.isEffectivelyConst(context))
-            yield Failable.failure(
+            yield Result.failure(
                 `Variable ${this.name} is not mutable`,
                 this.span,
             )
-        return Failable.success([])
+        return Result.value([])
     }
 
     *isEffectivelyConst(context: Context): Failable<boolean> {
         const variableResult = yield* this.lookupInScope(context)
         const variable: Variable = yield variableResult
-        return Failable.success(variable.isImmutable)
+        return Result.value(variable.isImmutable)
     }
 
     *isolationLevel(context: Context): Failable<IsolationLevel | UNKNOWN> {
         const variableResult = yield* this.lookupInScope(context)
         const variable: Variable = yield variableResult
-        return Failable.success(variable.isolationLevel)
+        return Result.value(variable.isolationLevel)
     }
 
     *declaredLattice(context: Context): Failable<Lattice> {
         const variableResult = yield* this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
         const variable: Variable = yield variableResult
-        return Failable.success(variable.lattice)
+        return Result.value(variable.lattice)
     }
 
     *currentValue(context: Context): Failable<Lattice> {
         const result = context.scope.currentValue(this.name)
         if (!result) {
-            return Failable.failure(
+            return Result.failure(
                 `Variable ${this.name} has no value in the current context`,
                 this.span,
             )
         }
-        return Failable.success(result)
+        return Result.value(result)
     }
 
     *setCurrentValue(context: Context, value: Lattice): Failable {
         context.scope.setCurrentValue(this.name, value)
-        return Failable.success()
+        return Result.success
     }
 
     *toCIRExpression(
@@ -73,7 +73,7 @@ export class VariableReference implements Expression {
         if (isFailure(variableResult)) return variableResult
         const valueResult = yield* this.currentValue(context)
         if (isFailure(valueResult)) return valueResult
-        return Failable.success({
+        return Result.value({
             kind: 'VARIABLE_REF' as const,
             name: this.name,
             value: (yield valueResult).toCIR(),
@@ -83,10 +83,10 @@ export class VariableReference implements Expression {
     *lookupInScope(context: Context) {
         const variable = context.scope.variableDeclaration(this.name)
         if (!variable)
-            return Failable.failure(
+            return Result.failure(
                 `Variable ${this.name} is not defined in the current context`,
                 this.span,
             )
-        return Failable.success(variable)
+        return Result.value(variable)
     }
 }

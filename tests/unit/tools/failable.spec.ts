@@ -1,30 +1,36 @@
 import { describe, it, expect, test } from 'bun:test'
 import { someCodeSpan } from '@@/util'
-import { Failable, isFailure, isSuccess, SemanticError } from '@/tools/failable'
+import {
+    Failable,
+    isFailure,
+    isSuccess,
+    Result,
+    SemanticError,
+} from '@/tools/failable'
 
 describe('Failable', () => {
     describe('success', () => {
         it('is successful', () => {
-            expect(isSuccess(Failable.success(42))).toBeTrue()
+            expect(isSuccess(Result.value(42))).toBeTrue()
         })
 
         it('has no error', () => {
-            expect(isFailure(Failable.success(42))).toBeFalse()
+            expect(isFailure(Result.value(42))).toBeFalse()
         })
 
         it('has a resolved value', () => {
-            expect(Failable.success(42).value).toBe(42)
+            expect(Result.value(42).value).toBe(42)
         })
     })
 
     describe('failure', () => {
         it('is not successful', () => {
-            expect(isSuccess(Failable.failure(someError))).toBeFalse()
+            expect(isSuccess(Result.failure(someError))).toBeFalse()
         })
 
         it('has an error', () => {
-            expect(isFailure(Failable.failure(someError))).toBeTrue()
-            expect(Failable.failure(someError).errors).toContainValue(someError)
+            expect(isFailure(Result.failure(someError))).toBeTrue()
+            expect(Result.failure(someError).errors).toContainValue(someError)
         })
     })
 
@@ -32,10 +38,10 @@ describe('Failable', () => {
         it('unyields values', () => {
             let one: any, two: any, three: any
             const result = Failable.do(function* () {
-                one = yield Failable.success(1)
-                two = yield Failable.success(2)
-                three = yield Failable.success(3)
-                return Failable.success(three as number)
+                one = yield Result.value(1)
+                two = yield Result.value(2)
+                three = yield Result.value(3)
+                return Result.value(three as number)
             })
             expect(isFailure(result)).toBeFalse()
             expect(isSuccess(result)).toBeTrue()
@@ -45,25 +51,25 @@ describe('Failable', () => {
 
         test('yield* returns nothing', () => {
             function* muchSuccess() {
-                yield Failable.success(1)
-                yield Failable.success(2)
-                yield Failable.success(3)
+                yield Result.value(1)
+                yield Result.value(2)
+                yield Result.value(3)
             }
             let yielded: any
             Failable.do(function* () {
                 yielded = yield* muchSuccess()
-                return Failable.success()
+                return Result.success
             })
             expect(yielded).toBeUndefined()
         })
 
         it('collects all non-fatal failures', () => {
             const result = Failable.do(function* () {
-                yield Failable.success(1)
-                yield Failable.failure('This is does not end it', someCodeSpan)
-                yield Failable.failure('This also is does end it', someCodeSpan)
-                yield Failable.failure('This is the final thing', someCodeSpan)
-                return Failable.success()
+                yield Result.value(1)
+                yield Result.failure('This is does not end it', someCodeSpan)
+                yield Result.failure('This also is does end it', someCodeSpan)
+                yield Result.failure('This is the final thing', someCodeSpan)
+                return Result.success
             })
             expect(isFailure(result)).toBeTrue()
             expect((result as any).errors).toHaveLength(3)

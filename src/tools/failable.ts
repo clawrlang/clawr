@@ -5,20 +5,19 @@ type Success<T> = { value: T }
 type Failure = { errors: SemanticError[] }
 
 export const Failable = {
-    success,
-    undefined() {
-        return success()
-    },
-    true() {
-        return success(true)
-    },
-    false() {
-        return success(false)
-    },
-    failure,
     collect,
     do: _do,
     map,
+}
+
+export const Result = {
+    true: success(true),
+    false: success(false),
+    success: success(),
+    value<T>(value: T) {
+        return success(value)
+    },
+    failure,
 }
 
 function success(): Success<undefined>

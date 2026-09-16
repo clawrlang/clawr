@@ -1,6 +1,11 @@
 import * as cir from '@/cir'
 import { Context, Declaration, Statement } from '.'
-import { Failable, isFailure, SemanticErrorCollection } from '@/tools/failable'
+import {
+    Failable,
+    isFailure,
+    Result,
+    SemanticErrorCollection,
+} from '@/tools/failable'
 
 export class Module {
     private constructor(
@@ -25,7 +30,7 @@ export class Module {
                 yield yield* decl.emitDeclaration(context)
             for (const stmt of self.main)
                 yield yield* stmt.emitStatement(context)
-            return Failable.success(undefined)
+            return Result.success
         })
         if (isFailure(result))
             throw SemanticErrorCollection.create(result.errors)

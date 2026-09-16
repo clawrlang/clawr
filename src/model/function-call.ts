@@ -106,54 +106,57 @@ export class FunctionCall implements Expression, Statement {
         } satisfies cir.Expression)
     }
 
-    *emitStatement(context: Context): Failable {
-        const _name = this.name.toCIR()
-        const args: cir.Expression[] = yield yield* Failable.map(
-            this.arguments,
-            function* (arg) {
-                return arg.toCIRExpression(context)
-            },
-        )
-        if (_name.baseName === 'print') {
-            const tempName = context.scope.nextTempVar()
-            const boxedLattice = { ...args[0].value, boxed: true as const }
-            context.scope.emitted.push(
-                {
-                    kind: 'VARIABLE_DECL',
-                    name: tempName,
-                    lattice: boxedLattice,
-                    initialValue: {
-                        kind: 'BOX',
-                        expression: args[0],
-                        value: boxedLattice,
-                    },
-                },
-                {
-                    kind: 'CALL',
-                    name: _name,
-                    arguments: [
-                        {
-                            kind: 'VARIABLE_REF',
-                            name: tempName,
-                            value: boxedLattice,
-                        },
-                    ],
-                },
-                {
-                    kind: 'RELEASE',
-                    object: {
-                        kind: 'VARIABLE_REF',
-                        name: tempName,
-                    },
+    emitStatement(context: Context): Result {
+        const self = this
+        return Failable.do(function* () {
+            const _name = self.name.toCIR()
+            const args: cir.Expression[] = yield yield* Failable.map(
+                self.arguments,
+                function* (arg) {
+                    return arg.toCIRExpression(context)
                 },
             )
-        } else {
-            context.scope.emitted.push({
-                kind: 'CALL',
-                name: _name,
-                arguments: args,
-            })
-        }
-        return Result.success
+            if (_name.baseName === 'print') {
+                const tempName = context.scope.nextTempVar()
+                const boxedLattice = { ...args[0].value, boxed: true as const }
+                context.scope.emitted.push(
+                    {
+                        kind: 'VARIABLE_DECL',
+                        name: tempName,
+                        lattice: boxedLattice,
+                        initialValue: {
+                            kind: 'BOX',
+                            expression: args[0],
+                            value: boxedLattice,
+                        },
+                    },
+                    {
+                        kind: 'CALL',
+                        name: _name,
+                        arguments: [
+                            {
+                                kind: 'VARIABLE_REF',
+                                name: tempName,
+                                value: boxedLattice,
+                            },
+                        ],
+                    },
+                    {
+                        kind: 'RELEASE',
+                        object: {
+                            kind: 'VARIABLE_REF',
+                            name: tempName,
+                        },
+                    },
+                )
+            } else {
+                context.scope.emitted.push({
+                    kind: 'CALL',
+                    name: _name,
+                    arguments: args,
+                })
+            }
+            return Result.success
+        })
     }
 }

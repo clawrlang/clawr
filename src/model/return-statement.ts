@@ -22,57 +22,58 @@ export class ReturnStatement implements Statement {
         return new ReturnStatement(value, span)
     }
 
-    *emitStatement(context: Context): Failable {
-        const validation = yield* this.validateInput(context)
-        if (isFailure(validation)) return validation
-        if (!this.value || !context.calleeResult) {
-            context.scope.releaseVariables()
-            context.scope.emitted.push({
-                kind: 'RETURN',
-            })
-            return Result.success
-        }
+    emitStatement(context: Context): Result {
+        const self = this
+        return Failable.do(function* () {
+            const validation = yield* self.validateInput(context)
+            if (isFailure(validation)) return validation
+            if (!self.value || !context.calleeResult) {
+                context.scope.releaseVariables()
+                context.scope.emitted.push({
+                    kind: 'RETURN',
+                })
+                return Result.success
+            }
 
-        const lattice: Lattice = yield this.value.currentValue(context)
-        const retainedValue: Expression = yield Retain.ifStorage(
-            this.value,
-            context,
-        )
+            const lattice: Lattice = yield self.value.currentValue(context)
+            const retainedValue = yield Retain.ifStorage(self.value, context)
 
-        const retainedValueCIR: cir.Expression =
-            yield retainedValue.toCIRExpression(context)
+            const retainedValueCIR: cir.Expression =
+                yield retainedValue.toCIRExpression(context)
 
-        if (retainedValue instanceof Retain) {
-            // && isolationLevel === ISOLATED
-            const object = yield retainedValue.value.toCIRExpression(context)
-            context.scope.emitted.push({
-                kind: 'ENSURE_UNIQUE',
-                object,
-            })
-            const temp = context.scope.nextTempVar()
-            context.scope.emitted.push({
-                kind: 'VARIABLE_DECL',
-                name: temp,
-                lattice: lattice.toCIR(),
-                initialValue: retainedValueCIR,
-            })
-            context.scope.releaseVariables()
-            context.scope.emitted.push({
-                kind: 'RETURN',
-                value: {
-                    kind: 'VARIABLE_REF',
+            if (retainedValue instanceof Retain) {
+                // && isolationLevel === ISOLATED
+                const object =
+                    yield retainedValue.value.toCIRExpression(context)
+                context.scope.emitted.push({
+                    kind: 'ENSURE_UNIQUE',
+                    object,
+                })
+                const temp = context.scope.nextTempVar()
+                context.scope.emitted.push({
+                    kind: 'VARIABLE_DECL',
                     name: temp,
-                    value: retainedValueCIR.value,
-                },
-            })
-        } else {
-            context.scope.releaseVariables()
-            context.scope.emitted.push({
-                kind: 'RETURN',
-                value: retainedValueCIR,
-            })
-        }
-        return Result.success
+                    lattice: lattice.toCIR(),
+                    initialValue: retainedValueCIR,
+                })
+                context.scope.releaseVariables()
+                context.scope.emitted.push({
+                    kind: 'RETURN',
+                    value: {
+                        kind: 'VARIABLE_REF',
+                        name: temp,
+                        value: retainedValueCIR.value,
+                    },
+                })
+            } else {
+                context.scope.releaseVariables()
+                context.scope.emitted.push({
+                    kind: 'RETURN',
+                    value: retainedValueCIR,
+                })
+            }
+            return Result.success
+        })
     }
 
     private *validateInput(context: Context): Failable {

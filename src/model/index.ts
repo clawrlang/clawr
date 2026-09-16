@@ -33,7 +33,7 @@ export interface Expression {
 }
 
 export interface Statement {
-    emitStatement(context: Context): Failable
+    emitStatement(context: Context): Result
 }
 
 export interface Declaration {

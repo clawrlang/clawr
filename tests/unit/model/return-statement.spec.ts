@@ -29,7 +29,7 @@ describe('ReturnStatement', () => {
                 isolationLevel: ISOLATED,
             },
         }
-        Failable.do(() => returnStatement.emitStatement(context))
+        returnStatement.emitStatement(context)
 
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'RETURN',
@@ -44,7 +44,7 @@ describe('ReturnStatement', () => {
         })
 
         const context = newSemanticContext()
-        const result = Failable.do(() => returnStatement.emitStatement(context))
+        const result = returnStatement.emitStatement(context)
         expect(isFailure(result)).toBeTrue()
         expect(context.scope.emitted.length).toBe(0)
     })
@@ -62,7 +62,7 @@ describe('ReturnStatement', () => {
                 isolationLevel: ISOLATED,
             },
         }
-        const result = Failable.do(() => returnStatement.emitStatement(context))
+        const result = returnStatement.emitStatement(context)
         expect(isFailure(result)).toBeTrue()
         expect(context.scope.emitted.length).toBe(1)
     })
@@ -91,17 +91,15 @@ describe('ReturnStatement', () => {
             span: someCodeSpan,
         })
 
-        const result = Failable.do(() =>
-            returnStatement.emitStatement({
-                ...context,
-                calleeResult: {
-                    lattice: RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyData' }),
-                    }),
-                    isolationLevel: SHARED,
-                },
-            }),
-        )
+        const result = returnStatement.emitStatement({
+            ...context,
+            calleeResult: {
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyData' }),
+                }),
+                isolationLevel: SHARED,
+            },
+        })
         assert(isFailure(result))
         expect(result.errors.map((e) => e.message)).toContain(
             'Cannot return an ISOLATED value as SHARED',

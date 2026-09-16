@@ -213,7 +213,7 @@ describe('FunctionCall', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
-        Failable.do(() => statement.emitStatement(context))
+        statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'VARIABLE_DECL',
@@ -263,7 +263,7 @@ describe('FunctionCall', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
-        Failable.do(() => statement.emitStatement(context))
+        statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'VARIABLE_DECL',
@@ -325,7 +325,7 @@ describe('FunctionCall', () => {
             ],
             span: someCodeSpan,
         })
-        Failable.do(() => statement.emitStatement(context))
+        statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'VARIABLE_DECL',

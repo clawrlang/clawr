@@ -27,21 +27,24 @@ export class Assignment implements Statement {
         return new Assignment(target, value, span)
     }
 
-    *emitStatement(context: Context): Failable {
-        const validity = this.checkValidity(context)
-        if (isFailure(validity)) return validity
-        const targetLattice: Lattice =
-            yield this.target.declaredLattice(context)
-        const explicitLatticeContext = {
-            ...context,
-            isolationLevel: yield this.target.isolationLevel(context),
-            explicitLattice: targetLattice,
-        }
-        yield yield* this.emitCIRStatements(context)
-        const value: Lattice = yield this.value.currentValue(
-            explicitLatticeContext,
-        )
-        return this.target.setCurrentValue(context, value)
+    emitStatement(context: Context): Result {
+        const self = this
+        return Failable.do(function* () {
+            const validity = self.checkValidity(context)
+            if (isFailure(validity)) return validity
+            const targetLattice: Lattice =
+                yield self.target.declaredLattice(context)
+            const explicitLatticeContext = {
+                ...context,
+                isolationLevel: yield self.target.isolationLevel(context),
+                explicitLattice: targetLattice,
+            }
+            yield yield* self.emitCIRStatements(context)
+            const value: Lattice = yield self.value.currentValue(
+                explicitLatticeContext,
+            )
+            return self.target.setCurrentValue(context, value)
+        })
     }
 
     private *emitCIRStatements(context: Context): Failable {

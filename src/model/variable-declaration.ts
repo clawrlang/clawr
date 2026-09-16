@@ -45,8 +45,11 @@ export class VariableDeclaration implements Statement, Declaration {
         return this.emit(context.scope.rootScope, context)
     }
 
-    emitStatement(context: Context): Failable {
-        return this.emit(context.scope, context)
+    emitStatement(context: Context): Result {
+        const self = this
+        return Failable.do(function* () {
+            return yield* self.emit(context.scope, context)
+        }) as Result
     }
 
     private *emit(

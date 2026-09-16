@@ -96,7 +96,7 @@ export class FunctionDeclaration implements Declaration {
                       }),
                   ]
 
-        for (const stmt of body) yield* stmt.emitStatement(bodyContext)
+        for (const stmt of body) stmt.emitStatement(bodyContext)
 
         if (
             this.implementation.kind === 'body' &&
@@ -137,7 +137,7 @@ export class FunctionDeclaration implements Declaration {
                       }),
                   ]
 
-        for (const stmt of body) yield* stmt.emitStatement(bodyContext)
+        for (const stmt of body) stmt.emitStatement(bodyContext)
 
         if (
             this.implementation.kind === 'body' &&
@@ -182,7 +182,7 @@ export class FunctionDeclaration implements Declaration {
                       }),
                   ]
 
-        for (const stmt of body) yield* stmt.emitStatement(bodyContext)
+        for (const stmt of body) stmt.emitStatement(bodyContext)
 
         if (
             this.implementation.kind === 'body' &&

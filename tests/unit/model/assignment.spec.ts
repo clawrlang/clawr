@@ -31,7 +31,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        Failable.do(() => assignment.emitStatement(context))
+        assignment.emitStatement(context)
 
         expect(context.scope.emitted).toMatchObject([
             {
@@ -90,7 +90,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        Failable.do(() => assignment.emitStatement(context))
+        assignment.emitStatement(context)
 
         expect(context.scope.emitted).toMatchObject([
             {
@@ -202,7 +202,7 @@ describe('Assignment', () => {
                 span: someCodeSpan,
             })
 
-            Failable.do(() => assignment.emitStatement(context))
+            assignment.emitStatement(context)
             expect(context.scope.emitted).toMatchObject([
                 {
                     kind: 'VARIABLE_DECL',
@@ -286,7 +286,7 @@ describe('Assignment', () => {
                 span: someCodeSpan,
             })
 
-            Failable.do(() => assignment.emitStatement(context))
+            assignment.emitStatement(context)
             expect(context.scope.emitted).toMatchObject([
                 {
                     kind: 'VARIABLE_DECL',
@@ -369,7 +369,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        Failable.do(() => assignment.emitStatement(context))
+        assignment.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'ENSURE_UNIQUE',
@@ -444,7 +444,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        Failable.do(() => assignment.emitStatement(context))
+        assignment.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'ASSIGN',
@@ -477,7 +477,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
         const context = newSemanticContext()
-        const result = Failable.do(() => assignment.emitStatement(context))
+        const result = assignment.emitStatement(context)
         assert(isFailure(result))
         expect(result.errors.map((e) => e.message)).toContain(
             'Variable x is not defined in the current context',
@@ -537,9 +537,7 @@ describe('Assignment', () => {
                     }),
                     span: someCodeSpan,
                 })
-                const result = Failable.do(() =>
-                    assignment.emitStatement(context),
-                )
+                const result = assignment.emitStatement(context)
                 assert(isFailure(result))
                 expect(result.errors).toMatchObject([
                     {
@@ -601,7 +599,7 @@ describe('Assignment', () => {
             value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
             span: someCodeSpan,
         })
-        const result = Failable.do(() => assignment.emitStatement(context))
+        const result = assignment.emitStatement(context)
 
         assert(isFailure(result))
         expect(result.errors).toMatchObject([
@@ -664,7 +662,7 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        const result = Failable.do(() => assignment.emitStatement(context))
+        const result = assignment.emitStatement(context)
         assert(isFailure(result))
         expect(result.errors).toMatchObject([
             {
@@ -744,9 +742,7 @@ describe('Assignment', () => {
                         span: someCodeSpan,
                     }),
                 })
-                const result = Failable.do(() =>
-                    assignment.emitStatement(context),
-                )
+                const result = assignment.emitStatement(context)
                 assert(isFailure(result))
                 expect(result.errors.map((e) => e.message)).toContain(
                     `Cannot assign SHARED value to ISOLATED target`,
@@ -806,9 +802,7 @@ describe('Assignment', () => {
                     }),
                     span: someCodeSpan,
                 })
-                const result = Failable.do(() =>
-                    assignment.emitStatement(context),
-                )
+                const result = assignment.emitStatement(context)
                 assert(isFailure(result))
                 expect(result.errors.map((e) => e.message)).toContain(
                     'Parameter with unspecified isolation level may not be used in assignment',
@@ -838,7 +832,7 @@ describe('Assignment', () => {
                 }),
                 span: someCodeSpan,
             })
-            Failable.do(() => assignment.emitStatement(context))
+            assignment.emitStatement(context)
             expect(context.scope.currentValue('x')).not.toBeNil()
             expect(context.scope.currentValue('x')).toMatchObject({
                 min: 42n,
@@ -896,7 +890,7 @@ describe('Assignment', () => {
                 }),
                 span: someCodeSpan,
             })
-            Failable.do(() => assignment.emitStatement(context))
+            assignment.emitStatement(context)
             expect(context.scope.currentValue('x')).not.toBeNil()
             expect(context.scope.currentValue('x')).toMatchObject({
                 fields: { field: { min: 42n, max: 42n } },

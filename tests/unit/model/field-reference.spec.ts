@@ -1,14 +1,14 @@
-import { describe, expect, it, test } from 'bun:test'
-import { FieldReference } from '@/model/field-reference'
-import { VariableReference } from '@/model/variable-reference'
-import { newSemanticContext, someCodeSpan } from '@@/util'
 import { DataDeclaration } from '@/model/data-declaration'
-import { TypeName } from '@/model/type-name'
-import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
+import { FieldReference } from '@/model/field-reference'
 import { ISOLATED, SHARED, UNKNOWN } from '@/model/isolation-level'
+import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
+import { TypeName } from '@/model/type-name'
+import { VariableReference } from '@/model/variable-reference'
 import { Failable, isFailure, isSuccess, Result } from '@/tools/failable'
+import { newSemanticContext, someCodeSpan } from '@@/util'
 import assert from 'assert'
+import { describe, expect, it, test } from 'bun:test'
 
 describe('Field Reference', () => {
     it('infers its type from the context', () => {

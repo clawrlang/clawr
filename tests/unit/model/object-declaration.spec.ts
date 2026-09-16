@@ -1,4 +1,3 @@
-import * as cir from '@/cir'
 import { Assignment } from '@/model/assignment'
 import { DataLiteral } from '@/model/data-literal'
 import { FunctionDeclaration } from '@/model/function-declaration'

@@ -1,5 +1,5 @@
-import typia from 'typia'
 import { ClawrModule } from '@/cir'
+import typia from 'typia'
 
 export default class CIRParser {
     private constructor(

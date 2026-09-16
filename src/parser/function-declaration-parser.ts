@@ -1,17 +1,17 @@
-import { Context, DeclarationParser } from '.'
-import { TokenStream, Token } from '@/lexer'
+import { Token, TokenStream } from '@/lexer'
+import { Expression } from '@/model'
 import { FunctionDeclaration } from '@/model/function-declaration'
-import { Parameter } from '@/model/parameter'
+import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { LatticeDeclaration } from '@/model/lattice-declaration'
+import { Parameter } from '@/model/parameter'
+import { Context, DeclarationParser } from '.'
 import { BlockParser } from './block-parser'
 import { ExpressionParser } from './expression-parser'
 import { LatticeParser } from './lattice-parser'
-import { Expression } from '@/model'
 import {
     SemanticsKeyword,
     SemanticsKeywordParser,
 } from './semantics-keyword-parser'
-import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
     private readonly latticeParser: LatticeParser

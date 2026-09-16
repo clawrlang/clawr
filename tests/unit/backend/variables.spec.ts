@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'bun:test'
-import { Declaration, Expression } from '@/cir'
 import { lowerExpr, lowerStmt } from '@/backend'
+import { Declaration, Expression } from '@/cir'
+import { describe, expect, it } from 'bun:test'
 
 describe('Lowering Variables', () => {
     it('lowers variable declarations correctly', () => {

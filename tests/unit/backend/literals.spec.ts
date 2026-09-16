@@ -1,8 +1,8 @@
-import { describe, expect, it, test } from 'bun:test'
-import { Expression } from '@/cir'
 import { lowerExpr } from '@/backend'
+import { Expression } from '@/cir'
 import { ISOLATED } from '@/model/isolation-level'
 import { truthvalue } from '@/model/lattice'
+import { describe, expect, it, test } from 'bun:test'
 
 describe('Lowering Literals', () => {
     it('lowers string literals correctly', () => {

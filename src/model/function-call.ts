@@ -1,11 +1,11 @@
 import * as cir from '@/cir'
-import { Context, Expression, Statement } from '.'
-import { AnyIsolationLevel, UNIQUE } from './isolation-level'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { FunctionName } from './function-name'
-import { Lattice, RCTypeLattice } from './lattice'
-import { mapFilter } from '@/tools/map-filter'
 import { Failable, Result } from '@/tools/failable'
+import { mapFilter } from '@/tools/map-filter'
+import { Context, Expression, Statement } from '.'
+import { FunctionName } from './function-name'
+import { AnyIsolationLevel, UNIQUE } from './isolation-level'
+import { Lattice, RCTypeLattice } from './lattice'
 
 export class FunctionCall implements Expression, Statement {
     private arguments: Expression[]

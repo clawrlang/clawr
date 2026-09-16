@@ -1,11 +1,11 @@
 import * as cir from '@/cir'
-import { Context, Declaration, Expression, Statement } from '.'
-import { Scope } from './scope'
-import { LatticeDeclaration } from './lattice-declaration'
-import { Lattice } from './lattice'
-import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
-import { Retain } from './retain'
 import { Failable, isFailure, Result } from '@/tools/failable'
+import { Context, Declaration, Expression, Statement } from '.'
+import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
+import { Lattice } from './lattice'
+import { LatticeDeclaration } from './lattice-declaration'
+import { Retain } from './retain'
+import { Scope } from './scope'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]

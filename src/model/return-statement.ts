@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
-import { Context, Expression, Statement } from '.'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Failable, isFailure, Result } from '@/tools/failable'
+import { Context, Expression, Statement } from '.'
 import { AnyIsolationLevel } from './isolation-level'
 import { Lattice } from './lattice'
 import { Retain } from './retain'

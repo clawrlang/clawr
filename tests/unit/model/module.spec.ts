@@ -1,14 +1,14 @@
-import { describe, expect, it } from 'bun:test'
-import { newSemanticContext, someCodeSpan } from '@@/util'
-import { Module } from '@/model/module'
+import { DataDeclaration } from '@/model/data-declaration'
 import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral } from '@/model/integer-literal'
-import { DataDeclaration } from '@/model/data-declaration'
-import { VariableDeclaration } from '@/model/variable-declaration'
-import { TypeName } from '@/model/type-name'
-import { IntegerLattice, TruthvalueLattice } from '@/model/lattice'
 import { ISOLATED } from '@/model/isolation-level'
+import { IntegerLattice, TruthvalueLattice } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
+import { Module } from '@/model/module'
+import { TypeName } from '@/model/type-name'
+import { VariableDeclaration } from '@/model/variable-declaration'
+import { newSemanticContext, someCodeSpan } from '@@/util'
+import { describe, expect, it } from 'bun:test'
 
 describe('Module', () => {
     it('outputs the main block in CIR', () => {

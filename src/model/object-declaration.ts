@@ -1,12 +1,12 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { FunctionDeclaration } from './function-declaration'
-import { DataField } from './data-declaration'
-import { Context, Declaration } from '.'
 import { Failable, Result } from '@/tools/failable'
-import { TypeName } from './type-name'
-import { RCTypeLattice } from './lattice'
+import { Context, Declaration } from '.'
+import { DataField } from './data-declaration'
+import { FunctionDeclaration } from './function-declaration'
 import { SHARED } from './isolation-level'
+import { RCTypeLattice } from './lattice'
+import { TypeName } from './type-name'
 
 export class ObjectDeclaration implements Declaration {
     private constructor(

@@ -2,8 +2,8 @@ import { TokenStream } from '@/lexer'
 import { Statement } from '@/model'
 import { FunctionCall } from '@/model/function-call'
 import { Context } from '.'
-import { StatementParser } from './statement-parser'
 import { ExpressionParser } from './expression-parser'
+import { StatementParser } from './statement-parser'
 
 export class FunctionCallParser implements StatementParser<Statement> {
     private constructor(private context: Context) {}

@@ -1,3 +1,3 @@
+export type { Keyword, Operator, PunctuationSymbol } from './kinds'
 export type { Token } from './token'
-export type { Keyword, PunctuationSymbol, Operator } from './kinds'
 export { TokenStream } from './token-stream'

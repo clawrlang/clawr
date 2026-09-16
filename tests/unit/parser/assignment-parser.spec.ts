@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
 import { TokenStream } from '@/lexer'
-import { TestErrorReporter } from '@@/util'
 import { AssignmentParser } from '@/parser/assignment-parser'
+import { TestErrorReporter } from '@@/util'
+import { describe, expect, it } from 'bun:test'
 
 describe('Assignment Parser', () => {
     it('parses a simple assignment', () => {

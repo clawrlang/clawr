@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-import fs from 'fs/promises'
-import path from 'path'
 import Bun from 'bun'
 import { Command } from 'commander'
+import fs from 'fs/promises'
+import path from 'path'
 
 import * as backend from '@/backend'
-import { ModuleParser } from '@/parser'
 import { TokenStream } from '@/lexer'
-import { RWRCErrorReporter } from './error-reporter'
 import { Scope } from '@/model/scope'
+import { ModuleParser } from '@/parser'
+import { RWRCErrorReporter } from './error-reporter'
 
 const exeDir = path.dirname(process.execPath)
 const program = new Command()

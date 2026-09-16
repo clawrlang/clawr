@@ -1,13 +1,13 @@
-import { Context } from '.'
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { DataField } from '@/model/data-declaration'
+import { Context } from '.'
 import { ExpressionParser } from './expression-parser'
+import { LatticeParser } from './lattice-parser'
 import {
     SemanticsKeyword,
     SemanticsKeywordParser,
 } from './semantics-keyword-parser'
-import { LatticeParser } from './lattice-parser'
 
 export class DataFieldParser {
     private constructor(private context: Context) {}

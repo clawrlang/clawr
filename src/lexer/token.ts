@@ -1,4 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
+import { decimal } from 'decimalish'
 import type {
     Annotation,
     Keyword,
@@ -6,7 +7,6 @@ import type {
     PunctuationSymbol,
     TruthvalueLiteral,
 } from './kinds'
-import { decimal } from 'decimalish'
 
 export type Token =
     | NewlineToken

@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'bun:test'
 import { TokenStream } from '@/lexer'
-import { TestErrorReporter } from '@@/util'
-import { DataDeclarationParser } from '@/parser/data-declaration-parser'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { IntegerLattice, TruthvalueLattice } from '@/model/lattice'
+import { DataDeclarationParser } from '@/parser/data-declaration-parser'
+import { TestErrorReporter } from '@@/util'
+import { describe, expect, it } from 'bun:test'
 
 describe('DataDeclarationParser', () => {
     it('parses a data declaration with default-mutability', () => {

@@ -1,3 +1,19 @@
+import { ErrorReporter, Position } from '@/tools/diagnostics'
+import { decimal } from 'decimalish'
+import type {
+    Annotation,
+    Keyword,
+    Operator,
+    PunctuationSymbol,
+    TruthvalueLiteral,
+} from './kinds'
+import {
+    keywords,
+    operators,
+    punctuationChars,
+    punctuationSymbols,
+    truthValues,
+} from './kinds'
 import type {
     AnnotationToken,
     IdentifierToken,
@@ -12,22 +28,6 @@ import type {
     Token,
     TruthvalueLiteralToken,
 } from './token'
-import {
-    keywords,
-    operators,
-    punctuationChars,
-    punctuationSymbols,
-    truthValues,
-} from './kinds'
-import type {
-    Annotation,
-    Keyword,
-    Operator,
-    PunctuationSymbol,
-    TruthvalueLiteral,
-} from './kinds'
-import { decimal } from 'decimalish'
-import { ErrorReporter, Position } from '@/tools/diagnostics'
 
 export class TokenStream {
     private source: Source

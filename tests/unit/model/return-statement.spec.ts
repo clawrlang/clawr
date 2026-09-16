@@ -1,19 +1,19 @@
-import { describe, it, expect } from 'bun:test'
-import { ReturnStatement } from '@/model/return-statement'
-import { newSemanticContext, someCodeSpan } from '@@/util'
-import { IntegerLiteral } from '@/model/integer-literal'
 import { Context } from '@/model'
+import { DataDeclaration } from '@/model/data-declaration'
+import { IntegerLiteral } from '@/model/integer-literal'
+import { ISOLATED, SHARED } from '@/model/isolation-level'
 import {
     IntegerLattice,
     RCTypeLattice,
     TruthvalueLattice,
 } from '@/model/lattice'
-import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { ReturnStatement } from '@/model/return-statement'
 import { TypeName } from '@/model/type-name'
-import { DataDeclaration } from '@/model/data-declaration'
 import { VariableReference } from '@/model/variable-reference'
 import { Failable, isFailure } from '@/tools/failable'
+import { newSemanticContext, someCodeSpan } from '@@/util'
 import assert from 'assert'
+import { describe, expect, it } from 'bun:test'
 
 describe('ReturnStatement', () => {
     it('converts to CIR', () => {

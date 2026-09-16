@@ -1,6 +1,6 @@
-import { ErrorReporter, SourceCodeSpan } from '@/tools/diagnostics'
 import { Context } from '@/model'
 import { Scope } from '@/model/scope'
+import { ErrorReporter, SourceCodeSpan } from '@/tools/diagnostics'
 
 export class TestErrorReporter implements ErrorReporter {
     errors: { message: string; location: SourceCodeSpan }[] = []

@@ -1,13 +1,13 @@
-import { describe, expect, it, test } from 'bun:test'
-import { VariableReference } from '@/model/variable-reference'
-import { newSemanticContext, someCodeSpan } from '@@/util'
 import { DataDeclaration } from '@/model/data-declaration'
-import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
-import { TypeName } from '@/model/type-name'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
+import { TypeName } from '@/model/type-name'
+import { VariableReference } from '@/model/variable-reference'
 import { Failable, isFailure, isSuccess } from '@/tools/failable'
+import { newSemanticContext, someCodeSpan } from '@@/util'
 import assert from 'assert'
+import { describe, expect, it, test } from 'bun:test'
 
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {

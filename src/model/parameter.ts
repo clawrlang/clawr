@@ -1,7 +1,7 @@
-import { Expression } from '.'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { LatticeDeclaration } from './lattice-declaration'
+import { Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
+import { LatticeDeclaration } from './lattice-declaration'
 
 export class Parameter {
     private constructor(

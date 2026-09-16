@@ -1,6 +1,6 @@
-import { Context } from '.'
 import { TokenStream } from '@/lexer'
 import { Statement } from '@/model'
+import { Context } from '.'
 import { AssignmentParser } from './assignment-parser'
 import { FunctionCallParser } from './function-call-parser'
 import { ReturnStatementParser } from './return-statement-parser'

@@ -1,11 +1,11 @@
-import { Context } from '.'
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { FieldReference } from '@/model/field-reference'
-import { IntegerLiteral } from '@/model/integer-literal'
 import { FunctionCall } from '@/model/function-call'
+import { IntegerLiteral } from '@/model/integer-literal'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { VariableReference } from '@/model/variable-reference'
+import { Context } from '.'
 import { DataLiteralParser } from './data-literal-parser'
 import { FunctionArgumentsParser } from './function-arguments-parser'
 

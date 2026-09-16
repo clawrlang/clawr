@@ -1,15 +1,15 @@
-import { describe, expect, it } from 'bun:test'
-import { newSemanticContext, someCodeSpan } from '@@/util'
-import { TruthValueLiteral } from '@/model/truthvalue-literal'
-import { IntegerLiteral } from '@/model/integer-literal'
-import { DataLiteral } from '@/model/data-literal'
 import { DataDeclaration } from '@/model/data-declaration'
-import { TypeName } from '@/model/type-name'
+import { DataLiteral } from '@/model/data-literal'
+import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { IntegerLattice, RCTypeLattice, truthvalue } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
+import { TruthValueLiteral } from '@/model/truthvalue-literal'
+import { TypeName } from '@/model/type-name'
 import { Failable, isFailure, isSuccess } from '@/tools/failable'
+import { newSemanticContext, someCodeSpan } from '@@/util'
 import assert from 'assert'
+import { describe, expect, it } from 'bun:test'
 
 describe('Literals', () => {
     describe('truthvalue literals', () => {

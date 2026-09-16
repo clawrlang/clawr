@@ -1,12 +1,12 @@
 import * as cir from '@/cir'
-import { Statement, Expression, Context } from '.'
-import { AnyIsolationLevel, ISOLATED, UNIQUE, UNKNOWN } from './isolation-level'
-import { FieldReference } from './field-reference'
-import { VariableReference } from './variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
+import { Failable, isFailure, Result } from '@/tools/failable'
+import { Context, Expression, Statement } from '.'
+import { FieldReference } from './field-reference'
+import { AnyIsolationLevel, UNIQUE, UNKNOWN } from './isolation-level'
 import { Lattice, RCTypeLattice } from './lattice'
 import { Retain } from './retain'
-import { Failable, isFailure, Result } from '@/tools/failable'
+import { VariableReference } from './variable-reference'
 
 export class Assignment implements Statement {
     private constructor(

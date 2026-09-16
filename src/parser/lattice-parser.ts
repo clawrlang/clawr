@@ -1,19 +1,19 @@
-import { Context } from '.'
 import { Token, TokenStream } from '@/lexer'
 import { IdentifierToken } from '@/lexer/token'
 import { IntegerLiteral } from '@/model/integer-literal'
-import {
-    decorateLattice,
-    LatticeDeclaration,
-} from '@/model/lattice-declaration'
-import { ExpressionParser } from './expression-parser'
-import { TypeName } from '@/model/type-name'
 import {
     IntegerLattice,
     RCTypeLattice,
     StringLattice,
     TruthvalueLattice,
 } from '@/model/lattice'
+import {
+    decorateLattice,
+    LatticeDeclaration,
+} from '@/model/lattice-declaration'
+import { TypeName } from '@/model/type-name'
+import { Context } from '.'
+import { ExpressionParser } from './expression-parser'
 
 export class LatticeParser {
     private constructor(private context: Context) {}

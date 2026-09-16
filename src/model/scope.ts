@@ -1,11 +1,11 @@
 import * as cir from '@/cir'
-import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { DataDeclaration } from './data-declaration'
-import { ObjectDeclaration } from './object-declaration'
 import { FunctionDeclaration } from './function-declaration'
-import { Lattice, RCTypeLattice } from './lattice'
-import { TypeName } from './type-name'
 import { FunctionName } from './function-name'
+import { IsolationLevel, UNKNOWN } from './isolation-level'
+import { Lattice, RCTypeLattice } from './lattice'
+import { ObjectDeclaration } from './object-declaration'
+import { TypeName } from './type-name'
 
 class RootScope {
     public readonly variables: Map<string, Variable> = new Map()

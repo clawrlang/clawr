@@ -1,5 +1,5 @@
-import * as cir from '@/cir'
 import CIRParser from '#cir-parser'
+import * as cir from '@/cir'
 
 export function lower(json: string): string {
     const cir = CIRParser.parse(json).module()

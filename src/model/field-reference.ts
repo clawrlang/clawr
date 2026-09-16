@@ -1,15 +1,15 @@
 import * as cir from '@/cir'
+import { SourceCodeSpan } from '@/tools/diagnostics'
+import { Failable, isFailure, Result } from '@/tools/failable'
 import { Context, Expression, isStorage } from '.'
+import { DataDeclaration, DataField } from './data-declaration'
 import {
     AnyIsolationLevel,
     ISOLATED,
     IsolationLevel,
     SHARED,
 } from './isolation-level'
-import { SourceCodeSpan } from '@/tools/diagnostics'
-import { DataDeclaration, DataField } from './data-declaration'
-import { RCTypeLattice, Lattice } from './lattice'
-import { Failable, isFailure, Result } from '@/tools/failable'
+import { Lattice, RCTypeLattice } from './lattice'
 
 export class FieldReference implements Expression {
     private constructor(

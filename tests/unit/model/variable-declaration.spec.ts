@@ -1,23 +1,23 @@
-import { describe, expect, it, test } from 'bun:test'
-import { IntegerLiteral } from '@/model/integer-literal'
-import { VariableDeclaration } from '@/model/variable-declaration'
-import { newSemanticContext, someCodeSpan } from '@@/util'
 import { DataDeclaration } from '@/model/data-declaration'
-import { VariableReference } from '@/model/variable-reference'
 import { DataLiteral } from '@/model/data-literal'
 import { FieldReference } from '@/model/field-reference'
-import { TruthValueLiteral } from '@/model/truthvalue-literal'
+import { FunctionCall } from '@/model/function-call'
+import { IntegerLiteral } from '@/model/integer-literal'
+import { ISOLATED, SHARED } from '@/model/isolation-level'
 import {
-    RCTypeLattice,
     IntegerLattice,
+    RCTypeLattice,
     TruthvalueLattice,
 } from '@/model/lattice'
-import { TypeName } from '@/model/type-name'
-import { FunctionCall } from '@/model/function-call'
-import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { decorateLattice } from '@/model/lattice-declaration'
+import { TruthValueLiteral } from '@/model/truthvalue-literal'
+import { TypeName } from '@/model/type-name'
+import { VariableDeclaration } from '@/model/variable-declaration'
+import { VariableReference } from '@/model/variable-reference'
 import { Failable, isFailure } from '@/tools/failable'
+import { newSemanticContext, someCodeSpan } from '@@/util'
 import assert from 'assert'
+import { describe, expect, it, test } from 'bun:test'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {

@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
-import { ErrorReporter } from '@/tools/diagnostics'
 import { TokenStream } from '@/lexer'
 import { Declaration } from '@/model'
+import { ErrorReporter } from '@/tools/diagnostics'
 
 export type Context = {
     errorReporter: ErrorReporter

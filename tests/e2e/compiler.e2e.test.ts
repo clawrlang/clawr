@@ -1,7 +1,7 @@
-import fs from 'fs'
-import path from 'path'
-import child_process from 'node:child_process'
 import { describe, expect, test } from 'bun:test'
+import fs from 'fs'
+import child_process from 'node:child_process'
+import path from 'path'
 
 const CASES_DIR = path.join(__dirname, 'cases')
 const OUTPUT_DIR = path.join(__dirname, '.out')

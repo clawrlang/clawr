@@ -1,11 +1,11 @@
 import { TokenStream } from '@/lexer'
-import { Context } from '.'
 import { DataField } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
+import { TypeName } from '@/model/type-name'
+import { Context } from '.'
 import { DataFieldParser } from './data-field-parser'
 import { FunctionDeclarationParser } from './function-declaration-parser'
-import { TypeName } from '@/model/type-name'
 
 export class ObjectDeclarationParser {
     private readonly functionParser: FunctionDeclarationParser

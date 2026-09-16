@@ -1,27 +1,16 @@
 import * as cir from '@/cir'
-import {
-    Context,
-    ContextWithLattice,
-    Declaration,
-    Expression,
-    Statement,
-} from '.'
-import {
-    AnyIsolationLevel,
-    IsolationLevel,
-    SHARED,
-    UNIQUE,
-} from './isolation-level'
-import { LatticeDeclaration } from './lattice-declaration'
-import { ReturnStatement } from './return-statement'
-import { FunctionName } from './function-name'
-import { Lattice, RCTypeLattice } from './lattice'
-import { mapFilter } from '@/tools/map-filter'
-import { Parameter } from './parameter'
-import { Scope } from './scope'
 import { Failable, isFailure, Result } from '@/tools/failable'
-import { TypeName } from './type-name'
+import { mapFilter } from '@/tools/map-filter'
+import { Context, Declaration, Expression, Statement } from '.'
 import { Assignment } from './assignment'
+import { FunctionName } from './function-name'
+import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
+import { Lattice, RCTypeLattice } from './lattice'
+import { LatticeDeclaration } from './lattice-declaration'
+import { Parameter } from './parameter'
+import { ReturnStatement } from './return-statement'
+import { Scope } from './scope'
+import { TypeName } from './type-name'
 import { VariableReference } from './variable-reference'
 
 export class FunctionDeclaration implements Declaration {

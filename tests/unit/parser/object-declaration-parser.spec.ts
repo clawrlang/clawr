@@ -1,8 +1,8 @@
-import { describe, it, expect, test } from 'bun:test'
 import { TokenStream } from '@/lexer'
-import { TestErrorReporter } from '@@/util'
-import { ObjectDeclarationParser } from '@/parser/object-declaration-parser'
 import { ISOLATED } from '@/model/isolation-level'
+import { ObjectDeclarationParser } from '@/parser/object-declaration-parser'
+import { TestErrorReporter } from '@@/util'
+import { describe, expect, it, test } from 'bun:test'
 
 describe('ObjectDeclaration Parser', () => {
     it('parses an empty object', () => {

@@ -1,8 +1,8 @@
-import { ExpressionParser } from './expression-parser'
 import { TokenStream } from '@/lexer'
 import { DataLiteral } from '@/model/data-literal'
-import { Context } from '.'
 import { FunctionCall } from '@/model/function-call'
+import { Context } from '.'
+import { ExpressionParser } from './expression-parser'
 
 export class DataLiteralParser {
     private constructor(private expressionParser: ExpressionParser) {}

@@ -1,13 +1,13 @@
-import { describe, expect, it } from 'bun:test'
+import { TokenStream } from '@/lexer'
 import {
     IntegerLattice,
     RCTypeLattice,
     StringLattice,
     TruthvalueLattice,
 } from '@/model/lattice'
-import { TokenStream } from '@/lexer'
 import { LatticeParser } from '@/parser/lattice-parser'
 import { TestErrorReporter } from '@@/util'
+import { describe, expect, it } from 'bun:test'
 
 describe('LatticeParser', () => {
     it('parses unconstrained integer type', () => {

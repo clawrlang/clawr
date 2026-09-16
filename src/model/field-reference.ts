@@ -51,13 +51,12 @@ export class FieldReference implements Expression {
     }
 
     isEffectivelyConst(context: Context): Result<boolean> {
-        const self = this
-        const isolationLevelResult = self.object.isolationLevel(context)
+        const isolationLevelResult = this.object.isolationLevel(context)
 
         if (isFailure(isolationLevelResult)) return isolationLevelResult
         if (isolationLevelResult.value === SHARED) return Result.false
 
-        return self.object.isEffectivelyConst(context)
+        return this.object.isEffectivelyConst(context)
     }
 
     isolationLevel(context: Context): Result<IsolationLevel> {

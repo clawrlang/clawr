@@ -28,7 +28,7 @@ export class Assignment implements Statement {
     }
 
     *emitStatement(context: Context): Failable {
-        const validity = yield* this.checkValidity(context)
+        const validity = this.checkValidity(context)
         if (isFailure(validity)) return validity
         const targetLattice: Lattice =
             yield this.target.declaredLattice(context)
@@ -118,35 +118,47 @@ export class Assignment implements Statement {
         return Result.success
     }
 
-    private *checkValidity(context: Context): Failable {
-        const targetLatticeResult = this.target.declaredLattice(context)
-        if (isFailure(targetLatticeResult)) return targetLatticeResult
-        const targetLattice: Lattice = yield targetLatticeResult
+    private checkValidity(context: Context): Result {
+        const collected = Failable.collect([
+            this.target.declaredLattice(context),
+            this.target.isolationLevel(context),
+        ])
+        if (isFailure(collected)) return collected
+        const [targetLattice, targetIsolationLevel] = collected.value
+
+        if (targetIsolationLevel === UNKNOWN)
+            return Result.failure(
+                'Cannot assign to UNKNOWN isolation target',
+                this.span,
+            )
+
         const explicitLatticeContext = {
             ...context,
-            isolationLevel: yield this.target.isolationLevel(context),
+            isolationLevel: targetIsolationLevel,
             explicitLattice: targetLattice,
         }
-        const assignedValue: Lattice = yield this.value.currentValue(
+        const assignedValueResult = this.value.currentValue(
             explicitLatticeContext,
         )
+        if (isFailure(assignedValueResult)) return assignedValueResult
+        const assignedValue = assignedValueResult.value
         if (!targetLattice.isSupersetTo(assignedValue))
-            yield Result.failure(
+            return Result.failure(
                 `Cannot assign value of type ${assignedValue?.toString() ?? this.value.constructor.name} to target of type ${targetLattice.toString()}`,
                 this.span,
             )
-        const valueIsolationLevel: AnyIsolationLevel =
-            yield this.value.isolationLevel(context)
+        const valueIsolationLevelResult = this.value.isolationLevel(context)
+        if (isFailure(valueIsolationLevelResult))
+            return valueIsolationLevelResult
+        const valueIsolationLevel = valueIsolationLevelResult.value
         if (valueIsolationLevel === UNIQUE) return Result.success
         if (valueIsolationLevel === UNKNOWN)
-            yield Result.failure(
+            return Result.failure(
                 'Parameter with unspecified isolation level may not be used in assignment',
                 this.value.span,
             )
-        const targetIsolationLevel: AnyIsolationLevel =
-            yield this.target.isolationLevel(context)
         if (targetIsolationLevel !== valueIsolationLevel)
-            yield Result.failure(
+            return Result.failure(
                 `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,
                 this.span,
             )

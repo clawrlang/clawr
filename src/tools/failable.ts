@@ -57,7 +57,7 @@ function collect<T extends unknown[]>(values: {
     for (let i = 0; i < values.length; i++) {
         const value = values[i]
         if (isFailure(value)) errors.push(...value.errors)
-        else result.push(value)
+        else result.push(value.value)
     }
 
     if (errors.length > 0) return failure(errors)

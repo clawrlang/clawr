@@ -166,12 +166,11 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                const result = Failable.do(function* () {
-                    return Result.value([
-                        yield fieldRef.isolationLevel(context),
-                        yield fieldRef.declaredLattice(context),
-                    ])
-                })
+                const result = Failable.collect([
+                    fieldRef.isolationLevel(context),
+                    fieldRef.declaredLattice(context),
+                ])
+
                 assert(isSuccess(result))
                 expect(result.value).toMatchObject([
                     expected,

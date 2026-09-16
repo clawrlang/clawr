@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, Result, Success } from '@/tools/failable'
+import { Failable, isFailure, Result, Success } from '@/tools/failable'
 import { mapFilter } from '@/tools/map-filter'
 import { Context, Expression, Statement } from '.'
 import { FunctionName } from './function-name'
@@ -55,9 +55,7 @@ export class FunctionCall implements Expression, Statement {
                 `unknown function ${this.name.toString()}`,
                 this.span,
             )
-        return Failable.do(function* () {
-            return yield* decl.resultIsolationLevel(context)
-        })
+        return decl.resultIsolationLevel(context)
     }
 
     declaredLattice(context: Context): Result<Lattice> {
@@ -65,50 +63,47 @@ export class FunctionCall implements Expression, Statement {
     }
 
     currentValue(context: Context): Result<Lattice> {
-        const self = this
-        return Failable.do(function* () {
-            if (self.name.toString() === 'copy(of:)') {
-                const value = yield self.arguments[0].currentValue(context)
-                return value instanceof RCTypeLattice
-                    ? Result.value(value)
-                    : Result.failure('not a reference-counted type', self.span)
-            }
+        if (this.name.toString() === 'copy(of:)') {
+            const valueResult = this.arguments[0].currentValue(context)
+            if (isFailure(valueResult)) return valueResult
+            const value = valueResult.value
+            return value instanceof RCTypeLattice
+                ? Result.value(value)
+                : Result.failure('not a reference-counted type', this.span)
+        }
 
-            const decl = context.scope.functionDeclaration(self.name)
-            if (!decl)
-                return Result.failure(
-                    `Function declaration not found: ${self.name.toString()}`,
-                    self.span,
-                )
+        const decl = context.scope.functionDeclaration(this.name)
+        if (!decl)
+            return Result.failure(
+                `Function declaration not found: ${this.name.toString()}`,
+                this.span,
+            )
 
-            const lattice: Lattice | undefined =
-                yield yield* decl.lattice(context)
-            if (!lattice)
-                return Result.failure(
-                    `Function declaration has no result lattice: ${self.name.toString()}`,
-                    self.span,
-                )
-            return Result.value(lattice)
-        })
+        const latticeResult = decl.lattice(context)
+        if (isFailure(latticeResult)) return latticeResult
+        if (!latticeResult.value)
+            return Result.failure(
+                `Function declaration has no result lattice: ${this.name.toString()}`,
+                this.span,
+            )
+        return Result.value(latticeResult.value)
     }
 
     toCIRExpression(context: Context): Result<cir.Expression> {
-        const self = this
-        return Failable.do(function* () {
-            const value: Lattice = yield self.currentValue(context)
-            const args: cir.Expression[] = yield yield* Failable.map(
-                self.arguments,
-                function* (arg) {
-                    return arg.toCIRExpression(context)
-                },
-            )
-            return Result.value({
-                kind: 'CALL',
-                name: self.name.toCIR(),
-                arguments: args,
-                value: value.toCIR(),
-            } satisfies cir.Expression)
-        })
+        const argsResult = Failable.collect([
+            this.currentValue(context),
+            ...this.arguments.map((arg) => arg.toCIRExpression(context)),
+        ])
+
+        if (isFailure(argsResult)) return argsResult
+        const [value, ...args] = argsResult.value
+
+        return Result.value({
+            kind: 'CALL',
+            name: this.name.toCIR(),
+            arguments: args,
+            value: value.toCIR(),
+        } satisfies cir.Expression)
     }
 
     *emitStatement(context: Context): Failable {

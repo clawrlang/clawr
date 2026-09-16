@@ -62,7 +62,7 @@ export class FunctionDeclaration implements Declaration {
         })
     }
 
-    *resultIsolationLevel(context: Context): Failable<AnyIsolationLevel> {
+    resultIsolationLevel(context: Context): Result<AnyIsolationLevel> {
         if (this.result) return Result.value(this.result.isolationLevel)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.isolationLevel(context)
@@ -72,7 +72,7 @@ export class FunctionDeclaration implements Declaration {
             )
     }
 
-    *lattice(context: Context): Failable<Lattice | undefined> {
+    lattice(context: Context): Result<Lattice | undefined> {
         if (this.result) return Result.value(this.result.lattice)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.currentValue(

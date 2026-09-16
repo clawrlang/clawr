@@ -27,7 +27,7 @@ export class Module {
         const self = this
         const result = Failable.do(function* () {
             for (const decl of self.declarations)
-                yield yield* decl.emitDeclaration(context)
+                yield decl.emitDeclaration(context)
             for (const stmt of self.main) yield stmt.emitStatement(context)
             return Result.success
         })

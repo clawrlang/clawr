@@ -40,7 +40,7 @@ describe('ObjectDeclaration', () => {
 
         const context = newSemanticContext()
 
-        Failable.do(() => object.emitDeclaration(context))
+        object.emitDeclaration(context)
 
         expect(
             context.scope.objectDeclaration(
@@ -145,8 +145,7 @@ describe('ObjectDeclaration', () => {
         })
 
         const context = newSemanticContext()
-
-        Failable.do(() => object.emitDeclaration(context))
+        object.emitDeclaration(context)
 
         expect(
             context.scope.objectDeclaration(
@@ -268,8 +267,7 @@ describe('ObjectDeclaration', () => {
         })
 
         const context = newSemanticContext()
-
-        const result = Failable.do(() => object.emitDeclaration(context))
+        const result = object.emitDeclaration(context)
 
         expect(isSuccess(result) || result.errors).toBeTrue()
         expect(

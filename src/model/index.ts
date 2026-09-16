@@ -37,7 +37,7 @@ export interface Statement {
 }
 
 export interface Declaration {
-    emitDeclaration(context: Context): Failable
+    emitDeclaration(context: Context): Result
 }
 export function isStorage(
     value: any,

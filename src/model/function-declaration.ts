@@ -81,45 +81,49 @@ export class FunctionDeclaration implements Declaration {
         return Result.success
     }
 
-    *emitDeclaration(context: Context): Failable {
-        context.scope.rootScope.addFunctionDeclaration(this)
+    emitDeclaration(context: Context): Result {
+        const self = this
+        return Failable.do(function* () {
+            context.scope.rootScope.addFunctionDeclaration(self)
 
-        const bodyContext: Context = yield yield* this.makeBodyContext(context)
+            const bodyContext: Context =
+                yield yield* self.makeBodyContext(context)
 
-        const body =
-            this.implementation.kind === 'body'
-                ? this.implementation.statements
-                : [
-                      ReturnStatement.create({
-                          value: this.implementation.expression,
-                          span: undefined as any,
-                      }),
-                  ]
+            const body =
+                self.implementation.kind === 'body'
+                    ? self.implementation.statements
+                    : [
+                          ReturnStatement.create({
+                              value: self.implementation.expression,
+                              span: undefined as any,
+                          }),
+                      ]
 
-        for (const stmt of body) stmt.emitStatement(bodyContext)
+            for (const stmt of body) stmt.emitStatement(bodyContext)
 
-        if (
-            this.implementation.kind === 'body' &&
-            !body.some((stmt) => stmt instanceof ReturnStatement)
-        )
-            bodyContext.scope.releaseVariables()
+            if (
+                self.implementation.kind === 'body' &&
+                !body.some((stmt) => stmt instanceof ReturnStatement)
+            )
+                bodyContext.scope.releaseVariables()
 
-        const lattice: cir.Lattice | undefined =
-            yield this.resultLattice(bodyContext)
+            const lattice: cir.Lattice | undefined =
+                yield self.resultLattice(bodyContext)
 
-        const cirFuncDecl: cir.Declaration = {
-            kind: 'FUNCTION_DECL',
-            baseName: this.baseName,
-            labels: mapFilter(this.parameters, (p) => p.label),
-            parameters: this.parameters.map((param) => ({
-                name: param.varName,
-                lattice: param.lattice!.toCIR(),
-            })),
-            lattice,
-            body: bodyContext.scope.emitted,
-        }
-        context.scope.rootScope.emitted.push(cirFuncDecl)
-        return Result.success
+            const cirFuncDecl: cir.Declaration = {
+                kind: 'FUNCTION_DECL',
+                baseName: self.baseName,
+                labels: mapFilter(self.parameters, (p) => p.label),
+                parameters: self.parameters.map((param) => ({
+                    name: param.varName,
+                    lattice: param.lattice!.toCIR(),
+                })),
+                lattice,
+                body: bodyContext.scope.emitted,
+            }
+            context.scope.rootScope.emitted.push(cirFuncDecl)
+            return Result.success
+        })
     }
 
     *emitMethod(

@@ -58,10 +58,7 @@ export class Assignment implements Statement {
 
         const valueIsolationLevel: AnyIsolationLevel =
             yield this.value.isolationLevel(explicitLatticeContext)
-        const retainedValue: Expression = yield yield* Retain.ifStorage(
-            this.value,
-            context,
-        )
+        const retainedValue = yield Retain.ifStorage(this.value, context)
         const retainedValueCIRResult = retainedValue.toCIRExpression(
             explicitLatticeContext,
         )

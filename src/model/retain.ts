@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, isFailure, Result, Success } from '@/tools/failable'
+import { isFailure, Result, Success } from '@/tools/failable'
 import { Context, ContextWithLattice, Expression, isStorage } from '.'
 import { FieldReference } from './field-reference'
 import { AnyIsolationLevel } from './isolation-level'
@@ -17,14 +17,15 @@ export class Retain implements Expression {
         private readonly lattice: RCTypeLattice,
     ) {}
 
-    static *ifStorage<T extends Expression>(
+    static ifStorage<T extends Expression>(
         value: T,
         context: Context,
-    ): Failable<T | Retain> {
+    ): Result<T | Retain> {
         if (!isStorage(value)) return Result.value(value)
-        const lattice: Lattice = yield value.currentValue(context)
-        return lattice instanceof RCTypeLattice
-            ? Result.value(new Retain(value, lattice))
+        const latticeResult = value.currentValue(context)
+        if (isFailure(latticeResult)) return latticeResult
+        return latticeResult.value instanceof RCTypeLattice
+            ? Result.value(new Retain(value, latticeResult.value))
             : Result.value(value as T)
     }
 

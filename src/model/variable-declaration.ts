@@ -74,7 +74,7 @@ export class VariableDeclaration implements Statement, Declaration {
         lattice: Lattice,
         scope: Scope | Scope['rootScope'],
     ): Failable {
-        const valueResult = yield* Retain.ifStorage(this.initialValue, context)
+        const valueResult = Retain.ifStorage(this.initialValue, context)
         const value: Expression = yield valueResult
 
         const initialValueResult = value.toCIRExpression({

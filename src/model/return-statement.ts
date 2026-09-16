@@ -34,12 +34,9 @@ export class ReturnStatement implements Statement {
         }
 
         const lattice: Lattice = yield this.value.currentValue(context)
-        const retainedValue: Expression = yield yield* Retain.ifStorage(
+        const retainedValue: Expression = yield Retain.ifStorage(
             this.value,
-            {
-                ...context,
-                ...{ isolationLevel: undefined },
-            },
+            context,
         )
 
         const retainedValueCIR: cir.Expression =

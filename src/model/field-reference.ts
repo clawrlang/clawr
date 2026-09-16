@@ -37,7 +37,7 @@ export class FieldReference implements Expression {
     }
 
     *assignmentPrelude(context: Context): Failable<cir.Statement[]> {
-        if (yield yield* this.isEffectivelyConst(context))
+        if (yield yield* this.isEffectivelyConst_obsolete(context))
             yield Result.failure(
                 `Cannot mutate field ${this.field} of a reference type object`,
                 this.span,
@@ -45,39 +45,41 @@ export class FieldReference implements Expression {
 
         if (isStorage(this.object)) {
             const isolationLevel =
-                yield yield* this.object.isolationLevel(context)
+                yield yield* this.object.isolationLevel_obsolete(context)
             if (isolationLevel === ISOLATED) {
                 const object: cir.Expression & {
                     kind: 'VARABLE_REF' | 'FIELD_REF'
-                } = yield yield* this.object.toCIRExpression(context)
+                } = yield yield* this.object.toCIRExpression_obsolete(context)
                 return Result.value([{ kind: 'ENSURE_UNIQUE', object }])
             }
         }
         return Result.value([])
     }
 
-    *isEffectivelyConst(context: Context): Failable<boolean> {
-        const isolationLevelResult = yield* this.object.isolationLevel(context)
+    *isEffectivelyConst_obsolete(context: Context): Failable<boolean> {
+        const isolationLevelResult =
+            yield* this.object.isolationLevel_obsolete(context)
 
         if ((yield isolationLevelResult) === SHARED) return Result.false
 
-        return yield* this.object.isEffectivelyConst(context)
+        return yield* this.object.isEffectivelyConst_obsolete(context)
     }
 
-    *isolationLevel(context: Context): Failable<IsolationLevel> {
+    *isolationLevel_obsolete(context: Context): Failable<IsolationLevel> {
         const field: DataField = yield yield* this.getFieldFromContext(context)
         return field.lattice instanceof RCTypeLattice
             ? Result.value(field.isolationLevel ?? ISOLATED)
             : Result.value(ISOLATED)
     }
 
-    *declaredLattice(context: Context): Failable<Lattice> {
+    *declaredLattice_obsolete(context: Context): Failable<Lattice> {
         const field = yield yield* this.getFieldFromContext(context)
         return Result.value(field.lattice!)
     }
 
-    *currentValue(context: Context): Failable<Lattice> {
-        const objectValue = yield yield* this.object.currentValue(context)
+    *currentValue_obsolete(context: Context): Failable<Lattice> {
+        const objectValue =
+            yield yield* this.object.currentValue_obsolete(context)
         if (!(objectValue instanceof RCTypeLattice))
             return Result.failure('unknown object value', this.span)
         return objectValue.fields
@@ -85,19 +87,23 @@ export class FieldReference implements Expression {
             : Result.failure(`unknown field value ${this.field}`, this.span)
     }
 
-    *setCurrentValue(context: Context, value: Lattice): Failable {
-        const objectValue = yield yield* this.object.currentValue(context)
+    *setCurrentValue_obsolete(context: Context, value: Lattice): Failable {
+        const objectValue =
+            yield yield* this.object.currentValue_obsolete(context)
         if (objectValue instanceof RCTypeLattice) {
             if (objectValue.fields) objectValue.fields[this.field] = value
 
             const object: Expression = this.object
-            const result = object.setCurrentValue?.(context, objectValue)
+            const result = object.setCurrentValue_obsolete?.(
+                context,
+                objectValue,
+            )
             if (result) return yield* result
         }
         return Result.success
     }
 
-    *toCIRExpression(
+    *toCIRExpression_obsolete(
         context: Context,
     ): Failable<cir.Expression & { kind: 'FIELD_REF' }> {
         yield yield* this.checkOperatorCompatibility(context)
@@ -105,7 +111,7 @@ export class FieldReference implements Expression {
         if (isFailure(fieldResult)) return fieldResult
         const field: DataField = yield fieldResult
         const object: cir.Expression =
-            yield yield* this.object.toCIRExpression(context)
+            yield yield* this.object.toCIRExpression_obsolete(context)
 
         return Result.value({
             kind: 'FIELD_REF',
@@ -118,7 +124,8 @@ export class FieldReference implements Expression {
     private *getFieldFromContext(
         context: Context,
     ): Failable<DataDeclaration['fields'][number]> {
-        const objectValue = yield yield* this.object.declaredLattice(context)
+        const objectValue =
+            yield yield* this.object.declaredLattice_obsolete(context)
         if (!(objectValue instanceof RCTypeLattice))
             return Result.failure('unknown object value', this.span)
         const type = context.scope.dataDeclaration(objectValue.type)
@@ -133,7 +140,7 @@ export class FieldReference implements Expression {
 
     private *checkOperatorCompatibility(context: Context): Failable {
         const isolationLevel: AnyIsolationLevel =
-            yield yield* this.object.isolationLevel(context)
+            yield yield* this.object.isolationLevel_obsolete(context)
         if ((isolationLevel === SHARED) !== (this.operator === '->')) {
             return Result.failure(
                 `Cannot access field ${this.field} of a ${isolationLevel} type object with "${this.operator}" operator`,

@@ -21,7 +21,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 const result = Failable.do(() =>
-                    literal.toCIRExpression(newSemanticContext()),
+                    literal.toCIRExpression_obsolete(newSemanticContext()),
                 )
                 assert(isSuccess(result))
                 expect(result.value).toMatchObject({
@@ -36,7 +36,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 const result = Failable.do(() =>
-                    literal.currentValue(newSemanticContext()),
+                    literal.currentValue_obsolete(newSemanticContext()),
                 )
                 assert(isSuccess(result))
                 expect(result.value).toMatchObject({
@@ -55,7 +55,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 const result = Failable.do(() =>
-                    literal.toCIRExpression(newSemanticContext()),
+                    literal.toCIRExpression_obsolete(newSemanticContext()),
                 )
                 assert(isSuccess(result))
                 expect(result.value).toMatchObject({
@@ -70,7 +70,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 const result = Failable.do(() =>
-                    literal.currentValue(newSemanticContext()),
+                    literal.currentValue_obsolete(newSemanticContext()),
                 )
                 assert(isSuccess(result))
                 expect(result.value).toMatchObject({
@@ -131,7 +131,7 @@ describe('Literals', () => {
             })
 
             const result = Failable.do(() =>
-                dataLiteral.toCIRExpression({
+                dataLiteral.toCIRExpression_obsolete({
                     ...context,
                     explicitLattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
@@ -210,7 +210,7 @@ describe('Literals', () => {
             })
 
             const result = Failable.do(() =>
-                dataLiteral.currentValue({
+                dataLiteral.currentValue_obsolete({
                     ...context,
                     explicitLattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
@@ -272,7 +272,7 @@ describe('Literals', () => {
             })
 
             const result = Failable.do(() =>
-                dataLiteral.currentValue({
+                dataLiteral.currentValue_obsolete({
                     ...context,
                     explicitLattice: RCTypeLattice.create({
                         type: TypeName.create({

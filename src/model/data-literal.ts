@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, isFailure, Result } from '@/tools/failable'
+import { Failable, isFailure, Result, Success } from '@/tools/failable'
 import { Context, ContextWithLattice, Expression } from '.'
 import { FunctionCall } from './function-call'
 import { UNIQUE } from './isolation-level'
@@ -26,15 +26,21 @@ export class DataLiteral implements Expression {
         return new DataLiteral(initializerCall, fields, span)
     }
 
-    *isEffectivelyConst(_: Context): Failable<boolean> {
+    *isEffectivelyConst_obsolete(_: Context): Failable<boolean> {
+        return this.isEffectivelyConst()
+    }
+    isEffectivelyConst(): Success<true> {
         return Result.true
     }
 
-    *isolationLevel(_: Context): Failable<UNIQUE> {
+    *isolationLevel_obsolete(_: Context): Failable<UNIQUE> {
+        return Result.value(UNIQUE)
+    }
+    isolationLevel(): Success<UNIQUE> {
         return Result.value(UNIQUE)
     }
 
-    *currentValue(context: ContextWithLattice): Failable<Lattice> {
+    *currentValue_obsolete(context: ContextWithLattice): Failable<Lattice> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
             return Result.failure(
@@ -62,7 +68,7 @@ export class DataLiteral implements Expression {
                         `DataLiteral.currentValue: field ${field.name} not found on type ${explicitLattice.type.name}`,
                         thisspan,
                     )
-                return yield* field.value.currentValue({
+                return yield* field.value.currentValue_obsolete({
                     ...context,
                     explicitLattice: fieldDeclaration.lattice,
                 })
@@ -83,7 +89,12 @@ export class DataLiteral implements Expression {
         )
     }
 
-    *declaredLattice(context: Context & { type: TypeName }): Failable<Lattice> {
+    *declaredLattice_obsolete(
+        context: Context & { type: TypeName },
+    ): Failable<Lattice> {
+        return this.declaredLattice(context)
+    }
+    declaredLattice(context: Context & { type: TypeName }): Result<Lattice> {
         const decl = context.scope.dataDeclaration(context.type)
         if (!decl)
             return Result.failure(
@@ -100,7 +111,9 @@ export class DataLiteral implements Expression {
         )
     }
 
-    *toCIRExpression(context: ContextWithLattice): Failable<cir.Expression> {
+    *toCIRExpression_obsolete(
+        context: ContextWithLattice,
+    ): Failable<cir.Expression> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
             return Result.failure(
@@ -141,7 +154,9 @@ export class DataLiteral implements Expression {
                     isolationLevel: fieldDeclaration.isolationLevel,
                 }
                 const value: cir.Expression =
-                    yield yield* field.value.toCIRExpression(nestedContext)
+                    yield yield* field.value.toCIRExpression_obsolete(
+                        nestedContext,
+                    )
                 return Result.value({
                     name: field.name,
                     value,

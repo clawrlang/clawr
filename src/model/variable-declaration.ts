@@ -77,7 +77,7 @@ export class VariableDeclaration implements Statement, Declaration {
         const valueResult = yield* Retain.ifStorage(this.initialValue, context)
         const value: Expression = yield valueResult
 
-        const initialValueResult = yield* value.toCIRExpression({
+        const initialValueResult = yield* value.toCIRExpression_obsolete({
             ...context,
             explicitLattice: this.lattice,
             isolationLevel: this.isolationLevel,
@@ -116,7 +116,7 @@ export class VariableDeclaration implements Statement, Declaration {
             )
 
         const valueIsolationLevel =
-            yield yield* this.initialValue.isolationLevel(context)
+            yield yield* this.initialValue.isolationLevel_obsolete(context)
         if (valueIsolationLevel === UNIQUE) return Result.success
         if (this.isolationLevel !== valueIsolationLevel)
             return Result.failure(
@@ -131,7 +131,7 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private currentValueFromInitial(context: Context): Failable<Lattice> {
-        return this.initialValue.currentValue({
+        return this.initialValue.currentValue_obsolete({
             ...context,
             explicitLattice: this.lattice,
         })

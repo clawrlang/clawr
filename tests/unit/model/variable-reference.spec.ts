@@ -23,7 +23,9 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        const result = Failable.do(() => variableRef.toCIRExpression(context))
+        const result = Failable.do(() =>
+            variableRef.toCIRExpression_obsolete(context),
+        )
         assert(isSuccess(result))
         expect(result.value).toMatchObject({
             kind: 'VARIABLE_REF',
@@ -39,7 +41,9 @@ describe('Variable Reference', () => {
         const variableRef = VariableReference.create({ name: 'myVar', span })
 
         const context = newSemanticContext()
-        const result = Failable.do(() => variableRef.toCIRExpression(context))
+        const result = Failable.do(() =>
+            variableRef.toCIRExpression_obsolete(context),
+        )
         assert(isFailure(result))
         expect(result.errors[0]).toMatchObject({
             message: `Variable myVar is not defined in the current context`,
@@ -59,7 +63,9 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        const result = Failable.do(() => variableRef.declaredLattice(context))
+        const result = Failable.do(() =>
+            variableRef.declaredLattice_obsolete(context),
+        )
         assert(isSuccess(result))
         expect(result.value).toEqual(
             IntegerLattice.create({ min: 10n, max: 10n }),
@@ -82,7 +88,9 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        const result = Failable.do(() => variableRef.currentValue(context))
+        const result = Failable.do(() =>
+            variableRef.currentValue_obsolete(context),
+        )
         assert(isSuccess(result))
         expect(result.value).toMatchObject({
             min: 10n,
@@ -126,7 +134,7 @@ describe('Variable Reference', () => {
                     span: someCodeSpan,
                 })
                 const result = Failable.do(() =>
-                    variableRef.isolationLevel(context),
+                    variableRef.isolationLevel_obsolete(context),
                 )
                 assert(isSuccess(result))
                 expect(result.value).toEqual(isolationLevel)

@@ -47,7 +47,9 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        const result = Failable.do(() => fieldRef.declaredLattice(context))
+        const result = Failable.do(() =>
+            fieldRef.declaredLattice_obsolete(context),
+        )
         assert(isSuccess(result))
         expect(result.value.toCIR().type).toBe('integer')
     })
@@ -90,7 +92,9 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        const result = Failable.do(() => fieldRef.isolationLevel(context))
+        const result = Failable.do(() =>
+            fieldRef.isolationLevel_obsolete(context),
+        )
         assert(isSuccess(result))
         expect(result.value).toEqual(SHARED)
     })
@@ -168,8 +172,8 @@ describe('Field Reference', () => {
                 })
                 const result = Failable.do(function* () {
                     return Result.value([
-                        yield yield* fieldRef.isolationLevel(context),
-                        yield yield* fieldRef.declaredLattice(context),
+                        yield yield* fieldRef.isolationLevel_obsolete(context),
+                        yield yield* fieldRef.declaredLattice_obsolete(context),
                     ])
                 })
                 assert(isSuccess(result))
@@ -218,7 +222,9 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        const result = Failable.do(() => fieldRef.toCIRExpression(context))
+        const result = Failable.do(() =>
+            fieldRef.toCIRExpression_obsolete(context),
+        )
         assert(isFailure(result))
         expect(result.errors.map((e) => e.message)).toContain(
             'Field nonExistentField does not exist on type MyType',
@@ -290,7 +296,7 @@ describe('Field Reference', () => {
                     fieldSpan: someCodeSpan,
                 })
                 const result = Failable.do(() =>
-                    fieldRef.toCIRExpression(context),
+                    fieldRef.toCIRExpression_obsolete(context),
                 )
                 assert(isFailure(result))
                 expect(result.errors[0]).toMatchObject({
@@ -366,7 +372,7 @@ describe('Field Reference', () => {
                     fieldSpan: someCodeSpan,
                 })
                 const result = Failable.do(() =>
-                    fieldRef.isEffectivelyConst(context),
+                    fieldRef.isEffectivelyConst_obsolete(context),
                 )
                 assert(isSuccess(result))
                 expect(result.value).toBe(expected)
@@ -410,7 +416,7 @@ describe('Field Reference', () => {
                 fieldSpan: someCodeSpan,
             })
             const result = Failable.do(() =>
-                fieldRef.isEffectivelyConst(context),
+                fieldRef.isEffectivelyConst_obsolete(context),
             )
             assert(isSuccess(result))
             expect(result.value).toBeTrue()
@@ -453,7 +459,7 @@ describe('Field Reference', () => {
                 fieldSpan: someCodeSpan,
             })
             const result = Failable.do(() =>
-                fieldRef.isEffectivelyConst(context),
+                fieldRef.isEffectivelyConst_obsolete(context),
             )
             assert(isSuccess(result))
             expect(result.value).toBeTrue()
@@ -496,7 +502,7 @@ describe('Field Reference', () => {
                 fieldSpan: someCodeSpan,
             })
             const result = Failable.do(() =>
-                fieldRef.isEffectivelyConst(context),
+                fieldRef.isEffectivelyConst_obsolete(context),
             )
             assert(isSuccess(result))
             expect(result.value).toBeFalse()

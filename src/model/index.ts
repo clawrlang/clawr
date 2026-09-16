@@ -23,13 +23,15 @@ export type ContextWithLattice = Context & {
 export interface Expression {
     get span(): SourceCodeSpan
 
-    isEffectivelyConst(context: Context): Failable<boolean>
-    isolationLevel(context: Context): Failable<AnyIsolationLevel>
-    declaredLattice(context: ContextWithLattice): Failable<Lattice>
-    currentValue(context: ContextWithLattice): Failable<Lattice>
-    toCIRExpression(context: ContextWithLattice): Failable<cir.Expression>
+    isEffectivelyConst_obsolete(context: Context): Failable<boolean>
+    isolationLevel_obsolete(context: Context): Failable<AnyIsolationLevel>
+    declaredLattice_obsolete(context: ContextWithLattice): Failable<Lattice>
+    currentValue_obsolete(context: ContextWithLattice): Failable<Lattice>
+    toCIRExpression_obsolete(
+        context: ContextWithLattice,
+    ): Failable<cir.Expression>
 
-    setCurrentValue?(context: Context, value: Lattice): Failable
+    setCurrentValue_obsolete?(context: Context, value: Lattice): Failable
 }
 
 export interface Statement {

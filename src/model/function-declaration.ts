@@ -65,7 +65,9 @@ export class FunctionDeclaration implements Declaration {
     *resultIsolationLevel(context: Context): Failable<AnyIsolationLevel> {
         if (this.result) return Result.value(this.result.isolationLevel)
         if (this.implementation.kind === 'implicit-return')
-            return yield* this.implementation.expression.isolationLevel(context)
+            return yield* this.implementation.expression.isolationLevel_obsolete(
+                context,
+            )
         else
             throw new Error(
                 `unable to infer isolation level for ${this.baseName}`,
@@ -75,7 +77,7 @@ export class FunctionDeclaration implements Declaration {
     *lattice(context: Context): Failable<Lattice | undefined> {
         if (this.result) return Result.value(this.result.lattice)
         if (this.implementation.kind === 'implicit-return')
-            return yield* this.implementation.expression.currentValue(
+            return yield* this.implementation.expression.currentValue_obsolete(
                 this.bodyContext(context),
             )
         return Result.success
@@ -220,11 +222,11 @@ export class FunctionDeclaration implements Declaration {
               ? undefined
               : {
                     isolationLevel:
-                        yield yield* this.implementation.expression.isolationLevel(
+                        yield yield* this.implementation.expression.isolationLevel_obsolete(
                             contextWithParameters,
                         ),
                     lattice:
-                        yield yield* this.implementation.expression.currentValue(
+                        yield yield* this.implementation.expression.currentValue_obsolete(
                             {
                                 ...contextWithParameters,
                                 explicitLattice,
@@ -243,7 +245,7 @@ export class FunctionDeclaration implements Declaration {
         const parameterScope = context.scope.createChildScope()
         for (const param of this.parameters) {
             const latticeResult = param.defaultValue
-                ? yield* param.defaultValue.currentValue(context)
+                ? yield* param.defaultValue.currentValue_obsolete(context)
                 : param.lattice
                   ? Result.value(param.lattice)
                   : Result.failure(
@@ -268,7 +270,9 @@ export class FunctionDeclaration implements Declaration {
         if (this.result) return Result.value(this.result.lattice.toCIR())
         if (this.implementation.kind === 'body') return Result.value(undefined)
         const lattice: Lattice =
-            yield yield* this.implementation.expression.currentValue(context)
+            yield yield* this.implementation.expression.currentValue_obsolete(
+                context,
+            )
         return Result.value(lattice.toCIR())
     }
 

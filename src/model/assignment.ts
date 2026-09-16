@@ -31,40 +31,45 @@ export class Assignment implements Statement {
         const validity = yield* this.checkValidity(context)
         if (isFailure(validity)) return validity
         const targetLattice: Lattice =
-            yield yield* this.target.declaredLattice(context)
+            yield yield* this.target.declaredLattice_obsolete(context)
         const explicitLatticeContext = {
             ...context,
-            isolationLevel: yield yield* this.target.isolationLevel(context),
+            isolationLevel:
+                yield yield* this.target.isolationLevel_obsolete(context),
             explicitLattice: targetLattice,
         }
         yield yield* this.emitCIRStatements(context)
-        const value: Lattice = yield yield* this.value.currentValue(
+        const value: Lattice = yield yield* this.value.currentValue_obsolete(
             explicitLatticeContext,
         )
-        return yield* this.target.setCurrentValue(context, value)
+        return yield* this.target.setCurrentValue_obsolete(context, value)
     }
 
     private *emitCIRStatements(context: Context): Failable {
         const targetLattice: Lattice =
-            yield yield* this.target.declaredLattice(context)
+            yield yield* this.target.declaredLattice_obsolete(context)
         const target: cir.Expression & {
             kind: 'VARIABLE_REF' | 'FIELD_REF'
-        } = yield yield* this.target.toCIRExpression(context)
+        } = yield yield* this.target.toCIRExpression_obsolete(context)
         const explicitLatticeContext = {
             ...context,
-            isolationLevel: yield yield* this.target.isolationLevel(context),
+            isolationLevel:
+                yield yield* this.target.isolationLevel_obsolete(context),
             explicitLattice: targetLattice,
         }
 
         const valueIsolationLevel: AnyIsolationLevel =
-            yield yield* this.value.isolationLevel(explicitLatticeContext)
+            yield yield* this.value.isolationLevel_obsolete(
+                explicitLatticeContext,
+            )
         const retainedValue: Expression = yield yield* Retain.ifStorage(
             this.value,
             context,
         )
-        const retainedValueCIRResult = yield* retainedValue.toCIRExpression(
-            explicitLatticeContext,
-        )
+        const retainedValueCIRResult =
+            yield* retainedValue.toCIRExpression_obsolete(
+                explicitLatticeContext,
+            )
         if (isFailure(retainedValueCIRResult)) return retainedValueCIRResult
         const retainedValueCIR: cir.Expression = yield retainedValueCIRResult
         const prelude = yield yield* this.target.assignmentPrelude(context)
@@ -119,24 +124,27 @@ export class Assignment implements Statement {
     }
 
     private *checkValidity(context: Context): Failable {
-        const targetLatticeResult = yield* this.target.declaredLattice(context)
+        const targetLatticeResult =
+            yield* this.target.declaredLattice_obsolete(context)
         if (isFailure(targetLatticeResult)) return targetLatticeResult
         const targetLattice: Lattice = yield targetLatticeResult
         const explicitLatticeContext = {
             ...context,
-            isolationLevel: yield yield* this.target.isolationLevel(context),
+            isolationLevel:
+                yield yield* this.target.isolationLevel_obsolete(context),
             explicitLattice: targetLattice,
         }
-        const assignedValue: Lattice = yield yield* this.value.currentValue(
-            explicitLatticeContext,
-        )
+        const assignedValue: Lattice =
+            yield yield* this.value.currentValue_obsolete(
+                explicitLatticeContext,
+            )
         if (!targetLattice.isSupersetTo(assignedValue))
             yield Result.failure(
                 `Cannot assign value of type ${assignedValue?.toString() ?? this.value.constructor.name} to target of type ${targetLattice.toString()}`,
                 this.span,
             )
         const valueIsolationLevel: AnyIsolationLevel =
-            yield yield* this.value.isolationLevel(context)
+            yield yield* this.value.isolationLevel_obsolete(context)
         if (valueIsolationLevel === UNIQUE) return Result.success
         if (valueIsolationLevel === UNKNOWN)
             yield Result.failure(
@@ -144,7 +152,7 @@ export class Assignment implements Statement {
                 this.value.span,
             )
         const targetIsolationLevel: AnyIsolationLevel =
-            yield yield* this.target.isolationLevel(context)
+            yield yield* this.target.isolationLevel_obsolete(context)
         if (targetIsolationLevel !== valueIsolationLevel)
             yield Result.failure(
                 `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,

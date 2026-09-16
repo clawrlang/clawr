@@ -1,8 +1,8 @@
 import { SourceCodeSpan } from './diagnostics'
 
 export type Result<T> = Success<T> | Failure
-type Success<T> = { value: T }
-type Failure = { errors: SemanticError[] }
+export type Success<T = undefined> = { value: T }
+export type Failure = { errors: SemanticError[] }
 
 export const Failable = {
     collect,
@@ -11,8 +11,8 @@ export const Failable = {
 }
 
 export const Result = {
-    true: success(true),
-    false: success(false),
+    true: success(true as const),
+    false: success(false as const),
     success: success(),
     value<T>(value: T) {
         return success(value)
@@ -20,7 +20,7 @@ export const Result = {
     failure,
 }
 
-function success(): Success<undefined>
+function success(): Success
 function success<T>(value: T): Success<T>
 function success<T>(value?: T): Success<T> {
     return { value: value as T }

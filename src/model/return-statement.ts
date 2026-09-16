@@ -33,7 +33,8 @@ export class ReturnStatement implements Statement {
             return Result.success
         }
 
-        const lattice: Lattice = yield yield* this.value.currentValue(context)
+        const lattice: Lattice =
+            yield yield* this.value.currentValue_obsolete(context)
         const retainedValue: Expression = yield yield* Retain.ifStorage(
             this.value,
             {
@@ -43,12 +44,14 @@ export class ReturnStatement implements Statement {
         )
 
         const retainedValueCIR: cir.Expression =
-            yield yield* retainedValue.toCIRExpression(context)
+            yield yield* retainedValue.toCIRExpression_obsolete(context)
 
         if (retainedValue instanceof Retain) {
             // && isolationLevel === ISOLATED
             const object =
-                yield yield* retainedValue.value.toCIRExpression(context)
+                yield yield* retainedValue.value.toCIRExpression_obsolete(
+                    context,
+                )
             context.scope.emitted.push({
                 kind: 'ENSURE_UNIQUE',
                 object,
@@ -95,12 +98,13 @@ export class ReturnStatement implements Statement {
                 'Called function has no return value',
                 this.value!.span,
             )
-        const lattice: Lattice = yield yield* this.value.currentValue(context)
+        const lattice: Lattice =
+            yield yield* this.value.currentValue_obsolete(context)
         if (!calleeResult.lattice.isSupersetTo(lattice))
             yield Result.failure('Return value type mismatch', this.value!.span)
 
         const isolationLevel: AnyIsolationLevel =
-            yield yield* this.value.isolationLevel(context)
+            yield yield* this.value.isolationLevel_obsolete(context)
 
         return calleeResult.isolationLevel !== isolationLevel
             ? Result.failure(

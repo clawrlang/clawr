@@ -42,11 +42,11 @@ export class FunctionCall implements Expression, Statement {
         )
     }
 
-    *isEffectivelyConst(_: Context): Failable<boolean> {
+    *isEffectivelyConst_obsolete(_: Context): Failable<boolean> {
         return Result.true
     }
 
-    *isolationLevel(context: Context): Failable<AnyIsolationLevel> {
+    *isolationLevel_obsolete(context: Context): Failable<AnyIsolationLevel> {
         if (this.name.toString() === 'copy(of:)') return Result.value(UNIQUE)
 
         const decl = context.scope.functionDeclaration(this.name)
@@ -58,13 +58,14 @@ export class FunctionCall implements Expression, Statement {
         return yield* decl.resultIsolationLevel(context)
     }
 
-    declaredLattice(context: Context): Failable<Lattice> {
-        return this.currentValue(context)
+    declaredLattice_obsolete(context: Context): Failable<Lattice> {
+        return this.currentValue_obsolete(context)
     }
 
-    *currentValue(context: Context): Failable<Lattice> {
+    *currentValue_obsolete(context: Context): Failable<Lattice> {
         if (this.name.toString() === 'copy(of:)') {
-            const value = yield yield* this.arguments[0].currentValue(context)
+            const value =
+                yield yield* this.arguments[0].currentValue_obsolete(context)
             return value instanceof RCTypeLattice
                 ? Result.value(value)
                 : Result.failure('not a reference-counted type', this.span)
@@ -86,11 +87,11 @@ export class FunctionCall implements Expression, Statement {
         return Result.value(lattice)
     }
 
-    *toCIRExpression(context: Context): Failable<cir.Expression> {
-        const value: Lattice = yield yield* this.currentValue(context)
+    *toCIRExpression_obsolete(context: Context): Failable<cir.Expression> {
+        const value: Lattice = yield yield* this.currentValue_obsolete(context)
         const args: cir.Expression[] = yield yield* Failable.map(
             this.arguments,
-            (arg) => arg.toCIRExpression(context),
+            (arg) => arg.toCIRExpression_obsolete(context),
         )
         return Result.value({
             kind: 'CALL',
@@ -104,7 +105,7 @@ export class FunctionCall implements Expression, Statement {
         const _name = this.name.toCIR()
         const args: cir.Expression[] = yield yield* Failable.map(
             this.arguments,
-            (arg) => arg.toCIRExpression(context),
+            (arg) => arg.toCIRExpression_obsolete(context),
         )
         if (_name.baseName === 'print') {
             const tempName = context.scope.nextTempVar()

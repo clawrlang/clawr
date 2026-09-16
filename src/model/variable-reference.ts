@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, isFailure, Result } from '@/tools/failable'
+import { Failable, isFailure, Result, Success } from '@/tools/failable'
 import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { Lattice } from './lattice'
@@ -23,7 +23,7 @@ export class VariableReference implements Expression {
     }
 
     *assignmentPrelude(context: Context): Failable<cir.Statement[]> {
-        if (yield yield* this.isEffectivelyConst(context))
+        if (yield yield* this.isEffectivelyConst_obsolete(context))
             yield Result.failure(
                 `Variable ${this.name} is not mutable`,
                 this.span,
@@ -31,26 +31,28 @@ export class VariableReference implements Expression {
         return Result.value([])
     }
 
-    *isEffectivelyConst(context: Context): Failable<boolean> {
+    *isEffectivelyConst_obsolete(context: Context): Failable<boolean> {
         const variableResult = this.lookupInScope(context)
         const variable: Variable = yield variableResult
         return Result.value(variable.isImmutable)
     }
 
-    *isolationLevel(context: Context): Failable<IsolationLevel | UNKNOWN> {
+    *isolationLevel_obsolete(
+        context: Context,
+    ): Failable<IsolationLevel | UNKNOWN> {
         const variableResult = this.lookupInScope(context)
         const variable: Variable = yield variableResult
         return Result.value(variable.isolationLevel)
     }
 
-    *declaredLattice(context: Context): Failable<Lattice> {
+    *declaredLattice_obsolete(context: Context): Failable<Lattice> {
         const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
         const variable: Variable = yield variableResult
         return Result.value(variable.lattice)
     }
 
-    *currentValue(context: Context): Failable<Lattice> {
+    *currentValue_obsolete(context: Context): Failable<Lattice> {
         const result = context.scope.currentValue(this.name)
         if (!result) {
             return Result.failure(
@@ -61,17 +63,20 @@ export class VariableReference implements Expression {
         return Result.value(result)
     }
 
-    *setCurrentValue(context: Context, value: Lattice): Failable {
+    *setCurrentValue_obsolete(context: Context, value: Lattice): Failable {
+        return this.setCurrentValue(context, value)
+    }
+    setCurrentValue(context: Context, value: Lattice): Success {
         context.scope.setCurrentValue(this.name, value)
         return Result.success
     }
 
-    *toCIRExpression(
+    *toCIRExpression_obsolete(
         context: Context,
     ): Failable<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
         const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
-        const valueResult = yield* this.currentValue(context)
+        const valueResult = yield* this.currentValue_obsolete(context)
         if (isFailure(valueResult)) return valueResult
         return Result.value({
             kind: 'VARIABLE_REF' as const,

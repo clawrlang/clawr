@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, Result } from '@/tools/failable'
+import { Failable, Result, Success } from '@/tools/failable'
 import { Context, Expression } from '.'
 import { ISOLATED } from './isolation-level'
 import { IntegerLattice, Lattice } from './lattice'
@@ -31,19 +31,31 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         )
     }
 
-    *isolationLevel(_: Context): Failable<ISOLATED> {
+    *isolationLevel_obsolete(_: Context): Failable<ISOLATED> {
+        return this.isolationLevel()
+    }
+    isolationLevel(): Success<ISOLATED> {
         return Result.value(ISOLATED)
     }
 
-    *currentValue(_: Context): Failable<Lattice> {
+    *currentValue_obsolete(_: Context): Failable<Lattice> {
+        return this.currentValue()
+    }
+    currentValue(): Success<IntegerLattice<Value, Value>> {
         return Result.value(this.value)
     }
 
-    *declaredLattice(_: Context): Failable<Lattice> {
+    *declaredLattice_obsolete(_: Context): Failable<Lattice> {
+        return this.declaredLattice()
+    }
+    declaredLattice(): Success<IntegerLattice<Value, Value>> {
         return Result.value(this.value)
     }
 
-    *toCIRExpression(_: Context): Failable<cir.Expression> {
+    *toCIRExpression_obsolete(_: Context): Failable<cir.Expression> {
+        return this.toCIRExpression()
+    }
+    toCIRExpression(): Success<cir.Expression & { kind: 'INTEGER_LITERAL' }> {
         return Result.value({
             kind: 'INTEGER_LITERAL',
             value: this.value.toCIR() as cir.Lattice & {
@@ -54,7 +66,10 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         })
     }
 
-    *isEffectivelyConst(_: Context): Failable<boolean> {
+    *isEffectivelyConst_obsolete(_: Context): Failable<boolean> {
+        return this.isEffectivelyConst()
+    }
+    isEffectivelyConst(): Success<true> {
         return Result.true
     }
 }

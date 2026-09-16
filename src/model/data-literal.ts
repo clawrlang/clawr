@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, isFailure, Result, Success } from '@/tools/failable'
+import { isFailure, Result, Success } from '@/tools/failable'
 import { Context, ContextWithLattice, Expression } from '.'
 import { FunctionCall } from './function-call'
 import { UNIQUE } from './isolation-level'
@@ -50,7 +50,7 @@ export class DataLiteral implements Expression {
                 this.span,
             )
 
-        const fieldValuesResult = Failable.collect(
+        const fieldValuesResult = Result.collect(
             this.fields.map((field) => {
                 const fieldDeclaration = decl.fields.find(
                     (declaredField) => declaredField.name === field.name,
@@ -123,7 +123,7 @@ export class DataLiteral implements Expression {
             targetType.fields.map((field) => [field.name, field]),
         )
 
-        const fieldValuesResult = Failable.collect(
+        const fieldValuesResult = Result.collect(
             this.fields.map((field) => {
                 const fieldDeclaration = fieldDeclarations.get(field.name)
                 if (!fieldDeclaration)

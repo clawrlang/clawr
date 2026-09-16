@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, isFailure, Result } from '@/tools/failable'
+import { isFailure, Result } from '@/tools/failable'
 import { Context, Expression, isStorage } from '.'
 import { DataDeclaration } from './data-declaration'
 import { ISOLATED, IsolationLevel, SHARED } from './isolation-level'
@@ -41,7 +41,7 @@ export class FieldReference implements Expression {
             )
 
         if (isStorage(this.object)) {
-            const collected = Failable.collect([
+            const collected = Result.collect([
                 this.object.isolationLevel(context),
                 this.object.toCIRExpression(context),
             ])

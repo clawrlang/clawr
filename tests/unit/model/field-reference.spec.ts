@@ -5,7 +5,7 @@ import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
-import { Failable, isFailure, isSuccess } from '@/tools/failable'
+import { isFailure, isSuccess, Result } from '@/tools/failable'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import assert from 'assert'
 import { describe, expect, it, test } from 'bun:test'
@@ -166,7 +166,7 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                const result = Failable.collect([
+                const result = Result.collect([
                     fieldRef.isolationLevel(context),
                     fieldRef.declaredLattice(context),
                 ])

@@ -90,7 +90,7 @@ export class FunctionCall implements Expression, Statement {
     }
 
     toCIRExpression(context: Context): Result<cir.Expression> {
-        const argsResult = Failable.collect([
+        const argsResult = Result.collect([
             this.currentValue(context),
             ...this.arguments.map((arg) => arg.toCIRExpression(context)),
         ])

@@ -1,5 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, isFailure, Result } from '@/tools/failable'
+import { isFailure, Result } from '@/tools/failable'
 import { Context, Expression, Statement } from '.'
 import { FieldReference } from './field-reference'
 import { UNIQUE, UNKNOWN } from './isolation-level'
@@ -30,7 +30,7 @@ export class Assignment implements Statement {
         const validity = this.checkValidity(context)
         if (isFailure(validity)) return validity
 
-        const collected = Failable.collect([
+        const collected = Result.collect([
             this.target.isolationLevel(context),
             this.target.declaredLattice(context),
         ])
@@ -58,7 +58,7 @@ export class Assignment implements Statement {
     }
 
     private emitCIRStatements(context: Context): Result {
-        const collectedTargetResults = Failable.collect([
+        const collectedTargetResults = Result.collect([
             this.target.isolationLevel(context),
             this.target.declaredLattice(context),
             this.target.toCIRExpression(context),
@@ -72,7 +72,7 @@ export class Assignment implements Statement {
             isolationLevel: targetIsolationLevel,
             explicitLattice: targetLattice,
         }
-        const collectedValueResults = Failable.collect([
+        const collectedValueResults = Result.collect([
             this.value.isolationLevel(explicitLatticeContext),
             Retain.ifStorage(this.value, context),
         ])
@@ -146,7 +146,7 @@ export class Assignment implements Statement {
     }
 
     private checkValidity(context: Context): Result {
-        const collected = Failable.collect([
+        const collected = Result.collect([
             this.target.declaredLattice(context),
             this.target.isolationLevel(context),
         ])

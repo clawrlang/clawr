@@ -5,7 +5,6 @@ export type Success<T = undefined> = { value: T }
 export type Failure = { errors: SemanticError[] }
 
 export const Failable = {
-    collect,
     do: _do,
     map,
 }
@@ -18,6 +17,8 @@ export const Result = {
         return success(value)
     },
     failure,
+
+    collect,
 }
 
 function success(): Success

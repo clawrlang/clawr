@@ -3,7 +3,7 @@ import { Failable, isFailure, Result } from '@/tools/failable'
 import { Context, Expression, Statement } from '.'
 import { FieldReference } from './field-reference'
 import { UNIQUE, UNKNOWN } from './isolation-level'
-import { Lattice, RCTypeLattice } from './lattice'
+import { RCTypeLattice } from './lattice'
 import { Retain } from './retain'
 import { VariableReference } from './variable-reference'
 
@@ -27,23 +27,34 @@ export class Assignment implements Statement {
     }
 
     emitStatement(context: Context): Result {
-        const self = this
-        return Failable.do(function* () {
-            const validity = self.checkValidity(context)
-            if (isFailure(validity)) return validity
-            const targetLattice: Lattice =
-                yield self.target.declaredLattice(context)
-            const explicitLatticeContext = {
-                ...context,
-                isolationLevel: yield self.target.isolationLevel(context),
-                explicitLattice: targetLattice,
-            }
-            yield self.emitCIRStatements(context)
-            const value: Lattice = yield self.value.currentValue(
-                explicitLatticeContext,
+        const validity = this.checkValidity(context)
+        if (isFailure(validity)) return validity
+
+        const collected = Failable.collect([
+            this.target.isolationLevel(context),
+            this.target.declaredLattice(context),
+        ])
+        if (isFailure(collected)) return collected
+
+        const [targetIsolationLevel, targetLattice] = collected.value
+        if (targetIsolationLevel === UNKNOWN)
+            return Result.failure(
+                'Cannot assign to target parameter with UNKNOWN isolation-level',
+                this.span,
             )
-            return self.target.setCurrentValue(context, value)
-        })
+
+        const explicitLatticeContext = {
+            ...context,
+            isolationLevel: targetIsolationLevel,
+            explicitLattice: targetLattice,
+        }
+
+        const latticeResult = this.value.currentValue(explicitLatticeContext)
+        if (isFailure(latticeResult)) return latticeResult
+        const cirResults = this.emitCIRStatements(context)
+        if (isFailure(cirResults)) return cirResults
+
+        return this.target.setCurrentValue(context, latticeResult.value)
     }
 
     private emitCIRStatements(context: Context): Result {

@@ -815,7 +815,7 @@ describe('Assignment', () => {
         test('variable-reference', () => {
             const context = newSemanticContext()
             context.scope.variables.set('x', {
-                isImmutable: true,
+                isImmutable: false,
                 isolationLevel: ISOLATED,
                 lattice: IntegerLattice.unconstrained(),
             })
@@ -832,7 +832,8 @@ describe('Assignment', () => {
                 }),
                 span: someCodeSpan,
             })
-            assignment.emitStatement(context)
+            const result = assignment.emitStatement(context)
+            expect(result).toMatchObject({ value: undefined })
             expect(context.scope.currentValue('x')).not.toBeNil()
             expect(context.scope.currentValue('x')).toMatchObject({
                 min: 42n,
@@ -859,7 +860,7 @@ describe('Assignment', () => {
                 }),
             )
             context.scope.variables.set('x', {
-                isImmutable: true,
+                isImmutable: false,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),

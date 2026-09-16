@@ -47,9 +47,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        const result = Failable.do(() =>
-            fieldRef.declaredLattice_obsolete(context),
-        )
+        const result = fieldRef.declaredLattice(context)
         assert(isSuccess(result))
         expect(result.value.toCIR().type).toBe('integer')
     })
@@ -92,9 +90,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        const result = Failable.do(() =>
-            fieldRef.isolationLevel_obsolete(context),
-        )
+        const result = fieldRef.isolationLevel(context)
         assert(isSuccess(result))
         expect(result.value).toEqual(SHARED)
     })
@@ -172,8 +168,8 @@ describe('Field Reference', () => {
                 })
                 const result = Failable.do(function* () {
                     return Result.value([
-                        yield yield* fieldRef.isolationLevel_obsolete(context),
-                        yield yield* fieldRef.declaredLattice_obsolete(context),
+                        yield fieldRef.isolationLevel(context),
+                        yield fieldRef.declaredLattice(context),
                     ])
                 })
                 assert(isSuccess(result))
@@ -222,9 +218,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        const result = Failable.do(() =>
-            fieldRef.toCIRExpression_obsolete(context),
-        )
+        const result = fieldRef.toCIRExpression(context)
         assert(isFailure(result))
         expect(result.errors.map((e) => e.message)).toContain(
             'Field nonExistentField does not exist on type MyType',
@@ -295,9 +289,7 @@ describe('Field Reference', () => {
                     },
                     fieldSpan: someCodeSpan,
                 })
-                const result = Failable.do(() =>
-                    fieldRef.toCIRExpression_obsolete(context),
-                )
+                const result = fieldRef.toCIRExpression(context)
                 assert(isFailure(result))
                 expect(result.errors[0]).toMatchObject({
                     message: `Cannot access field myField of a ${isolationLevel} type object with "${operator}" operator`,
@@ -371,9 +363,7 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                const result = Failable.do(() =>
-                    fieldRef.isEffectivelyConst_obsolete(context),
-                )
+                const result = fieldRef.isEffectivelyConst(context)
                 assert(isSuccess(result))
                 expect(result.value).toBe(expected)
             })
@@ -415,9 +405,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            const result = Failable.do(() =>
-                fieldRef.isEffectivelyConst_obsolete(context),
-            )
+            const result = fieldRef.isEffectivelyConst(context)
             assert(isSuccess(result))
             expect(result.value).toBeTrue()
         })
@@ -458,9 +446,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            const result = Failable.do(() =>
-                fieldRef.isEffectivelyConst_obsolete(context),
-            )
+            const result = fieldRef.isEffectivelyConst(context)
             assert(isSuccess(result))
             expect(result.value).toBeTrue()
         })
@@ -501,9 +487,7 @@ describe('Field Reference', () => {
                 span: someCodeSpan,
                 fieldSpan: someCodeSpan,
             })
-            const result = Failable.do(() =>
-                fieldRef.isEffectivelyConst_obsolete(context),
-            )
+            const result = fieldRef.isEffectivelyConst(context)
             assert(isSuccess(result))
             expect(result.value).toBeFalse()
         })

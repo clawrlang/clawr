@@ -20,9 +20,7 @@ describe('Literals', () => {
                     value: input,
                     span: someCodeSpan,
                 })
-                const result = Failable.do(() =>
-                    literal.toCIRExpression_obsolete(newSemanticContext()),
-                )
+                const result = literal.toCIRExpression()
                 assert(isSuccess(result))
                 expect(result.value).toMatchObject({
                     kind: 'TRUTHVALUE_LITERAL',
@@ -35,9 +33,7 @@ describe('Literals', () => {
                     value: input,
                     span: someCodeSpan,
                 })
-                const result = Failable.do(() =>
-                    literal.currentValue_obsolete(newSemanticContext()),
-                )
+                const result = literal.currentValue()
                 assert(isSuccess(result))
                 expect(result.value).toMatchObject({
                     values: [input],
@@ -54,9 +50,7 @@ describe('Literals', () => {
                     value: BigInt(input),
                     span: someCodeSpan,
                 })
-                const result = Failable.do(() =>
-                    literal.toCIRExpression_obsolete(newSemanticContext()),
-                )
+                const result = literal.toCIRExpression()
                 assert(isSuccess(result))
                 expect(result.value).toMatchObject({
                     kind: 'INTEGER_LITERAL',
@@ -69,9 +63,7 @@ describe('Literals', () => {
                     value: BigInt(input),
                     span: someCodeSpan,
                 })
-                const result = Failable.do(() =>
-                    literal.currentValue_obsolete(newSemanticContext()),
-                )
+                const result = literal.currentValue()
                 assert(isSuccess(result))
                 expect(result.value).toMatchObject({
                     min: BigInt(input),
@@ -130,15 +122,13 @@ describe('Literals', () => {
                 span: someCodeSpan,
             })
 
-            const result = Failable.do(() =>
-                dataLiteral.toCIRExpression_obsolete({
-                    ...context,
-                    explicitLattice: RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyType' }),
-                    }),
-                    isolationLevel: SHARED,
+            const result = dataLiteral.toCIRExpression({
+                ...context,
+                explicitLattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
                 }),
-            )
+                isolationLevel: SHARED,
+            })
             assert(isSuccess(result))
             expect(result.value).toMatchObject({
                 kind: 'ALLOCATION',
@@ -209,14 +199,12 @@ describe('Literals', () => {
                 span: someCodeSpan,
             })
 
-            const result = Failable.do(() =>
-                dataLiteral.currentValue_obsolete({
-                    ...context,
-                    explicitLattice: RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyType' }),
-                    }),
+            const result = dataLiteral.currentValue({
+                ...context,
+                explicitLattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'MyType' }),
                 }),
-            )
+            })
             assert(isSuccess(result))
             expect(result.value).toMatchObject({
                 type: { name: 'MyType' },
@@ -271,16 +259,14 @@ describe('Literals', () => {
                 span: someCodeSpan,
             })
 
-            const result = Failable.do(() =>
-                dataLiteral.currentValue_obsolete({
-                    ...context,
-                    explicitLattice: RCTypeLattice.create({
-                        type: TypeName.create({
-                            name: 'OuterType',
-                        }),
+            const result = dataLiteral.currentValue({
+                ...context,
+                explicitLattice: RCTypeLattice.create({
+                    type: TypeName.create({
+                        name: 'OuterType',
                     }),
                 }),
-            )
+            })
             expect(isFailure(result)).toBeTrue()
         })
     })

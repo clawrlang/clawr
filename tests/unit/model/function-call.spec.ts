@@ -36,9 +36,7 @@ describe('FunctionCall', () => {
                 },
             }),
         )
-        const result = Failable.do(() =>
-            query.toCIRExpression_obsolete(context),
-        )
+        const result = query.toCIRExpression(context)
         assert(isSuccess(result))
         expect(result.value).toMatchObject({
             kind: 'CALL',
@@ -94,9 +92,7 @@ describe('FunctionCall', () => {
                 },
             }),
         )
-        const result = Failable.do(() =>
-            query.toCIRExpression_obsolete(context),
-        )
+        const result = query.toCIRExpression(context)
         assert(isSuccess(result))
         expect(result.value).toMatchObject({
             kind: 'CALL',
@@ -144,9 +140,7 @@ describe('FunctionCall', () => {
                 arguments: [],
                 span: someCodeSpan,
             })
-            const result = Failable.do(() =>
-                query.toCIRExpression_obsolete(context),
-            )
+            const result = query.toCIRExpression(context)
             assert(isSuccess(result))
             expect(result.value).toMatchObject({
                 kind: 'CALL',
@@ -187,9 +181,7 @@ describe('FunctionCall', () => {
                 ],
                 span: someCodeSpan,
             })
-            const result = Failable.do(() =>
-                query.toCIRExpression_obsolete(context),
-            )
+            const result = query.toCIRExpression(context)
             assert(isSuccess(result))
             expect(result.value).toMatchObject({
                 kind: 'CALL',

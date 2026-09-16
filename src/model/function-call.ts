@@ -70,10 +70,7 @@ export class FunctionCall implements Expression, Statement {
         return this.declaredLattice(context)
     }
     declaredLattice(context: Context): Result<Lattice> {
-        const self = this
-        return Failable.do(function* () {
-            return yield* self.currentValue_obsolete(context)
-        })
+        return this.currentValue(context)
     }
 
     *currentValue_obsolete(context: Context): Failable<Lattice> {
@@ -83,10 +80,7 @@ export class FunctionCall implements Expression, Statement {
         const self = this
         return Failable.do(function* () {
             if (self.name.toString() === 'copy(of:)') {
-                const value =
-                    yield yield* self.arguments[0].currentValue_obsolete(
-                        context,
-                    )
+                const value = yield self.arguments[0].currentValue(context)
                 return value instanceof RCTypeLattice
                     ? Result.value(value)
                     : Result.failure('not a reference-counted type', self.span)
@@ -116,11 +110,12 @@ export class FunctionCall implements Expression, Statement {
     toCIRExpression(context: Context): Result<cir.Expression> {
         const self = this
         return Failable.do(function* () {
-            const value: Lattice =
-                yield yield* self.currentValue_obsolete(context)
+            const value: Lattice = yield self.currentValue(context)
             const args: cir.Expression[] = yield yield* Failable.map(
                 self.arguments,
-                (arg) => arg.toCIRExpression_obsolete(context),
+                function* (arg) {
+                    return arg.toCIRExpression(context)
+                },
             )
             return Result.value({
                 kind: 'CALL',
@@ -135,7 +130,9 @@ export class FunctionCall implements Expression, Statement {
         const _name = this.name.toCIR()
         const args: cir.Expression[] = yield yield* Failable.map(
             this.arguments,
-            (arg) => arg.toCIRExpression_obsolete(context),
+            function* (arg) {
+                return arg.toCIRExpression(context)
+            },
         )
         if (_name.baseName === 'print') {
             const tempName = context.scope.nextTempVar()

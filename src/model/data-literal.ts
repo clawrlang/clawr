@@ -75,7 +75,7 @@ export class DataLiteral implements Expression {
                             `DataLiteral.currentValue: field ${field.name} not found on type ${explicitLattice.type.name}`,
                             thisspan,
                         )
-                    return yield* field.value.currentValue_obsolete({
+                    return field.value.currentValue({
                         ...context,
                         explicitLattice: fieldDeclaration.lattice,
                     })
@@ -167,9 +167,7 @@ export class DataLiteral implements Expression {
                         isolationLevel: fieldDeclaration.isolationLevel,
                     }
                     const value: cir.Expression =
-                        yield yield* field.value.toCIRExpression_obsolete(
-                            nestedContext,
-                        )
+                        yield field.value.toCIRExpression(nestedContext)
                     return Result.value({
                         name: field.name,
                         value,

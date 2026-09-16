@@ -22,7 +22,7 @@ export class VariableReference implements Expression {
     }
 
     *assignmentPrelude(context: Context): Failable<cir.Statement[]> {
-        if (yield yield* this.isEffectivelyConst_obsolete(context))
+        if (yield this.isEffectivelyConst(context))
             yield Result.failure(
                 `Variable ${this.name} is not mutable`,
                 this.span,
@@ -84,30 +84,19 @@ export class VariableReference implements Expression {
     *toCIRExpression_obsolete(
         context: Context,
     ): Failable<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
-        const variableResult = this.lookupInScope(context)
-        if (isFailure(variableResult)) return variableResult
-        const valueResult = yield* this.currentValue_obsolete(context)
-        if (isFailure(valueResult)) return valueResult
-        return Result.value({
-            kind: 'VARIABLE_REF' as const,
-            name: this.name,
-            value: (yield valueResult).toCIR(),
-        })
+        return this.toCIRExpression(context)
     }
     toCIRExpression(
         context: Context,
     ): Result<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
-        const self = this
-        return Failable.do(function* () {
-            const variableResult = self.lookupInScope(context)
-            if (isFailure(variableResult)) return variableResult
-            const valueResult = yield* self.currentValue_obsolete(context)
-            if (isFailure(valueResult)) return valueResult
-            return Result.value({
-                kind: 'VARIABLE_REF' as const,
-                name: self.name,
-                value: (yield valueResult).toCIR(),
-            })
+        const variableResult = this.lookupInScope(context)
+        if (isFailure(variableResult)) return variableResult
+        const valueResult = this.currentValue(context)
+        if (isFailure(valueResult)) return valueResult
+        return Result.value({
+            kind: 'VARIABLE_REF' as const,
+            name: this.name,
+            value: valueResult.value.toCIR(),
         })
     }
 

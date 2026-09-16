@@ -23,9 +23,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        const result = Failable.do(() =>
-            variableRef.toCIRExpression_obsolete(context),
-        )
+        const result = variableRef.toCIRExpression(context)
         assert(isSuccess(result))
         expect(result.value).toMatchObject({
             kind: 'VARIABLE_REF',
@@ -41,9 +39,7 @@ describe('Variable Reference', () => {
         const variableRef = VariableReference.create({ name: 'myVar', span })
 
         const context = newSemanticContext()
-        const result = Failable.do(() =>
-            variableRef.toCIRExpression_obsolete(context),
-        )
+        const result = variableRef.toCIRExpression(context)
         assert(isFailure(result))
         expect(result.errors[0]).toMatchObject({
             message: `Variable myVar is not defined in the current context`,
@@ -63,9 +59,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        const result = Failable.do(() =>
-            variableRef.declaredLattice_obsolete(context),
-        )
+        const result = variableRef.declaredLattice(context)
         assert(isSuccess(result))
         expect(result.value).toEqual(
             IntegerLattice.create({ min: 10n, max: 10n }),
@@ -88,9 +82,7 @@ describe('Variable Reference', () => {
             name: 'myVar',
             span: someCodeSpan,
         })
-        const result = Failable.do(() =>
-            variableRef.currentValue_obsolete(context),
-        )
+        const result = variableRef.currentValue(context)
         assert(isSuccess(result))
         expect(result.value).toMatchObject({
             min: 10n,
@@ -133,9 +125,7 @@ describe('Variable Reference', () => {
                     name: 'myVar',
                     span: someCodeSpan,
                 })
-                const result = Failable.do(() =>
-                    variableRef.isolationLevel_obsolete(context),
-                )
+                const result = variableRef.isolationLevel(context)
                 assert(isSuccess(result))
                 expect(result.value).toEqual(isolationLevel)
             })

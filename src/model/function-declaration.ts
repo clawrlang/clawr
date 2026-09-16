@@ -65,9 +65,7 @@ export class FunctionDeclaration implements Declaration {
     *resultIsolationLevel(context: Context): Failable<AnyIsolationLevel> {
         if (this.result) return Result.value(this.result.isolationLevel)
         if (this.implementation.kind === 'implicit-return')
-            return yield* this.implementation.expression.isolationLevel_obsolete(
-                context,
-            )
+            return this.implementation.expression.isolationLevel(context)
         else
             throw new Error(
                 `unable to infer isolation level for ${this.baseName}`,
@@ -77,7 +75,7 @@ export class FunctionDeclaration implements Declaration {
     *lattice(context: Context): Failable<Lattice | undefined> {
         if (this.result) return Result.value(this.result.lattice)
         if (this.implementation.kind === 'implicit-return')
-            return yield* this.implementation.expression.currentValue_obsolete(
+            return this.implementation.expression.currentValue(
                 this.bodyContext(context),
             )
         return Result.success
@@ -107,7 +105,7 @@ export class FunctionDeclaration implements Declaration {
             bodyContext.scope.releaseVariables()
 
         const lattice: cir.Lattice | undefined =
-            yield yield* this.resultLattice(bodyContext)
+            yield this.resultLattice(bodyContext)
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -148,7 +146,7 @@ export class FunctionDeclaration implements Declaration {
             bodyContext.scope.releaseVariables()
 
         const lattice: cir.Lattice | undefined =
-            yield yield* this.resultLattice(bodyContext)
+            yield this.resultLattice(bodyContext)
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -222,16 +220,13 @@ export class FunctionDeclaration implements Declaration {
               ? undefined
               : {
                     isolationLevel:
-                        yield yield* this.implementation.expression.isolationLevel_obsolete(
+                        yield this.implementation.expression.isolationLevel(
                             contextWithParameters,
                         ),
-                    lattice:
-                        yield yield* this.implementation.expression.currentValue_obsolete(
-                            {
-                                ...contextWithParameters,
-                                explicitLattice,
-                            },
-                        ),
+                    lattice: yield this.implementation.expression.currentValue({
+                        ...contextWithParameters,
+                        explicitLattice,
+                    }),
                 }
         const bodyContext = this.bodyContext({
             ...context,
@@ -245,7 +240,7 @@ export class FunctionDeclaration implements Declaration {
         const parameterScope = context.scope.createChildScope()
         for (const param of this.parameters) {
             const latticeResult = param.defaultValue
-                ? yield* param.defaultValue.currentValue_obsolete(context)
+                ? param.defaultValue.currentValue(context)
                 : param.lattice
                   ? Result.value(param.lattice)
                   : Result.failure(
@@ -264,16 +259,13 @@ export class FunctionDeclaration implements Declaration {
         return Result.value(parameterScope)
     }
 
-    private *resultLattice(
-        context: Context,
-    ): Failable<cir.Lattice | undefined> {
+    private resultLattice(context: Context): Result<cir.Lattice | undefined> {
         if (this.result) return Result.value(this.result.lattice.toCIR())
         if (this.implementation.kind === 'body') return Result.value(undefined)
-        const lattice: Lattice =
-            yield yield* this.implementation.expression.currentValue_obsolete(
-                context,
-            )
-        return Result.value(lattice.toCIR())
+        const latticeResult =
+            this.implementation.expression.currentValue(context)
+        if (isFailure(latticeResult)) return latticeResult
+        return Result.value(latticeResult.value.toCIR())
     }
 
     private bodyContext(context: Context): Context {

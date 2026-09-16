@@ -53,7 +53,7 @@ export class VariableDeclaration implements Statement, Declaration {
         scope: Scope | Scope['rootScope'],
         context: Context,
     ): Failable {
-        const initialValue = yield yield* this.currentValueFromInitial(context)
+        const initialValue = yield this.currentValueFromInitial(context)
         const validity = yield* this.checkValidity(initialValue, context)
         if (isFailure(validity)) return validity
 
@@ -77,7 +77,7 @@ export class VariableDeclaration implements Statement, Declaration {
         const valueResult = yield* Retain.ifStorage(this.initialValue, context)
         const value: Expression = yield valueResult
 
-        const initialValueResult = yield* value.toCIRExpression_obsolete({
+        const initialValueResult = value.toCIRExpression({
             ...context,
             explicitLattice: this.lattice,
             isolationLevel: this.isolationLevel,
@@ -116,7 +116,7 @@ export class VariableDeclaration implements Statement, Declaration {
             )
 
         const valueIsolationLevel =
-            yield yield* this.initialValue.isolationLevel_obsolete(context)
+            yield this.initialValue.isolationLevel(context)
         if (valueIsolationLevel === UNIQUE) return Result.success
         if (this.isolationLevel !== valueIsolationLevel)
             return Result.failure(
@@ -130,8 +130,8 @@ export class VariableDeclaration implements Statement, Declaration {
         return !this.lattice || this.lattice.isSupersetTo(currentValue)
     }
 
-    private currentValueFromInitial(context: Context): Failable<Lattice> {
-        return this.initialValue.currentValue_obsolete({
+    private currentValueFromInitial(context: Context): Result<Lattice> {
+        return this.initialValue.currentValue({
             ...context,
             explicitLattice: this.lattice,
         })

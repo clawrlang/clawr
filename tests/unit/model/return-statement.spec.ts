@@ -10,7 +10,7 @@ import {
 import { ReturnStatement } from '@/model/return-statement'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
-import { Failable, isFailure } from '@/tools/failable'
+import { isFailure } from '@/tools/failable'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import assert from 'assert'
 import { describe, expect, it } from 'bun:test'

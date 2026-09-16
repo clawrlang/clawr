@@ -11,7 +11,6 @@ import { ReturnStatement } from '@/model/return-statement'
 import { TypeName } from '@/model/type-name'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import { VariableReference } from '@/model/variable-reference'
-import { Failable } from '@/tools/failable'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 

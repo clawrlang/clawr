@@ -3,7 +3,6 @@ import { ISOLATED } from '@/model/isolation-level'
 import { IntegerLattice, TruthvalueLattice } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
 import { TypeName } from '@/model/type-name'
-import { Failable } from '@/tools/failable'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 

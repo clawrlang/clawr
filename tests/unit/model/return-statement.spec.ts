@@ -64,7 +64,7 @@ describe('ReturnStatement', () => {
         }
         const result = returnStatement.emitStatement(context)
         expect(isFailure(result)).toBeTrue()
-        expect(context.scope.emitted.length).toBe(1)
+        expect(context.scope.emitted.length).toBe(0)
     })
 
     it('disallows value with wrong isolation-level', () => {

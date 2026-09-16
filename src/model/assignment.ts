@@ -81,10 +81,7 @@ export class Assignment implements Statement {
 
         const retainedValueCIR = retainedValueCIRResult.value
 
-        const self = this
-        const preludeResult = Failable.do(function* () {
-            return yield* self.target.assignmentPrelude(context)
-        })
+        const preludeResult = this.target.assignmentPrelude(context)
         if (isFailure(preludeResult)) return preludeResult
 
         context.scope.emitted.push(...preludeResult.value)

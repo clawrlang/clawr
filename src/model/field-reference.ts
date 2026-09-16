@@ -31,21 +31,24 @@ export class FieldReference implements Expression {
         return new FieldReference(object, operator, field, span, fieldSpan)
     }
 
-    *assignmentPrelude(context: Context): Failable<cir.Statement[]> {
-        if (yield this.isEffectivelyConst(context))
-            yield Result.failure(
+    assignmentPrelude(context: Context): Result<cir.Statement[]> {
+        const constResult = this.isEffectivelyConst(context)
+        if (isFailure(constResult)) return constResult
+        if (constResult.value)
+            return Result.failure(
                 `Cannot mutate field ${this.field} of a reference type object`,
                 this.span,
             )
 
         if (isStorage(this.object)) {
-            const isolationLevel = yield this.object.isolationLevel(context)
-            if (isolationLevel === ISOLATED) {
-                const object: cir.Expression & {
-                    kind: 'VARABLE_REF' | 'FIELD_REF'
-                } = yield this.object.toCIRExpression(context)
+            const collected = Failable.collect([
+                this.object.isolationLevel(context),
+                this.object.toCIRExpression(context),
+            ])
+            if (isFailure(collected)) return collected
+            const [isolationLevel, object] = collected.value
+            if (isolationLevel === ISOLATED)
                 return Result.value([{ kind: 'ENSURE_UNIQUE', object }])
-            }
         }
         return Result.value([])
     }

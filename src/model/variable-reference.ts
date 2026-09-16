@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, isFailure, Result, Success } from '@/tools/failable'
+import { isFailure, Result, Success } from '@/tools/failable'
 import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { Lattice } from './lattice'
@@ -21,9 +21,11 @@ export class VariableReference implements Expression {
         return new VariableReference(name, span)
     }
 
-    *assignmentPrelude(context: Context): Failable<cir.Statement[]> {
-        if (yield this.isEffectivelyConst(context))
-            yield Result.failure(
+    assignmentPrelude(context: Context): Result<cir.Statement[]> {
+        const constResult = this.isEffectivelyConst(context)
+        if (isFailure(constResult)) return constResult
+        if (constResult.value)
+            return Result.failure(
                 `Variable ${this.name} is not mutable`,
                 this.span,
             )

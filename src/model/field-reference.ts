@@ -2,13 +2,8 @@ import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Failable, isFailure, Result } from '@/tools/failable'
 import { Context, Expression, isStorage } from '.'
-import { DataDeclaration, DataField } from './data-declaration'
-import {
-    AnyIsolationLevel,
-    ISOLATED,
-    IsolationLevel,
-    SHARED,
-} from './isolation-level'
+import { DataDeclaration } from './data-declaration'
+import { ISOLATED, IsolationLevel, SHARED } from './isolation-level'
 import { Lattice, RCTypeLattice } from './lattice'
 
 export class FieldReference implements Expression {
@@ -55,9 +50,6 @@ export class FieldReference implements Expression {
         return Result.value([])
     }
 
-    *isEffectivelyConst_obsolete(context: Context): Failable<boolean> {
-        return this.isEffectivelyConst(context)
-    }
     isEffectivelyConst(context: Context): Result<boolean> {
         const self = this
         const isolationLevelResult = self.object.isolationLevel(context)
@@ -68,9 +60,6 @@ export class FieldReference implements Expression {
         return self.object.isEffectivelyConst(context)
     }
 
-    *isolationLevel_obsolete(context: Context): Failable<IsolationLevel> {
-        return this.isolationLevel(context)
-    }
     isolationLevel(context: Context): Result<IsolationLevel> {
         const fieldResult = this.getFieldFromContext(context)
         if (isFailure(fieldResult)) return fieldResult
@@ -80,18 +69,12 @@ export class FieldReference implements Expression {
             : Result.value(ISOLATED)
     }
 
-    *declaredLattice_obsolete(context: Context): Failable<Lattice> {
-        return this.declaredLattice(context)
-    }
     declaredLattice(context: Context): Result<Lattice> {
         const fieldResult = this.getFieldFromContext(context)
         if (isFailure(fieldResult)) return fieldResult
         return Result.value(fieldResult.value.lattice!)
     }
 
-    *currentValue_obsolete(context: Context): Failable<Lattice> {
-        return this.currentValue(context)
-    }
     currentValue(context: Context): Result<Lattice> {
         const objectValueResult = this.object.currentValue(context)
         if (isFailure(objectValueResult)) return objectValueResult
@@ -103,9 +86,6 @@ export class FieldReference implements Expression {
             : Result.failure(`unknown field value ${this.field}`, this.span)
     }
 
-    *setCurrentValue_obsolete(context: Context, value: Lattice): Failable {
-        return this.setCurrentValue(context, value)
-    }
     setCurrentValue(context: Context, value: Lattice): Result {
         const objectvalueResult = this.object.currentValue(context)
         if (isFailure(objectvalueResult)) return objectvalueResult
@@ -120,11 +100,6 @@ export class FieldReference implements Expression {
         return Result.success
     }
 
-    *toCIRExpression_obsolete(
-        context: Context,
-    ): Failable<cir.Expression & { kind: 'FIELD_REF' }> {
-        return this.toCIRExpression(context)
-    }
     toCIRExpression(
         context: Context,
     ): Result<cir.Expression & { kind: 'FIELD_REF' }> {

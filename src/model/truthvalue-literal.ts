@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, Result, Success } from '@/tools/failable'
-import { Context, Expression } from '.'
+import { Result, Success } from '@/tools/failable'
+import { Expression } from '.'
 import { ISOLATED } from './isolation-level'
 import { Lattice, TruthvalueLattice, truthvalue } from './lattice'
 
@@ -21,30 +21,18 @@ export class TruthValueLiteral<Value extends truthvalue> implements Expression {
         return new TruthValueLiteral(TruthvalueLattice.singleton(value), span)
     }
 
-    *isolationLevel_obsolete(_: Context): Failable<ISOLATED> {
-        return this.isolationLevel()
-    }
     isolationLevel(): Success<ISOLATED> {
         return Result.value(ISOLATED)
     }
 
-    *currentValue_obsolete(_: Context): Failable<TruthvalueLattice<[Value]>> {
-        return this.currentValue()
-    }
     currentValue(): Success<TruthvalueLattice<[Value]>> {
         return Result.value(this.value)
     }
 
-    *declaredLattice_obsolete(_: Context): Failable<Lattice> {
-        return this.declaredLattice()
-    }
     declaredLattice(): Success<Lattice> {
         return Result.value(this.value)
     }
 
-    *toCIRExpression_obsolete(_: Context): Failable<cir.Expression> {
-        return this.toCIRExpression()
-    }
     toCIRExpression(): Success<
         cir.Expression & { kind: 'TRUTHVALUE_LITERAL' }
     > {
@@ -54,9 +42,6 @@ export class TruthValueLiteral<Value extends truthvalue> implements Expression {
         })
     }
 
-    *isEffectivelyConst_obsolete(_: Context): Failable<boolean> {
-        return this.isEffectivelyConst()
-    }
     isEffectivelyConst(): Success<true> {
         return Result.true
     }

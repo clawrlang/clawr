@@ -26,23 +26,14 @@ export class DataLiteral implements Expression {
         return new DataLiteral(initializerCall, fields, span)
     }
 
-    *isEffectivelyConst_obsolete(_: Context): Failable<boolean> {
-        return this.isEffectivelyConst()
-    }
     isEffectivelyConst(): Success<true> {
         return Result.true
     }
 
-    *isolationLevel_obsolete(_: Context): Failable<UNIQUE> {
-        return Result.value(UNIQUE)
-    }
     isolationLevel(): Success<UNIQUE> {
         return Result.value(UNIQUE)
     }
 
-    *currentValue_obsolete(context: ContextWithLattice): Failable<Lattice> {
-        return this.currentValue(context)
-    }
     currentValue(context: ContextWithLattice): Result<Lattice> {
         const self = this
         return Failable.do(function* () {
@@ -97,11 +88,6 @@ export class DataLiteral implements Expression {
         })
     }
 
-    *declaredLattice_obsolete(
-        context: Context & { type: TypeName },
-    ): Failable<Lattice> {
-        return this.declaredLattice(context)
-    }
     declaredLattice(context: Context & { type: TypeName }): Result<Lattice> {
         const decl = context.scope.dataDeclaration(context.type)
         if (!decl)
@@ -119,11 +105,6 @@ export class DataLiteral implements Expression {
         )
     }
 
-    *toCIRExpression_obsolete(
-        context: ContextWithLattice,
-    ): Failable<cir.Expression> {
-        return this.toCIRExpression(context)
-    }
     toCIRExpression(context: ContextWithLattice): Result<cir.Expression> {
         const self = this
         return Failable.do(function* () {

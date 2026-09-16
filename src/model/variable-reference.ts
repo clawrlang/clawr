@@ -30,38 +30,24 @@ export class VariableReference implements Expression {
         return Result.value([])
     }
 
-    *isEffectivelyConst_obsolete(context: Context): Failable<boolean> {
-        return this.isEffectivelyConst(context)
-    }
     isEffectivelyConst(context: Context): Result<boolean> {
         const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
         return Result.value(variableResult.value.isImmutable)
     }
 
-    *isolationLevel_obsolete(
-        context: Context,
-    ): Failable<IsolationLevel | UNKNOWN> {
-        return this.isolationLevel(context)
-    }
     isolationLevel(context: Context): Result<IsolationLevel | UNKNOWN> {
         const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
         return Result.value(variableResult.value.isolationLevel)
     }
 
-    *declaredLattice_obsolete(context: Context): Failable<Lattice> {
-        return this.declaredLattice(context)
-    }
     declaredLattice(context: Context): Result<Lattice> {
         const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
         return Result.value(variableResult.value.lattice)
     }
 
-    *currentValue_obsolete(context: Context): Failable<Lattice> {
-        return this.currentValue(context)
-    }
     currentValue(context: Context): Result<Lattice> {
         const result = context.scope.currentValue(this.name)
         if (!result) {
@@ -73,19 +59,11 @@ export class VariableReference implements Expression {
         return Result.value(result)
     }
 
-    *setCurrentValue_obsolete(context: Context, value: Lattice): Failable {
-        return this.setCurrentValue(context, value)
-    }
     setCurrentValue(context: Context, value: Lattice): Success {
         context.scope.setCurrentValue(this.name, value)
         return Result.success
     }
 
-    *toCIRExpression_obsolete(
-        context: Context,
-    ): Failable<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
-        return this.toCIRExpression(context)
-    }
     toCIRExpression(
         context: Context,
     ): Result<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {

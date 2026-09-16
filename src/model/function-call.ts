@@ -42,16 +42,10 @@ export class FunctionCall implements Expression, Statement {
         )
     }
 
-    *isEffectivelyConst_obsolete(_: Context): Failable<boolean> {
-        return this.isEffectivelyConst()
-    }
     isEffectivelyConst(): Success<true> {
         return Result.true
     }
 
-    *isolationLevel_obsolete(context: Context): Failable<AnyIsolationLevel> {
-        return this.isolationLevel(context)
-    }
     isolationLevel(context: Context): Result<AnyIsolationLevel> {
         if (this.name.toString() === 'copy(of:)') return Result.value(UNIQUE)
 
@@ -66,16 +60,10 @@ export class FunctionCall implements Expression, Statement {
         })
     }
 
-    *declaredLattice_obsolete(context: Context): Failable<Lattice> {
-        return this.declaredLattice(context)
-    }
     declaredLattice(context: Context): Result<Lattice> {
         return this.currentValue(context)
     }
 
-    *currentValue_obsolete(context: Context): Failable<Lattice> {
-        return this.currentValue(context)
-    }
     currentValue(context: Context): Result<Lattice> {
         const self = this
         return Failable.do(function* () {
@@ -104,9 +92,6 @@ export class FunctionCall implements Expression, Statement {
         })
     }
 
-    *toCIRExpression_obsolete(context: Context): Failable<cir.Expression> {
-        return this.toCIRExpression(context)
-    }
     toCIRExpression(context: Context): Result<cir.Expression> {
         const self = this
         return Failable.do(function* () {

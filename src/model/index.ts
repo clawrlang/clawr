@@ -30,16 +30,6 @@ export interface Expression {
     toCIRExpression(context: ContextWithLattice): Result<cir.Expression>
 
     setCurrentValue?(context: Context, value: Lattice): Result
-
-    isEffectivelyConst_obsolete(context: Context): Failable<boolean>
-    isolationLevel_obsolete(context: Context): Failable<AnyIsolationLevel>
-    declaredLattice_obsolete(context: ContextWithLattice): Failable<Lattice>
-    currentValue_obsolete(context: ContextWithLattice): Failable<Lattice>
-    toCIRExpression_obsolete(
-        context: ContextWithLattice,
-    ): Failable<cir.Expression>
-
-    setCurrentValue_obsolete?(context: Context, value: Lattice): Failable
 }
 
 export interface Statement {

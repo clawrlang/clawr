@@ -28,39 +28,22 @@ export class Retain implements Expression {
             : Result.value(value as T)
     }
 
-    *isEffectivelyConst_obsolete(): Failable<boolean> {
-        return this.isEffectivelyConst()
-    }
     isEffectivelyConst(): Success<true> {
         return Result.true
     }
 
-    *isolationLevel_obsolete(context: Context): Failable<AnyIsolationLevel> {
-        return this.isolationLevel(context)
-    }
     isolationLevel(context: Context): Result<AnyIsolationLevel> {
         return this.value.isolationLevel(context)
     }
 
-    *declaredLattice_obsolete(context: ContextWithLattice): Failable<Lattice> {
-        return this.declaredLattice(context)
-    }
     declaredLattice(context: ContextWithLattice): Result<Lattice> {
         return this.value.declaredLattice(context)
     }
 
-    *currentValue_obsolete(context: ContextWithLattice): Failable<Lattice> {
-        return this.currentValue(context)
-    }
     currentValue(context: ContextWithLattice): Result<Lattice> {
         return this.value.currentValue(context)
     }
 
-    *toCIRExpression_obsolete(
-        context: ContextWithLattice,
-    ): Failable<cir.Expression> {
-        return this.toCIRExpression(context)
-    }
     toCIRExpression(context: ContextWithLattice): Result<cir.Expression> {
         const objectResult = this.value.toCIRExpression(context)
         if (isFailure(objectResult)) return objectResult

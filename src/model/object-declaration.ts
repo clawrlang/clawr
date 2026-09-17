@@ -76,9 +76,7 @@ export class ObjectDeclaration implements Declaration {
                 yield yield* Failable.map(
                     [...self.readonly, ...self.mutating],
                     function* (item) {
-                        const methodCIRResult =
-                            yield* item.emitMethod(objectContext)
-                        return methodCIRResult
+                        return item.emitMethod(objectContext)
                     },
                 )
 
@@ -88,7 +86,7 @@ export class ObjectDeclaration implements Declaration {
             })[] = yield yield* Failable.map(
                 [...self.initializers],
                 function* (item) {
-                    return yield* item.emitInitializer(objectContext)
+                    return item.emitInitializer(objectContext)
                 },
             )
 

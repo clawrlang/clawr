@@ -1,10 +1,15 @@
 import * as cir from '@/cir'
-import { Failable, isFailure, Result } from '@/tools/failable'
+import { isFailure, Result } from '@/tools/failable'
 import { mapFilter } from '@/tools/map-filter'
 import { Context, Declaration, Expression, Statement } from '.'
 import { Assignment } from './assignment'
 import { FunctionName } from './function-name'
-import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
+import {
+    AnyIsolationLevel,
+    IsolationLevel,
+    UNIQUE,
+    UNKNOWN,
+} from './isolation-level'
 import { Lattice, RCTypeLattice } from './lattice'
 import { LatticeDeclaration } from './lattice-declaration'
 import { Parameter } from './parameter'
@@ -82,54 +87,55 @@ export class FunctionDeclaration implements Declaration {
     }
 
     emitDeclaration(context: Context): Result {
-        const self = this
-        return Failable.do(function* () {
-            context.scope.rootScope.addFunctionDeclaration(self)
+        context.scope.rootScope.addFunctionDeclaration(this)
 
-            const bodyContext: Context =
-                yield yield* self.makeBodyContext(context)
+        const bodyContextResult = this.makeBodyContext(context)
+        if (isFailure(bodyContextResult)) return bodyContextResult
+        const bodyContext = bodyContextResult.value
 
-            const body =
-                self.implementation.kind === 'body'
-                    ? self.implementation.statements
-                    : [
-                          ReturnStatement.create({
-                              value: self.implementation.expression,
-                              span: undefined as any,
-                          }),
-                      ]
+        const body =
+            this.implementation.kind === 'body'
+                ? this.implementation.statements
+                : [
+                      ReturnStatement.create({
+                          value: this.implementation.expression,
+                          span: undefined as any,
+                      }),
+                  ]
 
-            for (const stmt of body) stmt.emitStatement(bodyContext)
+        for (const stmt of body) stmt.emitStatement(bodyContext)
 
-            if (
-                self.implementation.kind === 'body' &&
-                !body.some((stmt) => stmt instanceof ReturnStatement)
-            )
-                bodyContext.scope.releaseVariables()
+        if (
+            this.implementation.kind === 'body' &&
+            !body.some((stmt) => stmt instanceof ReturnStatement)
+        )
+            bodyContext.scope.releaseVariables()
 
-            const lattice: cir.Lattice | undefined =
-                yield self.resultLattice(bodyContext)
+        const latticeResult = this.resultLattice(bodyContext)
+        if (isFailure(latticeResult)) return latticeResult
+        const lattice = latticeResult.value
 
-            const cirFuncDecl: cir.Declaration = {
-                kind: 'FUNCTION_DECL',
-                baseName: self.baseName,
-                labels: mapFilter(self.parameters, (p) => p.label),
-                parameters: self.parameters.map((param) => ({
-                    name: param.varName,
-                    lattice: param.lattice!.toCIR(),
-                })),
-                lattice,
-                body: bodyContext.scope.emitted,
-            }
-            context.scope.rootScope.emitted.push(cirFuncDecl)
-            return Result.success
-        })
+        const cirFuncDecl: cir.Declaration = {
+            kind: 'FUNCTION_DECL',
+            baseName: this.baseName,
+            labels: mapFilter(this.parameters, (p) => p.label),
+            parameters: this.parameters.map((param) => ({
+                name: param.varName,
+                lattice: param.lattice!.toCIR(),
+            })),
+            lattice,
+            body: bodyContext.scope.emitted,
+        }
+        context.scope.rootScope.emitted.push(cirFuncDecl)
+        return Result.success
     }
 
-    *emitMethod(
+    emitMethod(
         context: Context & { self: TypeName },
-    ): Failable<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
-        const bodyContext: Context = yield yield* this.makeBodyContext(context)
+    ): Result<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
+        const bodyContextResult = this.makeBodyContext(context)
+        if (isFailure(bodyContextResult)) return bodyContextResult
+        const bodyContext = bodyContextResult.value
 
         const body =
             this.implementation.kind === 'body'
@@ -149,8 +155,9 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const lattice: cir.Lattice | undefined =
-            yield this.resultLattice(bodyContext)
+        const latticeResult = this.resultLattice(bodyContext)
+        if (isFailure(latticeResult)) return latticeResult
+        const lattice = latticeResult.value
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -167,10 +174,12 @@ export class FunctionDeclaration implements Declaration {
         return Result.value(cirFuncDecl)
     }
 
-    *emitInitializer(
+    emitInitializer(
         context: Context & { self: TypeName },
-    ): Failable<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
-        const bodyContext: Context = yield yield* this.makeBodyContext(context)
+    ): Result<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
+        const bodyContextResult = this.makeBodyContext(context)
+        if (isFailure(bodyContextResult)) return bodyContextResult
+        const bodyContext = bodyContextResult.value
 
         const body =
             this.implementation.kind === 'body'
@@ -209,38 +218,54 @@ export class FunctionDeclaration implements Declaration {
         return Result.value(cirFuncDecl)
     }
 
-    private *makeBodyContext(
+    private makeBodyContext(
         context: Context & { self?: TypeName },
-    ): Failable<Context> {
-        const parameterScope = yield yield* this.scopeAddingParameters(context)
-        const contextWithParameters = { ...context, scope: parameterScope }
+    ): Result<Context> {
+        const parameterScopeResult = this.scopeAddingParameters(context)
+        if (isFailure(parameterScopeResult)) return parameterScopeResult
+        const contextWithParameters = {
+            ...context,
+            scope: parameterScopeResult.value,
+        }
         const explicitLattice =
             this.implementation.kind === 'implicit-return' && context.self
                 ? RCTypeLattice.create({ type: context.self })
                 : undefined
-        const calleeResult = this.result
-            ? this.result
-            : this.implementation.kind === 'body'
-              ? undefined
-              : {
-                    isolationLevel:
-                        yield this.implementation.expression.isolationLevel(
-                            contextWithParameters,
-                        ),
-                    lattice: yield this.implementation.expression.currentValue({
-                        ...contextWithParameters,
-                        explicitLattice,
-                    }),
-                }
-        const bodyContext = this.bodyContext({
-            ...context,
-            scope: parameterScope,
-            calleeResult,
-        })
-        return Result.value(bodyContext)
+
+        if (this.result || this.implementation.kind === 'body') {
+            const bodyContext = this.bodyContext({
+                ...context,
+                scope: parameterScopeResult.value,
+                calleeResult: this.result,
+            })
+            return Result.value(bodyContext)
+        } else {
+            const collected = Result.collect([
+                this.implementation.expression.isolationLevel(
+                    contextWithParameters,
+                ),
+                this.implementation.expression.currentValue({
+                    ...contextWithParameters,
+                    explicitLattice,
+                }),
+            ])
+            if (isFailure(collected)) return collected
+            const [isolationLevel, lattice] = collected.value
+            if (isolationLevel === UNKNOWN)
+                return Result.failure(
+                    'Returning UNKNOWN value',
+                    this.implementation.expression.span,
+                )
+            const bodyContext = this.bodyContext({
+                ...context,
+                scope: parameterScopeResult.value,
+                calleeResult: { isolationLevel, lattice },
+            })
+            return Result.value(bodyContext)
+        }
     }
 
-    private *scopeAddingParameters(context: Context): Failable<Scope> {
+    private scopeAddingParameters(context: Context): Result<Scope> {
         const parameterScope = context.scope.createChildScope()
         for (const param of this.parameters) {
             const latticeResult = param.defaultValue
@@ -252,13 +277,12 @@ export class FunctionDeclaration implements Declaration {
                         param.span,
                     )
             if (isFailure(latticeResult)) return latticeResult
-            const lattice: Lattice = yield latticeResult
             parameterScope.variables.set(param.varName, {
                 isImmutable: param.isImmutable,
                 isolationLevel: param.isolationLevel,
-                lattice,
+                lattice: latticeResult.value,
             })
-            parameterScope.setCurrentValue(param.varName, lattice)
+            parameterScope.setCurrentValue(param.varName, latticeResult.value)
         }
         return Result.value(parameterScope)
     }

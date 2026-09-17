@@ -860,8 +860,8 @@ describe('Assignment', () => {
                 }),
             )
             context.scope.variables.set('x', {
-                isImmutable: false,
-                isolationLevel: ISOLATED,
+                isImmutable: true,
+                isolationLevel: SHARED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
@@ -880,7 +880,7 @@ describe('Assignment', () => {
                         name: 'x',
                         span: someCodeSpan,
                     }),
-                    operator: '.',
+                    operator: '->',
                     field: 'field',
                     fieldSpan: someCodeSpan,
                     span: someCodeSpan,
@@ -891,7 +891,8 @@ describe('Assignment', () => {
                 }),
                 span: someCodeSpan,
             })
-            assignment.emitStatement(context)
+            const result = assignment.emitStatement(context)
+            expect(isFailure(result) && result.errors).toBeFalse()
             expect(context.scope.currentValue('x')).not.toBeNil()
             expect(context.scope.currentValue('x')).toMatchObject({
                 fields: { field: { min: 42n, max: 42n } },

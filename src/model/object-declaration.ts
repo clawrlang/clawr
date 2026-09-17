@@ -1,6 +1,5 @@
-import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Failable, Result } from '@/tools/failable'
+import { isFailure, Result } from '@/tools/failable'
 import { Context, Declaration } from '.'
 import { DataField } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
@@ -52,56 +51,49 @@ export class ObjectDeclaration implements Declaration {
     }
 
     emitDeclaration(context: Context): Result {
-        const self = this
-        return Failable.do(function* () {
-            context.scope.rootScope.addObjectDeclaration(self)
+        context.scope.rootScope.addObjectDeclaration(this)
 
-            const objectContext = {
-                ...context,
-                scope: context.scope.createChildScope(),
-                self: self.name,
-            }
-            objectContext.scope.addObjectDeclaration(self)
-            objectContext.scope.variables.set('self', {
-                isImmutable: false,
-                isolationLevel: SHARED,
-                lattice: RCTypeLattice.create({ type: self.name }),
-            })
-            objectContext.scope.setCurrentValue(
-                'self',
-                RCTypeLattice.create({ type: self.name }),
-            )
-
-            const methods: (cir.Declaration & { kind: 'FUNCTION_DECL' })[] =
-                yield yield* Failable.map(
-                    [...self.readonly, ...self.mutating],
-                    function* (item) {
-                        return item.emitMethod(objectContext)
-                    },
-                )
-
-            const initializers: (cir.Declaration & {
-                kind: 'FUNCTION_DECL'
-                lattice: undefined
-            })[] = yield yield* Failable.map(
-                [...self.initializers],
-                function* (item) {
-                    return item.emitInitializer(objectContext)
-                },
-            )
-
-            context.scope.rootScope.emitted.push({
-                kind: 'RC_TYPE_DECL',
-                name: self.name.name,
-                namespace: self.name.namespace,
-                methods,
-                initializers,
-                fields: self.fields.map((field) => ({
-                    name: field.name,
-                    lattice: field.lattice!.toCIR(),
-                })),
-            })
-            return Result.success
+        const objectContext = {
+            ...context,
+            scope: context.scope.createChildScope(),
+            self: this.name,
+        }
+        objectContext.scope.addObjectDeclaration(this)
+        objectContext.scope.variables.set('self', {
+            isImmutable: false,
+            isolationLevel: SHARED,
+            lattice: RCTypeLattice.create({ type: this.name }),
         })
+        objectContext.scope.setCurrentValue(
+            'self',
+            RCTypeLattice.create({ type: this.name }),
+        )
+
+        const methodsResult = Result.collect(
+            [...this.readonly, ...this.mutating].map((m) =>
+                m.emitMethod(objectContext),
+            ),
+        )
+        if (isFailure(methodsResult)) return methodsResult
+        const methods = methodsResult.value
+
+        const initializersResult = Result.collect(
+            this.initializers.map((m) => m.emitInitializer(objectContext)),
+        )
+        if (isFailure(initializersResult)) return initializersResult
+        const initializers = initializersResult.value
+
+        context.scope.rootScope.emitted.push({
+            kind: 'RC_TYPE_DECL',
+            name: this.name.name,
+            namespace: this.name.namespace,
+            methods,
+            initializers,
+            fields: this.fields.map((field) => ({
+                name: field.name,
+                lattice: field.lattice!.toCIR(),
+            })),
+        })
+        return Result.success
     }
 }

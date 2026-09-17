@@ -176,7 +176,7 @@ export class FunctionDeclaration implements Declaration {
 
     emitInitializer(
         context: Context & { self: TypeName },
-    ): Result<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
+    ): Result<cir.Declaration & { kind: 'FUNCTION_DECL'; lattice: undefined }> {
         const bodyContextResult = this.makeBodyContext(context)
         if (isFailure(bodyContextResult)) return bodyContextResult
         const bodyContext = bodyContextResult.value
@@ -203,7 +203,7 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const cirFuncDecl: cir.Declaration = {
+        const cirFuncDecl: cir.Declaration & { lattice: undefined } = {
             kind: 'FUNCTION_DECL',
             baseName: this.baseName,
             labels: mapFilter(this.parameters, (p) => p.label),

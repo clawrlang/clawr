@@ -1,10 +1,5 @@
 import * as cir from '@/cir'
-import {
-    Failable,
-    isFailure,
-    Result,
-    SemanticErrorCollection,
-} from '@/tools/failable'
+import { isFailure, Result, SemanticErrorCollection } from '@/tools/failable'
 import { Context, Declaration, Statement } from '.'
 
 export class Module {
@@ -24,13 +19,10 @@ export class Module {
     }
 
     toCIR(context: Context): cir.ClawrModule {
-        const self = this
-        const result = Failable.do(function* () {
-            for (const decl of self.declarations)
-                yield decl.emitDeclaration(context)
-            for (const stmt of self.main) yield stmt.emitStatement(context)
-            return Result.success
-        })
+        const result = Result.collect([
+            ...this.declarations.map((decl) => decl.emitDeclaration(context)),
+            ...this.main.map((stmt) => stmt.emitStatement(context)),
+        ])
         if (isFailure(result))
             throw SemanticErrorCollection.create(result.errors)
         return {

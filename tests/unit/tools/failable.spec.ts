@@ -1,12 +1,6 @@
-import {
-    Failable,
-    isFailure,
-    isSuccess,
-    Result,
-    SemanticError,
-} from '@/tools/failable'
+import { isFailure, isSuccess, Result, SemanticError } from '@/tools/failable'
 import { someCodeSpan } from '@@/util'
-import { describe, expect, it, test } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 
 describe('Failable', () => {
     describe('success', () => {
@@ -34,45 +28,25 @@ describe('Failable', () => {
         })
     })
 
-    describe('do', () => {
-        it('unyields values', () => {
-            let one: any, two: any, three: any
-            const result = Failable.do(function* () {
-                one = yield Result.value(1)
-                two = yield Result.value(2)
-                three = yield Result.value(3)
-                return Result.value(three as number)
-            })
+    describe('collect', () => {
+        it('collects successful values', () => {
+            const result = Result.collect([
+                Result.value(1),
+                Result.value(2),
+                Result.value(3),
+            ])
             expect(isFailure(result)).toBeFalse()
-            expect(isSuccess(result)).toBeTrue()
-            expect([one, two, three]).toEqual([1, 2, 3])
-            expect((result as any).value).toBe(3)
+            expect(isSuccess(result) && result.value).toEqual([1, 2, 3])
         })
 
-        test('yield* returns nothing', () => {
-            function* muchSuccess() {
-                yield Result.value(1)
-                yield Result.value(2)
-                yield Result.value(3)
-            }
-            let yielded: any
-            Failable.do(function* () {
-                yielded = yield* muchSuccess()
-                return Result.success
-            })
-            expect(yielded).toBeUndefined()
-        })
-
-        it('collects all non-fatal failures', () => {
-            const result = Failable.do(function* () {
-                yield Result.value(1)
-                yield Result.failure('This is does not end it', someCodeSpan)
-                yield Result.failure('This also is does end it', someCodeSpan)
-                yield Result.failure('This is the final thing', someCodeSpan)
-                return Result.success
-            })
-            expect(isFailure(result)).toBeTrue()
-            expect((result as any).errors).toHaveLength(3)
+        it('collects failures', () => {
+            const result = Result.collect([
+                Result.value(1),
+                Result.failure('This is does not end it', someCodeSpan),
+                Result.failure('This also is does end it', someCodeSpan),
+                Result.failure('This is the final thing', someCodeSpan),
+            ])
+            expect(isFailure(result) && result.errors).toHaveLength(3)
         })
     })
 })

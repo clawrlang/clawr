@@ -5,7 +5,6 @@ export type Success<T = undefined> = { value: T }
 export type Failure = { errors: SemanticError[] }
 
 export const Failable = {
-    do: _do,
     map,
 }
 
@@ -72,25 +71,6 @@ export function isSuccess<T>(value: Result<T>): value is Success<T> {
 
 export function isFailure(value: Result<unknown>): value is Failure {
     return 'errors' in value
-}
-
-function _do<T>(generator: () => Failable<T>): Result<T> {
-    const gen = generator()
-    let generatorResult = gen.next()
-    let result = generatorResult.value
-    const errors: SemanticError[] = isFailure(result) ? result.errors : []
-
-    while (!generatorResult.done) {
-        generatorResult = gen.next(
-            result && isSuccess(result) ? result.value : undefined,
-        )
-        result = generatorResult.value
-        if (isFailure(result)) errors.push(...result.errors)
-    }
-
-    return errors.length
-        ? failure(errors)
-        : (generatorResult.value as Result<T>)
 }
 
 function* map<T, U>(

@@ -1,4 +1,4 @@
-import { Result } from '@/tools/failable'
+import { Result } from '@/tools/result'
 import { Context, Declaration, Expression } from '.'
 import { IsolationLevel } from './isolation-level'
 import { LatticeDeclaration } from './lattice-declaration'

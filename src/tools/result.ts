@@ -1,12 +1,9 @@
 import { SourceCodeSpan } from './diagnostics'
+import { SemanticError } from './semantic-error'
 
 export type Result<T = undefined> = Success<T> | Failure
 export type Success<T = undefined> = { value: T }
 export type Failure = { errors: SemanticError[] }
-
-export const Failable = {
-    map,
-}
 
 export const Result = {
     true: success(true as const),
@@ -19,13 +16,11 @@ export const Result = {
 
     collect,
 }
-
 function success(): Success
 function success<T>(value: T): Success<T>
 function success<T>(value?: T): Success<T> {
     return { value: value as T }
 }
-
 function failure(message: string, span: SourceCodeSpan): Failure
 function failure(message: string, span: SourceCodeSpan): Failure
 function failure(error: SemanticError | SemanticError[]): Failure
@@ -47,7 +42,6 @@ function failure(
         errors: [SemanticError.create({ message: errorOrMessage, span })],
     }
 }
-
 function collect<T extends unknown[]>(values: {
     [K in keyof T]: Result<T[K]>
 }): Result<T> {
@@ -71,55 +65,4 @@ export function isSuccess<T>(value: Result<T>): value is Success<T> {
 
 export function isFailure(value: Result<unknown>): value is Failure {
     return 'errors' in value
-}
-
-function* map<T, U>(
-    items: T[],
-    generator: (item: T) => Failable<U>,
-): Failable<U[]> {
-    const results: U[] = []
-
-    for (const item of items) {
-        const result = yield* generator(item)
-        if ('errors' in result) return result
-        results.push(result.value)
-    }
-
-    return { value: results }
-}
-
-export type Failable<T = void> = Generator<Result<unknown>, Result<T>, any>
-
-export class SemanticError extends Error {
-    private constructor(
-        message: string,
-        public span: SourceCodeSpan,
-    ) {
-        super(message)
-    }
-
-    static create({
-        message,
-        span,
-    }: {
-        message: string
-        span: SourceCodeSpan
-    }) {
-        return new SemanticError(message, span)
-    }
-}
-
-export class SemanticErrorCollection extends Error {
-    private constructor(public errors: SemanticError[]) {
-        super(errors.map((e) => e.message).join('\n'))
-    }
-
-    static create(errors: SemanticError[]): SemanticErrorCollection {
-        return new SemanticErrorCollection(errors)
-    }
-
-    add(...errors: SemanticError[]): void {
-        this.errors.push(...errors)
-        this.message = this.errors.map((e) => e.message).join('\n')
-    }
 }

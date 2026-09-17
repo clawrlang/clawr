@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Result, Success } from '@/tools/failable'
+import { Result, Success } from '@/tools/result'
 import { Expression } from '.'
 import { ISOLATED } from './isolation-level'
 import { IntegerLattice } from './lattice'

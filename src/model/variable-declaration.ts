@@ -1,5 +1,5 @@
 import * as cir from '@/cir'
-import { isFailure, Result } from '@/tools/failable'
+import { isFailure, Result } from '@/tools/result'
 import { Context, Declaration, Expression, Statement } from '.'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 import { Lattice } from './lattice'

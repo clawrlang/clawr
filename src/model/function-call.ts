@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, Result, Success } from '@/tools/failable'
 import { mapFilter } from '@/tools/map-filter'
+import { isFailure, Result, Success } from '@/tools/result'
 import { Context, Expression, Statement } from '.'
 import { FunctionName } from './function-name'
 import { AnyIsolationLevel, UNIQUE } from './isolation-level'

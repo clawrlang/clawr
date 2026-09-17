@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
-import { isFailure, Result } from '@/tools/failable'
 import { mapFilter } from '@/tools/map-filter'
+import { isFailure, Result } from '@/tools/result'
 import { Context, Declaration, Expression, Statement } from '.'
 import { Assignment } from './assignment'
 import { FunctionName } from './function-name'

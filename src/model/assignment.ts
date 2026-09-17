@@ -1,5 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, Result } from '@/tools/failable'
+import { isFailure, Result } from '@/tools/result'
 import { Context, Expression, Statement } from '.'
 import { FieldReference } from './field-reference'
 import { UNIQUE, UNKNOWN } from './isolation-level'

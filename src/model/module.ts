@@ -1,5 +1,6 @@
 import * as cir from '@/cir'
-import { isFailure, Result, SemanticErrorCollection } from '@/tools/failable'
+import { isFailure, Result } from '@/tools/result'
+import { SemanticErrorCollection } from '@/tools/semantic-error'
 import { Context, Declaration, Statement } from '.'
 
 export class Module {

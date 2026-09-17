@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, Result } from '@/tools/failable'
+import { isFailure, Result } from '@/tools/result'
 import { Context, Expression, isStorage } from '.'
 import { DataDeclaration } from './data-declaration'
 import { ISOLATED, IsolationLevel, SHARED } from './isolation-level'

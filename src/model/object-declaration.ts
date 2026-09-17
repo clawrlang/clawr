@@ -1,5 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, Result } from '@/tools/failable'
+import { isFailure, Result } from '@/tools/result'
 import { Context, Declaration } from '.'
 import { DataField } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'

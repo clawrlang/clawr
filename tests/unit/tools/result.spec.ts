@@ -1,8 +1,9 @@
-import { isFailure, isSuccess, Result, SemanticError } from '@/tools/failable'
+import { isFailure, isSuccess, Result } from '@/tools/result'
+import { SemanticError } from '@/tools/semantic-error'
 import { someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
-describe('Failable', () => {
+describe('Result', () => {
     describe('success', () => {
         it('is successful', () => {
             expect(isSuccess(Result.value(42))).toBeTrue()

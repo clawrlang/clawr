@@ -27,8 +27,8 @@ export class Assignment implements Statement {
     }
 
     emitStatement(context: Context): Result {
-        const validity = this.checkValidity(context)
-        if (isFailure(validity)) return validity
+        const validityResult = this.checkValidity(context)
+        if (isFailure(validityResult)) return validityResult
 
         const collected = Result.collect([
             this.target.isolationLevel(context),
@@ -171,7 +171,7 @@ export class Assignment implements Statement {
         const assignedValue = assignedValueResult.value
         if (!targetLattice.isSupersetTo(assignedValue))
             return Result.failure(
-                `Cannot assign value of type ${assignedValue?.toString() ?? this.value.constructor.name} to target of type ${targetLattice.toString()}`,
+                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
                 this.span,
             )
         const valueIsolationLevelResult = this.value.isolationLevel(context)

@@ -82,10 +82,14 @@ export class FieldReference implements Expression {
         if (isFailure(objectValueResult)) return objectValueResult
         const objectValue = objectValueResult.value
         if (!(objectValue instanceof RCTypeLattice))
-            return Result.failure('unknown object value', this.span)
-        return objectValue.fields
-            ? Result.value(objectValue.fields[this.field])
-            : Result.failure(`unknown field value ${this.field}`, this.span)
+            return Result.failure(
+                `${objectValue.toCIR().type} is not an rc-type`,
+                this.object.span,
+            )
+        if (objectValue.fields)
+            return Result.value(objectValue.fields[this.field])
+
+        return this.declaredLattice(context)
     }
 
     setCurrentValue(context: Context, value: Lattice): Result {

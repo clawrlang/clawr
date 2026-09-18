@@ -491,4 +491,53 @@ describe('Field Reference', () => {
             expect(result.value).toBeFalse()
         })
     })
+
+    describe('current value', () => {
+        it('returns the declared lattice', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.addDataDeclaration(
+                DataDeclaration.create({
+                    name: TypeName.create({ name: 'Data' }),
+                    fields: [
+                        {
+                            name: 'field',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
+                            lattice: decorateLattice(
+                                IntegerLattice.create({ max: 100n, min: 0n }),
+                                { span: someCodeSpan },
+                            ),
+                        },
+                    ],
+                }),
+            )
+            context.scope.variables.set('myVar', {
+                isImmutable: false,
+                isolationLevel: ISOLATED,
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'Data' }),
+                }),
+            })
+            context.scope.setCurrentValue(
+                'myVar',
+                RCTypeLattice.create({
+                    type: TypeName.create({ name: 'Data' }),
+                }),
+            )
+
+            const fieldRef = FieldReference.create({
+                object: VariableReference.create({
+                    name: 'myVar',
+                    span: someCodeSpan,
+                }),
+                operator: '.',
+                field: 'field',
+                span: someCodeSpan,
+                fieldSpan: someCodeSpan,
+            })
+            const result = fieldRef.currentValue(context)
+
+            expect(result).toMatchObject({ value: { min: 0n, max: 100n } })
+        })
+    })
 })

@@ -3,6 +3,7 @@ import { FieldReference } from '@/model/field-reference'
 import { ISOLATED, SHARED, UNKNOWN } from '@/model/isolation-level'
 import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
+import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
 import { isFailure, isSuccess, Result } from '@/tools/result'
@@ -493,7 +494,7 @@ describe('Field Reference', () => {
     })
 
     describe('current value', () => {
-        it('returns the declared lattice', () => {
+        it('returns the declared lattice (Data)', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
@@ -522,6 +523,58 @@ describe('Field Reference', () => {
                 'myVar',
                 RCTypeLattice.create({
                     type: TypeName.create({ name: 'Data' }),
+                }),
+            )
+
+            const fieldRef = FieldReference.create({
+                object: VariableReference.create({
+                    name: 'myVar',
+                    span: someCodeSpan,
+                }),
+                operator: '.',
+                field: 'field',
+                span: someCodeSpan,
+                fieldSpan: someCodeSpan,
+            })
+            const result = fieldRef.currentValue(context)
+
+            expect(result).toMatchObject({ value: { min: 0n, max: 100n } })
+        })
+
+        it('returns the declared lattice (Object)', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.addObjectDeclaration(
+                ObjectDeclaration.create({
+                    name: TypeName.create({ name: 'Object' }),
+                    kind: 'object',
+                    readonly: [],
+                    mutating: [],
+                    initializers: [],
+                    fields: [
+                        {
+                            name: 'field',
+                            isImmutable: false,
+                            isolationLevel: 'ISOLATED',
+                            lattice: decorateLattice(
+                                IntegerLattice.create({ max: 100n, min: 0n }),
+                                { span: someCodeSpan },
+                            ),
+                        },
+                    ],
+                    span: someCodeSpan,
+                }),
+            )
+            context.scope.variables.set('myVar', {
+                isImmutable: false,
+                isolationLevel: ISOLATED,
+                lattice: RCTypeLattice.create({
+                    type: TypeName.create({ name: 'Object' }),
+                }),
+            })
+            context.scope.setCurrentValue(
+                'myVar',
+                RCTypeLattice.create({
+                    type: TypeName.create({ name: 'Object' }),
                 }),
             )
 

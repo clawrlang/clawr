@@ -134,7 +134,9 @@ export class FieldReference implements Expression {
         const objectValue = objectValueResult.value
         if (!(objectValue instanceof RCTypeLattice))
             return Result.failure('unknown object value', this.span)
-        const type = context.scope.dataDeclaration(objectValue.type)
+        const type =
+            context.scope.dataDeclaration(objectValue.type) ||
+            context.scope.objectDeclaration(objectValue.type)
         const field = type?.fields.find((field) => field.name === this.field)
         return field
             ? Result.value(field)

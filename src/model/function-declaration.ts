@@ -15,7 +15,6 @@ import { LatticeDeclaration } from './lattice-declaration'
 import { Parameter } from './parameter'
 import { ReturnStatement } from './return-statement'
 import { Scope } from './scope'
-import { TypeName } from './type-name'
 import { VariableReference } from './variable-reference'
 
 export class FunctionDeclaration implements Declaration {
@@ -131,7 +130,7 @@ export class FunctionDeclaration implements Declaration {
     }
 
     emitMethod(
-        context: Context & { self: TypeName },
+        context: Context,
     ): Result<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
         const bodyContextResult = this.makeBodyContext(context)
         if (isFailure(bodyContextResult)) return bodyContextResult
@@ -175,7 +174,7 @@ export class FunctionDeclaration implements Declaration {
     }
 
     emitInitializer(
-        context: Context & { self: TypeName },
+        context: Context,
     ): Result<cir.Declaration & { kind: 'FUNCTION_DECL'; lattice: undefined }> {
         const bodyContextResult = this.makeBodyContext(context)
         if (isFailure(bodyContextResult)) return bodyContextResult
@@ -218,18 +217,23 @@ export class FunctionDeclaration implements Declaration {
         return Result.value(cirFuncDecl)
     }
 
-    private makeBodyContext(
-        context: Context & { self?: TypeName },
-    ): Result<Context> {
+    private makeBodyContext(context: Context): Result<Context> {
         const parameterScopeResult = this.scopeAddingParameters(context)
         if (isFailure(parameterScopeResult)) return parameterScopeResult
         const contextWithParameters = {
             ...context,
             scope: parameterScopeResult.value,
         }
+
+        const self = context.scope.variables.get('self')
+        if (self && !(self.lattice instanceof RCTypeLattice))
+            throw new Error(`'self' variable must be an rc-type`)
+
         const explicitLattice =
-            this.implementation.kind === 'implicit-return' && context.self
-                ? RCTypeLattice.create({ type: context.self })
+            this.implementation.kind === 'implicit-return' && self
+                ? RCTypeLattice.create({
+                      type: (self.lattice as RCTypeLattice).type,
+                  })
                 : undefined
 
         if (this.result || this.implementation.kind === 'body') {

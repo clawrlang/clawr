@@ -56,7 +56,6 @@ export class ObjectDeclaration implements Declaration {
         const objectContext = {
             ...context,
             scope: context.scope.createChildScope(),
-            self: this.name,
         }
         objectContext.scope.addObjectDeclaration(this)
         objectContext.scope.variables.set('self', {

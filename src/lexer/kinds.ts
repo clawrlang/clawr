@@ -85,7 +85,6 @@ const ALL_KW = [
     'trait',
 
     // Object-scoped variables
-    `self`,
     `super`,
 
     // Object sections

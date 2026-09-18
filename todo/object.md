@@ -12,6 +12,7 @@
 - `companion` with no matching type is an error
   - or is it a singleton? but then “companion” may be the wrong term?
 - Add `object`/`service` type
+- Make 'self' a reserved identifier
 - Make `FunctionCall` support methods
   - direct
   - inherited

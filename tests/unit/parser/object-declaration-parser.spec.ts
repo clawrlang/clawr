@@ -60,7 +60,7 @@ describe('ObjectDeclaration Parser', () => {
         const code = `
             object O {
                 func method1() => 42
-                func method2() => true
+                func method2() => self.x
             }`
 
         expect(parseObject(code)).toMatchObject({
@@ -77,14 +77,16 @@ describe('ObjectDeclaration Parser', () => {
             object O {
             mutating:
                 func method1() {}
-                func method2() {}
+                func method2() {
+                    self.x = y
+                }
             }`
 
         expect(parseObject(code)).toMatchObject({
             mutating: [{ baseName: 'method1' }, { baseName: 'method2' }],
             span: {
                 start: { line: 2, column: 13 },
-                end: { line: 6, column: 14 },
+                end: { line: 8, column: 14 },
             },
         })
     })

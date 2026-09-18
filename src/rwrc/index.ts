@@ -9,6 +9,8 @@ import * as backend from '@/backend'
 import { TokenStream } from '@/lexer'
 import { Scope } from '@/model/scope'
 import { ModuleParser } from '@/parser'
+import { SourceCodeSpan } from '@/tools/diagnostics'
+import { SemanticError, SemanticErrorCollection } from '@/tools/semantic-error'
 import { RWRCErrorReporter } from './error-reporter'
 
 const exeDir = path.dirname(process.execPath)
@@ -28,7 +30,16 @@ program
             await parseToCIR({ file, outputFilePath })
             await compileCIR(outputFilePath)
         } catch (err) {
-            console.error(err instanceof Error ? err.message : err)
+            const errors =
+                err instanceof SemanticErrorCollection
+                    ? err.errors
+                    : err instanceof SemanticError
+                      ? [err]
+                      : undefined
+            if (errors)
+                for (const e of errors)
+                    console.error(`${file}:${spanString(e.span)}:${e.message}`)
+            else console.error(err instanceof Error ? err.message : err)
             process.exit(1)
         }
     })
@@ -84,4 +95,10 @@ async function ensureDirectoryExists(outputDir: string) {
     if (!(await fs.stat(outputDir).catch(() => false))) {
         await fs.mkdir(outputDir, { recursive: true })
     }
+}
+
+function spanString({ start, end }: SourceCodeSpan) {
+    return start.line === end.line
+        ? `${start.line}:${start.column}-${end.column}`
+        : `${start.line}:${start.column}-${end.line}:${end.column}`
 }

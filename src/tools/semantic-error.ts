@@ -3,7 +3,7 @@ import { SourceCodeSpan } from './diagnostics'
 export class SemanticError extends Error {
     private constructor(
         message: string,
-        readonly span: SourceCodeSpan,
+        public readonly span: SourceCodeSpan,
     ) {
         super(message)
     }
@@ -20,7 +20,7 @@ export class SemanticError extends Error {
 }
 
 export class SemanticErrorCollection extends Error {
-    private constructor(private readonly errors: SemanticError[]) {
+    private constructor(public readonly errors: SemanticError[]) {
         super(errors.map((e) => e.message).join('\n'))
     }
 

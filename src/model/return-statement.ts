@@ -1,5 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, Result } from '@/tools/result'
+import { isFailure, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { Retain } from './retain'
 
@@ -19,7 +19,7 @@ export class ReturnStatement implements Statement {
         return new ReturnStatement(value, span)
     }
 
-    emitStatement(context: Context): Result {
+    emitStatement(context: Context): SemanticResult {
         const validationResult = this.validateInput(context)
         if (isFailure(validationResult)) return validationResult
 
@@ -28,10 +28,10 @@ export class ReturnStatement implements Statement {
             context.scope.emitted.push({
                 kind: 'RETURN',
             })
-            return Result.success
+            return SemanticResult.success
         }
 
-        const collected = Result.collect([
+        const collected = SemanticResult.collect([
             this.value.currentValue(context),
             Retain.ifStorage(this.value, context),
         ])
@@ -73,26 +73,26 @@ export class ReturnStatement implements Statement {
                 value: retainedValueCIR,
             })
         }
-        return Result.success
+        return SemanticResult.success
     }
 
-    private validateInput(context: Context): Result {
+    private validateInput(context: Context): SemanticResult {
         if (!this.value) {
             return context.calleeResult
-                ? Result.failure(
+                ? SemanticResult.failure(
                       `Must return a ${context.calleeResult.lattice.toString()} value`,
                       this.span,
                   )
-                : Result.success
+                : SemanticResult.success
         }
 
         const calleeResult = context.calleeResult
         if (!calleeResult)
-            return Result.failure(
+            return SemanticResult.failure(
                 'Called function has no return value',
                 this.value!.span,
             )
-        const collected = Result.collect([
+        const collected = SemanticResult.collect([
             this.value.currentValue(context),
             this.value.isolationLevel(context),
         ])
@@ -100,16 +100,16 @@ export class ReturnStatement implements Statement {
 
         const [lattice, isolationLevel] = collected.value
         if (!calleeResult.lattice.isSupersetTo(lattice))
-            return Result.failure(
+            return SemanticResult.failure(
                 'Return value type mismatch',
                 this.value!.span,
             )
 
         return calleeResult.isolationLevel !== isolationLevel
-            ? Result.failure(
+            ? SemanticResult.failure(
                   `Cannot return an ${isolationLevel} value as ${calleeResult.isolationLevel}`,
                   this.value!.span,
               )
-            : Result.success
+            : SemanticResult.success
     }
 }

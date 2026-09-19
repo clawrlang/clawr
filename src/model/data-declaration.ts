@@ -1,4 +1,4 @@
-import { Result } from '@/tools/result'
+import { SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration, Expression } from '.'
 import { IsolationLevel } from './isolation-level'
 import { LatticeDeclaration } from './lattice-declaration'
@@ -28,7 +28,7 @@ export class DataDeclaration implements Declaration {
         return new DataDeclaration(name, fields)
     }
 
-    emitDeclaration(context: Context): Result {
+    emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addDataDeclaration(this)
         context.scope.rootScope.emitted.push({
             kind: 'RC_TYPE_DECL',
@@ -39,6 +39,6 @@ export class DataDeclaration implements Declaration {
                 lattice: field.lattice!.toCIR(),
             })),
         })
-        return Result.success
+        return SemanticResult.success
     }
 }

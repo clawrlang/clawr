@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
-import { isFailure, Result, Success } from '@/tools/result'
+import { isFailure, SemanticResult, Success } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { FunctionName } from './function-name'
 import { AnyIsolationLevel, UNIQUE } from './isolation-level'
@@ -43,38 +43,42 @@ export class FunctionCall implements Expression, Statement {
     }
 
     isEffectivelyConst(): Success<true> {
-        return Result.true
+        return SemanticResult.true
     }
 
-    isolationLevel(context: Context): Result<AnyIsolationLevel> {
-        if (this.name.toString() === 'copy(of:)') return Result.value(UNIQUE)
+    isolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
+        if (this.name.toString() === 'copy(of:)')
+            return SemanticResult.value(UNIQUE)
 
         const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
-            return Result.failure(
+            return SemanticResult.failure(
                 `unknown function ${this.name.toString()}`,
                 this.span,
             )
         return decl.resultIsolationLevel(context)
     }
 
-    declaredLattice(context: Context): Result<Lattice> {
+    declaredLattice(context: Context): SemanticResult<Lattice> {
         return this.currentValue(context)
     }
 
-    currentValue(context: Context): Result<Lattice> {
+    currentValue(context: Context): SemanticResult<Lattice> {
         if (this.name.toString() === 'copy(of:)') {
             const valueResult = this.arguments[0].currentValue(context)
             if (isFailure(valueResult)) return valueResult
             const value = valueResult.value
             return value instanceof RCTypeLattice
-                ? Result.value(value)
-                : Result.failure('not a reference-counted type', this.span)
+                ? SemanticResult.value(value)
+                : SemanticResult.failure(
+                      'not a reference-counted type',
+                      this.span,
+                  )
         }
 
         const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
-            return Result.failure(
+            return SemanticResult.failure(
                 `Function declaration not found: ${this.name.toString()}`,
                 this.span,
             )
@@ -82,15 +86,15 @@ export class FunctionCall implements Expression, Statement {
         const latticeResult = decl.lattice(context)
         if (isFailure(latticeResult)) return latticeResult
         if (!latticeResult.value)
-            return Result.failure(
+            return SemanticResult.failure(
                 `Function declaration has no result lattice: ${this.name.toString()}`,
                 this.span,
             )
-        return Result.value(latticeResult.value)
+        return SemanticResult.value(latticeResult.value)
     }
 
-    toCIRExpression(context: Context): Result<cir.Expression> {
-        const argsResult = Result.collect([
+    toCIRExpression(context: Context): SemanticResult<cir.Expression> {
+        const argsResult = SemanticResult.collect([
             this.currentValue(context),
             ...this.arguments.map((arg) => arg.toCIRExpression(context)),
         ])
@@ -98,7 +102,7 @@ export class FunctionCall implements Expression, Statement {
         if (isFailure(argsResult)) return argsResult
         const [value, ...args] = argsResult.value
 
-        return Result.value({
+        return SemanticResult.value({
             kind: 'CALL',
             name: this.name.toCIR(),
             arguments: args,
@@ -106,8 +110,8 @@ export class FunctionCall implements Expression, Statement {
         } satisfies cir.Expression)
     }
 
-    emitStatement(context: Context): Result {
-        const argsResult = Result.collect(
+    emitStatement(context: Context): SemanticResult {
+        const argsResult = SemanticResult.collect(
             this.arguments.map((arg) => arg.toCIRExpression(context)),
         )
         if (isFailure(argsResult)) return argsResult
@@ -153,6 +157,6 @@ export class FunctionCall implements Expression, Statement {
                 arguments: args,
             })
         }
-        return Result.success
+        return SemanticResult.success
     }
 }

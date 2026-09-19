@@ -1,5 +1,5 @@
 import * as cir from '@/cir'
-import { isFailure, Result } from '@/tools/result'
+import { isFailure, SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration, Expression, Statement } from '.'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 import { Lattice } from './lattice'
@@ -41,15 +41,18 @@ export class VariableDeclaration implements Statement, Declaration {
         )
     }
 
-    emitDeclaration(context: Context): Result {
+    emitDeclaration(context: Context): SemanticResult {
         return this.emit(context.scope.rootScope, context)
     }
 
-    emitStatement(context: Context): Result {
+    emitStatement(context: Context): SemanticResult {
         return this.emit(context.scope, context)
     }
 
-    private emit(scope: Scope | Scope['rootScope'], context: Context): Result {
+    private emit(
+        scope: Scope | Scope['rootScope'],
+        context: Context,
+    ): SemanticResult {
         const initialValueResult = this.currentValueFromInitial(context)
         if (isFailure(initialValueResult)) return initialValueResult
         const initialValue = initialValueResult.value
@@ -65,14 +68,14 @@ export class VariableDeclaration implements Statement, Declaration {
         if (isFailure(emissionResult)) return emissionResult
         this.addDeclarationToScope(scope, lattice)
         this.setCurrentValue(context, initialValue)
-        return Result.success
+        return SemanticResult.success
     }
 
     private emitCIRDeclaration(
         context: Context,
         lattice: Lattice,
         scope: Scope | Scope['rootScope'],
-    ): Result {
+    ): SemanticResult {
         const valueResult = Retain.ifStorage(this.initialValue, context)
         if (isFailure(valueResult)) return valueResult
         const value = valueResult.value
@@ -91,7 +94,7 @@ export class VariableDeclaration implements Statement, Declaration {
             lattice: lattice.toCIR(),
             initialValue: initialValue,
         })
-        return Result.success
+        return SemanticResult.success
     }
 
     private addDeclarationToScope(
@@ -109,9 +112,12 @@ export class VariableDeclaration implements Statement, Declaration {
         context.scope.setCurrentValue(this.name, currentValue)
     }
 
-    private checkValidity(currentValue: Lattice, context: Context): Result {
+    private checkValidity(
+        currentValue: Lattice,
+        context: Context,
+    ): SemanticResult {
         if (!this.isValidValue(currentValue))
-            return Result.failure(
+            return SemanticResult.failure(
                 'Incompatible initial value',
                 this.initialValue.span,
             )
@@ -121,20 +127,20 @@ export class VariableDeclaration implements Statement, Declaration {
         if (isFailure(valueIsolationLevelResult))
             return valueIsolationLevelResult
         const valueIsolationLevel = valueIsolationLevelResult.value
-        if (valueIsolationLevel === UNIQUE) return Result.success
+        if (valueIsolationLevel === UNIQUE) return SemanticResult.success
         if (this.isolationLevel !== valueIsolationLevel)
-            return Result.failure(
+            return SemanticResult.failure(
                 `Cannot assign ${valueIsolationLevel} value to ${this.isolationLevel} target`,
                 this.initialValue.span,
             )
-        return Result.success
+        return SemanticResult.success
     }
 
     private isValidValue(currentValue: Lattice) {
         return !this.lattice || this.lattice.isSupersetTo(currentValue)
     }
 
-    private currentValueFromInitial(context: Context): Result<Lattice> {
+    private currentValueFromInitial(context: Context): SemanticResult<Lattice> {
         return this.initialValue.currentValue({
             ...context,
             explicitLattice: this.lattice,

@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, Result, Success } from '@/tools/result'
+import { isFailure, SemanticResult, Success } from '@/tools/semantic-result'
 import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { Lattice } from './lattice'
@@ -21,59 +21,59 @@ export class VariableReference implements Expression {
         return new VariableReference(name, span)
     }
 
-    assignmentPrelude(context: Context): Result<cir.Statement[]> {
+    assignmentPrelude(context: Context): SemanticResult<cir.Statement[]> {
         const constResult = this.isEffectivelyConst(context)
         if (isFailure(constResult)) return constResult
         if (constResult.value)
-            return Result.failure(
+            return SemanticResult.failure(
                 `Variable ${this.name} is not mutable`,
                 this.span,
             )
-        return Result.value([])
+        return SemanticResult.value([])
     }
 
-    isEffectivelyConst(context: Context): Result<boolean> {
+    isEffectivelyConst(context: Context): SemanticResult<boolean> {
         const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
-        return Result.value(variableResult.value.isImmutable)
+        return SemanticResult.value(variableResult.value.isImmutable)
     }
 
-    isolationLevel(context: Context): Result<IsolationLevel | UNKNOWN> {
+    isolationLevel(context: Context): SemanticResult<IsolationLevel | UNKNOWN> {
         const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
-        return Result.value(variableResult.value.isolationLevel)
+        return SemanticResult.value(variableResult.value.isolationLevel)
     }
 
-    declaredLattice(context: Context): Result<Lattice> {
+    declaredLattice(context: Context): SemanticResult<Lattice> {
         const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
-        return Result.value(variableResult.value.lattice)
+        return SemanticResult.value(variableResult.value.lattice)
     }
 
-    currentValue(context: Context): Result<Lattice> {
+    currentValue(context: Context): SemanticResult<Lattice> {
         const result = context.scope.currentValue(this.name)
         if (!result) {
-            return Result.failure(
+            return SemanticResult.failure(
                 `Variable ${this.name} has no value in the current context`,
                 this.span,
             )
         }
-        return Result.value(result)
+        return SemanticResult.value(result)
     }
 
     setCurrentValue(context: Context, value: Lattice): Success {
         context.scope.setCurrentValue(this.name, value)
-        return Result.success
+        return SemanticResult.success
     }
 
     toCIRExpression(
         context: Context,
-    ): Result<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
+    ): SemanticResult<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
         const variableResult = this.lookupInScope(context)
         if (isFailure(variableResult)) return variableResult
         const valueResult = this.currentValue(context)
         if (isFailure(valueResult)) return valueResult
-        return Result.value({
+        return SemanticResult.value({
             kind: 'VARIABLE_REF' as const,
             name: this.name,
             value: valueResult.value.toCIR(),
@@ -83,10 +83,10 @@ export class VariableReference implements Expression {
     private lookupInScope(context: Context) {
         const variable = context.scope.variableDeclaration(this.name)
         if (!variable)
-            return Result.failure(
+            return SemanticResult.failure(
                 `Variable ${this.name} is not defined in the current context`,
                 this.span,
             )
-        return Result.value(variable)
+        return SemanticResult.value(variable)
     }
 }

@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, Result, Success } from '@/tools/result'
+import { isFailure, SemanticResult, Success } from '@/tools/semantic-result'
 import { Context, ContextWithLattice, Expression } from '.'
 import { FunctionCall } from './function-call'
 import { UNIQUE } from './isolation-level'
@@ -27,17 +27,17 @@ export class DataLiteral implements Expression {
     }
 
     isEffectivelyConst(): Success<true> {
-        return Result.true
+        return SemanticResult.true
     }
 
     isolationLevel(): Success<UNIQUE> {
-        return Result.value(UNIQUE)
+        return SemanticResult.value(UNIQUE)
     }
 
-    currentValue(context: ContextWithLattice): Result<Lattice> {
+    currentValue(context: ContextWithLattice): SemanticResult<Lattice> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
-            return Result.failure(
+            return SemanticResult.failure(
                 'Data Literal without explicit value set is not supported',
                 this.span,
             )
@@ -45,18 +45,18 @@ export class DataLiteral implements Expression {
         const objectDecl = context.scope.objectDeclaration(explicitLattice.type)
         const decl = dataDecl ?? objectDecl
         if (!decl)
-            return Result.failure(
+            return SemanticResult.failure(
                 `DataLiteral.currentValue: type ${explicitLattice.type.name} not found in scope`,
                 this.span,
             )
 
-        const fieldValuesResult = Result.collect(
+        const fieldValuesResult = SemanticResult.collect(
             this.fields.map((field) => {
                 const fieldDeclaration = decl.fields.find(
                     (declaredField) => declaredField.name === field.name,
                 )
                 if (!fieldDeclaration)
-                    return Result.failure(
+                    return SemanticResult.failure(
                         `DataLiteral.currentValue: field ${field.name} not found on type ${explicitLattice.type.name}`,
                         this.span,
                     )
@@ -68,7 +68,7 @@ export class DataLiteral implements Expression {
         )
         if (isFailure(fieldValuesResult)) return fieldValuesResult
         const fieldValues = fieldValuesResult.value
-        return Result.value(
+        return SemanticResult.value(
             RCTypeLattice.create({
                 type: decl.name,
                 fields: Object.fromEntries(
@@ -81,14 +81,16 @@ export class DataLiteral implements Expression {
         )
     }
 
-    declaredLattice(context: Context & { type: TypeName }): Result<Lattice> {
+    declaredLattice(
+        context: Context & { type: TypeName },
+    ): SemanticResult<Lattice> {
         const decl = context.scope.dataDeclaration(context.type)
         if (!decl)
-            return Result.failure(
+            return SemanticResult.failure(
                 `DataLiteral.declaredLattice: type ${context.type.name} not found in scope`,
                 this.span,
             )
-        return Result.value(
+        return SemanticResult.value(
             RCTypeLattice.create({
                 type: decl.name,
                 fields: Object.fromEntries(
@@ -98,15 +100,17 @@ export class DataLiteral implements Expression {
         )
     }
 
-    toCIRExpression(context: ContextWithLattice): Result<cir.Expression> {
+    toCIRExpression(
+        context: ContextWithLattice,
+    ): SemanticResult<cir.Expression> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
-            return Result.failure(
+            return SemanticResult.failure(
                 'DataLiteral.toCIRExpression: data literal without explicit type',
                 this.span,
             )
         if (!context.isolationLevel)
-            return Result.failure(
+            return SemanticResult.failure(
                 'DataLiteral.toCIRExpression: target isolation level not specified',
                 this.span,
             )
@@ -115,7 +119,7 @@ export class DataLiteral implements Expression {
             context.scope.dataDeclaration(explicitLattice.type) ??
             context.scope.objectDeclaration(explicitLattice.type)
         if (!targetType)
-            return Result.failure(
+            return SemanticResult.failure(
                 `DataLiteral.toCIRExpression: target type ${explicitLattice.type.name} not found in scope`,
                 this.span,
             )
@@ -123,11 +127,11 @@ export class DataLiteral implements Expression {
             targetType.fields.map((field) => [field.name, field]),
         )
 
-        const fieldValuesResult = Result.collect(
+        const fieldValuesResult = SemanticResult.collect(
             this.fields.map((field) => {
                 const fieldDeclaration = fieldDeclarations.get(field.name)
                 if (!fieldDeclaration)
-                    return Result.failure(
+                    return SemanticResult.failure(
                         `field ${field.name} not found on type ${explicitLattice.type.canonical()}`,
                         this.span,
                     )
@@ -138,7 +142,7 @@ export class DataLiteral implements Expression {
                 }
                 const valueResult = field.value.toCIRExpression(nestedContext)
                 if (isFailure(valueResult)) return valueResult
-                return Result.value({
+                return SemanticResult.value({
                     name: field.name,
                     value: valueResult.value,
                     lattice: valueResult.value.value,
@@ -148,7 +152,7 @@ export class DataLiteral implements Expression {
         if (isFailure(fieldValuesResult)) return fieldValuesResult
 
         const fields = fieldValuesResult.value
-        return Result.value({
+        return SemanticResult.value({
             kind: 'ALLOCATION',
             isolationLevel: context.isolationLevel!,
             fields,

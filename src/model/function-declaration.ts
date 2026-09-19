@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { mapFilter } from '@/tools/map-filter'
-import { isFailure, Result } from '@/tools/result'
+import { isFailure, SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration, Expression, Statement } from '.'
 import { Assignment } from './assignment'
 import { FunctionName } from './function-name'
@@ -66,8 +66,8 @@ export class FunctionDeclaration implements Declaration {
         })
     }
 
-    resultIsolationLevel(context: Context): Result<AnyIsolationLevel> {
-        if (this.result) return Result.value(this.result.isolationLevel)
+    resultIsolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
+        if (this.result) return SemanticResult.value(this.result.isolationLevel)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.isolationLevel(context)
         else
@@ -76,16 +76,16 @@ export class FunctionDeclaration implements Declaration {
             )
     }
 
-    lattice(context: Context): Result<Lattice | undefined> {
-        if (this.result) return Result.value(this.result.lattice)
+    lattice(context: Context): SemanticResult<Lattice | undefined> {
+        if (this.result) return SemanticResult.value(this.result.lattice)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.currentValue(
                 this.bodyContext(context),
             )
-        return Result.success
+        return SemanticResult.success
     }
 
-    emitDeclaration(context: Context): Result {
+    emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addFunctionDeclaration(this)
 
         const bodyContextResult = this.makeBodyContext(context)
@@ -126,12 +126,12 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
-        return Result.success
+        return SemanticResult.success
     }
 
     emitMethod(
         context: Context,
-    ): Result<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
+    ): SemanticResult<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
         const bodyContextResult = this.makeBodyContext(context)
         if (isFailure(bodyContextResult)) return bodyContextResult
         const bodyContext = bodyContextResult.value
@@ -170,12 +170,14 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
 
-        return Result.value(cirFuncDecl)
+        return SemanticResult.value(cirFuncDecl)
     }
 
     emitInitializer(
         context: Context,
-    ): Result<cir.Declaration & { kind: 'FUNCTION_DECL'; lattice: undefined }> {
+    ): SemanticResult<
+        cir.Declaration & { kind: 'FUNCTION_DECL'; lattice: undefined }
+    > {
         const bodyContextResult = this.makeBodyContext(context)
         if (isFailure(bodyContextResult)) return bodyContextResult
         const bodyContext = bodyContextResult.value
@@ -214,10 +216,10 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
 
-        return Result.value(cirFuncDecl)
+        return SemanticResult.value(cirFuncDecl)
     }
 
-    private makeBodyContext(context: Context): Result<Context> {
+    private makeBodyContext(context: Context): SemanticResult<Context> {
         const parameterScopeResult = this.scopeAddingParameters(context)
         if (isFailure(parameterScopeResult)) return parameterScopeResult
         const contextWithParameters = {
@@ -242,9 +244,9 @@ export class FunctionDeclaration implements Declaration {
                 scope: parameterScopeResult.value,
                 calleeResult: this.result,
             })
-            return Result.value(bodyContext)
+            return SemanticResult.value(bodyContext)
         } else {
-            const collected = Result.collect([
+            const collected = SemanticResult.collect([
                 this.implementation.expression.isolationLevel(
                     contextWithParameters,
                 ),
@@ -256,7 +258,7 @@ export class FunctionDeclaration implements Declaration {
             if (isFailure(collected)) return collected
             const [isolationLevel, lattice] = collected.value
             if (isolationLevel === UNKNOWN)
-                return Result.failure(
+                return SemanticResult.failure(
                     'Returning UNKNOWN value',
                     this.implementation.expression.span,
                 )
@@ -265,18 +267,18 @@ export class FunctionDeclaration implements Declaration {
                 scope: parameterScopeResult.value,
                 calleeResult: { isolationLevel, lattice },
             })
-            return Result.value(bodyContext)
+            return SemanticResult.value(bodyContext)
         }
     }
 
-    private scopeAddingParameters(context: Context): Result<Scope> {
+    private scopeAddingParameters(context: Context): SemanticResult<Scope> {
         const parameterScope = context.scope.createChildScope()
         for (const param of this.parameters) {
             const latticeResult = param.defaultValue
                 ? param.defaultValue.currentValue(context)
                 : param.lattice
-                  ? Result.value(param.lattice)
-                  : Result.failure(
+                  ? SemanticResult.value(param.lattice)
+                  : SemanticResult.failure(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
                         param.span,
                     )
@@ -288,16 +290,20 @@ export class FunctionDeclaration implements Declaration {
             })
             parameterScope.setCurrentValue(param.varName, latticeResult.value)
         }
-        return Result.value(parameterScope)
+        return SemanticResult.value(parameterScope)
     }
 
-    private resultLattice(context: Context): Result<cir.Lattice | undefined> {
-        if (this.result) return Result.value(this.result.lattice.toCIR())
-        if (this.implementation.kind === 'body') return Result.value(undefined)
+    private resultLattice(
+        context: Context,
+    ): SemanticResult<cir.Lattice | undefined> {
+        if (this.result)
+            return SemanticResult.value(this.result.lattice.toCIR())
+        if (this.implementation.kind === 'body')
+            return SemanticResult.value(undefined)
         const latticeResult =
             this.implementation.expression.currentValue(context)
         if (isFailure(latticeResult)) return latticeResult
-        return Result.value(latticeResult.value.toCIR())
+        return SemanticResult.value(latticeResult.value.toCIR())
     }
 
     private bodyContext(context: Context): Context {

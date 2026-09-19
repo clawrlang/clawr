@@ -1,51 +1,56 @@
-import { isFailure, isSuccess, Result } from '@/tools/result'
 import { SemanticError } from '@/tools/semantic-error'
+import { isFailure, isSuccess, SemanticResult } from '@/tools/semantic-result'
 import { someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('Result', () => {
     describe('success', () => {
         it('is successful', () => {
-            expect(isSuccess(Result.value(42))).toBeTrue()
+            expect(isSuccess(SemanticResult.value(42))).toBeTrue()
         })
 
         it('has no error', () => {
-            expect(isFailure(Result.value(42))).toBeFalse()
+            expect(isFailure(SemanticResult.value(42))).toBeFalse()
         })
 
         it('has a resolved value', () => {
-            expect(Result.value(42).value).toBe(42)
+            expect(SemanticResult.value(42).value).toBe(42)
         })
     })
 
     describe('failure', () => {
         it('is not successful', () => {
-            expect(isSuccess(Result.failure(someError))).toBeFalse()
+            expect(isSuccess(SemanticResult.failure(someError))).toBeFalse()
         })
 
         it('has an error', () => {
-            expect(isFailure(Result.failure(someError))).toBeTrue()
-            expect(Result.failure(someError).errors).toContainValue(someError)
+            expect(isFailure(SemanticResult.failure(someError))).toBeTrue()
+            expect(SemanticResult.failure(someError).errors).toContainValue(
+                someError,
+            )
         })
     })
 
     describe('collect', () => {
         it('collects successful values', () => {
-            const result = Result.collect([
-                Result.value(1),
-                Result.value(2),
-                Result.value(3),
+            const result = SemanticResult.collect([
+                SemanticResult.value(1),
+                SemanticResult.value(2),
+                SemanticResult.value(3),
             ])
             expect(isFailure(result)).toBeFalse()
             expect(isSuccess(result) && result.value).toEqual([1, 2, 3])
         })
 
         it('collects failures', () => {
-            const result = Result.collect([
-                Result.value(1),
-                Result.failure('This is does not end it', someCodeSpan),
-                Result.failure('This also is does end it', someCodeSpan),
-                Result.failure('This is the final thing', someCodeSpan),
+            const result = SemanticResult.collect([
+                SemanticResult.value(1),
+                SemanticResult.failure('This is does not end it', someCodeSpan),
+                SemanticResult.failure(
+                    'This also is does end it',
+                    someCodeSpan,
+                ),
+                SemanticResult.failure('This is the final thing', someCodeSpan),
             ])
             expect(isFailure(result) && result.errors).toHaveLength(3)
         })

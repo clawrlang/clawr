@@ -1,5 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, Result } from '@/tools/result'
+import { isFailure, SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration } from '.'
 import { DataField } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
@@ -50,7 +50,7 @@ export class ObjectDeclaration implements Declaration {
         )
     }
 
-    emitDeclaration(context: Context): Result {
+    emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addObjectDeclaration(this)
 
         const objectContext = {
@@ -68,7 +68,7 @@ export class ObjectDeclaration implements Declaration {
             RCTypeLattice.create({ type: this.name }),
         )
 
-        const methodsResult = Result.collect(
+        const methodsResult = SemanticResult.collect(
             [...this.readonly, ...this.mutating].map((m) =>
                 m.emitMethod(objectContext),
             ),
@@ -76,7 +76,7 @@ export class ObjectDeclaration implements Declaration {
         if (isFailure(methodsResult)) return methodsResult
         const methods = methodsResult.value
 
-        const initializersResult = Result.collect(
+        const initializersResult = SemanticResult.collect(
             this.initializers.map((m) => m.emitInitializer(objectContext)),
         )
         if (isFailure(initializersResult)) return initializersResult
@@ -93,6 +93,6 @@ export class ObjectDeclaration implements Declaration {
                 lattice: field.lattice!.toCIR(),
             })),
         })
-        return Result.success
+        return SemanticResult.success
     }
 }

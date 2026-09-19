@@ -1,11 +1,11 @@
 import { SourceCodeSpan } from './diagnostics'
 import { SemanticError } from './semantic-error'
 
-export type Result<T = undefined> = Success<T> | Failure
+export type SemanticResult<T = undefined> = Success<T> | Failure
 export type Success<T = undefined> = { value: T }
-export type Failure = { errors: SemanticError[] }
+type Failure = { errors: SemanticError[] }
 
-export const Result = {
+export const SemanticResult = {
     true: success(true as const),
     false: success(false as const),
     success: success(),
@@ -43,8 +43,8 @@ function failure(
     }
 }
 function collect<T extends unknown[]>(values: {
-    [K in keyof T]: Result<T[K]>
-}): Result<T> {
+    [K in keyof T]: SemanticResult<T[K]>
+}): SemanticResult<T> {
     const result: unknown[] = []
     const errors: SemanticError[] = []
 
@@ -59,10 +59,10 @@ function collect<T extends unknown[]>(values: {
     return success(result as T)
 }
 
-export function isSuccess<T>(value: Result<T>): value is Success<T> {
+export function isSuccess<T>(value: SemanticResult<T>): value is Success<T> {
     return 'value' in value
 }
 
-export function isFailure(value: Result<unknown>): value is Failure {
+export function isFailure(value: SemanticResult<unknown>): value is Failure {
     return 'errors' in value
 }

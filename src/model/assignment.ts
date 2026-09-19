@@ -1,5 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, Result } from '@/tools/result'
+import { isFailure, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { FieldReference } from './field-reference'
 import { UNIQUE, UNKNOWN } from './isolation-level'
@@ -26,11 +26,11 @@ export class Assignment implements Statement {
         return new Assignment(target, value, span)
     }
 
-    emitStatement(context: Context): Result {
+    emitStatement(context: Context): SemanticResult {
         const validityResult = this.checkValidity(context)
         if (isFailure(validityResult)) return validityResult
 
-        const collected = Result.collect([
+        const collected = SemanticResult.collect([
             this.target.isolationLevel(context),
             this.target.declaredLattice(context),
         ])
@@ -38,7 +38,7 @@ export class Assignment implements Statement {
 
         const [targetIsolationLevel, targetLattice] = collected.value
         if (targetIsolationLevel === UNKNOWN)
-            return Result.failure(
+            return SemanticResult.failure(
                 'Cannot assign to target parameter with UNKNOWN isolation-level',
                 this.span,
             )
@@ -57,8 +57,8 @@ export class Assignment implements Statement {
         return this.target.setCurrentValue(context, latticeResult.value)
     }
 
-    private emitCIRStatements(context: Context): Result {
-        const collectedTargetResults = Result.collect([
+    private emitCIRStatements(context: Context): SemanticResult {
+        const collectedTargetResults = SemanticResult.collect([
             this.target.isolationLevel(context),
             this.target.declaredLattice(context),
             this.target.toCIRExpression(context),
@@ -72,7 +72,7 @@ export class Assignment implements Statement {
             isolationLevel: targetIsolationLevel,
             explicitLattice: targetLattice,
         }
-        const collectedValueResults = Result.collect([
+        const collectedValueResults = SemanticResult.collect([
             this.value.isolationLevel(explicitLatticeContext),
             Retain.ifStorage(this.value, context),
         ])
@@ -80,7 +80,7 @@ export class Assignment implements Statement {
 
         const [valueIsolationLevel, retainedValue] = collectedValueResults.value
         if (explicitLatticeContext.isolationLevel === UNKNOWN)
-            return Result.failure(
+            return SemanticResult.failure(
                 'Cannot assign to parameter with UNKNOWN isolationLevel',
                 this.span,
             )
@@ -142,11 +142,11 @@ export class Assignment implements Statement {
                 value: retainedValueCIR,
             })
         }
-        return Result.success
+        return SemanticResult.success
     }
 
-    private checkValidity(context: Context): Result {
-        const collected = Result.collect([
+    private checkValidity(context: Context): SemanticResult {
+        const collected = SemanticResult.collect([
             this.target.declaredLattice(context),
             this.target.isolationLevel(context),
         ])
@@ -154,7 +154,7 @@ export class Assignment implements Statement {
         const [targetLattice, targetIsolationLevel] = collected.value
 
         if (targetIsolationLevel === UNKNOWN)
-            return Result.failure(
+            return SemanticResult.failure(
                 'Cannot assign to UNKNOWN isolation target',
                 this.span,
             )
@@ -170,7 +170,7 @@ export class Assignment implements Statement {
         if (isFailure(assignedValueResult)) return assignedValueResult
         const assignedValue = assignedValueResult.value
         if (!targetLattice.isSupersetTo(assignedValue))
-            return Result.failure(
+            return SemanticResult.failure(
                 `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
                 this.span,
             )
@@ -178,17 +178,17 @@ export class Assignment implements Statement {
         if (isFailure(valueIsolationLevelResult))
             return valueIsolationLevelResult
         const valueIsolationLevel = valueIsolationLevelResult.value
-        if (valueIsolationLevel === UNIQUE) return Result.success
+        if (valueIsolationLevel === UNIQUE) return SemanticResult.success
         if (valueIsolationLevel === UNKNOWN)
-            return Result.failure(
+            return SemanticResult.failure(
                 'Parameter with unspecified isolation level may not be used in assignment',
                 this.value.span,
             )
         if (targetIsolationLevel !== valueIsolationLevel)
-            return Result.failure(
+            return SemanticResult.failure(
                 `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,
                 this.span,
             )
-        return Result.success
+        return SemanticResult.success
     }
 }

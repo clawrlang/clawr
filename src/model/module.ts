@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
-import { isFailure, Result } from '@/tools/result'
 import { SemanticErrorCollection } from '@/tools/semantic-error'
+import { isFailure, SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration, Statement } from '.'
 
 export class Module {
@@ -20,7 +20,7 @@ export class Module {
     }
 
     toCIR(context: Context): cir.ClawrModule {
-        const result = Result.collect([
+        const result = SemanticResult.collect([
             ...this.declarations.map((decl) => decl.emitDeclaration(context)),
             ...this.main.map((stmt) => stmt.emitStatement(context)),
         ])

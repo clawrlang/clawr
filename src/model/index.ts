@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Result } from '@/tools/result'
+import { SemanticResult } from '@/tools/semantic-result'
 import { FieldReference } from './field-reference'
 import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
 import { Lattice } from './lattice'
@@ -23,21 +23,21 @@ export type ContextWithLattice = Context & {
 export interface Expression {
     get span(): SourceCodeSpan
 
-    isEffectivelyConst(context: Context): Result<boolean>
-    isolationLevel(context: Context): Result<AnyIsolationLevel>
-    declaredLattice(context: ContextWithLattice): Result<Lattice>
-    currentValue(context: ContextWithLattice): Result<Lattice>
-    toCIRExpression(context: ContextWithLattice): Result<cir.Expression>
+    isEffectivelyConst(context: Context): SemanticResult<boolean>
+    isolationLevel(context: Context): SemanticResult<AnyIsolationLevel>
+    declaredLattice(context: ContextWithLattice): SemanticResult<Lattice>
+    currentValue(context: ContextWithLattice): SemanticResult<Lattice>
+    toCIRExpression(context: ContextWithLattice): SemanticResult<cir.Expression>
 
-    setCurrentValue?(context: Context, value: Lattice): Result
+    setCurrentValue?(context: Context, value: Lattice): SemanticResult
 }
 
 export interface Statement {
-    emitStatement(context: Context): Result
+    emitStatement(context: Context): SemanticResult
 }
 
 export interface Declaration {
-    emitDeclaration(context: Context): Result
+    emitDeclaration(context: Context): SemanticResult
 }
 export function isStorage(
     value: any,

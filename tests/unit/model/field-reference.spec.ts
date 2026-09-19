@@ -6,7 +6,7 @@ import { decorateLattice } from '@/model/lattice-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
-import { isFailure, isSuccess, Result } from '@/tools/result'
+import { isFailure, isSuccess, SemanticResult } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import assert from 'assert'
 import { describe, expect, it, test } from 'bun:test'
@@ -167,7 +167,7 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 })
-                const result = Result.collect([
+                const result = SemanticResult.collect([
                     fieldRef.isolationLevel(context),
                     fieldRef.declaredLattice(context),
                 ])

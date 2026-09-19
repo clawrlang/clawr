@@ -1,7 +1,8 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
-import { isFailure, SemanticResult, Success } from '@/tools/semantic-result'
+import { SuccessResult } from '@/tools/result'
+import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { FunctionName } from './function-name'
 import { AnyIsolationLevel, UNIQUE } from './isolation-level'
@@ -42,17 +43,17 @@ export class FunctionCall implements Expression, Statement {
         )
     }
 
-    isEffectivelyConst(): Success<true> {
-        return SemanticResult.true
+    isEffectivelyConst(): SuccessResult<true> {
+        return SuccessResult.true
     }
 
     isolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
         if (this.name.toString() === 'copy(of:)')
-            return SemanticResult.value(UNIQUE)
+            return SuccessResult.value(UNIQUE)
 
         const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 `unknown function ${this.name.toString()}`,
                 this.span,
             )
@@ -66,31 +67,28 @@ export class FunctionCall implements Expression, Statement {
     currentValue(context: Context): SemanticResult<Lattice> {
         if (this.name.toString() === 'copy(of:)') {
             const valueResult = this.arguments[0].currentValue(context)
-            if (isFailure(valueResult)) return valueResult
+            if (valueResult.isError) return valueResult
             const value = valueResult.value
             return value instanceof RCTypeLattice
-                ? SemanticResult.value(value)
-                : SemanticResult.failure(
-                      'not a reference-counted type',
-                      this.span,
-                  )
+                ? SuccessResult.value(value)
+                : ErrorResult.failure('not a reference-counted type', this.span)
         }
 
         const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 `Function declaration not found: ${this.name.toString()}`,
                 this.span,
             )
 
         const latticeResult = decl.lattice(context)
-        if (isFailure(latticeResult)) return latticeResult
+        if (latticeResult.isError) return latticeResult
         if (!latticeResult.value)
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 `Function declaration has no result lattice: ${this.name.toString()}`,
                 this.span,
             )
-        return SemanticResult.value(latticeResult.value)
+        return SuccessResult.value(latticeResult.value)
     }
 
     toCIRExpression(context: Context): SemanticResult<cir.Expression> {
@@ -99,10 +97,10 @@ export class FunctionCall implements Expression, Statement {
             ...this.arguments.map((arg) => arg.toCIRExpression(context)),
         ])
 
-        if (isFailure(argsResult)) return argsResult
+        if (argsResult.isError) return argsResult
         const [value, ...args] = argsResult.value
 
-        return SemanticResult.value({
+        return SuccessResult.value({
             kind: 'CALL',
             name: this.name.toCIR(),
             arguments: args,
@@ -114,7 +112,7 @@ export class FunctionCall implements Expression, Statement {
         const argsResult = SemanticResult.collect(
             this.arguments.map((arg) => arg.toCIRExpression(context)),
         )
-        if (isFailure(argsResult)) return argsResult
+        if (argsResult.isError) return argsResult
         const args = argsResult.value
         const _name = this.name.toCIR()
         if (_name.baseName === 'print') {
@@ -157,6 +155,6 @@ export class FunctionCall implements Expression, Statement {
                 arguments: args,
             })
         }
-        return SemanticResult.success
+        return SuccessResult.ok
     }
 }

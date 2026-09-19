@@ -1,9 +1,15 @@
 export type Result<T = undefined> = SuccessResult<T> | ErrorResult
-export type SuccessResult<T = undefined> = { isSuccess: true; value: T }
-type ErrorResult = { isSuccess: false; error: Error }
+export type SuccessResult<T = undefined> = {
+    isSuccess: true
+    isError: false
+    value: T
+}
+type ErrorResult = { isSuccess: false; isError: true; error: Error }
 
 export const SuccessResult = {
-    undefined: success(undefined),
+    true: success(true as const),
+    false: success(false as const),
+    ok: success(undefined),
     value: success,
 }
 
@@ -11,6 +17,7 @@ export const ErrorResult = {
     failure(errorOrMessage: string | Error): ErrorResult {
         return {
             isSuccess: false,
+            isError: true,
             error:
                 errorOrMessage instanceof Error
                     ? errorOrMessage
@@ -19,5 +26,5 @@ export const ErrorResult = {
     },
 }
 function success<T>(value?: T): SuccessResult<T> {
-    return { isSuccess: true, value: value as T }
+    return { isSuccess: true, isError: false, value: value as T }
 }

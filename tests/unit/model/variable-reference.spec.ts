@@ -4,9 +4,7 @@ import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
-import { isFailure, isSuccess } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
-import assert from 'assert'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Variable Reference', () => {
@@ -23,8 +21,7 @@ describe('Variable Reference', () => {
             span: someCodeSpan,
         })
         const result = variableRef.toCIRExpression(context)
-        assert(isSuccess(result))
-        expect(result.value).toMatchObject({
+        expect(result.isSuccess && result.value).toMatchObject({
             kind: 'VARIABLE_REF',
             name: 'myVar',
         })
@@ -39,8 +36,7 @@ describe('Variable Reference', () => {
 
         const context = newSemanticContext()
         const result = variableRef.toCIRExpression(context)
-        assert(isFailure(result))
-        expect(result.errors[0]).toMatchObject({
+        expect(result.isError && result.error.errors[0]).toMatchObject({
             message: `Variable myVar is not defined in the current context`,
             span,
         })
@@ -59,8 +55,7 @@ describe('Variable Reference', () => {
             span: someCodeSpan,
         })
         const result = variableRef.declaredLattice(context)
-        assert(isSuccess(result))
-        expect(result.value).toEqual(
+        expect(result.isSuccess && result.value).toEqual(
             IntegerLattice.create({ min: 10n, max: 10n }),
         )
     })
@@ -78,8 +73,7 @@ describe('Variable Reference', () => {
             span: someCodeSpan,
         })
         const result = variableRef.currentValue(context)
-        assert(isSuccess(result))
-        expect(result.value).toMatchObject({
+        expect(result.isSuccess && result.value).toMatchObject({
             min: 10n,
             max: 10n,
         })
@@ -121,8 +115,7 @@ describe('Variable Reference', () => {
                     span: someCodeSpan,
                 })
                 const result = variableRef.isolationLevel(context)
-                assert(isSuccess(result))
-                expect(result.value).toEqual(isolationLevel)
+                expect(result.isSuccess && result.value).toEqual(isolationLevel)
             })
         }
     })

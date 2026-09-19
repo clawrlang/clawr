@@ -1,5 +1,6 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, SemanticResult } from '@/tools/semantic-result'
+import { SuccessResult } from '@/tools/result'
+import { SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration } from '.'
 import { DataField } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
@@ -69,13 +70,13 @@ export class ObjectDeclaration implements Declaration {
                 m.emitMethod(objectContext),
             ),
         )
-        if (isFailure(methodsResult)) return methodsResult
+        if (methodsResult.isError) return methodsResult
         const methods = methodsResult.value
 
         const initializersResult = SemanticResult.collect(
             this.initializers.map((m) => m.emitInitializer(objectContext)),
         )
-        if (isFailure(initializersResult)) return initializersResult
+        if (initializersResult.isError) return initializersResult
         const initializers = initializersResult.value
 
         context.scope.rootScope.emitted.push({
@@ -89,6 +90,6 @@ export class ObjectDeclaration implements Declaration {
                 lattice: field.lattice!.toCIR(),
             })),
         })
-        return SemanticResult.success
+        return SuccessResult.ok
     }
 }

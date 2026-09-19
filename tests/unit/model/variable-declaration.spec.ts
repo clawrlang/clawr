@@ -14,9 +14,7 @@ import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { TypeName } from '@/model/type-name'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import { VariableReference } from '@/model/variable-reference'
-import { isFailure } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
-import assert from 'assert'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('VariableDeclaration', () => {
@@ -638,8 +636,7 @@ describe('VariableDeclaration', () => {
                     }),
                 })
                 const result = declaration.emitStatement(context)
-                assert(isFailure(result))
-                expect(result.errors).toMatchObject([
+                expect(result.isError && result.error.errors).toMatchObject([
                     {
                         message: `Cannot assign SHARED value to ISOLATED target`,
                         span: {

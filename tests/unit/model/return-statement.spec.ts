@@ -10,9 +10,7 @@ import {
 import { ReturnStatement } from '@/model/return-statement'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
-import { isFailure } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
-import assert from 'assert'
 import { describe, expect, it } from 'bun:test'
 
 describe('ReturnStatement', () => {
@@ -45,7 +43,7 @@ describe('ReturnStatement', () => {
 
         const context = newSemanticContext()
         const result = returnStatement.emitStatement(context)
-        expect(isFailure(result)).toBeTrue()
+        expect(result.isError).toBeTrue()
         expect(context.scope.emitted.length).toBe(0)
     })
 
@@ -63,7 +61,7 @@ describe('ReturnStatement', () => {
             },
         }
         const result = returnStatement.emitStatement(context)
-        expect(isFailure(result)).toBeTrue()
+        expect(result.isError).toBeTrue()
         expect(context.scope.emitted.length).toBe(0)
     })
 
@@ -96,10 +94,9 @@ describe('ReturnStatement', () => {
                 isolationLevel: SHARED,
             },
         })
-        assert(isFailure(result))
-        expect(result.errors.map((e) => e.message)).toContain(
-            'Cannot return an ISOLATED value as SHARED',
-        )
+        expect(
+            result.isError && result.error.errors.map((e) => e.message),
+        ).toContain('Cannot return an ISOLATED value as SHARED')
         expect(context.scope.emitted.length).toBe(0)
     })
 })

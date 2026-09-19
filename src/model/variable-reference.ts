@@ -1,6 +1,7 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, SemanticResult } from '@/tools/semantic-result'
+import { SuccessResult } from '@/tools/result'
+import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { Lattice } from './lattice'
@@ -23,59 +24,59 @@ export class VariableReference implements Expression {
 
     assignmentPrelude(context: Context): SemanticResult<cir.Statement[]> {
         const constResult = this.isEffectivelyConst(context)
-        if (isFailure(constResult)) return constResult
+        if (constResult.isError) return constResult
         if (constResult.value)
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 `Variable ${this.name} is not mutable`,
                 this.span,
             )
-        return SemanticResult.value([])
+        return SuccessResult.value([])
     }
 
     isEffectivelyConst(context: Context): SemanticResult<boolean> {
         const variableResult = this.lookupInScope(context)
-        if (isFailure(variableResult)) return variableResult
-        return SemanticResult.value(variableResult.value.isImmutable)
+        if (variableResult.isError) return variableResult
+        return SuccessResult.value(variableResult.value.isImmutable)
     }
 
     isolationLevel(context: Context): SemanticResult<IsolationLevel | UNKNOWN> {
         const variableResult = this.lookupInScope(context)
-        if (isFailure(variableResult)) return variableResult
-        return SemanticResult.value(variableResult.value.isolationLevel)
+        if (variableResult.isError) return variableResult
+        return SuccessResult.value(variableResult.value.isolationLevel)
     }
 
     declaredLattice(context: Context): SemanticResult<Lattice> {
         const variableResult = this.lookupInScope(context)
-        if (isFailure(variableResult)) return variableResult
-        return SemanticResult.value(variableResult.value.lattice)
+        if (variableResult.isError) return variableResult
+        return SuccessResult.value(variableResult.value.lattice)
     }
 
     currentValue(context: Context): SemanticResult<Lattice> {
         const result = context.scope.currentValue(this.name)
         if (!result) {
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 `Variable ${this.name} has no value in the current context`,
                 this.span,
             )
         }
-        return SemanticResult.value(result)
+        return SuccessResult.value(result)
     }
 
     setCurrentValue(context: Context, value: Lattice): SemanticResult {
         const result = context.scope.setCurrentValue(this.name, value)
         if ('error' in result)
-            return SemanticResult.failure(result.error.message, this.span)
-        return SemanticResult.success
+            return ErrorResult.failure(result.error.message, this.span)
+        return SuccessResult.ok
     }
 
     toCIRExpression(
         context: Context,
     ): SemanticResult<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
         const variableResult = this.lookupInScope(context)
-        if (isFailure(variableResult)) return variableResult
+        if (variableResult.isError) return variableResult
         const valueResult = this.currentValue(context)
-        if (isFailure(valueResult)) return valueResult
-        return SemanticResult.value({
+        if (valueResult.isError) return valueResult
+        return SuccessResult.value({
             kind: 'VARIABLE_REF' as const,
             name: this.name,
             value: valueResult.value.toCIR(),
@@ -85,10 +86,10 @@ export class VariableReference implements Expression {
     private lookupInScope(context: Context) {
         const variable = context.scope.variableDeclaration(this.name)
         if (!variable)
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 `Variable ${this.name} is not defined in the current context`,
                 this.span,
             )
-        return SemanticResult.value(variable)
+        return SuccessResult.value(variable)
     }
 }

@@ -6,9 +6,8 @@ import { decorateLattice } from '@/model/lattice-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
-import { isFailure, isSuccess, SemanticResult } from '@/tools/semantic-result'
+import { SemanticResult } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
-import assert from 'assert'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Field Reference', () => {
@@ -49,8 +48,7 @@ describe('Field Reference', () => {
             fieldSpan: someCodeSpan,
         })
         const result = fieldRef.declaredLattice(context)
-        assert(isSuccess(result))
-        expect(result.value.toCIR().type).toBe('integer')
+        expect(result.isSuccess && result.value.toCIR().type).toBe('integer')
     })
 
     it('infers its isolation level from the context', () => {
@@ -92,8 +90,7 @@ describe('Field Reference', () => {
             fieldSpan: someCodeSpan,
         })
         const result = fieldRef.isolationLevel(context)
-        assert(isSuccess(result))
-        expect(result.value).toEqual(SHARED)
+        expect(result.isSuccess && result.value).toEqual(SHARED)
     })
 
     describe('infers its type and isolation level from the context', () => {
@@ -172,8 +169,7 @@ describe('Field Reference', () => {
                     fieldRef.declaredLattice(context),
                 ])
 
-                assert(isSuccess(result))
-                expect(result.value).toMatchObject([
+                expect(result.isSuccess && result.value).toMatchObject([
                     expected,
                     {
                         type: { name: 'InnerType' },
@@ -219,10 +215,9 @@ describe('Field Reference', () => {
             fieldSpan: someCodeSpan,
         })
         const result = fieldRef.toCIRExpression(context)
-        assert(isFailure(result))
-        expect(result.errors.map((e) => e.message)).toContain(
-            'Field nonExistentField does not exist on type MyType',
-        )
+        expect(
+            result.isError && result.error.errors.map((e) => e.message),
+        ).toContain('Field nonExistentField does not exist on type MyType')
     })
 
     describe('throws if the object’s isolation-level is not compatible with the operator', () => {
@@ -290,8 +285,7 @@ describe('Field Reference', () => {
                     fieldSpan: someCodeSpan,
                 })
                 const result = fieldRef.toCIRExpression(context)
-                assert(isFailure(result))
-                expect(result.errors[0]).toMatchObject({
+                expect(result.isError && result.error.errors[0]).toMatchObject({
                     message: `Cannot access field myField of a ${isolationLevel} type object with "${operator}" operator`,
                     span: {
                         start: { line: 1, column: 1 },
@@ -364,8 +358,7 @@ describe('Field Reference', () => {
                     fieldSpan: someCodeSpan,
                 })
                 const result = fieldRef.isEffectivelyConst(context)
-                assert(isSuccess(result))
-                expect(result.value).toBe(expected)
+                expect(result.isSuccess && result.value).toBe(expected)
             })
         }
 
@@ -406,8 +399,7 @@ describe('Field Reference', () => {
                 fieldSpan: someCodeSpan,
             })
             const result = fieldRef.isEffectivelyConst(context)
-            assert(isSuccess(result))
-            expect(result.value).toBeTrue()
+            expect(result.isSuccess && result.value).toBeTrue()
         })
 
         it('returns true if the object is UNKNOWN immutable', () => {
@@ -447,8 +439,7 @@ describe('Field Reference', () => {
                 fieldSpan: someCodeSpan,
             })
             const result = fieldRef.isEffectivelyConst(context)
-            assert(isSuccess(result))
-            expect(result.value).toBeTrue()
+            expect(result.isSuccess && result.value).toBeTrue()
         })
 
         it('returns false if the object is mutable', () => {
@@ -488,8 +479,8 @@ describe('Field Reference', () => {
                 fieldSpan: someCodeSpan,
             })
             const result = fieldRef.isEffectivelyConst(context)
-            assert(isSuccess(result))
-            expect(result.value).toBeFalse()
+            expect(result.isSuccess).toBeTrue()
+            expect(result.isSuccess && result.value).toBeFalse()
         })
     })
 

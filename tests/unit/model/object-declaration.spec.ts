@@ -8,7 +8,6 @@ import { decorateLattice } from '@/model/lattice-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
-import { isSuccess } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
@@ -269,7 +268,7 @@ describe('ObjectDeclaration', () => {
         const context = newSemanticContext()
         const result = object.emitDeclaration(context)
 
-        expect(isSuccess(result) || result.errors).toBeTrue()
+        expect(result.isSuccess || result.error.errors).toBeTrue()
         expect(
             context.scope.objectDeclaration(
                 TypeName.create({ name: 'Object' }),

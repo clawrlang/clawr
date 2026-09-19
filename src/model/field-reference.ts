@@ -1,6 +1,7 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, SemanticResult } from '@/tools/semantic-result'
+import { SuccessResult } from '@/tools/result'
+import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, isStorage } from '.'
 import { DataDeclaration } from './data-declaration'
 import { ISOLATED, IsolationLevel, SHARED } from './isolation-level'
@@ -33,9 +34,9 @@ export class FieldReference implements Expression {
 
     assignmentPrelude(context: Context): SemanticResult<cir.Statement[]> {
         const constResult = this.isEffectivelyConst(context)
-        if (isFailure(constResult)) return constResult
+        if (constResult.isError) return constResult
         if (constResult.value)
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 `Cannot mutate field ${this.field} of a reference type object`,
                 this.span,
             )
@@ -45,56 +46,56 @@ export class FieldReference implements Expression {
                 this.object.isolationLevel(context),
                 this.object.toCIRExpression(context),
             ])
-            if (isFailure(collected)) return collected
+            if (collected.isError) return collected
             const [isolationLevel, object] = collected.value
             if (isolationLevel === ISOLATED)
-                return SemanticResult.value([{ kind: 'ENSURE_UNIQUE', object }])
+                return SuccessResult.value([{ kind: 'ENSURE_UNIQUE', object }])
         }
-        return SemanticResult.value([])
+        return SuccessResult.value([])
     }
 
     isEffectivelyConst(context: Context): SemanticResult<boolean> {
         const isolationLevelResult = this.object.isolationLevel(context)
 
-        if (isFailure(isolationLevelResult)) return isolationLevelResult
-        if (isolationLevelResult.value === SHARED) return SemanticResult.false
+        if (isolationLevelResult.isError) return isolationLevelResult
+        if (isolationLevelResult.value === SHARED) return SuccessResult.false
 
         return this.object.isEffectivelyConst(context)
     }
 
     isolationLevel(context: Context): SemanticResult<IsolationLevel> {
         const fieldResult = this.getFieldFromContext(context)
-        if (isFailure(fieldResult)) return fieldResult
+        if (fieldResult.isError) return fieldResult
         const field = fieldResult.value
         return field.lattice instanceof RCTypeLattice
-            ? SemanticResult.value(field.isolationLevel ?? ISOLATED)
-            : SemanticResult.value(ISOLATED)
+            ? SuccessResult.value(field.isolationLevel ?? ISOLATED)
+            : SuccessResult.value(ISOLATED)
     }
 
     declaredLattice(context: Context): SemanticResult<Lattice> {
         const fieldResult = this.getFieldFromContext(context)
-        if (isFailure(fieldResult)) return fieldResult
-        return SemanticResult.value(fieldResult.value.lattice!)
+        if (fieldResult.isError) return fieldResult
+        return SuccessResult.value(fieldResult.value.lattice!)
     }
 
     currentValue(context: Context): SemanticResult<Lattice> {
         const objectValueResult = this.object.currentValue(context)
-        if (isFailure(objectValueResult)) return objectValueResult
+        if (objectValueResult.isError) return objectValueResult
         const objectValue = objectValueResult.value
         if (!(objectValue instanceof RCTypeLattice))
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 `${objectValue.toCIR().type} is not an rc-type`,
                 this.object.span,
             )
         if (objectValue.fields)
-            return SemanticResult.value(objectValue.fields[this.field])
+            return SuccessResult.value(objectValue.fields[this.field])
 
         return this.declaredLattice(context)
     }
 
     setCurrentValue(context: Context, value: Lattice): SemanticResult {
         const objectvalueResult = this.object.currentValue(context)
-        if (isFailure(objectvalueResult)) return objectvalueResult
+        if (objectvalueResult.isError) return objectvalueResult
         const objectValue = objectvalueResult.value
         if (objectValue instanceof RCTypeLattice) {
             if (objectValue.fields) objectValue.fields[this.field] = value
@@ -103,22 +104,22 @@ export class FieldReference implements Expression {
             const result = object.setCurrentValue?.(context, objectValue)
             if (result) return result
         }
-        return SemanticResult.success
+        return SuccessResult.ok
     }
 
     toCIRExpression(
         context: Context,
     ): SemanticResult<cir.Expression & { kind: 'FIELD_REF' }> {
         const compatibilityResult = this.checkOperatorCompatibility(context)
-        if (isFailure(compatibilityResult)) return compatibilityResult
+        if (compatibilityResult.isError) return compatibilityResult
         const fieldResult = this.getFieldFromContext(context)
-        if (isFailure(fieldResult)) return fieldResult
+        if (fieldResult.isError) return fieldResult
         const field = fieldResult.value
         const cirResult = this.object.toCIRExpression(context)
-        if (isFailure(cirResult)) return cirResult
+        if (cirResult.isError) return cirResult
         const object: cir.Expression = cirResult.value
 
-        return SemanticResult.value({
+        return SuccessResult.value({
             kind: 'FIELD_REF',
             object,
             field: this.field,
@@ -130,17 +131,17 @@ export class FieldReference implements Expression {
         context: Context,
     ): SemanticResult<DataDeclaration['fields'][number]> {
         const objectValueResult = this.object.declaredLattice(context)
-        if (isFailure(objectValueResult)) return objectValueResult
+        if (objectValueResult.isError) return objectValueResult
         const objectValue = objectValueResult.value
         if (!(objectValue instanceof RCTypeLattice))
-            return SemanticResult.failure('unknown object value', this.span)
+            return ErrorResult.failure('unknown object value', this.span)
         const type =
             context.scope.dataDeclaration(objectValue.type) ||
             context.scope.objectDeclaration(objectValue.type)
         const field = type?.fields.find((field) => field.name === this.field)
         return field
-            ? SemanticResult.value(field)
-            : SemanticResult.failure(
+            ? SuccessResult.value(field)
+            : ErrorResult.failure(
                   `Field ${this.field} does not exist on type ${type?.name.canonical()}`,
                   this.fieldSpan,
               )
@@ -148,13 +149,13 @@ export class FieldReference implements Expression {
 
     private checkOperatorCompatibility(context: Context): SemanticResult {
         const isolationLevelResult = this.object.isolationLevel(context)
-        if (isFailure(isolationLevelResult)) return isolationLevelResult
+        if (isolationLevelResult.isError) return isolationLevelResult
         const isolationLevel = isolationLevelResult.value
         if ((isolationLevel === SHARED) !== (this.operator === '->')) {
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 `Cannot access field ${this.field} of a ${isolationLevel} type object with "${this.operator}" operator`,
                 this.span,
             )
-        } else return SemanticResult.success
+        } else return SuccessResult.ok
     }
 }

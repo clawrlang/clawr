@@ -1,6 +1,7 @@
 import * as cir from '@/cir'
 import { mapFilter } from '@/tools/map-filter'
-import { isFailure, SemanticResult } from '@/tools/semantic-result'
+import { SuccessResult } from '@/tools/result'
+import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration, Expression, Statement } from '.'
 import { Assignment } from './assignment'
 import { FunctionName } from './function-name'
@@ -67,7 +68,7 @@ export class FunctionDeclaration implements Declaration {
     }
 
     resultIsolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
-        if (this.result) return SemanticResult.value(this.result.isolationLevel)
+        if (this.result) return SuccessResult.value(this.result.isolationLevel)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.isolationLevel(context)
         else
@@ -77,19 +78,19 @@ export class FunctionDeclaration implements Declaration {
     }
 
     lattice(context: Context): SemanticResult<Lattice | undefined> {
-        if (this.result) return SemanticResult.value(this.result.lattice)
+        if (this.result) return SuccessResult.value(this.result.lattice)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.currentValue(
                 this.bodyContext(context),
             )
-        return SemanticResult.success
+        return SuccessResult.ok
     }
 
     emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addFunctionDeclaration(this)
 
         const bodyContextResult = this.makeBodyContext(context)
-        if (isFailure(bodyContextResult)) return bodyContextResult
+        if (bodyContextResult.isError) return bodyContextResult
         const bodyContext = bodyContextResult.value
 
         const body =
@@ -111,7 +112,7 @@ export class FunctionDeclaration implements Declaration {
             bodyContext.scope.releaseVariables()
 
         const latticeResult = this.resultLattice(bodyContext)
-        if (isFailure(latticeResult)) return latticeResult
+        if (latticeResult.isError) return latticeResult
         const lattice = latticeResult.value
 
         const cirFuncDecl: cir.Declaration = {
@@ -126,14 +127,14 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
-        return SemanticResult.success
+        return SuccessResult.ok
     }
 
     emitMethod(
         context: Context,
     ): SemanticResult<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
         const bodyContextResult = this.makeBodyContext(context)
-        if (isFailure(bodyContextResult)) return bodyContextResult
+        if (bodyContextResult.isError) return bodyContextResult
         const bodyContext = bodyContextResult.value
 
         const body =
@@ -155,7 +156,7 @@ export class FunctionDeclaration implements Declaration {
             bodyContext.scope.releaseVariables()
 
         const latticeResult = this.resultLattice(bodyContext)
-        if (isFailure(latticeResult)) return latticeResult
+        if (latticeResult.isError) return latticeResult
         const lattice = latticeResult.value
 
         const cirFuncDecl: cir.Declaration = {
@@ -170,7 +171,7 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
 
-        return SemanticResult.value(cirFuncDecl)
+        return SuccessResult.value(cirFuncDecl)
     }
 
     emitInitializer(
@@ -179,7 +180,7 @@ export class FunctionDeclaration implements Declaration {
         cir.Declaration & { kind: 'FUNCTION_DECL'; lattice: undefined }
     > {
         const bodyContextResult = this.makeBodyContext(context)
-        if (isFailure(bodyContextResult)) return bodyContextResult
+        if (bodyContextResult.isError) return bodyContextResult
         const bodyContext = bodyContextResult.value
 
         const body =
@@ -216,12 +217,12 @@ export class FunctionDeclaration implements Declaration {
             body: bodyContext.scope.emitted,
         }
 
-        return SemanticResult.value(cirFuncDecl)
+        return SuccessResult.value(cirFuncDecl)
     }
 
     private makeBodyContext(context: Context): SemanticResult<Context> {
         const parameterScopeResult = this.scopeAddingParameters(context)
-        if (isFailure(parameterScopeResult)) return parameterScopeResult
+        if (parameterScopeResult.isError) return parameterScopeResult
         const contextWithParameters = {
             ...context,
             scope: parameterScopeResult.value,
@@ -244,7 +245,7 @@ export class FunctionDeclaration implements Declaration {
                 scope: parameterScopeResult.value,
                 calleeResult: this.result,
             })
-            return SemanticResult.value(bodyContext)
+            return SuccessResult.value(bodyContext)
         } else {
             const collected = SemanticResult.collect([
                 this.implementation.expression.isolationLevel(
@@ -255,10 +256,10 @@ export class FunctionDeclaration implements Declaration {
                     explicitLattice,
                 }),
             ])
-            if (isFailure(collected)) return collected
+            if (collected.isError) return collected
             const [isolationLevel, lattice] = collected.value
             if (isolationLevel === UNKNOWN)
-                return SemanticResult.failure(
+                return ErrorResult.failure(
                     'Returning UNKNOWN value',
                     this.implementation.expression.span,
                 )
@@ -267,7 +268,7 @@ export class FunctionDeclaration implements Declaration {
                 scope: parameterScopeResult.value,
                 calleeResult: { isolationLevel, lattice },
             })
-            return SemanticResult.value(bodyContext)
+            return SuccessResult.value(bodyContext)
         }
     }
 
@@ -277,32 +278,31 @@ export class FunctionDeclaration implements Declaration {
             const latticeResult = param.defaultValue
                 ? param.defaultValue.currentValue(context)
                 : param.lattice
-                  ? SemanticResult.value(param.lattice)
-                  : SemanticResult.failure(
+                  ? SuccessResult.value(param.lattice)
+                  : ErrorResult.failure(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
                         param.span,
                     )
-            if (isFailure(latticeResult)) return latticeResult
+            if (latticeResult.isError) return latticeResult
             parameterScope.addVariableDeclaration(param.varName, {
                 isImmutable: param.isImmutable,
                 isolationLevel: param.isolationLevel,
                 lattice: latticeResult.value,
             })
         }
-        return SemanticResult.value(parameterScope)
+        return SuccessResult.value(parameterScope)
     }
 
     private resultLattice(
         context: Context,
     ): SemanticResult<cir.Lattice | undefined> {
-        if (this.result)
-            return SemanticResult.value(this.result.lattice.toCIR())
+        if (this.result) return SuccessResult.value(this.result.lattice.toCIR())
         if (this.implementation.kind === 'body')
-            return SemanticResult.value(undefined)
+            return SuccessResult.value(undefined)
         const latticeResult =
             this.implementation.expression.currentValue(context)
-        if (isFailure(latticeResult)) return latticeResult
-        return SemanticResult.value(latticeResult.value.toCIR())
+        if (latticeResult.isError) return latticeResult
+        return SuccessResult.value(latticeResult.value.toCIR())
     }
 
     private bodyContext(context: Context): Context {

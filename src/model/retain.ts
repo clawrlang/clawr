@@ -1,6 +1,7 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, SemanticResult, Success } from '@/tools/semantic-result'
+import { SuccessResult } from '@/tools/result'
+import { SemanticResult } from '@/tools/semantic-result'
 import { Context, ContextWithLattice, Expression, isStorage } from '.'
 import { FieldReference } from './field-reference'
 import { AnyIsolationLevel } from './isolation-level'
@@ -21,16 +22,16 @@ export class Retain implements Expression {
         value: T,
         context: Context,
     ): SemanticResult<T | Retain> {
-        if (!isStorage(value)) return SemanticResult.value(value)
+        if (!isStorage(value)) return SuccessResult.value(value)
         const latticeResult = value.currentValue(context)
-        if (isFailure(latticeResult)) return latticeResult
+        if (latticeResult.isError) return latticeResult
         return latticeResult.value instanceof RCTypeLattice
-            ? SemanticResult.value(new Retain(value, latticeResult.value))
-            : SemanticResult.value(value as T)
+            ? SuccessResult.value(new Retain(value, latticeResult.value))
+            : SuccessResult.value(value as T)
     }
 
-    isEffectivelyConst(): Success<true> {
-        return SemanticResult.true
+    isEffectivelyConst(): SuccessResult<true> {
+        return SuccessResult.true
     }
 
     isolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
@@ -49,8 +50,8 @@ export class Retain implements Expression {
         context: ContextWithLattice,
     ): SemanticResult<cir.Expression> {
         const objectResult = this.value.toCIRExpression(context)
-        if (isFailure(objectResult)) return objectResult
-        return SemanticResult.value({
+        if (objectResult.isError) return objectResult
+        return SuccessResult.value({
             kind: 'RETAIN' as const,
             object: objectResult.value,
             value: this.lattice.toCIR(),

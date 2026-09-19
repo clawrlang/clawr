@@ -141,7 +141,7 @@ export class Scope {
         if (!variable?.lattice.isSupersetTo(lattice))
             return ErrorResult.failure(`Incompatible value for ${name}`)
         this.currentValues.set(name, lattice)
-        return SuccessResult.undefined
+        return SuccessResult.ok
     }
 }
 

@@ -10,9 +10,7 @@ import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
-import { isFailure, isSuccess } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
-import assert from 'assert'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Assignment', () => {
@@ -33,7 +31,7 @@ describe('Assignment', () => {
         })
 
         const result = assignment.emitStatement(context)
-        expect(isSuccess(result) || result.errors).toBeTrue()
+        expect(result.isSuccess || result.error.errors).toBeTrue()
 
         expect(context.scope.emitted).toMatchObject([
             {
@@ -438,10 +436,9 @@ describe('Assignment', () => {
         })
         const context = newSemanticContext()
         const result = assignment.emitStatement(context)
-        assert(isFailure(result))
-        expect(result.errors.map((e) => e.message)).toContain(
-            'Variable x is not defined in the current context',
-        )
+        expect(
+            result.isError && result.error.errors.map((e) => e.message),
+        ).toContain('Variable x is not defined in the current context')
     })
 
     describe('throws if the target variable is immutable/non-assignable', () => {
@@ -484,8 +481,7 @@ describe('Assignment', () => {
                     span: someCodeSpan,
                 })
                 const result = assignment.emitStatement(context)
-                assert(isFailure(result))
-                expect(result.errors).toMatchObject([
+                expect(result.isError && result.error.errors).toMatchObject([
                     {
                         message: `Variable target is not mutable`,
                         span: {
@@ -543,8 +539,7 @@ describe('Assignment', () => {
         })
         const result = assignment.emitStatement(context)
 
-        assert(isFailure(result))
-        expect(result.errors).toMatchObject([
+        expect(result.isError && result.error.errors).toMatchObject([
             {
                 message:
                     'Cannot mutate field myField of a reference type object',
@@ -601,8 +596,7 @@ describe('Assignment', () => {
         })
 
         const result = assignment.emitStatement(context)
-        assert(isFailure(result))
-        expect(result.errors).toMatchObject([
+        expect(result.isError && result.error.errors).toMatchObject([
             {
                 message:
                     'Cannot mutate field myField of a reference type object',
@@ -669,10 +663,9 @@ describe('Assignment', () => {
                     }),
                 })
                 const result = assignment.emitStatement(context)
-                assert(isFailure(result))
-                expect(result.errors.map((e) => e.message)).toContain(
-                    `Cannot assign SHARED value to ISOLATED target`,
-                )
+                expect(
+                    result.isError && result.error.errors.map((e) => e.message),
+                ).toContain(`Cannot assign SHARED value to ISOLATED target`)
             })
         })
     })
@@ -716,8 +709,9 @@ describe('Assignment', () => {
                     span: someCodeSpan,
                 })
                 const result = assignment.emitStatement(context)
-                assert(isFailure(result))
-                expect(result.errors.map((e) => e.message)).toContain(
+                expect(
+                    result.isError && result.error.errors.map((e) => e.message),
+                ).toContain(
                     'Parameter with unspecified isolation level may not be used in assignment',
                 )
             })
@@ -804,7 +798,7 @@ describe('Assignment', () => {
                 span: someCodeSpan,
             })
             const result = assignment.emitStatement(context)
-            expect(isFailure(result) && result.errors).toBeFalse()
+            expect(result.isError && result.error.errors).toBeFalse()
             expect(context.scope.currentValue('x')).not.toBeNil()
             expect(context.scope.currentValue('x')).toMatchObject({
                 fields: { field: { min: 42n, max: 42n } },

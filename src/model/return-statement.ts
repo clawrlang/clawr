@@ -1,5 +1,6 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, SemanticResult } from '@/tools/semantic-result'
+import { SuccessResult } from '@/tools/result'
+import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { Retain } from './retain'
 
@@ -21,31 +22,31 @@ export class ReturnStatement implements Statement {
 
     emitStatement(context: Context): SemanticResult {
         const validationResult = this.validateInput(context)
-        if (isFailure(validationResult)) return validationResult
+        if (validationResult.isError) return validationResult
 
         if (!this.value || !context.calleeResult) {
             context.scope.releaseVariables()
             context.scope.emitted.push({
                 kind: 'RETURN',
             })
-            return SemanticResult.success
+            return SuccessResult.ok
         }
 
         const collected = SemanticResult.collect([
             this.value.currentValue(context),
             Retain.ifStorage(this.value, context),
         ])
-        if (isFailure(collected)) return collected
+        if (collected.isError) return collected
         const [lattice, retainedValue] = collected.value
 
         const cirResult = retainedValue.toCIRExpression(context)
-        if (isFailure(cirResult)) return cirResult
+        if (cirResult.isError) return cirResult
         const retainedValueCIR = cirResult.value
 
         if (retainedValue instanceof Retain) {
             // && isolationLevel === ISOLATED
             const objectResult = retainedValue.value.toCIRExpression(context)
-            if (isFailure(objectResult)) return objectResult
+            if (objectResult.isError) return objectResult
             context.scope.emitted.push({
                 kind: 'ENSURE_UNIQUE',
                 object: objectResult.value,
@@ -73,22 +74,22 @@ export class ReturnStatement implements Statement {
                 value: retainedValueCIR,
             })
         }
-        return SemanticResult.success
+        return SuccessResult.ok
     }
 
     private validateInput(context: Context): SemanticResult {
         if (!this.value) {
             return context.calleeResult
-                ? SemanticResult.failure(
+                ? ErrorResult.failure(
                       `Must return a ${context.calleeResult.lattice.toString()} value`,
                       this.span,
                   )
-                : SemanticResult.success
+                : SuccessResult.ok
         }
 
         const calleeResult = context.calleeResult
         if (!calleeResult)
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 'Called function has no return value',
                 this.value!.span,
             )
@@ -96,20 +97,20 @@ export class ReturnStatement implements Statement {
             this.value.currentValue(context),
             this.value.isolationLevel(context),
         ])
-        if (isFailure(collected)) return collected
+        if (collected.isError) return collected
 
         const [lattice, isolationLevel] = collected.value
         if (!calleeResult.lattice.isSupersetTo(lattice))
-            return SemanticResult.failure(
+            return ErrorResult.failure(
                 'Return value type mismatch',
                 this.value!.span,
             )
 
         return calleeResult.isolationLevel !== isolationLevel
-            ? SemanticResult.failure(
+            ? ErrorResult.failure(
                   `Cannot return an ${isolationLevel} value as ${calleeResult.isolationLevel}`,
                   this.value!.span,
               )
-            : SemanticResult.success
+            : SuccessResult.ok
     }
 }

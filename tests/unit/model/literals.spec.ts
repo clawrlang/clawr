@@ -6,9 +6,7 @@ import { IntegerLattice, RCTypeLattice, truthvalue } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { TypeName } from '@/model/type-name'
-import { isFailure, isSuccess } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
-import assert from 'assert'
 import { describe, expect, it } from 'bun:test'
 
 describe('Literals', () => {
@@ -21,8 +19,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 const result = literal.toCIRExpression()
-                assert(isSuccess(result))
-                expect(result.value).toMatchObject({
+                expect(result.isSuccess && result.value).toMatchObject({
                     kind: 'TRUTHVALUE_LITERAL',
                     value: { values: [input] },
                 })
@@ -34,8 +31,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 const result = literal.currentValue()
-                assert(isSuccess(result))
-                expect(result.value).toMatchObject({
+                expect(result.isSuccess && result.value).toMatchObject({
                     values: [input],
                 })
             })
@@ -51,8 +47,7 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 const result = literal.toCIRExpression()
-                assert(isSuccess(result))
-                expect(result.value).toMatchObject({
+                expect(result.isSuccess && result.value).toMatchObject({
                     kind: 'INTEGER_LITERAL',
                     value: { max: input, min: input },
                 })
@@ -64,7 +59,6 @@ describe('Literals', () => {
                     span: someCodeSpan,
                 })
                 const result = literal.currentValue()
-                assert(isSuccess(result))
                 expect(result.value).toMatchObject({
                     min: BigInt(input),
                     max: BigInt(input),
@@ -129,8 +123,7 @@ describe('Literals', () => {
                 }),
                 isolationLevel: SHARED,
             })
-            assert(isSuccess(result))
-            expect(result.value).toMatchObject({
+            expect(result.isSuccess && result.value).toMatchObject({
                 kind: 'ALLOCATION',
                 fields: [
                     {
@@ -205,8 +198,7 @@ describe('Literals', () => {
                     type: TypeName.create({ name: 'MyType' }),
                 }),
             })
-            assert(isSuccess(result))
-            expect(result.value).toMatchObject({
+            expect(result.isSuccess && result.value).toMatchObject({
                 type: { name: 'MyType' },
                 fields: {
                     x: { min: 42n, max: 42n },
@@ -267,7 +259,7 @@ describe('Literals', () => {
                     }),
                 }),
             })
-            expect(isFailure(result)).toBeTrue()
+            expect(result.isError).toBeTrue()
         })
     })
 })

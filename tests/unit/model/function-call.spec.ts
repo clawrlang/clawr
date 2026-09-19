@@ -9,9 +9,7 @@ import { Parameter } from '@/model/parameter'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
-import { isSuccess } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
-import assert from 'assert'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('FunctionCall', () => {
@@ -37,8 +35,7 @@ describe('FunctionCall', () => {
             }),
         )
         const result = query.toCIRExpression(context)
-        assert(isSuccess(result))
-        expect(result.value).toMatchObject({
+        expect(result.isSuccess && result.value).toMatchObject({
             kind: 'CALL',
             name: {
                 baseName: 'foo',
@@ -93,8 +90,7 @@ describe('FunctionCall', () => {
             }),
         )
         const result = query.toCIRExpression(context)
-        assert(isSuccess(result))
-        expect(result.value).toMatchObject({
+        expect(result.isSuccess && result.value).toMatchObject({
             kind: 'CALL',
             name: {
                 baseName: 'foo',
@@ -141,8 +137,7 @@ describe('FunctionCall', () => {
                 span: someCodeSpan,
             })
             const result = query.toCIRExpression(context)
-            assert(isSuccess(result))
-            expect(result.value).toMatchObject({
+            expect(result.isSuccess && result.value).toMatchObject({
                 kind: 'CALL',
                 name: {
                     baseName: 'foo',
@@ -176,8 +171,7 @@ describe('FunctionCall', () => {
                 span: someCodeSpan,
             })
             const result = query.toCIRExpression(context)
-            assert(isSuccess(result))
-            expect(result.value).toMatchObject({
+            expect(result.isSuccess && result.value).toMatchObject({
                 kind: 'CALL',
                 name: {
                     baseName: 'copy',

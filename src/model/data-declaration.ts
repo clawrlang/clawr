@@ -1,3 +1,4 @@
+import { SuccessResult } from '@/tools/result'
 import { SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration, Expression } from '.'
 import { IsolationLevel } from './isolation-level'
@@ -39,6 +40,6 @@ export class DataDeclaration implements Declaration {
                 lattice: field.lattice!.toCIR(),
             })),
         })
-        return SemanticResult.success
+        return SuccessResult.ok
     }
 }

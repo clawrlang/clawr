@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { SemanticResult, Success } from '@/tools/semantic-result'
+import { SuccessResult } from '@/tools/result'
 import { Expression } from '.'
 import { ISOLATED } from './isolation-level'
 import { IntegerLattice } from './lattice'
@@ -31,20 +31,22 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         )
     }
 
-    isolationLevel(): Success<ISOLATED> {
-        return SemanticResult.value(ISOLATED)
+    isolationLevel(): SuccessResult<ISOLATED> {
+        return SuccessResult.value(ISOLATED)
     }
 
-    currentValue(): Success<IntegerLattice<Value, Value>> {
-        return SemanticResult.value(this.value)
+    currentValue(): SuccessResult<IntegerLattice<Value, Value>> {
+        return SuccessResult.value(this.value)
     }
 
-    declaredLattice(): Success<IntegerLattice<Value, Value>> {
-        return SemanticResult.value(this.value)
+    declaredLattice(): SuccessResult<IntegerLattice<Value, Value>> {
+        return SuccessResult.value(this.value)
     }
 
-    toCIRExpression(): Success<cir.Expression & { kind: 'INTEGER_LITERAL' }> {
-        return SemanticResult.value({
+    toCIRExpression(): SuccessResult<
+        cir.Expression & { kind: 'INTEGER_LITERAL' }
+    > {
+        return SuccessResult.value({
             kind: 'INTEGER_LITERAL',
             value: this.value.toCIR() as cir.Lattice & {
                 type: 'integer'
@@ -54,7 +56,7 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         })
     }
 
-    isEffectivelyConst(): Success<true> {
-        return SemanticResult.true
+    isEffectivelyConst(): SuccessResult<true> {
+        return SuccessResult.true
     }
 }

@@ -1,5 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { SuccessResult } from '@/tools/result'
+import { Result } from '@/tools/result'
 import { SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration } from '.'
 import { DataField } from './data-declaration'
@@ -90,6 +90,6 @@ export class ObjectDeclaration implements Declaration {
                 lattice: field.lattice!.toCIR(),
             })),
         })
-        return SuccessResult.ok
+        return Result.ok
     }
 }

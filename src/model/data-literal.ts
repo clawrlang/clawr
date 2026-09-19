@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { SuccessResult } from '@/tools/result'
+import { Result, SuccessResult } from '@/tools/result'
 import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, ContextWithLattice, Expression } from '.'
 import { FunctionCall } from './function-call'
@@ -28,11 +28,11 @@ export class DataLiteral implements Expression {
     }
 
     isEffectivelyConst(): SuccessResult<true> {
-        return SuccessResult.true
+        return Result.true
     }
 
     isolationLevel(): SuccessResult<UNIQUE> {
-        return SuccessResult.value(UNIQUE)
+        return Result.value(UNIQUE)
     }
 
     currentValue(context: ContextWithLattice): SemanticResult<Lattice> {
@@ -69,7 +69,7 @@ export class DataLiteral implements Expression {
         )
         if (fieldValuesResult.isError) return fieldValuesResult
         const fieldValues = fieldValuesResult.value
-        return SuccessResult.value(
+        return Result.value(
             RCTypeLattice.create({
                 type: decl.name,
                 fields: Object.fromEntries(
@@ -91,7 +91,7 @@ export class DataLiteral implements Expression {
                 `DataLiteral.declaredLattice: type ${context.type.name} not found in scope`,
                 this.span,
             )
-        return SuccessResult.value(
+        return Result.value(
             RCTypeLattice.create({
                 type: decl.name,
                 fields: Object.fromEntries(
@@ -143,7 +143,7 @@ export class DataLiteral implements Expression {
                 }
                 const valueResult = field.value.toCIRExpression(nestedContext)
                 if (valueResult.isError) return valueResult
-                return SuccessResult.value({
+                return Result.value({
                     name: field.name,
                     value: valueResult.value,
                     lattice: valueResult.value.value,
@@ -153,7 +153,7 @@ export class DataLiteral implements Expression {
         if (fieldValuesResult.isError) return fieldValuesResult
 
         const fields = fieldValuesResult.value
-        return SuccessResult.value({
+        return Result.value({
             kind: 'ALLOCATION',
             isolationLevel: context.isolationLevel!,
             fields,

@@ -1,5 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { SuccessResult } from '@/tools/result'
+import { Result } from '@/tools/result'
 import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { Retain } from './retain'
@@ -29,7 +29,7 @@ export class ReturnStatement implements Statement {
             context.scope.emitted.push({
                 kind: 'RETURN',
             })
-            return SuccessResult.ok
+            return Result.ok
         }
 
         const collected = SemanticResult.collect([
@@ -74,7 +74,7 @@ export class ReturnStatement implements Statement {
                 value: retainedValueCIR,
             })
         }
-        return SuccessResult.ok
+        return Result.ok
     }
 
     private validateInput(context: Context): SemanticResult {
@@ -84,7 +84,7 @@ export class ReturnStatement implements Statement {
                       `Must return a ${context.calleeResult.lattice.toString()} value`,
                       this.span,
                   )
-                : SuccessResult.ok
+                : Result.ok
         }
 
         const calleeResult = context.calleeResult
@@ -111,6 +111,6 @@ export class ReturnStatement implements Statement {
                   `Cannot return an ${isolationLevel} value as ${calleeResult.isolationLevel}`,
                   this.value!.span,
               )
-            : SuccessResult.ok
+            : Result.ok
     }
 }

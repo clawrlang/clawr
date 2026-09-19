@@ -1,5 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { SuccessResult } from '@/tools/result'
+import { Result } from '@/tools/result'
 import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { DataLiteral } from './data-literal'
@@ -96,7 +96,7 @@ export class Assignment implements Statement {
                 target,
                 value: retainedValueCIRResult.value,
             })
-            return SuccessResult.ok
+            return Result.ok
         }
 
         const collectedValueResults = SemanticResult.collect([
@@ -170,7 +170,7 @@ export class Assignment implements Statement {
                 value: retainedValueCIR,
             })
         }
-        return SuccessResult.ok
+        return Result.ok
     }
 
     private checkValidity(context: Context): SemanticResult {
@@ -205,7 +205,7 @@ export class Assignment implements Statement {
         const valueIsolationLevelResult = this.value.isolationLevel(context)
         if (valueIsolationLevelResult.isError) return valueIsolationLevelResult
         const valueIsolationLevel = valueIsolationLevelResult.value
-        if (valueIsolationLevel === UNIQUE) return SuccessResult.ok
+        if (valueIsolationLevel === UNIQUE) return Result.ok
         if (valueIsolationLevel === UNKNOWN)
             return ErrorResult.failure(
                 'Parameter with unspecified isolation level may not be used in assignment',
@@ -216,6 +216,6 @@ export class Assignment implements Statement {
                 `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,
                 this.span,
             )
-        return SuccessResult.ok
+        return Result.ok
     }
 }

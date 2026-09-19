@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { SuccessResult } from '@/tools/result'
+import { Result, SuccessResult } from '@/tools/result'
 import { Expression } from '.'
 import { ISOLATED } from './isolation-level'
 import { IntegerLattice } from './lattice'
@@ -32,21 +32,21 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
     }
 
     isolationLevel(): SuccessResult<ISOLATED> {
-        return SuccessResult.value(ISOLATED)
+        return Result.value(ISOLATED)
     }
 
     currentValue(): SuccessResult<IntegerLattice<Value, Value>> {
-        return SuccessResult.value(this.value)
+        return Result.value(this.value)
     }
 
     declaredLattice(): SuccessResult<IntegerLattice<Value, Value>> {
-        return SuccessResult.value(this.value)
+        return Result.value(this.value)
     }
 
     toCIRExpression(): SuccessResult<
         cir.Expression & { kind: 'INTEGER_LITERAL' }
     > {
-        return SuccessResult.value({
+        return Result.value({
             kind: 'INTEGER_LITERAL',
             value: this.value.toCIR() as cir.Lattice & {
                 type: 'integer'
@@ -57,6 +57,6 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
     }
 
     isEffectivelyConst(): SuccessResult<true> {
-        return SuccessResult.true
+        return Result.true
     }
 }

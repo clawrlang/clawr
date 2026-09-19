@@ -6,7 +6,7 @@ export type SuccessResult<T = undefined> = {
 }
 type ErrorResult = { isSuccess: false; isError: true; error: Error }
 
-export const SuccessResult = {
+export const Result = {
     true: success(true as const),
     false: success(false as const),
     ok: success(undefined),

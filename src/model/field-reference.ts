@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { SuccessResult } from '@/tools/result'
+import { Result } from '@/tools/result'
 import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, isStorage } from '.'
 import { DataDeclaration } from './data-declaration'
@@ -49,16 +49,16 @@ export class FieldReference implements Expression {
             if (collected.isError) return collected
             const [isolationLevel, object] = collected.value
             if (isolationLevel === ISOLATED)
-                return SuccessResult.value([{ kind: 'ENSURE_UNIQUE', object }])
+                return Result.value([{ kind: 'ENSURE_UNIQUE', object }])
         }
-        return SuccessResult.value([])
+        return Result.value([])
     }
 
     isEffectivelyConst(context: Context): SemanticResult<boolean> {
         const isolationLevelResult = this.object.isolationLevel(context)
 
         if (isolationLevelResult.isError) return isolationLevelResult
-        if (isolationLevelResult.value === SHARED) return SuccessResult.false
+        if (isolationLevelResult.value === SHARED) return Result.false
 
         return this.object.isEffectivelyConst(context)
     }
@@ -68,14 +68,14 @@ export class FieldReference implements Expression {
         if (fieldResult.isError) return fieldResult
         const field = fieldResult.value
         return field.lattice instanceof RCTypeLattice
-            ? SuccessResult.value(field.isolationLevel ?? ISOLATED)
-            : SuccessResult.value(ISOLATED)
+            ? Result.value(field.isolationLevel ?? ISOLATED)
+            : Result.value(ISOLATED)
     }
 
     declaredLattice(context: Context): SemanticResult<Lattice> {
         const fieldResult = this.getFieldFromContext(context)
         if (fieldResult.isError) return fieldResult
-        return SuccessResult.value(fieldResult.value.lattice!)
+        return Result.value(fieldResult.value.lattice!)
     }
 
     currentValue(context: Context): SemanticResult<Lattice> {
@@ -88,7 +88,7 @@ export class FieldReference implements Expression {
                 this.object.span,
             )
         if (objectValue.fields)
-            return SuccessResult.value(objectValue.fields[this.field])
+            return Result.value(objectValue.fields[this.field])
 
         return this.declaredLattice(context)
     }
@@ -104,7 +104,7 @@ export class FieldReference implements Expression {
             const result = object.setCurrentValue?.(context, objectValue)
             if (result) return result
         }
-        return SuccessResult.ok
+        return Result.ok
     }
 
     toCIRExpression(
@@ -119,7 +119,7 @@ export class FieldReference implements Expression {
         if (cirResult.isError) return cirResult
         const object: cir.Expression = cirResult.value
 
-        return SuccessResult.value({
+        return Result.value({
             kind: 'FIELD_REF',
             object,
             field: this.field,
@@ -140,7 +140,7 @@ export class FieldReference implements Expression {
             context.scope.objectDeclaration(objectValue.type)
         const field = type?.fields.find((field) => field.name === this.field)
         return field
-            ? SuccessResult.value(field)
+            ? Result.value(field)
             : ErrorResult.failure(
                   `Field ${this.field} does not exist on type ${type?.name.canonical()}`,
                   this.fieldSpan,
@@ -156,6 +156,6 @@ export class FieldReference implements Expression {
                 `Cannot access field ${this.field} of a ${isolationLevel} type object with "${this.operator}" operator`,
                 this.span,
             )
-        } else return SuccessResult.ok
+        } else return Result.ok
     }
 }

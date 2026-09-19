@@ -1,5 +1,5 @@
 import { SourceCodeSpan } from './diagnostics'
-import { ErrorResult as Err, SuccessResult } from './result'
+import { ErrorResult as Err, Result, SuccessResult } from './result'
 import { SemanticError, SemanticErrorCollection } from './semantic-error'
 
 export type SemanticResult<T = undefined> = SuccessResult<T> | ErrorResult
@@ -24,7 +24,7 @@ export const SemanticResult = {
 
         if (errors.length > 0) return ErrorResult.errors(errors)
 
-        return SuccessResult.value(result as T)
+        return Result.value(result as T)
     },
 }
 

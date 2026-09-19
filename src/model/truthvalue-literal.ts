@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { SuccessResult } from '@/tools/result'
+import { Result, SuccessResult } from '@/tools/result'
 import { Expression } from '.'
 import { ISOLATED } from './isolation-level'
 import { Lattice, TruthvalueLattice, truthvalue } from './lattice'
@@ -22,27 +22,27 @@ export class TruthValueLiteral<Value extends truthvalue> implements Expression {
     }
 
     isolationLevel(): SuccessResult<ISOLATED> {
-        return SuccessResult.value(ISOLATED)
+        return Result.value(ISOLATED)
     }
 
     currentValue(): SuccessResult<TruthvalueLattice<[Value]>> {
-        return SuccessResult.value(this.value)
+        return Result.value(this.value)
     }
 
     declaredLattice(): SuccessResult<Lattice> {
-        return SuccessResult.value(this.value)
+        return Result.value(this.value)
     }
 
     toCIRExpression(): SuccessResult<
         cir.Expression & { kind: 'TRUTHVALUE_LITERAL' }
     > {
-        return SuccessResult.value({
+        return Result.value({
             kind: 'TRUTHVALUE_LITERAL',
             value: this.value.toCIR(),
         })
     }
 
     isEffectivelyConst(): SuccessResult<true> {
-        return SuccessResult.true
+        return Result.true
     }
 }

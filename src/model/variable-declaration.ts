@@ -1,5 +1,5 @@
 import * as cir from '@/cir'
-import { SuccessResult } from '@/tools/result'
+import { Result } from '@/tools/result'
 import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import assert from 'assert'
 import { Context, Declaration, Expression, Statement } from '.'
@@ -74,7 +74,7 @@ export class VariableDeclaration implements Statement, Declaration {
             lattice,
         })
         this.setCurrentValue(context, initialValue)
-        return SuccessResult.ok
+        return Result.ok
     }
 
     private emitCIRDeclaration(
@@ -100,7 +100,7 @@ export class VariableDeclaration implements Statement, Declaration {
             lattice: lattice.toCIR(),
             initialValue: initialValue,
         })
-        return SuccessResult.ok
+        return Result.ok
     }
 
     private setCurrentValue(context: Context, currentValue: Lattice) {
@@ -124,13 +124,13 @@ export class VariableDeclaration implements Statement, Declaration {
             this.initialValue.isolationLevel(context)
         if (valueIsolationLevelResult.isError) return valueIsolationLevelResult
         const valueIsolationLevel = valueIsolationLevelResult.value
-        if (valueIsolationLevel === UNIQUE) return SuccessResult.ok
+        if (valueIsolationLevel === UNIQUE) return Result.ok
         if (this.isolationLevel !== valueIsolationLevel)
             return ErrorResult.failure(
                 `Cannot assign ${valueIsolationLevel} value to ${this.isolationLevel} target`,
                 this.initialValue.span,
             )
-        return SuccessResult.ok
+        return Result.ok
     }
 
     private isValidValue(currentValue: Lattice) {

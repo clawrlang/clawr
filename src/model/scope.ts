@@ -1,5 +1,5 @@
 import * as cir from '@/cir'
-import { ErrorResult, Result, SuccessResult } from '@/tools/result'
+import { ErrorResult, Result } from '@/tools/result'
 import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { FunctionName } from './function-name'
@@ -141,7 +141,7 @@ export class Scope {
         if (!variable?.lattice.isSupersetTo(lattice))
             return ErrorResult.failure(`Incompatible value for ${name}`)
         this.currentValues.set(name, lattice)
-        return SuccessResult.ok
+        return Result.ok
     }
 }
 

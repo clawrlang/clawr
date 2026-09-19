@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
-import { SuccessResult } from '@/tools/result'
+import { Result, SuccessResult } from '@/tools/result'
 import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { FunctionName } from './function-name'
@@ -44,12 +44,11 @@ export class FunctionCall implements Expression, Statement {
     }
 
     isEffectivelyConst(): SuccessResult<true> {
-        return SuccessResult.true
+        return Result.true
     }
 
     isolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
-        if (this.name.toString() === 'copy(of:)')
-            return SuccessResult.value(UNIQUE)
+        if (this.name.toString() === 'copy(of:)') return Result.value(UNIQUE)
 
         const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
@@ -70,7 +69,7 @@ export class FunctionCall implements Expression, Statement {
             if (valueResult.isError) return valueResult
             const value = valueResult.value
             return value instanceof RCTypeLattice
-                ? SuccessResult.value(value)
+                ? Result.value(value)
                 : ErrorResult.failure('not a reference-counted type', this.span)
         }
 
@@ -88,7 +87,7 @@ export class FunctionCall implements Expression, Statement {
                 `Function declaration has no result lattice: ${this.name.toString()}`,
                 this.span,
             )
-        return SuccessResult.value(latticeResult.value)
+        return Result.value(latticeResult.value)
     }
 
     toCIRExpression(context: Context): SemanticResult<cir.Expression> {
@@ -100,7 +99,7 @@ export class FunctionCall implements Expression, Statement {
         if (argsResult.isError) return argsResult
         const [value, ...args] = argsResult.value
 
-        return SuccessResult.value({
+        return Result.value({
             kind: 'CALL',
             name: this.name.toCIR(),
             arguments: args,
@@ -155,6 +154,6 @@ export class FunctionCall implements Expression, Statement {
                 arguments: args,
             })
         }
-        return SuccessResult.ok
+        return Result.ok
     }
 }

@@ -1,4 +1,4 @@
-import { SuccessResult } from '@/tools/result'
+import { Result } from '@/tools/result'
 import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
@@ -14,9 +14,9 @@ describe('SemanticResult', () => {
     describe('collect', () => {
         it('collects successful values', () => {
             const result = SemanticResult.collect([
-                SuccessResult.value(1),
-                SuccessResult.value(2),
-                SuccessResult.value(3),
+                Result.value(1),
+                Result.value(2),
+                Result.value(3),
             ])
             expect(result.isError).toBeFalse()
             expect(result.isSuccess && result.value).toEqual([1, 2, 3])
@@ -24,7 +24,7 @@ describe('SemanticResult', () => {
 
         it('collects failures', () => {
             const result = SemanticResult.collect([
-                SuccessResult.value(1),
+                Result.value(1),
                 ErrorResult.failure('This is does not end it', someCodeSpan),
                 ErrorResult.failure('This also is does end it', someCodeSpan),
                 ErrorResult.failure('This is the final thing', someCodeSpan),

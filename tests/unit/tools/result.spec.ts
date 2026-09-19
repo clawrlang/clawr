@@ -1,18 +1,18 @@
-import { ErrorResult, SuccessResult } from '@/tools/result'
+import { ErrorResult, Result } from '@/tools/result'
 import { describe, expect, it } from 'bun:test'
 
 describe('Result', () => {
     describe('success', () => {
         it('is successful', () => {
-            expect(SuccessResult.value(42).isSuccess).toBeTrue()
+            expect(Result.value(42).isSuccess).toBeTrue()
         })
 
         it('has no error', () => {
-            expect(SuccessResult.value(42).isError).toBeFalse()
+            expect(Result.value(42).isError).toBeFalse()
         })
 
         it('has a resolved value', () => {
-            expect(SuccessResult.value(42).value).toBe(42)
+            expect(Result.value(42).value).toBe(42)
         })
     })
 

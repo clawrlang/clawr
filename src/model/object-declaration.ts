@@ -4,8 +4,6 @@ import { SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration } from '.'
 import { DataField } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
-import { SHARED } from './isolation-level'
-import { RCTypeLattice } from './lattice'
 import { TypeName } from './type-name'
 
 export class ObjectDeclaration implements Declaration {
@@ -59,11 +57,7 @@ export class ObjectDeclaration implements Declaration {
             scope: context.scope.createChildScope(),
         }
         objectContext.scope.addObjectDeclaration(this)
-        objectContext.scope.addVariableDeclaration('self', {
-            isImmutable: false,
-            isolationLevel: SHARED,
-            lattice: RCTypeLattice.create({ type: this.name }),
-        })
+        objectContext.scope.addSelfVariable(this.name)
 
         const methodsResult = SemanticResult.collect(
             [...this.readonly, ...this.mutating].map((m) =>

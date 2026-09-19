@@ -3,7 +3,7 @@ import { ErrorResult, Result } from '@/tools/result'
 import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { FunctionName } from './function-name'
-import { IsolationLevel, UNKNOWN } from './isolation-level'
+import { IsolationLevel, SHARED, UNKNOWN } from './isolation-level'
 import { Lattice, RCTypeLattice } from './lattice'
 import { ObjectDeclaration } from './object-declaration'
 import { TypeName } from './type-name'
@@ -106,6 +106,22 @@ export class Scope {
         return this.rootScope.variableDeclaration(name)
     }
 
+    addVariableDeclaration(name: string, value: Variable) {
+        this.variables.set(name, value)
+    }
+
+    selfVariable(): Variable | undefined {
+        return this.variableDeclaration('self')
+    }
+
+    addSelfVariable(type: TypeName) {
+        this.addVariableDeclaration('self', {
+            isImmutable: false,
+            isolationLevel: SHARED,
+            lattice: RCTypeLattice.create({ type }),
+        })
+    }
+
     releaseVariables() {
         const vars = [...this.variables.entries()]
             .filter((v) => v[1].lattice instanceof RCTypeLattice)
@@ -120,10 +136,6 @@ export class Scope {
                 },
             })
         }
-    }
-
-    addVariableDeclaration(name: string, value: Variable) {
-        this.variables.set(name, value)
     }
 
     currentValue(name: string): Lattice | undefined {

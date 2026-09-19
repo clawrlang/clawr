@@ -237,7 +237,7 @@ export class FunctionDeclaration implements Declaration {
             scope: parameterScopeResult.value,
         }
 
-        const self = context.scope.variableDeclaration('self')
+        const self = context.scope.selfVariable()
         if (self && !(self.lattice instanceof RCTypeLattice))
             throw new Error(`'self' variable must be an rc-type`)
 

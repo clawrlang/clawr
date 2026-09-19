@@ -98,17 +98,7 @@ describe('FunctionDeclaration (initializer)', () => {
                 span: someCodeSpan,
             }),
         )
-        context.scope.addVariableDeclaration('self', {
-            isImmutable: true,
-            isolationLevel: SHARED,
-            lattice: RCTypeLattice.create({
-                type: TypeName.create({ name: 'Object' }),
-            }),
-        })
-        context.scope.setCurrentValue(
-            'self',
-            RCTypeLattice.create({ type: TypeName.create({ name: 'Object' }) }),
-        )
+        context.scope.addSelfVariable(TypeName.create({ name: 'Object' }))
 
         const result = funcDecl.emitInitializer(context)
         expect(result.isSuccess || result.error.errors).toBeTrue()

@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
-import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, ContextWithLattice, Expression } from '.'
 import { FunctionCall } from './function-call'
 import { UNIQUE } from './isolation-level'
@@ -38,7 +38,7 @@ export class DataLiteral implements Expression {
     currentValue(context: ContextWithLattice): SemanticResult<Lattice> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 'Data Literal without explicit value set is not supported',
                 this.span,
             )
@@ -46,7 +46,7 @@ export class DataLiteral implements Expression {
         const objectDecl = context.scope.objectDeclaration(explicitLattice.type)
         const decl = dataDecl ?? objectDecl
         if (!decl)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `DataLiteral.currentValue: type ${explicitLattice.type.name} not found in scope`,
                 this.span,
             )
@@ -57,7 +57,7 @@ export class DataLiteral implements Expression {
                     (declaredField) => declaredField.name === field.name,
                 )
                 if (!fieldDeclaration)
-                    return ErrorResult.failure(
+                    return SemanticErrorResult.failure(
                         `DataLiteral.currentValue: field ${field.name} not found on type ${explicitLattice.type.name}`,
                         this.span,
                     )
@@ -87,7 +87,7 @@ export class DataLiteral implements Expression {
     ): SemanticResult<Lattice> {
         const decl = context.scope.dataDeclaration(context.type)
         if (!decl)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `DataLiteral.declaredLattice: type ${context.type.name} not found in scope`,
                 this.span,
             )
@@ -106,12 +106,12 @@ export class DataLiteral implements Expression {
     ): SemanticResult<cir.Expression> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 'DataLiteral.toCIRExpression: data literal without explicit type',
                 this.span,
             )
         if (!context.isolationLevel)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 'DataLiteral.toCIRExpression: target isolation level not specified',
                 this.span,
             )
@@ -120,7 +120,7 @@ export class DataLiteral implements Expression {
             context.scope.dataDeclaration(explicitLattice.type) ??
             context.scope.objectDeclaration(explicitLattice.type)
         if (!targetType)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `DataLiteral.toCIRExpression: target type ${explicitLattice.type.name} not found in scope`,
                 this.span,
             )
@@ -132,7 +132,7 @@ export class DataLiteral implements Expression {
             this.fields.map((field) => {
                 const fieldDeclaration = fieldDeclarations.get(field.name)
                 if (!fieldDeclaration)
-                    return ErrorResult.failure(
+                    return SemanticErrorResult.failure(
                         `field ${field.name} not found on type ${explicitLattice.type.canonical()}`,
                         this.span,
                     )

@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { Result } from '@/tools/result'
-import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import assert from 'assert'
 import { Context, Declaration, Expression, Statement } from '.'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
@@ -115,7 +115,7 @@ export class VariableDeclaration implements Statement, Declaration {
         context: Context,
     ): SemanticResult {
         if (!this.isValidValue(currentValue))
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 'Incompatible initial value',
                 this.initialValue.span,
             )
@@ -126,7 +126,7 @@ export class VariableDeclaration implements Statement, Declaration {
         const valueIsolationLevel = valueIsolationLevelResult.value
         if (valueIsolationLevel === UNIQUE) return Result.ok
         if (this.isolationLevel !== valueIsolationLevel)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `Cannot assign ${valueIsolationLevel} value to ${this.isolationLevel} target`,
                 this.initialValue.span,
             )

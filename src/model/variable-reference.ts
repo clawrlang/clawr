@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
-import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { Lattice } from './lattice'
@@ -26,7 +26,7 @@ export class VariableReference implements Expression {
         const constResult = this.isEffectivelyConst(context)
         if (constResult.isError) return constResult
         if (constResult.value && this.name !== 'self')
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `Variable ${this.name} is not mutable`,
                 this.span,
             )
@@ -55,7 +55,7 @@ export class VariableReference implements Expression {
         const result = context.scope.currentValue(this.name)
         return result
             ? Result.value(result)
-            : ErrorResult.failure(
+            : SemanticErrorResult.failure(
                   `Variable ${this.name} has no value in the current context`,
                   this.span,
               )
@@ -64,7 +64,7 @@ export class VariableReference implements Expression {
     setCurrentValue(context: Context, value: Lattice): SemanticResult {
         const result = context.scope.setCurrentValue(this.name, value)
         if ('error' in result)
-            return ErrorResult.failure(result.error.message, this.span)
+            return SemanticErrorResult.failure(result.error.message, this.span)
         return Result.ok
     }
 
@@ -85,7 +85,7 @@ export class VariableReference implements Expression {
     private lookupInScope(context: Context) {
         const variable = context.scope.variableDeclaration(this.name)
         if (!variable)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `Variable ${this.name} is not defined in the current context`,
                 this.span,
             )

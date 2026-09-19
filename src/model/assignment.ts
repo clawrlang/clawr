@@ -1,6 +1,6 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
-import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { DataLiteral } from './data-literal'
 import { FieldReference } from './field-reference'
@@ -40,7 +40,7 @@ export class Assignment implements Statement {
 
         const [targetIsolationLevel, targetLattice] = collected.value
         if (targetIsolationLevel === UNKNOWN)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 'Cannot assign to target parameter with UNKNOWN isolation-level',
                 this.span,
             )
@@ -81,7 +81,7 @@ export class Assignment implements Statement {
             this.value instanceof DataLiteral
         ) {
             if (explicitLatticeContext.isolationLevel === UNKNOWN)
-                return ErrorResult.failure(
+                return SemanticErrorResult.failure(
                     'Cannot assign to parameter with UNKNOWN isolationLevel',
                     this.span,
                 )
@@ -107,7 +107,7 @@ export class Assignment implements Statement {
 
         const [valueIsolationLevel, retainedValue] = collectedValueResults.value
         if (explicitLatticeContext.isolationLevel === UNKNOWN)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 'Cannot assign to parameter with UNKNOWN isolationLevel',
                 this.span,
             )
@@ -182,7 +182,7 @@ export class Assignment implements Statement {
         const [targetLattice, targetIsolationLevel] = collected.value
 
         if (targetIsolationLevel === UNKNOWN)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 'Cannot assign to UNKNOWN isolation target',
                 this.span,
             )
@@ -198,7 +198,7 @@ export class Assignment implements Statement {
         if (assignedValueResult.isError) return assignedValueResult
         const assignedValue = assignedValueResult.value
         if (!targetLattice.isSupersetTo(assignedValue))
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
                 this.span,
             )
@@ -207,12 +207,12 @@ export class Assignment implements Statement {
         const valueIsolationLevel = valueIsolationLevelResult.value
         if (valueIsolationLevel === UNIQUE) return Result.ok
         if (valueIsolationLevel === UNKNOWN)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 'Parameter with unspecified isolation level may not be used in assignment',
                 this.value.span,
             )
         if (targetIsolationLevel !== valueIsolationLevel)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `Cannot assign ${valueIsolationLevel} value to ${targetIsolationLevel} target`,
                 this.span,
             )

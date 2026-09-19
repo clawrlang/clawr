@@ -1,6 +1,6 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
-import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { Retain } from './retain'
 
@@ -80,7 +80,7 @@ export class ReturnStatement implements Statement {
     private validateInput(context: Context): SemanticResult {
         if (!this.value) {
             return context.calleeResult
-                ? ErrorResult.failure(
+                ? SemanticErrorResult.failure(
                       `Must return a ${context.calleeResult.lattice.toString()} value`,
                       this.span,
                   )
@@ -89,7 +89,7 @@ export class ReturnStatement implements Statement {
 
         const calleeResult = context.calleeResult
         if (!calleeResult)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 'Called function has no return value',
                 this.value!.span,
             )
@@ -101,13 +101,13 @@ export class ReturnStatement implements Statement {
 
         const [lattice, isolationLevel] = collected.value
         if (!calleeResult.lattice.isSupersetTo(lattice))
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 'Return value type mismatch',
                 this.value!.span,
             )
 
         return calleeResult.isolationLevel !== isolationLevel
-            ? ErrorResult.failure(
+            ? SemanticErrorResult.failure(
                   `Cannot return an ${isolationLevel} value as ${calleeResult.isolationLevel}`,
                   this.value!.span,
               )

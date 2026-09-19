@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
 import { mapFilter } from '@/tools/map-filter'
 import { Result } from '@/tools/result'
-import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration, Expression, Statement } from '.'
 import { Assignment } from './assignment'
 import { FunctionName } from './function-name'
@@ -268,7 +268,7 @@ export class FunctionDeclaration implements Declaration {
             if (collected.isError) return collected
             const [isolationLevel, lattice] = collected.value
             if (isolationLevel === UNKNOWN)
-                return ErrorResult.failure(
+                return SemanticErrorResult.failure(
                     'Returning UNKNOWN value',
                     this.implementation.expression.span,
                 )
@@ -288,7 +288,7 @@ export class FunctionDeclaration implements Declaration {
                 ? param.defaultValue.currentValue(context)
                 : param.lattice
                   ? Result.value(param.lattice)
-                  : ErrorResult.failure(
+                  : SemanticErrorResult.failure(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
                         param.span,
                     )

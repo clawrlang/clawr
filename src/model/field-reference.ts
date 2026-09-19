@@ -1,7 +1,7 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
-import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, isStorage } from '.'
 import { DataDeclaration } from './data-declaration'
 import { ISOLATED, IsolationLevel, SHARED } from './isolation-level'
@@ -36,7 +36,7 @@ export class FieldReference implements Expression {
         const constResult = this.isEffectivelyConst(context)
         if (constResult.isError) return constResult
         if (constResult.value)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `Cannot mutate field ${this.field} of a reference type object`,
                 this.span,
             )
@@ -83,7 +83,7 @@ export class FieldReference implements Expression {
         if (objectValueResult.isError) return objectValueResult
         const objectValue = objectValueResult.value
         if (!(objectValue instanceof RCTypeLattice))
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `${objectValue.toCIR().type} is not an rc-type`,
                 this.object.span,
             )
@@ -134,14 +134,17 @@ export class FieldReference implements Expression {
         if (objectValueResult.isError) return objectValueResult
         const objectValue = objectValueResult.value
         if (!(objectValue instanceof RCTypeLattice))
-            return ErrorResult.failure('unknown object value', this.span)
+            return SemanticErrorResult.failure(
+                'unknown object value',
+                this.span,
+            )
         const type =
             context.scope.dataDeclaration(objectValue.type) ||
             context.scope.objectDeclaration(objectValue.type)
         const field = type?.fields.find((field) => field.name === this.field)
         return field
             ? Result.value(field)
-            : ErrorResult.failure(
+            : SemanticErrorResult.failure(
                   `Field ${this.field} does not exist on type ${type?.name.canonical()}`,
                   this.fieldSpan,
               )
@@ -152,7 +155,7 @@ export class FieldReference implements Expression {
         if (isolationLevelResult.isError) return isolationLevelResult
         const isolationLevel = isolationLevelResult.value
         if ((isolationLevel === SHARED) !== (this.operator === '->')) {
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `Cannot access field ${this.field} of a ${isolationLevel} type object with "${this.operator}" operator`,
                 this.span,
             )

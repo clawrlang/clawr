@@ -1,12 +1,15 @@
 import { Result } from '@/tools/result'
-import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('SemanticResult', () => {
     describe('failure', () => {
         it('has an error', () => {
-            const failure = ErrorResult.failure('someError', someCodeSpan)
+            const failure = SemanticErrorResult.failure(
+                'someError',
+                someCodeSpan,
+            )
             expect(failure.error.errors).toHaveLength(1)
         })
     })
@@ -25,9 +28,18 @@ describe('SemanticResult', () => {
         it('collects failures', () => {
             const result = SemanticResult.collect([
                 Result.value(1),
-                ErrorResult.failure('This is does not end it', someCodeSpan),
-                ErrorResult.failure('This also is does end it', someCodeSpan),
-                ErrorResult.failure('This is the final thing', someCodeSpan),
+                SemanticErrorResult.failure(
+                    'This is does not end it',
+                    someCodeSpan,
+                ),
+                SemanticErrorResult.failure(
+                    'This also is does end it',
+                    someCodeSpan,
+                ),
+                SemanticErrorResult.failure(
+                    'This is the final thing',
+                    someCodeSpan,
+                ),
             ])
             expect(result.isError && result.error.errors).toHaveLength(3)
         })

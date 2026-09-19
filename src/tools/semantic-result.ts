@@ -1,13 +1,9 @@
 import { SourceCodeSpan } from './diagnostics'
-import { ErrorResult as Err, Result, SuccessResult } from './result'
+import { ErrorResult, Result, SuccessResult } from './result'
 import { SemanticError, SemanticErrorCollection } from './semantic-error'
 
-export type SemanticResult<T = undefined> = SuccessResult<T> | ErrorResult
-type ErrorResult = {
-    isSuccess: false
-    isError: true
-    error: SemanticErrorCollection
-}
+export type SemanticResult<T = undefined> =
+    SuccessResult<T> | ErrorResult<SemanticErrorCollection>
 
 export const SemanticResult = {
     collect<T extends unknown[]>(values: {
@@ -22,19 +18,20 @@ export const SemanticResult = {
             else result.push(value.value)
         }
 
-        if (errors.length > 0) return ErrorResult.errors(errors)
+        if (errors.length > 0) return SemanticErrorResult.errors(errors)
 
         return Result.value(result as T)
     },
 }
 
-export const ErrorResult = {
-    failure(message: string, span: SourceCodeSpan): ErrorResult {
+export const SemanticErrorResult = {
+    failure(
+        message: string,
+        span: SourceCodeSpan,
+    ): ErrorResult<SemanticErrorCollection> {
         return this.errors([SemanticError.create({ message, span })])
     },
-    errors(errors: SemanticError[]): ErrorResult {
-        return Err.failure(
-            SemanticErrorCollection.create(errors),
-        ) as ErrorResult
+    errors(errors: SemanticError[]): ErrorResult<SemanticErrorCollection> {
+        return ErrorResult.failure(SemanticErrorCollection.create(errors))
     },
 }

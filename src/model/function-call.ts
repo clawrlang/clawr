@@ -2,7 +2,7 @@ import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
 import { Result, SuccessResult } from '@/tools/result'
-import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { FunctionName } from './function-name'
 import { AnyIsolationLevel, UNIQUE } from './isolation-level'
@@ -52,7 +52,7 @@ export class FunctionCall implements Expression, Statement {
 
         const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `unknown function ${this.name.toString()}`,
                 this.span,
             )
@@ -70,12 +70,15 @@ export class FunctionCall implements Expression, Statement {
             const value = valueResult.value
             return value instanceof RCTypeLattice
                 ? Result.value(value)
-                : ErrorResult.failure('not a reference-counted type', this.span)
+                : SemanticErrorResult.failure(
+                      'not a reference-counted type',
+                      this.span,
+                  )
         }
 
         const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `Function declaration not found: ${this.name.toString()}`,
                 this.span,
             )
@@ -83,7 +86,7 @@ export class FunctionCall implements Expression, Statement {
         const latticeResult = decl.lattice(context)
         if (latticeResult.isError) return latticeResult
         if (!latticeResult.value)
-            return ErrorResult.failure(
+            return SemanticErrorResult.failure(
                 `Function declaration has no result lattice: ${this.name.toString()}`,
                 this.span,
             )

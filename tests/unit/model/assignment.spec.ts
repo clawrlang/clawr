@@ -10,7 +10,7 @@ import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
 import { TypeName } from '@/model/type-name'
 import { VariableReference } from '@/model/variable-reference'
-import { isFailure } from '@/tools/semantic-result'
+import { isFailure, isSuccess } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import assert from 'assert'
 import { describe, expect, it, test } from 'bun:test'
@@ -18,11 +18,12 @@ import { describe, expect, it, test } from 'bun:test'
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('x', {
+        context.scope.addVariableDeclaration('x', {
             isImmutable: false,
             isolationLevel: ISOLATED,
             lattice: IntegerLattice.unconstrained(),
         })
+
         context.scope.setCurrentValue('x', IntegerLattice.singleton(0n))
 
         const assignment = Assignment.create({
@@ -31,7 +32,8 @@ describe('Assignment', () => {
             span: someCodeSpan,
         })
 
-        assignment.emitStatement(context)
+        const result = assignment.emitStatement(context)
+        expect(isSuccess(result) || result.errors).toBeTrue()
 
         expect(context.scope.emitted).toMatchObject([
             {
@@ -63,7 +65,7 @@ describe('Assignment', () => {
                 ],
             }),
         )
-        context.scope.variables.set('x', {
+        context.scope.addVariableDeclaration('x', {
             isImmutable: false,
             isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
@@ -71,7 +73,6 @@ describe('Assignment', () => {
                 fields: { field: IntegerLattice.singleton(12n) },
             }),
         })
-        context.scope.setCurrentValue('x', IntegerLattice.singleton(0n))
 
         const assignment = Assignment.create({
             target: VariableReference.create({ name: 'x', span: someCodeSpan }),
@@ -151,38 +152,20 @@ describe('Assignment', () => {
                     ],
                 }),
             )
-            context.scope.variables.set('bar', {
+            context.scope.addVariableDeclaration('bar', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'OuterType' }),
                 }),
             })
-            context.scope.variables.set('foo', {
+            context.scope.addVariableDeclaration('foo', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'InnerType' }),
                 }),
             })
-            context.scope.setCurrentValue(
-                'foo',
-                RCTypeLattice.create({
-                    type: TypeName.create({ name: 'InnerType' }),
-                }),
-            )
-            context.scope.setCurrentValue(
-                'bar',
-                RCTypeLattice.create({
-                    type: TypeName.create({ name: 'OuterType' }),
-                    fields: {
-                        field: RCTypeLattice.create({
-                            type: TypeName.create({ name: 'InnerType' }),
-                            fields: {},
-                        }),
-                    },
-                }),
-            )
 
             const assignment = Assignment.create({
                 target: VariableReference.create({
@@ -246,33 +229,20 @@ describe('Assignment', () => {
                     fields: [],
                 }),
             )
-            context.scope.variables.set('bar', {
+            context.scope.addVariableDeclaration('bar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
             })
-            context.scope.variables.set('foo', {
+            context.scope.addVariableDeclaration('foo', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
             })
-            context.scope.setCurrentValue(
-                'bar',
-                RCTypeLattice.create({
-                    type: TypeName.create({ name: 'MyType' }),
-                    fields: {},
-                }),
-            )
-            context.scope.setCurrentValue(
-                'foo',
-                RCTypeLattice.create({
-                    type: TypeName.create({ name: 'MyType' }),
-                }),
-            )
 
             const assignment = Assignment.create({
                 target: VariableReference.create({
@@ -340,19 +310,13 @@ describe('Assignment', () => {
                 ],
             }),
         )
-        context.scope.variables.set('foo', {
+        context.scope.addVariableDeclaration('foo', {
             isImmutable: false,
             isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
-        context.scope.setCurrentValue(
-            'foo',
-            RCTypeLattice.create({
-                type: TypeName.create({ name: 'MyType' }),
-            }),
-        )
 
         const assignment = Assignment.create({
             target: FieldReference.create({
@@ -412,24 +376,20 @@ describe('Assignment', () => {
                 },
             }),
         )
-        context.scope.rootScope.variables.set('refVar', {
+        context.scope.rootScope.addVariableDeclaration('refVar', {
             isImmutable: false,
             isolationLevel: SHARED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
-        context.scope.rootScope.variables.set('mutVar', {
+        context.scope.rootScope.addVariableDeclaration('mutVar', {
             isImmutable: false,
             isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
-        context.scope.setCurrentValue(
-            'refVar',
-            RCTypeLattice.create({ type: TypeName.create({ name: 'MyType' }) }),
-        )
 
         const assignment = Assignment.create({
             target: VariableReference.create({
@@ -494,34 +454,20 @@ describe('Assignment', () => {
                         fields: [],
                     }),
                 )
-                context.scope.variables.set('target', {
+                context.scope.addVariableDeclaration('target', {
                     isImmutable: true,
                     isolationLevel: isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
-                context.scope.variables.set('value', {
+                context.scope.addVariableDeclaration('value', {
                     isImmutable: true,
                     isolationLevel: isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
-                context.scope.setCurrentValue(
-                    'target',
-                    RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyType' }),
-                        fields: {},
-                    }),
-                )
-                context.scope.setCurrentValue(
-                    'value',
-                    RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyType' }),
-                        fields: {},
-                    }),
-                )
 
                 const assignment = Assignment.create({
                     target: VariableReference.create({
@@ -570,17 +516,13 @@ describe('Assignment', () => {
                 ],
             }),
         )
-        context.scope.variables.set('x', {
+        context.scope.addVariableDeclaration('x', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
-        context.scope.setCurrentValue(
-            'x',
-            RCTypeLattice.create({ type: TypeName.create({ name: 'MyType' }) }),
-        )
 
         const assignment = Assignment.create({
             target: FieldReference.create({
@@ -632,17 +574,13 @@ describe('Assignment', () => {
                 ],
             }),
         )
-        context.scope.variables.set('x', {
+        context.scope.addVariableDeclaration('x', {
             isImmutable: true,
             isolationLevel: UNKNOWN,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
-        context.scope.setCurrentValue(
-            'x',
-            RCTypeLattice.create({ type: TypeName.create({ name: 'MyType' }) }),
-        )
 
         const assignment = Assignment.create({
             target: FieldReference.create({
@@ -701,32 +639,20 @@ describe('Assignment', () => {
                         ],
                     }),
                 )
-                context.scope.variables.set('target', {
+                context.scope.addVariableDeclaration('target', {
                     isImmutable: false,
                     isolationLevel: ISOLATED,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
-                context.scope.variables.set('value', {
+                context.scope.addVariableDeclaration('value', {
                     isImmutable,
                     isolationLevel: SHARED,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
-                context.scope.setCurrentValue(
-                    'target',
-                    RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyType' }),
-                    }),
-                )
-                context.scope.setCurrentValue(
-                    'value',
-                    RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyType' }),
-                    }),
-                )
                 const assignment = Assignment.create({
                     target: VariableReference.create({
                         name: 'target',
@@ -760,33 +686,20 @@ describe('Assignment', () => {
                         fields: [],
                     }),
                 )
-                context.scope.variables.set('target', {
+                context.scope.addVariableDeclaration('target', {
                     isImmutable: false,
                     isolationLevel: isolationLevel,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
-                context.scope.variables.set('value', {
+                context.scope.addVariableDeclaration('value', {
                     isImmutable: true,
                     isolationLevel: UNKNOWN,
                     lattice: RCTypeLattice.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
-                context.scope.setCurrentValue(
-                    'value',
-                    RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyType' }),
-                        fields: {},
-                    }),
-                )
-                context.scope.setCurrentValue(
-                    'target',
-                    RCTypeLattice.create({
-                        type: TypeName.create({ name: 'MyType' }),
-                    }),
-                )
 
                 const assignment = Assignment.create({
                     target: VariableReference.create({
@@ -814,12 +727,11 @@ describe('Assignment', () => {
     describe('updates current-value', () => {
         test('variable-reference', () => {
             const context = newSemanticContext()
-            context.scope.variables.set('x', {
+            context.scope.addVariableDeclaration('x', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
                 lattice: IntegerLattice.unconstrained(),
             })
-            context.scope.setCurrentValue('x', IntegerLattice.singleton(0n))
 
             const assignment = Assignment.create({
                 target: VariableReference.create({
@@ -859,7 +771,7 @@ describe('Assignment', () => {
                     ],
                 }),
             )
-            context.scope.variables.set('x', {
+            context.scope.addVariableDeclaration('x', {
                 isImmutable: true,
                 isolationLevel: SHARED,
                 lattice: RCTypeLattice.create({

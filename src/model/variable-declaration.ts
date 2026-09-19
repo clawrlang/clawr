@@ -1,5 +1,6 @@
 import * as cir from '@/cir'
 import { isFailure, SemanticResult } from '@/tools/semantic-result'
+import assert from 'assert'
 import { Context, Declaration, Expression, Statement } from '.'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 import { Lattice } from './lattice'
@@ -66,7 +67,11 @@ export class VariableDeclaration implements Statement, Declaration {
 
         const emissionResult = this.emitCIRDeclaration(context, lattice, scope)
         if (isFailure(emissionResult)) return emissionResult
-        this.addDeclarationToScope(scope, lattice)
+        scope.addVariableDeclaration(this.name, {
+            isImmutable: this.isImmutable,
+            isolationLevel: this.isolationLevel!!,
+            lattice,
+        })
         this.setCurrentValue(context, initialValue)
         return SemanticResult.success
     }
@@ -97,19 +102,11 @@ export class VariableDeclaration implements Statement, Declaration {
         return SemanticResult.success
     }
 
-    private addDeclarationToScope(
-        scope: Scope | Scope['rootScope'],
-        lattice: Lattice,
-    ) {
-        scope.variables.set(this.name, {
-            isImmutable: this.isImmutable,
-            isolationLevel: this.isolationLevel!!,
-            lattice,
-        })
-    }
-
     private setCurrentValue(context: Context, currentValue: Lattice) {
-        context.scope.setCurrentValue(this.name, currentValue)
+        assert(
+            context.scope.setCurrentValue(this.name, currentValue).isSuccess,
+            `Setting current value for variable ${this.name} failed`,
+        )
     }
 
     private checkValidity(

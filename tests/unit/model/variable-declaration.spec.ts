@@ -191,7 +191,7 @@ describe('VariableDeclaration', () => {
                     ],
                 }),
             )
-            context.scope.variables.set('bar', {
+            context.scope.addVariableDeclaration('bar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
@@ -271,7 +271,7 @@ describe('VariableDeclaration', () => {
                     ],
                 }),
             )
-            context.scope.variables.set('bar', {
+            context.scope.addVariableDeclaration('bar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
@@ -336,7 +336,7 @@ describe('VariableDeclaration', () => {
                     ],
                 }),
             )
-            context.scope.variables.set('bar', {
+            context.scope.addVariableDeclaration('bar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
@@ -538,19 +538,13 @@ describe('VariableDeclaration', () => {
                     fields: [],
                 }),
             )
-            context.scope.variables.set('c', {
+            context.scope.addVariableDeclaration('c', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
             })
-            context.scope.setCurrentValue(
-                'c',
-                RCTypeLattice.create({
-                    type: TypeName.create({ name: 'MyData' }),
-                }),
-            )
 
             const decl = VariableDeclaration.create({
                 isImmutable: true,
@@ -605,7 +599,7 @@ describe('VariableDeclaration', () => {
                         ],
                     }),
                 )
-                context.scope.variables.set('value', {
+                context.scope.addVariableDeclaration('value', {
                     isImmutable,
                     isolationLevel: SHARED,
                     lattice: RCTypeLattice.create({

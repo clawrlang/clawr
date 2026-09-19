@@ -75,17 +75,13 @@ describe('ReturnStatement', () => {
                 fields: [],
             }),
         )
-        context.scope.variables.set('x', {
+        context.scope.addVariableDeclaration('x', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
             }),
         })
-        context.scope.setCurrentValue(
-            'x',
-            RCTypeLattice.create({ type: TypeName.create({ name: 'MyData' }) }),
-        )
         const returnStatement = ReturnStatement.create({
             value: VariableReference.create({ name: 'x', span: someCodeSpan }),
             span: someCodeSpan,

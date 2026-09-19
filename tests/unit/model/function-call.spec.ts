@@ -154,19 +154,13 @@ describe('FunctionCall', () => {
 
         test('for copy(of:) function', () => {
             const context = newSemanticContext()
-            context.scope.variables.set('value', {
+            context.scope.addVariableDeclaration('value', {
                 isImmutable: true,
                 isolationLevel: SHARED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
             })
-            context.scope.setCurrentValue(
-                'value',
-                RCTypeLattice.create({
-                    type: TypeName.create({ name: 'MyData' }),
-                }),
-            )
 
             const query = FunctionCall.create({
                 baseName: 'copy',
@@ -303,15 +297,11 @@ describe('FunctionCall', () => {
 
     it('boxes integer variable for printing', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('x', {
+        context.scope.addVariableDeclaration('x', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min: 42n, max: 42n }),
         })
-        context.scope.setCurrentValue(
-            'x',
-            IntegerLattice.create({ min: 42n, max: 42n }),
-        )
 
         const statement = FunctionCall.create({
             baseName: 'print',

@@ -58,15 +58,11 @@ export class ObjectDeclaration implements Declaration {
             scope: context.scope.createChildScope(),
         }
         objectContext.scope.addObjectDeclaration(this)
-        objectContext.scope.variables.set('self', {
+        objectContext.scope.addVariableDeclaration('self', {
             isImmutable: false,
             isolationLevel: SHARED,
             lattice: RCTypeLattice.create({ type: this.name }),
         })
-        objectContext.scope.setCurrentValue(
-            'self',
-            RCTypeLattice.create({ type: this.name }),
-        )
 
         const methodsResult = SemanticResult.collect(
             [...this.readonly, ...this.mutating].map((m) =>

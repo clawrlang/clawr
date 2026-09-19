@@ -138,19 +138,13 @@ describe('FunctionDeclaration', () => {
                 fields: [],
             }),
         )
-        context.scope.variables.set('myVar', {
+        context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: SHARED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
             }),
         })
-        context.scope.setCurrentValue(
-            'myVar',
-            RCTypeLattice.create({
-                type: TypeName.create({ name: 'MyData' }),
-            }),
-        )
 
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
@@ -186,20 +180,13 @@ describe('FunctionDeclaration', () => {
                 fields: [],
             }),
         )
-        context.scope.variables.set('myVar', {
+        context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
             }),
         })
-        context.scope.setCurrentValue(
-            'myVar',
-            RCTypeLattice.create({
-                type: TypeName.create({ name: 'MyData' }),
-                fields: {},
-            }),
-        )
 
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
@@ -235,20 +222,13 @@ describe('FunctionDeclaration', () => {
                 fields: [],
             }),
         )
-        context.scope.variables.set('myVar', {
+        context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
                 type: TypeName.create({ name: 'MyData' }),
             }),
         })
-        context.scope.setCurrentValue(
-            'myVar',
-            RCTypeLattice.create({
-                type: TypeName.create({ name: 'MyData' }),
-                fields: {},
-            }),
-        )
 
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',
@@ -322,20 +302,13 @@ describe('FunctionDeclaration', () => {
                     fields: [],
                 }),
             )
-            context.scope.variables.set('myVar', {
+            context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
             })
-            context.scope.setCurrentValue(
-                'myVar',
-                RCTypeLattice.create({
-                    type: TypeName.create({ name: 'MyData' }),
-                    fields: {},
-                }),
-            )
 
             const funcDecl = FunctionDeclaration.create({
                 baseName: 'myFunction',
@@ -371,19 +344,13 @@ describe('FunctionDeclaration', () => {
                     fields: [],
                 }),
             )
-            context.scope.variables.set('myVar', {
+            context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: SHARED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
             })
-            context.scope.setCurrentValue(
-                'myVar',
-                RCTypeLattice.create({
-                    type: TypeName.create({ name: 'MyData' }),
-                }),
-            )
 
             const funcDecl = FunctionDeclaration.create({
                 baseName: 'myFunction',

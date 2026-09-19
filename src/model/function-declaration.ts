@@ -227,7 +227,7 @@ export class FunctionDeclaration implements Declaration {
             scope: parameterScopeResult.value,
         }
 
-        const self = context.scope.variables.get('self')
+        const self = context.scope.variableDeclaration('self')
         if (self && !(self.lattice instanceof RCTypeLattice))
             throw new Error(`'self' variable must be an rc-type`)
 
@@ -283,12 +283,11 @@ export class FunctionDeclaration implements Declaration {
                         param.span,
                     )
             if (isFailure(latticeResult)) return latticeResult
-            parameterScope.variables.set(param.varName, {
+            parameterScope.addVariableDeclaration(param.varName, {
                 isImmutable: param.isImmutable,
                 isolationLevel: param.isolationLevel,
                 lattice: latticeResult.value,
             })
-            parameterScope.setCurrentValue(param.varName, latticeResult.value)
         }
         return SemanticResult.value(parameterScope)
     }

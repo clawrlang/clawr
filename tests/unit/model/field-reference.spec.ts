@@ -14,7 +14,7 @@ import { describe, expect, it, test } from 'bun:test'
 describe('Field Reference', () => {
     it('infers its type from the context', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('myVar', {
+        context.scope.addVariableDeclaration('myVar', {
             isImmutable: false,
             isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
@@ -55,7 +55,7 @@ describe('Field Reference', () => {
 
     it('infers its isolation level from the context', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('myVar', {
+        context.scope.addVariableDeclaration('myVar', {
             isImmutable: false,
             isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
@@ -123,7 +123,7 @@ describe('Field Reference', () => {
         for (const { keyword, isImmutable, expected } of cases)
             test(`${keyword} object`, () => {
                 const context = newSemanticContext()
-                context.scope.variables.set('myVar', {
+                context.scope.addVariableDeclaration('myVar', {
                     isImmutable,
                     isolationLevel: expected,
                     lattice: RCTypeLattice.create({
@@ -184,7 +184,7 @@ describe('Field Reference', () => {
 
     it('throws if the field does not exist on the type', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('myVar', {
+        context.scope.addVariableDeclaration('myVar', {
             isImmutable: false,
             isolationLevel: ISOLATED,
             lattice: RCTypeLattice.create({
@@ -252,7 +252,7 @@ describe('Field Reference', () => {
         for (const { operator, isImmutable, isolationLevel } of cases) {
             test(`${isolationLevel} with "${operator}"`, () => {
                 const context = newSemanticContext()
-                context.scope.variables.set('myVar', {
+                context.scope.addVariableDeclaration('myVar', {
                     isImmutable,
                     isolationLevel: isolationLevel,
                     lattice: RCTypeLattice.create({
@@ -329,7 +329,7 @@ describe('Field Reference', () => {
         for (const { isImmutable, isolationLevel, expected } of cases) {
             it(`returns ${expected} if the object is ${isolationLevel}`, () => {
                 const context = newSemanticContext()
-                context.scope.variables.set('myVar', {
+                context.scope.addVariableDeclaration('myVar', {
                     isImmutable,
                     isolationLevel,
                     lattice: RCTypeLattice.create({
@@ -371,7 +371,7 @@ describe('Field Reference', () => {
 
         it('returns true if the object is ISOLATED immutable', () => {
             const context = newSemanticContext()
-            context.scope.variables.set('myVar', {
+            context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
@@ -412,7 +412,7 @@ describe('Field Reference', () => {
 
         it('returns true if the object is UNKNOWN immutable', () => {
             const context = newSemanticContext()
-            context.scope.variables.set('myVar', {
+            context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: UNKNOWN,
                 lattice: RCTypeLattice.create({
@@ -453,7 +453,7 @@ describe('Field Reference', () => {
 
         it('returns false if the object is mutable', () => {
             const context = newSemanticContext()
-            context.scope.variables.set('myVar', {
+            context.scope.addVariableDeclaration('myVar', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
@@ -512,19 +512,13 @@ describe('Field Reference', () => {
                     ],
                 }),
             )
-            context.scope.variables.set('myVar', {
+            context.scope.addVariableDeclaration('myVar', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'Data' }),
                 }),
             })
-            context.scope.setCurrentValue(
-                'myVar',
-                RCTypeLattice.create({
-                    type: TypeName.create({ name: 'Data' }),
-                }),
-            )
 
             const fieldRef = FieldReference.create({
                 object: VariableReference.create({
@@ -564,19 +558,13 @@ describe('Field Reference', () => {
                     span: someCodeSpan,
                 }),
             )
-            context.scope.variables.set('myVar', {
+            context.scope.addVariableDeclaration('myVar', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
                 lattice: RCTypeLattice.create({
                     type: TypeName.create({ name: 'Object' }),
                 }),
             })
-            context.scope.setCurrentValue(
-                'myVar',
-                RCTypeLattice.create({
-                    type: TypeName.create({ name: 'Object' }),
-                }),
-            )
 
             const fieldRef = FieldReference.create({
                 object: VariableReference.create({

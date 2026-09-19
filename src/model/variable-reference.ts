@@ -1,6 +1,6 @@
 import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { isFailure, SemanticResult, Success } from '@/tools/semantic-result'
+import { isFailure, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
 import { Lattice } from './lattice'
@@ -61,8 +61,10 @@ export class VariableReference implements Expression {
         return SemanticResult.value(result)
     }
 
-    setCurrentValue(context: Context, value: Lattice): Success {
-        context.scope.setCurrentValue(this.name, value)
+    setCurrentValue(context: Context, value: Lattice): SemanticResult {
+        const result = context.scope.setCurrentValue(this.name, value)
+        if ('error' in result)
+            return SemanticResult.failure(result.error.message, this.span)
         return SemanticResult.success
     }
 

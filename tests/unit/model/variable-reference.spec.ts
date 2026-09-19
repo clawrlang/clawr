@@ -12,12 +12,11 @@ import { describe, expect, it, test } from 'bun:test'
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('myVar', {
+        context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
-        context.scope.setCurrentValue('myVar', IntegerLattice.singleton(0n))
 
         const variableRef = VariableReference.create({
             name: 'myVar',
@@ -49,7 +48,7 @@ describe('Variable Reference', () => {
 
     it('infers its type from the context', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('myVar', {
+        context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min: 10n, max: 10n }),
@@ -68,15 +67,11 @@ describe('Variable Reference', () => {
 
     it('has the same current value as the referenced variable', () => {
         const context = newSemanticContext()
-        context.scope.variables.set('myVar', {
+        context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             lattice: IntegerLattice.create({ min: 10n, max: 10n }),
         })
-        context.scope.setCurrentValue(
-            'myVar',
-            IntegerLattice.create({ min: 10n, max: 10n }),
-        )
 
         const variableRef = VariableReference.create({
             name: 'myVar',
@@ -113,7 +108,7 @@ describe('Variable Reference', () => {
 
         for (const isolationLevel of cases) {
             test(isolationLevel, () => {
-                context.scope.variables.set('myVar', {
+                context.scope.addVariableDeclaration('myVar', {
                     isImmutable: true,
                     isolationLevel,
                     lattice: RCTypeLattice.create({

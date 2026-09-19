@@ -1,4 +1,5 @@
 import * as cir from '@/cir'
+import { ErrorResult, Result, SuccessResult } from '@/tools/result'
 import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { FunctionName } from './function-name'
@@ -8,7 +9,7 @@ import { ObjectDeclaration } from './object-declaration'
 import { TypeName } from './type-name'
 
 class RootScope {
-    public readonly variables: Map<string, Variable> = new Map()
+    private readonly variables: Map<string, Variable> = new Map()
     private readonly functions: Map<string, FunctionDeclaration> = new Map()
     private readonly types: Map<string, DataDeclaration | ObjectDeclaration> =
         new Map()
@@ -45,10 +46,14 @@ class RootScope {
     variableDeclaration(name: string): Variable | undefined {
         return this.variables.get(name)
     }
+
+    addVariableDeclaration(name: string, value: Variable) {
+        this.variables.set(name, value)
+    }
 }
 
 export class Scope {
-    public variables: Map<string, Variable> = new Map()
+    private readonly variables: Map<string, Variable> = new Map()
     private readonly types: Map<string, DataDeclaration | ObjectDeclaration> =
         new Map()
     private currentValues: Map<string, Lattice> = new Map()
@@ -117,19 +122,30 @@ export class Scope {
         }
     }
 
+    addVariableDeclaration(name: string, value: Variable) {
+        this.variables.set(name, value)
+    }
+
     currentValue(name: string): Lattice | undefined {
         const value = this.currentValues.get(name)
         if (value) return value
+        const variable = this.variables.get(name)
+        if (variable) return variable.lattice
         if (this.parentScope) return this.parentScope.currentValue(name)
-        return undefined
+        return this.rootScope.variableDeclaration(name)?.lattice
     }
 
-    setCurrentValue(name: string, lattice: Lattice) {
+    setCurrentValue(name: string, lattice: Lattice): Result {
+        const variable = this.variableDeclaration(name)
+        if (!variable) return ErrorResult.failure(`Unknown variable: ${name}`)
+        if (!variable?.lattice.isSupersetTo(lattice))
+            return ErrorResult.failure(`Incompatible value for ${name}`)
         this.currentValues.set(name, lattice)
+        return SuccessResult.undefined
     }
 }
 
-export type Variable = {
+type Variable = {
     isImmutable: boolean
     isolationLevel: IsolationLevel | UNKNOWN
     lattice: Lattice

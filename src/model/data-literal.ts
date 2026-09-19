@@ -103,7 +103,7 @@ export class DataLiteral implements Expression {
 
     toCIRExpression(
         context: ContextWithLattice,
-    ): SemanticResult<cir.Expression> {
+    ): SemanticResult<cir.Expression & { kind: 'ALLOCATION' }> {
         const explicitLattice = context.explicitLattice
         if (!(explicitLattice instanceof RCTypeLattice))
             return SemanticErrorResult.failure(

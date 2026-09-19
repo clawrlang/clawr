@@ -127,6 +127,11 @@ type Assign = {
     value: Expression
 }
 
+type SelfAssign = {
+    kind: 'SELF_ASSIGN'
+    value: Omit<MemoryAllocation, 'kind' | 'isolationLevel'> & { kind: 'DATA' }
+}
+
 export type Statement =
     | EnsureUnique
     | Release
@@ -134,6 +139,7 @@ export type Statement =
     | Return
     | VariableDeclaration
     | Assign
+    | SelfAssign
 
 type Storage = Omit<VariableReference, 'value'> | Omit<FieldReference, 'value'>
 

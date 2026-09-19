@@ -3,7 +3,7 @@ import { mapFilter } from '@/tools/map-filter'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration, Expression, Statement } from '.'
-import { Assignment } from './assignment'
+import { DataLiteral } from './data-literal'
 import { FunctionName } from './function-name'
 import {
     AnyIsolationLevel,
@@ -16,7 +16,7 @@ import { LatticeDeclaration } from './lattice-declaration'
 import { Parameter } from './parameter'
 import { ReturnStatement } from './return-statement'
 import { Scope } from './scope'
-import { VariableReference } from './variable-reference'
+import { SelfAssignment } from './self-assignment'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -189,24 +189,23 @@ export class FunctionDeclaration implements Declaration {
         if (bodyContextResult.isError) return bodyContextResult
         const bodyContext = bodyContextResult.value
 
-        const body =
-            this.implementation.kind === 'body'
-                ? this.implementation.statements
-                : [
-                      Assignment.create({
-                          target: VariableReference.create({
-                              name: 'self',
-                              span: this.implementation.expression.span,
-                          }),
-                          value: this.implementation.expression,
-                          span: this.implementation.expression.span,
-                      }),
-                  ]
+        if (
+            this.implementation.kind === 'implicit-return' &&
+            !(this.implementation.expression instanceof DataLiteral)
+        )
+            return SemanticErrorResult.failure(
+                'Cannot assign to `self`',
+                this.implementation.expression.span,
+            )
 
-        const bodyResult = SemanticResult.collect(
+        const bodyResult = this.makeInitializerBody()
+        if (bodyResult.isError) return bodyResult
+        const body = bodyResult.value
+
+        const bodyMapResult = SemanticResult.collect(
             body.map((stmt) => stmt.emitStatement(bodyContext)),
         )
-        if (bodyResult.isError) return bodyResult
+        if (bodyMapResult.isError) return bodyMapResult
 
         if (
             this.implementation.kind === 'body' &&
@@ -229,6 +228,23 @@ export class FunctionDeclaration implements Declaration {
         return Result.value(cirFuncDecl)
     }
 
+    private makeInitializerBody(): SemanticResult<Statement[]> {
+        if (this.implementation.kind === 'body')
+            return Result.value(this.implementation.statements)
+
+        if (!(this.implementation.expression instanceof DataLiteral))
+            return SemanticErrorResult.failure(
+                'Cannot assign to `self`',
+                this.implementation.expression.span,
+            )
+        return Result.value([
+            SelfAssignment.create({
+                value: this.implementation.expression,
+                span: this.implementation.expression.span,
+            }),
+        ])
+    }
+
     private makeBodyContext(context: Context): SemanticResult<Context> {
         const parameterScopeResult = this.scopeAddingParameters(context)
         if (parameterScopeResult.isError) return parameterScopeResult
@@ -238,9 +254,6 @@ export class FunctionDeclaration implements Declaration {
         }
 
         const self = context.scope.selfVariable()
-        if (self && !(self.lattice instanceof RCTypeLattice))
-            throw new Error(`'self' variable must be an rc-type`)
-
         const explicitLattice =
             this.implementation.kind === 'implicit-return' && self
                 ? RCTypeLattice.create({

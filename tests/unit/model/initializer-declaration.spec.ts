@@ -54,7 +54,7 @@ describe('FunctionDeclaration (initializer)', () => {
         })
     })
 
-    it.only('converts to CIR with implicit self-assignment  ', () => {
+    it('converts to CIR with implicit self-assignment  ', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'makeNew',
             parameters: [],
@@ -111,9 +111,9 @@ describe('FunctionDeclaration (initializer)', () => {
             lattice: undefined,
             body: [
                 {
-                    kind: 'ASSIGN',
+                    kind: 'SELF_ASSIGN',
                     value: {
-                        kind: 'ALLOCATION',
+                        kind: 'DATA',
                         fields: [
                             { value: { value: { max: '42', min: '42' } } },
                         ],
@@ -292,42 +292,53 @@ describe('FunctionDeclaration (initializer)', () => {
         )
     })
 
-    describe.skip('infers self-assignment from implicit-return expression', () => {
-        it('infers integer return value-set', () => {
-            const funcDecl = FunctionDeclaration.create({
-                baseName: 'makeNew',
-                parameters: [],
-                result: undefined,
-                implementation: {
-                    kind: 'implicit-return',
-                    expression: DataLiteral.create({
-                        fields: [],
-                        span: someCodeSpan,
-                    }),
+    it('infers self-assignment from implicit-return expression', () => {
+        const funcDecl = FunctionDeclaration.create({
+            baseName: 'makeNew',
+            parameters: [],
+            result: undefined,
+            implementation: {
+                kind: 'implicit-return',
+                expression: DataLiteral.create({
+                    fields: [],
+                    span: someCodeSpan,
+                }),
+            },
+        })
+
+        const context = newSemanticContext()
+        context.scope.addObjectDeclaration(
+            ObjectDeclaration.create({
+                kind: 'object',
+                name: TypeName.create({ name: 'Object' }),
+                fields: [],
+                initializers: [],
+                mutating: [],
+                readonly: [],
+                span: someCodeSpan,
+            }),
+        )
+        context.scope.addSelfVariable(TypeName.create({ name: 'Object' }))
+
+        const result = funcDecl.emitInitializer(context)
+        expect(result.isSuccess || result.error.errors).toBeTrue()
+
+        const decl = result.isSuccess && result.value
+        expect(decl).toMatchObject({
+            kind: 'FUNCTION_DECL',
+            baseName: 'makeNew',
+            parameters: [],
+            lattice: undefined,
+            body: [
+                {
+                    kind: 'SELF_ASSIGN',
+                    value: { kind: 'DATA' },
                 },
-            })
-
-            const context = newSemanticContext()
-            const result = funcDecl.emitInitializer(context)
-            expect(result.isSuccess || result.error.errors).toBeTrue()
-
-            const decl = result.isSuccess && result.value
-            expect(decl).toMatchObject({
-                kind: 'FUNCTION_DECL',
-                baseName: 'makeNew',
-                parameters: [],
-                lattice: undefined,
-                body: [
-                    {
-                        kind: 'ASSIGN',
-                        value: { value: { kind: 'ALLOCATION' } },
-                    },
-                ],
-            })
+            ],
         })
     })
 
-    it.skip('registers parameters in the function body scope', () => {
+    it('registers parameters in the function body scope', () => {
         const decl = FunctionDeclaration.create({
             baseName: 'makeNew',
             parameters: [
@@ -361,15 +372,54 @@ describe('FunctionDeclaration (initializer)', () => {
         })
 
         const context = newSemanticContext()
+        context.scope.addObjectDeclaration(
+            ObjectDeclaration.create({
+                kind: 'object',
+                name: TypeName.create({ name: 'Object' }),
+                readonly: [],
+                mutating: [],
+                initializers: [],
+                fields: [
+                    {
+                        name: 'field',
+                        isImmutable: false,
+                        isolationLevel: ISOLATED,
+                        lattice: decorateLattice(
+                            IntegerLattice.unconstrained(),
+                            { span: someCodeSpan },
+                        ),
+                    },
+                ],
+                span: someCodeSpan,
+            }),
+        )
+        context.scope.addSelfVariable(TypeName.create({ name: 'Object' }))
+
         const result = decl.emitInitializer(context)
         expect(result.isSuccess || result.error.errors).toBeTrue()
 
         expect(result.isSuccess && result.value.body).toMatchObject([
             {
-                kind: 'ASSIGN',
+                kind: 'SELF_ASSIGN',
                 value: {
-                    kind: 'VARIABLE_REF',
-                    name: 'x',
+                    kind: 'DATA',
+                    fields: [
+                        {
+                            name: 'field',
+                            value: {
+                                kind: 'VARIABLE_REF',
+                                name: 'x',
+                                value: {
+                                    type: 'string',
+                                },
+                            },
+                        },
+                    ],
+                    value: {
+                        type: 'rc-type',
+                        name: 'Object',
+                        namespace: undefined,
+                    },
                 },
             },
         ])

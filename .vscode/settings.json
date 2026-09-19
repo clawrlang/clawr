@@ -50,6 +50,7 @@
               { "$ref": "#/$defs/FunctionCall" },
               { "$ref": "#/$defs/Release" },
               { "$ref": "#/$defs/Return" },
+              { "$ref": "#/$defs/SelfAssign" },
               { "$ref": "#/$defs/VariableDeclaration" }
             ],
             "discriminator": {
@@ -59,6 +60,7 @@
                 "ENSURE_UNIQUE": "#/components/schemas/EnsureUnique",
                 "RELEASE": "#/components/schemas/Release",
                 "RETURN": "#/components/schemas/Return",
+                "SELF_ASSIGN": "#/components/schemas/SelfAssign",
                 "VARIABLE_DECL": "#/components/schemas/VariableDeclaration"
               },
               "propertyName": "kind"
@@ -1628,6 +1630,30 @@
             "required": ["kind"],
             "additionalProperties": false
           },
+          "SelfAssign": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "SELF_ASSIGN" },
+              "value": {
+                "$ref": "#/$defs/OmitMemoryAllocationisolationLevelkind__type"
+              }
+            },
+            "required": ["kind", "value"],
+            "additionalProperties": false
+          },
+          "OmitMemoryAllocationisolationLevelkind__type": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "DATA" },
+              "fields": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/__type-o1" }
+              },
+              "value": { "$ref": "#/$defs/RCTypeLattice" }
+            },
+            "required": ["kind", "value"],
+            "additionalProperties": false
+          },
           "VariableDeclaration": {
             "type": "object",
             "properties": {
@@ -1914,7 +1940,5 @@
     }
   ],
   "C_Cpp.default.includePath": ["src/runtime/include"],
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "always"
-  }
+  "editor.codeActionsOnSave": { "source.organizeImports": "always" }
 }

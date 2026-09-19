@@ -57,14 +57,9 @@
                     "parameters": [],
                     "body": [
                         {
-                            "kind": "ASSIGN",
-                            "target": {
-                                "kind": "VARIABLE_REF",
-                                "name": "self"
-                            },
+                            "kind": "SELF_ASSIGN",
                             "value": {
-                                "kind": "ALLOCATION",
-                                "isolationLevel": "ISOLATED",
+                                "kind": "DATA",
                                 "fields": [
                                     {
                                         "name": "field",

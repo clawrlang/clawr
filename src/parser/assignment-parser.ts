@@ -1,12 +1,16 @@
 import { TokenStream } from '@/lexer'
 import { Assignment } from '@/model/assignment'
 import { FieldReference } from '@/model/field-reference'
+import { SelfAssignment } from '@/model/self-assignment'
 import { VariableReference } from '@/model/variable-reference'
 import { Context } from '.'
+import { DataLiteralParser } from './data-literal-parser'
 import { ExpressionParser } from './expression-parser'
 import { StatementParser } from './statement-parser'
 
-export class AssignmentParser implements StatementParser<Assignment> {
+export class AssignmentParser implements StatementParser<
+    Assignment | SelfAssignment
+> {
     private constructor(private context: Context) {}
 
     static create(context: Context) {
@@ -24,10 +28,17 @@ export class AssignmentParser implements StatementParser<Assignment> {
         }
     }
 
-    parse(stream: TokenStream) {
+    parse(stream: TokenStream): Assignment | SelfAssignment {
         const expressionParser = ExpressionParser.create(this.context)
         const target = expressionParser.parse(stream)
-        if (
+        if (target instanceof VariableReference && target.name === 'self') {
+            const equalsToken = stream.expect('PUNCTUATION', '=')
+            const value = DataLiteralParser.create(this.context).parse(stream)
+            return SelfAssignment.create({
+                value: value,
+                span: { start: equalsToken.start, end: equalsToken.end },
+            })
+        } else if (
             target instanceof VariableReference ||
             target instanceof FieldReference
         ) {

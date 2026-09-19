@@ -267,6 +267,11 @@ export function lowerStmt(stmt: cir.Statement): string {
                     sizeof(${mangleTypeName(stmt.value.value)}ˇfields));`
             else
                 return `${lowerStorage(stmt.target)} = ${lowerExpr(stmt.value)};`
+        case 'SELF_ASSIGN':
+            return `memcpy(&self->fields, &(${mangleTypeName(stmt.value.value)}ˇfields){
+                    ${stmt.value.fields?.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ') ?? ''}
+                },
+                sizeof(${mangleTypeName(stmt.value.value)}ˇfields));`
         case 'ENSURE_UNIQUE':
             return `mutateRC(${lowerStorage(stmt.object)});`
         case 'RELEASE':

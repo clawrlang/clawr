@@ -2,7 +2,6 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
-import { DataLiteral } from './data-literal'
 import { FieldReference } from './field-reference'
 import { UNIQUE, UNKNOWN } from './isolation-level'
 import { RCTypeLattice } from './lattice'
@@ -73,30 +72,6 @@ export class Assignment implements Statement {
             ...context,
             isolationLevel: targetIsolationLevel,
             explicitLattice: targetLattice,
-        }
-
-        if (
-            this.target instanceof VariableReference &&
-            this.target.name === 'self' &&
-            this.value instanceof DataLiteral
-        ) {
-            if (explicitLatticeContext.isolationLevel === UNKNOWN)
-                return SemanticErrorResult.failure(
-                    'Cannot assign to parameter with UNKNOWN isolationLevel',
-                    this.span,
-                )
-            const retainedValueCIRResult = this.value.toCIRExpression({
-                ...explicitLatticeContext,
-                isolationLevel: explicitLatticeContext.isolationLevel,
-            })
-            if (retainedValueCIRResult.isError) return retainedValueCIRResult
-
-            context.scope.emitted.push({
-                kind: 'ASSIGN',
-                target,
-                value: retainedValueCIRResult.value,
-            })
-            return Result.ok
         }
 
         const collectedValueResults = SemanticResult.collect([

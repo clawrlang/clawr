@@ -2,7 +2,6 @@ import { describe, expect, it } from 'bun:test'
 
 import { lowerDecl } from '@/backend'
 import type * as cir from '@/cir'
-import { SHARED } from '@/model/isolation-level'
 
 describe('Type declaration', () => {
     describe('fields', () => {
@@ -235,14 +234,9 @@ describe('Type declaration', () => {
                     ],
                     body: [
                         {
-                            kind: 'ASSIGN',
-                            target: {
-                                kind: 'VARIABLE_REF',
-                                name: 'self',
-                            },
+                            kind: 'SELF_ASSIGN',
                             value: {
-                                kind: 'ALLOCATION',
-                                isolationLevel: SHARED,
+                                kind: 'DATA',
                                 fields: [
                                     {
                                         name: 'field',

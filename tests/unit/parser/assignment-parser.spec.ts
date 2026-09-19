@@ -1,4 +1,5 @@
 import { TokenStream } from '@/lexer'
+import { SelfAssignment } from '@/model/self-assignment'
 import { AssignmentParser } from '@/parser/assignment-parser'
 import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
@@ -22,6 +23,19 @@ describe('Assignment Parser', () => {
                 field: 'field',
             },
             value: { value: { values: ['true'] } },
+        })
+    })
+
+    it('parses a self-assignment', () => {
+        const code = 'self = {c: 12}'
+        const result = parseAssignment(code)
+        expect(result).toBeInstanceOf(SelfAssignment)
+        expect(result).toMatchObject({
+            value: {
+                fields: [
+                    { name: 'c', value: { value: { min: 12n, max: 12n } } },
+                ],
+            },
         })
     })
 })

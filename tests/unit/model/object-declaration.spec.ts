@@ -1,4 +1,3 @@
-import { Assignment } from '@/model/assignment'
 import { DataLiteral } from '@/model/data-literal'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { IntegerLiteral } from '@/model/integer-literal'
@@ -6,8 +5,8 @@ import { ISOLATED } from '@/model/isolation-level'
 import { IntegerLattice } from '@/model/lattice'
 import { decorateLattice } from '@/model/lattice-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
+import { SelfAssignment } from '@/model/self-assignment'
 import { TypeName } from '@/model/type-name'
-import { VariableReference } from '@/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
@@ -224,11 +223,7 @@ describe('ObjectDeclaration', () => {
                     implementation: {
                         kind: 'body',
                         statements: [
-                            Assignment.create({
-                                target: VariableReference.create({
-                                    name: 'self',
-                                    span: someCodeSpan,
-                                }),
+                            SelfAssignment.create({
                                 value: DataLiteral.create({
                                     fields: [
                                         {
@@ -287,8 +282,7 @@ describe('ObjectDeclaration', () => {
                         parameters: [],
                         body: [
                             {
-                                kind: 'ASSIGN',
-                                target: { name: 'self' },
+                                kind: 'SELF_ASSIGN',
                                 value: {},
                             },
                         ],
@@ -301,8 +295,7 @@ describe('ObjectDeclaration', () => {
                         parameters: [{ name: 'var' }],
                         body: [
                             {
-                                kind: 'ASSIGN',
-                                target: { name: 'self' },
+                                kind: 'SELF_ASSIGN',
                                 value: {},
                             },
                         ],

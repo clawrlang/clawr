@@ -2,6 +2,7 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { SuccessResult } from '@/tools/result'
 import { ErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
+import { DataLiteral } from './data-literal'
 import { FieldReference } from './field-reference'
 import { UNIQUE, UNKNOWN } from './isolation-level'
 import { RCTypeLattice } from './lattice'
@@ -73,6 +74,31 @@ export class Assignment implements Statement {
             isolationLevel: targetIsolationLevel,
             explicitLattice: targetLattice,
         }
+
+        if (
+            this.target instanceof VariableReference &&
+            this.target.name === 'self' &&
+            this.value instanceof DataLiteral
+        ) {
+            if (explicitLatticeContext.isolationLevel === UNKNOWN)
+                return ErrorResult.failure(
+                    'Cannot assign to parameter with UNKNOWN isolationLevel',
+                    this.span,
+                )
+            const retainedValueCIRResult = this.value.toCIRExpression({
+                ...explicitLatticeContext,
+                isolationLevel: explicitLatticeContext.isolationLevel,
+            })
+            if (retainedValueCIRResult.isError) return retainedValueCIRResult
+
+            context.scope.emitted.push({
+                kind: 'ASSIGN',
+                target,
+                value: retainedValueCIRResult.value,
+            })
+            return SuccessResult.ok
+        }
+
         const collectedValueResults = SemanticResult.collect([
             this.value.isolationLevel(explicitLatticeContext),
             Retain.ifStorage(this.value, context),
@@ -85,6 +111,7 @@ export class Assignment implements Statement {
                 'Cannot assign to parameter with UNKNOWN isolationLevel',
                 this.span,
             )
+
         const retainedValueCIRResult = retainedValue.toCIRExpression({
             ...explicitLatticeContext,
             isolationLevel: explicitLatticeContext.isolationLevel,

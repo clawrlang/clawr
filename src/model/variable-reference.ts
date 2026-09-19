@@ -25,7 +25,7 @@ export class VariableReference implements Expression {
     assignmentPrelude(context: Context): SemanticResult<cir.Statement[]> {
         const constResult = this.isEffectivelyConst(context)
         if (constResult.isError) return constResult
-        if (constResult.value)
+        if (constResult.value && this.name !== 'self')
             return ErrorResult.failure(
                 `Variable ${this.name} is not mutable`,
                 this.span,

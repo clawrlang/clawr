@@ -103,7 +103,10 @@ export class FunctionDeclaration implements Declaration {
                       }),
                   ]
 
-        for (const stmt of body) stmt.emitStatement(bodyContext)
+        const bodyResult = SemanticResult.collect(
+            body.map((stmt) => stmt.emitStatement(bodyContext)),
+        )
+        if (bodyResult.isError) return bodyResult
 
         if (
             this.implementation.kind === 'body' &&
@@ -147,7 +150,10 @@ export class FunctionDeclaration implements Declaration {
                       }),
                   ]
 
-        for (const stmt of body) stmt.emitStatement(bodyContext)
+        const bodyResult = SemanticResult.collect(
+            body.map((stmt) => stmt.emitStatement(bodyContext)),
+        )
+        if (bodyResult.isError) return bodyResult
 
         if (
             this.implementation.kind === 'body' &&
@@ -197,7 +203,10 @@ export class FunctionDeclaration implements Declaration {
                       }),
                   ]
 
-        for (const stmt of body) stmt.emitStatement(bodyContext)
+        const bodyResult = SemanticResult.collect(
+            body.map((stmt) => stmt.emitStatement(bodyContext)),
+        )
+        if (bodyResult.isError) return bodyResult
 
         if (
             this.implementation.kind === 'body' &&

@@ -1,3 +1,4 @@
+import { decimal } from 'decimalish'
 import { tags } from 'typia'
 
 export type ClawrModule = {
@@ -232,11 +233,18 @@ type IntegerLattice<
         ? { max?: undefined }
         : { max: `${Max}` & tags.Pattern<'^-?\\d+$'> })
 
-type RealLattice = {
+type RealLattice<
+    Min extends decimal | undefined,
+    Max extends decimal | undefined,
+> = {
     type: 'real'
-    min?: string // numeric, can be arbitrarity big
-    max?: string // numeric, can be arbitrarity big
-}
+    boxed?: true
+} & (Min extends undefined
+    ? { min?: undefined }
+    : { min: `${Min}` & tags.Pattern<'^-?\\d+\.\\d+$'> }) &
+    (Max extends undefined
+        ? { max?: undefined }
+        : { max: `${Max}` & tags.Pattern<'^-?\\d+\.\\d+$'> })
 
 type TruthvalueLattice<Values extends truthvalue[]> = {
     type: 'truthvalue'
@@ -260,7 +268,7 @@ type InterfaceLattice = {
 
 export type Lattice =
     | IntegerLattice<bigint | undefined, bigint | undefined>
-    | RealLattice
+    | RealLattice<decimal | undefined, decimal | undefined>
     | TruthvalueLattice<truthvalue[]>
     | StringLattice
     | RCTypeLattice

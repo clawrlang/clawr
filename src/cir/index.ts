@@ -158,7 +158,7 @@ type IntegerLiteral<Value extends bigint> = {
     value: IntegerLattice<Value, Value>
 }
 
-type TruthLiteral<Value extends truthvalue> = {
+type TruthvalueLiteral<Value extends truthvalue> = {
     kind: 'TRUTHVALUE_LITERAL'
     value: TruthvalueLattice<[Value]>
 }
@@ -207,7 +207,7 @@ type FieldReference = {
 export type Expression =
     | StringLiteral
     | IntegerLiteral<bigint>
-    | TruthLiteral<truthvalue>
+    | TruthvalueLiteral<truthvalue>
     | MemoryAllocation
     | MemoryRetention
     | AsShared

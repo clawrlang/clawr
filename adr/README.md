@@ -46,6 +46,10 @@ Records so far:
 - [ADR-014](./adr-014.md): Traits and Static
 - [ADR-015](./adr-015.md): Basic ARC Rules
 - [ADR-016](./adr-016.md): Backend-Managed Boxing of Unboxed Primitives
+- [ADR-017](./adr-017.md): Inheritance Allocation
+- [ADR-018](./adr-018.md): `object` Initialization
+- [ADR-019](./adr-019.md): `namespace`
+- [ADR-020](./adr-020.md): Singleton `service`
 
 Draft ideas with no ADR number:
 
@@ -68,4 +72,6 @@ Draft ideas with no ADR number:
 - [Disposing `service`](./drafts/deinit.md)
 - [External Access Only Through `service`](./drafts/services.md)
 - [Weak References](./drafts/weak-ref.md)
+- [Prune Branches](./drafts/prune-branches.md)
+- [Efficient Construction](./drafts/efficient-construction.md)
 - [Miscellaneous](./drafts/misc.md)

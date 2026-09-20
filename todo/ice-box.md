@@ -1,20 +1,8 @@
 # Ice Box
 
-- Parse namespace
-  - Decide the syntax. How/where are namespaces defined?
-  - `FunctionName`
-  - `DataDeclarationParser`
-  - `FunctionDeclarationParser`
-  - `LatticeParser`
 - Do the tests perform too much setup?
-- Generate IDE diagnostics for syntax coloring
-  - errors
-  - did-you-mean suggestions
-  - fixits
-- Lower to `Integer*` if unbounded [See bigint.md](../adr/drafts/bigint.md)
 - Publish the JSON schema to <http://clawr.lang/schema/cir/DRAFT-0> (preliminary URL)
 - `FunctionCall.declaredLattice()` should probably not return `currentValue()`
-- `FunctionCall.currentValue()` should use parameters and `self` to figure out the returned value
 - `VariableDeclaration.initialValue` — handle type mismatch
 - `DataLiteral` – handle field type mismatch
 - Get the field values from the declared lattice when converting `SHARED` to `ISOLATED`

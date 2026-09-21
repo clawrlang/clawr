@@ -4,8 +4,8 @@ import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { FieldReference } from './field-reference'
 import { UNIQUE, UNKNOWN } from './isolation-level'
-import { RCTypeLattice } from './lattice'
 import { Retain } from './retain'
+import { RCTypeSet } from './value-set'
 import { VariableReference } from './variable-reference'
 
 export class Assignment implements Statement {
@@ -33,63 +33,63 @@ export class Assignment implements Statement {
 
         const collected = SemanticResult.collect([
             this.target.isolationLevel(context),
-            this.target.declaredLattice(context),
+            this.target.domain(context),
         ])
         if (collected.isError) return collected
 
-        const [targetIsolationLevel, targetLattice] = collected.value
+        const [targetIsolationLevel, targetDomain] = collected.value
         if (targetIsolationLevel === UNKNOWN)
             return SemanticErrorResult.failure(
                 'Cannot assign to target parameter with UNKNOWN isolation-level',
                 this.span,
             )
 
-        const explicitLatticeContext = {
+        const explicitDomainContext = {
             ...context,
             isolationLevel: targetIsolationLevel,
-            explicitLattice: targetLattice,
+            explicitDomain: targetDomain,
         }
 
-        const latticeResult = this.value.currentValue(explicitLatticeContext)
-        if (latticeResult.isError) return latticeResult
+        const value = this.value.currentValue(explicitDomainContext)
+        if (value.isError) return value
         const cirResults = this.emitCIRStatements(context)
         if (cirResults.isError) return cirResults
 
-        return this.target.setCurrentValue(context, latticeResult.value)
+        return this.target.setCurrentValue(context, value.value)
     }
 
     private emitCIRStatements(context: Context): SemanticResult {
         const collectedTargetResults = SemanticResult.collect([
             this.target.isolationLevel(context),
-            this.target.declaredLattice(context),
+            this.target.domain(context),
             this.target.toCIRExpression(context),
         ])
         if (collectedTargetResults.isError) return collectedTargetResults
-        const [targetIsolationLevel, targetLattice, target] =
+        const [targetIsolationLevel, targetDomain, target] =
             collectedTargetResults.value
 
-        const explicitLatticeContext = {
+        const explicitDomainContext = {
             ...context,
             isolationLevel: targetIsolationLevel,
-            explicitLattice: targetLattice,
+            explicitDomain: targetDomain,
         }
 
         const collectedValueResults = SemanticResult.collect([
-            this.value.isolationLevel(explicitLatticeContext),
+            this.value.isolationLevel(explicitDomainContext),
             Retain.ifStorage(this.value, context),
         ])
         if (collectedValueResults.isError) return collectedValueResults
 
         const [valueIsolationLevel, retainedValue] = collectedValueResults.value
-        if (explicitLatticeContext.isolationLevel === UNKNOWN)
+        if (explicitDomainContext.isolationLevel === UNKNOWN)
             return SemanticErrorResult.failure(
                 'Cannot assign to parameter with UNKNOWN isolationLevel',
                 this.span,
             )
 
         const retainedValueCIRResult = retainedValue.toCIRExpression({
-            ...explicitLatticeContext,
-            isolationLevel: explicitLatticeContext.isolationLevel,
+            ...explicitDomainContext,
+            isolationLevel: explicitDomainContext.isolationLevel,
         })
         if (retainedValueCIRResult.isError) return retainedValueCIRResult
 
@@ -106,7 +106,7 @@ export class Assignment implements Statement {
             context.scope.emitted.push({
                 kind: 'VARIABLE_DECL' as const,
                 name: tempVar,
-                domain: targetLattice.toCIR(),
+                domain: targetDomain.toCIR(),
                 initialValue: target,
             })
 
@@ -125,7 +125,7 @@ export class Assignment implements Statement {
                 },
             )
         } else if (
-            targetLattice instanceof RCTypeLattice &&
+            targetDomain instanceof RCTypeSet &&
             retainedValueCIR?.kind === 'CALL' &&
             valueIsolationLevel === UNIQUE
         ) {
@@ -135,7 +135,7 @@ export class Assignment implements Statement {
                 value: {
                     kind: 'AS_SHARED',
                     object: retainedValueCIR,
-                    value: targetLattice.toCIR(),
+                    value: targetDomain.toCIR(),
                 },
             })
         } else {
@@ -150,11 +150,11 @@ export class Assignment implements Statement {
 
     private checkValidity(context: Context): SemanticResult {
         const collected = SemanticResult.collect([
-            this.target.declaredLattice(context),
+            this.target.domain(context),
             this.target.isolationLevel(context),
         ])
         if (collected.isError) return collected
-        const [targetLattice, targetIsolationLevel] = collected.value
+        const [targetDomain, targetIsolationLevel] = collected.value
 
         if (targetIsolationLevel === UNKNOWN)
             return SemanticErrorResult.failure(
@@ -162,19 +162,19 @@ export class Assignment implements Statement {
                 this.span,
             )
 
-        const explicitLatticeContext = {
+        const explicitDomainContext = {
             ...context,
             isolationLevel: targetIsolationLevel,
-            explicitLattice: targetLattice,
+            explicitDomain: targetDomain,
         }
         const assignedValueResult = this.value.currentValue(
-            explicitLatticeContext,
+            explicitDomainContext,
         )
         if (assignedValueResult.isError) return assignedValueResult
         const assignedValue = assignedValueResult.value
-        if (!targetLattice.isSupersetTo(assignedValue))
+        if (!targetDomain.isSupersetTo(assignedValue))
             return SemanticErrorResult.failure(
-                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
+                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetDomain.toString()}`,
                 this.span,
             )
         const valueIsolationLevelResult = this.value.isolationLevel(context)

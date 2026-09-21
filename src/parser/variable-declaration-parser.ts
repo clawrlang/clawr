@@ -1,12 +1,12 @@
 import { TokenStream } from '@/lexer'
-import { LatticeDeclaration } from '@/model/lattice-declaration'
+import { DomainDeclaration } from '@/model/domain-declaration'
 import {
     VARIABLE_SEMANTICS,
     VariableDeclaration,
 } from '@/model/variable-declaration'
 import { Context } from '.'
+import { DomainParser } from './domain-parser'
 import { ExpressionParser } from './expression-parser'
-import { LatticeParser } from './lattice-parser'
 import { SemanticsKeyword } from './semantics-keyword-parser'
 import { StatementParser } from './statement-parser'
 
@@ -30,22 +30,22 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
         const semanticsKeyword = SemanticsKeyword[semanticsToken.keyword]
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
-        const lattice = this.parseLattice(stream)
+        const domain = this.parseDomain(stream)
         stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse(stream)
         return VariableDeclaration.create({
             ...semanticsKeyword,
             name,
             isolationLevel: semanticsKeyword.isolationLevel,
-            lattice,
+            domain,
             initialValue,
         })
     }
 
-    private parseLattice(stream: TokenStream): LatticeDeclaration | undefined {
+    private parseDomain(stream: TokenStream): DomainDeclaration | undefined {
         if (!stream.isNext('PUNCTUATION', ':')) return undefined
 
         stream.expect('PUNCTUATION', ':')
-        return LatticeParser.create(this.context).parse(stream)
+        return DomainParser.create(this.context).parse(stream)
     }
 }

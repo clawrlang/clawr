@@ -1,7 +1,7 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Expression } from '.'
+import { DomainDeclaration } from './domain-declaration'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
-import { LatticeDeclaration } from './lattice-declaration'
 
 export class Parameter {
     private constructor(
@@ -10,7 +10,7 @@ export class Parameter {
         public readonly varName: string,
         public readonly span: SourceCodeSpan,
         public readonly isolationLevel: IsolationLevel | UNKNOWN,
-        public readonly lattice: LatticeDeclaration | undefined,
+        public readonly domain: DomainDeclaration | undefined,
         public readonly defaultValue?: Expression,
     ) {}
 
@@ -19,14 +19,14 @@ export class Parameter {
         label,
         varName,
         isolationLevel,
-        lattice,
+        domain,
         defaultValue,
         span,
     }: {
         label: string | undefined
         varName: string
         isolationLevel: IsolationLevel | UNKNOWN
-        lattice?: LatticeDeclaration
+        domain?: DomainDeclaration
         isImmutable: boolean
         defaultValue?: Expression
         span: SourceCodeSpan
@@ -37,7 +37,7 @@ export class Parameter {
             varName,
             span,
             isolationLevel,
-            lattice,
+            domain,
             defaultValue,
         )
     }

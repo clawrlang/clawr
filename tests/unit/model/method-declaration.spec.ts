@@ -1,13 +1,13 @@
 import { DataDeclaration } from '@/model/data-declaration'
 import { DataLiteral } from '@/model/data-literal'
+import { decorateDomain } from '@/model/domain-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { IntegerLattice, RCTypeLattice, StringLattice } from '@/model/lattice'
-import { decorateLattice } from '@/model/lattice-declaration'
 import { Parameter } from '@/model/parameter'
 import { ReturnStatement } from '@/model/return-statement'
 import { TypeName } from '@/model/type-name'
+import { IntegerRange, RCTypeSet, StringSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import { VariableReference } from '@/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '@@/util'
@@ -23,7 +23,7 @@ describe('FunctionDeclaration (method)', () => {
                     isImmutable: true,
                     varName: 'x',
                     isolationLevel: ISOLATED,
-                    lattice: decorateLattice(StringLattice.create(), {
+                    domain: decorateDomain(StringSet.create(), {
                         span: someCodeSpan,
                     }),
                     span: someCodeSpan,
@@ -91,7 +91,7 @@ describe('FunctionDeclaration (method)', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                lattice: decorateLattice(IntegerLattice.unconstrained(), {
+                domain: decorateDomain(IntegerRange.unconstrained(), {
                     span: someCodeSpan,
                 }),
                 isolationLevel: ISOLATED,
@@ -140,7 +140,7 @@ describe('FunctionDeclaration (method)', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: SHARED,
-            lattice: RCTypeLattice.create({
+            domain: RCTypeSet.create({
                 type: TypeName.create({ name: 'MyData' }),
             }),
         })
@@ -149,8 +149,8 @@ describe('FunctionDeclaration (method)', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                lattice: decorateLattice(
-                    RCTypeLattice.create({
+                domain: decorateDomain(
+                    RCTypeSet.create({
                         type: TypeName.create({ name: 'MyData' }),
                     }),
                     { span: someCodeSpan },
@@ -182,7 +182,7 @@ describe('FunctionDeclaration (method)', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            lattice: RCTypeLattice.create({
+            domain: RCTypeSet.create({
                 type: TypeName.create({ name: 'MyData' }),
             }),
         })
@@ -191,8 +191,8 @@ describe('FunctionDeclaration (method)', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                lattice: decorateLattice(
-                    RCTypeLattice.create({
+                domain: decorateDomain(
+                    RCTypeSet.create({
                         type: TypeName.create({ name: 'MyData' }),
                     }),
                     { span: someCodeSpan },
@@ -224,7 +224,7 @@ describe('FunctionDeclaration (method)', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            lattice: RCTypeLattice.create({
+            domain: RCTypeSet.create({
                 type: TypeName.create({ name: 'MyData' }),
             }),
         })
@@ -233,8 +233,8 @@ describe('FunctionDeclaration (method)', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                lattice: decorateLattice(
-                    RCTypeLattice.create({
+                domain: decorateDomain(
+                    RCTypeSet.create({
                         type: TypeName.create({ name: 'MyData' }),
                     }),
                     { span: someCodeSpan },
@@ -304,7 +304,7 @@ describe('FunctionDeclaration (method)', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                lattice: RCTypeLattice.create({
+                domain: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
             })
@@ -348,7 +348,7 @@ describe('FunctionDeclaration (method)', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: SHARED,
-                lattice: RCTypeLattice.create({
+                domain: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
             })
@@ -389,7 +389,7 @@ describe('FunctionDeclaration (method)', () => {
                     isImmutable: true,
                     varName: 'x',
                     isolationLevel: ISOLATED,
-                    lattice: decorateLattice(StringLattice.create(), {
+                    domain: decorateDomain(StringSet.create(), {
                         span: someCodeSpan,
                     }),
                     span: someCodeSpan,
@@ -435,8 +435,8 @@ describe('FunctionDeclaration (method)', () => {
                             name: 'field1',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -455,8 +455,8 @@ describe('FunctionDeclaration (method)', () => {
                             isImmutable: true,
                             name: 'myVar',
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                RCTypeLattice.create({
+                            domain: decorateDomain(
+                                RCTypeSet.create({
                                     type: TypeName.create({ name: 'MyData' }),
                                 }),
                                 { span: someCodeSpan },
@@ -502,8 +502,8 @@ describe('FunctionDeclaration (method)', () => {
                             name: 'field1',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -515,7 +515,7 @@ describe('FunctionDeclaration (method)', () => {
                 baseName: 'myFunction',
                 parameters: [],
                 result: {
-                    lattice: decorateLattice(IntegerLattice.unconstrained(), {
+                    domain: decorateDomain(IntegerRange.unconstrained(), {
                         span: someCodeSpan,
                     }),
                     isolationLevel: ISOLATED,
@@ -527,8 +527,8 @@ describe('FunctionDeclaration (method)', () => {
                             isImmutable: true,
                             name: 'myVar',
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                RCTypeLattice.create({
+                            domain: decorateDomain(
+                                RCTypeSet.create({
                                     type: TypeName.create({ name: 'MyData' }),
                                 }),
                                 { span: someCodeSpan },
@@ -584,8 +584,8 @@ describe('FunctionDeclaration (method)', () => {
                 baseName: 'myFunction',
                 parameters: [],
                 result: {
-                    lattice: decorateLattice(
-                        RCTypeLattice.create({
+                    domain: decorateDomain(
+                        RCTypeSet.create({
                             type: TypeName.create({ name: 'MyData' }),
                         }),
                         { span: someCodeSpan },
@@ -599,8 +599,8 @@ describe('FunctionDeclaration (method)', () => {
                             isImmutable: true,
                             name: 'myVar',
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                RCTypeLattice.create({
+                            domain: decorateDomain(
+                                RCTypeSet.create({
                                     type: TypeName.create({ name: 'MyData' }),
                                 }),
                                 { span: someCodeSpan },

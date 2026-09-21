@@ -1,8 +1,8 @@
 import { DataDeclaration } from '@/model/data-declaration'
+import { decorateDomain } from '@/model/domain-declaration'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
-import { decorateLattice } from '@/model/lattice-declaration'
 import { TypeName } from '@/model/type-name'
+import { IntegerRange, RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
@@ -13,7 +13,7 @@ describe('Variable Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            lattice: IntegerLattice.create({ min: 10n, max: 10n }),
+            domain: IntegerRange.create({ min: 10n, max: 10n }),
         })
 
         const variableRef = VariableReference.create({
@@ -47,16 +47,16 @@ describe('Variable Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            lattice: IntegerLattice.create({ min: 10n, max: 10n }),
+            domain: IntegerRange.create({ min: 10n, max: 10n }),
         })
 
         const variableRef = VariableReference.create({
             name: 'myVar',
             span: someCodeSpan,
         })
-        const result = variableRef.declaredLattice(context)
+        const result = variableRef.domain(context)
         expect(result.isSuccess && result.value).toEqual(
-            IntegerLattice.create({ min: 10n, max: 10n }),
+            IntegerRange.create({ min: 10n, max: 10n }),
         )
     })
 
@@ -65,7 +65,7 @@ describe('Variable Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            lattice: IntegerLattice.create({ min: 10n, max: 10n }),
+            domain: IntegerRange.create({ min: 10n, max: 10n }),
         })
 
         const variableRef = VariableReference.create({
@@ -91,10 +91,9 @@ describe('Variable Reference', () => {
                         isImmutable: false,
                         name: 'myField',
                         isolationLevel: ISOLATED,
-                        lattice: decorateLattice(
-                            IntegerLattice.unconstrained(),
-                            { span: someCodeSpan },
-                        ),
+                        domain: decorateDomain(IntegerRange.unconstrained(), {
+                            span: someCodeSpan,
+                        }),
                     },
                 ],
             }),
@@ -105,7 +104,7 @@ describe('Variable Reference', () => {
                 context.scope.addVariableDeclaration('myVar', {
                     isImmutable: true,
                     isolationLevel,
-                    lattice: RCTypeLattice.create({
+                    domain: RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })

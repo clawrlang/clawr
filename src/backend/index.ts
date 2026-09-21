@@ -237,16 +237,16 @@ function lowerInit(
     }`
 }
 
-function lowerType(lattice: cir.ValueSet): string {
-    switch (lattice.type) {
+function lowerType(valueSet: cir.ValueSet): string {
+    switch (valueSet.type) {
         case 'integer':
-            return lattice.boxed ? 'Integer*' : 'int64_t'
+            return valueSet.boxed ? 'Integer*' : 'int64_t'
         case 'truthvalue':
-            return lattice.boxed ? 'TruthvalueBox*' : 'truthvalue_t'
+            return valueSet.boxed ? 'TruthvalueBox*' : 'truthvalue_t'
         case 'rc-type':
-            return `${lattice.name}*`
+            return `${valueSet.name}*`
         default:
-            throw new Error(`Unknown value set type: ${(lattice as any).type}`)
+            throw new Error(`Unknown value set type: ${(valueSet as any).type}`)
     }
 }
 

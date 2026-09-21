@@ -3,7 +3,7 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import { Expression } from '.'
 import { ISOLATED } from './isolation-level'
-import { IntegerLattice } from './lattice'
+import { IntegerRange } from './value-set'
 
 export class IntegerLiteral<Value extends bigint> implements Expression {
     get negated() {
@@ -14,7 +14,7 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
     }
 
     private constructor(
-        public readonly value: IntegerLattice<Value, Value>,
+        public readonly value: IntegerRange<Value, Value>,
         public readonly span: SourceCodeSpan,
     ) {}
 
@@ -26,7 +26,7 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         span: SourceCodeSpan
     }) {
         return new IntegerLiteral(
-            IntegerLattice.create({ min: value, max: value }),
+            IntegerRange.create({ min: value, max: value }),
             span,
         )
     }
@@ -35,11 +35,11 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         return Result.value(ISOLATED)
     }
 
-    currentValue(): SuccessResult<IntegerLattice<Value, Value>> {
+    currentValue(): SuccessResult<IntegerRange<Value, Value>> {
         return Result.value(this.value)
     }
 
-    declaredLattice(): SuccessResult<IntegerLattice<Value, Value>> {
+    domain(): SuccessResult<IntegerRange<Value, Value>> {
         return Result.value(this.value)
     }
 

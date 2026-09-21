@@ -10,7 +10,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
             name: 'foo',
-            lattice: { min: undefined, max: undefined },
+            domain: { min: undefined, max: undefined },
             initialValue: { value: { min: 1n, max: 1n } },
         })
     })
@@ -20,7 +20,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: false,
             name: 'foo',
-            lattice: { min: undefined, max: undefined },
+            domain: { min: undefined, max: undefined },
             initialValue: { value: { min: 1n, max: 1n } },
         })
     })
@@ -31,7 +31,7 @@ describe('VariableDeclarationParser', () => {
             isImmutable: false,
             name: 'foo',
             isolationLevel: SHARED,
-            lattice: { type: { name: 'Type' } },
+            domain: { type: { name: 'Type' } },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: { min: 1n, max: 1n } } },
@@ -47,7 +47,7 @@ describe('VariableDeclarationParser', () => {
             isImmutable: true,
             name: 'foo',
             isolationLevel: SHARED,
-            lattice: { type: { name: 'Type' } },
+            domain: { type: { name: 'Type' } },
             initialValue: {
                 fields: [
                     { name: 'x', value: { value: { min: 1n, max: 1n } } },
@@ -75,7 +75,7 @@ describe('VariableDeclarationParser', () => {
             isImmutable: true,
             name: 'r',
             isolationLevel: SHARED,
-            lattice: { type: { name: 'MyData' } },
+            domain: { type: { name: 'MyData' } },
             initialValue: { fields: [] },
         })
     })

@@ -1,13 +1,13 @@
 import { DataLiteral } from '@/model/data-literal'
+import { decorateDomain } from '@/model/domain-declaration'
 import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
-import { decorateLattice } from '@/model/lattice-declaration'
 import { Parameter } from '@/model/parameter'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { TypeName } from '@/model/type-name'
+import { IntegerRange, RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
@@ -69,8 +69,8 @@ describe('FunctionCall', () => {
                         isImmutable: true,
                         varName: 'x',
                         isolationLevel: ISOLATED,
-                        lattice: decorateLattice(
-                            IntegerLattice.create({
+                        domain: decorateDomain(
+                            IntegerRange.create({
                                 min: 0n,
                                 max: 100n,
                             }),
@@ -113,8 +113,8 @@ describe('FunctionCall', () => {
                     baseName: 'foo',
                     parameters: [],
                     result: {
-                        lattice: decorateLattice(
-                            RCTypeLattice.create({
+                        domain: decorateDomain(
+                            RCTypeSet.create({
                                 type: TypeName.create({ name: 'MyData' }),
                             }),
                             { span: someCodeSpan },
@@ -152,7 +152,7 @@ describe('FunctionCall', () => {
             context.scope.addVariableDeclaration('value', {
                 isImmutable: true,
                 isolationLevel: SHARED,
-                lattice: RCTypeLattice.create({
+                domain: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
             })
@@ -294,7 +294,7 @@ describe('FunctionCall', () => {
         context.scope.addVariableDeclaration('x', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            lattice: IntegerLattice.create({ min: 42n, max: 42n }),
+            domain: IntegerRange.create({ min: 42n, max: 42n }),
         })
 
         const statement = FunctionCall.create({

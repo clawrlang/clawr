@@ -81,7 +81,7 @@ export class ObjectDeclaration implements Declaration {
             initializers,
             fields: this.fields.map((field) => ({
                 name: field.name,
-                domain: field.lattice!.toCIR(),
+                domain: field.domain!.toCIR(),
             })),
         })
         return Result.ok

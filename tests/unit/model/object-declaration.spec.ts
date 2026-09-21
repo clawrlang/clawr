@@ -1,12 +1,12 @@
 import { DataLiteral } from '@/model/data-literal'
+import { decorateDomain } from '@/model/domain-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED } from '@/model/isolation-level'
-import { IntegerLattice } from '@/model/lattice'
-import { decorateLattice } from '@/model/lattice-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { SelfAssignment } from '@/model/self-assignment'
 import { TypeName } from '@/model/type-name'
+import { IntegerRange } from '@/model/value-set'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
@@ -24,7 +24,7 @@ describe('ObjectDeclaration', () => {
                     name: 'field',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
-                    lattice: decorateLattice(IntegerLattice.singleton(20n), {
+                    domain: decorateDomain(IntegerRange.singleton(20n), {
                         span: someCodeSpan,
                     }),
                     defaultValue: IntegerLiteral.create({
@@ -77,8 +77,8 @@ describe('ObjectDeclaration', () => {
                             label: 'label',
                             isImmutable: true,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                             varName: 'var',
@@ -94,10 +94,9 @@ describe('ObjectDeclaration', () => {
                     },
                     result: {
                         isolationLevel: ISOLATED,
-                        lattice: decorateLattice(
-                            IntegerLattice.singleton(42n),
-                            { span: someCodeSpan },
-                        ),
+                        domain: decorateDomain(IntegerRange.singleton(42n), {
+                            span: someCodeSpan,
+                        }),
                     },
                 }),
             ],
@@ -109,8 +108,8 @@ describe('ObjectDeclaration', () => {
                             label: 'label',
                             isImmutable: true,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                             varName: 'var',
@@ -130,7 +129,7 @@ describe('ObjectDeclaration', () => {
                     name: 'field',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
-                    lattice: decorateLattice(IntegerLattice.singleton(20n), {
+                    domain: decorateDomain(IntegerRange.singleton(20n), {
                         span: someCodeSpan,
                     }),
                     defaultValue: IntegerLiteral.create({
@@ -212,8 +211,8 @@ describe('ObjectDeclaration', () => {
                             label: 'label',
                             isImmutable: true,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                             varName: 'var',
@@ -248,7 +247,7 @@ describe('ObjectDeclaration', () => {
                     name: 'field',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
-                    lattice: decorateLattice(IntegerLattice.singleton(20n), {
+                    domain: decorateDomain(IntegerRange.singleton(20n), {
                         span: someCodeSpan,
                     }),
                     defaultValue: IntegerLiteral.create({

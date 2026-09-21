@@ -4,9 +4,9 @@ import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { FunctionName } from './function-name'
 import { IsolationLevel, SHARED, UNKNOWN } from './isolation-level'
-import { Lattice, RCTypeLattice } from './lattice'
 import { ObjectDeclaration } from './object-declaration'
 import { TypeName } from './type-name'
+import { RCTypeSet, ValueSet } from './value-set'
 
 class RootScope {
     private readonly variables: Map<string, Variable> = new Map()
@@ -56,7 +56,7 @@ export class Scope {
     private readonly variables: Map<string, Variable> = new Map()
     private readonly types: Map<string, DataDeclaration | ObjectDeclaration> =
         new Map()
-    private currentValues: Map<string, Lattice> = new Map()
+    private currentValues: Map<string, ValueSet> = new Map()
     public emitted: cir.Statement[] = []
     private nextTempVarCounter = 0
 
@@ -118,13 +118,13 @@ export class Scope {
         this.addVariableDeclaration('self', {
             isImmutable: false,
             isolationLevel: SHARED,
-            lattice: RCTypeLattice.create({ type }),
+            domain: RCTypeSet.create({ type }),
         })
     }
 
     releaseVariables() {
         const vars = [...this.variables.entries()]
-            .filter((v) => v[1].lattice instanceof RCTypeLattice)
+            .filter((v) => v[1].domain instanceof RCTypeSet)
             .map((v) => v[0])
 
         for (const name of vars) {
@@ -138,21 +138,21 @@ export class Scope {
         }
     }
 
-    currentValue(name: string): Lattice | undefined {
+    currentValue(name: string): ValueSet | undefined {
         const value = this.currentValues.get(name)
         if (value) return value
         const variable = this.variables.get(name)
-        if (variable) return variable.lattice
+        if (variable) return variable.domain
         if (this.parentScope) return this.parentScope.currentValue(name)
-        return this.rootScope.variableDeclaration(name)?.lattice
+        return this.rootScope.variableDeclaration(name)?.domain
     }
 
-    setCurrentValue(name: string, lattice: Lattice): Result {
+    setCurrentValue(name: string, valueSet: ValueSet): Result {
         const variable = this.variableDeclaration(name)
         if (!variable) return ErrorResult.failure(`Unknown variable: ${name}`)
-        if (!variable?.lattice.isSupersetTo(lattice))
+        if (!variable?.domain.isSupersetTo(valueSet))
             return ErrorResult.failure(`Incompatible value for ${name}`)
-        this.currentValues.set(name, lattice)
+        this.currentValues.set(name, valueSet)
         return Result.ok
     }
 }
@@ -160,5 +160,5 @@ export class Scope {
 type Variable = {
     isImmutable: boolean
     isolationLevel: IsolationLevel | UNKNOWN
-    lattice: Lattice
+    domain: ValueSet
 }

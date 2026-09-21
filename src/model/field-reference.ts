@@ -5,7 +5,7 @@ import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, isStorage } from '.'
 import { DataDeclaration } from './data-declaration'
 import { ISOLATED, IsolationLevel, SHARED } from './isolation-level'
-import { Lattice, RCTypeLattice } from './lattice'
+import { RCTypeSet, ValueSet } from './value-set'
 
 export class FieldReference implements Expression {
     private constructor(
@@ -67,22 +67,22 @@ export class FieldReference implements Expression {
         const fieldResult = this.getFieldFromContext(context)
         if (fieldResult.isError) return fieldResult
         const field = fieldResult.value
-        return field.lattice instanceof RCTypeLattice
+        return field.domain instanceof RCTypeSet
             ? Result.value(field.isolationLevel ?? ISOLATED)
             : Result.value(ISOLATED)
     }
 
-    declaredLattice(context: Context): SemanticResult<Lattice> {
+    domain(context: Context): SemanticResult<ValueSet> {
         const fieldResult = this.getFieldFromContext(context)
         if (fieldResult.isError) return fieldResult
-        return Result.value(fieldResult.value.lattice!)
+        return Result.value(fieldResult.value.domain!)
     }
 
-    currentValue(context: Context): SemanticResult<Lattice> {
+    currentValue(context: Context): SemanticResult<ValueSet> {
         const objectValueResult = this.object.currentValue(context)
         if (objectValueResult.isError) return objectValueResult
         const objectValue = objectValueResult.value
-        if (!(objectValue instanceof RCTypeLattice))
+        if (!(objectValue instanceof RCTypeSet))
             return SemanticErrorResult.failure(
                 `${objectValue.toCIR().type} is not an rc-type`,
                 this.object.span,
@@ -90,14 +90,14 @@ export class FieldReference implements Expression {
         if (objectValue.fields)
             return Result.value(objectValue.fields[this.field])
 
-        return this.declaredLattice(context)
+        return this.domain(context)
     }
 
-    setCurrentValue(context: Context, value: Lattice): SemanticResult {
+    setCurrentValue(context: Context, value: ValueSet): SemanticResult {
         const objectvalueResult = this.object.currentValue(context)
         if (objectvalueResult.isError) return objectvalueResult
         const objectValue = objectvalueResult.value
-        if (objectValue instanceof RCTypeLattice) {
+        if (objectValue instanceof RCTypeSet) {
             if (objectValue.fields) objectValue.fields[this.field] = value
 
             const object: Expression = this.object
@@ -123,17 +123,17 @@ export class FieldReference implements Expression {
             kind: 'FIELD_REF',
             object,
             field: this.field,
-            value: field.lattice.toCIR(),
+            value: field.domain.toCIR(),
         } satisfies cir.Expression)
     }
 
     private getFieldFromContext(
         context: Context,
     ): SemanticResult<DataDeclaration['fields'][number]> {
-        const objectValueResult = this.object.declaredLattice(context)
+        const objectValueResult = this.object.domain(context)
         if (objectValueResult.isError) return objectValueResult
         const objectValue = objectValueResult.value
-        if (!(objectValue instanceof RCTypeLattice))
+        if (!(objectValue instanceof RCTypeSet))
             return SemanticErrorResult.failure(
                 'unknown object value',
                 this.span,

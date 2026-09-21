@@ -2,11 +2,11 @@ import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
-import { Context, ContextWithLattice, Expression } from '.'
+import { Context, ContextWithDomain, Expression } from '.'
 import { FunctionCall } from './function-call'
 import { UNIQUE } from './isolation-level'
-import { Lattice, RCTypeLattice } from './lattice'
 import { TypeName } from './type-name'
+import { RCTypeSet, ValueSet } from './value-set'
 
 export class DataLiteral implements Expression {
     private constructor(
@@ -35,19 +35,19 @@ export class DataLiteral implements Expression {
         return Result.value(UNIQUE)
     }
 
-    currentValue(context: ContextWithLattice): SemanticResult<Lattice> {
-        const explicitLattice = context.explicitLattice
-        if (!(explicitLattice instanceof RCTypeLattice))
+    currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
+        const explicitDomain = context.explicitDomain
+        if (!(explicitDomain instanceof RCTypeSet))
             return SemanticErrorResult.failure(
                 'Data Literal without explicit value set is not supported',
                 this.span,
             )
-        const dataDecl = context.scope.dataDeclaration(explicitLattice.type)
-        const objectDecl = context.scope.objectDeclaration(explicitLattice.type)
+        const dataDecl = context.scope.dataDeclaration(explicitDomain.type)
+        const objectDecl = context.scope.objectDeclaration(explicitDomain.type)
         const decl = dataDecl ?? objectDecl
         if (!decl)
             return SemanticErrorResult.failure(
-                `DataLiteral.currentValue: type ${explicitLattice.type.name} not found in scope`,
+                `DataLiteral.currentValue: type ${explicitDomain.type.name} not found in scope`,
                 this.span,
             )
 
@@ -58,19 +58,19 @@ export class DataLiteral implements Expression {
                 )
                 if (!fieldDeclaration)
                     return SemanticErrorResult.failure(
-                        `DataLiteral.currentValue: field ${field.name} not found on type ${explicitLattice.type.name}`,
+                        `DataLiteral.currentValue: field ${field.name} not found on type ${explicitDomain.type.name}`,
                         this.span,
                     )
                 return field.value.currentValue({
                     ...context,
-                    explicitLattice: fieldDeclaration.lattice,
+                    explicitDomain: fieldDeclaration.domain,
                 })
             }),
         )
         if (fieldValuesResult.isError) return fieldValuesResult
         const fieldValues = fieldValuesResult.value
         return Result.value(
-            RCTypeLattice.create({
+            RCTypeSet.create({
                 type: decl.name,
                 fields: Object.fromEntries(
                     fieldValues.map((value, index) => [
@@ -82,30 +82,28 @@ export class DataLiteral implements Expression {
         )
     }
 
-    declaredLattice(
-        context: Context & { type: TypeName },
-    ): SemanticResult<Lattice> {
+    domain(context: Context & { type: TypeName }): SemanticResult<ValueSet> {
         const decl = context.scope.dataDeclaration(context.type)
         if (!decl)
             return SemanticErrorResult.failure(
-                `DataLiteral.declaredLattice: type ${context.type.name} not found in scope`,
+                `DataLiteral.domain: type ${context.type.name} not found in scope`,
                 this.span,
             )
         return Result.value(
-            RCTypeLattice.create({
+            RCTypeSet.create({
                 type: decl.name,
                 fields: Object.fromEntries(
-                    decl.fields.map((field) => [field.name, field.lattice]),
+                    decl.fields.map((field) => [field.name, field.domain]),
                 ),
             }),
         )
     }
 
     toCIRExpression(
-        context: ContextWithLattice,
+        context: ContextWithDomain,
     ): SemanticResult<cir.Expression & { kind: 'ALLOCATION' }> {
-        const explicitLattice = context.explicitLattice
-        if (!(explicitLattice instanceof RCTypeLattice))
+        const explicitDomain = context.explicitDomain
+        if (!(explicitDomain instanceof RCTypeSet))
             return SemanticErrorResult.failure(
                 'DataLiteral.toCIRExpression: data literal without explicit type',
                 this.span,
@@ -117,11 +115,11 @@ export class DataLiteral implements Expression {
             )
 
         const targetType =
-            context.scope.dataDeclaration(explicitLattice.type) ??
-            context.scope.objectDeclaration(explicitLattice.type)
+            context.scope.dataDeclaration(explicitDomain.type) ??
+            context.scope.objectDeclaration(explicitDomain.type)
         if (!targetType)
             return SemanticErrorResult.failure(
-                `DataLiteral.toCIRExpression: target type ${explicitLattice.type.name} not found in scope`,
+                `DataLiteral.toCIRExpression: target type ${explicitDomain.type.name} not found in scope`,
                 this.span,
             )
         const fieldDeclarations = new Map(
@@ -133,12 +131,12 @@ export class DataLiteral implements Expression {
                 const fieldDeclaration = fieldDeclarations.get(field.name)
                 if (!fieldDeclaration)
                     return SemanticErrorResult.failure(
-                        `field ${field.name} not found on type ${explicitLattice.type.canonical()}`,
+                        `field ${field.name} not found on type ${explicitDomain.type.canonical()}`,
                         this.span,
                     )
-                const nestedContext: ContextWithLattice = {
+                const nestedContext: ContextWithDomain = {
                     ...context,
-                    explicitLattice: fieldDeclaration.lattice,
+                    explicitDomain: fieldDeclaration.domain,
                     isolationLevel: fieldDeclaration.isolationLevel,
                 }
                 const valueResult = field.value.toCIRExpression(nestedContext)
@@ -146,7 +144,7 @@ export class DataLiteral implements Expression {
                 return Result.value({
                     name: field.name,
                     value: valueResult.value,
-                    lattice: valueResult.value.value,
+                    domain: valueResult.value.value,
                 })
             }),
         )
@@ -159,7 +157,7 @@ export class DataLiteral implements Expression {
             fields,
             value: {
                 type: 'rc-type',
-                ...explicitLattice.type.toCIR(),
+                ...explicitDomain.type.toCIR(),
             },
         } satisfies cir.Expression)
     }

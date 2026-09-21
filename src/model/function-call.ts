@@ -6,7 +6,7 @@ import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
 import { FunctionName } from './function-name'
 import { AnyIsolationLevel, UNIQUE } from './isolation-level'
-import { Lattice, RCTypeLattice } from './lattice'
+import { RCTypeSet, ValueSet } from './value-set'
 
 export class FunctionCall implements Expression, Statement {
     private arguments: Expression[]
@@ -59,16 +59,16 @@ export class FunctionCall implements Expression, Statement {
         return decl.resultIsolationLevel(context)
     }
 
-    declaredLattice(context: Context): SemanticResult<Lattice> {
+    domain(context: Context): SemanticResult<ValueSet> {
         return this.currentValue(context)
     }
 
-    currentValue(context: Context): SemanticResult<Lattice> {
+    currentValue(context: Context): SemanticResult<ValueSet> {
         if (this.name.toString() === 'copy(of:)') {
             const valueResult = this.arguments[0].currentValue(context)
             if (valueResult.isError) return valueResult
             const value = valueResult.value
-            return value instanceof RCTypeLattice
+            return value instanceof RCTypeSet
                 ? Result.value(value)
                 : SemanticErrorResult.failure(
                       'not a reference-counted type',
@@ -83,14 +83,14 @@ export class FunctionCall implements Expression, Statement {
                 this.span,
             )
 
-        const latticeResult = decl.lattice(context)
-        if (latticeResult.isError) return latticeResult
-        if (!latticeResult.value)
+        const domainResult = decl.domain(context)
+        if (domainResult.isError) return domainResult
+        if (!domainResult.value)
             return SemanticErrorResult.failure(
-                `Function declaration has no result lattice: ${this.name.toString()}`,
+                `Function declaration has no result set: ${this.name.toString()}`,
                 this.span,
             )
-        return Result.value(latticeResult.value)
+        return Result.value(domainResult.value)
     }
 
     toCIRExpression(context: Context): SemanticResult<cir.Expression> {
@@ -119,16 +119,16 @@ export class FunctionCall implements Expression, Statement {
         const _name = this.name.toCIR()
         if (_name.baseName === 'print') {
             const tempName = context.scope.nextTempVar()
-            const boxedLattice = { ...args[0].value, boxed: true as const }
+            const boxDomain = { ...args[0].value, boxed: true as const }
             context.scope.emitted.push(
                 {
                     kind: 'VARIABLE_DECL',
                     name: tempName,
-                    domain: boxedLattice,
+                    domain: boxDomain,
                     initialValue: {
                         kind: 'BOX',
                         expression: args[0],
-                        value: boxedLattice,
+                        value: boxDomain,
                     },
                 },
                 {
@@ -138,7 +138,7 @@ export class FunctionCall implements Expression, Statement {
                         {
                             kind: 'VARIABLE_REF',
                             name: tempName,
-                            value: boxedLattice,
+                            value: boxDomain,
                         },
                     ],
                 },

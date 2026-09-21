@@ -1,6 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { IntegerLattice, TruthvalueLattice } from '@/model/lattice'
+import { IntegerRange, TruthvalueSet } from '@/model/value-set'
 import { DataDeclarationParser } from '@/parser/data-declaration-parser'
 import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
@@ -31,8 +31,8 @@ describe('DataDeclarationParser', () => {
                 },
             ],
         })
-        expect(result.fields[0].lattice).toBeInstanceOf(IntegerLattice)
-        expect(result.fields[1].lattice).toBeInstanceOf(TruthvalueLattice)
+        expect(result.fields[0].domain).toBeInstanceOf(IntegerRange)
+        expect(result.fields[1].domain).toBeInstanceOf(TruthvalueSet)
     })
 
     it('parses a data declaration with mixed semantics', () => {
@@ -60,7 +60,7 @@ describe('DataDeclarationParser', () => {
                 },
             ],
         })
-        expect(result.fields[0].lattice).toBeInstanceOf(IntegerLattice)
-        expect(result.fields[1].lattice).toBeInstanceOf(TruthvalueLattice)
+        expect(result.fields[0].domain).toBeInstanceOf(IntegerRange)
+        expect(result.fields[1].domain).toBeInstanceOf(TruthvalueSet)
     })
 })

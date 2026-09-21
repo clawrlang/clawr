@@ -1,19 +1,19 @@
 import { TokenStream } from '@/lexer'
 import {
-    IntegerLattice,
-    RCTypeLattice,
-    StringLattice,
-    TruthvalueLattice,
-} from '@/model/lattice'
-import { LatticeParser } from '@/parser/lattice-parser'
+    IntegerRange,
+    RCTypeSet,
+    StringSet,
+    TruthvalueSet,
+} from '@/model/value-set'
+import { DomainParser } from '@/parser/domain-parser'
 import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
-describe('LatticeParser', () => {
+describe('DomainParser', () => {
     it('parses unconstrained integer type', () => {
-        const lattice = parseLattice('integer')
-        expect(lattice).toBeInstanceOf(IntegerLattice)
-        expect(lattice).toMatchObject({
+        const domain = parseDomain('integer')
+        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 8 },
@@ -22,9 +22,9 @@ describe('LatticeParser', () => {
     })
 
     it('parses integer type with min constraint only', () => {
-        const lattice = parseLattice('integer(1...)')
-        expect(lattice).toBeInstanceOf(IntegerLattice)
-        expect(lattice).toMatchObject({
+        const domain = parseDomain('integer(1...)')
+        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toMatchObject({
             min: 1n,
             span: {
                 start: { line: 1, column: 1 },
@@ -34,9 +34,9 @@ describe('LatticeParser', () => {
     })
 
     it('parses integer type with (exclusive) max constraint only', () => {
-        const lattice = parseLattice('integer(..<10)')
-        expect(lattice).toBeInstanceOf(IntegerLattice)
-        expect(lattice).toMatchObject({
+        const domain = parseDomain('integer(..<10)')
+        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toMatchObject({
             max: 9n,
             span: {
                 start: { line: 1, column: 1 },
@@ -46,9 +46,9 @@ describe('LatticeParser', () => {
     })
 
     it('parses integer type with (inclusive) max constraint only', () => {
-        const lattice = parseLattice('integer(...10)')
-        expect(lattice).toBeInstanceOf(IntegerLattice)
-        expect(lattice).toMatchObject({
+        const domain = parseDomain('integer(...10)')
+        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toMatchObject({
             max: 10n,
             span: {
                 start: { line: 1, column: 1 },
@@ -58,9 +58,9 @@ describe('LatticeParser', () => {
     })
 
     it('parses integer type with min and (inclusive) max constraints', () => {
-        const lattice = parseLattice('integer(1...10)')
-        expect(lattice).toBeInstanceOf(IntegerLattice)
-        expect(lattice).toMatchObject({
+        const domain = parseDomain('integer(1...10)')
+        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toMatchObject({
             min: 1n,
             max: 10n,
             span: {
@@ -71,9 +71,9 @@ describe('LatticeParser', () => {
     })
 
     it('parses integer type with min and (exclusive) max constraints', () => {
-        const lattice = parseLattice('integer(1..<10)')
-        expect(lattice).toBeInstanceOf(IntegerLattice)
-        expect(lattice).toMatchObject({
+        const domain = parseDomain('integer(1..<10)')
+        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toMatchObject({
             min: 1n,
             max: 9n,
             span: {
@@ -84,9 +84,9 @@ describe('LatticeParser', () => {
     })
 
     it('parses unconstrained truthvalue type', () => {
-        const lattice = parseLattice('truthvalue')
-        expect(lattice).toBeInstanceOf(TruthvalueLattice)
-        expect(lattice).toMatchObject({
+        const domain = parseDomain('truthvalue')
+        expect(domain).toBeInstanceOf(TruthvalueSet)
+        expect(domain).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 11 },
@@ -95,9 +95,9 @@ describe('LatticeParser', () => {
     })
 
     it('parses truthvalue type with constraints', () => {
-        const lattice = parseLattice('truthvalue(true, false)')
-        expect(lattice).toBeInstanceOf(TruthvalueLattice)
-        expect(lattice).toMatchObject({
+        const domain = parseDomain('truthvalue(true, false)')
+        expect(domain).toBeInstanceOf(TruthvalueSet)
+        expect(domain).toMatchObject({
             values: ['true', 'false'],
             span: {
                 start: { line: 1, column: 1 },
@@ -107,9 +107,9 @@ describe('LatticeParser', () => {
     })
 
     it('parses unconstrained string type', () => {
-        const lattice = parseLattice('string')
-        expect(lattice).toBeInstanceOf(StringLattice)
-        expect(lattice).toMatchObject({
+        const domain = parseDomain('string')
+        expect(domain).toBeInstanceOf(StringSet)
+        expect(domain).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 7 },
@@ -118,9 +118,9 @@ describe('LatticeParser', () => {
     })
 
     it('parses rc-types', () => {
-        const lattice = parseLattice('MyType')
-        expect(lattice).toBeInstanceOf(RCTypeLattice)
-        expect(lattice).toMatchObject({
+        const domain = parseDomain('MyType')
+        expect(domain).toBeInstanceOf(RCTypeSet)
+        expect(domain).toMatchObject({
             type: { name: 'MyType' },
             span: {
                 start: { line: 1, column: 1 },
@@ -130,9 +130,9 @@ describe('LatticeParser', () => {
     })
 })
 
-function parseLattice(input: string) {
+function parseDomain(input: string) {
     const errorReporter = new TestErrorReporter()
     const stream = TokenStream.read(input, errorReporter)
-    const parser = LatticeParser.create({ errorReporter })
+    const parser = DomainParser.create({ errorReporter })
     return parser.parse(stream)
 }

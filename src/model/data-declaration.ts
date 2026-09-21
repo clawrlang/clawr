@@ -1,15 +1,15 @@
 import { Result } from '@/tools/result'
 import { SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration, Expression } from '.'
+import { DomainDeclaration } from './domain-declaration'
 import { IsolationLevel } from './isolation-level'
-import { LatticeDeclaration } from './lattice-declaration'
 import { TypeName } from './type-name'
 
 export type DataField = {
     isImmutable: boolean
     name: string
     isolationLevel: IsolationLevel
-    lattice: LatticeDeclaration
+    domain: DomainDeclaration
     defaultValue?: Expression
 }
 
@@ -37,7 +37,7 @@ export class DataDeclaration implements Declaration {
             namespace: this.name.namespace,
             fields: this.fields.map((field) => ({
                 name: field.name,
-                domain: field.lattice!.toCIR(),
+                domain: field.domain!.toCIR(),
             })),
         })
         return Result.ok

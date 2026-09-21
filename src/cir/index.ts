@@ -216,9 +216,9 @@ export type Expression =
     | FieldReference
     | (FunctionCall & { value: ValueSet })
 
-// --------
-// Lattices
-// --------
+// ---------
+// ValueSets
+// ---------
 
 type IntegerRange<
     Min extends bigint | undefined = bigint | undefined,

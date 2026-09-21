@@ -1,11 +1,11 @@
 import { DataDeclaration } from '@/model/data-declaration'
+import { decorateDomain } from '@/model/domain-declaration'
 import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED } from '@/model/isolation-level'
-import { IntegerLattice, TruthvalueLattice } from '@/model/lattice'
-import { decorateLattice } from '@/model/lattice-declaration'
 import { Module } from '@/model/module'
 import { TypeName } from '@/model/type-name'
+import { IntegerRange, TruthvalueSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
@@ -69,8 +69,8 @@ describe('Module', () => {
                             name: 'field1',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -78,8 +78,8 @@ describe('Module', () => {
                             name: 'field2',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -106,7 +106,7 @@ describe('Module', () => {
                     isImmutable: true,
                     name: 'x',
                     isolationLevel: ISOLATED,
-                    lattice: decorateLattice(IntegerLattice.unconstrained(), {
+                    domain: decorateDomain(IntegerRange.unconstrained(), {
                         span: someCodeSpan,
                     }),
                     initialValue: IntegerLiteral.create({
@@ -121,7 +121,7 @@ describe('Module', () => {
         expect(context.scope.variableDeclaration('x')).toEqual({
             isImmutable: true,
             isolationLevel: ISOLATED,
-            lattice: IntegerLattice.create({ min: 42n, max: 42n }),
+            domain: IntegerRange.create({ min: 42n, max: 42n }),
         })
     })
 
@@ -136,8 +136,8 @@ describe('Module', () => {
                             name: 'field1',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -145,8 +145,8 @@ describe('Module', () => {
                             name: 'field2',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                TruthvalueLattice.unconstrained(),
+                            domain: decorateDomain(
+                                TruthvalueSet.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -166,11 +166,9 @@ describe('Module', () => {
                 { name: 'field2', isImmutable: false },
             ],
         })
-        expect(myDataDeclaration?.fields[0].lattice).toBeInstanceOf(
-            IntegerLattice,
-        )
-        expect(myDataDeclaration?.fields[1].lattice).toBeInstanceOf(
-            TruthvalueLattice,
+        expect(myDataDeclaration?.fields[0].domain).toBeInstanceOf(IntegerRange)
+        expect(myDataDeclaration?.fields[1].domain).toBeInstanceOf(
+            TruthvalueSet,
         )
     })
 })

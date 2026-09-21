@@ -2,10 +2,10 @@ import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import { SemanticResult } from '@/tools/semantic-result'
-import { Context, ContextWithLattice, Expression, isStorage } from '.'
+import { Context, ContextWithDomain, Expression, isStorage } from '.'
 import { FieldReference } from './field-reference'
 import { AnyIsolationLevel } from './isolation-level'
-import { Lattice, RCTypeLattice } from './lattice'
+import { RCTypeSet, ValueSet } from './value-set'
 import { VariableReference } from './variable-reference'
 
 export class Retain implements Expression {
@@ -15,7 +15,7 @@ export class Retain implements Expression {
 
     private constructor(
         public readonly value: VariableReference | FieldReference,
-        private readonly lattice: RCTypeLattice,
+        private readonly valueSet: RCTypeSet,
     ) {}
 
     static ifStorage<T extends Expression>(
@@ -23,10 +23,10 @@ export class Retain implements Expression {
         context: Context,
     ): SemanticResult<T | Retain> {
         if (!isStorage(value)) return Result.value(value)
-        const latticeResult = value.currentValue(context)
-        if (latticeResult.isError) return latticeResult
-        return latticeResult.value instanceof RCTypeLattice
-            ? Result.value(new Retain(value, latticeResult.value))
+        const valueResult = value.currentValue(context)
+        if (valueResult.isError) return valueResult
+        return valueResult.value instanceof RCTypeSet
+            ? Result.value(new Retain(value, valueResult.value))
             : Result.value(value as T)
     }
 
@@ -38,23 +38,23 @@ export class Retain implements Expression {
         return this.value.isolationLevel(context)
     }
 
-    declaredLattice(context: ContextWithLattice): SemanticResult<Lattice> {
-        return this.value.declaredLattice(context)
+    domain(context: ContextWithDomain): SemanticResult<ValueSet> {
+        return this.value.domain(context)
     }
 
-    currentValue(context: ContextWithLattice): SemanticResult<Lattice> {
+    currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
         return this.value.currentValue(context)
     }
 
     toCIRExpression(
-        context: ContextWithLattice,
+        context: ContextWithDomain,
     ): SemanticResult<cir.Expression> {
         const objectResult = this.value.toCIRExpression(context)
         if (objectResult.isError) return objectResult
         return Result.value({
             kind: 'RETAIN' as const,
             object: objectResult.value,
-            value: this.lattice.toCIR(),
+            value: this.valueSet.toCIR(),
         })
     }
 }

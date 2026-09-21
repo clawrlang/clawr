@@ -1,10 +1,10 @@
 import { DataDeclaration } from '@/model/data-declaration'
+import { decorateDomain } from '@/model/domain-declaration'
 import { FieldReference } from '@/model/field-reference'
 import { ISOLATED, SHARED, UNKNOWN } from '@/model/isolation-level'
-import { IntegerLattice, RCTypeLattice } from '@/model/lattice'
-import { decorateLattice } from '@/model/lattice-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
+import { IntegerRange, RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { SemanticResult } from '@/tools/semantic-result'
 import { newSemanticContext, someCodeSpan } from '@@/util'
@@ -16,7 +16,7 @@ describe('Field Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: false,
             isolationLevel: ISOLATED,
-            lattice: RCTypeLattice.create({
+            domain: RCTypeSet.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
@@ -28,10 +28,9 @@ describe('Field Reference', () => {
                         name: 'myField',
                         isImmutable: false,
                         isolationLevel: ISOLATED,
-                        lattice: decorateLattice(
-                            IntegerLattice.unconstrained(),
-                            { span: someCodeSpan },
-                        ),
+                        domain: decorateDomain(IntegerRange.unconstrained(), {
+                            span: someCodeSpan,
+                        }),
                     },
                 ],
             }),
@@ -47,7 +46,7 @@ describe('Field Reference', () => {
             span: someCodeSpan,
             fieldSpan: someCodeSpan,
         })
-        const result = fieldRef.declaredLattice(context)
+        const result = fieldRef.domain(context)
         expect(result.isSuccess && result.value.toCIR().type).toBe('integer')
     })
 
@@ -56,7 +55,7 @@ describe('Field Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: false,
             isolationLevel: ISOLATED,
-            lattice: RCTypeLattice.create({
+            domain: RCTypeSet.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
@@ -68,8 +67,8 @@ describe('Field Reference', () => {
                         isImmutable: true,
                         name: 'myField',
                         isolationLevel: SHARED,
-                        lattice: decorateLattice(
-                            RCTypeLattice.create({
+                        domain: decorateDomain(
+                            RCTypeSet.create({
                                 type: TypeName.create({ name: 'MyType' }),
                             }),
                             { span: someCodeSpan },
@@ -123,7 +122,7 @@ describe('Field Reference', () => {
                 context.scope.addVariableDeclaration('myVar', {
                     isImmutable,
                     isolationLevel: expected,
-                    lattice: RCTypeLattice.create({
+                    domain: RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
@@ -141,8 +140,8 @@ describe('Field Reference', () => {
                                 isImmutable,
                                 name: 'myField',
                                 isolationLevel: expected,
-                                lattice: decorateLattice(
-                                    RCTypeLattice.create({
+                                domain: decorateDomain(
+                                    RCTypeSet.create({
                                         type: TypeName.create({
                                             name: 'InnerType',
                                         }),
@@ -166,7 +165,7 @@ describe('Field Reference', () => {
                 })
                 const result = SemanticResult.collect([
                     fieldRef.isolationLevel(context),
-                    fieldRef.declaredLattice(context),
+                    fieldRef.domain(context),
                 ])
 
                 expect(result.isSuccess && result.value).toMatchObject([
@@ -183,7 +182,7 @@ describe('Field Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: false,
             isolationLevel: ISOLATED,
-            lattice: RCTypeLattice.create({
+            domain: RCTypeSet.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
@@ -195,10 +194,9 @@ describe('Field Reference', () => {
                         isImmutable: false,
                         name: 'myField',
                         isolationLevel: ISOLATED,
-                        lattice: decorateLattice(
-                            IntegerLattice.unconstrained(),
-                            { span: someCodeSpan },
-                        ),
+                        domain: decorateDomain(IntegerRange.unconstrained(), {
+                            span: someCodeSpan,
+                        }),
                     },
                 ],
             }),
@@ -250,7 +248,7 @@ describe('Field Reference', () => {
                 context.scope.addVariableDeclaration('myVar', {
                     isImmutable,
                     isolationLevel: isolationLevel,
-                    lattice: RCTypeLattice.create({
+                    domain: RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
@@ -262,8 +260,8 @@ describe('Field Reference', () => {
                                 name: 'myField',
                                 isImmutable: false,
                                 isolationLevel: ISOLATED,
-                                lattice: decorateLattice(
-                                    IntegerLattice.unconstrained(),
+                                domain: decorateDomain(
+                                    IntegerRange.unconstrained(),
                                     { span: someCodeSpan },
                                 ),
                             },
@@ -326,7 +324,7 @@ describe('Field Reference', () => {
                 context.scope.addVariableDeclaration('myVar', {
                     isImmutable,
                     isolationLevel,
-                    lattice: RCTypeLattice.create({
+                    domain: RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
@@ -338,8 +336,8 @@ describe('Field Reference', () => {
                                 name: 'myField',
                                 isImmutable,
                                 isolationLevel: ISOLATED,
-                                lattice: decorateLattice(
-                                    IntegerLattice.unconstrained(),
+                                domain: decorateDomain(
+                                    IntegerRange.unconstrained(),
                                     { span: someCodeSpan },
                                 ),
                             },
@@ -367,7 +365,7 @@ describe('Field Reference', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                lattice: RCTypeLattice.create({
+                domain: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
             })
@@ -379,8 +377,8 @@ describe('Field Reference', () => {
                             isImmutable: false,
                             name: 'myField',
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -407,7 +405,7 @@ describe('Field Reference', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: UNKNOWN,
-                lattice: RCTypeLattice.create({
+                domain: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
             })
@@ -419,8 +417,8 @@ describe('Field Reference', () => {
                             isImmutable: false,
                             name: 'myField',
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -447,7 +445,7 @@ describe('Field Reference', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: RCTypeLattice.create({
+                domain: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
             })
@@ -459,8 +457,8 @@ describe('Field Reference', () => {
                             isImmutable: false,
                             name: 'myField',
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -485,7 +483,7 @@ describe('Field Reference', () => {
     })
 
     describe('current value', () => {
-        it('returns the declared lattice (Data)', () => {
+        it('returns the declared domain (Data)', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
@@ -495,8 +493,8 @@ describe('Field Reference', () => {
                             name: 'field',
                             isImmutable: false,
                             isolationLevel: 'ISOLATED',
-                            lattice: decorateLattice(
-                                IntegerLattice.create({ max: 100n, min: 0n }),
+                            domain: decorateDomain(
+                                IntegerRange.create({ max: 100n, min: 0n }),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -506,7 +504,7 @@ describe('Field Reference', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: RCTypeLattice.create({
+                domain: RCTypeSet.create({
                     type: TypeName.create({ name: 'Data' }),
                 }),
             })
@@ -526,7 +524,7 @@ describe('Field Reference', () => {
             expect(result).toMatchObject({ value: { min: 0n, max: 100n } })
         })
 
-        it('returns the declared lattice (Object)', () => {
+        it('returns the declared domain (Object)', () => {
             const context = newSemanticContext()
             context.scope.rootScope.addObjectDeclaration(
                 ObjectDeclaration.create({
@@ -540,8 +538,8 @@ describe('Field Reference', () => {
                             name: 'field',
                             isImmutable: false,
                             isolationLevel: 'ISOLATED',
-                            lattice: decorateLattice(
-                                IntegerLattice.create({ max: 100n, min: 0n }),
+                            domain: decorateDomain(
+                                IntegerRange.create({ max: 100n, min: 0n }),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -552,7 +550,7 @@ describe('Field Reference', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: RCTypeLattice.create({
+                domain: RCTypeSet.create({
                     type: TypeName.create({ name: 'Object' }),
                 }),
             })

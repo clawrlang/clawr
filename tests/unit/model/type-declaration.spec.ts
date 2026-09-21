@@ -1,8 +1,8 @@
 import { DataDeclaration } from '@/model/data-declaration'
+import { decorateDomain } from '@/model/domain-declaration'
 import { ISOLATED } from '@/model/isolation-level'
-import { IntegerLattice, TruthvalueLattice } from '@/model/lattice'
-import { decorateLattice } from '@/model/lattice-declaration'
 import { TypeName } from '@/model/type-name'
+import { IntegerRange, TruthvalueSet } from '@/model/value-set'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
@@ -15,7 +15,7 @@ describe('DataDeclaration', () => {
                     name: 'field1',
                     isImmutable: false,
                     isolationLevel: ISOLATED,
-                    lattice: decorateLattice(IntegerLattice.unconstrained(), {
+                    domain: decorateDomain(IntegerRange.unconstrained(), {
                         span: someCodeSpan,
                     }),
                 },
@@ -23,12 +23,9 @@ describe('DataDeclaration', () => {
                     name: 'field2',
                     isImmutable: false,
                     isolationLevel: ISOLATED,
-                    lattice: decorateLattice(
-                        TruthvalueLattice.unconstrained(),
-                        {
-                            span: someCodeSpan,
-                        },
-                    ),
+                    domain: decorateDomain(TruthvalueSet.unconstrained(), {
+                        span: someCodeSpan,
+                    }),
                 },
             ],
         })

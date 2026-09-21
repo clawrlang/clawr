@@ -3,11 +3,11 @@ import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import assert from 'assert'
 import { Context, Declaration, Expression, Statement } from '.'
+import { DomainDeclaration } from './domain-declaration'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
-import { Lattice } from './lattice'
-import { LatticeDeclaration } from './lattice-declaration'
 import { Retain } from './retain'
 import { Scope } from './scope'
+import { ValueSet } from './value-set'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -17,7 +17,7 @@ export class VariableDeclaration implements Statement, Declaration {
         private readonly isImmutable: boolean,
         private readonly name: string,
         private readonly isolationLevel: IsolationLevel,
-        private readonly lattice: LatticeDeclaration | undefined,
+        private readonly domain: DomainDeclaration | undefined,
         private readonly initialValue: Expression,
     ) {}
 
@@ -25,20 +25,20 @@ export class VariableDeclaration implements Statement, Declaration {
         isImmutable,
         name,
         isolationLevel,
-        lattice: lattice,
+        domain,
         initialValue,
     }: {
         isImmutable: boolean
         name: string
         isolationLevel: IsolationLevel
-        lattice?: LatticeDeclaration
+        domain?: DomainDeclaration
         initialValue: Expression
     }): VariableDeclaration {
         return new VariableDeclaration(
             isImmutable,
             name,
             isolationLevel,
-            lattice,
+            domain,
             initialValue,
         )
     }
@@ -61,17 +61,17 @@ export class VariableDeclaration implements Statement, Declaration {
         const validityResult = this.checkValidity(initialValue, context)
         if (validityResult.isError) return validityResult
 
-        const lattice =
+        const domain =
             this.isImmutable && this.isolationLevel === ISOLATED
                 ? initialValue
-                : (this.lattice ?? initialValue.unconstrained())
+                : (this.domain ?? initialValue.unconstrained())
 
-        const emissionResult = this.emitCIRDeclaration(context, lattice, scope)
+        const emissionResult = this.emitCIRDeclaration(context, domain, scope)
         if (emissionResult.isError) return emissionResult
         scope.addVariableDeclaration(this.name, {
             isImmutable: this.isImmutable,
             isolationLevel: this.isolationLevel!!,
-            lattice,
+            domain: domain,
         })
         this.setCurrentValue(context, initialValue)
         return Result.ok
@@ -79,7 +79,7 @@ export class VariableDeclaration implements Statement, Declaration {
 
     private emitCIRDeclaration(
         context: Context,
-        lattice: Lattice,
+        domain: ValueSet,
         scope: Scope | Scope['rootScope'],
     ): SemanticResult {
         const valueResult = Retain.ifStorage(this.initialValue, context)
@@ -88,7 +88,7 @@ export class VariableDeclaration implements Statement, Declaration {
 
         const initialValueResult = value.toCIRExpression({
             ...context,
-            explicitLattice: this.lattice,
+            explicitDomain: this.domain,
             isolationLevel: this.isolationLevel,
         })
         if (initialValueResult.isError) return initialValueResult
@@ -97,13 +97,13 @@ export class VariableDeclaration implements Statement, Declaration {
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,
             name: this.name,
-            domain: lattice.toCIR(),
+            domain: domain.toCIR(),
             initialValue: initialValue,
         })
         return Result.ok
     }
 
-    private setCurrentValue(context: Context, currentValue: Lattice) {
+    private setCurrentValue(context: Context, currentValue: ValueSet) {
         assert(
             context.scope.setCurrentValue(this.name, currentValue).isSuccess,
             `Setting current value for variable ${this.name} failed`,
@@ -111,7 +111,7 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private checkValidity(
-        currentValue: Lattice,
+        currentValue: ValueSet,
         context: Context,
     ): SemanticResult {
         if (!this.isValidValue(currentValue))
@@ -133,14 +133,16 @@ export class VariableDeclaration implements Statement, Declaration {
         return Result.ok
     }
 
-    private isValidValue(currentValue: Lattice) {
-        return !this.lattice || this.lattice.isSupersetTo(currentValue)
+    private isValidValue(currentValue: ValueSet) {
+        return !this.domain || this.domain.isSupersetTo(currentValue)
     }
 
-    private currentValueFromInitial(context: Context): SemanticResult<Lattice> {
+    private currentValueFromInitial(
+        context: Context,
+    ): SemanticResult<ValueSet> {
         return this.initialValue.currentValue({
             ...context,
-            explicitLattice: this.lattice,
+            explicitDomain: this.domain,
         })
     }
 }

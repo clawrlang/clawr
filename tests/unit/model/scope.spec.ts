@@ -1,16 +1,16 @@
 import { ISOLATED } from '@/model/isolation-level'
-import { IntegerLattice } from '@/model/lattice'
 import { Scope } from '@/model/scope'
+import { IntegerRange } from '@/model/value-set'
 import { describe, expect, it } from 'bun:test'
 
 describe('Scope', () => {
     describe('variables in current scope', () => {
-        it('defaults to the entire lattice', () => {
+        it('defaults to the entire domain', () => {
             const scope = Scope.createRoot()
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: IntegerLattice.unconstrained(),
+                domain: IntegerRange.unconstrained(),
             })
 
             expect(scope.currentValue('v')).toMatchObject({
@@ -19,16 +19,16 @@ describe('Scope', () => {
             })
         })
 
-        it('can set a smaller lattice', () => {
+        it('can set a subset of the domain', () => {
             const scope = Scope.createRoot()
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: IntegerLattice.unconstrained(),
+                domain: IntegerRange.unconstrained(),
             })
 
             expect(
-                scope.setCurrentValue('v', IntegerLattice.singleton(12n))
+                scope.setCurrentValue('v', IntegerRange.singleton(12n))
                     .isSuccess,
             ).toBeTrue()
 
@@ -43,11 +43,11 @@ describe('Scope', () => {
             parent.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: IntegerLattice.unconstrained(),
+                domain: IntegerRange.unconstrained(),
             })
 
             expect(
-                parent.setCurrentValue('v', IntegerLattice.singleton(12n))
+                parent.setCurrentValue('v', IntegerRange.singleton(12n))
                     .isSuccess,
             ).toBeTrue()
 
@@ -63,11 +63,11 @@ describe('Scope', () => {
             parent.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: IntegerLattice.unconstrained(),
+                domain: IntegerRange.unconstrained(),
             })
 
             expect(
-                parent.setCurrentValue('v', IntegerLattice.singleton(12n))
+                parent.setCurrentValue('v', IntegerRange.singleton(12n))
                     .isSuccess,
             ).toBeTrue()
 
@@ -75,7 +75,7 @@ describe('Scope', () => {
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: IntegerLattice.unconstrained(),
+                domain: IntegerRange.unconstrained(),
             })
             expect(scope.currentValue('v')).toMatchObject({
                 min: undefined,
@@ -83,17 +83,17 @@ describe('Scope', () => {
             })
         })
 
-        it('fails if setting a wider lattice', () => {
+        it('fails if setting a wider range', () => {
             const scope = Scope.createRoot()
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: IntegerLattice.singleton(12n),
+                domain: IntegerRange.singleton(12n),
             })
 
             const result = scope.setCurrentValue(
                 'v',
-                IntegerLattice.unconstrained(),
+                IntegerRange.unconstrained(),
             )
             expect(result.isSuccess && result.value).toBeFalse()
 
@@ -108,7 +108,7 @@ describe('Scope', () => {
 
             const result = scope.setCurrentValue(
                 'v',
-                IntegerLattice.unconstrained(),
+                IntegerRange.unconstrained(),
             )
             expect(result.isSuccess && result.value).toBeFalse()
 
@@ -117,12 +117,12 @@ describe('Scope', () => {
     })
 
     describe('variables in root scope', () => {
-        it('defaults to the entire lattice', () => {
+        it('defaults to the entire domain', () => {
             const scope = Scope.createRoot()
             scope.rootScope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: IntegerLattice.unconstrained(),
+                domain: IntegerRange.unconstrained(),
             })
 
             expect(scope.currentValue('v')).toMatchObject({
@@ -131,16 +131,16 @@ describe('Scope', () => {
             })
         })
 
-        it('can set a smaller lattice', () => {
+        it('can set to a subset', () => {
             const scope = Scope.createRoot()
             scope.rootScope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: IntegerLattice.unconstrained(),
+                domain: IntegerRange.unconstrained(),
             })
 
             expect(
-                scope.setCurrentValue('v', IntegerLattice.singleton(12n))
+                scope.setCurrentValue('v', IntegerRange.singleton(12n))
                     .isSuccess,
             ).toBeTrue()
 
@@ -150,17 +150,17 @@ describe('Scope', () => {
             })
         })
 
-        it('fails if setting a wider lattice', () => {
+        it('fails if setting a wider range', () => {
             const scope = Scope.createRoot()
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                lattice: IntegerLattice.singleton(12n),
+                domain: IntegerRange.singleton(12n),
             })
 
             const result = scope.setCurrentValue(
                 'v',
-                IntegerLattice.unconstrained(),
+                IntegerRange.unconstrained(),
             )
             expect(result.isSuccess && result.value).toBeFalse()
 

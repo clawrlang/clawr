@@ -1,11 +1,11 @@
 import { DataDeclaration } from '@/model/data-declaration'
 import { DataLiteral } from '@/model/data-literal'
+import { decorateDomain } from '@/model/domain-declaration'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { IntegerLattice, RCTypeLattice, truthvalue } from '@/model/lattice'
-import { decorateLattice } from '@/model/lattice-declaration'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { TypeName } from '@/model/type-name'
+import { IntegerRange, RCTypeSet, truthvalue } from '@/model/value-set'
 import { newSemanticContext, someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
@@ -78,8 +78,8 @@ describe('Literals', () => {
                             name: 'x',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -87,8 +87,8 @@ describe('Literals', () => {
                             name: 'y',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -118,7 +118,7 @@ describe('Literals', () => {
 
             const result = dataLiteral.toCIRExpression({
                 ...context,
-                explicitLattice: RCTypeLattice.create({
+                explicitDomain: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
                 isolationLevel: SHARED,
@@ -154,8 +154,8 @@ describe('Literals', () => {
                             name: 'x',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -163,8 +163,8 @@ describe('Literals', () => {
                             name: 'y',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                IntegerLattice.unconstrained(),
+                            domain: decorateDomain(
+                                IntegerRange.unconstrained(),
                                 { span: someCodeSpan },
                             ),
                         },
@@ -194,7 +194,7 @@ describe('Literals', () => {
 
             const result = dataLiteral.currentValue({
                 ...context,
-                explicitLattice: RCTypeLattice.create({
+                explicitDomain: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
             })
@@ -217,8 +217,8 @@ describe('Literals', () => {
                             name: 'inner',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            lattice: decorateLattice(
-                                RCTypeLattice.create({
+                            domain: decorateDomain(
+                                RCTypeSet.create({
                                     type: TypeName.create({
                                         name: 'MissingInnerType',
                                     }),
@@ -253,7 +253,7 @@ describe('Literals', () => {
 
             const result = dataLiteral.currentValue({
                 ...context,
-                explicitLattice: RCTypeLattice.create({
+                explicitDomain: RCTypeSet.create({
                     type: TypeName.create({
                         name: 'OuterType',
                     }),

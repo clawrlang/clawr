@@ -4,7 +4,7 @@ import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression } from '.'
 import { IsolationLevel, UNKNOWN } from './isolation-level'
-import { Lattice } from './lattice'
+import { ValueSet } from './value-set'
 
 export class VariableReference implements Expression {
     private constructor(
@@ -45,13 +45,13 @@ export class VariableReference implements Expression {
         return Result.value(variableResult.value.isolationLevel)
     }
 
-    declaredLattice(context: Context): SemanticResult<Lattice> {
+    domain(context: Context): SemanticResult<ValueSet> {
         const variableResult = this.lookupInScope(context)
         if (variableResult.isError) return variableResult
-        return Result.value(variableResult.value.lattice)
+        return Result.value(variableResult.value.domain)
     }
 
-    currentValue(context: Context): SemanticResult<Lattice> {
+    currentValue(context: Context): SemanticResult<ValueSet> {
         const result = context.scope.currentValue(this.name)
         return result
             ? Result.value(result)
@@ -61,7 +61,7 @@ export class VariableReference implements Expression {
               )
     }
 
-    setCurrentValue(context: Context, value: Lattice): SemanticResult {
+    setCurrentValue(context: Context, value: ValueSet): SemanticResult {
         const result = context.scope.setCurrentValue(this.name, value)
         if ('error' in result)
             return SemanticErrorResult.failure(result.error.message, this.span)

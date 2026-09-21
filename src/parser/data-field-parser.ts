@@ -2,8 +2,8 @@ import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { DataField } from '@/model/data-declaration'
 import { Context } from '.'
+import { DomainParser } from './domain-parser'
 import { ExpressionParser } from './expression-parser'
-import { LatticeParser } from './lattice-parser'
 import {
     SemanticsKeyword,
     SemanticsKeywordParser,
@@ -23,7 +23,7 @@ export class DataFieldParser {
         const fieldName = fieldNameToken.identifier
 
         stream.expect('PUNCTUATION', ':')
-        const lattice = LatticeParser.create(this.context).parse(stream)
+        const domain = DomainParser.create(this.context).parse(stream)
 
         let defaultValue: Expression | undefined
         if (stream.isNext('PUNCTUATION', '=')) {
@@ -35,7 +35,7 @@ export class DataFieldParser {
             name: fieldName,
             isImmutable: keyword.isImmutable,
             isolationLevel: keyword.isolationLevel,
-            lattice,
+            domain,
             defaultValue,
         }
     }

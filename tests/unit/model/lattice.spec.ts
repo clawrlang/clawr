@@ -1,21 +1,21 @@
-import {
-    IntegerLattice,
-    RCTypeLattice,
-    StringLattice,
-    TruthvalueLattice,
-} from '@/model/lattice'
 import { TypeName } from '@/model/type-name'
+import {
+    IntegerRange,
+    RCTypeSet,
+    StringSet,
+    TruthvalueSet,
+} from '@/model/value-set'
 import { describe, expect, it } from 'bun:test'
 
-describe('Lattice', () => {
+describe('ValueSet', () => {
     describe('toCIR', () => {
         it('converts constrained integer to CIR correctly', () => {
-            const lattice = IntegerLattice.create({
+            const valueSet = IntegerRange.create({
                 min: 1n,
                 max: 10n,
             })
 
-            expect(lattice.toCIR()).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'integer',
                 min: '1',
                 max: '10',
@@ -23,9 +23,9 @@ describe('Lattice', () => {
         })
 
         it('converts unconstrained integer to CIR correctly', () => {
-            const lattice = IntegerLattice.unconstrained()
+            const valueSet = IntegerRange.unconstrained()
 
-            expect(lattice.toCIR()).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'integer',
                 min: undefined,
                 max: undefined,
@@ -33,9 +33,9 @@ describe('Lattice', () => {
         })
 
         it('converts integer with min constraint only to CIR correctly', () => {
-            const lattice = IntegerLattice.create({ min: 1n })
+            const valueSet = IntegerRange.create({ min: 1n })
 
-            expect(lattice.toCIR()).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'integer',
                 min: '1',
                 max: undefined,
@@ -43,9 +43,9 @@ describe('Lattice', () => {
         })
 
         it('converts integer with max constraint only to CIR correctly', () => {
-            const lattice = IntegerLattice.create({ max: 10n })
+            const valueSet = IntegerRange.create({ max: 10n })
 
-            expect(lattice.toCIR()).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'integer',
                 min: undefined,
                 max: '10',
@@ -53,35 +53,35 @@ describe('Lattice', () => {
         })
 
         it('converts truthvalue to CIR correctly', () => {
-            const lattice = TruthvalueLattice.create(['true', 'false'])
+            const valueSet = TruthvalueSet.create(['true', 'false'])
 
-            expect(lattice.toCIR()).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'truthvalue',
                 values: ['true', 'false'],
             })
         })
 
         it('converts unconstrained truthvalue to CIR correctly', () => {
-            const lattice = TruthvalueLattice.unconstrained()
+            const valueSet = TruthvalueSet.unconstrained()
 
-            expect(lattice.toCIR()).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'truthvalue',
                 values: ['false', 'ambiguous', 'true'],
             })
         })
 
         it('converts string to CIR correctly', () => {
-            const lattice = StringLattice.create()
+            const valueSet = StringSet.create()
 
-            expect(lattice.toCIR()).toEqual({ type: 'string' })
+            expect(valueSet.toCIR()).toEqual({ type: 'string' })
         })
 
         it('converts rc-type to CIR correctly', () => {
-            const lattice = RCTypeLattice.create({
+            const valueSet = RCTypeSet.create({
                 type: TypeName.create({ name: 'MyType' }),
             })
 
-            expect(lattice.toCIR()).toEqual({
+            expect(valueSet.toCIR()).toEqual({
                 type: 'rc-type',
                 name: 'MyType',
             })

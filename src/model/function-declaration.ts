@@ -4,6 +4,7 @@ import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration, Expression, Statement } from '.'
 import { DataLiteral } from './data-literal'
+import { DomainDeclaration } from './domain-declaration'
 import { FunctionName } from './function-name'
 import {
     AnyIsolationLevel,
@@ -11,12 +12,11 @@ import {
     UNIQUE,
     UNKNOWN,
 } from './isolation-level'
-import { Lattice, RCTypeLattice } from './lattice'
-import { LatticeDeclaration } from './lattice-declaration'
 import { Parameter } from './parameter'
 import { ReturnStatement } from './return-statement'
 import { Scope } from './scope'
 import { SelfAssignment } from './self-assignment'
+import { RCTypeSet, ValueSet } from './value-set'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
@@ -24,7 +24,7 @@ export class FunctionDeclaration implements Declaration {
         public readonly parameters: Parameter[],
         public readonly result:
             | {
-                  lattice: LatticeDeclaration
+                  domain: DomainDeclaration
                   isolationLevel: IsolationLevel | UNIQUE
               }
             | undefined,
@@ -43,7 +43,7 @@ export class FunctionDeclaration implements Declaration {
         parameters: Parameter[]
         result:
             | {
-                  lattice: LatticeDeclaration
+                  domain: DomainDeclaration
                   isolationLevel: IsolationLevel | UNIQUE
               }
             | undefined
@@ -77,8 +77,8 @@ export class FunctionDeclaration implements Declaration {
             )
     }
 
-    lattice(context: Context): SemanticResult<Lattice | undefined> {
-        if (this.result) return Result.value(this.result.lattice)
+    domain(context: Context): SemanticResult<ValueSet | undefined> {
+        if (this.result) return Result.value(this.result.domain)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.currentValue(
                 this.bodyContext(context),
@@ -114,9 +114,9 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const latticeResult = this.resultLattice(bodyContext)
-        if (latticeResult.isError) return latticeResult
-        const lattice = latticeResult.value
+        const domainResult = this.resultDomain(bodyContext)
+        if (domainResult.isError) return domainResult
+        const domain = domainResult.value
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -124,9 +124,9 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                domain: param.lattice!.toCIR(),
+                domain: param.domain!.toCIR(),
             })),
-            domain: lattice,
+            domain,
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
@@ -161,9 +161,9 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const latticeResult = this.resultLattice(bodyContext)
-        if (latticeResult.isError) return latticeResult
-        const lattice = latticeResult.value
+        const domainResult = this.resultDomain(bodyContext)
+        if (domainResult.isError) return domainResult
+        const domain = domainResult.value
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -171,9 +171,9 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                domain: param.lattice!.toCIR(),
+                domain: param.domain!.toCIR(),
             })),
-            domain: lattice,
+            domain,
             body: bodyContext.scope.emitted,
         }
 
@@ -219,7 +219,7 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                domain: param.lattice!.toCIR(),
+                domain: param.domain!.toCIR(),
             })),
             domain: undefined,
             body: bodyContext.scope.emitted,
@@ -254,10 +254,10 @@ export class FunctionDeclaration implements Declaration {
         }
 
         const self = context.scope.selfVariable()
-        const explicitLattice =
+        const explicitDomain =
             this.implementation.kind === 'implicit-return' && self
-                ? RCTypeLattice.create({
-                      type: (self.lattice as RCTypeLattice).type,
+                ? RCTypeSet.create({
+                      type: (self.domain as RCTypeSet).type,
                   })
                 : undefined
 
@@ -273,13 +273,14 @@ export class FunctionDeclaration implements Declaration {
                 this.implementation.expression.isolationLevel(
                     contextWithParameters,
                 ),
+                // TODO: ??
                 this.implementation.expression.currentValue({
                     ...contextWithParameters,
-                    explicitLattice,
+                    explicitDomain,
                 }),
             ])
             if (collected.isError) return collected
-            const [isolationLevel, lattice] = collected.value
+            const [isolationLevel, domain] = collected.value
             if (isolationLevel === UNKNOWN)
                 return SemanticErrorResult.failure(
                     'Returning UNKNOWN value',
@@ -288,7 +289,7 @@ export class FunctionDeclaration implements Declaration {
             const bodyContext = this.bodyContext({
                 ...context,
                 scope: parameterScopeResult.value,
-                calleeResult: { isolationLevel, lattice },
+                calleeResult: { isolationLevel, domain },
             })
             return Result.value(bodyContext)
         }
@@ -297,33 +298,33 @@ export class FunctionDeclaration implements Declaration {
     private scopeAddingParameters(context: Context): SemanticResult<Scope> {
         const parameterScope = context.scope.createChildScope()
         for (const param of this.parameters) {
-            const latticeResult = param.defaultValue
+            const domainResult = param.defaultValue
                 ? param.defaultValue.currentValue(context)
-                : param.lattice
-                  ? Result.value(param.lattice)
+                : param.domain
+                  ? Result.value(param.domain)
                   : SemanticErrorResult.failure(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
                         param.span,
                     )
-            if (latticeResult.isError) return latticeResult
+            if (domainResult.isError) return domainResult
             parameterScope.addVariableDeclaration(param.varName, {
                 isImmutable: param.isImmutable,
                 isolationLevel: param.isolationLevel,
-                lattice: latticeResult.value,
+                domain: domainResult.value,
             })
         }
         return Result.value(parameterScope)
     }
 
-    private resultLattice(
+    private resultDomain(
         context: Context,
     ): SemanticResult<cir.ValueSet | undefined> {
-        if (this.result) return Result.value(this.result.lattice.toCIR())
+        if (this.result) return Result.value(this.result.domain.toCIR())
         if (this.implementation.kind === 'body') return Result.value(undefined)
-        const latticeResult =
+        const domainResult =
             this.implementation.expression.currentValue(context)
-        if (latticeResult.isError) return latticeResult
-        return Result.value(latticeResult.value.toCIR())
+        if (domainResult.isError) return domainResult
+        return Result.value(domainResult.value.toCIR())
     }
 
     private bodyContext(context: Context): Context {

@@ -1,23 +1,23 @@
 import { Token, TokenStream } from '@/lexer'
 import { Expression } from '@/model'
+import { DomainDeclaration } from '@/model/domain-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
-import { LatticeDeclaration } from '@/model/lattice-declaration'
 import { Parameter } from '@/model/parameter'
 import { Context, DeclarationParser } from '.'
 import { BlockParser } from './block-parser'
+import { DomainParser } from './domain-parser'
 import { ExpressionParser } from './expression-parser'
-import { LatticeParser } from './lattice-parser'
 import {
     SemanticsKeyword,
     SemanticsKeywordParser,
 } from './semantics-keyword-parser'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
-    private readonly latticeParser: LatticeParser
+    private readonly domainParser: DomainParser
 
     private constructor(private context: Context) {
-        this.latticeParser = LatticeParser.create(context)
+        this.domainParser = DomainParser.create(context)
     }
 
     static create(context: Context): FunctionDeclarationParser {
@@ -34,7 +34,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         const baseName = nameToken.identifier
 
         const parameters = this.parseParameters(stream)
-        const result = this.parseResultLattice(stream)
+        const result = this.parseResultDomain(stream)
 
         if (stream.isNext('PUNCTUATION', '=>')) {
             stream.expect('PUNCTUATION', '=>')
@@ -63,12 +63,12 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         })
     }
 
-    private parseResultLattice(stream: TokenStream) {
+    private parseResultDomain(stream: TokenStream) {
         if (stream.isNext('OPERATOR', '->')) {
             stream.expect('OPERATOR', '->')
             const isolationLevel = this.parseIsolationlevel(stream)
             return {
-                lattice: this.latticeParser.parse(stream),
+                domain: this.domainParser.parse(stream),
                 isolationLevel,
             }
         }
@@ -104,7 +104,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                 varNameToken = stream.expect('IDENTIFIER')
             else varNameToken = labelToken
 
-            const lattice = this.parseLattice(stream)
+            const domain = this.parseDomain(stream)
 
             let defaultValue: Expression | undefined
             if (stream.isNext('PUNCTUATION', '=')) {
@@ -123,13 +123,13 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                             : labelToken.identifier,
                     varName: varNameToken.identifier,
                     isolationLevel: semanticsKeyword?.isolationLevel ?? UNKNOWN,
-                    lattice: lattice,
+                    domain: domain,
                     defaultValue,
                     span: {
                         start: semanticsToken?.start ?? labelToken.start,
                         end:
                             defaultValue?.span.end ??
-                            lattice?.span?.end ??
+                            domain?.span?.end ??
                             varNameToken.end,
                     },
                 }),
@@ -142,9 +142,9 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         return parameters
     }
 
-    private parseLattice(stream: TokenStream): LatticeDeclaration | undefined {
+    private parseDomain(stream: TokenStream): DomainDeclaration | undefined {
         if (!stream.isNext('PUNCTUATION', ':')) return undefined
         stream.expect('PUNCTUATION', ':')
-        return this.latticeParser.parse(stream)
+        return this.domainParser.parse(stream)
     }
 }

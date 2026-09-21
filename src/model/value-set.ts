@@ -1,48 +1,48 @@
 import * as cir from '@/cir'
 import { TypeName } from './type-name'
 
-export interface Lattice {
-    unconstrained(): Lattice
-    isSupersetTo(lattice: Lattice): boolean
+export interface ValueSet {
+    unconstrained(): ValueSet
+    isSupersetTo(other: ValueSet): boolean
     toCIR(): cir.ValueSet
     toString(): string
 }
 
-export class IntegerLattice<
+export class IntegerRange<
     Min extends bigint | undefined,
     Max extends bigint | undefined,
-> implements Lattice {
+> implements ValueSet {
     private constructor(
         public readonly min: Min,
         public readonly max: Max,
     ) {}
 
     static unconstrained() {
-        return new IntegerLattice(undefined, undefined)
+        return new IntegerRange(undefined, undefined)
     }
 
     static singleton<Value extends bigint>(v: Value) {
-        return new IntegerLattice(v, v)
+        return new IntegerRange(v, v)
     }
 
     static create<
         Min extends bigint | undefined,
         Max extends bigint | undefined,
     >({ min, max }: { min?: Min; max?: Max }) {
-        return new IntegerLattice<Min, Max>(min as Min, max as Max)
+        return new IntegerRange<Min, Max>(min as Min, max as Max)
     }
 
-    unconstrained(): Lattice {
-        return IntegerLattice.create({ min: undefined, max: undefined })
+    unconstrained(): ValueSet {
+        return IntegerRange.create({ min: undefined, max: undefined })
     }
 
-    isSupersetTo(lattice: Lattice): boolean {
+    isSupersetTo(other: ValueSet): boolean {
         return (
-            lattice instanceof IntegerLattice &&
+            other instanceof IntegerRange &&
             (this.min === undefined ||
-                (lattice.min !== undefined && lattice.min >= this.min)) &&
+                (other.min !== undefined && other.min >= this.min)) &&
             (this.max === undefined ||
-                (lattice.max !== undefined && lattice.max <= this.max))
+                (other.max !== undefined && other.max <= this.max))
         )
     }
 
@@ -60,31 +60,29 @@ export class IntegerLattice<
 }
 
 export type truthvalue = 'false' | 'ambiguous' | 'true'
-export class TruthvalueLattice<Values extends truthvalue[]> implements Lattice {
+export class TruthvalueSet<Values extends truthvalue[]> implements ValueSet {
     private constructor(public readonly values: Values) {}
 
-    static unconstrained() {
+    static unconstrained(): TruthvalueSet<['false', 'ambiguous', 'true']> {
         return this.create(['false', 'ambiguous', 'true'])
     }
 
     static singleton<Value extends truthvalue>(value: Value) {
-        return new TruthvalueLattice<[Value]>([value])
+        return new TruthvalueSet<[Value]>([value])
     }
 
     static create<Values extends truthvalue[]>(values: Values) {
-        return new TruthvalueLattice(values)
+        return new TruthvalueSet(values)
     }
 
-    unconstrained(): Lattice {
-        return TruthvalueLattice.create(['false', 'ambiguous', 'true'])
+    unconstrained(): TruthvalueSet<['false', 'ambiguous', 'true']> {
+        return TruthvalueSet.create(['false', 'ambiguous', 'true'])
     }
 
-    isSupersetTo(lattice: Lattice): boolean {
+    isSupersetTo(other: ValueSet): boolean {
         return (
-            lattice instanceof TruthvalueLattice &&
-            (lattice.values as truthvalue[]).every((v) =>
-                this.values.includes(v),
-            )
+            other instanceof TruthvalueSet &&
+            (other.values as truthvalue[]).every((v) => this.values.includes(v))
         )
     }
 
@@ -100,19 +98,19 @@ export class TruthvalueLattice<Values extends truthvalue[]> implements Lattice {
     }
 }
 
-export class StringLattice implements Lattice {
+export class StringSet implements ValueSet {
     private constructor() {}
 
-    static create(): StringLattice {
-        return new StringLattice()
+    static create(): StringSet {
+        return new StringSet()
     }
 
-    unconstrained(): Lattice {
+    unconstrained(): StringSet {
         return this
     }
 
-    isSupersetTo(lattice: Lattice): boolean {
-        return lattice instanceof StringLattice
+    isSupersetTo(other: ValueSet): boolean {
+        return other instanceof StringSet
     }
 
     toCIR(): cir.ValueSet & { type: 'string' } {
@@ -124,10 +122,10 @@ export class StringLattice implements Lattice {
     }
 }
 
-export class RCTypeLattice implements Lattice {
+export class RCTypeSet implements ValueSet {
     private constructor(
         public readonly type: TypeName,
-        public readonly fields: Record<string, Lattice> | undefined,
+        public readonly fields: Record<string, ValueSet> | undefined,
     ) {}
 
     static create({
@@ -135,13 +133,13 @@ export class RCTypeLattice implements Lattice {
         fields,
     }: {
         type: TypeName
-        fields?: Record<string, Lattice>
-    }): RCTypeLattice {
-        return new RCTypeLattice(type, fields)
+        fields?: Record<string, ValueSet>
+    }): RCTypeSet {
+        return new RCTypeSet(type, fields)
     }
 
-    unconstrained(): Lattice {
-        return RCTypeLattice.create({
+    unconstrained(): RCTypeSet {
+        return RCTypeSet.create({
             type: this.type,
             fields: Object.fromEntries(
                 Object.entries(this.fields ?? {}).map(([name, field]) => [
@@ -152,10 +150,10 @@ export class RCTypeLattice implements Lattice {
         })
     }
 
-    isSupersetTo(lattice: Lattice): boolean {
+    isSupersetTo(other: ValueSet): boolean {
         return (
-            lattice instanceof RCTypeLattice &&
-            this.type.canonical() === lattice.type.canonical()
+            other instanceof RCTypeSet &&
+            this.type.canonical() === other.type.canonical()
         )
     }
 

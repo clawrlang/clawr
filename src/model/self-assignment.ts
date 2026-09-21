@@ -25,37 +25,34 @@ export class SelfAssignment implements Statement {
         const validityResult = this.checkValidity(context)
         if (validityResult.isError) return validityResult
 
-        const targetLattice = context.scope.selfVariable()?.lattice
+        const targetDomain = context.scope.selfVariable()?.domain
 
-        const explicitLatticeContext = {
+        const explicitDomainContext = {
             ...context,
             isolationLevel: SHARED,
-            explicitLattice: targetLattice,
+            explicitDomain: targetDomain,
         }
 
-        const latticeResult = this.value.currentValue(explicitLatticeContext)
-        if (latticeResult.isError) return latticeResult
+        const valueResult = this.value.currentValue(explicitDomainContext)
+        if (valueResult.isError) return valueResult
         const cirResults = this.emitCIRStatements(context)
         if (cirResults.isError) return cirResults
 
-        const result = context.scope.setCurrentValue(
-            'self',
-            latticeResult.value,
-        )
+        const result = context.scope.setCurrentValue('self', valueResult.value)
         return result.isError
             ? SemanticErrorResult.failure(result.error.message, this.span)
             : Result.ok
     }
 
     private emitCIRStatements(context: Context): SemanticResult {
-        const explicitLatticeContext = {
+        const explicitDomainContext = {
             ...context,
             isolationLevel: SHARED,
-            explicitLattice: context.scope.selfVariable()?.lattice,
+            explicitDomain: context.scope.selfVariable()?.domain,
         }
         const valueCIRResult = this.value.toCIRExpression({
-            ...explicitLatticeContext,
-            isolationLevel: explicitLatticeContext.isolationLevel,
+            ...explicitDomainContext,
+            isolationLevel: explicitDomainContext.isolationLevel,
         })
         if (valueCIRResult.isError) return valueCIRResult
 
@@ -69,21 +66,21 @@ export class SelfAssignment implements Statement {
     }
 
     private checkValidity(context: Context): SemanticResult {
-        const targetLattice = context.scope.selfVariable()?.lattice
-        if (!targetLattice) throw new Error('`self` variable not added')
-        const explicitLatticeContext = {
+        const targetDomain = context.scope.selfVariable()?.domain
+        if (!targetDomain) throw new Error('`self` variable not added')
+        const explicitDomainContext = {
             ...context,
             isolationLevel: SHARED,
-            explicitLattice: targetLattice,
+            explicitDomain: targetDomain,
         }
         const assignedValueResult = this.value.currentValue(
-            explicitLatticeContext,
+            explicitDomainContext,
         )
         if (assignedValueResult.isError) return assignedValueResult
         const assignedValue = assignedValueResult.value
-        if (!targetLattice.isSupersetTo(assignedValue))
+        if (!targetDomain.isSupersetTo(assignedValue))
             return SemanticErrorResult.failure(
-                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetLattice.toString()}`,
+                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetDomain.toString()}`,
                 this.span,
             )
         return Result.ok

@@ -3,11 +3,11 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import { Expression } from '.'
 import { ISOLATED } from './isolation-level'
-import { Lattice, TruthvalueLattice, truthvalue } from './lattice'
+import { TruthvalueSet, ValueSet, truthvalue } from './value-set'
 
 export class TruthValueLiteral<Value extends truthvalue> implements Expression {
     private constructor(
-        public value: TruthvalueLattice<[Value]>,
+        public value: TruthvalueSet<[Value]>,
         public span: SourceCodeSpan,
     ) {}
 
@@ -18,18 +18,18 @@ export class TruthValueLiteral<Value extends truthvalue> implements Expression {
         value: Value
         span: SourceCodeSpan
     }) {
-        return new TruthValueLiteral(TruthvalueLattice.singleton(value), span)
+        return new TruthValueLiteral(TruthvalueSet.singleton(value), span)
     }
 
     isolationLevel(): SuccessResult<ISOLATED> {
         return Result.value(ISOLATED)
     }
 
-    currentValue(): SuccessResult<TruthvalueLattice<[Value]>> {
+    currentValue(): SuccessResult<TruthvalueSet<[Value]>> {
         return Result.value(this.value)
     }
 
-    declaredLattice(): SuccessResult<Lattice> {
+    domain(): SuccessResult<ValueSet> {
         return Result.value(this.value)
     }
 

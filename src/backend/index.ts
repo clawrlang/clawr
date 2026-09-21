@@ -237,7 +237,7 @@ function lowerInit(
     }`
 }
 
-function lowerType(lattice: cir.Lattice): string {
+function lowerType(lattice: cir.ValueSet): string {
     switch (lattice.type) {
         case 'integer':
             return lattice.boxed ? 'Integer*' : 'int64_t'
@@ -393,9 +393,9 @@ type FunctionSignature = {
     labels: string[]
     parameters: {
         name: string
-        lattice: cir.Lattice
+        lattice: cir.ValueSet
     }[]
-    lattice?: cir.Lattice
+    lattice?: cir.ValueSet
 }
 
 function mangleNameWithLabels(

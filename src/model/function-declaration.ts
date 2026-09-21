@@ -317,7 +317,7 @@ export class FunctionDeclaration implements Declaration {
 
     private resultLattice(
         context: Context,
-    ): SemanticResult<cir.Lattice | undefined> {
+    ): SemanticResult<cir.ValueSet | undefined> {
         if (this.result) return Result.value(this.result.lattice.toCIR())
         if (this.implementation.kind === 'body') return Result.value(undefined)
         const latticeResult =

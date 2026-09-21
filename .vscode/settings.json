@@ -154,7 +154,7 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/Expression" }
               },
-              "value": { "$ref": "#/$defs/Lattice" }
+              "value": { "$ref": "#/$defs/ValueSet" }
             },
             "required": ["kind", "name", "arguments", "value"],
             "additionalProperties": false
@@ -201,12 +201,12 @@
             "properties": {
               "kind": { "const": "AS_SHARED" },
               "object": { "$ref": "#/$defs/FunctionCall__type" },
-              "value": { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" }
+              "value": { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" }
             },
             "required": ["kind", "object", "value"],
             "additionalProperties": false
           },
-          "RCTypeLatticeInterfaceDeclaration": {
+          "RCTypeSetInterfaceDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -232,7 +232,7 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/Lattice" }
+                    "lattice": { "$ref": "#/$defs/ValueSet" }
                   },
                   "required": ["name", "lattice"],
                   "additionalProperties": false
@@ -248,17 +248,17 @@
                   { "$ref": "#/$defs/__type__type__type-o2" },
                   { "$ref": "#/$defs/__type__type__type-o1" },
                   { "$ref": "#/$defs/__type__type__type" },
-                  { "$ref": "#/$defs/InterfaceLattice" },
-                  { "$ref": "#/$defs/RCTypeLattice" },
-                  { "$ref": "#/$defs/StringLattice" },
-                  { "$ref": "#/$defs/TruthvalueLatticetruthvalue" }
+                  { "$ref": "#/$defs/InterfaceSet" },
+                  { "$ref": "#/$defs/RCTypeSet" },
+                  { "$ref": "#/$defs/StringSet" },
+                  { "$ref": "#/$defs/TruthvalueSettruthvalue" }
                 ]
               }
             },
             "required": ["baseName", "labels", "parameters"],
             "additionalProperties": false
           },
-          "Lattice": {
+          "ValueSet": {
             "oneOf": [
               { "$ref": "#/$defs/__type__type__type" },
               { "$ref": "#/$defs/__type__type__type-o1" },
@@ -268,10 +268,10 @@
               { "$ref": "#/$defs/__type__type__type-o5" },
               { "$ref": "#/$defs/__type__type__type-o6" },
               { "$ref": "#/$defs/__type__type__type-o7" },
-              { "$ref": "#/$defs/InterfaceLattice" },
-              { "$ref": "#/$defs/RCTypeLattice" },
-              { "$ref": "#/$defs/StringLattice" },
-              { "$ref": "#/$defs/TruthvalueLatticetruthvalue" }
+              { "$ref": "#/$defs/InterfaceSet" },
+              { "$ref": "#/$defs/RCTypeSet" },
+              { "$ref": "#/$defs/StringSet" },
+              { "$ref": "#/$defs/TruthvalueSettruthvalue" }
             ]
           },
           "__type__type__type": {
@@ -354,7 +354,7 @@
             "required": ["type", "min", "max"],
             "additionalProperties": false
           },
-          "InterfaceLattice": {
+          "InterfaceSet": {
             "type": "object",
             "properties": {
               "type": { "const": "interface" },
@@ -364,7 +364,7 @@
             "required": ["type", "name"],
             "additionalProperties": false
           },
-          "RCTypeLattice": {
+          "RCTypeSet": {
             "type": "object",
             "properties": {
               "type": { "const": "rc-type" },
@@ -374,7 +374,7 @@
             "required": ["type", "name"],
             "additionalProperties": false
           },
-          "StringLattice": {
+          "StringSet": {
             "type": "object",
             "properties": {
               "type": { "const": "string" },
@@ -383,7 +383,7 @@
             "required": ["type"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalue": {
+          "TruthvalueSettruthvalue": {
             "type": "object",
             "properties": {
               "type": { "const": "truthvalue" },
@@ -410,13 +410,11 @@
               "expression": { "$ref": "#/$defs/Expression" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/RCTypeLattice__typeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/RCTypeSet__typeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/InterfaceSet__typeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/StringSet__typeInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/InterfaceLattice__typeInterfaceDeclaration"
-                  },
-                  { "$ref": "#/$defs/StringLattice__typeInterfaceDeclaration" },
-                  {
-                    "$ref": "#/$defs/TruthvalueLatticetruthvalue__typeInterfaceDeclaration"
+                    "$ref": "#/$defs/TruthvalueSettruthvalue__typeInterfaceDeclaration"
                   },
                   {
                     "$ref": "#/$defs/__type__type__type__typeInterfaceDeclaration-o7"
@@ -448,7 +446,7 @@
             "required": ["kind", "expression", "value"],
             "additionalProperties": false
           },
-          "RCTypeLattice__typeInterfaceDeclaration": {
+          "RCTypeSet__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -464,7 +462,7 @@
             "required": ["kind", "methods", "boxed", "type", "name"],
             "additionalProperties": false
           },
-          "InterfaceLattice__typeInterfaceDeclaration": {
+          "InterfaceSet__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -480,7 +478,7 @@
             "required": ["kind", "methods", "boxed", "type", "name"],
             "additionalProperties": false
           },
-          "StringLattice__typeInterfaceDeclaration": {
+          "StringSet__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -496,7 +494,7 @@
             "required": ["kind", "name", "methods", "boxed", "type"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalue__typeInterfaceDeclaration": {
+          "TruthvalueSettruthvalue__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -667,11 +665,11 @@
               "field": { "type": "string" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" },
-                  { "$ref": "#/$defs/InterfaceLatticeInterfaceDeclaration" },
-                  { "$ref": "#/$defs/StringLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" },
+                  { "$ref": "#/$defs/InterfaceSetInterfaceDeclaration" },
+                  { "$ref": "#/$defs/StringSetInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/TruthvalueLatticetruthvalueInterfaceDeclaration"
+                    "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration"
                   },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o7"
@@ -701,7 +699,7 @@
             "required": ["kind", "object", "field", "value"],
             "additionalProperties": false
           },
-          "InterfaceLatticeInterfaceDeclaration": {
+          "InterfaceSetInterfaceDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -716,7 +714,7 @@
             "required": ["kind", "methods", "type", "name"],
             "additionalProperties": false
           },
-          "StringLatticeInterfaceDeclaration": {
+          "StringSetInterfaceDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -731,7 +729,7 @@
             "required": ["kind", "name", "methods", "type"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalueInterfaceDeclaration": {
+          "TruthvalueSettruthvalueInterfaceDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -898,7 +896,7 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type-o1" }
               },
-              "value": { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" }
+              "value": { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" }
             },
             "required": ["kind", "isolationLevel", "value"],
             "additionalProperties": false
@@ -920,7 +918,7 @@
             "properties": {
               "kind": { "const": "RETAIN" },
               "object": { "$ref": "#/$defs/Storage" },
-              "value": { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" }
+              "value": { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" }
             },
             "required": ["kind", "object", "value"],
             "additionalProperties": false
@@ -930,13 +928,13 @@
             "properties": {
               "kind": { "const": "TRUTHVALUE_LITERAL" },
               "value": {
-                "$ref": "#/$defs/TruthvalueLatticetruthvalueInterfaceDeclaration-o1"
+                "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration-o1"
               }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalueInterfaceDeclaration-o1": {
+          "TruthvalueSettruthvalueInterfaceDeclaration-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -961,13 +959,13 @@
             "properties": {
               "kind": { "const": "STRING_LITERAL" },
               "value": {
-                "$ref": "#/$defs/StringLattice__typeInterfaceDeclaration-o1"
+                "$ref": "#/$defs/StringSet__typeInterfaceDeclaration-o1"
               }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "StringLattice__typeInterfaceDeclaration-o1": {
+          "StringSet__typeInterfaceDeclaration-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -989,11 +987,11 @@
               "name": { "type": "string" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" },
-                  { "$ref": "#/$defs/InterfaceLatticeInterfaceDeclaration" },
-                  { "$ref": "#/$defs/StringLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" },
+                  { "$ref": "#/$defs/InterfaceSetInterfaceDeclaration" },
+                  { "$ref": "#/$defs/StringSetInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/TruthvalueLatticetruthvalueInterfaceDeclaration"
+                    "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration"
                   },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o7"
@@ -1049,11 +1047,11 @@
               },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/RCTypeLatticeInterfaceDeclaration" },
-                  { "$ref": "#/$defs/InterfaceLatticeInterfaceDeclaration" },
-                  { "$ref": "#/$defs/StringLatticeInterfaceDeclaration" },
+                  { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" },
+                  { "$ref": "#/$defs/InterfaceSetInterfaceDeclaration" },
+                  { "$ref": "#/$defs/StringSetInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/TruthvalueLatticetruthvalueInterfaceDeclaration"
+                    "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration"
                   },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o7"
@@ -1125,7 +1123,7 @@
             "properties": {
               "kind": { "const": "AS_SHARED" },
               "object": { "$ref": "#/$defs/FunctionCall__type" },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "object", "value"],
             "additionalProperties": false
@@ -1135,12 +1133,12 @@
             "properties": {
               "kind": { "const": "BOX" },
               "expression": { "$ref": "#/$defs/Expression" },
-              "value": { "$ref": "#/$defs/RCTypeLattice__type" }
+              "value": { "$ref": "#/$defs/RCTypeSet__type" }
             },
             "required": ["kind", "expression", "value"],
             "additionalProperties": false
           },
-          "RCTypeLattice__type": {
+          "RCTypeSet__type": {
             "type": "object",
             "properties": {
               "boxed": { "const": true },
@@ -1157,7 +1155,7 @@
               "kind": { "const": "FIELD_REF" },
               "object": { "$ref": "#/$defs/Expression" },
               "field": { "type": "string" },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "object", "field", "value"],
             "additionalProperties": false
@@ -1166,12 +1164,12 @@
             "type": "object",
             "properties": {
               "kind": { "const": "INTEGER_LITERAL" },
-              "value": { "$ref": "#/$defs/__type__type__typeRCTypeLattice" }
+              "value": { "$ref": "#/$defs/__type__type__typeRCTypeSet" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "__type__type__typeRCTypeLattice": {
+          "__type__type__typeRCTypeSet": {
             "type": "object",
             "properties": {},
             "required": [],
@@ -1186,7 +1184,7 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type-o1" }
               },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "isolationLevel", "value"],
             "additionalProperties": false
@@ -1196,7 +1194,7 @@
             "properties": {
               "kind": { "const": "RETAIN" },
               "object": { "$ref": "#/$defs/Storage" },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "object", "value"],
             "additionalProperties": false
@@ -1205,14 +1203,12 @@
             "type": "object",
             "properties": {
               "kind": { "const": "TRUTHVALUE_LITERAL" },
-              "value": {
-                "$ref": "#/$defs/TruthvalueLatticetruthvalueRCTypeLattice"
-              }
+              "value": { "$ref": "#/$defs/TruthvalueSettruthvalueRCTypeSet" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalueRCTypeLattice": {
+          "TruthvalueSettruthvalueRCTypeSet": {
             "type": "object",
             "properties": {},
             "required": [],
@@ -1222,12 +1218,12 @@
             "type": "object",
             "properties": {
               "kind": { "const": "STRING_LITERAL" },
-              "value": { "$ref": "#/$defs/StringLattice__typeRCTypeLattice" }
+              "value": { "$ref": "#/$defs/StringSet__typeRCTypeSet" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "StringLattice__typeRCTypeLattice": {
+          "StringSet__typeRCTypeSet": {
             "type": "object",
             "properties": {},
             "required": [],
@@ -1238,7 +1234,7 @@
             "properties": {
               "kind": { "const": "VARIABLE_REF" },
               "name": { "type": "string" },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "name", "value"],
             "additionalProperties": false
@@ -1267,7 +1263,7 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/Expression" }
               },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "name", "arguments", "value"],
             "additionalProperties": false
@@ -1314,7 +1310,7 @@
             "properties": {
               "kind": { "const": "AS_SHARED" },
               "object": { "$ref": "#/$defs/FunctionCall__type" },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "object", "value"],
             "additionalProperties": false
@@ -1326,13 +1322,13 @@
               "expression": { "$ref": "#/$defs/Expression" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/RCTypeLattice__type" },
-                  { "$ref": "#/$defs/InterfaceLattice__type" }
+                  { "$ref": "#/$defs/RCTypeSet__type" },
+                  { "$ref": "#/$defs/InterfaceSet__type" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "interface": "#/components/schemas/InterfaceLattice__type",
-                    "rc-type": "#/components/schemas/RCTypeLattice__type"
+                    "interface": "#/components/schemas/InterfaceSet__type",
+                    "rc-type": "#/components/schemas/RCTypeSet__type"
                   },
                   "propertyName": "type"
                 }
@@ -1341,7 +1337,7 @@
             "required": ["kind", "expression", "value"],
             "additionalProperties": false
           },
-          "InterfaceLattice__type": {
+          "InterfaceSet__type": {
             "type": "object",
             "properties": {
               "boxed": { "const": true },
@@ -1360,13 +1356,13 @@
               "field": { "type": "string" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/InterfaceLattice" },
-                  { "$ref": "#/$defs/RCTypeLattice" }
+                  { "$ref": "#/$defs/InterfaceSet" },
+                  { "$ref": "#/$defs/RCTypeSet" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "interface": "#/components/schemas/InterfaceLattice",
-                    "rc-type": "#/components/schemas/RCTypeLattice"
+                    "interface": "#/components/schemas/InterfaceSet",
+                    "rc-type": "#/components/schemas/RCTypeSet"
                   },
                   "propertyName": "type"
                 }
@@ -1390,7 +1386,7 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type-o1" }
               },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "isolationLevel", "value"],
             "additionalProperties": false
@@ -1400,7 +1396,7 @@
             "properties": {
               "kind": { "const": "RETAIN" },
               "object": { "$ref": "#/$defs/Storage" },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "object", "value"],
             "additionalProperties": false
@@ -1424,13 +1420,13 @@
               "name": { "type": "string" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/InterfaceLattice" },
-                  { "$ref": "#/$defs/RCTypeLattice" }
+                  { "$ref": "#/$defs/InterfaceSet" },
+                  { "$ref": "#/$defs/RCTypeSet" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "interface": "#/components/schemas/InterfaceLattice",
-                    "rc-type": "#/components/schemas/RCTypeLattice"
+                    "interface": "#/components/schemas/InterfaceSet",
+                    "rc-type": "#/components/schemas/RCTypeSet"
                   },
                   "propertyName": "type"
                 }
@@ -1465,13 +1461,13 @@
               },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/InterfaceLattice" },
-                  { "$ref": "#/$defs/RCTypeLattice" }
+                  { "$ref": "#/$defs/InterfaceSet" },
+                  { "$ref": "#/$defs/RCTypeSet" }
                 ],
                 "discriminator": {
                   "mapping": {
-                    "interface": "#/components/schemas/InterfaceLattice",
-                    "rc-type": "#/components/schemas/RCTypeLattice"
+                    "interface": "#/components/schemas/InterfaceSet",
+                    "rc-type": "#/components/schemas/RCTypeSet"
                   },
                   "propertyName": "type"
                 }
@@ -1495,7 +1491,7 @@
             "properties": {
               "kind": { "const": "AS_SHARED" },
               "object": { "$ref": "#/$defs/FunctionCall__type" },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "object", "value"],
             "additionalProperties": false
@@ -1507,10 +1503,10 @@
               "expression": { "$ref": "#/$defs/Expression" },
               "value": {
                 "oneOf": [
-                  { "$ref": "#/$defs/RCTypeLattice__type" },
-                  { "$ref": "#/$defs/InterfaceLattice__type" },
-                  { "$ref": "#/$defs/StringLattice__type" },
-                  { "$ref": "#/$defs/TruthvalueLatticetruthvalue__type" },
+                  { "$ref": "#/$defs/RCTypeSet__type" },
+                  { "$ref": "#/$defs/InterfaceSet__type" },
+                  { "$ref": "#/$defs/StringSet__type" },
+                  { "$ref": "#/$defs/TruthvalueSettruthvalue__type" },
                   { "$ref": "#/$defs/__type__type__type__type-o7" },
                   { "$ref": "#/$defs/__type__type__type__type-o6" },
                   { "$ref": "#/$defs/__type__type__type__type-o5" },
@@ -1525,7 +1521,7 @@
             "required": ["kind", "expression", "value"],
             "additionalProperties": false
           },
-          "StringLattice__type": {
+          "StringSet__type": {
             "type": "object",
             "properties": {
               "boxed": { "const": true },
@@ -1535,7 +1531,7 @@
             "required": ["boxed", "type"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalue__type": {
+          "TruthvalueSettruthvalue__type": {
             "type": "object",
             "properties": {
               "type": { "const": "truthvalue" },
@@ -1634,7 +1630,7 @@
               "kind": { "const": "FIELD_REF" },
               "object": { "$ref": "#/$defs/Expression" },
               "field": { "type": "string" },
-              "value": { "$ref": "#/$defs/Lattice" }
+              "value": { "$ref": "#/$defs/ValueSet" }
             },
             "required": ["kind", "object", "field", "value"],
             "additionalProperties": false
@@ -1643,12 +1639,12 @@
             "type": "object",
             "properties": {
               "kind": { "const": "INTEGER_LITERAL" },
-              "value": { "$ref": "#/$defs/IntegerLatticebigintbigint" }
+              "value": { "$ref": "#/$defs/IntegerRangebigintbigint" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "IntegerLatticebigintbigint": {
+          "IntegerRangebigintbigint": {
             "type": "object",
             "properties": {
               "type": { "const": "integer" },
@@ -1668,7 +1664,7 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type-o1" }
               },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "isolationLevel", "value"],
             "additionalProperties": false
@@ -1678,7 +1674,7 @@
             "properties": {
               "kind": { "const": "RETAIN" },
               "object": { "$ref": "#/$defs/Storage" },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "object", "value"],
             "additionalProperties": false
@@ -1687,12 +1683,12 @@
             "type": "object",
             "properties": {
               "kind": { "const": "STRING_LITERAL" },
-              "value": { "$ref": "#/$defs/StringLattice__type-o1" }
+              "value": { "$ref": "#/$defs/StringSet__type-o1" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "StringLattice__type-o1": {
+          "StringSet__type-o1": {
             "type": "object",
             "properties": {
               "type": { "const": "string" },
@@ -1705,12 +1701,12 @@
             "type": "object",
             "properties": {
               "kind": { "const": "TRUTHVALUE_LITERAL" },
-              "value": { "$ref": "#/$defs/TruthvalueLatticetruthvalue-o1" }
+              "value": { "$ref": "#/$defs/TruthvalueSettruthvalue-o1" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
           },
-          "TruthvalueLatticetruthvalue-o1": {
+          "TruthvalueSettruthvalue-o1": {
             "type": "object",
             "properties": {
               "type": { "const": "truthvalue" },
@@ -1729,7 +1725,7 @@
             "properties": {
               "kind": { "const": "VARIABLE_REF" },
               "name": { "type": "string" },
-              "value": { "$ref": "#/$defs/Lattice" }
+              "value": { "$ref": "#/$defs/ValueSet" }
             },
             "required": ["kind", "name", "value"],
             "additionalProperties": false
@@ -1845,7 +1841,7 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type-o1" }
               },
-              "value": { "$ref": "#/$defs/RCTypeLattice" }
+              "value": { "$ref": "#/$defs/RCTypeSet" }
             },
             "required": ["kind", "value"],
             "additionalProperties": false
@@ -1855,7 +1851,7 @@
             "properties": {
               "kind": { "const": "VARIABLE_DECL" },
               "name": { "type": "string" },
-              "lattice": { "$ref": "#/$defs/Lattice" },
+              "lattice": { "$ref": "#/$defs/ValueSet" },
               "initialValue": { "$ref": "#/$defs/Expression" }
             },
             "required": ["kind", "name", "lattice", "initialValue"],
@@ -1889,7 +1885,7 @@
             "properties": {
               "kind": { "const": "VARIABLE_DECL" },
               "name": { "type": "string" },
-              "lattice": { "$ref": "#/$defs/Lattice" },
+              "lattice": { "$ref": "#/$defs/ValueSet" },
               "initialValue": { "$ref": "#/$defs/Expression" },
               "namespace": { "type": "string" }
             },
@@ -1908,7 +1904,7 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/Lattice" }
+                    "lattice": { "$ref": "#/$defs/ValueSet" }
                   },
                   "required": ["name", "lattice"],
                   "additionalProperties": false
@@ -1975,7 +1971,7 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/Lattice" }
+                    "lattice": { "$ref": "#/$defs/ValueSet" }
                   },
                   "required": ["name", "lattice"],
                   "additionalProperties": false
@@ -1991,10 +1987,10 @@
                   { "$ref": "#/$defs/__type__type__type-o2" },
                   { "$ref": "#/$defs/__type__type__type-o1" },
                   { "$ref": "#/$defs/__type__type__type" },
-                  { "$ref": "#/$defs/InterfaceLattice" },
-                  { "$ref": "#/$defs/RCTypeLattice" },
-                  { "$ref": "#/$defs/StringLattice" },
-                  { "$ref": "#/$defs/TruthvalueLatticetruthvalue" }
+                  { "$ref": "#/$defs/InterfaceSet" },
+                  { "$ref": "#/$defs/RCTypeSet" },
+                  { "$ref": "#/$defs/StringSet" },
+                  { "$ref": "#/$defs/TruthvalueSettruthvalue" }
                 ]
               },
               "namespace": { "type": "string" }
@@ -2014,7 +2010,7 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/Lattice" }
+                    "lattice": { "$ref": "#/$defs/ValueSet" }
                   },
                   "required": ["name", "lattice"],
                   "additionalProperties": false
@@ -2085,7 +2081,7 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/Lattice" }
+                    "lattice": { "$ref": "#/$defs/ValueSet" }
                   },
                   "required": ["name", "lattice"],
                   "additionalProperties": false
@@ -2101,10 +2097,10 @@
                   { "$ref": "#/$defs/__type__type__type-o2" },
                   { "$ref": "#/$defs/__type__type__type-o1" },
                   { "$ref": "#/$defs/__type__type__type" },
-                  { "$ref": "#/$defs/InterfaceLattice" },
-                  { "$ref": "#/$defs/RCTypeLattice" },
-                  { "$ref": "#/$defs/StringLattice" },
-                  { "$ref": "#/$defs/TruthvalueLatticetruthvalue" }
+                  { "$ref": "#/$defs/InterfaceSet" },
+                  { "$ref": "#/$defs/RCTypeSet" },
+                  { "$ref": "#/$defs/StringSet" },
+                  { "$ref": "#/$defs/TruthvalueSettruthvalue" }
                 ]
               }
             },
@@ -2127,7 +2123,7 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/Lattice" }
+                    "lattice": { "$ref": "#/$defs/ValueSet" }
                   },
                   "required": ["name", "lattice"],
                   "additionalProperties": false

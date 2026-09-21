@@ -4,7 +4,7 @@ import { TypeName } from './type-name'
 export interface Lattice {
     unconstrained(): Lattice
     isSupersetTo(lattice: Lattice): boolean
-    toCIR(): cir.Lattice
+    toCIR(): cir.ValueSet
     toString(): string
 }
 
@@ -46,7 +46,7 @@ export class IntegerLattice<
         )
     }
 
-    toCIR(): cir.Lattice & { type: 'integer' } {
+    toCIR(): cir.ValueSet & { type: 'integer' } {
         return {
             type: 'integer' as const,
             min: this.min?.toString() as any,
@@ -88,7 +88,7 @@ export class TruthvalueLattice<Values extends truthvalue[]> implements Lattice {
         )
     }
 
-    toCIR(): cir.Lattice & { type: 'truthvalue'; values: Values } {
+    toCIR(): cir.ValueSet & { type: 'truthvalue'; values: Values } {
         return {
             type: 'truthvalue',
             values: this.values,
@@ -115,7 +115,7 @@ export class StringLattice implements Lattice {
         return lattice instanceof StringLattice
     }
 
-    toCIR(): cir.Lattice & { type: 'string' } {
+    toCIR(): cir.ValueSet & { type: 'string' } {
         return { type: 'string' }
     }
 
@@ -159,7 +159,7 @@ export class RCTypeLattice implements Lattice {
         )
     }
 
-    toCIR(): cir.Lattice & { type: 'rc-type' } {
+    toCIR(): cir.ValueSet & { type: 'rc-type' } {
         return {
             type: 'rc-type',
             name: this.type.name,

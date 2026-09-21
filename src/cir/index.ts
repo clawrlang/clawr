@@ -20,7 +20,7 @@ type InterfaceDeclaration = {
 type VariableDeclaration = {
     kind: 'VARIABLE_DECL'
     name: string
-    lattice: Lattice
+    lattice: ValueSet
     initialValue: Expression
 }
 
@@ -34,9 +34,9 @@ type FunctionSignature = {
     labels: string[]
     parameters: {
         name: string
-        lattice: Lattice
+        lattice: ValueSet
     }[]
-    lattice?: Lattice
+    lattice?: ValueSet
 }
 
 type RCTypeDeclaration = {
@@ -45,7 +45,7 @@ type RCTypeDeclaration = {
     name: string
     fields: {
         name: string
-        lattice: Lattice
+        lattice: ValueSet
     }[]
     conformances?: {
         interface: CanonicalName
@@ -98,11 +98,11 @@ type Release = {
 
 type Receiver =
     | {
-          object: Expression & { value: RCTypeLattice | InterfaceLattice }
+          object: Expression & { value: RCTypeSet | InterfaceSet }
           dispatch: 'direct'
       }
     | {
-          object: Expression & { value: RCTypeLattice }
+          object: Expression & { value: RCTypeSet }
           dispatch: 'inherited'
       }
     | {
@@ -150,17 +150,17 @@ type Storage = Omit<VariableReference, 'value'> | Omit<FieldReference, 'value'>
 
 type StringLiteral = {
     kind: 'STRING_LITERAL'
-    value: StringLattice & { value: string }
+    value: StringSet & { value: string }
 }
 
 type IntegerLiteral<Value extends bigint> = {
     kind: 'INTEGER_LITERAL'
-    value: IntegerLattice<Value, Value>
+    value: IntegerRange<Value, Value>
 }
 
 type TruthvalueLiteral<Value extends truthvalue> = {
     kind: 'TRUTHVALUE_LITERAL'
-    value: TruthvalueLattice<[Value]>
+    value: TruthvalueSet<[Value]>
 }
 
 type MemoryAllocation = {
@@ -170,38 +170,38 @@ type MemoryAllocation = {
         name: string
         value: Expression
     }[]
-    value: RCTypeLattice
+    value: RCTypeSet
 }
 
 type MemoryRetention = {
     kind: 'RETAIN'
     object: Storage
-    value: RCTypeLattice
+    value: RCTypeSet
 }
 
 type AsShared = {
     kind: 'AS_SHARED'
     object: FunctionCall & Expression
-    value: RCTypeLattice
+    value: RCTypeSet
 }
 
 type Box = {
     kind: 'BOX'
     expression: Expression
-    value: Lattice & { boxed: true }
+    value: ValueSet & { boxed: true }
 }
 
 type VariableReference = {
     kind: 'VARIABLE_REF'
     name: string
-    value: Lattice
+    value: ValueSet
 }
 
 type FieldReference = {
     kind: 'FIELD_REF'
     object: Expression
     field: string
-    value: Lattice
+    value: ValueSet
 }
 
 export type Expression =
@@ -214,13 +214,13 @@ export type Expression =
     | Box
     | VariableReference
     | FieldReference
-    | (FunctionCall & { value: Lattice })
+    | (FunctionCall & { value: ValueSet })
 
 // --------
 // Lattices
 // --------
 
-type IntegerLattice<
+type IntegerRange<
     Min extends bigint | undefined = bigint | undefined,
     Max extends bigint | undefined = bigint | undefined,
 > = {
@@ -233,7 +233,7 @@ type IntegerLattice<
         ? { max?: undefined }
         : { max: `${Max}` & tags.Pattern<'^-?\\d+$'> })
 
-type RealLattice<
+type RealRange<
     Min extends decimal | undefined = decimal | undefined,
     Max extends decimal | undefined = decimal | undefined,
 > = {
@@ -246,33 +246,33 @@ type RealLattice<
         ? { max?: undefined }
         : { max: `${Max}` & tags.Pattern<'^-?\\d+\.\\d+$'> })
 
-type TruthvalueLattice<Values extends truthvalue[] = truthvalue[]> = {
+type TruthvalueSet<Values extends truthvalue[] = truthvalue[]> = {
     type: 'truthvalue'
     boxed?: true
     values: Values
 }
 
-type StringLattice = { type: 'string'; value?: string }
+type StringSet = { type: 'string'; value?: string }
 
-type RCTypeLattice = {
+type RCTypeSet = {
     type: 'rc-type'
     namespace?: string
     name: string
 }
 
-type InterfaceLattice = {
+type InterfaceSet = {
     type: 'interface'
     namespace?: string
     name: string
 }
 
-export type Lattice =
-    | IntegerLattice
-    | RealLattice
-    | TruthvalueLattice
-    | StringLattice
-    | RCTypeLattice
-    | InterfaceLattice
+export type ValueSet =
+    | IntegerRange
+    | RealRange
+    | TruthvalueSet
+    | StringSet
+    | RCTypeSet
+    | InterfaceSet
 
 type IsolationLevel = 'ISOLATED' | 'SHARED'
 type truthvalue = 'false' | 'ambiguous' | 'true'

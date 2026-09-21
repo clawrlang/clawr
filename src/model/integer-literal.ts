@@ -48,7 +48,7 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
     > {
         return Result.value({
             kind: 'INTEGER_LITERAL',
-            value: this.value.toCIR() as cir.Lattice & {
+            value: this.value.toCIR() as cir.ValueSet & {
                 type: 'integer'
                 min: `${Value}`
                 max: `${Value}`

@@ -221,8 +221,8 @@ export type Expression =
 // --------
 
 type IntegerLattice<
-    Min extends bigint | undefined,
-    Max extends bigint | undefined,
+    Min extends bigint | undefined = bigint | undefined,
+    Max extends bigint | undefined = bigint | undefined,
 > = {
     type: 'integer'
     boxed?: true
@@ -234,8 +234,8 @@ type IntegerLattice<
         : { max: `${Max}` & tags.Pattern<'^-?\\d+$'> })
 
 type RealLattice<
-    Min extends decimal | undefined,
-    Max extends decimal | undefined,
+    Min extends decimal | undefined = decimal | undefined,
+    Max extends decimal | undefined = decimal | undefined,
 > = {
     type: 'real'
     boxed?: true
@@ -246,7 +246,7 @@ type RealLattice<
         ? { max?: undefined }
         : { max: `${Max}` & tags.Pattern<'^-?\\d+\.\\d+$'> })
 
-type TruthvalueLattice<Values extends truthvalue[]> = {
+type TruthvalueLattice<Values extends truthvalue[] = truthvalue[]> = {
     type: 'truthvalue'
     boxed?: true
     values: Values
@@ -267,9 +267,9 @@ type InterfaceLattice = {
 }
 
 export type Lattice =
-    | IntegerLattice<bigint | undefined, bigint | undefined>
-    | RealLattice<decimal | undefined, decimal | undefined>
-    | TruthvalueLattice<truthvalue[]>
+    | IntegerLattice
+    | RealLattice
+    | TruthvalueLattice
     | StringLattice
     | RCTypeLattice
     | InterfaceLattice

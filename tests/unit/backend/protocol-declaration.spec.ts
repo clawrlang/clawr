@@ -7,7 +7,7 @@ describe('Interface Declaration', () => {
         const decl: cir.Declaration = {
             kind: 'INTERFACE_DECL',
             name: 'MyInterface',
-            requirements: [
+            methods: [
                 {
                     baseName: 'slot',
                     labels: ['l'],

@@ -14,7 +14,7 @@ export type ClawrModule = {
 type InterfaceDeclaration = {
     kind: 'INTERFACE_DECL'
     name: string
-    requirements: FunctionSignature[]
+    methods: FunctionSignature[]
 }
 
 type VariableDeclaration = {

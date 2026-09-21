@@ -86,7 +86,7 @@ export function lowerDecl(decl: cir.Declaration): string {
 
         case 'INTERFACE_DECL':
             return `typedef struct ${mangleTypeName(decl)}ˇwitness {
-                    ${decl.requirements.map(lowerAbstractSlot).join('\n')}
+                    ${decl.methods.map(lowerAbstractSlot).join('\n')}
                 } ${mangleTypeName(decl)}ˇwitness;
                 __interface_info ${mangleTypeName(decl)}ˇinfo = {
                     .name = "${mangleTypeName(decl)}"

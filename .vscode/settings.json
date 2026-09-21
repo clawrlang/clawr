@@ -210,7 +210,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -218,7 +218,7 @@
               "namespace": { "type": "string" },
               "name": { "type": "string" }
             },
-            "required": ["kind", "requirements", "type", "name"],
+            "required": ["kind", "methods", "type", "name"],
             "additionalProperties": false
           },
           "FunctionSignature": {
@@ -452,7 +452,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -461,14 +461,14 @@
               "namespace": { "type": "string" },
               "name": { "type": "string" }
             },
-            "required": ["kind", "requirements", "boxed", "type", "name"],
+            "required": ["kind", "methods", "boxed", "type", "name"],
             "additionalProperties": false
           },
           "InterfaceLattice__typeInterfaceDeclaration": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -477,7 +477,7 @@
               "namespace": { "type": "string" },
               "name": { "type": "string" }
             },
-            "required": ["kind", "requirements", "boxed", "type", "name"],
+            "required": ["kind", "methods", "boxed", "type", "name"],
             "additionalProperties": false
           },
           "StringLattice__typeInterfaceDeclaration": {
@@ -485,7 +485,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -493,7 +493,7 @@
               "type": { "const": "string" },
               "value": { "type": "string" }
             },
-            "required": ["kind", "name", "requirements", "boxed", "type"],
+            "required": ["kind", "name", "methods", "boxed", "type"],
             "additionalProperties": false
           },
           "TruthvalueLatticetruthvalue__typeInterfaceDeclaration": {
@@ -501,7 +501,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -512,14 +512,7 @@
                 "items": { "$ref": "#/$defs/truthvalue" }
               }
             },
-            "required": [
-              "kind",
-              "name",
-              "requirements",
-              "type",
-              "boxed",
-              "values"
-            ],
+            "required": ["kind", "name", "methods", "type", "boxed", "values"],
             "additionalProperties": false
           },
           "__type__type__type__typeInterfaceDeclaration-o7": {
@@ -527,7 +520,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -539,7 +532,7 @@
             "required": [
               "kind",
               "name",
-              "requirements",
+              "methods",
               "type",
               "boxed",
               "min",
@@ -552,7 +545,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -560,14 +553,7 @@
               "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+.\\d+$" }
             },
-            "required": [
-              "kind",
-              "name",
-              "requirements",
-              "type",
-              "boxed",
-              "min"
-            ],
+            "required": ["kind", "name", "methods", "type", "boxed", "min"],
             "additionalProperties": false
           },
           "__type__type__type__typeInterfaceDeclaration-o5": {
@@ -575,7 +561,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -583,14 +569,7 @@
               "boxed": { "const": true },
               "max": { "type": "string", "pattern": "^-?\\d+.\\d+$" }
             },
-            "required": [
-              "kind",
-              "name",
-              "requirements",
-              "type",
-              "boxed",
-              "max"
-            ],
+            "required": ["kind", "name", "methods", "type", "boxed", "max"],
             "additionalProperties": false
           },
           "__type__type__type__typeInterfaceDeclaration-o4": {
@@ -598,14 +577,14 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "real" },
               "boxed": { "const": true }
             },
-            "required": ["kind", "name", "requirements", "type", "boxed"],
+            "required": ["kind", "name", "methods", "type", "boxed"],
             "additionalProperties": false
           },
           "__type__type__type__typeInterfaceDeclaration-o3": {
@@ -613,7 +592,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -625,7 +604,7 @@
             "required": [
               "kind",
               "name",
-              "requirements",
+              "methods",
               "type",
               "boxed",
               "min",
@@ -638,7 +617,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -646,14 +625,7 @@
               "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": [
-              "kind",
-              "name",
-              "requirements",
-              "type",
-              "boxed",
-              "min"
-            ],
+            "required": ["kind", "name", "methods", "type", "boxed", "min"],
             "additionalProperties": false
           },
           "__type__type__type__typeInterfaceDeclaration-o1": {
@@ -661,7 +633,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -669,14 +641,7 @@
               "boxed": { "const": true },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": [
-              "kind",
-              "name",
-              "requirements",
-              "type",
-              "boxed",
-              "max"
-            ],
+            "required": ["kind", "name", "methods", "type", "boxed", "max"],
             "additionalProperties": false
           },
           "__type__type__type__typeInterfaceDeclaration": {
@@ -684,14 +649,14 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" },
               "boxed": { "const": true }
             },
-            "required": ["kind", "name", "requirements", "type", "boxed"],
+            "required": ["kind", "name", "methods", "type", "boxed"],
             "additionalProperties": false
           },
           "FieldReference__type-o2": {
@@ -740,7 +705,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -748,7 +713,7 @@
               "namespace": { "type": "string" },
               "name": { "type": "string" }
             },
-            "required": ["kind", "requirements", "type", "name"],
+            "required": ["kind", "methods", "type", "name"],
             "additionalProperties": false
           },
           "StringLatticeInterfaceDeclaration": {
@@ -756,14 +721,14 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "string" },
               "value": { "type": "string" }
             },
-            "required": ["kind", "name", "requirements", "type"],
+            "required": ["kind", "name", "methods", "type"],
             "additionalProperties": false
           },
           "TruthvalueLatticetruthvalueInterfaceDeclaration": {
@@ -771,7 +736,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -782,7 +747,7 @@
                 "items": { "$ref": "#/$defs/truthvalue" }
               }
             },
-            "required": ["kind", "name", "requirements", "type", "values"],
+            "required": ["kind", "name", "methods", "type", "values"],
             "additionalProperties": false
           },
           "__type__type__typeInterfaceDeclaration-o7": {
@@ -790,7 +755,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -799,7 +764,7 @@
               "min": { "type": "string", "pattern": "^-?\\d+.\\d+$" },
               "max": { "type": "string", "pattern": "^-?\\d+.\\d+$" }
             },
-            "required": ["kind", "name", "requirements", "type", "min", "max"],
+            "required": ["kind", "name", "methods", "type", "min", "max"],
             "additionalProperties": false
           },
           "__type__type__typeInterfaceDeclaration-o6": {
@@ -807,7 +772,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -815,7 +780,7 @@
               "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+.\\d+$" }
             },
-            "required": ["kind", "name", "requirements", "type", "min"],
+            "required": ["kind", "name", "methods", "type", "min"],
             "additionalProperties": false
           },
           "__type__type__typeInterfaceDeclaration-o5": {
@@ -823,7 +788,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -831,7 +796,7 @@
               "boxed": { "const": true },
               "max": { "type": "string", "pattern": "^-?\\d+.\\d+$" }
             },
-            "required": ["kind", "name", "requirements", "type", "max"],
+            "required": ["kind", "name", "methods", "type", "max"],
             "additionalProperties": false
           },
           "__type__type__typeInterfaceDeclaration-o4": {
@@ -839,14 +804,14 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "real" },
               "boxed": { "const": true }
             },
-            "required": ["kind", "name", "requirements", "type"],
+            "required": ["kind", "name", "methods", "type"],
             "additionalProperties": false
           },
           "__type__type__typeInterfaceDeclaration-o3": {
@@ -854,7 +819,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -863,7 +828,7 @@
               "min": { "type": "string", "pattern": "^-?\\d+$" },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["kind", "name", "requirements", "type", "min", "max"],
+            "required": ["kind", "name", "methods", "type", "min", "max"],
             "additionalProperties": false
           },
           "__type__type__typeInterfaceDeclaration-o2": {
@@ -871,7 +836,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -879,7 +844,7 @@
               "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["kind", "name", "requirements", "type", "min"],
+            "required": ["kind", "name", "methods", "type", "min"],
             "additionalProperties": false
           },
           "__type__type__typeInterfaceDeclaration-o1": {
@@ -887,7 +852,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -895,7 +860,7 @@
               "boxed": { "const": true },
               "max": { "type": "string", "pattern": "^-?\\d+$" }
             },
-            "required": ["kind", "name", "requirements", "type", "max"],
+            "required": ["kind", "name", "methods", "type", "max"],
             "additionalProperties": false
           },
           "__type__type__typeInterfaceDeclaration": {
@@ -903,14 +868,14 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "integer" },
               "boxed": { "const": true }
             },
-            "required": ["kind", "name", "requirements", "type"],
+            "required": ["kind", "name", "methods", "type"],
             "additionalProperties": false
           },
           "IntegerLiteralbigint__type-o2": {
@@ -976,7 +941,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
@@ -988,7 +953,7 @@
                 "additionalItems": false
               }
             },
-            "required": ["kind", "name", "requirements", "type", "values"],
+            "required": ["kind", "name", "methods", "type", "values"],
             "additionalProperties": false
           },
           "StringLiteral__type-o2": {
@@ -1007,14 +972,14 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "type": { "const": "string" },
               "value": { "type": "string" }
             },
-            "required": ["kind", "name", "requirements", "type", "value"],
+            "required": ["kind", "name", "methods", "type", "value"],
             "additionalProperties": false
           },
           "VariableReference__type-o2": {
@@ -1910,13 +1875,13 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
-              "requirements": {
+              "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
               },
               "namespace": { "type": "string" }
             },
-            "required": ["kind", "name", "requirements"],
+            "required": ["kind", "name", "methods"],
             "additionalProperties": false
           },
           "__typeVariableDeclaration": {

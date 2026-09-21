@@ -38,4 +38,4 @@ Or should we not have `null` as a generic concept? Instead we could require the 
 union LinkedList = { value: integer, next: LinkedList } | end
 ```
 
-Maybe a new concept — e.g. a `symbol` or a value-less `union`case — can represent absence generically without involving  formal generics? Then ?. and ?? can operate on unions that have such a case and a `subset` or a lattice can remove that option.
+Maybe a new concept — e.g. a `symbol` or a value-less `union` case — can represent absence generically without involving formal generics? Then ?. and ?? can operate on unions that have such a case and a `subset` or a lattice can remove that option.

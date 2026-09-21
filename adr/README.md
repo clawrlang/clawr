@@ -34,7 +34,7 @@ Records so far:
 - [ADR-002](./adr-002.md): Per-Variable Isolation
 - [ADR-003](./adr-003.md): `UNIQUE` Return Values
 - [ADR-004](./adr-004.md): `UNKNOWN` Parameters
-- [ADR-005](./adr-005.md): Type Lattices
+- [ADR-005](./adr-005.md): Types are Sets
 - [ADR-006](./adr-006.md): Three-valued Truth
 - [ADR-007](./adr-007.md): Three-valued Logic Operators
 - [ADR-008](./adr-008.md): Encapsulation vs Data

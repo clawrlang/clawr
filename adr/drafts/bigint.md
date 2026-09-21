@@ -34,7 +34,7 @@ When a variable, function etc is lowered, it should have a type that fits the en
 ## Alternatives Considered
 
 - A `union` type with a discriminator value that selects between `int64_t` or a pointer.
-- Polluting the CIR with multiple lattices for each expression.
+- Polluting the CIR with multiple sets for each expression.
 
 ## Related ADRs
 

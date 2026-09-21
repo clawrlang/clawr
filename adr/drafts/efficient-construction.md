@@ -59,7 +59,7 @@ const sample: ClawrModule = {
                 ],
                 ],
             },
-            lattice: {
+            domain: {
                 type: 'rc-type',
                 name: 'Object',
             },
@@ -97,6 +97,6 @@ But even so: we should perhaps allow for varying backend implementations. So the
 
 Or maybe we don't need that. Maybe it can be the CIR specification: allocation is always complete. If so, the `self` allocations should be removed from the initializers (only the super initializer call would remains).
 
-Well, we’ll still need to distinguish owner type for each field. The fields are named because the backend doesn’t *have* to use `memcpy`. (And it doesn’t need to layout field in the order they are declared.) It should be allowed to set each field individually by name. But if it cannot separate the fields by type, the names will conflict.
+Well, we’ll still need to distinguish owner type for each field. The fields are named because the backend doesn’t _have_ to use `memcpy`. (And it doesn’t need to layout field in the order they are declared.) It should be allowed to set each field individually by name. But if it cannot separate the fields by type, the names will conflict.
 
-Besides: the layout within each type cannot be known by the frontend. The ordering cannot be guaranteed to be compatible. It can only be guaranteed to be *consistent* with other parts of the CIR.
+Besides: the layout within each type cannot be known by the frontend. The ordering cannot be guaranteed to be compatible. It can only be guaranteed to be _consistent_ with other parts of the CIR.

@@ -22,7 +22,7 @@ CIR instructions MAY carry optional debug metadata:
 
 - source span (file, line, column range)
 - provenance chain (what expression/instruction this was derived from)
-- static lattice of the value at this point
+- static value-set of the value at this point
 
 The metadata is optional. Backends MUST NOT depend on it. Backends MUST
 NOT emit it. It is consumed by debuggers and reference interpreters only.
@@ -57,7 +57,7 @@ appear in debug metadata as a source-level operation.
 
 - Debugging can be designed later without changing the CIR.
 - Reference interpreter can serve as a debugger.
-- Static lattices are exposed to the user, not just the optimizer.
+- Static value-sets are exposed to the user, not just the optimizer.
 
 ### Negative
 
@@ -68,6 +68,6 @@ appear in debug metadata as a source-level operation.
 ## Related ADRs
 
 - [ADR-001](./adr-001.md) (Syntax, Semantics and CIR)
-- [ADR-005](./adr-005.md) (Type Lattices)
+- [ADR-005](./adr-005.md) (Types are Sets)
 - [ADR-015](./adr-015.md) (Basic ARC Rules)
 - [ADR-016](./adr-016.md) (Backend-Managed Boxing)

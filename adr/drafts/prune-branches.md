@@ -1,9 +1,9 @@
 # Prune CIR Banches
 
-`FunctionCall.currentValue()` should use parameters, `self` and the function body to figure out the returned value lattice
+`FunctionCall.currentValue()` should use parameters, `self` and the function body to figure out the returned value-set
 
-An optimization step can use this analysis to remove the function call entirely if the lattice is a singleton.
-But even before pruning, this feature can help narrow the value lattice, which is probably valuable.
+An optimization step can use this analysis to remove the function call entirely if the value-set is a singleton.
+But even before pruning, this feature can help narrow the expression value, which is probably valuable.
 
 This only applies to `object`, not `service`.
 

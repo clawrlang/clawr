@@ -12,7 +12,7 @@ describe('Type declaration', () => {
                 fields: [
                     {
                         name: 'field',
-                        lattice: {
+                        domain: {
                             type: 'integer',
                             min: '0',
                             max: '100',
@@ -33,7 +33,7 @@ describe('Type declaration', () => {
                 fields: [
                     {
                         name: 'field',
-                        lattice: {
+                        domain: {
                             type: 'integer',
                             min: '0',
                             max: '100',
@@ -120,7 +120,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    lattice: { type: 'integer' },
+                    domain: { type: 'integer' },
                 },
             ],
             dispatchTable: [
@@ -129,7 +129,7 @@ describe('Type declaration', () => {
                         baseName: 'f',
                         labels: [],
                         parameters: [],
-                        lattice: { type: 'integer' },
+                        domain: { type: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
                     implementation: { name: 'MyType' },
@@ -161,10 +161,10 @@ describe('Type declaration', () => {
                         parameters: [
                             {
                                 name: 'v',
-                                lattice: { type: 'integer' },
+                                domain: { type: 'integer' },
                             },
                         ],
-                        lattice: { type: 'integer' },
+                        domain: { type: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
                     implementation: { name: 'MyType' },
@@ -194,7 +194,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    lattice: { type: 'integer' },
+                    domain: { type: 'integer' },
                 },
             ],
             dispatchTable: [
@@ -225,7 +225,7 @@ describe('Type declaration', () => {
                     parameters: [
                         {
                             name: 'field',
-                            lattice: {
+                            domain: {
                                 type: 'integer',
                                 min: '0',
                                 max: '100',

@@ -53,7 +53,7 @@ describe('ObjectDeclaration', () => {
                 fields: [
                     {
                         name: 'field',
-                        lattice: {
+                        domain: {
                             max: '20',
                             min: '20',
                             type: 'integer',
@@ -162,7 +162,7 @@ describe('ObjectDeclaration', () => {
                         labels: ['label'],
                         parameters: [{ name: 'var' }],
                         body: [{ kind: 'RETURN' }],
-                        lattice: {},
+                        domain: {},
                     },
                     {
                         kind: 'FUNCTION_DECL',
@@ -170,7 +170,7 @@ describe('ObjectDeclaration', () => {
                         labels: ['label'],
                         parameters: [{ name: 'var' }],
                         body: [],
-                        lattice: undefined,
+                        domain: undefined,
                     },
                 ],
             }, //satisfies cir.Declaration,
@@ -286,7 +286,7 @@ describe('ObjectDeclaration', () => {
                                 value: {},
                             },
                         ],
-                        lattice: undefined,
+                        domain: undefined,
                     },
                     {
                         kind: 'FUNCTION_DECL',
@@ -299,7 +299,7 @@ describe('ObjectDeclaration', () => {
                                 value: {},
                             },
                         ],
-                        lattice: undefined,
+                        domain: undefined,
                     },
                 ],
             },

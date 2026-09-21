@@ -36,7 +36,7 @@ describe('VariableDeclaration', () => {
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'VARIABLE_DECL',
             name: 'foo',
-            lattice: { type: 'integer', min: '1', max: '1' },
+            domain: { type: 'integer', min: '1', max: '1' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
                 value: { type: 'integer', min: '1', max: '1' },
@@ -57,7 +57,7 @@ describe('VariableDeclaration', () => {
             })
             const context = newSemanticContext()
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).lattice).toEqual({
+            expect((context.scope.emitted[0] as any).domain).toEqual({
                 type: 'integer',
                 min: '1',
                 max: '1',
@@ -92,7 +92,7 @@ describe('VariableDeclaration', () => {
                 }),
             )
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).lattice).toEqual({
+            expect((context.scope.emitted[0] as any).domain).toEqual({
                 type: 'integer',
             })
         })
@@ -109,7 +109,7 @@ describe('VariableDeclaration', () => {
             })
             const context = newSemanticContext()
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).lattice).toEqual({
+            expect((context.scope.emitted[0] as any).domain).toEqual({
                 type: 'truthvalue',
                 values: ['true'],
             })
@@ -143,7 +143,7 @@ describe('VariableDeclaration', () => {
                 }),
             )
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).lattice).toEqual({
+            expect((context.scope.emitted[0] as any).domain).toEqual({
                 type: 'truthvalue',
                 values: ['false', 'ambiguous', 'true'],
             })

@@ -45,10 +45,10 @@ describe('FunctionDeclaration (method)', () => {
             parameters: [
                 {
                     name: 'x',
-                    lattice: { type: 'string' },
+                    domain: { type: 'string' },
                 },
             ],
-            lattice: undefined,
+            domain: undefined,
             body: [],
         })
     })
@@ -76,7 +76,7 @@ describe('FunctionDeclaration (method)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            lattice: { type: 'integer', min: '42', max: '42' },
+            domain: { type: 'integer', min: '42', max: '42' },
             body: [
                 {
                     kind: 'RETURN',
@@ -119,7 +119,7 @@ describe('FunctionDeclaration (method)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            lattice: { type: 'integer', min: undefined, max: undefined },
+            domain: { type: 'integer', min: undefined, max: undefined },
             body: [
                 {
                     kind: 'RETURN',
@@ -279,7 +279,7 @@ describe('FunctionDeclaration (method)', () => {
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 parameters: [],
-                lattice: {
+                domain: {
                     type: 'integer',
                     min: '42',
                     max: '42',
@@ -330,7 +330,7 @@ describe('FunctionDeclaration (method)', () => {
             expect(decl).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                lattice: {
+                domain: {
                     type: 'rc-type',
                     name: 'MyData',
                 },
@@ -372,7 +372,7 @@ describe('FunctionDeclaration (method)', () => {
             expect(decl).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                lattice: {
+                domain: {
                     type: 'rc-type',
                     name: 'MyData',
                 },

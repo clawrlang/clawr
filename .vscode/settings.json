@@ -232,13 +232,13 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/ValueSet" }
+                    "domain": { "$ref": "#/$defs/ValueSet" }
                   },
-                  "required": ["name", "lattice"],
+                  "required": ["name", "domain"],
                   "additionalProperties": false
                 }
               },
-              "lattice": {
+              "domain": {
                 "oneOf": [
                   { "$ref": "#/$defs/__type__type__type-o7" },
                   { "$ref": "#/$defs/__type__type__type-o6" },
@@ -1851,10 +1851,10 @@
             "properties": {
               "kind": { "const": "VARIABLE_DECL" },
               "name": { "type": "string" },
-              "lattice": { "$ref": "#/$defs/ValueSet" },
+              "domain": { "$ref": "#/$defs/ValueSet" },
               "initialValue": { "$ref": "#/$defs/Expression" }
             },
-            "required": ["kind", "name", "lattice", "initialValue"],
+            "required": ["kind", "name", "domain", "initialValue"],
             "additionalProperties": false
           },
           "Declaration": {
@@ -1885,11 +1885,11 @@
             "properties": {
               "kind": { "const": "VARIABLE_DECL" },
               "name": { "type": "string" },
-              "lattice": { "$ref": "#/$defs/ValueSet" },
+              "domain": { "$ref": "#/$defs/ValueSet" },
               "initialValue": { "$ref": "#/$defs/Expression" },
               "namespace": { "type": "string" }
             },
-            "required": ["kind", "name", "lattice", "initialValue"],
+            "required": ["kind", "name", "domain", "initialValue"],
             "additionalProperties": false
           },
           "__type__type": {
@@ -1904,9 +1904,9 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/ValueSet" }
+                    "domain": { "$ref": "#/$defs/ValueSet" }
                   },
-                  "required": ["name", "lattice"],
+                  "required": ["name", "domain"],
                   "additionalProperties": false
                 }
               },
@@ -1971,13 +1971,13 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/ValueSet" }
+                    "domain": { "$ref": "#/$defs/ValueSet" }
                   },
-                  "required": ["name", "lattice"],
+                  "required": ["name", "domain"],
                   "additionalProperties": false
                 }
               },
-              "lattice": {
+              "domain": {
                 "oneOf": [
                   { "$ref": "#/$defs/__type__type__type-o7" },
                   { "$ref": "#/$defs/__type__type__type-o6" },
@@ -2010,9 +2010,9 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/ValueSet" }
+                    "domain": { "$ref": "#/$defs/ValueSet" }
                   },
-                  "required": ["name", "lattice"],
+                  "required": ["name", "domain"],
                   "additionalProperties": false
                 }
               },
@@ -2081,13 +2081,13 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/ValueSet" }
+                    "domain": { "$ref": "#/$defs/ValueSet" }
                   },
-                  "required": ["name", "lattice"],
+                  "required": ["name", "domain"],
                   "additionalProperties": false
                 }
               },
-              "lattice": {
+              "domain": {
                 "oneOf": [
                   { "$ref": "#/$defs/__type__type__type-o7" },
                   { "$ref": "#/$defs/__type__type__type-o6" },
@@ -2123,9 +2123,9 @@
                   "type": "object",
                   "properties": {
                     "name": { "type": "string" },
-                    "lattice": { "$ref": "#/$defs/ValueSet" }
+                    "domain": { "$ref": "#/$defs/ValueSet" }
                   },
-                  "required": ["name", "lattice"],
+                  "required": ["name", "domain"],
                   "additionalProperties": false
                 }
               }

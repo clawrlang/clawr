@@ -20,7 +20,7 @@ type InterfaceDeclaration = {
 type VariableDeclaration = {
     kind: 'VARIABLE_DECL'
     name: string
-    lattice: ValueSet
+    domain: ValueSet
     initialValue: Expression
 }
 
@@ -34,9 +34,9 @@ type FunctionSignature = {
     labels: string[]
     parameters: {
         name: string
-        lattice: ValueSet
+        domain: ValueSet
     }[]
-    lattice?: ValueSet
+    domain?: ValueSet
 }
 
 type RCTypeDeclaration = {
@@ -45,7 +45,7 @@ type RCTypeDeclaration = {
     name: string
     fields: {
         name: string
-        lattice: ValueSet
+        domain: ValueSet
     }[]
     conformances?: {
         interface: CanonicalName
@@ -58,7 +58,7 @@ type RCTypeDeclaration = {
     | {
           base?: CanonicalName
           methods: FunctionDeclaration[]
-          initializers: (FunctionDeclaration & { lattice?: undefined })[]
+          initializers: (FunctionDeclaration & { domain?: undefined })[]
           dispatchTable?: {
               slot: FunctionSignature
               declaredIn: CanonicalName

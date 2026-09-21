@@ -55,7 +55,7 @@ export class ReturnStatement implements Statement {
             context.scope.emitted.push({
                 kind: 'VARIABLE_DECL',
                 name: temp,
-                lattice: lattice.toCIR(),
+                domain: lattice.toCIR(),
                 initialValue: retainedValueCIR,
             })
             context.scope.releaseVariables()

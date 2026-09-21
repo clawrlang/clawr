@@ -4,7 +4,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "foo",
-            "lattice": {
+            "domain": {
                 "type": "truthvalue",
                 "values": [
                     "ambiguous"
@@ -25,7 +25,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "__tempˇ0",
-            "lattice": {
+            "domain": {
                 "type": "truthvalue",
                 "boxed": true,
                 "values": [

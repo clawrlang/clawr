@@ -256,7 +256,7 @@ describe('FunctionCall', () => {
             {
                 kind: 'VARIABLE_DECL',
                 name: expect.stringMatching(/^__tempˇ\d+$/),
-                lattice: { type: 'truthvalue', values: ['true'] },
+                domain: { type: 'truthvalue', values: ['true'] },
                 initialValue: {
                     kind: 'BOX',
                     expression: {

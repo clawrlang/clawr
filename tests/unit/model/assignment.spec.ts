@@ -188,7 +188,7 @@ describe('Assignment', () => {
                 {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
-                    lattice: {
+                    domain: {
                         type: 'rc-type',
                         name: 'InnerType',
                     },
@@ -259,7 +259,7 @@ describe('Assignment', () => {
                 {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
-                    lattice: {
+                    domain: {
                         type: 'rc-type',
                         name: 'MyType',
                     },

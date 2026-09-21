@@ -7,7 +7,7 @@
             "fields": [
                 {
                     "name": "bar",
-                    "lattice": {
+                    "domain": {
                         "type": "integer"
                     }
                 }
@@ -16,7 +16,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "foo",
-            "lattice": {
+            "domain": {
                 "type": "rc-type",
                 "name": "FooData"
             },
@@ -92,7 +92,7 @@
                     "boxed": true
                 }
             },
-            "lattice": {
+            "domain": {
                 "type": "integer",
                 "boxed": true
             }

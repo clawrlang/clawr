@@ -37,7 +37,7 @@ export class DataDeclaration implements Declaration {
             namespace: this.name.namespace,
             fields: this.fields.map((field) => ({
                 name: field.name,
-                lattice: field.lattice!.toCIR(),
+                domain: field.lattice!.toCIR(),
             })),
         })
         return Result.ok

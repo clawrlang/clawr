@@ -7,7 +7,7 @@
             "fields": [
                 {
                     "name": "bar",
-                    "lattice": {
+                    "domain": {
                         "type": "integer"
                     }
                 }
@@ -16,7 +16,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "two",
-            "lattice": {
+            "domain": {
                 "type": "rc-type",
                 "name": "FooData"
             },
@@ -47,7 +47,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "one",
-            "lattice": {
+            "domain": {
                 "type": "rc-type",
                 "name": "FooData"
             },
@@ -118,7 +118,7 @@
                     "boxed": true
                 }
             },
-            "lattice": {
+            "domain": {
                 "type": "integer",
                 "boxed": true
             }
@@ -172,7 +172,7 @@
                     "boxed": true
                 }
             },
-            "lattice": {
+            "domain": {
                 "type": "integer",
                 "boxed": true
             }

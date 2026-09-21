@@ -124,7 +124,7 @@ export class FunctionCall implements Expression, Statement {
                 {
                     kind: 'VARIABLE_DECL',
                     name: tempName,
-                    lattice: boxedLattice,
+                    domain: boxedLattice,
                     initialValue: {
                         kind: 'BOX',
                         expression: args[0],

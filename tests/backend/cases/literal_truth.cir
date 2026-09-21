@@ -4,7 +4,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "__tempˇ0",
-            "lattice": {
+            "domain": {
                 "type": "truthvalue",
                 "boxed": true,
                 "values": [

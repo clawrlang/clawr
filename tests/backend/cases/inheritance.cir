@@ -7,7 +7,7 @@
             "fields": [
                 {
                     "name": "field",
-                    "lattice": {
+                    "domain": {
                         "type": "integer",
                         "min": "0",
                         "max": "100"
@@ -20,7 +20,7 @@
                     "baseName": "f",
                     "labels": [],
                     "parameters": [],
-                    "lattice": {
+                    "domain": {
                         "type": "integer",
                         "min": "0",
                         "max": "100"
@@ -59,7 +59,7 @@
                     "parameters": [
                         {
                             "name": "field",
-                            "lattice": {
+                            "domain": {
                                 "type": "integer",
                                 "min": "0",
                                 "max": "100"
@@ -100,7 +100,7 @@
                         "baseName": "f",
                         "labels": [],
                         "parameters": [],
-                        "lattice": {
+                        "domain": {
                             "type": "integer",
                             "min": "0",
                             "max": "100"
@@ -124,7 +124,7 @@
             "fields": [
                 {
                     "name": "field",
-                    "lattice": {
+                    "domain": {
                         "type": "integer",
                         "min": "0",
                         "max": "100"
@@ -137,7 +137,7 @@
                     "baseName": "f",
                     "labels": [],
                     "parameters": [],
-                    "lattice": {
+                    "domain": {
                         "type": "integer",
                         "min": "43",
                         "max": "43"
@@ -235,7 +235,7 @@
                         "baseName": "f",
                         "labels": [],
                         "parameters": [],
-                        "lattice": {
+                        "domain": {
                             "type": "integer",
                             "min": "0",
                             "max": "100"
@@ -314,7 +314,7 @@
                         "baseName": "f",
                         "labels": [],
                         "parameters": [],
-                        "lattice": {
+                        "domain": {
                             "type": "integer",
                             "min": "0",
                             "max": "100"
@@ -334,7 +334,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "obj1",
-            "lattice": {
+            "domain": {
                 "type": "rc-type",
                 "name": "Sub1"
             },
@@ -369,7 +369,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "obj2",
-            "lattice": {
+            "domain": {
                 "type": "rc-type",
                 "name": "Sub2"
             },
@@ -435,7 +435,7 @@
                     "boxed": true
                 }
             },
-            "lattice": {
+            "domain": {
                 "type": "integer",
                 "boxed": true
             }
@@ -498,7 +498,7 @@
                     "boxed": true
                 }
             },
-            "lattice": {
+            "domain": {
                 "type": "integer",
                 "boxed": true
             }

@@ -41,7 +41,7 @@ describe('DataDeclaration', () => {
                 fields: [
                     {
                         name: 'field1',
-                        lattice: {
+                        domain: {
                             type: 'integer',
                             min: undefined,
                             max: undefined,
@@ -49,7 +49,7 @@ describe('DataDeclaration', () => {
                     },
                     {
                         name: 'field2',
-                        lattice: {
+                        domain: {
                             type: 'truthvalue',
                             values: ['false', 'ambiguous', 'true'],
                         },

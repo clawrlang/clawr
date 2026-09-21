@@ -97,7 +97,7 @@ export class VariableDeclaration implements Statement, Declaration {
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,
             name: this.name,
-            lattice: lattice.toCIR(),
+            domain: lattice.toCIR(),
             initialValue: initialValue,
         })
         return Result.ok

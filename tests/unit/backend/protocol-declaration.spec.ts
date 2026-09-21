@@ -14,10 +14,10 @@ describe('Interface Declaration', () => {
                     parameters: [
                         {
                             name: 'p',
-                            lattice: { type: 'truthvalue', values: ['false'] },
+                            domain: { type: 'truthvalue', values: ['false'] },
                         },
                     ],
-                    lattice: { type: 'integer', max: '10', min: '0' },
+                    domain: { type: 'integer', max: '10', min: '0' },
                 },
             ],
         }

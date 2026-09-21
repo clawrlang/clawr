@@ -7,7 +7,7 @@
             "fields": [
                 {
                     "name": "field",
-                    "lattice": {
+                    "domain": {
                         "type": "integer"
                     }
                 }
@@ -22,7 +22,7 @@
                 {
                     "kind": "VARIABLE_DECL",
                     "name": "var",
-                    "lattice": {
+                    "domain": {
                         "type": "rc-type",
                         "name": "MyData"
                     },
@@ -60,7 +60,7 @@
                     }
                 }
             ],
-            "lattice": {
+            "domain": {
                 "type": "rc-type",
                 "name": "MyData"
             }
@@ -70,7 +70,7 @@
         {
             "kind": "VARIABLE_DECL",
             "name": "var",
-            "lattice": {
+            "domain": {
                 "type": "rc-type",
                 "name": "MyData"
             },
@@ -118,7 +118,7 @@
                     "boxed": true
                 }
             },
-            "lattice": {
+            "domain": {
                 "type": "integer",
                 "boxed": true
             }

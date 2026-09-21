@@ -46,10 +46,10 @@ describe('FunctionDeclaration (initializer)', () => {
             parameters: [
                 {
                     name: 'x',
-                    lattice: { type: 'string' },
+                    domain: { type: 'string' },
                 },
             ],
-            lattice: undefined,
+            domain: undefined,
             body: [],
         })
     })
@@ -108,7 +108,7 @@ describe('FunctionDeclaration (initializer)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'makeNew',
             parameters: [],
-            lattice: undefined,
+            domain: undefined,
             body: [
                 {
                     kind: 'SELF_ASSIGN',
@@ -156,7 +156,7 @@ describe('FunctionDeclaration (initializer)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'makeNew',
             parameters: [],
-            lattice: undefined,
+            domain: undefined,
             body: [
                 {
                     kind: 'RETURN',
@@ -328,7 +328,7 @@ describe('FunctionDeclaration (initializer)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'makeNew',
             parameters: [],
-            lattice: undefined,
+            domain: undefined,
             body: [
                 {
                     kind: 'SELF_ASSIGN',

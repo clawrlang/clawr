@@ -46,10 +46,10 @@ describe('FunctionDeclaration', () => {
             parameters: [
                 {
                     name: 'x',
-                    lattice: { type: 'string' },
+                    domain: { type: 'string' },
                 },
             ],
-            lattice: undefined,
+            domain: undefined,
             body: [],
         })
     })
@@ -77,7 +77,7 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            lattice: { type: 'integer', min: '42', max: '42' },
+            domain: { type: 'integer', min: '42', max: '42' },
             body: [
                 {
                     kind: 'RETURN',
@@ -120,7 +120,7 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            lattice: { type: 'integer', min: undefined, max: undefined },
+            domain: { type: 'integer', min: undefined, max: undefined },
             body: [
                 {
                     kind: 'RETURN',
@@ -280,7 +280,7 @@ describe('FunctionDeclaration', () => {
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 parameters: [],
-                lattice: {
+                domain: {
                     type: 'integer',
                     min: '42',
                     max: '42',
@@ -329,7 +329,7 @@ describe('FunctionDeclaration', () => {
             expect(decl).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                lattice: {
+                domain: {
                     type: 'rc-type',
                     name: 'MyData',
                 },
@@ -371,7 +371,7 @@ describe('FunctionDeclaration', () => {
             expect(decl).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                lattice: {
+                domain: {
                     type: 'rc-type',
                     name: 'MyData',
                 },

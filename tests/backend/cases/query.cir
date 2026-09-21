@@ -10,7 +10,7 @@
             "parameters": [
                 {
                     "name": "var",
-                    "lattice": {
+                    "domain": {
                         "type": "integer"
                     }
                 }
@@ -28,7 +28,7 @@
                     }
                 }
             ],
-            "lattice": {
+            "domain": {
                 "type": "integer",
                 "max": "42",
                 "min": "42"
@@ -70,7 +70,7 @@
                     "boxed": true
                 }
             },
-            "lattice": {
+            "domain": {
                 "type": "integer",
                 "boxed": true
             }

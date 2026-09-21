@@ -106,7 +106,7 @@ export class Assignment implements Statement {
             context.scope.emitted.push({
                 kind: 'VARIABLE_DECL' as const,
                 name: tempVar,
-                lattice: targetLattice.toCIR(),
+                domain: targetLattice.toCIR(),
                 initialValue: target,
             })
 

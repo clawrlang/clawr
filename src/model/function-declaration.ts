@@ -124,9 +124,9 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                lattice: param.lattice!.toCIR(),
+                domain: param.lattice!.toCIR(),
             })),
-            lattice,
+            domain: lattice,
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
@@ -171,9 +171,9 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                lattice: param.lattice!.toCIR(),
+                domain: param.lattice!.toCIR(),
             })),
-            lattice,
+            domain: lattice,
             body: bodyContext.scope.emitted,
         }
 
@@ -183,7 +183,7 @@ export class FunctionDeclaration implements Declaration {
     emitInitializer(
         context: Context,
     ): SemanticResult<
-        cir.Declaration & { kind: 'FUNCTION_DECL'; lattice: undefined }
+        cir.Declaration & { kind: 'FUNCTION_DECL'; domain: undefined }
     > {
         const bodyContextResult = this.makeBodyContext(context)
         if (bodyContextResult.isError) return bodyContextResult
@@ -213,15 +213,15 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const cirFuncDecl: cir.Declaration & { lattice: undefined } = {
+        const cirFuncDecl: cir.Declaration & { domain: undefined } = {
             kind: 'FUNCTION_DECL',
             baseName: this.baseName,
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                lattice: param.lattice!.toCIR(),
+                domain: param.lattice!.toCIR(),
             })),
-            lattice: undefined,
+            domain: undefined,
             body: bodyContext.scope.emitted,
         }
 

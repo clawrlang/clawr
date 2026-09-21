@@ -7,7 +7,7 @@ describe('Lowering Variables', () => {
         const decl: Declaration = {
             kind: 'VARIABLE_DECL',
             name: 'x',
-            lattice: { type: 'integer' },
+            domain: { type: 'integer' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
                 value: { type: 'integer', max: '42', min: '42' },

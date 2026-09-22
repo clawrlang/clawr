@@ -64,50 +64,110 @@ export class FunctionCall implements Expression, Statement {
     }
 
     currentValue(context: Context): SemanticResult<ValueSet> {
-        if (this.name.toString() === 'copy(of:)') {
-            const valueResult = this.arguments[0].currentValue(context)
-            if (valueResult.isError) return valueResult
-            const value = valueResult.value
-            return value instanceof RCTypeSet
-                ? Result.value(value)
-                : SemanticErrorResult.failure(
-                      'not a reference-counted type',
-                      this.span,
-                  )
+        if (this.recipient) {
+            const recipientDomainResult = this.recipient.domain(context)
+            if (recipientDomainResult.isError) return recipientDomainResult
+            const recipientDomain = recipientDomainResult.value
+            if (!(recipientDomain instanceof RCTypeSet))
+                return SemanticErrorResult.failure(
+                    'Recipient must be rc-type',
+                    this.recipient.span,
+                )
+
+            const typeDecl = context.scope.objectDeclaration(
+                recipientDomain.type,
+            )
+            if (!typeDecl)
+                return SemanticErrorResult.failure(
+                    'Unknown type',
+                    this.recipient.span,
+                )
+
+            const decl = typeDecl.method(this.name)
+            if (!decl)
+                return SemanticErrorResult.failure(
+                    `Method declaration not found: ${this.name.toString()}`,
+                    this.span,
+                )
+
+            const domainResult = decl.domain(context)
+            if (domainResult.isError) return domainResult
+            if (!domainResult.value)
+                return SemanticErrorResult.failure(
+                    `Method has no result set: ${this.name.toString()}`,
+                    this.span,
+                )
+            return Result.value(domainResult.value)
+        } else {
+            if (this.name.toString() === 'copy(of:)') {
+                const valueResult = this.arguments[0].currentValue(context)
+                if (valueResult.isError) return valueResult
+                const value = valueResult.value
+                return value instanceof RCTypeSet
+                    ? Result.value(value)
+                    : SemanticErrorResult.failure(
+                          'not a reference-counted type',
+                          this.span,
+                      )
+            }
+
+            const decl = context.scope.functionDeclaration(this.name)
+            if (!decl)
+                return SemanticErrorResult.failure(
+                    `Function declaration not found: ${this.name.toString()}`,
+                    this.span,
+                )
+
+            const domainResult = decl.domain(context)
+            if (domainResult.isError) return domainResult
+            if (!domainResult.value)
+                return SemanticErrorResult.failure(
+                    `Function declaration has no result set: ${this.name.toString()}`,
+                    this.span,
+                )
+            return Result.value(domainResult.value)
         }
-
-        const decl = context.scope.functionDeclaration(this.name)
-        if (!decl)
-            return SemanticErrorResult.failure(
-                `Function declaration not found: ${this.name.toString()}`,
-                this.span,
-            )
-
-        const domainResult = decl.domain(context)
-        if (domainResult.isError) return domainResult
-        if (!domainResult.value)
-            return SemanticErrorResult.failure(
-                `Function declaration has no result set: ${this.name.toString()}`,
-                this.span,
-            )
-        return Result.value(domainResult.value)
     }
 
     toCIRExpression(context: Context): SemanticResult<cir.Expression> {
-        const argsResult = SemanticResult.collect([
-            this.currentValue(context),
-            ...this.arguments.map((arg) => arg.toCIRExpression(context)),
-        ])
+        if (this.recipient) {
+            const argsResult = SemanticResult.collect([
+                this.currentValue(context),
+                this.recipient.toCIRExpression(context),
+                ...this.arguments.map((arg) => arg.toCIRExpression(context)),
+            ])
 
-        if (argsResult.isError) return argsResult
-        const [value, ...args] = argsResult.value
+            if (argsResult.isError) return argsResult
+            const [value, recipient, ...args] = argsResult.value
 
-        return Result.value({
-            kind: 'CALL',
-            name: this.name.toCIR(),
-            arguments: args,
-            value: value.toCIR(),
-        } satisfies cir.Expression)
+            return Result.value({
+                kind: 'CALL',
+                name: this.name.toCIR(),
+                arguments: args,
+                receiver: {
+                    dispatch: 'direct',
+                    object: recipient as cir.Expression & {
+                        value: { type: 'rc-type' | 'interface' }
+                    },
+                },
+                value: value.toCIR(),
+            } satisfies cir.Expression)
+        } else {
+            const argsResult = SemanticResult.collect([
+                this.currentValue(context),
+                ...this.arguments.map((arg) => arg.toCIRExpression(context)),
+            ])
+
+            if (argsResult.isError) return argsResult
+            const [value, ...args] = argsResult.value
+
+            return Result.value({
+                kind: 'CALL',
+                name: this.name.toCIR(),
+                arguments: args,
+                value: value.toCIR(),
+            } satisfies cir.Expression)
+        }
     }
 
     emitStatement(context: Context): SemanticResult {

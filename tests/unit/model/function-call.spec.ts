@@ -4,6 +4,7 @@ import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { ObjectDeclaration } from '@/model/object-declaration'
 import { Parameter } from '@/model/parameter'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { TypeName } from '@/model/type-name'
@@ -340,5 +341,68 @@ describe('FunctionCall', () => {
                 },
             },
         ])
+    })
+
+    it('can make direct method call', () => {
+        const context = newSemanticContext()
+        context.scope.rootScope.addObjectDeclaration(
+            ObjectDeclaration.create({
+                kind: 'object',
+                name: TypeName.create({ name: 'Object' }),
+                readonly: [
+                    FunctionDeclaration.create({
+                        baseName: 'read',
+                        parameters: [],
+                        implementation: {
+                            kind: 'implicit-return',
+                            expression: IntegerLiteral.create({
+                                value: 42n,
+                                span: someCodeSpan,
+                            }),
+                        },
+                        result: undefined,
+                    }),
+                ],
+                mutating: [],
+                initializers: [],
+                fields: [],
+                span: someCodeSpan,
+            }),
+        )
+        context.scope.addVariableDeclaration('x', {
+            isImmutable: false,
+            isolationLevel: ISOLATED,
+            domain: RCTypeSet.create({
+                type: TypeName.create({ name: 'Object' }),
+            }),
+        })
+
+        const call = FunctionCall.create({
+            baseName: 'read',
+            arguments: [],
+            recipient: VariableReference.create({
+                name: 'x',
+                span: someCodeSpan,
+            }),
+            span: someCodeSpan,
+        })
+        const result = call.toCIRExpression(context)
+        expect(result.isSuccess || result.error.errors).toBeTrue()
+
+        expect(result.isSuccess && result.value).toMatchObject({
+            kind: 'CALL',
+            name: {
+                baseName: 'read',
+                labels: [],
+            },
+            receiver: {
+                dispatch: 'direct',
+                object: {
+                    kind: 'VARIABLE_REF',
+                    name: 'x',
+                },
+            },
+            arguments: [],
+        })
     })
 })

@@ -4,6 +4,7 @@ import { SemanticResult } from '@/tools/semantic-result'
 import { Context, Declaration } from '.'
 import { DataField } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
+import { FunctionName } from './function-name'
 import { TypeName } from './type-name'
 
 export class ObjectDeclaration implements Declaration {
@@ -46,6 +47,12 @@ export class ObjectDeclaration implements Declaration {
             initializers,
             fields,
             span,
+        )
+    }
+
+    method(name: FunctionName): FunctionDeclaration | undefined {
+        return [...this.readonly, ...this.mutating].find(
+            (m) => m.name().toString() === name.toString(),
         )
     }
 

@@ -1,8 +1,6 @@
 # `object`/`service`
 
 - Make 'self' a reserved identifier
-- Remove `companion` (ADR-019, ADR-020). It is not used yet anyway
-  - `CompanionParser` is still in its test-fixture module
 - Make `FunctionCall` support methods
   - direct
   - inherited

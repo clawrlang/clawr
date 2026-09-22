@@ -153,12 +153,12 @@ type StringLiteral = {
     value: StringSet & { value: string }
 }
 
-type IntegerLiteral<Value extends bigint> = {
+type IntegerLiteral<Value extends bigint = bigint> = {
     kind: 'INTEGER_LITERAL'
     value: IntegerRange<Value, Value>
 }
 
-type TruthvalueLiteral<Value extends truthvalue> = {
+type TruthvalueLiteral<Value extends truthvalue = truthvalue> = {
     kind: 'TRUTHVALUE_LITERAL'
     value: TruthvalueSet<[Value]>
 }
@@ -206,8 +206,8 @@ type FieldReference = {
 
 export type Expression =
     | StringLiteral
-    | IntegerLiteral<bigint>
-    | TruthvalueLiteral<truthvalue>
+    | IntegerLiteral
+    | TruthvalueLiteral
     | MemoryAllocation
     | MemoryRetention
     | AsShared

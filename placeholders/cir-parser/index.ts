@@ -1,3 +1,8 @@
+/*
+ * This file is replaced with generated code.
+ * Changes might not apply correctly unless the /generated/cir-parser folder is first deleted.
+ */
+
 import { ClawrModule } from '@/cir'
 import typia from 'typia'
 

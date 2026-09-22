@@ -90,7 +90,7 @@ export class FunctionCall implements Expression, Statement {
                     this.span,
                 )
 
-            const domainResult = decl.domain(context)
+            const domainResult = decl.domain(typeDecl.injectSelf(context))
             if (domainResult.isError) return domainResult
             if (!domainResult.value)
                 return SemanticErrorResult.failure(

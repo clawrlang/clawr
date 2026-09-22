@@ -1,5 +1,6 @@
 import { DataLiteral } from '@/model/data-literal'
 import { decorateDomain } from '@/model/domain-declaration'
+import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { IntegerLiteral } from '@/model/integer-literal'
@@ -355,8 +356,14 @@ describe('FunctionCall', () => {
                         parameters: [],
                         implementation: {
                             kind: 'implicit-return',
-                            expression: IntegerLiteral.create({
-                                value: 42n,
+                            expression: FieldReference.create({
+                                object: VariableReference.create({
+                                    name: 'self',
+                                    span: someCodeSpan,
+                                }),
+                                operator: '->',
+                                field: 'field',
+                                fieldSpan: someCodeSpan,
                                 span: someCodeSpan,
                             }),
                         },
@@ -365,7 +372,16 @@ describe('FunctionCall', () => {
                 ],
                 mutating: [],
                 initializers: [],
-                fields: [],
+                fields: [
+                    {
+                        name: 'field',
+                        isImmutable: true,
+                        isolationLevel: ISOLATED,
+                        domain: decorateDomain(IntegerRange.singleton(42n), {
+                            span: someCodeSpan,
+                        }),
+                    },
+                ],
                 span: someCodeSpan,
             }),
         )

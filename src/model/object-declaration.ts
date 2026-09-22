@@ -56,6 +56,12 @@ export class ObjectDeclaration implements Declaration {
         )
     }
 
+    injectSelf(context: Context): Context {
+        const scope = context.scope.createChildScope()
+        scope.addSelfVariable(this.name)
+        return { ...context, scope }
+    }
+
     emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addObjectDeclaration(this)
 

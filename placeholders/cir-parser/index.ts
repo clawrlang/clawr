@@ -2,24 +2,13 @@ import { ClawrModule } from '@/cir'
 import typia from 'typia'
 
 export default class CIRParser {
-    private constructor(
-        private readonly _module?: ClawrModule,
-        private readonly errors?: typia.IValidation.IError[],
-    ) {}
-
-    static parse(input: string): CIRParser {
+    static parse(input: string): ClawrModule {
         const result = typia.validate<ClawrModule>(JSON.parse(input))
+        if (result.success) return result.data
 
-        if (result.success) return new CIRParser(result.data)
-        else return new CIRParser(undefined, result.errors)
-    }
-
-    module(): ClawrModule {
-        if (this.errors) {
-            const details = this.errors
-                .map((error) => `${error.path} expected ${error.expected}`)
-                .join('; ')
-            throw new Error(`Invalid CIR: ${details}`)
-        } else return this._module!
+        const details = result.errors
+            .map((error) => `${error.path} expected ${error.expected}`)
+            .join('; ')
+        throw new Error(`Invalid CIR: ${details}`)
     }
 }

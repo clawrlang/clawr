@@ -1,4 +1,4 @@
-import CIRParser from '#cir-parser'
+import CIRParser from '#/cir-parser'
 import * as cir from '@/cir'
 
 export function lower(json: string): string {

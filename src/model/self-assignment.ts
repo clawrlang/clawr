@@ -60,7 +60,15 @@ export class SelfAssignment implements Statement {
 
         context.scope.emitted.push({
             kind: 'SELF_ASSIGN',
-            value: { ...value, kind: 'DATA' },
+
+            value: {
+                kind: 'DATA',
+                fields: value.fields?.map((f) => ({
+                    name: f.name,
+                    value: f.value,
+                })),
+                value: value.value,
+            },
         })
         return Result.ok
     }

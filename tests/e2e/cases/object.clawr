@@ -1,0 +1,12 @@
+object Object {
+    func field() => self->field
+init:
+    func new() => {field: 42}
+state:
+    field: integer
+}
+
+@main {
+    const x: Object = {Object.new()}
+    print(x.field())
+}

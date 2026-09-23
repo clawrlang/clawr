@@ -3,8 +3,10 @@ import { DataLiteral } from '@/model/data-literal'
 import { decorateDomain } from '@/model/domain-declaration'
 import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
+import { FunctionDeclaration } from '@/model/function-declaration'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { ObjectDeclaration } from '@/model/object-declaration'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { TypeName } from '@/model/type-name'
 import { IntegerRange, RCTypeSet, TruthvalueSet } from '@/model/value-set'
@@ -380,6 +382,90 @@ describe('VariableDeclaration', () => {
                 },
             })
         })
+    })
+
+    it('outputs an initializer literal as CALL', () => {
+        const context = newSemanticContext()
+        context.scope.rootScope.addObjectDeclaration(
+            ObjectDeclaration.create({
+                kind: 'object',
+                name: TypeName.create({ name: 'Object' }),
+                initializers: [
+                    FunctionDeclaration.create({
+                        baseName: 'new',
+                        parameters: [],
+                        implementation: { kind: 'body', statements: [] },
+                        result: undefined,
+                    }),
+                ],
+                mutating: [],
+                readonly: [],
+                fields: [],
+                span: someCodeSpan,
+            }),
+        )
+
+        const decl = VariableDeclaration.create({
+            name: 'x',
+            isImmutable: false,
+            isolationLevel: ISOLATED,
+            domain: decorateDomain(
+                RCTypeSet.create({
+                    type: TypeName.create({ name: 'Object' }),
+                }),
+                { span: someCodeSpan },
+            ),
+            initialValue: DataLiteral.create({
+                initializerCall: FunctionCall.create({
+                    baseName: 'new',
+                    arguments: [],
+                    span: someCodeSpan,
+                }),
+                fields: [],
+                span: someCodeSpan,
+            }),
+        })
+
+        const result = decl.emitStatement(context)
+        expect(result.isSuccess).toBeTrue()
+        expect(context.scope.emitted).toMatchObject([
+            {
+                kind: 'VARIABLE_DECL',
+                name: 'x',
+                domain: {
+                    type: 'rc-type',
+                    name: 'Object',
+                },
+                initialValue: {
+                    kind: 'ALLOCATION',
+                    isolationLevel: 'ISOLATED',
+                    fields: [],
+                    value: {
+                        type: 'rc-type',
+                        name: 'Object',
+                    },
+                },
+            },
+            {
+                kind: 'CALL',
+                name: {
+                    baseName: 'new',
+                    labels: [],
+                },
+                arguments: [],
+                receiver: {
+                    dispatch: 'direct',
+                    object: {
+                        kind: 'VARIABLE_REF',
+                        name: 'x',
+                        value: {
+                            type: 'rc-type',
+                            name: 'Object',
+                        },
+                    },
+                },
+            },
+        ])
     })
 
     describe('registers its value in the context', () => {

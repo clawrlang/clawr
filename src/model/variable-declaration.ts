@@ -3,11 +3,13 @@ import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import assert from 'assert'
 import { Context, Declaration, Expression, Statement } from '.'
+import { DataLiteral } from './data-literal'
 import { DomainDeclaration } from './domain-declaration'
 import { ISOLATED, IsolationLevel, UNIQUE } from './isolation-level'
 import { Retain } from './retain'
 import { Scope } from './scope'
 import { ValueSet } from './value-set'
+import { VariableReference } from './variable-reference'
 
 export const VARIABLE_SEMANTICS = ['const', 'mut', 'ref', 'mutref'] as const
 export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
@@ -66,14 +68,16 @@ export class VariableDeclaration implements Statement, Declaration {
                 ? initialValue
                 : (this.domain ?? initialValue.unconstrained())
 
-        const emissionResult = this.emitCIRDeclaration(context, domain, scope)
-        if (emissionResult.isError) return emissionResult
         scope.addVariableDeclaration(this.name, {
             isImmutable: this.isImmutable,
             isolationLevel: this.isolationLevel!!,
             domain: domain,
         })
         this.setCurrentValue(context, initialValue)
+
+        const emissionResult = this.emitCIRDeclaration(context, domain, scope)
+        if (emissionResult.isError) return emissionResult
+
         return Result.ok
     }
 
@@ -100,6 +104,16 @@ export class VariableDeclaration implements Statement, Declaration {
             domain: domain.toCIR(),
             initialValue: initialValue,
         })
+
+        if (
+            this.initialValue instanceof DataLiteral &&
+            this.initialValue.initializerCall
+        ) {
+            const initializer = this.initialValue.initializerCall.withTarget(
+                VariableReference.create({ name: this.name, span: {} as any }),
+            )
+            initializer.emitStatement(context)
+        }
         return Result.ok
     }
 

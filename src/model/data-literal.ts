@@ -10,7 +10,7 @@ import { RCTypeSet, ValueSet } from './value-set'
 
 export class DataLiteral implements Expression {
     private constructor(
-        private readonly initializerCall: FunctionCall | undefined,
+        readonly initializerCall: FunctionCall | undefined,
         private readonly fields: FieldValue[],
         public readonly span: SourceCodeSpan,
     ) {}

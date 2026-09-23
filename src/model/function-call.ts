@@ -43,6 +43,10 @@ export class FunctionCall implements Expression, Statement {
         )
     }
 
+    withTarget(target: Expression) {
+        return new FunctionCall(this.name, target, this.arguments, this.span)
+    }
+
     isEffectivelyConst(): SuccessResult<true> {
         return Result.true
     }
@@ -211,12 +215,30 @@ export class FunctionCall implements Expression, Statement {
                 },
             )
         } else {
+            const recipientCIR = this.maybeRecipientCIR(context)
             context.scope.emitted.push({
                 kind: 'CALL',
                 name: _name,
                 arguments: args,
+                receiver: recipientCIR && {
+                    dispatch: 'direct',
+                    object: recipientCIR as any,
+                },
             })
         }
         return Result.ok
+    }
+
+    private maybeRecipientCIR(context: Context): cir.Expression | undefined {
+        if (!this.recipient) return undefined
+
+        const recipientTypeResult = this.recipient.domain(context)
+        if (recipientTypeResult.isError) return undefined
+        const recipientResult =
+            recipientTypeResult.value instanceof RCTypeSet
+                ? this.recipient?.toCIRExpression(context)
+                : undefined
+        if (recipientResult?.isError) return undefined
+        return recipientResult?.value
     }
 }

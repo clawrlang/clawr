@@ -1,6 +1,5 @@
 # Ice Box
 
-- Do the tests perform too much setup?
 - Publish the JSON schema to <http://clawr.lang/schema/cir/DRAFT-0> (preliminary URL)
 - `FunctionCall.declaredLattice()` should probably not return `currentValue()`
 - `VariableDeclaration.initialValue` — handle type mismatch

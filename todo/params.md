@@ -3,8 +3,8 @@
 - Do not `ENSURE_UNIQUE` a `SHARED` return-value
 
 - Refactoring: improve encapsulation; `Parameter` does nothing
-  - Ensure that `lattice` and `defaultValue` are compatible
-  - `FunctionCall`: Check `isolationLevel` and value/lattices of arguments
+  - Ensure that `domain` and `defaultValue` are compatible
+  - `FunctionCall`: Check `isolationLevel` and value/domains of arguments
 
 - Ensure that variables with `undefined` `isolationLevel` are not modified
 - Ensure that variables with `undefined` `isolationLevel` are not assigned without `copy(of:)`

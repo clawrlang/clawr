@@ -2,6 +2,7 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import { Context, Expression, Statement } from '.'
+import { DataLiteral } from './data-literal'
 import { FieldReference } from './field-reference'
 import { UNIQUE, UNKNOWN } from './isolation-level'
 import { Retain } from './retain'
@@ -54,6 +55,11 @@ export class Assignment implements Statement {
         if (value.isError) return value
         const cirResults = this.emitCIRStatements(context)
         if (cirResults.isError) return cirResults
+
+        if (this.value instanceof DataLiteral && this.value.initializerCall)
+            this.value.initializerCall
+                .withTarget(this.target)
+                .emitStatement(context)
 
         return this.target.setCurrentValue(context, value.value)
     }

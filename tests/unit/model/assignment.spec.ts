@@ -7,6 +7,7 @@ import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
+import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
 import { IntegerRange, RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
@@ -283,6 +284,174 @@ describe('Assignment', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: '__tempˇ0',
+                    },
+                },
+            ])
+        })
+    })
+
+    describe('outputs an initializer literal as CALL', () => {
+        test('for a FieldReference', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.addObjectDeclaration(
+                ObjectDeclaration.create({
+                    kind: 'object',
+                    name: TypeName.create({ name: 'MyType' }),
+                    initializers: [
+                        FunctionDeclaration.create({
+                            baseName: 'new',
+                            parameters: [],
+                            implementation: { kind: 'body', statements: [] },
+                            result: undefined,
+                        }),
+                    ],
+                    mutating: [],
+                    readonly: [],
+                    fields: [],
+                    span: someCodeSpan,
+                }),
+            )
+            context.scope.rootScope.addDataDeclaration(
+                DataDeclaration.create({
+                    name: TypeName.create({ name: 'MyData' }),
+                    fields: [
+                        {
+                            name: 'field',
+                            isImmutable: false,
+                            isolationLevel: ISOLATED,
+                            domain: decorateDomain(
+                                RCTypeSet.create({
+                                    type: TypeName.create({ name: 'MyType' }),
+                                }),
+                                { span: someCodeSpan },
+                            ),
+                        },
+                    ],
+                }),
+            )
+            context.scope.addVariableDeclaration('x', {
+                isImmutable: false,
+                isolationLevel: ISOLATED,
+                domain: RCTypeSet.create({
+                    type: TypeName.create({ name: 'MyData' }),
+                }),
+            })
+
+            const assignment = Assignment.create({
+                target: FieldReference.create({
+                    object: VariableReference.create({
+                        name: 'x',
+                        span: someCodeSpan,
+                    }),
+                    field: 'field',
+                    operator: '.',
+                    fieldSpan: someCodeSpan,
+                    span: someCodeSpan,
+                }),
+                value: DataLiteral.create({
+                    initializerCall: FunctionCall.create({
+                        baseName: 'new',
+                        arguments: [],
+                        span: someCodeSpan,
+                    }),
+                    fields: [],
+                    span: someCodeSpan,
+                }),
+                span: someCodeSpan,
+            })
+
+            expect(assignment.emitStatement(context).isSuccess).toBeTrue()
+            expect(context.scope.emitted).toMatchObject([
+                { kind: 'ENSURE_UNIQUE' },
+                {
+                    kind: 'ASSIGN',
+                    target: {
+                        field: 'field',
+                        object: { name: 'x' },
+                    },
+                    value: { fields: [] },
+                },
+                {
+                    kind: 'CALL',
+                    name: {
+                        baseName: 'new',
+                        labels: [],
+                    },
+                    arguments: [],
+                    receiver: {
+                        dispatch: 'direct',
+                        object: {
+                            kind: 'FIELD_REF',
+                            field: 'field',
+                            object: { name: 'x' },
+                        },
+                    },
+                },
+            ])
+        })
+
+        test('for a VariableReference', () => {
+            const context = newSemanticContext()
+            context.scope.rootScope.addObjectDeclaration(
+                ObjectDeclaration.create({
+                    kind: 'object',
+                    name: TypeName.create({ name: 'MyType' }),
+                    initializers: [
+                        FunctionDeclaration.create({
+                            baseName: 'new',
+                            parameters: [],
+                            implementation: { kind: 'body', statements: [] },
+                            result: undefined,
+                        }),
+                    ],
+                    mutating: [],
+                    readonly: [],
+                    fields: [],
+                    span: someCodeSpan,
+                }),
+            )
+            context.scope.addVariableDeclaration('x', {
+                isImmutable: false,
+                isolationLevel: ISOLATED,
+                domain: RCTypeSet.create({
+                    type: TypeName.create({ name: 'MyType' }),
+                }),
+            })
+
+            const assignment = Assignment.create({
+                target: VariableReference.create({
+                    name: 'x',
+                    span: someCodeSpan,
+                }),
+                value: DataLiteral.create({
+                    initializerCall: FunctionCall.create({
+                        baseName: 'new',
+                        arguments: [],
+                        span: someCodeSpan,
+                    }),
+                    fields: [],
+                    span: someCodeSpan,
+                }),
+                span: someCodeSpan,
+            })
+
+            expect(assignment.emitStatement(context).isSuccess).toBeTrue()
+            expect(context.scope.emitted).toMatchObject([
+                {
+                    kind: 'ASSIGN',
+                    target: { name: 'x' },
+                    value: { fields: [] },
+                },
+                {
+                    kind: 'CALL',
+                    name: {
+                        baseName: 'new',
+                        labels: [],
+                    },
+                    arguments: [],
+                    receiver: {
+                        dispatch: 'direct',
+                        object: { name: 'x' },
                     },
                 },
             ])
@@ -665,6 +834,7 @@ describe('Assignment', () => {
             })
         })
     })
+
     describe('throws if the value is UNKNOWN isolation level', () => {
         for (const isolationLevel of [ISOLATED, SHARED] as const) {
             test(isolationLevel, () => {

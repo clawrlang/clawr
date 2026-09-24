@@ -65,10 +65,7 @@ export const someObjectDeclConfig = {
 export const someFunctionDeclConfig = {
     parameters: [],
     result: undefined,
-    implementation: {
-        kind: 'body',
-        statements: [],
-    },
+    implementation: { kind: 'body' as const, statements: [] },
 }
 
 export const someParameterDeclConfig = {
@@ -76,6 +73,13 @@ export const someParameterDeclConfig = {
     isImmutable: true,
     isolationLevel: ISOLATED,
     domain: spannedDomain(IntegerRange.unconstrained()),
+    span: someCodeSpan,
+}
+
+export const someVariableDeclConfig = {
+    isImmutable: false,
+    isolationLevel: ISOLATED,
+    nameSpan: someCodeSpan,
     span: someCodeSpan,
 }
 

@@ -1,41 +1,32 @@
 import { DataLiteral } from '@/model/data-literal'
-import { decorateDomain } from '@/model/domain-declaration'
-import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
-import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { Parameter } from '@/model/parameter'
-import { TruthValueLiteral } from '@/model/truthvalue-literal'
-import { TypeName } from '@/model/type-name'
-import { IntegerRange, RCTypeSet } from '@/model/value-set'
-import { VariableReference } from '@/model/variable-reference'
-import { newSemanticContext, someCodeSpan } from '@@/util'
+import { RCTypeSet } from '@/model/value-set'
+import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('FunctionCall', () => {
     it('converts to CIR', () => {
-        const query = FunctionCall.create({
-            baseName: 'foo',
-            arguments: [],
-            span: someCodeSpan,
-        })
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addFunctionDeclaration(
             FunctionDeclaration.create({
+                ...util.someFunctionDeclConfig,
                 baseName: 'foo',
-                parameters: [],
-                result: undefined,
                 implementation: {
                     kind: 'implicit-return',
-                    expression: IntegerLiteral.create({
-                        value: 42n,
-                        span: someCodeSpan,
-                    }),
+                    expression: util.integerLiteral(42),
                 },
             }),
         )
+
+        const query = FunctionCall.create({
+            baseName: 'foo',
+            arguments: [],
+            span: util.someCodeSpan,
+        })
         const result = query.toCIRExpression(context)
         expect(result.isSuccess && result.value).toMatchObject({
             kind: 'CALL',
@@ -48,49 +39,30 @@ describe('FunctionCall', () => {
     })
 
     it('includes argument labels in signature', () => {
-        const query = FunctionCall.create({
-            baseName: 'foo',
-            arguments: [
-                {
-                    label: 'x',
-                    value: IntegerLiteral.create({
-                        value: 42n,
-                        span: someCodeSpan,
-                    }),
-                },
-            ],
-            span: someCodeSpan,
-        })
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addFunctionDeclaration(
             FunctionDeclaration.create({
                 baseName: 'foo',
                 parameters: [
                     Parameter.create({
+                        ...util.someParameterDeclConfig,
                         label: 'x',
-                        isImmutable: true,
                         varName: 'x',
-                        isolationLevel: ISOLATED,
-                        domain: decorateDomain(
-                            IntegerRange.create({
-                                min: 0n,
-                                max: 100n,
-                            }),
-                            { span: someCodeSpan },
-                        ),
-                        span: someCodeSpan,
                     }),
                 ],
                 result: undefined,
                 implementation: {
                     kind: 'implicit-return',
-                    expression: IntegerLiteral.create({
-                        value: 42n,
-                        span: someCodeSpan,
-                    }),
+                    expression: util.integerLiteral(42),
                 },
             }),
         )
+
+        const query = FunctionCall.create({
+            baseName: 'foo',
+            arguments: [{ label: 'x', value: util.integerLiteral(42) }],
+            span: util.someCodeSpan,
+        })
         const result = query.toCIRExpression(context)
         expect(result.isSuccess && result.value).toMatchObject({
             kind: 'CALL',
@@ -109,25 +81,24 @@ describe('FunctionCall', () => {
 
     describe('converts UNIQUE isolation-level to ISOLATED in CIR', () => {
         test('for custom function', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addFunctionDeclaration(
                 FunctionDeclaration.create({
+                    ...util.someFunctionDeclConfig,
                     baseName: 'foo',
-                    parameters: [],
                     result: {
-                        domain: decorateDomain(
-                            RCTypeSet.create({
-                                type: TypeName.create({ name: 'MyData' }),
-                            }),
-                            { span: someCodeSpan },
-                        ),
                         isolationLevel: ISOLATED,
+                        domain: util.spannedDomain(
+                            RCTypeSet.create({
+                                type: util.simpleTypeName('MyData'),
+                            }),
+                        ),
                     },
                     implementation: {
                         kind: 'implicit-return',
                         expression: DataLiteral.create({
                             fields: [],
-                            span: someCodeSpan,
+                            span: util.someCodeSpan,
                         }),
                     },
                 }),
@@ -136,7 +107,7 @@ describe('FunctionCall', () => {
             const query = FunctionCall.create({
                 baseName: 'foo',
                 arguments: [],
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             })
             const result = query.toCIRExpression(context)
             expect(result.isSuccess && result.value).toMatchObject({
@@ -150,27 +121,19 @@ describe('FunctionCall', () => {
         })
 
         test('for copy(of:) function', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.addVariableDeclaration('value', {
                 isImmutable: true,
                 isolationLevel: SHARED,
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyData' }),
+                    type: util.simpleTypeName('MyData'),
                 }),
             })
 
             const query = FunctionCall.create({
                 baseName: 'copy',
-                arguments: [
-                    {
-                        label: 'of',
-                        value: VariableReference.create({
-                            name: 'value',
-                            span: someCodeSpan,
-                        }),
-                    },
-                ],
-                span: someCodeSpan,
+                arguments: [{ label: 'of', value: util.variableRef('value') }],
+                span: util.someCodeSpan,
             })
             const result = query.toCIRExpression(context)
             expect(result.isSuccess && result.value).toMatchObject({
@@ -192,17 +155,10 @@ describe('FunctionCall', () => {
     it('boxes integer literal for printing', () => {
         const statement = FunctionCall.create({
             baseName: 'print',
-            arguments: [
-                {
-                    value: IntegerLiteral.create({
-                        value: 1n,
-                        span: someCodeSpan,
-                    }),
-                },
-            ],
-            span: someCodeSpan,
+            arguments: [{ value: util.integerLiteral(1) }],
+            span: util.someCodeSpan,
         })
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
@@ -242,17 +198,10 @@ describe('FunctionCall', () => {
     it('boxes truthvalue for printing', () => {
         const statement = FunctionCall.create({
             baseName: 'print',
-            arguments: [
-                {
-                    value: TruthValueLiteral.create({
-                        value: 'true',
-                        span: someCodeSpan,
-                    }),
-                },
-            ],
-            span: someCodeSpan,
+            arguments: [{ value: util.truthvalueLiteral('true') }],
+            span: util.someCodeSpan,
         })
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
@@ -292,26 +241,19 @@ describe('FunctionCall', () => {
     })
 
     it('boxes integer variable for printing', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.addVariableDeclaration('x', {
+            ...util.someIntegerVariable,
             isImmutable: true,
-            isolationLevel: ISOLATED,
-            domain: IntegerRange.create({ min: 42n, max: 42n }),
         })
 
         const statement = FunctionCall.create({
             baseName: 'print',
-            arguments: [
-                {
-                    value: VariableReference.create({
-                        name: 'x',
-                        span: someCodeSpan,
-                    }),
-                },
-            ],
-            span: someCodeSpan,
+            arguments: [{ value: util.variableRef('x') }],
+            span: util.someCodeSpan,
         })
-        statement.emitStatement(context)
+        const result = statement.emitStatement(context)
+        expect(result.isSuccess || result.error.errors).toBeTrue()
         expect(context.scope.emitted).toMatchObject([
             {
                 kind: 'VARIABLE_DECL',
@@ -345,62 +287,45 @@ describe('FunctionCall', () => {
     })
 
     it('can make direct method call', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addObjectDeclaration(
             ObjectDeclaration.create({
-                kind: 'object',
-                name: TypeName.create({ name: 'Object' }),
+                ...util.someObjectDeclConfig,
+                name: util.simpleTypeName('Object'),
                 readonly: [
                     FunctionDeclaration.create({
+                        ...util.someFunctionDeclConfig,
                         baseName: 'read',
-                        parameters: [],
                         implementation: {
                             kind: 'implicit-return',
-                            expression: FieldReference.create({
-                                object: VariableReference.create({
-                                    name: 'self',
-                                    span: someCodeSpan,
-                                }),
-                                operator: '->',
-                                field: 'field',
-                                fieldSpan: someCodeSpan,
-                                span: someCodeSpan,
-                            }),
+                            expression: util.sharedFieldRef(
+                                util.variableRef('self'),
+                                'field',
+                            ),
                         },
-                        result: undefined,
                     }),
                 ],
-                mutating: [],
-                initializers: [],
                 fields: [
                     {
-                        name: 'field',
+                        ...util.someFieldDeclConfig,
                         isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: decorateDomain(IntegerRange.singleton(42n), {
-                            span: someCodeSpan,
-                        }),
+                        name: 'field',
                     },
                 ],
-                span: someCodeSpan,
             }),
         )
         context.scope.addVariableDeclaration('x', {
-            isImmutable: false,
-            isolationLevel: ISOLATED,
+            ...util.someIntegerVariable,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'Object' }),
+                type: util.simpleTypeName('Object'),
             }),
         })
 
         const call = FunctionCall.create({
             baseName: 'read',
             arguments: [],
-            recipient: VariableReference.create({
-                name: 'x',
-                span: someCodeSpan,
-            }),
-            span: someCodeSpan,
+            recipient: util.variableRef('x'),
+            span: util.someCodeSpan,
         })
         const result = call.toCIRExpression(context)
         expect(result.isSuccess || result.error.errors).toBeTrue()

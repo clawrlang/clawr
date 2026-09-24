@@ -4,8 +4,9 @@ import { FieldReference } from '@/model/field-reference'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED } from '@/model/isolation-level'
 import { Scope } from '@/model/scope'
+import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { TypeName } from '@/model/type-name'
-import { IntegerRange, ValueSet } from '@/model/value-set'
+import { IntegerRange, truthvalue, ValueSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { ErrorReporter, SourceCodeSpan } from '@/tools/diagnostics'
 
@@ -61,6 +62,23 @@ export const someObjectDeclConfig = {
     span: someCodeSpan,
 }
 
+export const someFunctionDeclConfig = {
+    parameters: [],
+    result: undefined,
+    implementation: {
+        kind: 'body',
+        statements: [],
+    },
+}
+
+export const someParameterDeclConfig = {
+    label: undefined,
+    isImmutable: true,
+    isolationLevel: ISOLATED,
+    domain: spannedDomain(IntegerRange.unconstrained()),
+    span: someCodeSpan,
+}
+
 export function simpleTypeName(name: string) {
     return TypeName.create({ name })
 }
@@ -91,6 +109,10 @@ export function sharedFieldRef(object: Expression, field: string) {
 
 export function integerLiteral(value: number | bigint) {
     return IntegerLiteral.create({ value: BigInt(value), span: someCodeSpan })
+}
+
+export function truthvalueLiteral(value: truthvalue) {
+    return TruthValueLiteral.create({ value, span: someCodeSpan })
 }
 
 export function spannedDomain(domain: ValueSet) {

@@ -1,34 +1,27 @@
 import { Assignment } from '@/model/assignment'
 import { DataDeclaration } from '@/model/data-declaration'
 import { DataLiteral } from '@/model/data-literal'
-import { decorateDomain } from '@/model/domain-declaration'
 import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { ObjectDeclaration } from '@/model/object-declaration'
-import { TypeName } from '@/model/type-name'
 import { IntegerRange, RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
-import { newSemanticContext, someCodeSpan } from '@@/util'
+import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
-        const context = newSemanticContext()
-        context.scope.addVariableDeclaration('x', {
-            isImmutable: false,
-            isolationLevel: ISOLATED,
-            domain: IntegerRange.unconstrained(),
-        })
-
+        const context = util.newSemanticContext()
+        context.scope.addVariableDeclaration('x', util.someIntegerVariable)
         context.scope.setCurrentValue('x', IntegerRange.singleton(0n))
 
         const assignment = Assignment.create({
-            target: VariableReference.create({ name: 'x', span: someCodeSpan }),
-            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-            span: someCodeSpan,
+            target: util.variableRef('x'),
+            value: util.integerLiteral(42),
+            span: util.someCodeSpan,
         })
 
         const result = assignment.emitStatement(context)
@@ -47,46 +40,28 @@ describe('Assignment', () => {
     })
 
     it('accepts data-literal as value', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
-                name: TypeName.create({ name: 'MyData' }),
-                fields: [
-                    {
-                        name: 'field',
-                        isImmutable: false,
-                        isolationLevel: ISOLATED,
-                        domain: decorateDomain(IntegerRange.unconstrained(), {
-                            span: someCodeSpan,
-                        }),
-                    },
-                ],
+                name: util.simpleTypeName('MyData'),
+                fields: [{ ...util.someFieldDeclConfig, name: 'field' }],
             }),
         )
         context.scope.addVariableDeclaration('x', {
-            isImmutable: false,
-            isolationLevel: ISOLATED,
+            ...util.someIntegerVariable,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'MyData' }),
+                type: util.simpleTypeName('MyData'),
                 fields: { field: IntegerRange.singleton(12n) },
             }),
         })
 
         const assignment = Assignment.create({
-            target: VariableReference.create({ name: 'x', span: someCodeSpan }),
+            target: util.variableRef('x'),
             value: DataLiteral.create({
-                fields: [
-                    {
-                        name: 'field',
-                        value: IntegerLiteral.create({
-                            value: 1n,
-                            span: someCodeSpan,
-                        }),
-                    },
-                ],
-                span: someCodeSpan,
+                fields: [{ name: 'field', value: util.integerLiteral(1) }],
+                span: util.someCodeSpan,
             }),
-            span: someCodeSpan,
+            span: util.someCodeSpan,
         })
 
         assignment.emitStatement(context)
@@ -113,74 +88,48 @@ describe('Assignment', () => {
 
     describe('injects RELEASE/RETAIN statements', () => {
         test('for a FieldReference', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'InnerType' }),
+                    name: util.simpleTypeName('InnerType'),
                     fields: [
-                        {
-                            isImmutable: false,
-                            name: 'innerField',
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
+                        { ...util.someFieldDeclConfig, name: 'innerField' },
                     ],
                 }),
             )
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'OuterType' }),
+                    name: util.simpleTypeName('OuterType'),
                     fields: [
                         {
-                            isImmutable: false,
+                            ...util.someFieldDeclConfig,
                             name: 'field',
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
+                            domain: util.spannedDomain(
                                 RCTypeSet.create({
-                                    type: TypeName.create({
-                                        name: 'InnerType',
-                                    }),
+                                    type: util.simpleTypeName('InnerType'),
                                 }),
-                                { span: someCodeSpan },
                             ),
                         },
                     ],
                 }),
             )
             context.scope.addVariableDeclaration('bar', {
-                isImmutable: false,
-                isolationLevel: ISOLATED,
+                ...util.someIntegerVariable,
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'OuterType' }),
+                    type: util.simpleTypeName('OuterType'),
                 }),
             })
             context.scope.addVariableDeclaration('foo', {
-                isImmutable: false,
-                isolationLevel: ISOLATED,
+                ...util.someIntegerVariable,
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'InnerType' }),
+                    type: util.simpleTypeName('InnerType'),
                 }),
             })
 
             const assignment = Assignment.create({
-                target: VariableReference.create({
-                    name: 'foo',
-                    span: someCodeSpan,
-                }),
-                value: FieldReference.create({
-                    object: VariableReference.create({
-                        name: 'bar',
-                        span: someCodeSpan,
-                    }),
-                    field: 'field',
-                    operator: '.',
-                    span: someCodeSpan,
-                    fieldSpan: someCodeSpan,
-                }),
-                span: someCodeSpan,
+                target: util.variableRef('foo'),
+                value: util.isolatedFieldRef(util.variableRef('bar'), 'field'),
+                span: util.someCodeSpan,
             })
 
             assignment.emitStatement(context)
@@ -220,38 +169,30 @@ describe('Assignment', () => {
         })
 
         test('for a VariableReference', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyType' }),
+                    name: util.simpleTypeName('MyType'),
                     fields: [],
                 }),
             )
             context.scope.addVariableDeclaration('bar', {
-                isImmutable: true,
-                isolationLevel: ISOLATED,
+                ...util.someIntegerVariable,
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyType' }),
+                    type: util.simpleTypeName('MyType'),
                 }),
             })
             context.scope.addVariableDeclaration('foo', {
-                isImmutable: false,
-                isolationLevel: ISOLATED,
+                ...util.someIntegerVariable,
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyType' }),
+                    type: util.simpleTypeName('MyType'),
                 }),
             })
 
             const assignment = Assignment.create({
-                target: VariableReference.create({
-                    name: 'foo',
-                    span: someCodeSpan,
-                }),
-                value: VariableReference.create({
-                    name: 'bar',
-                    span: someCodeSpan,
-                }),
-                span: someCodeSpan,
+                target: util.variableRef('foo'),
+                value: util.variableRef('bar'),
+                span: util.someCodeSpan,
             })
 
             assignment.emitStatement(context)
@@ -292,11 +233,11 @@ describe('Assignment', () => {
 
     describe('outputs an initializer literal as CALL', () => {
         test('for a FieldReference', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addObjectDeclaration(
                 ObjectDeclaration.create({
-                    kind: 'object',
-                    name: TypeName.create({ name: 'MyType' }),
+                    ...util.someObjectDeclConfig,
+                    name: util.simpleTypeName('MyType'),
                     initializers: [
                         FunctionDeclaration.create({
                             baseName: 'new',
@@ -305,35 +246,28 @@ describe('Assignment', () => {
                             result: undefined,
                         }),
                     ],
-                    mutating: [],
-                    readonly: [],
-                    fields: [],
-                    span: someCodeSpan,
                 }),
             )
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyData' }),
+                    name: util.simpleTypeName('MyData'),
                     fields: [
                         {
+                            ...util.someFieldDeclConfig,
                             name: 'field',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
+                            domain: util.spannedDomain(
                                 RCTypeSet.create({
-                                    type: TypeName.create({ name: 'MyType' }),
+                                    type: util.simpleTypeName('MyType'),
                                 }),
-                                { span: someCodeSpan },
                             ),
                         },
                     ],
                 }),
             )
             context.scope.addVariableDeclaration('x', {
-                isImmutable: false,
-                isolationLevel: ISOLATED,
+                ...util.someIntegerVariable,
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyData' }),
+                    type: util.simpleTypeName('MyData'),
                 }),
             })
 
@@ -341,23 +275,23 @@ describe('Assignment', () => {
                 target: FieldReference.create({
                     object: VariableReference.create({
                         name: 'x',
-                        span: someCodeSpan,
+                        span: util.someCodeSpan,
                     }),
                     field: 'field',
                     operator: '.',
-                    fieldSpan: someCodeSpan,
-                    span: someCodeSpan,
+                    fieldSpan: util.someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
                 value: DataLiteral.create({
                     initializerCall: FunctionCall.create({
                         baseName: 'new',
                         arguments: [],
-                        span: someCodeSpan,
+                        span: util.someCodeSpan,
                     }),
                     fields: [],
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             })
 
             expect(assignment.emitStatement(context).isSuccess).toBeTrue()
@@ -391,11 +325,11 @@ describe('Assignment', () => {
         })
 
         test('for a VariableReference', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addObjectDeclaration(
                 ObjectDeclaration.create({
-                    kind: 'object',
-                    name: TypeName.create({ name: 'MyType' }),
+                    ...util.someObjectDeclConfig,
+                    name: util.simpleTypeName('MyType'),
                     initializers: [
                         FunctionDeclaration.create({
                             baseName: 'new',
@@ -404,35 +338,27 @@ describe('Assignment', () => {
                             result: undefined,
                         }),
                     ],
-                    mutating: [],
-                    readonly: [],
-                    fields: [],
-                    span: someCodeSpan,
                 }),
             )
             context.scope.addVariableDeclaration('x', {
-                isImmutable: false,
-                isolationLevel: ISOLATED,
+                ...util.someIntegerVariable,
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyType' }),
+                    type: util.simpleTypeName('MyType'),
                 }),
             })
 
             const assignment = Assignment.create({
-                target: VariableReference.create({
-                    name: 'x',
-                    span: someCodeSpan,
-                }),
+                target: util.variableRef('x'),
                 value: DataLiteral.create({
                     initializerCall: FunctionCall.create({
                         baseName: 'new',
                         arguments: [],
-                        span: someCodeSpan,
+                        span: util.someCodeSpan,
                     }),
                     fields: [],
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             })
 
             expect(assignment.emitStatement(context).isSuccess).toBeTrue()
@@ -459,43 +385,24 @@ describe('Assignment', () => {
     })
 
     it('injects ENSURE_UNIQUE for ISOLATED target before assignment', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
-                name: TypeName.create({ name: 'MyType' }),
-                fields: [
-                    {
-                        name: 'field',
-                        isImmutable: false,
-                        isolationLevel: ISOLATED,
-                        domain: decorateDomain(IntegerRange.unconstrained(), {
-                            span: someCodeSpan,
-                        }),
-                    },
-                ],
+                name: util.simpleTypeName('MyType'),
+                fields: [{ ...util.someFieldDeclConfig, name: 'field' }],
             }),
         )
         context.scope.addVariableDeclaration('foo', {
-            isImmutable: false,
-            isolationLevel: ISOLATED,
+            ...util.someIntegerVariable,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'MyType' }),
+                type: util.simpleTypeName('MyType'),
             }),
         })
 
         const assignment = Assignment.create({
-            target: FieldReference.create({
-                object: VariableReference.create({
-                    name: 'foo',
-                    span: someCodeSpan,
-                }),
-                field: 'field',
-                operator: '.',
-                span: someCodeSpan,
-                fieldSpan: someCodeSpan,
-            }),
-            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-            span: someCodeSpan,
+            target: util.isolatedFieldRef(util.variableRef('foo'), 'field'),
+            value: util.integerLiteral(42),
+            span: util.someCodeSpan,
         })
 
         assignment.emitStatement(context)
@@ -512,10 +419,10 @@ describe('Assignment', () => {
     })
 
     it('injects AS_SHARED for UNIQUE value before assignment to SHARED target', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
-                name: TypeName.create({ name: 'MyType' }),
+                name: util.simpleTypeName('MyType'),
                 fields: [],
             }),
         )
@@ -523,11 +430,10 @@ describe('Assignment', () => {
             FunctionDeclaration.create({
                 baseName: 'myFunction',
                 result: {
-                    domain: decorateDomain(
+                    domain: util.spannedDomain(
                         RCTypeSet.create({
-                            type: TypeName.create({ name: 'MyType' }),
+                            type: util.simpleTypeName('MyType'),
                         }),
-                        { span: someCodeSpan },
                     ),
                     isolationLevel: UNIQUE,
                 },
@@ -536,7 +442,7 @@ describe('Assignment', () => {
                     kind: 'implicit-return',
                     expression: VariableReference.create({
                         name: 'mutVar',
-                        span: someCodeSpan,
+                        span: util.someCodeSpan,
                     }),
                 },
             }),
@@ -545,28 +451,24 @@ describe('Assignment', () => {
             isImmutable: false,
             isolationLevel: SHARED,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'MyType' }),
+                type: util.simpleTypeName('MyType'),
             }),
         })
         context.scope.rootScope.addVariableDeclaration('mutVar', {
-            isImmutable: false,
-            isolationLevel: ISOLATED,
+            ...util.someIntegerVariable,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'MyType' }),
+                type: util.simpleTypeName('MyType'),
             }),
         })
 
         const assignment = Assignment.create({
-            target: VariableReference.create({
-                name: 'refVar',
-                span: someCodeSpan,
-            }),
+            target: util.variableRef('refVar'),
             value: FunctionCall.create({
                 baseName: 'myFunction',
                 arguments: [],
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             }),
-            span: someCodeSpan,
+            span: util.someCodeSpan,
         })
 
         assignment.emitStatement(context)
@@ -598,11 +500,10 @@ describe('Assignment', () => {
                     end: { line: 1, column: 2 },
                 },
             }),
-            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-            span: someCodeSpan,
+            value: util.integerLiteral(42),
+            span: util.someCodeSpan,
         })
-        const context = newSemanticContext()
-        const result = assignment.emitStatement(context)
+        const result = assignment.emitStatement(util.newSemanticContext())
         expect(
             result.isError && result.error.errors.map((e) => e.message),
         ).toContain('Variable x is not defined in the current context')
@@ -611,25 +512,25 @@ describe('Assignment', () => {
     describe('throws if the target variable is immutable/non-assignable', () => {
         for (const isolationLevel of [ISOLATED, SHARED] as const) {
             test(isolationLevel, () => {
-                const context = newSemanticContext()
+                const context = util.newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
-                        name: TypeName.create({ name: 'MyType' }),
+                        name: util.simpleTypeName('MyType'),
                         fields: [],
                     }),
                 )
                 context.scope.addVariableDeclaration('target', {
                     isImmutable: true,
-                    isolationLevel: isolationLevel,
+                    isolationLevel,
                     domain: RCTypeSet.create({
-                        type: TypeName.create({ name: 'MyType' }),
+                        type: util.simpleTypeName('MyType'),
                     }),
                 })
                 context.scope.addVariableDeclaration('value', {
                     isImmutable: true,
-                    isolationLevel: isolationLevel,
+                    isolationLevel,
                     domain: RCTypeSet.create({
-                        type: TypeName.create({ name: 'MyType' }),
+                        type: util.simpleTypeName('MyType'),
                     }),
                 })
 
@@ -643,9 +544,9 @@ describe('Assignment', () => {
                     }),
                     value: VariableReference.create({
                         name: 'value',
-                        span: someCodeSpan,
+                        span: util.someCodeSpan,
                     }),
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 })
                 const result = assignment.emitStatement(context)
                 expect(result.isError && result.error.errors).toMatchObject([
@@ -662,46 +563,34 @@ describe('Assignment', () => {
     })
 
     it('throws if the target field is effectively const (ISOLATED)', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
-                name: TypeName.create({ name: 'MyType' }),
-                fields: [
-                    {
-                        name: 'myField',
-                        isImmutable: false,
-                        isolationLevel: ISOLATED,
-                        domain: decorateDomain(IntegerRange.unconstrained(), {
-                            span: someCodeSpan,
-                        }),
-                    },
-                ],
+                name: util.simpleTypeName('MyType'),
+                fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
             }),
         )
         context.scope.addVariableDeclaration('x', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'MyType' }),
+                type: util.simpleTypeName('MyType'),
             }),
         })
 
         const assignment = Assignment.create({
             target: FieldReference.create({
-                object: VariableReference.create({
-                    name: 'x',
-                    span: someCodeSpan,
-                }),
+                object: util.variableRef('x'),
                 operator: '.',
                 field: 'myField',
                 span: {
                     start: { line: 1, column: 3 },
                     end: { line: 1, column: 4 },
                 },
-                fieldSpan: someCodeSpan,
+                fieldSpan: util.someCodeSpan,
             }),
-            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-            span: someCodeSpan,
+            value: util.integerLiteral(42),
+            span: util.someCodeSpan,
         })
         const result = assignment.emitStatement(context)
 
@@ -718,27 +607,18 @@ describe('Assignment', () => {
     })
 
     it('throws if the target field is effectively const (UNKNOWN isolation level)', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
-                name: TypeName.create({ name: 'MyType' }),
-                fields: [
-                    {
-                        name: 'myField',
-                        isImmutable: false,
-                        isolationLevel: ISOLATED,
-                        domain: decorateDomain(IntegerRange.unconstrained(), {
-                            span: someCodeSpan,
-                        }),
-                    },
-                ],
+                name: util.simpleTypeName('MyType'),
+                fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
             }),
         )
         context.scope.addVariableDeclaration('x', {
             isImmutable: true,
             isolationLevel: UNKNOWN,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'MyType' }),
+                type: util.simpleTypeName('MyType'),
             }),
         })
 
@@ -746,7 +626,7 @@ describe('Assignment', () => {
             target: FieldReference.create({
                 object: VariableReference.create({
                     name: 'x',
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
                 operator: '.',
                 field: 'myField',
@@ -754,10 +634,13 @@ describe('Assignment', () => {
                     start: { line: 1, column: 3 },
                     end: { line: 1, column: 4 },
                 },
-                fieldSpan: someCodeSpan,
+                fieldSpan: util.someCodeSpan,
             }),
-            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-            span: someCodeSpan,
+            value: IntegerLiteral.create({
+                value: 42n,
+                span: util.someCodeSpan,
+            }),
+            span: util.someCodeSpan,
         })
 
         const result = assignment.emitStatement(context)
@@ -781,51 +664,35 @@ describe('Assignment', () => {
 
         cases.forEach(({ isImmutable, mutString }) => {
             test(`mut target = ${mutString} value`, () => {
-                const context = newSemanticContext()
+                const context = util.newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
-                        name: TypeName.create({ name: 'MyType' }),
+                        name: util.simpleTypeName('MyType'),
                         fields: [
-                            {
-                                name: 'myField',
-                                isImmutable: false,
-                                isolationLevel: ISOLATED,
-                                domain: decorateDomain(
-                                    IntegerRange.unconstrained(),
-                                    { span: someCodeSpan },
-                                ),
-                            },
+                            { ...util.someFieldDeclConfig, name: 'myField' },
                         ],
                     }),
                 )
                 context.scope.addVariableDeclaration('target', {
-                    isImmutable: false,
-                    isolationLevel: ISOLATED,
+                    ...util.someIntegerVariable,
                     domain: RCTypeSet.create({
-                        type: TypeName.create({ name: 'MyType' }),
+                        type: util.simpleTypeName('MyType'),
                     }),
                 })
                 context.scope.addVariableDeclaration('value', {
                     isImmutable,
                     isolationLevel: SHARED,
                     domain: RCTypeSet.create({
-                        type: TypeName.create({ name: 'MyType' }),
+                        type: util.simpleTypeName('MyType'),
                     }),
                 })
                 const assignment = Assignment.create({
-                    target: VariableReference.create({
-                        name: 'target',
-                        span: someCodeSpan,
-                    }),
-
+                    target: util.variableRef('target'),
+                    value: util.variableRef('value'),
                     span: {
                         start: { line: 1, column: 3 },
                         end: { line: 1, column: 4 },
                     },
-                    value: VariableReference.create({
-                        name: 'value',
-                        span: someCodeSpan,
-                    }),
                 })
                 const result = assignment.emitStatement(context)
                 expect(
@@ -838,25 +705,25 @@ describe('Assignment', () => {
     describe('throws if the value is UNKNOWN isolation level', () => {
         for (const isolationLevel of [ISOLATED, SHARED] as const) {
             test(isolationLevel, () => {
-                const context = newSemanticContext()
+                const context = util.newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
-                        name: TypeName.create({ name: 'MyType' }),
+                        name: util.simpleTypeName('MyType'),
                         fields: [],
                     }),
                 )
                 context.scope.addVariableDeclaration('target', {
                     isImmutable: false,
-                    isolationLevel: isolationLevel,
+                    isolationLevel,
                     domain: RCTypeSet.create({
-                        type: TypeName.create({ name: 'MyType' }),
+                        type: util.simpleTypeName('MyType'),
                     }),
                 })
                 context.scope.addVariableDeclaration('value', {
                     isImmutable: true,
                     isolationLevel: UNKNOWN,
                     domain: RCTypeSet.create({
-                        type: TypeName.create({ name: 'MyType' }),
+                        type: util.simpleTypeName('MyType'),
                     }),
                 })
 
@@ -868,11 +735,8 @@ describe('Assignment', () => {
                             end: { line: 1, column: 2 },
                         },
                     }),
-                    value: VariableReference.create({
-                        name: 'value',
-                        span: someCodeSpan,
-                    }),
-                    span: someCodeSpan,
+                    value: util.variableRef('value'),
+                    span: util.someCodeSpan,
                 })
                 const result = assignment.emitStatement(context)
                 expect(
@@ -886,23 +750,13 @@ describe('Assignment', () => {
 
     describe('updates current-value', () => {
         test('variable-reference', () => {
-            const context = newSemanticContext()
-            context.scope.addVariableDeclaration('x', {
-                isImmutable: false,
-                isolationLevel: ISOLATED,
-                domain: IntegerRange.unconstrained(),
-            })
+            const context = util.newSemanticContext()
+            context.scope.addVariableDeclaration('x', util.someIntegerVariable)
 
             const assignment = Assignment.create({
-                target: VariableReference.create({
-                    name: 'x',
-                    span: someCodeSpan,
-                }),
-                value: IntegerLiteral.create({
-                    value: 42n,
-                    span: someCodeSpan,
-                }),
-                span: someCodeSpan,
+                target: util.variableRef('x'),
+                value: util.integerLiteral(42),
+                span: util.someCodeSpan,
             })
             const result = assignment.emitStatement(context)
             expect(result).toMatchObject({ value: undefined })
@@ -914,54 +768,32 @@ describe('Assignment', () => {
         })
 
         test('field-reference', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyType' }),
-                    fields: [
-                        {
-                            name: 'field',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
-                    ],
+                    name: util.simpleTypeName('MyType'),
+                    fields: [{ ...util.someFieldDeclConfig, name: 'field' }],
                 }),
             )
             context.scope.addVariableDeclaration('x', {
                 isImmutable: true,
                 isolationLevel: SHARED,
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyType' }),
+                    type: util.simpleTypeName('MyType'),
                 }),
             })
             context.scope.setCurrentValue(
                 'x',
                 RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyType' }),
+                    type: util.simpleTypeName('MyType'),
                     fields: {},
                 }),
             )
 
             const assignment = Assignment.create({
-                target: FieldReference.create({
-                    object: VariableReference.create({
-                        name: 'x',
-                        span: someCodeSpan,
-                    }),
-                    operator: '->',
-                    field: 'field',
-                    fieldSpan: someCodeSpan,
-                    span: someCodeSpan,
-                }),
-                value: IntegerLiteral.create({
-                    value: 42n,
-                    span: someCodeSpan,
-                }),
-                span: someCodeSpan,
+                target: util.sharedFieldRef(util.variableRef('x'), 'field'),
+                value: util.integerLiteral(42),
+                span: util.someCodeSpan,
             })
             const result = assignment.emitStatement(context)
             expect(result.isError && result.error.errors).toBeFalse()

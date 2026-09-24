@@ -74,4 +74,5 @@ Draft ideas with no ADR number:
 - [Weak References](./drafts/weak-ref.md)
 - [Prune Branches](./drafts/prune-branches.md)
 - [Efficient Construction](./drafts/efficient-construction.md)
+- [Published Schema](./drafts/published-schema.md)
 - [Miscellaneous](./drafts/misc.md)

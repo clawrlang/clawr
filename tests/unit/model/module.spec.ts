@@ -113,6 +113,8 @@ describe('Module', () => {
                         value: 42n,
                         span: someCodeSpan,
                     }),
+                    nameSpan: someCodeSpan,
+                    span: someCodeSpan,
                 }),
             ],
         })

@@ -489,6 +489,8 @@ describe('FunctionDeclaration', () => {
                                 ],
                                 span: someCodeSpan,
                             }),
+                            nameSpan: someCodeSpan,
+                            span: someCodeSpan,
                         }),
                     ],
                 },
@@ -564,6 +566,8 @@ describe('FunctionDeclaration', () => {
                                 ],
                                 span: someCodeSpan,
                             }),
+                            nameSpan: someCodeSpan,
+                            span: someCodeSpan,
                         }),
                         ReturnStatement.create({
                             value: IntegerLiteral.create({
@@ -631,6 +635,8 @@ describe('FunctionDeclaration', () => {
                                 fields: [],
                                 span: someCodeSpan,
                             }),
+                            nameSpan: someCodeSpan,
+                            span: someCodeSpan,
                         }),
                         ReturnStatement.create({
                             value: VariableReference.create({

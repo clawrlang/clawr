@@ -28,6 +28,8 @@ describe('VariableDeclaration', () => {
                 value: 1n,
                 span: someCodeSpan,
             }),
+            nameSpan: someCodeSpan,
+            span: someCodeSpan,
         })
         const context = newSemanticContext()
         decl.emitStatement(context)
@@ -52,6 +54,8 @@ describe('VariableDeclaration', () => {
                     value: 1n,
                     span: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
             const context = newSemanticContext()
             decl.emitStatement(context)
@@ -71,6 +75,8 @@ describe('VariableDeclaration', () => {
                     value: 1n,
                     span: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
@@ -104,6 +110,8 @@ describe('VariableDeclaration', () => {
                     value: 'true',
                     span: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
             const context = newSemanticContext()
             decl.emitStatement(context)
@@ -122,6 +130,8 @@ describe('VariableDeclaration', () => {
                     value: 'true',
                     span: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
             const context = newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
@@ -232,6 +242,8 @@ describe('VariableDeclaration', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
             decl.emitStatement(context)
             expect(context.scope.emitted[0]).toMatchObject({
@@ -301,6 +313,8 @@ describe('VariableDeclaration', () => {
                     name: 'bar',
                     span: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
             decl.emitStatement(context)
             expect(context.scope.emitted[0]).toMatchObject({
@@ -369,6 +383,8 @@ describe('VariableDeclaration', () => {
                     span: someCodeSpan,
                     fieldSpan: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
             decl.emitStatement(context)
             expect(context.scope.emitted[0]).toMatchObject({
@@ -424,6 +440,8 @@ describe('VariableDeclaration', () => {
                 fields: [],
                 span: someCodeSpan,
             }),
+            nameSpan: someCodeSpan,
+            span: someCodeSpan,
         })
 
         const result = decl.emitStatement(context)
@@ -481,6 +499,8 @@ describe('VariableDeclaration', () => {
                     value: 42n,
                     span: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
             const context = newSemanticContext()
             decl.emitStatement(context)
@@ -560,6 +580,8 @@ describe('VariableDeclaration', () => {
                     ],
                     span: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
 
             declaration.emitStatement(context)
@@ -603,6 +625,8 @@ describe('VariableDeclaration', () => {
                     fields: [],
                     span: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
             decl.emitStatement(context)
             expect(context.scope.currentValue('foo')).toBeInstanceOf(RCTypeSet)
@@ -647,6 +671,8 @@ describe('VariableDeclaration', () => {
                     ],
                     span: someCodeSpan,
                 }),
+                nameSpan: someCodeSpan,
+                span: someCodeSpan,
             })
             decl.emitStatement(context)
             expect(context.scope.currentValue('r')).toMatchObject({
@@ -714,6 +740,8 @@ describe('VariableDeclaration', () => {
                             end: { line: 1, column: 4 },
                         },
                     }),
+                    nameSpan: someCodeSpan,
+                    span: someCodeSpan,
                 })
                 const result = declaration.emitStatement(context)
                 expect(result.isError && result.error.errors).toMatchObject([

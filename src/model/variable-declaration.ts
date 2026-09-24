@@ -1,4 +1,5 @@
 import * as cir from '@/cir'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import assert from 'assert'
@@ -21,6 +22,8 @@ export class VariableDeclaration implements Statement, Declaration {
         private readonly isolationLevel: IsolationLevel,
         private readonly domain: DomainDeclaration | undefined,
         private readonly initialValue: Expression,
+        private readonly span: SourceCodeSpan,
+        private readonly nameSpan: SourceCodeSpan,
     ) {}
 
     static create({
@@ -29,12 +32,16 @@ export class VariableDeclaration implements Statement, Declaration {
         isolationLevel,
         domain,
         initialValue,
+        span,
+        nameSpan,
     }: {
         isImmutable: boolean
         name: string
         isolationLevel: IsolationLevel
         domain?: DomainDeclaration
         initialValue: Expression
+        span: SourceCodeSpan
+        nameSpan: SourceCodeSpan
     }): VariableDeclaration {
         return new VariableDeclaration(
             isImmutable,
@@ -42,6 +49,8 @@ export class VariableDeclaration implements Statement, Declaration {
             isolationLevel,
             domain,
             initialValue,
+            span,
+            nameSpan,
         )
     }
 
@@ -108,12 +117,16 @@ export class VariableDeclaration implements Statement, Declaration {
         if (
             this.initialValue instanceof DataLiteral &&
             this.initialValue.initializerCall
-        ) {
-            const initializer = this.initialValue.initializerCall.withTarget(
-                VariableReference.create({ name: this.name, span: {} as any }),
-            )
-            initializer.emitStatement(context)
-        }
+        )
+            this.initialValue.initializerCall
+                .withTarget(
+                    VariableReference.create({
+                        name: this.name,
+                        span: this.nameSpan,
+                    }),
+                )
+                .emitStatement(context)
+
         return Result.ok
     }
 

@@ -39,6 +39,8 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
             isolationLevel: semanticsKeyword.isolationLevel,
             domain,
             initialValue,
+            nameSpan: { start: nameToken.start, end: nameToken.end },
+            span: { start: semanticsToken.start, end: initialValue.span.end },
         })
     }
 

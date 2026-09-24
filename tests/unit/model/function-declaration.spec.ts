@@ -7,7 +7,6 @@ import { Parameter } from '@/model/parameter'
 import { ReturnStatement } from '@/model/return-statement'
 import { IntegerRange, RCTypeSet, StringSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
-import { VariableReference } from '@/model/variable-reference'
 import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 
@@ -210,10 +209,7 @@ describe('FunctionDeclaration', () => {
             },
             implementation: {
                 kind: 'implicit-return',
-                expression: VariableReference.create({
-                    name: 'myVar',
-                    span: util.someCodeSpan,
-                }),
+                expression: util.variableRef('myVar'),
             },
         })
 

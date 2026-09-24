@@ -1,44 +1,33 @@
 import { DataDeclaration } from '@/model/data-declaration'
 import { DataLiteral } from '@/model/data-literal'
-import { decorateDomain } from '@/model/domain-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
-import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { Parameter } from '@/model/parameter'
 import { ReturnStatement } from '@/model/return-statement'
-import { TypeName } from '@/model/type-name'
 import { IntegerRange, RCTypeSet, StringSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
-import { VariableReference } from '@/model/variable-reference'
-import { newSemanticContext, someCodeSpan } from '@@/util'
+import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('FunctionDeclaration (method)', () => {
     it('converts to CIR with function body', () => {
         const funcDecl = FunctionDeclaration.create({
+            ...util.someFunctionDeclConfig,
             baseName: 'myFunction',
             parameters: [
                 Parameter.create({
+                    ...util.someParameterDeclConfig,
                     label: 'param1',
-                    isImmutable: true,
                     varName: 'x',
-                    isolationLevel: ISOLATED,
-                    domain: decorateDomain(StringSet.create(), {
-                        span: someCodeSpan,
-                    }),
-                    span: someCodeSpan,
+                    domain: util.spannedDomain(StringSet.create()),
                 }),
             ],
-            result: undefined,
-            implementation: { kind: 'body', statements: [] },
         })
 
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         const result = funcDecl.emitMethod(context)
         expect(result.isSuccess || result.error.errors).toBeTrue()
-
-        const decl = result.isSuccess && result.value
-        expect(decl).toMatchObject({
+        expect(result.isSuccess && result.value).toMatchObject({
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             labels: ['param1'],
@@ -55,24 +44,18 @@ describe('FunctionDeclaration (method)', () => {
 
     it('converts to CIR with implicit return', () => {
         const funcDecl = FunctionDeclaration.create({
+            ...util.someFunctionDeclConfig,
             baseName: 'myFunction',
-            parameters: [],
-            result: undefined,
             implementation: {
                 kind: 'implicit-return',
-                expression: IntegerLiteral.create({
-                    value: 42n,
-                    span: someCodeSpan,
-                }),
+                expression: util.integerLiteral(42),
             },
         })
 
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         const result = funcDecl.emitMethod(context)
         expect(result.isSuccess || result.error.errors).toBeTrue()
-
-        const decl = result.isSuccess && result.value
-        expect(decl).toMatchObject({
+        expect(result.isSuccess && result.value).toMatchObject({
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
@@ -91,31 +74,24 @@ describe('FunctionDeclaration (method)', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                domain: decorateDomain(IntegerRange.unconstrained(), {
-                    span: someCodeSpan,
-                }),
+                domain: util.spannedDomain(IntegerRange.unconstrained()),
                 isolationLevel: ISOLATED,
             },
             implementation: {
                 kind: 'body',
                 statements: [
                     ReturnStatement.create({
-                        value: IntegerLiteral.create({
-                            value: 42n,
-                            span: someCodeSpan,
-                        }),
-                        span: someCodeSpan,
+                        value: util.integerLiteral(42),
+                        span: util.someCodeSpan,
                     }),
                 ],
             },
         })
 
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         const result = funcDecl.emitMethod(context)
         expect(result.isSuccess || result.error.errors).toBeTrue()
-
-        const decl = result.isSuccess && result.value
-        expect(decl).toMatchObject({
+        expect(result.isSuccess && result.value).toMatchObject({
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
@@ -130,10 +106,10 @@ describe('FunctionDeclaration (method)', () => {
     })
 
     it('throws if returning SHARED as UNIQUE', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
-                name: TypeName.create({ name: 'MyData' }),
+                name: util.simpleTypeName('MyData'),
                 fields: [],
             }),
         )
@@ -141,7 +117,7 @@ describe('FunctionDeclaration (method)', () => {
             isImmutable: true,
             isolationLevel: SHARED,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'MyData' }),
+                type: util.simpleTypeName('MyData'),
             }),
         })
 
@@ -149,20 +125,16 @@ describe('FunctionDeclaration (method)', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                domain: decorateDomain(
+                domain: util.spannedDomain(
                     RCTypeSet.create({
-                        type: TypeName.create({ name: 'MyData' }),
+                        type: util.simpleTypeName('MyData'),
                     }),
-                    { span: someCodeSpan },
                 ),
                 isolationLevel: ISOLATED,
             },
             implementation: {
                 kind: 'implicit-return',
-                expression: VariableReference.create({
-                    name: 'myVar',
-                    span: someCodeSpan,
-                }),
+                expression: util.variableRef('myVar'),
             },
         })
 
@@ -172,10 +144,10 @@ describe('FunctionDeclaration (method)', () => {
     })
 
     it('throws if returning ISOLATED as SHARED', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
-                name: TypeName.create({ name: 'MyData' }),
+                name: util.simpleTypeName('MyData'),
                 fields: [],
             }),
         )
@@ -183,7 +155,7 @@ describe('FunctionDeclaration (method)', () => {
             isImmutable: true,
             isolationLevel: ISOLATED,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'MyData' }),
+                type: util.simpleTypeName('MyData'),
             }),
         })
 
@@ -191,20 +163,16 @@ describe('FunctionDeclaration (method)', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                domain: decorateDomain(
+                domain: util.spannedDomain(
                     RCTypeSet.create({
-                        type: TypeName.create({ name: 'MyData' }),
+                        type: util.simpleTypeName('MyData'),
                     }),
-                    { span: someCodeSpan },
                 ),
                 isolationLevel: ISOLATED,
             },
             implementation: {
                 kind: 'implicit-return',
-                expression: VariableReference.create({
-                    name: 'myVar',
-                    span: someCodeSpan,
-                }),
+                expression: util.variableRef('myVar'),
             },
         })
 
@@ -214,10 +182,10 @@ describe('FunctionDeclaration (method)', () => {
     })
 
     it('throws if returning ISOLATED as SHARED', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
-                name: TypeName.create({ name: 'MyData' }),
+                name: util.simpleTypeName('MyData'),
                 fields: [],
             }),
         )
@@ -225,7 +193,7 @@ describe('FunctionDeclaration (method)', () => {
             isImmutable: true,
             isolationLevel: ISOLATED,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'MyData' }),
+                type: util.simpleTypeName('MyData'),
             }),
         })
 
@@ -233,20 +201,16 @@ describe('FunctionDeclaration (method)', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                domain: decorateDomain(
+                domain: util.spannedDomain(
                     RCTypeSet.create({
-                        type: TypeName.create({ name: 'MyData' }),
+                        type: util.simpleTypeName('MyData'),
                     }),
-                    { span: someCodeSpan },
                 ),
                 isolationLevel: ISOLATED,
             },
             implementation: {
                 kind: 'implicit-return',
-                expression: VariableReference.create({
-                    name: 'myVar',
-                    span: someCodeSpan,
-                }),
+                expression: util.variableRef('myVar'),
             },
         })
 
@@ -258,24 +222,18 @@ describe('FunctionDeclaration (method)', () => {
     describe('infers return value-set from implicit-return expression', () => {
         it('infers integer return value-set', () => {
             const funcDecl = FunctionDeclaration.create({
+                ...util.someFunctionDeclConfig,
                 baseName: 'myFunction',
-                parameters: [],
-                result: undefined,
                 implementation: {
                     kind: 'implicit-return',
-                    expression: IntegerLiteral.create({
-                        value: 42n,
-                        span: someCodeSpan,
-                    }),
+                    expression: util.integerLiteral(42),
                 },
             })
 
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             const result = funcDecl.emitMethod(context)
             expect(result.isSuccess || result.error.errors).toBeTrue()
-
-            const decl = result.isSuccess && result.value
-            expect(decl).toMatchObject({
+            expect(result.isSuccess && result.value).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 parameters: [],
@@ -294,10 +252,10 @@ describe('FunctionDeclaration (method)', () => {
         })
 
         it('infers ISOLATED return value-set from ISOLATED variable expression', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyData' }),
+                    name: util.simpleTypeName('MyData'),
                     fields: [],
                 }),
             )
@@ -305,29 +263,22 @@ describe('FunctionDeclaration (method)', () => {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyData' }),
+                    type: util.simpleTypeName('MyData'),
                 }),
             })
 
             const funcDecl = FunctionDeclaration.create({
+                ...util.someFunctionDeclConfig,
                 baseName: 'myFunction',
-                parameters: [],
-                result: undefined,
                 implementation: {
                     kind: 'implicit-return',
-                    expression: VariableReference.create({
-                        name: 'myVar',
-                        span: someCodeSpan,
-                    }),
+                    expression: util.variableRef('myVar'),
                 },
             })
 
             const result = funcDecl.emitMethod(context)
             expect(result.isSuccess || result.error.errors).toBeTrue()
-
-            const decl = result.isSuccess && result.value
-
-            expect(decl).toMatchObject({
+            expect(result.isSuccess && result.value).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 domain: {
@@ -338,10 +289,10 @@ describe('FunctionDeclaration (method)', () => {
         })
 
         it('infers SHARED return value-set from SHARED variable expression', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyData' }),
+                    name: util.simpleTypeName('MyData'),
                     fields: [],
                 }),
             )
@@ -349,27 +300,21 @@ describe('FunctionDeclaration (method)', () => {
                 isImmutable: true,
                 isolationLevel: SHARED,
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyData' }),
+                    type: util.simpleTypeName('MyData'),
                 }),
             })
 
             const funcDecl = FunctionDeclaration.create({
+                ...util.someFunctionDeclConfig,
                 baseName: 'myFunction',
-                parameters: [],
-                result: undefined,
                 implementation: {
                     kind: 'implicit-return',
-                    expression: VariableReference.create({
-                        name: 'myVar',
-                        span: someCodeSpan,
-                    }),
+                    expression: util.variableRef('myVar'),
                 },
             })
             const result = funcDecl.emitMethod(context)
             expect(result.isSuccess || result.error.errors).toBeTrue()
-
-            const decl = result.isSuccess && result.value
-            expect(decl).toMatchObject({
+            expect(result.isSuccess && result.value).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 domain: {
@@ -385,32 +330,22 @@ describe('FunctionDeclaration (method)', () => {
             baseName: 'myFunction',
             parameters: [
                 Parameter.create({
+                    ...util.someParameterDeclConfig,
                     label: 'param1',
-                    isImmutable: true,
                     varName: 'x',
-                    isolationLevel: ISOLATED,
-                    domain: decorateDomain(StringSet.create(), {
-                        span: someCodeSpan,
-                    }),
-                    span: someCodeSpan,
+                    domain: util.spannedDomain(StringSet.create()),
                 }),
             ],
             result: undefined,
             implementation: {
                 kind: 'implicit-return',
-                expression: VariableReference.create({
-                    name: 'x',
-                    span: someCodeSpan,
-                }),
+                expression: util.variableRef('x'),
             },
         })
 
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         const result = decl.emitMethod(context)
-
-        const cir = result.isSuccess && result.value
-
-        expect(cir).toMatchObject({
+        expect(result.isSuccess && result.value).toMatchObject({
             body: [
                 {
                     kind: 'RETURN',
@@ -425,65 +360,46 @@ describe('FunctionDeclaration (method)', () => {
 
     describe('releases rc-type variables before returning from the function', () => {
         test('with no return', () => {
-            const context = newSemanticContext()
-
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyData' }),
-                    fields: [
-                        {
-                            name: 'field1',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
-                    ],
+                    name: util.simpleTypeName('MyData'),
+                    fields: [{ ...util.someFieldDeclConfig, name: 'field1' }],
                 }),
             )
 
             const funcDecl = FunctionDeclaration.create({
+                ...util.someFunctionDeclConfig,
                 baseName: 'myFunction',
-                parameters: [],
-                result: undefined,
                 implementation: {
                     kind: 'body',
                     statements: [
                         VariableDeclaration.create({
+                            ...util.someVariableDeclConfig,
                             isImmutable: true,
                             name: 'myVar',
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
+                            domain: util.spannedDomain(
                                 RCTypeSet.create({
-                                    type: TypeName.create({ name: 'MyData' }),
+                                    type: util.simpleTypeName('MyData'),
                                 }),
-                                { span: someCodeSpan },
                             ),
                             initialValue: DataLiteral.create({
                                 fields: [
                                     {
                                         name: 'field1',
-                                        value: IntegerLiteral.create({
-                                            value: 42n,
-                                            span: someCodeSpan,
-                                        }),
+                                        value: util.integerLiteral(42),
                                     },
                                 ],
-                                span: someCodeSpan,
+                                span: util.someCodeSpan,
                             }),
-                            nameSpan: someCodeSpan,
-                            span: someCodeSpan,
                         }),
                     ],
                 },
             })
 
             const result = funcDecl.emitMethod(context)
-            expect(result.isSuccess || result.error.errors).toBeTrue()
-
             const decl = result.isSuccess ? result.value : undefined!
+            expect(result.isSuccess || result.error.errors).toBeTrue()
             expect(decl.body[decl.body.length - 1]).toMatchObject({
                 kind: 'RELEASE',
                 object: {
@@ -494,22 +410,11 @@ describe('FunctionDeclaration (method)', () => {
         })
 
         test('ending with return', () => {
-            const context = newSemanticContext()
-
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyData' }),
-                    fields: [
-                        {
-                            name: 'field1',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
-                    ],
+                    name: util.simpleTypeName('MyData'),
+                    fields: [{ ...util.someFieldDeclConfig, name: 'field1' }],
                 }),
             )
 
@@ -517,54 +422,41 @@ describe('FunctionDeclaration (method)', () => {
                 baseName: 'myFunction',
                 parameters: [],
                 result: {
-                    domain: decorateDomain(IntegerRange.unconstrained(), {
-                        span: someCodeSpan,
-                    }),
+                    domain: util.spannedDomain(IntegerRange.unconstrained()),
                     isolationLevel: ISOLATED,
                 },
                 implementation: {
                     kind: 'body',
                     statements: [
                         VariableDeclaration.create({
+                            ...util.someVariableDeclConfig,
                             isImmutable: true,
                             name: 'myVar',
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
+                            domain: util.spannedDomain(
                                 RCTypeSet.create({
-                                    type: TypeName.create({ name: 'MyData' }),
+                                    type: util.simpleTypeName('MyData'),
                                 }),
-                                { span: someCodeSpan },
                             ),
                             initialValue: DataLiteral.create({
                                 fields: [
                                     {
                                         name: 'field1',
-                                        value: IntegerLiteral.create({
-                                            value: 42n,
-                                            span: someCodeSpan,
-                                        }),
+                                        value: util.integerLiteral(42),
                                     },
                                 ],
-                                span: someCodeSpan,
+                                span: util.someCodeSpan,
                             }),
-                            nameSpan: someCodeSpan,
-                            span: someCodeSpan,
                         }),
                         ReturnStatement.create({
-                            value: IntegerLiteral.create({
-                                value: 42n,
-                                span: someCodeSpan,
-                            }),
-                            span: someCodeSpan,
+                            value: util.integerLiteral(42),
+                            span: util.someCodeSpan,
                         }),
                     ],
                 },
             })
-
             const result = funcDecl.emitMethod(context)
-            expect(result.isSuccess || result.error.errors).toBeTrue()
-
             const decl = result.isSuccess ? result.value : undefined!
+            expect(result.isSuccess || result.error.errors).toBeTrue()
             expect(decl.body[decl.body.length - 2]).toMatchObject({
                 kind: 'RELEASE',
                 object: {
@@ -575,24 +467,22 @@ describe('FunctionDeclaration (method)', () => {
         })
 
         test('returns UNIQUE return values with a ref-count of 1', () => {
-            const context = newSemanticContext()
-
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyData' }),
+                    name: util.simpleTypeName('MyData'),
                     fields: [],
                 }),
             )
 
             const funcDecl = FunctionDeclaration.create({
+                ...util.someFunctionDeclConfig,
                 baseName: 'myFunction',
-                parameters: [],
                 result: {
-                    domain: decorateDomain(
+                    domain: util.spannedDomain(
                         RCTypeSet.create({
-                            type: TypeName.create({ name: 'MyData' }),
+                            type: util.simpleTypeName('MyData'),
                         }),
-                        { span: someCodeSpan },
                     ),
                     isolationLevel: ISOLATED,
                 },
@@ -600,37 +490,30 @@ describe('FunctionDeclaration (method)', () => {
                     kind: 'body',
                     statements: [
                         VariableDeclaration.create({
+                            ...util.someVariableDeclConfig,
                             isImmutable: true,
                             name: 'myVar',
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
+                            domain: util.spannedDomain(
                                 RCTypeSet.create({
-                                    type: TypeName.create({ name: 'MyData' }),
+                                    type: util.simpleTypeName('MyData'),
                                 }),
-                                { span: someCodeSpan },
                             ),
                             initialValue: DataLiteral.create({
                                 fields: [],
-                                span: someCodeSpan,
+                                span: util.someCodeSpan,
                             }),
-                            nameSpan: someCodeSpan,
-                            span: someCodeSpan,
                         }),
                         ReturnStatement.create({
-                            value: VariableReference.create({
-                                name: 'myVar',
-                                span: someCodeSpan,
-                            }),
-                            span: someCodeSpan,
+                            value: util.variableRef('myVar'),
+                            span: util.someCodeSpan,
                         }),
                     ],
                 },
             })
 
             const result = funcDecl.emitMethod(context)
-            expect(result.isSuccess || result.error.errors).toBeTrue()
-
             const decl = result.isSuccess ? result.value : undefined!
+            expect(result.isSuccess || result.error.errors).toBeTrue()
             expect(decl.body).toMatchObject([
                 { kind: 'VARIABLE_DECL' },
                 {

@@ -272,16 +272,7 @@ describe('Assignment', () => {
             })
 
             const assignment = Assignment.create({
-                target: FieldReference.create({
-                    object: VariableReference.create({
-                        name: 'x',
-                        span: util.someCodeSpan,
-                    }),
-                    field: 'field',
-                    operator: '.',
-                    fieldSpan: util.someCodeSpan,
-                    span: util.someCodeSpan,
-                }),
+                target: util.isolatedFieldRef(util.variableRef('x'), 'field'),
                 value: DataLiteral.create({
                     initializerCall: FunctionCall.create({
                         baseName: 'new',
@@ -440,10 +431,7 @@ describe('Assignment', () => {
                 parameters: [],
                 implementation: {
                     kind: 'implicit-return',
-                    expression: VariableReference.create({
-                        name: 'mutVar',
-                        span: util.someCodeSpan,
-                    }),
+                    expression: util.variableRef('mutVar'),
                 },
             }),
         )
@@ -542,10 +530,7 @@ describe('Assignment', () => {
                             end: { line: 1, column: 2 },
                         },
                     }),
-                    value: VariableReference.create({
-                        name: 'value',
-                        span: util.someCodeSpan,
-                    }),
+                    value: util.variableRef('value'),
                     span: util.someCodeSpan,
                 })
                 const result = assignment.emitStatement(context)
@@ -624,10 +609,7 @@ describe('Assignment', () => {
 
         const assignment = Assignment.create({
             target: FieldReference.create({
-                object: VariableReference.create({
-                    name: 'x',
-                    span: util.someCodeSpan,
-                }),
+                object: util.variableRef('x'),
                 operator: '.',
                 field: 'myField',
                 span: {

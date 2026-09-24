@@ -1,10 +1,10 @@
-import { TypeName } from '@/model/type-name'
 import {
     IntegerRange,
     RCTypeSet,
     StringSet,
     TruthvalueSet,
 } from '@/model/value-set'
+import { simpleTypeName } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('ValueSet', () => {
@@ -78,7 +78,7 @@ describe('ValueSet', () => {
 
         it('converts rc-type to CIR correctly', () => {
             const valueSet = RCTypeSet.create({
-                type: TypeName.create({ name: 'MyType' }),
+                type: simpleTypeName('MyType'),
             })
 
             expect(valueSet.toCIR()).toEqual({

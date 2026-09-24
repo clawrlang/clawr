@@ -1,12 +1,9 @@
 import { DataDeclaration } from '@/model/data-declaration'
 import { DataLiteral } from '@/model/data-literal'
-import { decorateDomain } from '@/model/domain-declaration'
-import { IntegerLiteral } from '@/model/integer-literal'
-import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { TruthValueLiteral } from '@/model/truthvalue-literal'
+import { SHARED } from '@/model/isolation-level'
 import { TypeName } from '@/model/type-name'
-import { IntegerRange, RCTypeSet, truthvalue } from '@/model/value-set'
-import { newSemanticContext, someCodeSpan } from '@@/util'
+import { RCTypeSet, truthvalue } from '@/model/value-set'
+import * as util from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('Literals', () => {
@@ -14,10 +11,7 @@ describe('Literals', () => {
         const cases: truthvalue[] = ['true', 'false', 'ambiguous'] as const
         for (const input of cases) {
             it(`outputs ${input} as TRUTHVALUE_LITERAL`, () => {
-                const literal = TruthValueLiteral.create({
-                    value: input,
-                    span: someCodeSpan,
-                })
+                const literal = util.truthvalueLiteral(input)
                 const result = literal.toCIRExpression()
                 expect(result.isSuccess && result.value).toMatchObject({
                     kind: 'TRUTHVALUE_LITERAL',
@@ -26,10 +20,7 @@ describe('Literals', () => {
             })
 
             it('has a current value set of the literal value', () => {
-                const literal = TruthValueLiteral.create({
-                    value: input,
-                    span: someCodeSpan,
-                })
+                const literal = util.truthvalueLiteral(input)
                 const result = literal.currentValue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     values: [input],
@@ -42,10 +33,7 @@ describe('Literals', () => {
         const cases = ['0', '1', '2', '-1', '123456789'] as const
         for (const input of cases) {
             it(`outputs ${input} as INTEGER_LITERAL`, () => {
-                const literal = IntegerLiteral.create({
-                    value: BigInt(input),
-                    span: someCodeSpan,
-                })
+                const literal = util.integerLiteral(BigInt(input))
                 const result = literal.toCIRExpression()
                 expect(result.isSuccess && result.value).toMatchObject({
                     kind: 'INTEGER_LITERAL',
@@ -54,10 +42,7 @@ describe('Literals', () => {
             })
 
             it('has a current value set of the literal value', () => {
-                const literal = IntegerLiteral.create({
-                    value: BigInt(input),
-                    span: someCodeSpan,
-                })
+                const literal = util.integerLiteral(BigInt(input))
                 const result = literal.currentValue()
                 expect(result.value).toMatchObject({
                     min: BigInt(input),
@@ -69,57 +54,29 @@ describe('Literals', () => {
 
     describe('data literals', () => {
         it('outputs a data literal as ALLOCATE', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
                     fields: [
-                        {
-                            name: 'x',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
-                        {
-                            name: 'y',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
+                        { ...util.someFieldDeclConfig, name: 'x' },
+                        { ...util.someFieldDeclConfig, name: 'y' },
                     ],
                 }),
             )
 
             const dataLiteral = DataLiteral.create({
                 fields: [
-                    {
-                        name: 'x',
-                        value: IntegerLiteral.create({
-                            value: 42n,
-                            span: someCodeSpan,
-                        }),
-                    },
-                    {
-                        name: 'y',
-                        value: IntegerLiteral.create({
-                            value: 17n,
-                            span: someCodeSpan,
-                        }),
-                    },
+                    { name: 'x', value: util.integerLiteral(42) },
+                    { name: 'y', value: util.integerLiteral(17) },
                 ],
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             })
 
             const result = dataLiteral.toCIRExpression({
                 ...context,
                 explicitDomain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyType' }),
+                    type: util.simpleTypeName('MyType'),
                 }),
                 isolationLevel: SHARED,
             })
@@ -145,57 +102,29 @@ describe('Literals', () => {
         })
 
         it('has a current value set of the literal value', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyType' }),
+                    name: util.simpleTypeName('MyType'),
                     fields: [
-                        {
-                            name: 'x',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
-                        {
-                            name: 'y',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
+                        { ...util.someFieldDeclConfig, name: 'x' },
+                        { ...util.someFieldDeclConfig, name: 'y' },
                     ],
                 }),
             )
 
             const dataLiteral = DataLiteral.create({
                 fields: [
-                    {
-                        name: 'x',
-                        value: IntegerLiteral.create({
-                            value: 42n,
-                            span: someCodeSpan,
-                        }),
-                    },
-                    {
-                        name: 'y',
-                        value: IntegerLiteral.create({
-                            value: 17n,
-                            span: someCodeSpan,
-                        }),
-                    },
+                    { name: 'x', value: util.integerLiteral(42) },
+                    { name: 'y', value: util.integerLiteral(17) },
                 ],
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             })
 
             const result = dataLiteral.currentValue({
                 ...context,
                 explicitDomain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyType' }),
+                    type: util.simpleTypeName('MyType'),
                 }),
             })
             expect(result.isSuccess && result.value).toMatchObject({
@@ -208,22 +137,20 @@ describe('Literals', () => {
         })
 
         it('returns a failure from a nested field value', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'OuterType' }),
+                    name: util.simpleTypeName('OuterType'),
                     fields: [
                         {
+                            ...util.someFieldDeclConfig,
                             name: 'inner',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
+                            domain: util.spannedDomain(
                                 RCTypeSet.create({
-                                    type: TypeName.create({
-                                        name: 'MissingInnerType',
-                                    }),
+                                    type: util.simpleTypeName(
+                                        'MissingInnerType',
+                                    ),
                                 }),
-                                { span: someCodeSpan },
                             ),
                         },
                     ],
@@ -238,25 +165,20 @@ describe('Literals', () => {
                             fields: [
                                 {
                                     name: 'value',
-                                    value: IntegerLiteral.create({
-                                        value: 7n,
-                                        span: someCodeSpan,
-                                    }),
+                                    value: util.integerLiteral(7),
                                 },
                             ],
-                            span: someCodeSpan,
+                            span: util.someCodeSpan,
                         }),
                     },
                 ],
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             })
 
             const result = dataLiteral.currentValue({
                 ...context,
                 explicitDomain: RCTypeSet.create({
-                    type: TypeName.create({
-                        name: 'OuterType',
-                    }),
+                    type: util.simpleTypeName('OuterType'),
                 }),
             })
             expect(result.isError).toBeTrue()

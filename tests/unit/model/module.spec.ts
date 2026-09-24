@@ -1,13 +1,10 @@
 import { DataDeclaration } from '@/model/data-declaration'
-import { decorateDomain } from '@/model/domain-declaration'
 import { FunctionCall } from '@/model/function-call'
-import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED } from '@/model/isolation-level'
 import { Module } from '@/model/module'
-import { TypeName } from '@/model/type-name'
 import { IntegerRange, TruthvalueSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
-import { newSemanticContext, someCodeSpan } from '@@/util'
+import * as util from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('Module', () => {
@@ -17,24 +14,14 @@ describe('Module', () => {
                 FunctionCall.create({
                     baseName: 'add',
                     arguments: [
-                        {
-                            value: IntegerLiteral.create({
-                                value: 1n,
-                                span: someCodeSpan,
-                            }),
-                        },
-                        {
-                            value: IntegerLiteral.create({
-                                value: 2n,
-                                span: someCodeSpan,
-                            }),
-                        },
+                        { value: util.integerLiteral(1) },
+                        { value: util.integerLiteral(2) },
                     ],
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
             ],
         })
-        const result = module.toCIR(newSemanticContext())
+        const result = module.toCIR(util.newSemanticContext())
         expect(result).toMatchObject({
             startBlock: [
                 {
@@ -63,31 +50,15 @@ describe('Module', () => {
             main: [],
             declarations: [
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyData' }),
+                    name: util.simpleTypeName('MyData'),
                     fields: [
-                        {
-                            name: 'field1',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
-                        {
-                            name: 'field2',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
+                        { ...util.someFieldDeclConfig, name: 'field1' },
+                        { ...util.someFieldDeclConfig, name: 'field2' },
                     ],
                 }),
             ],
         })
-        const result = module.toCIR(newSemanticContext())
+        const result = module.toCIR(util.newSemanticContext())
         expect(result).toMatchObject({
             startBlock: [],
             declarations: [
@@ -103,22 +74,15 @@ describe('Module', () => {
         const module = Module.create({
             main: [
                 VariableDeclaration.create({
+                    ...util.someVariableDeclConfig,
                     isImmutable: true,
                     name: 'x',
-                    isolationLevel: ISOLATED,
-                    domain: decorateDomain(IntegerRange.unconstrained(), {
-                        span: someCodeSpan,
-                    }),
-                    initialValue: IntegerLiteral.create({
-                        value: 42n,
-                        span: someCodeSpan,
-                    }),
-                    nameSpan: someCodeSpan,
-                    span: someCodeSpan,
+                    domain: util.spannedDomain(IntegerRange.unconstrained()),
+                    initialValue: util.integerLiteral(42),
                 }),
             ],
         })
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         module.toCIR(context)
         expect(context.scope.variableDeclaration('x')).toEqual({
             isImmutable: true,
@@ -132,34 +96,24 @@ describe('Module', () => {
             main: [],
             declarations: [
                 DataDeclaration.create({
-                    name: TypeName.create({ name: 'MyData' }),
+                    name: util.simpleTypeName('MyData'),
                     fields: [
+                        { ...util.someFieldDeclConfig, name: 'field1' },
                         {
-                            name: 'field1',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
-                            ),
-                        },
-                        {
+                            ...util.someFieldDeclConfig,
                             name: 'field2',
-                            isImmutable: false,
-                            isolationLevel: ISOLATED,
-                            domain: decorateDomain(
+                            domain: util.spannedDomain(
                                 TruthvalueSet.unconstrained(),
-                                { span: someCodeSpan },
                             ),
                         },
                     ],
                 }),
             ],
         })
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         module.toCIR(context)
         const myDataDeclaration = context.scope.dataDeclaration(
-            TypeName.create({ name: 'MyData' }),
+            util.simpleTypeName('MyData'),
         )
         expect(myDataDeclaration).toMatchObject({
             name: { name: 'MyData' },

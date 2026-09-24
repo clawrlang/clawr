@@ -12,7 +12,7 @@ import { TypeName } from '@/model/type-name'
 import { IntegerRange, RCTypeSet, TruthvalueSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import { VariableReference } from '@/model/variable-reference'
-import { newSemanticContext, someCodeSpan } from '@@/util'
+import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('VariableDeclaration', () => {
@@ -22,16 +22,16 @@ describe('VariableDeclaration', () => {
             name: 'foo',
             isolationLevel: ISOLATED,
             domain: decorateDomain(IntegerRange.unconstrained(), {
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             }),
             initialValue: IntegerLiteral.create({
                 value: 1n,
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             }),
-            nameSpan: someCodeSpan,
-            span: someCodeSpan,
+            nameSpan: util.someCodeSpan,
+            span: util.someCodeSpan,
         })
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         decl.emitStatement(context)
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'VARIABLE_DECL',
@@ -52,12 +52,12 @@ describe('VariableDeclaration', () => {
                 isolationLevel: ISOLATED,
                 initialValue: IntegerLiteral.create({
                     value: 1n,
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             decl.emitStatement(context)
             expect((context.scope.emitted[0] as any).domain).toEqual({
                 type: 'integer',
@@ -73,12 +73,12 @@ describe('VariableDeclaration', () => {
                 isolationLevel: ISOLATED,
                 initialValue: IntegerLiteral.create({
                     value: 1n,
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
@@ -89,7 +89,7 @@ describe('VariableDeclaration', () => {
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
                                 IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
+                                { span: util.someCodeSpan },
                             ),
                         },
                     ],
@@ -108,12 +108,12 @@ describe('VariableDeclaration', () => {
                 isolationLevel: ISOLATED,
                 initialValue: TruthValueLiteral.create({
                     value: 'true',
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             decl.emitStatement(context)
             expect((context.scope.emitted[0] as any).domain).toEqual({
                 type: 'truthvalue',
@@ -128,12 +128,12 @@ describe('VariableDeclaration', () => {
                 isolationLevel: ISOLATED,
                 initialValue: TruthValueLiteral.create({
                     value: 'true',
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
@@ -144,7 +144,7 @@ describe('VariableDeclaration', () => {
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
                                 TruthvalueSet.unconstrained(),
-                                { span: someCodeSpan },
+                                { span: util.someCodeSpan },
                             ),
                         },
                     ],
@@ -160,7 +160,7 @@ describe('VariableDeclaration', () => {
 
     describe('injects RETAIN statement', () => {
         test('for a FieldReference', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'InnerType' }),
@@ -171,7 +171,7 @@ describe('VariableDeclaration', () => {
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
                                 IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
+                                { span: util.someCodeSpan },
                             ),
                         },
                     ],
@@ -191,7 +191,7 @@ describe('VariableDeclaration', () => {
                                         name: 'InnerType',
                                     }),
                                 }),
-                                { span: someCodeSpan },
+                                { span: util.someCodeSpan },
                             ),
                         },
                     ],
@@ -230,20 +230,20 @@ describe('VariableDeclaration', () => {
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'InnerType' }),
                     }),
-                    { span: someCodeSpan },
+                    { span: util.someCodeSpan },
                 ),
                 initialValue: FieldReference.create({
                     object: VariableReference.create({
                         name: 'bar',
-                        span: someCodeSpan,
+                        span: util.someCodeSpan,
                     }),
                     field: 'field',
                     operator: '.',
-                    span: someCodeSpan,
-                    fieldSpan: someCodeSpan,
+                    span: util.someCodeSpan,
+                    fieldSpan: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
             decl.emitStatement(context)
             expect(context.scope.emitted[0]).toMatchObject({
@@ -262,7 +262,7 @@ describe('VariableDeclaration', () => {
         })
 
         test('for a VariableReference', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
@@ -273,7 +273,7 @@ describe('VariableDeclaration', () => {
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
                                 IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
+                                { span: util.someCodeSpan },
                             ),
                         },
                     ],
@@ -307,14 +307,14 @@ describe('VariableDeclaration', () => {
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
-                    { span: someCodeSpan },
+                    { span: util.someCodeSpan },
                 ),
                 initialValue: VariableReference.create({
                     name: 'bar',
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
             decl.emitStatement(context)
             expect(context.scope.emitted[0]).toMatchObject({
@@ -329,7 +329,7 @@ describe('VariableDeclaration', () => {
         })
 
         test('but not for non-RC fields', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
@@ -340,7 +340,7 @@ describe('VariableDeclaration', () => {
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
                                 IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
+                                { span: util.someCodeSpan },
                             ),
                         },
                     ],
@@ -371,20 +371,20 @@ describe('VariableDeclaration', () => {
                 name: 'foo',
                 isolationLevel: ISOLATED,
                 domain: decorateDomain(IntegerRange.unconstrained(), {
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
                 initialValue: FieldReference.create({
                     object: VariableReference.create({
                         name: 'bar',
-                        span: someCodeSpan,
+                        span: util.someCodeSpan,
                     }),
                     field: 'field',
                     operator: '.',
-                    span: someCodeSpan,
-                    fieldSpan: someCodeSpan,
+                    span: util.someCodeSpan,
+                    fieldSpan: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
             decl.emitStatement(context)
             expect(context.scope.emitted[0]).toMatchObject({
@@ -401,7 +401,7 @@ describe('VariableDeclaration', () => {
     })
 
     it('outputs an initializer literal as CALL', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addObjectDeclaration(
             ObjectDeclaration.create({
                 kind: 'object',
@@ -417,7 +417,7 @@ describe('VariableDeclaration', () => {
                 mutating: [],
                 readonly: [],
                 fields: [],
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             }),
         )
 
@@ -429,19 +429,19 @@ describe('VariableDeclaration', () => {
                 RCTypeSet.create({
                     type: TypeName.create({ name: 'Object' }),
                 }),
-                { span: someCodeSpan },
+                { span: util.someCodeSpan },
             ),
             initialValue: DataLiteral.create({
                 initializerCall: FunctionCall.create({
                     baseName: 'new',
                     arguments: [],
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
                 fields: [],
-                span: someCodeSpan,
+                span: util.someCodeSpan,
             }),
-            nameSpan: someCodeSpan,
-            span: someCodeSpan,
+            nameSpan: util.someCodeSpan,
+            span: util.someCodeSpan,
         })
 
         const result = decl.emitStatement(context)
@@ -493,16 +493,16 @@ describe('VariableDeclaration', () => {
                 name: 'x',
                 isolationLevel: ISOLATED,
                 domain: decorateDomain(IntegerRange.unconstrained(), {
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
                 initialValue: IntegerLiteral.create({
                     value: 42n,
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             decl.emitStatement(context)
             expect(context.scope.variableDeclaration('x')).toEqual({
                 isImmutable: true,
@@ -512,7 +512,7 @@ describe('VariableDeclaration', () => {
         })
 
         test('for a nested rc-type variable', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'InnerType' }),
@@ -523,7 +523,7 @@ describe('VariableDeclaration', () => {
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
                                 IntegerRange.unconstrained(),
-                                { span: someCodeSpan },
+                                { span: util.someCodeSpan },
                             ),
                         },
                     ],
@@ -543,7 +543,7 @@ describe('VariableDeclaration', () => {
                                         name: 'InnerType',
                                     }),
                                 }),
-                                { span: someCodeSpan },
+                                { span: util.someCodeSpan },
                             ),
                         },
                     ],
@@ -558,7 +558,7 @@ describe('VariableDeclaration', () => {
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'OuterType' }),
                     }),
-                    { span: someCodeSpan },
+                    { span: util.someCodeSpan },
                 ),
                 initialValue: DataLiteral.create({
                     fields: [
@@ -570,18 +570,18 @@ describe('VariableDeclaration', () => {
                                         name: 'innerField',
                                         value: IntegerLiteral.create({
                                             value: 42n,
-                                            span: someCodeSpan,
+                                            span: util.someCodeSpan,
                                         }),
                                     },
                                 ],
-                                span: someCodeSpan,
+                                span: util.someCodeSpan,
                             }),
                         },
                     ],
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
 
             declaration.emitStatement(context)
@@ -603,7 +603,7 @@ describe('VariableDeclaration', () => {
         })
 
         it('converts UNIQUE expression to ISOLATED', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
@@ -619,21 +619,21 @@ describe('VariableDeclaration', () => {
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
-                    { span: someCodeSpan },
+                    { span: util.someCodeSpan },
                 ),
                 initialValue: DataLiteral.create({
                     fields: [],
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
             decl.emitStatement(context)
             expect(context.scope.currentValue('foo')).toBeInstanceOf(RCTypeSet)
         })
 
         it('converts UNIQUE expression to SHARED', () => {
-            const context = newSemanticContext()
+            const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyData' }),
@@ -656,7 +656,7 @@ describe('VariableDeclaration', () => {
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'MyData' }),
                     }),
-                    { span: someCodeSpan },
+                    { span: util.someCodeSpan },
                 ),
                 initialValue: FunctionCall.create({
                     baseName: 'copy',
@@ -665,14 +665,14 @@ describe('VariableDeclaration', () => {
                             label: 'of',
                             value: VariableReference.create({
                                 name: 'c',
-                                span: someCodeSpan,
+                                span: util.someCodeSpan,
                             }),
                         },
                     ],
-                    span: someCodeSpan,
+                    span: util.someCodeSpan,
                 }),
-                nameSpan: someCodeSpan,
-                span: someCodeSpan,
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
             })
             decl.emitStatement(context)
             expect(context.scope.currentValue('r')).toMatchObject({
@@ -686,7 +686,7 @@ describe('VariableDeclaration', () => {
 
         cases.forEach((isImmutable) => {
             test(`mut target = SHARED value`, () => {
-                const context = newSemanticContext()
+                const context = util.newSemanticContext()
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
                         name: TypeName.create({ name: 'MyType' }),
@@ -697,7 +697,7 @@ describe('VariableDeclaration', () => {
                                 isolationLevel: ISOLATED,
                                 domain: decorateDomain(
                                     IntegerRange.unconstrained(),
-                                    { span: someCodeSpan },
+                                    { span: util.someCodeSpan },
                                 ),
                             },
                         ],
@@ -731,7 +731,7 @@ describe('VariableDeclaration', () => {
                         RCTypeSet.create({
                             type: TypeName.create({ name: 'MyType' }),
                         }),
-                        { span: someCodeSpan },
+                        { span: util.someCodeSpan },
                     ),
                     initialValue: VariableReference.create({
                         name: 'value',
@@ -740,8 +740,8 @@ describe('VariableDeclaration', () => {
                             end: { line: 1, column: 4 },
                         },
                     }),
-                    nameSpan: someCodeSpan,
-                    span: someCodeSpan,
+                    nameSpan: util.someCodeSpan,
+                    span: util.someCodeSpan,
                 })
                 const result = declaration.emitStatement(context)
                 expect(result.isError && result.error.errors).toMatchObject([

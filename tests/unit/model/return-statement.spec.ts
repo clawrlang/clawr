@@ -1,23 +1,20 @@
 import { Context } from '@/model'
 import { DataDeclaration } from '@/model/data-declaration'
-import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { ReturnStatement } from '@/model/return-statement'
-import { TypeName } from '@/model/type-name'
 import { IntegerRange, RCTypeSet, TruthvalueSet } from '@/model/value-set'
-import { VariableReference } from '@/model/variable-reference'
-import { newSemanticContext, someCodeSpan } from '@@/util'
+import * as util from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('ReturnStatement', () => {
     it('converts to CIR', () => {
         const returnStatement = ReturnStatement.create({
-            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-            span: someCodeSpan,
+            value: util.integerLiteral(42),
+            span: util.someCodeSpan,
         })
 
         const context: Context = {
-            ...newSemanticContext(),
+            ...util.newSemanticContext(),
             calleeResult: {
                 domain: IntegerRange.unconstrained(),
                 isolationLevel: ISOLATED,
@@ -33,11 +30,11 @@ describe('ReturnStatement', () => {
 
     it('disallows value for void functions', () => {
         const returnStatement = ReturnStatement.create({
-            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-            span: someCodeSpan,
+            value: util.integerLiteral(42),
+            span: util.someCodeSpan,
         })
 
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         const result = returnStatement.emitStatement(context)
         expect(result.isError).toBeTrue()
         expect(context.scope.emitted.length).toBe(0)
@@ -45,12 +42,12 @@ describe('ReturnStatement', () => {
 
     it('disallows value with incompatible type', () => {
         const returnStatement = ReturnStatement.create({
-            value: IntegerLiteral.create({ value: 42n, span: someCodeSpan }),
-            span: someCodeSpan,
+            value: util.integerLiteral(42),
+            span: util.someCodeSpan,
         })
 
         const context: Context = {
-            ...newSemanticContext(),
+            ...util.newSemanticContext(),
             calleeResult: {
                 domain: TruthvalueSet.unconstrained(),
                 isolationLevel: ISOLATED,
@@ -62,10 +59,10 @@ describe('ReturnStatement', () => {
     })
 
     it('disallows value with wrong isolation-level', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
-                name: TypeName.create({ name: 'MyData' }),
+                name: util.simpleTypeName('MyData'),
                 fields: [],
             }),
         )
@@ -73,19 +70,19 @@ describe('ReturnStatement', () => {
             isImmutable: true,
             isolationLevel: ISOLATED,
             domain: RCTypeSet.create({
-                type: TypeName.create({ name: 'MyData' }),
+                type: util.simpleTypeName('MyData'),
             }),
         })
         const returnStatement = ReturnStatement.create({
-            value: VariableReference.create({ name: 'x', span: someCodeSpan }),
-            span: someCodeSpan,
+            value: util.variableRef('x'),
+            span: util.someCodeSpan,
         })
 
         const result = returnStatement.emitStatement({
             ...context,
             calleeResult: {
                 domain: RCTypeSet.create({
-                    type: TypeName.create({ name: 'MyData' }),
+                    type: util.simpleTypeName('MyData'),
                 }),
                 isolationLevel: SHARED,
             },

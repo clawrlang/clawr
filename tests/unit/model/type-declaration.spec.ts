@@ -1,35 +1,22 @@
 import { DataDeclaration } from '@/model/data-declaration'
-import { decorateDomain } from '@/model/domain-declaration'
-import { ISOLATED } from '@/model/isolation-level'
-import { TypeName } from '@/model/type-name'
-import { IntegerRange, TruthvalueSet } from '@/model/value-set'
-import { newSemanticContext, someCodeSpan } from '@@/util'
+import { TruthvalueSet } from '@/model/value-set'
+import * as util from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {
         const dataDecl = DataDeclaration.create({
-            name: TypeName.create({ name: 'MyData' }),
+            name: util.simpleTypeName('MyData'),
             fields: [
+                { ...util.someFieldDeclConfig, name: 'field1' },
                 {
-                    name: 'field1',
-                    isImmutable: false,
-                    isolationLevel: ISOLATED,
-                    domain: decorateDomain(IntegerRange.unconstrained(), {
-                        span: someCodeSpan,
-                    }),
-                },
-                {
+                    ...util.someFieldDeclConfig,
                     name: 'field2',
-                    isImmutable: false,
-                    isolationLevel: ISOLATED,
-                    domain: decorateDomain(TruthvalueSet.unconstrained(), {
-                        span: someCodeSpan,
-                    }),
+                    domain: util.spannedDomain(TruthvalueSet.unconstrained()),
                 },
             ],
         })
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         dataDecl.emitDeclaration(context)
         expect(context.scope.rootScope.emitted).toEqual([
             {

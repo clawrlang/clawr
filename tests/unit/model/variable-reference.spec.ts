@@ -1,25 +1,20 @@
 import { DataDeclaration } from '@/model/data-declaration'
-import { decorateDomain } from '@/model/domain-declaration'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { TypeName } from '@/model/type-name'
 import { IntegerRange, RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
-import { newSemanticContext, someCodeSpan } from '@@/util'
+import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Variable Reference', () => {
     it('generates correct CIR', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             domain: IntegerRange.create({ min: 10n, max: 10n }),
         })
 
-        const variableRef = VariableReference.create({
-            name: 'myVar',
-            span: someCodeSpan,
-        })
+        const variableRef = util.variableRef('myVar')
         const result = variableRef.toCIRExpression(context)
         expect(result.isSuccess && result.value).toMatchObject({
             kind: 'VARIABLE_REF',
@@ -34,7 +29,7 @@ describe('Variable Reference', () => {
         }
         const variableRef = VariableReference.create({ name: 'myVar', span })
 
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         const result = variableRef.toCIRExpression(context)
         expect(result.isError && result.error.errors[0]).toMatchObject({
             message: `Variable myVar is not defined in the current context`,
@@ -43,17 +38,14 @@ describe('Variable Reference', () => {
     })
 
     it('infers its type from the context', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             domain: IntegerRange.create({ min: 10n, max: 10n }),
         })
 
-        const variableRef = VariableReference.create({
-            name: 'myVar',
-            span: someCodeSpan,
-        })
+        const variableRef = util.variableRef('myVar')
         const result = variableRef.domain(context)
         expect(result.isSuccess && result.value).toEqual(
             IntegerRange.create({ min: 10n, max: 10n }),
@@ -61,17 +53,14 @@ describe('Variable Reference', () => {
     })
 
     it('has the same current value as the referenced variable', () => {
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
             domain: IntegerRange.create({ min: 10n, max: 10n }),
         })
 
-        const variableRef = VariableReference.create({
-            name: 'myVar',
-            span: someCodeSpan,
-        })
+        const variableRef = util.variableRef('myVar')
         const result = variableRef.currentValue(context)
         expect(result.isSuccess && result.value).toMatchObject({
             min: 10n,
@@ -82,20 +71,11 @@ describe('Variable Reference', () => {
     describe('infers isolation level from the context', () => {
         const cases = [ISOLATED, SHARED] as const
 
-        const context = newSemanticContext()
+        const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
-                name: TypeName.create({ name: 'MyType' }),
-                fields: [
-                    {
-                        isImmutable: false,
-                        name: 'myField',
-                        isolationLevel: ISOLATED,
-                        domain: decorateDomain(IntegerRange.unconstrained(), {
-                            span: someCodeSpan,
-                        }),
-                    },
-                ],
+                name: util.simpleTypeName('MyType'),
+                fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
             }),
         )
 
@@ -105,14 +85,11 @@ describe('Variable Reference', () => {
                     isImmutable: true,
                     isolationLevel,
                     domain: RCTypeSet.create({
-                        type: TypeName.create({ name: 'MyType' }),
+                        type: util.simpleTypeName('MyType'),
                     }),
                 })
 
-                const variableRef = VariableReference.create({
-                    name: 'myVar',
-                    span: someCodeSpan,
-                })
+                const variableRef = util.variableRef('myVar')
                 const result = variableRef.isolationLevel(context)
                 expect(result.isSuccess && result.value).toEqual(isolationLevel)
             })

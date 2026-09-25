@@ -14,12 +14,14 @@ export type ClawrModule = {
 type InterfaceDeclaration = {
     kind: 'INTERFACE_DECL'
     name: string
+    namespace?: string
     methods: FunctionSignature[]
 }
 
 type VariableDeclaration = {
     kind: 'VARIABLE_DECL'
     name: string
+    namespace?: string
     domain: ValueSet
     initialValue: Expression
 }
@@ -27,7 +29,7 @@ type VariableDeclaration = {
 type FunctionDeclaration = {
     kind: 'FUNCTION_DECL'
     body: Statement[]
-} & FunctionSignature
+} & FunctionSignature & { namespace?: string }
 
 type FunctionSignature = {
     baseName: string
@@ -43,6 +45,7 @@ type RCTypeDeclaration = {
     // `data` only supports these
     kind: 'RC_TYPE_DECL'
     name: string
+    namespace?: string
     fields: {
         name: string
         domain: ValueSet
@@ -75,12 +78,11 @@ type FunctionName = {
     labels: string[]
 }
 
-export type Declaration = { namespace?: string } & (
+export type Declaration =
     | VariableDeclaration
     | FunctionDeclaration
     | RCTypeDeclaration
     | InterfaceDeclaration
-)
 
 // ----------
 // Statements

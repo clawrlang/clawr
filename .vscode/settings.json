@@ -483,6 +483,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -499,6 +500,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -518,6 +520,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -543,6 +546,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -559,6 +563,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -575,6 +580,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -590,6 +596,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -615,6 +622,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -631,6 +639,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -647,6 +656,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -719,6 +729,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -734,6 +745,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -753,6 +765,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -770,6 +783,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -786,6 +800,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -802,6 +817,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -817,6 +833,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -834,6 +851,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -850,6 +868,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -866,6 +885,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -939,6 +959,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -970,6 +991,7 @@
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "methods": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/FunctionSignature" }
@@ -1851,6 +1873,7 @@
             "properties": {
               "kind": { "const": "VARIABLE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "domain": { "$ref": "#/$defs/ValueSet" },
               "initialValue": { "$ref": "#/$defs/Expression" }
             },
@@ -1859,83 +1882,58 @@
           },
           "Declaration": {
             "oneOf": [
-              { "$ref": "#/$defs/__typeInterfaceDeclaration" },
-              { "$ref": "#/$defs/__typeVariableDeclaration" },
-              { "$ref": "#/$defs/__type__type" },
-              { "$ref": "#/$defs/__type__typeFunctionSignature" },
-              { "$ref": "#/$defs/__type__type__type-o8" }
-            ]
-          },
-          "__typeInterfaceDeclaration": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "INTERFACE_DECL" },
-              "name": { "type": "string" },
-              "methods": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/FunctionSignature" }
-              },
-              "namespace": { "type": "string" }
-            },
-            "required": ["kind", "name", "methods"],
-            "additionalProperties": false
-          },
-          "__typeVariableDeclaration": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "VARIABLE_DECL" },
-              "name": { "type": "string" },
-              "domain": { "$ref": "#/$defs/ValueSet" },
-              "initialValue": { "$ref": "#/$defs/Expression" },
-              "namespace": { "type": "string" }
-            },
-            "required": ["kind", "name", "domain", "initialValue"],
-            "additionalProperties": false
-          },
-          "__type__type": {
-            "type": "object",
-            "properties": {
-              "namespace": { "type": "string" },
-              "kind": { "const": "RC_TYPE_DECL" },
-              "name": { "type": "string" },
-              "fields": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "domain": { "$ref": "#/$defs/ValueSet" }
-                  },
-                  "required": ["name", "domain"],
-                  "additionalProperties": false
-                }
-              },
-              "conformances": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "interface": { "$ref": "#/$defs/CanonicalName" },
-                    "fulfillments": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "requirement": { "$ref": "#/$defs/FunctionName" },
-                          "implementation": { "$ref": "#/$defs/FunctionName" }
-                        },
-                        "required": ["requirement", "implementation"],
-                        "additionalProperties": false
-                      }
+              {
+                "type": "object",
+                "properties": {
+                  "kind": { "const": "RC_TYPE_DECL" },
+                  "name": { "type": "string" },
+                  "namespace": { "type": "string" },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "domain": { "$ref": "#/$defs/ValueSet" }
+                      },
+                      "required": ["name", "domain"],
+                      "additionalProperties": false
                     }
                   },
-                  "required": ["interface", "fulfillments"],
-                  "additionalProperties": false
-                }
-              }
-            },
-            "required": ["kind", "name", "fields"],
-            "additionalProperties": false
+                  "conformances": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "interface": { "$ref": "#/$defs/CanonicalName" },
+                        "fulfillments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "requirement": { "$ref": "#/$defs/FunctionName" },
+                              "implementation": {
+                                "$ref": "#/$defs/FunctionName"
+                              }
+                            },
+                            "required": ["requirement", "implementation"],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": ["interface", "fulfillments"],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": ["kind", "name", "fields"],
+                "additionalProperties": false
+              },
+              { "$ref": "#/$defs/__type__type" },
+              { "$ref": "#/$defs/InterfaceDeclaration" },
+              { "$ref": "#/$defs/VariableDeclaration" },
+              { "$ref": "#/$defs/FunctionDeclaration" }
+            ]
           },
           "CanonicalName": {
             "type": "object",
@@ -1955,55 +1953,12 @@
             "required": ["baseName", "labels"],
             "additionalProperties": false
           },
-          "__type__typeFunctionSignature": {
+          "__type__type": {
             "type": "object",
             "properties": {
-              "kind": { "const": "FUNCTION_DECL" },
-              "body": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/Statement" }
-              },
-              "baseName": { "type": "string" },
-              "labels": { "type": "array", "items": { "type": "string" } },
-              "parameters": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "domain": { "$ref": "#/$defs/ValueSet" }
-                  },
-                  "required": ["name", "domain"],
-                  "additionalProperties": false
-                }
-              },
-              "domain": {
-                "oneOf": [
-                  { "$ref": "#/$defs/__type__type__type-o7" },
-                  { "$ref": "#/$defs/__type__type__type-o6" },
-                  { "$ref": "#/$defs/__type__type__type-o5" },
-                  { "$ref": "#/$defs/__type__type__type-o4" },
-                  { "$ref": "#/$defs/__type__type__type-o3" },
-                  { "$ref": "#/$defs/__type__type__type-o2" },
-                  { "$ref": "#/$defs/__type__type__type-o1" },
-                  { "$ref": "#/$defs/__type__type__type" },
-                  { "$ref": "#/$defs/InterfaceSet" },
-                  { "$ref": "#/$defs/RCTypeSet" },
-                  { "$ref": "#/$defs/StringSet" },
-                  { "$ref": "#/$defs/TruthvalueSettruthvalue" }
-                ]
-              },
-              "namespace": { "type": "string" }
-            },
-            "required": ["kind", "body", "baseName", "labels", "parameters"],
-            "additionalProperties": false
-          },
-          "__type__type__type-o8": {
-            "type": "object",
-            "properties": {
-              "namespace": { "type": "string" },
               "kind": { "const": "RC_TYPE_DECL" },
               "name": { "type": "string" },
+              "namespace": { "type": "string" },
               "fields": {
                 "type": "array",
                 "items": {
@@ -2046,7 +2001,9 @@
               },
               "initializers": {
                 "type": "array",
-                "items": { "$ref": "#/$defs/__typeFunctionSignature__type" }
+                "items": {
+                  "$ref": "#/$defs/__typeFunctionSignature__type__type"
+                }
               },
               "dispatchTable": {
                 "type": "array",
@@ -2073,6 +2030,7 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/Statement" }
               },
+              "namespace": { "type": "string" },
               "baseName": { "type": "string" },
               "labels": { "type": "array", "items": { "type": "string" } },
               "parameters": {
@@ -2107,7 +2065,7 @@
             "required": ["kind", "body", "baseName", "labels", "parameters"],
             "additionalProperties": false
           },
-          "__typeFunctionSignature__type": {
+          "__typeFunctionSignature__type__type": {
             "type": "object",
             "properties": {
               "kind": { "const": "FUNCTION_DECL" },
@@ -2115,6 +2073,7 @@
                 "type": "array",
                 "items": { "$ref": "#/$defs/Statement" }
               },
+              "namespace": { "type": "string" },
               "baseName": { "type": "string" },
               "labels": { "type": "array", "items": { "type": "string" } },
               "parameters": {
@@ -2131,6 +2090,20 @@
               }
             },
             "required": ["kind", "body", "baseName", "labels", "parameters"],
+            "additionalProperties": false
+          },
+          "InterfaceDeclaration": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "INTERFACE_DECL" },
+              "name": { "type": "string" },
+              "namespace": { "type": "string" },
+              "methods": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/FunctionSignature" }
+              }
+            },
+            "required": ["kind", "name", "methods"],
             "additionalProperties": false
           }
         }

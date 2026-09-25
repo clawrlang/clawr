@@ -76,3 +76,4 @@ Draft ideas with no ADR number:
 - [Efficient Construction](./drafts/efficient-construction.md)
 - [Published Schema](./drafts/published-schema.md)
 - [Miscellaneous](./drafts/misc.md)
+- [`helper` Keyword](./drafts/helper.md)

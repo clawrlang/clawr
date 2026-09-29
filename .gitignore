@@ -5,3 +5,4 @@ dist/
 .typia-temp/
 generated/
 .obsidian/
+*.tsbuildinfo

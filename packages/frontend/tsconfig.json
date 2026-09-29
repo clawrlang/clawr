@@ -1,7 +1,8 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
-    "module": "commonjs",
+    "module": "nodenext",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "types": ["bun-types"],
@@ -13,12 +14,11 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "plugins": [{ "transform": "@ttsc/paths" }],
     "paths": {
-      "#/*": ["./generated/*", "./placeholders/*"],
       "@/*": ["./src/*"],
       "@@/*": ["./tests/*"]
     }
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dist", "generated", "packages"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }

@@ -6,11 +6,14 @@ import fs from 'fs/promises'
 import path from 'path'
 
 import * as backend from '@/backend'
-import { TokenStream } from '@/lexer'
-import { Scope } from '@/model/scope'
-import { ModuleParser } from '@/parser'
-import { SourceCodeSpan } from '@/tools/diagnostics'
-import { SemanticError, SemanticErrorCollection } from '@/tools/semantic-error'
+import { TokenStream } from '@clawr/frontend/lexer'
+import { Scope } from '@clawr/frontend/model/scope'
+import { ModuleParser } from '@clawr/frontend/parser'
+import {
+    SemanticError,
+    SemanticErrorCollection,
+    SourceCodeSpan,
+} from '@clawr/frontend/tools'
 import { RWRCErrorReporter } from './error-reporter'
 
 const exeDir = path.dirname(process.execPath)

@@ -1,4 +1,4 @@
-import { ErrorReporter, SourceCodeSpan } from '@/tools/diagnostics'
+import { ErrorReporter, SourceCodeSpan } from '@clawr/frontend/tools'
 
 export class RWRCErrorReporter implements ErrorReporter {
     constructor(private file: string) {}

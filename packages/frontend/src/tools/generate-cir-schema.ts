@@ -59,7 +59,10 @@ main().catch((error) => {
 })
 
 async function updateVSCodeSchemaSettings(schema: JsonSchema) {
-    const settingsPath = path.resolve(__dirname, '../../.vscode/settings.json')
+    const settingsPath = path.resolve(
+        __dirname,
+        '../../../../.vscode/settings.json',
+    )
     const settings = await loadVSCodeSettings()
     settings['json.schemas'] = [
         {

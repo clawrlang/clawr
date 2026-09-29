@@ -16,10 +16,10 @@
     "packages/*"
   ],
   "scripts": {
-    "pretest:unit": "npm run build --workspace=@clawr/cir",
+    "pretest:unit": "npm run build --workspace=@clawr/cir && npm test --workspace=@clawr/frontend",
     "test:unit": "tsc --noEmit && BUN_JSC_useTailCalls=0 bun test ./tests/unit/",
     "build": "tsc --noEmit && npm run build:runtime && npm run build:rwrc",
-    "build:schema": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && node .typia-temp/tools/generate-cir-schema.js && npx prettier --write .vscode/settings.json",
+    "build:schema": "npm run build:schema --workspace=@clawr/frontend",
     "build:rwrc": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && bun build .typia-temp/rwrc/index.js --compile --outfile dist/rwrc",
     "build:typia": "rm -rf generated/cir-parser && npx ttsc -p tsconfig.typia.generated.json",
     "test:backend": "npm run build:runtime && npm run build:typia && bun test ./tests/backend/*.test.ts",
@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@clawr/cir": "^0.1.0",
+    "@clawr/frontend": "^0.1.0",
     "commander": "^15.0.0",
     "decimalish": "^0.1.2",
     "typia": "^14.0.4"

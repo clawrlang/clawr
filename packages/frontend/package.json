@@ -1,0 +1,73 @@
+{
+  "name": "@clawr/frontend",
+  "version": "0.1.0",
+  "description": "Clawr compiler frontend library: parses and analyzes Clawr source code and emits CIR.",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./model": {
+      "types": "./dist/src/model/index.d.ts",
+      "default": "./dist/src/model/index.js"
+    },
+    "./model/*": {
+      "types": "./dist/src/model/*.d.ts",
+      "default": "./dist/src/model/*.js"
+    },
+    "./parser": {
+      "types": "./dist/src/parser/index.d.ts",
+      "default": "./dist/src/parser/index.js"
+    },
+    "./parser/*": {
+      "types": "./dist/src/parser/*.d.ts",
+      "default": "./dist/src/parser/*.js"
+    },
+    "./lexer": {
+      "types": "./dist/src/lexer/index.d.ts",
+      "default": "./dist/src/lexer/index.js"
+    },
+    "./lexer/*": {
+      "types": "./dist/src/lexer/*.d.ts",
+      "default": "./dist/src/lexer/*.js"
+    },
+    "./tools": {
+      "types": "./dist/src/tools/index.d.ts",
+      "default": "./dist/src/tools/index.js"
+    },
+    "./tools/*": {
+      "types": "./dist/src/tools/*.d.ts",
+      "default": "./dist/src/tools/*.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "pretest": "npm run build",
+    "test": "tsc --noEmit && BUN_JSC_useTailCalls=0 bun test ./tests",
+    "build": "ttsc -p tsconfig.json",
+    "build:schema": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && node .typia-temp/tools/generate-cir-schema.js && npx prettier --write ../../.vscode/settings.json",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@clawr/cir": "^0.1.0",
+    "commander": "^15.0.0",
+    "decimalish": "^0.1.2",
+    "typia": "^14.0.4"
+  },
+  "devDependencies": {
+    "@ttsc/paths": "^0.28.4",
+    "@types/bun": "^1.4.0",
+    "@types/node": "^26.4.1",
+    "bun": "^1.4.0",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "ttsc": "^0.28.4",
+    "typescript": "^7.0.2"
+  }
+}

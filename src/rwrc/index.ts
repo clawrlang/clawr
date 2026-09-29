@@ -5,7 +5,7 @@ import { Command } from 'commander'
 import fs from 'fs/promises'
 import path from 'path'
 
-import * as backend from '@/backend'
+import * as backend from '@clawr/backend'
 import { TokenStream } from '@clawr/frontend/lexer'
 import { Scope } from '@clawr/frontend/model/scope'
 import { ModuleParser } from '@clawr/frontend/parser'
@@ -83,6 +83,7 @@ async function compileCIR(cirFilePath: string) {
             path.join(exeDir, 'include'),
             cFilePath,
             path.join(exeDir, 'libClawr.A.dylib'),
+            `-Wl,-rpath,${exeDir}`,
             '-o',
             exePath,
         ],

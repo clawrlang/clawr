@@ -14,11 +14,10 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "paths": {
-      "#/*": ["./generated/*", "./placeholders/*"],
       "@/*": ["./src/*"],
       "@@/*": ["./tests/*"]
     }
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dist", "generated", "packages"]
+  "exclude": ["node_modules", "dist", "packages"]
 }

@@ -1,4 +1,4 @@
-import { lowerExpr, lowerStmt } from '@/backend'
+import { lowerExpr, lowerStmt } from '@clawr/backend'
 import { Declaration, Expression } from '@clawr/cir'
 import { describe, expect, it } from 'bun:test'
 

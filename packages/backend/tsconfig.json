@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "plugins": [
+      { "transform": "typia/lib/transform" },
+      { "transform": "@ttsc/paths" }
+    ],
+    "paths": {
+      "#/cir-parser": [
+        "./generated/cir-parser/index.d.ts",
+        "./placeholders/cir-parser/index.ts"
+      ]
+    }
+  },
+  "include": ["src/**/*.ts", "placeholders/**/*.ts"]
+}

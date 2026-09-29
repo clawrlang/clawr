@@ -1,4 +1,4 @@
-import * as backend from '@/backend'
+import * as backend from '@clawr/backend'
 import { describe, expect, test } from 'bun:test'
 import fs from 'fs'
 import child_process from 'node:child_process'
@@ -8,7 +8,7 @@ const CASES_DIR = path.join(__dirname, 'cases')
 const OUTPUT_DIR = path.join(__dirname, '.out')
 
 describe('Lowering Tests', () => {
-    const distDir = path.resolve(process.cwd(), 'dist')
+    const distDir = path.resolve(process.cwd(), '../../dist')
     const cases = fs
         .readdirSync(CASES_DIR, { withFileTypes: true })
         .map((f) => f.name)
@@ -32,6 +32,7 @@ describe('Lowering Tests', () => {
                 path.join(distDir, 'include'),
                 path.join(OUTPUT_DIR, `${fileName.replace(/.cir$/, '.c')}`),
                 path.join(distDir, 'libClawr.A.dylib'),
+                `-Wl,-rpath,${distDir}`,
                 '-o',
                 exePath,
             ])

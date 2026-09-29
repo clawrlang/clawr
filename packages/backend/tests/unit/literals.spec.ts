@@ -1,4 +1,4 @@
-import { lowerExpr } from '@/backend'
+import { lowerExpr } from '@clawr/backend'
 import { Expression } from '@clawr/cir'
 import { ISOLATED } from '@clawr/frontend/model/isolation-level'
 import { truthvalue } from '@clawr/frontend/model/value-set'

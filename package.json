@@ -16,19 +16,22 @@
     "packages/*"
   ],
   "scripts": {
-    "pretest:unit": "npm run build --workspace=@clawr/cir && npm test --workspace=@clawr/frontend",
-    "test:unit": "tsc --noEmit && BUN_JSC_useTailCalls=0 bun test ./tests/unit/",
+    "pretest:unit": "npm run build --workspace=@clawr/cir",
+    "test:unit": "tsc --noEmit && npm test --workspace=@clawr/frontend && npm run test:unit --workspace=@clawr/backend",
     "build": "tsc --noEmit && npm run build:runtime && npm run build:rwrc",
+    "build:backend": "npm run build --workspace=@clawr/backend",
     "build:schema": "npm run build:schema --workspace=@clawr/frontend",
     "build:rwrc": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && bun build .typia-temp/rwrc/index.js --compile --outfile dist/rwrc",
-    "build:typia": "rm -rf generated/cir-parser && npx ttsc -p tsconfig.typia.generated.json",
-    "test:backend": "npm run build:runtime && npm run build:typia && bun test ./tests/backend/*.test.ts",
+    "test:backend": "npm test --workspace=@clawr/backend",
+    "pretest:e2e": "npm run build:backend",
     "test:e2e": "npm run build && bun test ./tests/e2e/*.test.ts",
-    "build:runtime": "mkdir -p dist && rm -rf dist/include && bun run cp -R src/runtime/include dist/include && clang -I dist/include src/runtime/*.c -dynamiclib -fvisibility=hidden -current_version 0.0.1 -compatibility_version 0.0.1 -o dist/libClawr.A.dylib",
+    "build:runtime": "mkdir -p dist && rm -rf dist/include && bun run cp -R src/runtime/include dist/include && clang -I dist/include src/runtime/*.c -dynamiclib -fvisibility=hidden -current_version 0.0.1 -compatibility_version 0.0.1 -Wl,-install_name,@rpath/libClawr.A.dylib -o dist/libClawr.A.dylib",
     "test:runtime": "npm run build:runtime && bun test ./tests/runtime/*.test.ts",
+    "pretest": "npm run build:backend",
     "test": "npm run test:unit && npm run test:backend && npm run test:e2e"
   },
   "dependencies": {
+    "@clawr/backend": "^0.1.0",
     "@clawr/cir": "^0.1.0",
     "@clawr/frontend": "^0.1.0",
     "commander": "^15.0.0",

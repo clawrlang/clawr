@@ -2,8 +2,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./placeholders",
-    "outDir": "./generated",
+    "rootDir": "placeholders",
+    "outDir": "generated",
     "declaration": true
   },
   "include": ["placeholders/cir-parser/index.ts"],

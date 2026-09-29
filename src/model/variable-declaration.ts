@@ -1,7 +1,7 @@
-import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
+import * as cir from '@clawr/cir'
 import assert from 'assert'
 import { Context, Declaration, Expression, Statement } from '.'
 import { DataLiteral } from './data-literal'

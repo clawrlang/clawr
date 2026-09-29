@@ -1,8 +1,8 @@
 import CIRParser from '#/cir-parser'
-import * as cir from '@/cir'
+import * as cir from '@clawr/cir'
 
 export function lower(json: string): string {
-    const cir = CIRParser.parse(json)
+    const cir: cir.ClawrModule = CIRParser.parse(json)
 
     const variableDecls =
         cir.declarations?.filter((decl) => decl.kind === 'VARIABLE_DECL') ?? []

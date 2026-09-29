@@ -1,4 +1,4 @@
-import * as cir from '@/cir'
+import * as cir from '@clawr/cir'
 import { TypeName } from './type-name'
 
 export interface ValueSet {

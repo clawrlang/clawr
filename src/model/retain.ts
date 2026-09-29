@@ -1,7 +1,7 @@
-import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import { SemanticResult } from '@/tools/semantic-result'
+import * as cir from '@clawr/cir'
 import { Context, ContextWithDomain, Expression, isStorage } from '.'
 import { FieldReference } from './field-reference'
 import { AnyIsolationLevel } from './isolation-level'

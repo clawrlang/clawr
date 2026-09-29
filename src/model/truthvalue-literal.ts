@@ -1,6 +1,6 @@
-import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
+import * as cir from '@clawr/cir'
 import { Expression } from '.'
 import { ISOLATED } from './isolation-level'
 import { TruthvalueSet, ValueSet, truthvalue } from './value-set'

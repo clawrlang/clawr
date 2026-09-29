@@ -1,5 +1,5 @@
-import * as cir from '@/cir'
 import { ErrorResult, Result } from '@/tools/result'
+import * as cir from '@clawr/cir'
 import { DataDeclaration } from './data-declaration'
 import { FunctionDeclaration } from './function-declaration'
 import { FunctionName } from './function-name'

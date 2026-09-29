@@ -1,4 +1,3 @@
-import * as cir from '@/cir'
 import { DataDeclaration } from '@/model/data-declaration'
 import { DataLiteral } from '@/model/data-literal'
 import { FunctionDeclaration } from '@/model/function-declaration'
@@ -8,6 +7,7 @@ import { ReturnStatement } from '@/model/return-statement'
 import { IntegerRange, RCTypeSet, StringSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import * as util from '@@/util'
+import * as cir from '@clawr/cir'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('FunctionDeclaration', () => {

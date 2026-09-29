@@ -1,7 +1,7 @@
-import * as cir from '@/cir'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
+import * as cir from '@clawr/cir'
 import { Context, ContextWithDomain, Expression } from '.'
 import { FunctionCall } from './function-call'
 import { UNIQUE } from './isolation-level'

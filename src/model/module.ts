@@ -1,5 +1,5 @@
-import * as cir from '@/cir'
 import { SemanticResult } from '@/tools/semantic-result'
+import * as cir from '@clawr/cir'
 import { Context, Declaration, Statement } from '.'
 
 export class Module {

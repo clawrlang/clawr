@@ -1,0 +1,29 @@
+{
+  "name": "@clawr/cir",
+  "version": "0.1.0",
+  "description": "Clawr Intermediate Representation (CIR): the data structures that define the interface between Clawr compiler frontends and backends.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "decimalish": "^0.1.2",
+    "typia": "^15.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.0"
+  }
+}

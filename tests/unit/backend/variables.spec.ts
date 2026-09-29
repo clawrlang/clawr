@@ -1,5 +1,5 @@
 import { lowerExpr, lowerStmt } from '@/backend'
-import { Declaration, Expression } from '@/cir'
+import { Declaration, Expression } from '@clawr/cir'
 import { describe, expect, it } from 'bun:test'
 
 describe('Lowering Variables', () => {

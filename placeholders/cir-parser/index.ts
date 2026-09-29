@@ -3,7 +3,7 @@
  * Changes might not apply correctly unless the /generated/cir-parser folder is first deleted.
  */
 
-import { ClawrModule } from '@/cir'
+import { ClawrModule } from '@clawr/cir'
 import typia from 'typia'
 
 export default class CIRParser {

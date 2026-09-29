@@ -1,5 +1,5 @@
 import { lowerDecl } from '@/backend'
-import type * as cir from '@/cir'
+import type * as cir from '@clawr/cir'
 import { describe, expect, it } from 'bun:test'
 
 describe('Interface Declaration', () => {

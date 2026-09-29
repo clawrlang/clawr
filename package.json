@@ -12,7 +12,11 @@
       "default": "./dist/index.js"
     }
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
+    "pretest:unit": "npm run build --workspace=@clawr/cir",
     "test:unit": "tsc --noEmit && BUN_JSC_useTailCalls=0 bun test ./tests/unit/",
     "build": "tsc --noEmit && npm run build:runtime && npm run build:rwrc",
     "build:schema": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && node .typia-temp/tools/generate-cir-schema.js && npx prettier --write .vscode/settings.json",
@@ -25,6 +29,7 @@
     "test": "npm run test:unit && npm run test:backend && npm run test:e2e"
   },
   "dependencies": {
+    "@clawr/cir": "^0.1.0",
     "commander": "^15.0.0",
     "decimalish": "^0.1.2",
     "typia": "^14.0.4"

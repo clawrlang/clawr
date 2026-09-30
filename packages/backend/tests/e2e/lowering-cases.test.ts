@@ -8,7 +8,7 @@ const CASES_DIR = path.join(__dirname, 'cases')
 const OUTPUT_DIR = path.join(__dirname, '.out')
 
 describe('Lowering Tests', () => {
-    const distDir = path.resolve(process.cwd(), '../../dist')
+    const distDir = path.resolve(__dirname, '../../../runtime/dist')
     const cases = fs
         .readdirSync(CASES_DIR, { withFileTypes: true })
         .map((f) => f.name)

@@ -17,35 +17,17 @@
   ],
   "scripts": {
     "pretest:unit": "npm run build --workspace=@clawr/cir",
-    "test:unit": "tsc --noEmit && npm test --workspace=@clawr/frontend && npm run test:unit --workspace=@clawr/backend",
-    "build": "tsc --noEmit && npm run build:runtime && npm run build:rwrc",
+    "test:unit": "npm test --workspace=@clawr/frontend && npm run test:unit --workspace=@clawr/backend",
+    "build": "npm run build --workspace=@clawr/rwrc",
     "build:backend": "npm run build --workspace=@clawr/backend",
     "build:schema": "npm run build:schema --workspace=@clawr/frontend",
-    "build:rwrc": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && bun build .typia-temp/rwrc/index.js --compile --outfile dist/rwrc",
+    "build:rwrc": "npm run build:rwrc --workspace=@clawr/rwrc",
     "test:backend": "npm test --workspace=@clawr/backend",
     "pretest:e2e": "npm run build:backend",
-    "test:e2e": "npm run build && bun test ./tests/e2e/*.test.ts",
-    "build:runtime": "npm run build --workspace=@clawr/runtime && mkdir -p dist && cp -R packages/runtime/dist/include dist/include && cp packages/runtime/dist/libClawr.0.dylib dist/libClawr.0.dylib",
+    "test:e2e": "npm test --workspace=@clawr/rwrc",
+    "build:runtime": "npm run build --workspace=@clawr/runtime",
     "test:runtime": "npm test --workspace=@clawr/runtime",
     "pretest": "npm run build:backend",
     "test": "npm run test:unit && npm run test:backend && npm run test:e2e"
-  },
-  "dependencies": {
-    "@clawr/backend": "^0.1.0",
-    "@clawr/cir": "^0.1.0",
-    "@clawr/frontend": "^0.1.0",
-    "commander": "^15.0.0",
-    "decimalish": "^0.1.2",
-    "typia": "^14.0.4"
-  },
-  "devDependencies": {
-    "@ttsc/paths": "^0.28.4",
-    "@types/bun": "^1.4.0",
-    "@types/node": "^26.4.1",
-    "bun": "^1.4.0",
-    "eslint": "^10.9.1",
-    "prettier": "^3.9.6",
-    "ttsc": "^0.28.4",
-    "typescript": "^7.0.2"
   }
 }

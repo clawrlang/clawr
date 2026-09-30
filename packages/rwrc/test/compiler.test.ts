@@ -5,6 +5,7 @@ import path from 'path'
 
 const CASES_DIR = path.join(__dirname, 'cases')
 const OUTPUT_DIR = path.join(__dirname, '.out')
+const RWRC_PATH = path.resolve(__dirname, '../dist/rwrc')
 
 describe('End-to-end Tests', () => {
     const cases = fs
@@ -48,7 +49,7 @@ describe('End-to-end Tests', () => {
 })
 
 async function runCli(filePath: string) {
-    return await exec('./dist/rwrc', ['build', filePath, '-o', OUTPUT_DIR])
+    return await exec(RWRC_PATH, ['build', filePath, '-o', OUTPUT_DIR])
 }
 
 async function exec(command: string, args: string[]) {

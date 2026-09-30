@@ -55,7 +55,7 @@ async function runClang(filePath: string, exeFile: string) {
         '-I',
         path.join(RUNTIME_DIR, 'include'),
         filePath,
-        path.join(RUNTIME_DIR, 'libClawr.A.dylib'),
+        path.join(RUNTIME_DIR, 'libClawr.0.dylib'),
         `-Wl,-rpath,${RUNTIME_DIR}`,
         '-o',
         exeFile,

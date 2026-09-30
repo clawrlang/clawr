@@ -31,7 +31,7 @@ describe('Lowering Tests', () => {
                 '-I',
                 path.join(distDir, 'include'),
                 path.join(OUTPUT_DIR, `${fileName.replace(/.cir$/, '.c')}`),
-                path.join(distDir, 'libClawr.A.dylib'),
+                path.join(distDir, 'libClawr.0.dylib'),
                 `-Wl,-rpath,${distDir}`,
                 '-o',
                 exePath,

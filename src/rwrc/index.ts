@@ -82,7 +82,7 @@ async function compileCIR(cirFilePath: string) {
             '-I',
             path.join(exeDir, 'include'),
             cFilePath,
-            path.join(exeDir, 'libClawr.A.dylib'),
+            path.join(exeDir, 'libClawr.0.dylib'),
             `-Wl,-rpath,${exeDir}`,
             '-o',
             exePath,

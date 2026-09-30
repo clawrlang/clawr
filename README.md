@@ -61,7 +61,7 @@ npx bun test ./tests/unit/parser/module-parser.spec.ts # Run a single test modul
 The example runtime does not change much and is not included in the main test suite. It can be built and tested using the following commands:
 
 ```sh
-npm run build:runtime # Build/update dist/libClawr.A.dylib
+npm run build:runtime # Build/update dist/libClawr.dylib
 npm run test:runtime  # Rebuild and run the runtime tests
 ```
 

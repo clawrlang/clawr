@@ -25,7 +25,7 @@
     "test:backend": "npm test --workspace=@clawr/backend",
     "pretest:e2e": "npm run build:backend",
     "test:e2e": "npm run build && bun test ./tests/e2e/*.test.ts",
-    "build:runtime": "mkdir -p dist && rm -rf dist/include && bun run cp -R src/runtime/include dist/include && clang -I dist/include src/runtime/*.c -dynamiclib -fvisibility=hidden -current_version 0.0.1 -compatibility_version 0.0.1 -Wl,-install_name,@rpath/libClawr.A.dylib -o dist/libClawr.A.dylib",
+    "build:runtime": "rm -rf dist && mkdir -p dist && cp -R src/runtime/include dist/include && clang -I dist/include src/runtime/*.c -dynamiclib -fvisibility=hidden -current_version $npm_package_version -compatibility_version $npm_package_version -Wl,-install_name,@rpath/libClawr.A.dylib -o dist/libClawr.A.dylib && otool -L dist/libClawr.A.dylib",
     "test:runtime": "npm run build:runtime && bun test ./tests/runtime/*.test.ts",
     "pretest": "npm run build:backend",
     "test": "npm run test:unit && npm run test:backend && npm run test:e2e"

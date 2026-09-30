@@ -2,7 +2,7 @@
   "[c]": { "editor.defaultFormatter": "ms-vscode.cpptools" },
   "C_Cpp.clang_format_style": "file",
   "C_Cpp.clang_format_fallbackStyle": "LLVM",
-  "C_Cpp.default.includePath": ["src/runtime/include"],
+  "C_Cpp.default.includePath": ["packages/runtime/src/include"],
   "C_Cpp.formatting": "clangFormat",
   "editor.codeActionsOnSave": { "source.organizeImports": "always" },
   "editor.defaultFormatter": "esbenp.prettier-vscode",

@@ -5,7 +5,7 @@ import path from 'path'
 
 const CASES_DIR = path.join(__dirname, 'cases')
 const OUTPUT_DIR = path.join(__dirname, '.out')
-const RUNTIME_DIR = path.join(__dirname, '../../dist')
+const RUNTIME_DIR = path.join(__dirname, '../dist')
 
 describe('Runtime Tests', () => {
     const cases = fs

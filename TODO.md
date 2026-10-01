@@ -1,5 +1,14 @@
 # TODO
 
+- Parse binary operator expressions
+  - Boolean OR `||`
+  - Boolean AND `&&`
+  - Field OR `|`
+  - Field AND `&`
+  - Comparison (`==`/`>`/`<`…)
+  - Additive (`+`/`-`)
+  - Multiplicative (`*`/`/`)
+  - Exponent `^` - right-associative
 - Parse `trait`/`role` types (method signatures without body)
 - Begin static analysis for `object`/`service`/`trait`/`role`
 - Use `${npm_package_version%%.*}` and `process.env.npm_package_version!.split('.')[0]`?

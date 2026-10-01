@@ -1,7 +1,10 @@
 import type { ClawrModule } from '@clawr/cir'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import typia from 'typia'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 type JsonSchema = {
     [key: string]: unknown

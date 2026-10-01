@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./.typia-temp",
     "declaration": true,
     "declarationMap": false,
@@ -11,6 +11,5 @@
       { "transform": "@ttsc/paths" }
     ]
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", ".typia-temp"]
+  "include": ["src/**/*.ts"]
 }

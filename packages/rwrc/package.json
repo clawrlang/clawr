@@ -15,7 +15,8 @@
   "dependencies": {
     "@clawr/backend": "^0.1.0",
     "@clawr/cir": "^0.1.0",
-    "@clawr/frontend": "^0.1.0"
+    "@clawr/frontend": "^0.1.0",
+    "commander": "^15.0.0"
   },
   "devDependencies": {
     "@types/bun": "^1.4.0",

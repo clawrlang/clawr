@@ -1,0 +1,4 @@
+@main {
+    const total: integer = 1
+    print(totl)
+}

@@ -1,4 +1,5 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
+import { HighlightRecorder } from '@/tools/highlights'
 import { SemanticResult } from '@/tools/semantic-result'
 import * as cir from '@clawr/cir'
 import { FieldReference } from './field-reference'
@@ -9,6 +10,7 @@ import { VariableReference } from './variable-reference'
 
 export type Context = {
     scope: Scope
+    highlightRecorder?: HighlightRecorder
     calleeResult?: {
         domain: ValueSet
         isolationLevel: IsolationLevel | UNIQUE

@@ -75,6 +75,11 @@ export class VariableReference implements Expression {
         if (variableResult.isError) return variableResult
         const valueResult = this.currentValue(context)
         if (valueResult.isError) return valueResult
+        context.highlightRecorder?.record(
+            'variable',
+            this.span,
+            variableResult.value.isImmutable ? ['readonly'] : [],
+        )
         return Result.value({
             kind: 'VARIABLE_REF' as const,
             name: this.name,

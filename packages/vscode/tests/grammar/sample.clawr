@@ -1,0 +1,26 @@
+// A line comment
+/* a block comment */
+
+func add(a: integer, b: integer) => a + b
+
+data Point {
+    x: integer
+    y: integer
+}
+
+object Counter {
+    func value() => self->count
+
+init:
+    func new() => {count: 0}
+
+state:
+    count: integer
+}
+
+@main {
+    const label: string = "hello"
+    mut total: integer = 0
+    total += 1
+    print(label)
+}

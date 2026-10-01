@@ -1,0 +1,131 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Clawr",
+  "scopeName": "source.clawr",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#annotations" },
+    { "include": "#keywords" },
+    { "include": "#truthvalue-literals" },
+    { "include": "#numeric-literals" },
+    { "include": "#string-literals" },
+    { "include": "#regex-literals" },
+    { "include": "#operators" },
+    { "include": "#punctuation" },
+    { "include": "#type-names" },
+    { "include": "#identifiers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.clawr",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.clawr",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "annotations": {
+      "name": "entity.name.function.annotation.clawr",
+      "match": "@main\\b"
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "storage.modifier.clawr",
+          "match": "\\b(const|mut|ref|mutref)\\b"
+        },
+        {
+          "name": "keyword.other.declaration.clawr",
+          "match": "\\b(func|pure|operator|enum|union|data|object|service|companion|role|trait)\\b"
+        },
+        {
+          "name": "variable.language.clawr",
+          "match": "\\bsuper\\b"
+        },
+        {
+          "name": "keyword.other.section.clawr",
+          "match": "\\b(init|mutating|state)\\b"
+        },
+        {
+          "name": "storage.modifier.clawr",
+          "match": "\\b(helper|atomic|concurrent)\\b"
+        },
+        {
+          "name": "keyword.control.clawr",
+          "match": "\\breturn\\b"
+        }
+      ]
+    },
+    "truthvalue-literals": {
+      "name": "constant.language.clawr",
+      "match": "\\b(false|ambiguous|true)\\b"
+    },
+    "numeric-literals": {
+      "name": "constant.numeric.clawr",
+      "match": "\\b[0-9][0-9_]*(\\.[0-9][0-9_]*)?\\b"
+    },
+    "string-literals": {
+      "name": "string.quoted.double.clawr",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.clawr",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "regex-literals": {
+      "name": "string.regexp.clawr",
+      "begin": "(?<=[=(,\\[]\\s*|^\\s*)/(?![/*])",
+      "end": "/[a-z]*",
+      "patterns": [
+        {
+          "name": "constant.character.escape.clawr",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "operators": {
+      "name": "keyword.operator.clawr",
+      "match": "(\\+=|-=|/=|\\*=|&&=|\\|\\|=|&=|\\|=|<<=|>>=|=>|->|\\.\\.\\.|\\.\\.<|\\.\\.|&&|\\|\\||===|!==|==|!=|≠|<=|>=|<<|>>|\\?\\?|\\?\\.|[+\\-*/%!&|~^<≤>≥])"
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.separator.comma.clawr",
+          "match": ","
+        },
+        {
+          "name": "punctuation.separator.colon.clawr",
+          "match": ":"
+        },
+        {
+          "name": "punctuation.terminator.clawr",
+          "match": ";"
+        },
+        {
+          "name": "punctuation.accessor.clawr",
+          "match": "\\.|\\[>|\\|>"
+        },
+        {
+          "name": "keyword.operator.assignment.clawr",
+          "match": "="
+        }
+      ]
+    },
+    "type-names": {
+      "name": "entity.name.type.clawr",
+      "match": "\\b[A-Z][A-Za-z0-9_]*\\b"
+    },
+    "identifiers": {
+      "name": "variable.other.clawr",
+      "match": "\\b[a-z_][A-Za-z0-9_]*\\b"
+    }
+  }
+}

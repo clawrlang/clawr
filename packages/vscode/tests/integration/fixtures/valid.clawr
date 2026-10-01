@@ -1,0 +1,16 @@
+object O {
+    func a(const y: integer) => self->x
+    func b(y: O) => copy(of: y)
+mutating:
+    func do() { self->z = true }
+state:
+    x: integer
+    y: real
+    z: truthvalue
+}
+
+data D {
+    x: integer
+    y: real
+    z: truthvalue
+}

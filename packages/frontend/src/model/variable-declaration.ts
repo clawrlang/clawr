@@ -82,6 +82,10 @@ export class VariableDeclaration implements Statement, Declaration {
             isolationLevel: this.isolationLevel!!,
             domain: domain,
         })
+        context.highlightRecorder?.record('variable', this.nameSpan, [
+            'declaration',
+            ...(this.isImmutable ? (['readonly'] as const) : []),
+        ])
         this.setCurrentValue(context, initialValue)
 
         const emissionResult = this.emitCIRDeclaration(context, domain, scope)

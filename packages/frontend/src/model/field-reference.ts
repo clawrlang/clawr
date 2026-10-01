@@ -119,6 +119,12 @@ export class FieldReference implements Expression {
         if (cirResult.isError) return cirResult
         const object: cir.Expression = cirResult.value
 
+        context.highlightRecorder?.record(
+            'field',
+            this.fieldSpan,
+            this.operator === '->' ? ['shared'] : [],
+        )
+
         return Result.value({
             kind: 'FIELD_REF',
             object,

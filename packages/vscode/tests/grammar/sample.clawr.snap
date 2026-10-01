@@ -1,0 +1,142 @@
+>// A line comment
+#^^^^^^^^^^^^^^^^^ source.clawr comment.line.double-slash.clawr
+>/* a block comment */
+#^^ source.clawr comment.block.clawr
+#  ^^^^^^^^^^^^^^^^^ source.clawr comment.block.clawr
+#                   ^^ source.clawr comment.block.clawr
+>
+>func add(a: integer, b: integer) => a + b
+#^^^^ source.clawr keyword.other.declaration.clawr
+#    ^ source.clawr
+#     ^^^ source.clawr variable.other.clawr
+#        ^ source.clawr
+#         ^ source.clawr variable.other.clawr
+#          ^ source.clawr punctuation.separator.colon.clawr
+#           ^ source.clawr
+#            ^^^^^^^ source.clawr variable.other.clawr
+#                   ^ source.clawr punctuation.separator.comma.clawr
+#                    ^ source.clawr
+#                     ^ source.clawr variable.other.clawr
+#                      ^ source.clawr punctuation.separator.colon.clawr
+#                       ^ source.clawr
+#                        ^^^^^^^ source.clawr variable.other.clawr
+#                               ^^ source.clawr
+#                                 ^^ source.clawr keyword.operator.clawr
+#                                   ^ source.clawr
+#                                    ^ source.clawr variable.other.clawr
+#                                     ^ source.clawr
+#                                      ^ source.clawr keyword.operator.clawr
+#                                       ^ source.clawr
+#                                        ^ source.clawr variable.other.clawr
+>
+>data Point {
+#^^^^ source.clawr keyword.other.declaration.clawr
+#    ^ source.clawr
+#     ^^^^^ source.clawr entity.name.type.clawr
+#          ^^^ source.clawr
+>    x: integer
+#^^^^ source.clawr
+#    ^ source.clawr variable.other.clawr
+#     ^ source.clawr punctuation.separator.colon.clawr
+#      ^ source.clawr
+#       ^^^^^^^ source.clawr variable.other.clawr
+>    y: integer
+#^^^^ source.clawr
+#    ^ source.clawr variable.other.clawr
+#     ^ source.clawr punctuation.separator.colon.clawr
+#      ^ source.clawr
+#       ^^^^^^^ source.clawr variable.other.clawr
+>}
+#^^ source.clawr
+>
+>object Counter {
+#^^^^^^ source.clawr keyword.other.declaration.clawr
+#      ^ source.clawr
+#       ^^^^^^^ source.clawr entity.name.type.clawr
+#              ^^^ source.clawr
+>    func value() => self->count
+#^^^^ source.clawr
+#    ^^^^ source.clawr keyword.other.declaration.clawr
+#        ^ source.clawr
+#         ^^^^^ source.clawr variable.other.clawr
+#              ^^^ source.clawr
+#                 ^^ source.clawr keyword.operator.clawr
+#                   ^ source.clawr
+#                    ^^^^ source.clawr variable.other.clawr
+#                        ^^ source.clawr keyword.operator.clawr
+#                          ^^^^^ source.clawr variable.other.clawr
+>
+>init:
+#^^^^ source.clawr keyword.other.section.clawr
+#    ^ source.clawr punctuation.separator.colon.clawr
+>    func new() => {count: 0}
+#^^^^ source.clawr
+#    ^^^^ source.clawr keyword.other.declaration.clawr
+#        ^ source.clawr
+#         ^^^ source.clawr variable.other.clawr
+#            ^^^ source.clawr
+#               ^^ source.clawr keyword.operator.clawr
+#                 ^^ source.clawr
+#                   ^^^^^ source.clawr variable.other.clawr
+#                        ^ source.clawr punctuation.separator.colon.clawr
+#                         ^ source.clawr
+#                          ^ source.clawr constant.numeric.clawr
+#                           ^^ source.clawr
+>
+>state:
+#^^^^^ source.clawr keyword.other.section.clawr
+#     ^ source.clawr punctuation.separator.colon.clawr
+>    count: integer
+#^^^^ source.clawr
+#    ^^^^^ source.clawr variable.other.clawr
+#         ^ source.clawr punctuation.separator.colon.clawr
+#          ^ source.clawr
+#           ^^^^^^^ source.clawr variable.other.clawr
+>}
+#^^ source.clawr
+>
+>@main {
+#^^^^^ source.clawr entity.name.function.annotation.clawr
+#     ^^^ source.clawr
+>    const label: string = "hello"
+#^^^^ source.clawr
+#    ^^^^^ source.clawr storage.modifier.clawr
+#         ^ source.clawr
+#          ^^^^^ source.clawr variable.other.clawr
+#               ^ source.clawr punctuation.separator.colon.clawr
+#                ^ source.clawr
+#                 ^^^^^^ source.clawr variable.other.clawr
+#                       ^ source.clawr
+#                        ^ source.clawr keyword.operator.assignment.clawr
+#                         ^ source.clawr
+#                          ^ source.clawr string.quoted.double.clawr
+#                           ^^^^^ source.clawr string.quoted.double.clawr
+#                                ^ source.clawr string.quoted.double.clawr
+>    mut total: integer = 0
+#^^^^ source.clawr
+#    ^^^ source.clawr storage.modifier.clawr
+#       ^ source.clawr
+#        ^^^^^ source.clawr variable.other.clawr
+#             ^ source.clawr punctuation.separator.colon.clawr
+#              ^ source.clawr
+#               ^^^^^^^ source.clawr variable.other.clawr
+#                      ^ source.clawr
+#                       ^ source.clawr keyword.operator.assignment.clawr
+#                        ^ source.clawr
+#                         ^ source.clawr constant.numeric.clawr
+>    total += 1
+#^^^^ source.clawr
+#    ^^^^^ source.clawr variable.other.clawr
+#         ^ source.clawr
+#          ^^ source.clawr keyword.operator.clawr
+#            ^ source.clawr
+#             ^ source.clawr constant.numeric.clawr
+>    print(label)
+#^^^^ source.clawr
+#    ^^^^^ source.clawr variable.other.clawr
+#         ^ source.clawr
+#          ^^^^^ source.clawr variable.other.clawr
+#               ^^ source.clawr
+>}
+#^^ source.clawr
+>

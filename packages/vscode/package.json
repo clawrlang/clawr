@@ -1,0 +1,63 @@
+{
+  "name": "@clawr/vscode",
+  "displayName": "Clawr Language Support",
+  "description": "Syntax and semantic coloring, diagnostics, and refactorings for the Clawr language.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "publisher": "clawr-community",
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./dist/src/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "clawr",
+        "aliases": [
+          "Clawr"
+        ],
+        "extensions": [
+          ".clawr"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "clawr",
+        "scopeName": "source.clawr",
+        "path": "./syntaxes/clawr.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "pretest": "npm run build",
+    "test": "npm run test:unit && npm run test:grammar && npm run test:integration",
+    "test:unit": "tsc --noEmit -p tsconfig.json && BUN_JSC_useTailCalls=0 bun test ./tests/unit",
+    "test:grammar": "vscode-tmgrammar-snap -s source.clawr -g ./syntaxes/clawr.tmLanguage.json tests/grammar/*.clawr",
+    "pretest:integration": "npm run build && tsc -p tests/integration/tsconfig.json",
+    "test:integration": "node ./scripts/run-integration-tests.mjs",
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@clawr/frontend": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^26.4.1",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "bun": "^1.4.0",
+    "mocha": "^11.7.5",
+    "typescript": "^7.0.2",
+    "vscode-tmgrammar-test": "^0.1.3"
+  }
+}

@@ -312,6 +312,10 @@ export class FunctionDeclaration implements Declaration {
                 isolationLevel: param.isolationLevel,
                 domain: domainResult.value,
             })
+            context.highlightRecorder?.record('parameter', param.span, [
+                'declaration',
+                ...(param.isImmutable ? (['readonly'] as const) : []),
+            ])
         }
         return Result.value(parameterScope)
     }

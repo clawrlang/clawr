@@ -66,6 +66,17 @@ export class Exponential implements Expression {
                 this.span,
             )
 
+        if (
+            base.min === 0n &&
+            base.max === 0n &&
+            exponent.min === 0n &&
+            exponent.max === 0n
+        )
+            return SemanticErrorResult.failure(
+                'The expression always evaluates to 0^0',
+                this.span,
+            )
+
         const { min, max } = integerExponentRange(base, exponent)
         return Result.value(IntegerRange.create({ min, max }))
     }

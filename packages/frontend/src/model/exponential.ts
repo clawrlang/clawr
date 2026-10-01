@@ -44,7 +44,13 @@ export class Exponential implements Expression {
     }
 
     currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
-        throw new Error('Method not implemented.')
+        const collected = SemanticResult.collect([
+            this.base.currentValue(context),
+            this.exponent.currentValue(context),
+        ])
+        if (collected.isError) return collected
+        const [base, exponent] = collected.value
+        return this.exp(base, exponent)
     }
 
     toCIRExpression(

@@ -111,6 +111,31 @@ describe('Exponential', () => {
                 })
         })
 
+        it('disallows 0^0 when both value sets are singletons', () => {
+            const context = newSemanticContext()
+            context.scope.addVariableDeclaration('base', {
+                isImmutable: true,
+                isolationLevel: ISOLATED,
+                domain: IntegerRange.create({ min: 0n, max: 0n }),
+            })
+            context.scope.addVariableDeclaration('exponent', {
+                isImmutable: true,
+                isolationLevel: ISOLATED,
+                domain: IntegerRange.create({ min: 0n, max: 0n }),
+            })
+
+            const expr = Exponential.create({
+                base: variableRef('base'),
+                exponent: variableRef('exponent'),
+                span: someCodeSpan,
+            })
+            const result = expr.domain(context)
+            expect(result.isError || result.value).toBeTrue()
+            expect(
+                result.isError && result.error.errors.map((e) => e.message),
+            ).toContain('The expression always evaluates to 0^0')
+        })
+
         it('disallows negative integer exponent', () => {
             const expr = Exponential.create({
                 base: integerLiteral(2),

@@ -4,7 +4,7 @@
   "compilerOptions": {
     "outDir": "../../dist-tests/integration",
     "rootDir": ".",
-    "types": ["node", "mocha", "vscode"]
+    "types": ["node", "vscode"]
   },
   "include": ["**/*.ts"]
 }

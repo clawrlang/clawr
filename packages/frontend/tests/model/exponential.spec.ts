@@ -7,21 +7,31 @@ import {
     someCodeSpan,
     variableRef,
 } from '@@/util'
-import { describe, expect, it, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 
 describe('Exponential', () => {
-    describe('domain', () => {
-        it('evaluates integer literals as a single value', () => {
+    describe('integer operands', () => {
+        describe('evaluates integer literals as a single value', () => {
             const expr = Exponential.create({
                 base: integerLiteral(2),
                 exponent: integerLiteral(3),
                 span: someCodeSpan,
             })
-            const result = expr.domain(newSemanticContext())
-            expect(result.isSuccess || result.error.errors).toBeTrue()
-            expect(result.isSuccess && result.value).toMatchObject({
-                min: 8n,
-                max: 8n,
+            test('domain', () => {
+                const result = expr.domain(newSemanticContext())
+                expect(result.isSuccess || result.error.errors).toBeTrue()
+                expect(result.isSuccess && result.value).toMatchObject({
+                    min: 8n,
+                    max: 8n,
+                })
+            })
+            test('currentValue', () => {
+                const result = expr.currentValue(newSemanticContext())
+                expect(result.isSuccess || result.error.errors).toBeTrue()
+                expect(result.isSuccess && result.value).toMatchObject({
+                    min: 8n,
+                    max: 8n,
+                })
             })
         })
 
@@ -84,8 +94,8 @@ describe('Exponential', () => {
                     expected: { min: 1n, max: 1n },
                 },
             ]
-            for (const { base, exponent, expected } of examples)
-                test(`[${base.min ?? 'inf'},${base.max ?? 'inf'}]^[${exponent.min ?? 'inf'},${exponent.max ?? 'inf'}] == [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
+            for (const { base, exponent, expected } of examples) {
+                describe(`[${base.min ?? 'inf'},${base.max ?? 'inf'}]^[${exponent.min ?? 'inf'},${exponent.max ?? 'inf'}] == [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
                     const context = newSemanticContext()
                     context.scope.addVariableDeclaration('base', {
                         isImmutable: true,
@@ -103,50 +113,91 @@ describe('Exponential', () => {
                         exponent: variableRef('exponent'),
                         span: someCodeSpan,
                     })
+                    test('domain', () => {
+                        const result = expr.domain(context)
+                        expect(
+                            result.isSuccess || result.error.errors,
+                        ).toBeTrue()
+                        expect(result.isSuccess && result.value).toMatchObject(
+                            expected,
+                        )
+                    })
+
+                    test('currentValue', () => {
+                        const result = expr.currentValue(context)
+                        expect(
+                            result.isSuccess || result.error.errors,
+                        ).toBeTrue()
+                        expect(result.isSuccess && result.value).toMatchObject(
+                            expected,
+                        )
+                    })
+                })
+            }
+
+            describe('disallows 0^0 when both value sets are singletons', () => {
+                const context = newSemanticContext()
+                context.scope.addVariableDeclaration('base', {
+                    isImmutable: true,
+                    isolationLevel: ISOLATED,
+                    domain: IntegerRange.create({ min: 0n, max: 0n }),
+                })
+                context.scope.addVariableDeclaration('exponent', {
+                    isImmutable: true,
+                    isolationLevel: ISOLATED,
+                    domain: IntegerRange.create({ min: 0n, max: 0n }),
+                })
+
+                const expr = Exponential.create({
+                    base: variableRef('base'),
+                    exponent: variableRef('exponent'),
+                    span: someCodeSpan,
+                })
+                test('domain', () => {
                     const result = expr.domain(context)
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject(
-                        expected,
+                    expect(result.isError || result.value).toBeTrue()
+                    expect(
+                        result.isError &&
+                            result.error.errors.map((e) => e.message),
+                    ).toContain('The expression always evaluates to 0^0')
+                })
+                test('currentValue', () => {
+                    const result = expr.currentValue(context)
+                    expect(result.isError || result.value).toBeTrue()
+                    expect(
+                        result.isError &&
+                            result.error.errors.map((e) => e.message),
+                    ).toContain('The expression always evaluates to 0^0')
+                })
+            })
+
+            describe('disallows negative integer exponent', () => {
+                const expr = Exponential.create({
+                    base: integerLiteral(2),
+                    exponent: integerLiteral(-3),
+                    span: someCodeSpan,
+                })
+                test('domain', () => {
+                    const result = expr.domain(newSemanticContext())
+                    expect(result.isError || result.value).toBeTrue()
+                    expect(
+                        result.isError &&
+                            result.error.errors.map((e) => e.message),
+                    ).toContain(
+                        'negative exponent is not supported for integers',
                     )
                 })
-        })
-
-        it('disallows 0^0 when both value sets are singletons', () => {
-            const context = newSemanticContext()
-            context.scope.addVariableDeclaration('base', {
-                isImmutable: true,
-                isolationLevel: ISOLATED,
-                domain: IntegerRange.create({ min: 0n, max: 0n }),
+                test('currentValue', () => {
+                    const result = expr.currentValue(newSemanticContext())
+                    expect(result.isError || result.value).toBeTrue()
+                    expect(
+                        result.isError &&
+                            result.error.errors.map((e) => e.message),
+                    ).toContain(
+                        'negative exponent is not supported for integers',
+                    )
+                })
             })
-            context.scope.addVariableDeclaration('exponent', {
-                isImmutable: true,
-                isolationLevel: ISOLATED,
-                domain: IntegerRange.create({ min: 0n, max: 0n }),
-            })
-
-            const expr = Exponential.create({
-                base: variableRef('base'),
-                exponent: variableRef('exponent'),
-                span: someCodeSpan,
-            })
-            const result = expr.domain(context)
-            expect(result.isError || result.value).toBeTrue()
-            expect(
-                result.isError && result.error.errors.map((e) => e.message),
-            ).toContain('The expression always evaluates to 0^0')
-        })
-
-        it('disallows negative integer exponent', () => {
-            const expr = Exponential.create({
-                base: integerLiteral(2),
-                exponent: integerLiteral(-3),
-                span: someCodeSpan,
-            })
-            const result = expr.domain(newSemanticContext())
-            expect(result.isError || result.value).toBeTrue()
-            expect(
-                result.isError && result.error.errors.map((e) => e.message),
-            ).toContain('negative exponent is not supported for integers')
         })
     })
 })

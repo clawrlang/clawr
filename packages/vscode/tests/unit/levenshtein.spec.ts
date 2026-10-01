@@ -6,8 +6,12 @@ describe('levenshteinDistance', () => {
         expect(levenshteinDistance('field', 'field')).toBe(0)
     })
 
-    it('counts a single substitution', () => {
+    it('counts a reordering', () => {
         expect(levenshteinDistance('feild', 'field')).toBe(2)
+    })
+
+    it('counts a single substitution', () => {
+        expect(levenshteinDistance('feild', 'feeld')).toBe(1)
     })
 
     it('counts insertions/deletions', () => {

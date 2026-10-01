@@ -1,5 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
+import { Exponential } from '@/model/exponential'
 import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral } from '@/model/integer-literal'
@@ -27,7 +28,24 @@ export class ExpressionParser {
     }
 
     parse(stream: TokenStream): Expression {
-        return this.parsePrefixExpression(stream)
+        return this.parseExponentialExpression(stream)
+    }
+
+    parseExponentialExpression(stream: TokenStream): Expression {
+        const base = this.parsePrefixExpression(stream)
+
+        if (!stream.isNext('OPERATOR', '^')) return base
+        stream.expect('OPERATOR', '^')
+
+        const exponent = this.parseExponentialExpression(stream)
+        return Exponential.create({
+            base,
+            exponent,
+            span: {
+                start: base.span.start,
+                end: exponent.span.end,
+            },
+        })
     }
 
     parsePrefixExpression(stream: TokenStream): Expression {

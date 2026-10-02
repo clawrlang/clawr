@@ -3,7 +3,7 @@ import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import * as cir from '@clawr/cir'
 import { Context, ContextWithDomain, Expression } from '.'
-import { AnyIsolationLevel } from './isolation-level'
+import { AnyIsolationLevel, ISOLATED } from './isolation-level'
 import { IntegerRange, ValueSet } from './value-set'
 
 export class Division implements Expression {
@@ -25,11 +25,11 @@ export class Division implements Expression {
         return new Division(numerator, denominator, span)
     }
 
-    isEffectivelyConst(context: Context): SemanticResult<boolean> {
-        throw new Error('Method not implemented.')
+    isEffectivelyConst(_: Context): SemanticResult<boolean> {
+        return Result.true
     }
-    isolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
-        throw new Error('Method not implemented.')
+    isolationLevel(_: Context): SemanticResult<AnyIsolationLevel> {
+        return Result.value(ISOLATED)
     }
 
     domain(context: ContextWithDomain): SemanticResult<ValueSet> {

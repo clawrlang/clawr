@@ -8,21 +8,21 @@ import { IntegerRange, ValueSet } from './value-set'
 
 export class Division implements Expression {
     private constructor(
-        private readonly numerator: Expression,
-        private readonly denominator: Expression,
+        private readonly dividend: Expression,
+        private readonly divisor: Expression,
         public readonly span: SourceCodeSpan,
     ) {}
 
     static create({
-        numerator,
-        denominator,
+        dividend,
+        divisor,
         span,
     }: {
-        numerator: Expression
-        denominator: Expression
+        dividend: Expression
+        divisor: Expression
         span: SourceCodeSpan
     }): Division {
-        return new Division(numerator, denominator, span)
+        return new Division(dividend, divisor, span)
     }
 
     isEffectivelyConst(_: Context): SemanticResult<boolean> {
@@ -34,22 +34,22 @@ export class Division implements Expression {
 
     domain(context: ContextWithDomain): SemanticResult<ValueSet> {
         const collected = SemanticResult.collect([
-            this.numerator.domain(context),
-            this.denominator.domain(context),
+            this.dividend.domain(context),
+            this.divisor.domain(context),
         ])
         if (collected.isError) return collected
-        const [numerator, denominator] = collected.value
-        return this.div(numerator, denominator)
+        const [dividend, divisor] = collected.value
+        return this.div(dividend, divisor)
     }
 
     currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
         const collected = SemanticResult.collect([
-            this.numerator.currentValue(context),
-            this.denominator.currentValue(context),
+            this.dividend.currentValue(context),
+            this.divisor.currentValue(context),
         ])
         if (collected.isError) return collected
-        const [numerator, denominator] = collected.value
-        return this.div(numerator, denominator)
+        const [dividend, divisor] = collected.value
+        return this.div(dividend, divisor)
     }
 
     toCIRExpression(
@@ -59,40 +59,39 @@ export class Division implements Expression {
     }
 
     private div(
-        numerator: ValueSet,
-        denominator: ValueSet,
+        dividend: ValueSet,
+        divisor: ValueSet,
     ): SemanticResult<ValueSet> {
         if (!(
-            numerator instanceof IntegerRange &&
-            denominator instanceof IntegerRange
+            dividend instanceof IntegerRange && divisor instanceof IntegerRange
         ))
             return SemanticErrorResult.failure(
-                `division between ${numerator.toString()} and ${denominator.toString()} is not supported`,
+                `division between ${dividend.toString()} and ${divisor.toString()} is not supported`,
                 this.span,
             )
 
-        if (denominator.min === 0n || denominator.max === 0n)
+        if (divisor.min === 0n || divisor.max === 0n)
             return SemanticErrorResult.failure('division by zero', this.span)
 
-        // A denominator range that merely spans zero (without having it as
+        // A divisor range that merely spans zero (without having it as
         // an exact bound) can't divide by zero at runtime, but the result
         // is the union of what's achievable on either side of zero.
         const spansZero =
-            (denominator.min === undefined || denominator.min < 0n) &&
-            (denominator.max === undefined || denominator.max > 0n)
+            (divisor.min === undefined || divisor.min < 0n) &&
+            (divisor.max === undefined || divisor.max > 0n)
 
         const { min, max } = spansZero
             ? unionRange(
                   integerDivisionRange(
-                      numerator,
-                      IntegerRange.create({ min: denominator.min, max: -1n }),
+                      dividend,
+                      IntegerRange.create({ min: divisor.min, max: -1n }),
                   ),
                   integerDivisionRange(
-                      numerator,
-                      IntegerRange.create({ min: 1n, max: denominator.max }),
+                      dividend,
+                      IntegerRange.create({ min: 1n, max: divisor.max }),
                   ),
               )
-            : integerDivisionRange(numerator, denominator)
+            : integerDivisionRange(dividend, divisor)
         return Result.value(IntegerRange.create({ min, max }))
     }
 }
@@ -107,12 +106,12 @@ function floorDiv(n: bigint, d: bigint): bigint {
 }
 
 // floorDiv(n, d) as d grows without bound towards +infinity.
-function floorDivLimitPositiveDenominator(n: bigint): bigint {
+function floorDivLimitPositiveDivisor(n: bigint): bigint {
     return n >= 0n ? 0n : -1n
 }
 
 // floorDiv(n, d) as d shrinks without bound towards -infinity.
-function floorDivLimitNegativeDenominator(n: bigint): bigint {
+function floorDivLimitNegativeDivisor(n: bigint): bigint {
     return n > 0n ? -1n : 0n
 }
 
@@ -136,32 +135,29 @@ function unionRange(
     }
 }
 
-// Computes the exact range of floor(numerator / denominator), given that the
-// denominator range is known not to contain zero (so it is entirely positive
+// Computes the exact range of floor(dividend / divisor), given that the
+// divisor range is known not to contain zero (so it is entirely positive
 // or entirely negative).
 function integerDivisionRange(
-    numerator: IntegerRange<bigint | undefined, bigint | undefined>,
-    denominator: IntegerRange<bigint | undefined, bigint | undefined>,
+    dividend: IntegerRange<bigint | undefined, bigint | undefined>,
+    divisor: IntegerRange<bigint | undefined, bigint | undefined>,
 ): { min: bigint | undefined; max: bigint | undefined } {
-    const nMin = numerator.min
-    const nMax = numerator.max
-    const isNegativeDenominator =
-        denominator.max !== undefined && denominator.max < 0n
+    const nMin = dividend.min
+    const nMax = dividend.max
+    const isNegativeDivisor = divisor.max !== undefined && divisor.max < 0n
 
-    const maxIsInfinite = isNegativeDenominator
+    const maxIsInfinite = isNegativeDivisor
         ? nMin === undefined
         : nMax === undefined
-    const minIsInfinite = isNegativeDenominator
+    const minIsInfinite = isNegativeDivisor
         ? nMax === undefined
         : nMin === undefined
 
-    // The denominator bound nearest zero is always defined (the range can't
+    // The divisor bound nearest zero is always defined (the range can't
     // straddle zero); the bound farthest from zero may be unbounded, in
     // which case the quotient approaches (but can still attain) a limit.
-    const dNear = (
-        isNegativeDenominator ? denominator.max : denominator.min
-    ) as bigint
-    const dFar = isNegativeDenominator ? denominator.min : denominator.max
+    const dNear = (isNegativeDivisor ? divisor.max : divisor.min) as bigint
+    const dFar = isNegativeDivisor ? divisor.min : divisor.max
 
     const candidates: bigint[] = []
     for (const n of [nMin, nMax]) {
@@ -170,9 +166,9 @@ function integerDivisionRange(
         candidates.push(
             dFar !== undefined
                 ? floorDiv(n, dFar)
-                : isNegativeDenominator
-                  ? floorDivLimitNegativeDenominator(n)
-                  : floorDivLimitPositiveDenominator(n),
+                : isNegativeDivisor
+                  ? floorDivLimitNegativeDivisor(n)
+                  : floorDivLimitPositiveDivisor(n),
         )
     }
 

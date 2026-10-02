@@ -47,8 +47,8 @@ describe('Expression Parser (Operators)', () => {
             const expr = parseExpression('2/3')
             expect(expr).toBeInstanceOf(Division)
             expect(expr).toMatchObject({
-                numerator: { value: { min: 2n, max: 2n } },
-                denominator: { value: { min: 3n, max: 3n } },
+                dividend: { value: { min: 2n, max: 2n } },
+                divisor: { value: { min: 3n, max: 3n } },
             })
         })
 
@@ -71,11 +71,11 @@ describe('Expression Parser (Operators)', () => {
             const expr = parseExpression('2*3/4')
             expect(expr).toBeInstanceOf(Division)
             expect(expr).toMatchObject({
-                numerator: {
+                dividend: {
                     left: { value: { min: 2n, max: 2n } },
                     right: { value: { min: 3n, max: 3n } },
                 },
-                denominator: { value: { min: 4n, max: 4n } },
+                divisor: { value: { min: 4n, max: 4n } },
             })
         })
     })

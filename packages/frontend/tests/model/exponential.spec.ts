@@ -159,7 +159,9 @@ describe('Exponential', () => {
                     expect(
                         result.isError &&
                             result.error.errors.map((e) => e.message),
-                    ).toContain('The expression always evaluates to 0^0')
+                    ).toContain(
+                        'The expression always evaluates to 0^0, which is undefined and will crash at runtime',
+                    )
                 })
                 test('currentValue', () => {
                     const result = expr.currentValue(context)
@@ -167,7 +169,9 @@ describe('Exponential', () => {
                     expect(
                         result.isError &&
                             result.error.errors.map((e) => e.message),
-                    ).toContain('The expression always evaluates to 0^0')
+                    ).toContain(
+                        'The expression always evaluates to 0^0, which is undefined and will crash at runtime',
+                    )
                 })
             })
 

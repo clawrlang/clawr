@@ -79,7 +79,7 @@ export class Exponential implements Expression {
             exponent.max === 0n
         )
             return SemanticErrorResult.failure(
-                'The expression always evaluates to 0^0',
+                'The expression always evaluates to 0^0, which is undefined and will crash at runtime',
                 this.span,
             )
 

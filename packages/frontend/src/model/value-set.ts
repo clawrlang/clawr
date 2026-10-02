@@ -9,8 +9,8 @@ export interface ValueSet {
 }
 
 export class IntegerRange<
-    Min extends bigint | undefined,
-    Max extends bigint | undefined,
+    Min extends bigint | undefined = bigint | undefined,
+    Max extends bigint | undefined = bigint | undefined,
 > implements ValueSet {
     private constructor(
         public readonly min: Min,

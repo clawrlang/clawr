@@ -1,8 +1,9 @@
 import { SourceCodeSpan } from '@/tools'
+import { Result } from '@/tools/result'
 import { SemanticResult } from '@/tools/semantic-result'
 import * as cir from '@clawr/cir'
 import { Context, ContextWithDomain, Expression } from '.'
-import { AnyIsolationLevel } from './isolation-level'
+import { AnyIsolationLevel, ISOLATED } from './isolation-level'
 import { ValueSet } from './value-set'
 
 export class Multiplication implements Expression {
@@ -24,18 +25,22 @@ export class Multiplication implements Expression {
         return new Multiplication(left, right, span)
     }
 
-    isEffectivelyConst(context: Context): SemanticResult<boolean> {
-        throw new Error('Method not implemented.')
+    isEffectivelyConst(_: Context): SemanticResult<boolean> {
+        return Result.true
     }
-    isolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
-        throw new Error('Method not implemented.')
+
+    isolationLevel(_: Context): SemanticResult<AnyIsolationLevel> {
+        return Result.value(ISOLATED)
     }
+
     domain(context: ContextWithDomain): SemanticResult<ValueSet> {
         throw new Error('Method not implemented.')
     }
+
     currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
         throw new Error('Method not implemented.')
     }
+
     toCIRExpression(
         context: ContextWithDomain,
     ): SemanticResult<cir.Expression> {

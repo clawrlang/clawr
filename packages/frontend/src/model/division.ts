@@ -71,13 +71,28 @@ export class Division implements Expression {
                 this.span,
             )
 
-        const zeroIsAchievableDenominator =
-            (denominator.min === undefined || denominator.min <= 0n) &&
-            (denominator.max === undefined || denominator.max >= 0n)
-        if (zeroIsAchievableDenominator)
+        if (denominator.min === 0n || denominator.max === 0n)
             return SemanticErrorResult.failure('division by zero', this.span)
 
-        const { min, max } = integerDivisionRange(numerator, denominator)
+        // A denominator range that merely spans zero (without having it as
+        // an exact bound) can't divide by zero at runtime, but the result
+        // is the union of what's achievable on either side of zero.
+        const spansZero =
+            (denominator.min === undefined || denominator.min < 0n) &&
+            (denominator.max === undefined || denominator.max > 0n)
+
+        const { min, max } = spansZero
+            ? unionRange(
+                  integerDivisionRange(
+                      numerator,
+                      IntegerRange.create({ min: denominator.min, max: -1n }),
+                  ),
+                  integerDivisionRange(
+                      numerator,
+                      IntegerRange.create({ min: 1n, max: denominator.max }),
+                  ),
+              )
+            : integerDivisionRange(numerator, denominator)
         return Result.value(IntegerRange.create({ min, max }))
     }
 }
@@ -99,6 +114,26 @@ function floorDivLimitPositiveDenominator(n: bigint): bigint {
 // floorDiv(n, d) as d shrinks without bound towards -infinity.
 function floorDivLimitNegativeDenominator(n: bigint): bigint {
     return n > 0n ? -1n : 0n
+}
+
+function unionRange(
+    a: { min: bigint | undefined; max: bigint | undefined },
+    b: { min: bigint | undefined; max: bigint | undefined },
+): { min: bigint | undefined; max: bigint | undefined } {
+    return {
+        min:
+            a.min === undefined || b.min === undefined
+                ? undefined
+                : a.min < b.min
+                  ? a.min
+                  : b.min,
+        max:
+            a.max === undefined || b.max === undefined
+                ? undefined
+                : a.max > b.max
+                  ? a.max
+                  : b.max,
+    }
 }
 
 // Computes the exact range of floor(numerator / denominator), given that the

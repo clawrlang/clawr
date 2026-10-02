@@ -1,11 +1,13 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
+import { Addition } from '@/model/addition'
 import { Division } from '@/model/division'
 import { Exponential } from '@/model/exponential'
 import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral } from '@/model/integer-literal'
 import { Multiplication } from '@/model/multiplication'
+import { Subtraction } from '@/model/subtraction'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { VariableReference } from '@/model/variable-reference'
 import { Context } from '.'
@@ -30,7 +32,28 @@ export class ExpressionParser {
     }
 
     parse(stream: TokenStream): Expression {
-        return this.parseMultiplicativeOperation(stream)
+        return this.parseAdditiveOperation(stream)
+    }
+
+    parseAdditiveOperation(stream: TokenStream): Expression {
+        let expr = this.parseMultiplicativeOperation(stream)
+        while (stream.isNext('OPERATOR', '+', '-')) {
+            const operator = stream.expect('OPERATOR', '+', '-').operator
+            const right = this.parseMultiplicativeOperation(stream)
+            expr =
+                operator == '+'
+                    ? Addition.create({
+                          left: expr,
+                          right,
+                          span: { start: expr.span.start, end: right.span.end },
+                      })
+                    : Subtraction.create({
+                          minuend: expr,
+                          subtrahend: right,
+                          span: { start: expr.span.start, end: right.span.end },
+                      })
+        }
+        return expr
     }
 
     parseMultiplicativeOperation(stream: TokenStream): Expression {

@@ -69,8 +69,8 @@ export class ExpressionParser {
                           span: { start: expr.span.start, end: right.span.end },
                       })
                     : Division.create({
-                          numerator: expr,
-                          denominator: right,
+                          dividend: expr,
+                          divisor: right,
                           span: { start: expr.span.start, end: right.span.end },
                       })
         }

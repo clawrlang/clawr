@@ -8,8 +8,8 @@ describe('Division', () => {
     describe('integer operands', () => {
         describe('evaluates integer literals as a single value', () => {
             const expr = Division.create({
-                numerator: util.integerLiteral(21),
-                denominator: util.integerLiteral(3),
+                dividend: util.integerLiteral(21),
+                divisor: util.integerLiteral(3),
                 span: util.someCodeSpan,
             })
             test('domain', () => {
@@ -32,8 +32,8 @@ describe('Division', () => {
 
         describe('rounds down', () => {
             const expr = Division.create({
-                numerator: util.integerLiteral(-2),
-                denominator: util.integerLiteral(3),
+                dividend: util.integerLiteral(-2),
+                divisor: util.integerLiteral(3),
                 span: util.someCodeSpan,
             })
             test('domain', () => {
@@ -56,8 +56,8 @@ describe('Division', () => {
 
         describe('rounds down', () => {
             const expr = Division.create({
-                numerator: util.integerLiteral(2),
-                denominator: util.integerLiteral(-3),
+                dividend: util.integerLiteral(2),
+                divisor: util.integerLiteral(-3),
                 span: util.someCodeSpan,
             })
             test('domain', () => {
@@ -81,75 +81,75 @@ describe('Division', () => {
         describe('integer ranges', () => {
             const examples = [
                 {
-                    numerator: { min: 0n, max: 10n },
-                    denominator: { min: 2n, max: 3n },
+                    dividend: { min: 0n, max: 10n },
+                    divisor: { min: 2n, max: 3n },
                     expected: { min: 0n, max: 5n },
                 },
                 {
-                    numerator: { min: -10n, max: 10n },
-                    denominator: { min: 2n, max: 5n },
+                    dividend: { min: -10n, max: 10n },
+                    divisor: { min: 2n, max: 5n },
                     expected: { min: -5n, max: 5n },
                 },
                 {
-                    numerator: { min: 0n, max: 10n },
-                    denominator: { min: -5n, max: -2n },
+                    dividend: { min: 0n, max: 10n },
+                    divisor: { min: -5n, max: -2n },
                     expected: { min: -5n, max: 0n },
                 },
                 {
-                    numerator: { min: -10n, max: 10n },
-                    denominator: { min: -5n, max: -2n },
+                    dividend: { min: -10n, max: 10n },
+                    divisor: { min: -5n, max: -2n },
                     expected: { min: -5n, max: 5n },
                 },
                 {
-                    // unbounded numerator, positive denominator: grows
+                    // unbounded dividend, positive divisor: grows
                     // without bound, but is still at least 0
-                    numerator: { min: 0n, max: undefined },
-                    denominator: { min: 1n, max: 5n },
+                    dividend: { min: 0n, max: undefined },
+                    divisor: { min: 1n, max: 5n },
                     expected: { min: 0n, max: undefined },
                 },
                 {
-                    // unbounded denominator: as it grows, the quotient
+                    // unbounded divisor: as it grows, the quotient
                     // shrinks towards (but never past) its limit of -1/0
-                    numerator: { min: -10n, max: 10n },
-                    denominator: { min: 2n, max: undefined },
+                    dividend: { min: -10n, max: 10n },
+                    divisor: { min: 2n, max: undefined },
                     expected: { min: -5n, max: 5n },
                 },
                 {
-                    numerator: { min: -10n, max: 10n },
-                    denominator: { min: undefined, max: -2n },
+                    dividend: { min: -10n, max: 10n },
+                    divisor: { min: undefined, max: -2n },
                     expected: { min: -5n, max: 5n },
                 },
                 {
-                    numerator: { min: -10n, max: 10n },
-                    denominator: { min: -2n, max: 2n },
+                    dividend: { min: -10n, max: 10n },
+                    divisor: { min: -2n, max: 2n },
                     expected: { min: -10n, max: 10n },
                 },
                 {
-                    // denominator spans zero with wide bounds: the extreme
+                    // divisor spans zero with wide bounds: the extreme
                     // magnitude comes from dividing by ±1, not the far
                     // bounds (-50/50), which would give a much smaller result
-                    numerator: { min: 100n, max: 100n },
-                    denominator: { min: -50n, max: 50n },
+                    dividend: { min: 100n, max: 100n },
+                    divisor: { min: -50n, max: 50n },
                     expected: { min: -100n, max: 100n },
                 },
             ]
-            for (const { numerator, denominator, expected } of examples)
-                describe(`[${numerator.min ?? 'inf'},${numerator.max ?? 'inf'}]/[${denominator.min ?? 'inf'},${denominator.max ?? 'inf'}] == [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
+            for (const { dividend: dividend, divisor, expected } of examples)
+                describe(`[${dividend.min ?? 'inf'},${dividend.max ?? 'inf'}]/[${divisor.min ?? 'inf'},${divisor.max ?? 'inf'}] == [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
                     const context = util.newSemanticContext()
-                    context.scope.addVariableDeclaration('numerator', {
+                    context.scope.addVariableDeclaration('dividend', {
                         isImmutable: true,
                         isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(numerator),
+                        domain: IntegerRange.create(dividend),
                     })
-                    context.scope.addVariableDeclaration('denominator', {
+                    context.scope.addVariableDeclaration('divisor', {
                         isImmutable: true,
                         isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(denominator),
+                        domain: IntegerRange.create(divisor),
                     })
 
                     const expr = Division.create({
-                        numerator: util.variableRef('numerator'),
-                        denominator: util.variableRef('denominator'),
+                        dividend: util.variableRef('dividend'),
+                        divisor: util.variableRef('divisor'),
                         span: util.someCodeSpan,
                     })
 
@@ -166,20 +166,20 @@ describe('Division', () => {
 
             describe('disallows zero divisor', () => {
                 const context = util.newSemanticContext()
-                context.scope.addVariableDeclaration('numerator', {
+                context.scope.addVariableDeclaration('dividend', {
                     isImmutable: true,
                     isolationLevel: ISOLATED,
                     domain: IntegerRange.singleton(0n),
                 })
-                context.scope.addVariableDeclaration('denominator', {
+                context.scope.addVariableDeclaration('divisor', {
                     isImmutable: true,
                     isolationLevel: ISOLATED,
                     domain: IntegerRange.singleton(0n),
                 })
 
                 const expr = Division.create({
-                    numerator: util.variableRef('numerator'),
-                    denominator: util.variableRef('denominator'),
+                    dividend: util.variableRef('dividend'),
+                    divisor: util.variableRef('divisor'),
                     span: util.someCodeSpan,
                 })
                 test('domain', () => {

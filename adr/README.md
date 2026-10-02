@@ -50,6 +50,8 @@ Records so far:
 - [ADR-018](./adr-018.md): `object` Initialization
 - [ADR-019](./adr-019.md): `namespace`
 - [ADR-020](./adr-020.md): Singleton `service`
+- [ADR-021](./adr-021.md): Binary Operators and Precedence
+- [ADR-022](./adr-022.md): `integer` exponentiation
 
 Draft ideas with no ADR number:
 

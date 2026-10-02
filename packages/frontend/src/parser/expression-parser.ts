@@ -1,9 +1,11 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
+import { Division } from '@/model/division'
 import { Exponential } from '@/model/exponential'
 import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral } from '@/model/integer-literal'
+import { Multiplication } from '@/model/multiplication'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { VariableReference } from '@/model/variable-reference'
 import { Context } from '.'
@@ -28,7 +30,28 @@ export class ExpressionParser {
     }
 
     parse(stream: TokenStream): Expression {
-        return this.parseExponentialExpression(stream)
+        return this.parseMultiplicativeOperation(stream)
+    }
+
+    parseMultiplicativeOperation(stream: TokenStream): Expression {
+        let expr = this.parseExponentialExpression(stream)
+        while (stream.isNext('OPERATOR', '*', '/')) {
+            const operator = stream.expect('OPERATOR', '*', '/').operator
+            const right = this.parseExponentialExpression(stream)
+            expr =
+                operator == '*'
+                    ? Multiplication.create({
+                          left: expr,
+                          right,
+                          span: { start: expr.span.start, end: right.span.end },
+                      })
+                    : Division.create({
+                          numerator: expr,
+                          denominator: right,
+                          span: { start: expr.span.start, end: right.span.end },
+                      })
+        }
+        return expr
     }
 
     parseExponentialExpression(stream: TokenStream): Expression {

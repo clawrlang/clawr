@@ -1,24 +1,19 @@
 import { Exponential } from '@/model/exponential'
 import { ISOLATED } from '@/model/isolation-level'
 import { IntegerRange } from '@/model/value-set'
-import {
-    integerLiteral,
-    newSemanticContext,
-    someCodeSpan,
-    variableRef,
-} from '@@/util'
+import * as util from '@@/util'
 import { describe, expect, test } from 'bun:test'
 
 describe('Exponential', () => {
     describe('integer operands', () => {
         describe('evaluates integer literals as a single value', () => {
             const expr = Exponential.create({
-                base: integerLiteral(2),
-                exponent: integerLiteral(3),
-                span: someCodeSpan,
+                base: util.integerLiteral(2),
+                exponent: util.integerLiteral(3),
+                span: util.someCodeSpan,
             })
             test('domain', () => {
-                const result = expr.domain(newSemanticContext())
+                const result = expr.domain(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     min: 8n,
@@ -26,7 +21,7 @@ describe('Exponential', () => {
                 })
             })
             test('currentValue', () => {
-                const result = expr.currentValue(newSemanticContext())
+                const result = expr.currentValue(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     min: 8n,
@@ -96,7 +91,7 @@ describe('Exponential', () => {
             ]
             for (const { base, exponent, expected } of examples) {
                 describe(`[${base.min ?? 'inf'},${base.max ?? 'inf'}]^[${exponent.min ?? 'inf'},${exponent.max ?? 'inf'}] == [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
-                    const context = newSemanticContext()
+                    const context = util.newSemanticContext()
                     context.scope.addVariableDeclaration('base', {
                         isImmutable: true,
                         isolationLevel: ISOLATED,
@@ -109,9 +104,9 @@ describe('Exponential', () => {
                     })
 
                     const expr = Exponential.create({
-                        base: variableRef('base'),
-                        exponent: variableRef('exponent'),
-                        span: someCodeSpan,
+                        base: util.variableRef('base'),
+                        exponent: util.variableRef('exponent'),
+                        span: util.someCodeSpan,
                     })
                     test('domain', () => {
                         const result = expr.domain(context)
@@ -136,7 +131,7 @@ describe('Exponential', () => {
             }
 
             describe('disallows 0^0 when both value sets are singletons', () => {
-                const context = newSemanticContext()
+                const context = util.newSemanticContext()
                 context.scope.addVariableDeclaration('base', {
                     isImmutable: true,
                     isolationLevel: ISOLATED,
@@ -149,9 +144,9 @@ describe('Exponential', () => {
                 })
 
                 const expr = Exponential.create({
-                    base: variableRef('base'),
-                    exponent: variableRef('exponent'),
-                    span: someCodeSpan,
+                    base: util.variableRef('base'),
+                    exponent: util.variableRef('exponent'),
+                    span: util.someCodeSpan,
                 })
                 test('domain', () => {
                     const result = expr.domain(context)
@@ -177,12 +172,12 @@ describe('Exponential', () => {
 
             describe('disallows negative integer exponent', () => {
                 const expr = Exponential.create({
-                    base: integerLiteral(2),
-                    exponent: integerLiteral(-3),
-                    span: someCodeSpan,
+                    base: util.integerLiteral(2),
+                    exponent: util.integerLiteral(-3),
+                    span: util.someCodeSpan,
                 })
                 test('domain', () => {
-                    const result = expr.domain(newSemanticContext())
+                    const result = expr.domain(util.newSemanticContext())
                     expect(result.isError || result.value).toBeTrue()
                     expect(
                         result.isError &&
@@ -192,7 +187,7 @@ describe('Exponential', () => {
                     )
                 })
                 test('currentValue', () => {
-                    const result = expr.currentValue(newSemanticContext())
+                    const result = expr.currentValue(util.newSemanticContext())
                     expect(result.isError || result.value).toBeTrue()
                     expect(
                         result.isError &&

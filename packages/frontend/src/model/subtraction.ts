@@ -1,10 +1,10 @@
 import { SourceCodeSpan } from '@/tools'
 import { Result } from '@/tools/result'
-import { SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
 import * as cir from '@clawr/cir'
 import { Context, ContextWithDomain, Expression } from '.'
 import { AnyIsolationLevel, ISOLATED } from './isolation-level'
-import { ValueSet } from './value-set'
+import { IntegerRange, ValueSet } from './value-set'
 
 export class Subtraction implements Expression {
     private constructor(
@@ -40,7 +40,7 @@ export class Subtraction implements Expression {
         ])
         if (collected.isError) return collected
         const [left, right] = collected.value
-        return this.add(left, right)
+        return this.sub(left, right)
     }
 
     currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
@@ -50,7 +50,7 @@ export class Subtraction implements Expression {
         ])
         if (collected.isError) return collected
         const [left, right] = collected.value
-        return this.add(left, right)
+        return this.sub(left, right)
     }
 
     toCIRExpression(
@@ -59,7 +59,26 @@ export class Subtraction implements Expression {
         throw new Error('Method not implemented.')
     }
 
-    private add(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
-        throw new Error('not implemented')
+    private sub(
+        minuend: ValueSet,
+        subtrahend: ValueSet,
+    ): SemanticResult<ValueSet> {
+        if (!(
+            minuend instanceof IntegerRange &&
+            subtrahend instanceof IntegerRange
+        ))
+            return SemanticErrorResult.failure(
+                `subtraction between ${minuend.toString()} and ${subtrahend.toString()} is not supported`,
+                this.span,
+            )
+        const min: bigint | undefined =
+            minuend.min === undefined || subtrahend.max === undefined
+                ? undefined
+                : (((minuend.min as bigint) - subtrahend.max) as bigint)
+        const max: bigint | undefined =
+            minuend.max === undefined || subtrahend.min === undefined
+                ? undefined
+                : (((minuend.max as bigint) - subtrahend.min) as bigint)
+        return Result.value(IntegerRange.create({ min, max }))
     }
 }

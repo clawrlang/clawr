@@ -4,7 +4,7 @@
   - [ ] Boolean OR `||`
   - [ ] Boolean AND `&&`
   - [ ] Comparison (`==`/`>`/`<`…)
-  - [ ] Additive (`+`/`-`)
+  - [x] Additive (`+`/`-`)
   - [x] Multiplicative (`*`/`/`) — left-associative
   - [x] Exponent `^` - right-associative
 - `Exponential.toCIRExpression()`

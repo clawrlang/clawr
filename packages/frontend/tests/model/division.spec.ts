@@ -119,6 +119,19 @@ describe('Division', () => {
                     denominator: { min: undefined, max: -2n },
                     expected: { min: -5n, max: 5n },
                 },
+                {
+                    numerator: { min: -10n, max: 10n },
+                    denominator: { min: -2n, max: 2n },
+                    expected: { min: -10n, max: 10n },
+                },
+                {
+                    // denominator spans zero with wide bounds: the extreme
+                    // magnitude comes from dividing by ±1, not the far
+                    // bounds (-50/50), which would give a much smaller result
+                    numerator: { min: 100n, max: 100n },
+                    denominator: { min: -50n, max: 50n },
+                    expected: { min: -100n, max: 100n },
+                },
             ]
             for (const { numerator, denominator, expected } of examples)
                 describe(`[${numerator.min ?? 'inf'},${numerator.max ?? 'inf'}]/[${denominator.min ?? 'inf'},${denominator.max ?? 'inf'}] == [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
@@ -179,34 +192,6 @@ describe('Division', () => {
                 })
                 test('currentValue', () => {
                     const result = expr.currentValue(context)
-                    expect(result.isError || result.value).toBeTrue()
-                    expect(
-                        result.isError &&
-                            result.error.errors.map((e) => e.message),
-                    ).toContain('division by zero')
-                })
-            })
-
-            describe('disallows a denominator range that can be zero', () => {
-                const context = util.newSemanticContext()
-                context.scope.addVariableDeclaration('numerator', {
-                    isImmutable: true,
-                    isolationLevel: ISOLATED,
-                    domain: IntegerRange.singleton(5n),
-                })
-                context.scope.addVariableDeclaration('denominator', {
-                    isImmutable: true,
-                    isolationLevel: ISOLATED,
-                    domain: IntegerRange.create({ min: -3n, max: 5n }),
-                })
-
-                const expr = Division.create({
-                    numerator: util.variableRef('numerator'),
-                    denominator: util.variableRef('denominator'),
-                    span: util.someCodeSpan,
-                })
-                test('domain', () => {
-                    const result = expr.domain(context)
                     expect(result.isError || result.value).toBeTrue()
                     expect(
                         result.isError &&

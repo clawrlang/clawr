@@ -3,13 +3,15 @@ import { Expression } from '@/model'
 import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral, TruthValueLiteral } from '@/model/literals'
-import { Addition } from '@/model/operators/addition'
-import { Comparison } from '@/model/operators/comparison'
-import { Division } from '@/model/operators/division'
-import { Exponential } from '@/model/operators/exponential'
-import { Modulus } from '@/model/operators/modulus'
-import { Multiplication } from '@/model/operators/multiplication'
-import { Subtraction } from '@/model/operators/subtraction'
+import {
+    Addition,
+    Comparison,
+    Division,
+    Exponential,
+    Modulus,
+    Multiplication,
+    Subtraction,
+} from '@/model/operators'
 import { VariableReference } from '@/model/variable-reference'
 import { Context } from '@/parser'
 import { FunctionArgumentsParser } from '@/parser/function-arguments-parser'

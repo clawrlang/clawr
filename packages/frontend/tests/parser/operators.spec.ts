@@ -1,12 +1,14 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
-import { Addition } from '@/model/operators/addition'
-import { Comparison } from '@/model/operators/comparison'
-import { Division } from '@/model/operators/division'
-import { Exponential } from '@/model/operators/exponential'
-import { Modulus } from '@/model/operators/modulus'
-import { Multiplication } from '@/model/operators/multiplication'
-import { Subtraction } from '@/model/operators/subtraction'
+import {
+    Addition,
+    Comparison,
+    Division,
+    Exponential,
+    Modulus,
+    Multiplication,
+    Subtraction,
+} from '@/model/operators'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { describe, expect, it, test } from 'bun:test'
 

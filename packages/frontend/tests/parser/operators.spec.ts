@@ -6,7 +6,6 @@ import { Exponential } from '@/model/exponential'
 import { Multiplication } from '@/model/multiplication'
 import { Subtraction } from '@/model/subtraction'
 import { ExpressionParser } from '@/parser/expression-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('Expression Parser (Operators)', () => {
@@ -129,9 +128,6 @@ describe('Expression Parser (Operators)', () => {
 })
 
 function parseExpression(input: string): Expression {
-    const errorReporter = new TestErrorReporter()
-    const tokenStream = TokenStream.read(input, errorReporter)
-    return ExpressionParser.create({
-        errorReporter,
-    }).parse(tokenStream)
+    const tokenStream = TokenStream.read(input)
+    return ExpressionParser.create({}).parse(tokenStream)
 }

@@ -1,7 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { SelfAssignment } from '@/model/self-assignment'
 import { AssignmentParser } from '@/parser/assignment-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('Assignment Parser', () => {
@@ -41,7 +40,6 @@ describe('Assignment Parser', () => {
 })
 
 function parseAssignment(input: string) {
-    const errorReporter = new TestErrorReporter()
-    const stream = TokenStream.read(input, errorReporter)
-    return AssignmentParser.create({ errorReporter }).parse(stream)
+    const stream = TokenStream.read(input)
+    return AssignmentParser.create({}).parse(stream)
 }

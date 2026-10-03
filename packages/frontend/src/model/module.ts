@@ -1,4 +1,4 @@
-import { SemanticResult } from '@/tools/semantic-result'
+import { SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
 import { Context, Declaration, Statement } from '.'
 

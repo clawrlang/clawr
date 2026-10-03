@@ -1,6 +1,6 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { HighlightRecorder } from '@/tools/highlights'
-import { SemanticResult } from '@/tools/semantic-result'
+import { SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
 import { FieldReference } from './field-reference'
 import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'

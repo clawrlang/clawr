@@ -1,6 +1,5 @@
 import { TokenStream } from '@/lexer'
 import { DataLiteralParser } from '@/parser/data-literal-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('DataLiteralParser', () => {
@@ -48,8 +47,7 @@ describe('DataLiteralParser', () => {
 })
 
 function parseDataLiteral(code: string) {
-    const errorReporter = new TestErrorReporter()
-    const tokenStream = TokenStream.read(code, errorReporter)
-    const parser = DataLiteralParser.create({ errorReporter })
+    const tokenStream = TokenStream.read(code)
+    const parser = DataLiteralParser.create({})
     return parser.parse(tokenStream)
 }

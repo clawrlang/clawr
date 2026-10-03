@@ -3,6 +3,7 @@ import { Assignment } from '@/model/assignment'
 import { FieldReference } from '@/model/field-reference'
 import { SelfAssignment } from '@/model/self-assignment'
 import { VariableReference } from '@/model/variable-reference'
+import { SourceError } from '@/tools'
 import { Context } from '.'
 import { DataLiteralParser } from './data-literal-parser'
 import { ExpressionParser } from './expression-parser'
@@ -50,10 +51,14 @@ export class AssignmentParser implements StatementParser<
                 span: { start: equalsToken.start, end: equalsToken.end },
             })
         } else {
-            this.context.errorReporter.reportFatalError(
-                'Invalid assignment target. Only variables and fields are allowed.',
-                { start: stream.peek()!!.start, end: stream.peek()!!.end },
-            )
+            throw SourceError.create({
+                message:
+                    'Invalid assignment target. Only variables and fields are allowed.',
+                span: {
+                    start: stream.peek()!!.start,
+                    end: stream.peek()!!.end,
+                },
+            })
         }
     }
 }

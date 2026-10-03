@@ -6,7 +6,6 @@ import {
     TruthvalueSet,
 } from '@/model/value-set'
 import { DomainParser } from '@/parser/domain-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('DomainParser', () => {
@@ -131,8 +130,7 @@ describe('DomainParser', () => {
 })
 
 function parseDomain(input: string) {
-    const errorReporter = new TestErrorReporter()
-    const stream = TokenStream.read(input, errorReporter)
-    const parser = DomainParser.create({ errorReporter })
+    const stream = TokenStream.read(input)
+    const parser = DomainParser.create({})
     return parser.parse(stream)
 }

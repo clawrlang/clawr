@@ -10,6 +10,7 @@ import { Multiplication } from '@/model/multiplication'
 import { Subtraction } from '@/model/subtraction'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { VariableReference } from '@/model/variable-reference'
+import { SourceError } from '@/tools'
 import { Context } from '.'
 import { DataLiteralParser } from './data-literal-parser'
 import { FunctionArgumentsParser } from './function-arguments-parser'
@@ -179,13 +180,13 @@ export class ExpressionParser {
                 return this.parseDataLiteral(stream)
         }
         const token = stream.expectToken()
-        this.context.errorReporter.reportFatalError(
-            `Unexpected ${token.kind}`,
-            {
+        throw SourceError.create({
+            message: `Unexpected ${token.kind}`,
+            span: {
                 start: token.start,
                 end: token.end,
             },
-        )
+        })
     }
 
     private parseVariableReference(stream: TokenStream) {

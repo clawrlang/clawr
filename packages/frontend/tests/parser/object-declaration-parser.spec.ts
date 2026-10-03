@@ -1,7 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { ISOLATED } from '@/model/isolation-level'
 import { ObjectDeclarationParser } from '@/parser/object-declaration-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('ObjectDeclaration Parser', () => {
@@ -203,8 +202,7 @@ describe('ObjectDeclaration Parser', () => {
 })
 
 function parseObject(input: string) {
-    const errorReporter = new TestErrorReporter()
-    const stream = TokenStream.read(input, errorReporter)
-    const parser = ObjectDeclarationParser.create({ errorReporter })
+    const stream = TokenStream.read(input)
+    const parser = ObjectDeclarationParser.create({})
     return parser.parse(stream)
 }

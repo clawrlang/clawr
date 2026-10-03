@@ -7,8 +7,8 @@ import type {
     SemanticTokenModifier,
     SourceCodeSpan,
 } from '@clawr/frontend/tools'
-import { SemanticErrorCollection } from '@clawr/frontend/tools'
-import { CollectedDiagnostic, CollectingErrorReporter } from './diagnostics'
+import { SourceError, SourceErrorCollection } from '@clawr/frontend/tools'
+import { CollectedDiagnostic } from './diagnostics'
 
 export type RecordedHighlight = {
     kind: SemanticTokenKind
@@ -27,7 +27,7 @@ export type ParsedDocument = {
  * failures are converted into diagnostics.
  */
 export function parseDocument(source: string): ParsedDocument {
-    const errorReporter = new CollectingErrorReporter()
+    const diagnostics: CollectedDiagnostic[] = []
     const highlights: RecordedHighlight[] = []
     const highlightRecorder: HighlightRecorder = {
         record(kind, span, modifiers) {
@@ -35,32 +35,30 @@ export function parseDocument(source: string): ParsedDocument {
         },
     }
     const context = {
-        errorReporter,
         highlightRecorder,
         scope: Scope.createRoot(),
     }
 
     try {
-        const stream = TokenStream.read(source, errorReporter)
+        const stream = TokenStream.read(source)
         const module = ModuleParser.create(context).parse(stream)
         module.toCIR(context)
     } catch (err) {
-        if (err instanceof SemanticErrorCollection) {
+        if (err instanceof SourceErrorCollection) {
             for (const error of err.errors)
-                errorReporter.diagnostics.push({
+                diagnostics.push({
                     message: error.message,
                     span: error.span,
                     severity: 'error',
                 })
-        } else {
-            // A genuine syntax error unwound all the way here. Earlier fatal
-            // candidates (if any) came from discarded speculative parses; only
-            // the last one recorded corresponds to the error that actually
-            // escaped.
-            const syntaxError = errorReporter.fatalCandidates.at(-1)
-            if (syntaxError) errorReporter.diagnostics.push(syntaxError)
+        } else if (err instanceof SourceError) {
+            diagnostics.push({
+                message: err.message,
+                span: err.span,
+                severity: 'error',
+            })
         }
     }
 
-    return { diagnostics: errorReporter.diagnostics, highlights }
+    return { diagnostics, highlights }
 }

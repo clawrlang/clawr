@@ -1,6 +1,5 @@
 import { TokenStream } from '@/lexer'
 import { ReturnStatementParser } from '@/parser/return-statement-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('Return Statement Parser', () => {
@@ -22,8 +21,7 @@ describe('Return Statement Parser', () => {
 })
 
 function parseReturnStatement(code: string) {
-    const errorReporter = new TestErrorReporter()
-    const tokenStream = TokenStream.read(code, errorReporter)
-    const parser = ReturnStatementParser.create({ errorReporter })
+    const tokenStream = TokenStream.read(code)
+    const parser = ReturnStatementParser.create({})
     return parser.parse(tokenStream)
 }

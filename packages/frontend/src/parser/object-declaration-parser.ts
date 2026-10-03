@@ -3,6 +3,7 @@ import { DataField } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
+import { SourceError } from '@/tools'
 import { Context } from '.'
 import { DataFieldParser } from './data-field-parser'
 import { FunctionDeclarationParser } from './function-declaration-parser'
@@ -45,30 +46,30 @@ export class ObjectDeclarationParser {
                 const dataToken = stream.expect('KEYWORD', 'state')
                 stream.expect('PUNCTUATION', ':')
                 if (fields)
-                    this.context.errorReporter.reportFatalError(
-                        `Repeated state section`,
-                        { ...dataToken },
-                    )
+                    throw SourceError.create({
+                        message: `Repeated state section`,
+                        span: { ...dataToken },
+                    })
                 fields = this.parseFields(stream)
             }
             if (stream.isNext('KEYWORD', 'init')) {
                 const inheritanceToken = stream.expect('KEYWORD', 'init')
                 stream.expect('PUNCTUATION', ':')
                 if (initializers)
-                    this.context.errorReporter.reportFatalError(
-                        `Repeated init section`,
-                        { ...inheritanceToken },
-                    )
+                    throw SourceError.create({
+                        message: `Repeated init section`,
+                        span: { ...inheritanceToken },
+                    })
                 initializers = this.parseMethods(stream)
             }
             if (stream.isNext('KEYWORD', 'mutating')) {
                 const mutatingToken = stream.expect('KEYWORD', 'mutating')
                 stream.expect('PUNCTUATION', ':')
                 if (mutating)
-                    this.context.errorReporter.reportFatalError(
-                        `Repeated mutating section`,
-                        { ...mutatingToken },
-                    )
+                    throw SourceError.create({
+                        message: `Repeated mutating section`,
+                        span: { ...mutatingToken },
+                    })
                 mutating = this.parseMethods(stream)
             }
         }
@@ -100,9 +101,7 @@ export class ObjectDeclarationParser {
 
     private parseFields(stream: TokenStream) {
         const fields: DataField[] = []
-        const fieldParser = DataFieldParser.create({
-            errorReporter: this.context.errorReporter,
-        })
+        const fieldParser = DataFieldParser.create({})
 
         while (!this.isSectionEnd(stream))
             fields.push(fieldParser.parse(stream))

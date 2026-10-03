@@ -1,7 +1,7 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
 import { Result, SuccessResult } from '@/tools/result'
-import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
 import { Context, Expression, Statement } from '.'
 import { FunctionName } from './function-name'

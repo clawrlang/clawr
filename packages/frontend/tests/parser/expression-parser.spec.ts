@@ -6,7 +6,6 @@ import { IntegerLiteral } from '@/model/integer-literal'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { VariableReference } from '@/model/variable-reference'
 import { ExpressionParser } from '@/parser/expression-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('Expression Parser', () => {
@@ -105,9 +104,6 @@ describe('Expression Parser', () => {
 })
 
 function parseExpression(input: string): Expression {
-    const errorReporter = new TestErrorReporter()
-    const tokenStream = TokenStream.read(input, errorReporter)
-    return ExpressionParser.create({
-        errorReporter,
-    }).parse(tokenStream)
+    const tokenStream = TokenStream.read(input)
+    return ExpressionParser.create({}).parse(tokenStream)
 }

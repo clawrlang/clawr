@@ -1,6 +1,7 @@
 import { TokenStream } from '@/lexer'
 import { Declaration, Statement } from '@/model'
 import { Module } from '@/model/module'
+import { SourceError } from '@/tools'
 import { Context, DeclarationParser } from '.'
 import { BlockParser } from './block-parser'
 import { DataDeclarationParser } from './data-declaration-parser'
@@ -34,10 +35,10 @@ export class ModuleParser {
             if (stream.isNext('ANNOTATION', '@main')) {
                 if (main !== undefined) {
                     const { start, end } = stream.peek()!!
-                    this.context.errorReporter.reportFatalError(
-                        'Multiple @main blocks found',
-                        { start, end },
-                    )
+                    throw SourceError.create({
+                        message: 'Multiple @main blocks found',
+                        span: { start, end },
+                    })
                 }
 
                 stream.expect('ANNOTATION', '@main')
@@ -48,10 +49,10 @@ export class ModuleParser {
                 )
                 if (!parser) {
                     const { start, end } = stream.peek()!!
-                    this.context.errorReporter.reportFatalError(
-                        `Unexpected token kind: ${stream.peek()?.kind} while parsing module`,
-                        { start, end },
-                    )
+                    throw SourceError.create({
+                        message: `Unexpected token kind: ${stream.peek()?.kind} while parsing module`,
+                        span: { start, end },
+                    })
                 }
                 declarations.push(parser!.parse(stream))
             }

@@ -1,7 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { VariableDeclarationParser } from '@/parser/variable-declaration-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('VariableDeclarationParser', () => {
@@ -82,9 +81,7 @@ describe('VariableDeclarationParser', () => {
 })
 
 function parseVariableDeclaration(source: string) {
-    const errorReporter = new TestErrorReporter()
-    const tokenStream = TokenStream.read(source, errorReporter)
-    const parser = VariableDeclarationParser.create({ errorReporter })
-    const decl = parser.parse(tokenStream)
-    return decl
+    const tokenStream = TokenStream.read(source)
+    const parser = VariableDeclarationParser.create({})
+    return parser.parse(tokenStream)
 }

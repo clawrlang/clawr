@@ -1,6 +1,6 @@
 import { SourceCodeSpan } from '@/tools'
 import { Result, SuccessResult } from '@/tools/result'
-import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
 import { Context, ContextWithDomain, Expression } from '.'
 import { ISOLATED } from './isolation-level'

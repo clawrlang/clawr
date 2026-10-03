@@ -1,6 +1,5 @@
 import { TokenStream } from '@/lexer'
 import { ModuleParser } from '@/parser/module-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('Module Parser', () => {
@@ -158,8 +157,7 @@ describe('Module Parser', () => {
 })
 
 function parseModule(code: string) {
-    const errorReporter = new TestErrorReporter()
-    const tokenStream = TokenStream.read(code, errorReporter)
-    const parser = ModuleParser.create({ errorReporter })
+    const tokenStream = TokenStream.read(code)
+    const parser = ModuleParser.create({})
     return parser.parse(tokenStream)
 }

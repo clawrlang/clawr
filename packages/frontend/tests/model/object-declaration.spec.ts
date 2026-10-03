@@ -1,7 +1,6 @@
-import { DataLiteral } from '@/model/data-literal'
 import { FunctionDeclaration } from '@/model/function-declaration'
-import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED } from '@/model/isolation-level'
+import { DataLiteral, IntegerLiteral } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { SelfAssignment } from '@/model/self-assignment'
 import { IntegerRange } from '@/model/value-set'

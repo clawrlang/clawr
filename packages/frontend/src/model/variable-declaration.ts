@@ -1,7 +1,7 @@
 import { Context, Declaration, Expression, Statement } from '@/model'
-import { DataLiteral } from '@/model/data-literal'
 import { DomainDeclaration } from '@/model/domain-declaration'
 import { ISOLATED, IsolationLevel, UNIQUE } from '@/model/isolation-level'
+import { DataLiteral } from '@/model/literals'
 import { Retain } from '@/model/retain'
 import { Scope } from '@/model/scope'
 import { ValueSet } from '@/model/value-set'

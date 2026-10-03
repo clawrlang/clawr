@@ -1,7 +1,7 @@
 import { Token, TokenStream } from '@/lexer'
 import { IdentifierToken } from '@/lexer/token'
 import { decorateDomain, DomainDeclaration } from '@/model/domain-declaration'
-import { IntegerLiteral } from '@/model/integer-literal'
+import { IntegerLiteral } from '@/model/literals'
 import { TypeName } from '@/model/type-name'
 import {
     IntegerRange,

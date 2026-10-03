@@ -1,5 +1,5 @@
 import { TokenStream } from '@/lexer'
-import { DataLiteralParser } from '@/parser/data-literal-parser'
+import { DataLiteralParser } from '@/parser/literals'
 import { describe, expect, it } from 'bun:test'
 
 describe('DataLiteralParser', () => {

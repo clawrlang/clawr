@@ -1,7 +1,7 @@
 import { Context, Expression, Statement } from '@/model'
-import { DataLiteral } from '@/model/data-literal'
 import { FieldReference } from '@/model/field-reference'
 import { UNIQUE, UNKNOWN } from '@/model/isolation-level'
+import { DataLiteral } from '@/model/literals'
 import { Retain } from '@/model/retain'
 import { RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'

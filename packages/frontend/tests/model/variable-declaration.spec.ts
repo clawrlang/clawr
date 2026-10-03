@@ -1,13 +1,15 @@
 import { DataDeclaration } from '@/model/data-declaration'
-import { DataLiteral } from '@/model/data-literal'
 import { decorateDomain } from '@/model/domain-declaration'
 import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
-import { IntegerLiteral } from '@/model/integer-literal'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
+import {
+    DataLiteral,
+    IntegerLiteral,
+    TruthValueLiteral,
+} from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
-import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { TypeName } from '@/model/type-name'
 import { IntegerRange, RCTypeSet, TruthvalueSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'

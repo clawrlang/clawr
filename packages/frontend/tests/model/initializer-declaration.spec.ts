@@ -1,7 +1,7 @@
 import { DataDeclaration } from '@/model/data-declaration'
-import { DataLiteral } from '@/model/data-literal'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { DataLiteral } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { Parameter } from '@/model/parameter'
 import { ReturnStatement } from '@/model/return-statement'

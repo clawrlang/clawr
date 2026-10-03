@@ -1,6 +1,6 @@
 import { TokenStream } from '@/lexer'
-import { DataLiteral } from '@/model/data-literal'
 import { FunctionCall } from '@/model/function-call'
+import { DataLiteral } from '@/model/literals'
 import { Context } from '@/parser'
 import { ExpressionParser } from '@/parser/expression-parser'
 

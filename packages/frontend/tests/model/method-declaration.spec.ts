@@ -1,7 +1,7 @@
 import { DataDeclaration } from '@/model/data-declaration'
-import { DataLiteral } from '@/model/data-literal'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { DataLiteral } from '@/model/literals'
 import { Parameter } from '@/model/parameter'
 import { ReturnStatement } from '@/model/return-statement'
 import { IntegerRange, RCTypeSet, StringSet } from '@/model/value-set'

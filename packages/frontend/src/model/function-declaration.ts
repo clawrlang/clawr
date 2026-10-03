@@ -1,5 +1,4 @@
 import { Context, Declaration, Expression, Statement } from '@/model'
-import { DataLiteral } from '@/model/data-literal'
 import { DomainDeclaration } from '@/model/domain-declaration'
 import { FunctionName } from '@/model/function-name'
 import {
@@ -8,6 +7,7 @@ import {
     UNIQUE,
     UNKNOWN,
 } from '@/model/isolation-level'
+import { DataLiteral } from '@/model/literals'
 import { Parameter } from '@/model/parameter'
 import { ReturnStatement } from '@/model/return-statement'
 import { Scope } from '@/model/scope'

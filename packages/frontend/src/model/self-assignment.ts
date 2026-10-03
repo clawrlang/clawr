@@ -1,6 +1,6 @@
 import { Context, Statement } from '@/model'
-import { DataLiteral } from '@/model/data-literal'
 import { SHARED } from '@/model/isolation-level'
+import { DataLiteral } from '@/model/literals'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'

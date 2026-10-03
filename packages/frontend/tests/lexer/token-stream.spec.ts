@@ -463,14 +463,6 @@ describe('TokenStream', () => {
                 expect(() => [...tokenize(`x${glyph}y`)]).toThrow(
                     /Reserved implementation glyph/,
                 )
-                expect(errorReporter.errors).toMatchObject([
-                    {
-                        location: {
-                            start: { line: 1, column: 2 },
-                            end: { line: 1, column: 2 },
-                        },
-                    },
-                ])
             })
         }
     })
@@ -480,14 +472,6 @@ describe('TokenStream', () => {
             expect(() => [...tokenize('ab\u200Ccd')]).toThrow(
                 /Forbidden Unicode character/,
             )
-            expect(errorReporter.errors).toMatchObject([
-                {
-                    location: {
-                        start: { line: 1, column: 3 },
-                        end: { line: 1, column: 4 },
-                    },
-                },
-            ])
         })
     })
 

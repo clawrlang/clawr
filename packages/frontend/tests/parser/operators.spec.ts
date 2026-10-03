@@ -1,13 +1,14 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { Addition } from '@/model/addition'
+import { Comparison } from '@/model/comparison'
 import { Division } from '@/model/division'
 import { Exponential } from '@/model/exponential'
 import { Modulus } from '@/model/modulus'
 import { Multiplication } from '@/model/multiplication'
 import { Subtraction } from '@/model/subtraction'
 import { ExpressionParser } from '@/parser/expression-parser'
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it, test } from 'bun:test'
 
 describe('Expression Parser (Operators)', () => {
     describe('Exponentials', () => {
@@ -133,6 +134,43 @@ describe('Expression Parser (Operators)', () => {
                 },
                 subtrahend: { value: { min: 4n, max: 4n } },
             })
+        })
+    })
+
+    describe('Comparison', () => {
+        describe('parses simple comparison', () => {
+            const operators = ['==', '!=', '===', '!==']
+            for (const operator of operators)
+                test(operator, () => {
+                    const expr = parseExpression(`2 ${operator} 3`)
+                    expect(expr).toBeInstanceOf(Comparison)
+                    expect(expr).toMatchObject({
+                        operator,
+                        left: { value: { min: 2n, max: 2n } },
+                        right: { value: { min: 3n, max: 3n } },
+                    })
+                })
+        })
+
+        it('is preceded by addition', () => {
+            const expr = parseExpression('2+3 == 3+4')
+            expect(expr).toBeInstanceOf(Comparison)
+            expect(expr).toMatchObject({
+                left: {
+                    left: { value: { min: 2n, max: 2n } },
+                    right: { value: { min: 3n, max: 3n } },
+                },
+                right: {
+                    left: { value: { min: 3n, max: 3n } },
+                    right: { value: { min: 4n, max: 4n } },
+                },
+            })
+        })
+
+        it('is non-associative', () => {
+            const tokenStream = TokenStream.read('2 == 3 == 4')
+            ExpressionParser.create({}).parse(tokenStream)
+            expect(tokenStream.peek()?.kind).toEqual('OPERATOR')
         })
     })
 })

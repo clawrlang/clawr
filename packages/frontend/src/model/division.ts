@@ -115,7 +115,7 @@ function floorDivLimitNegativeDivisor(n: bigint): bigint {
     return n > 0n ? -1n : 0n
 }
 
-function unionRange(
+export function unionRange(
     a: { min: bigint | undefined; max: bigint | undefined },
     b: { min: bigint | undefined; max: bigint | undefined },
 ): { min: bigint | undefined; max: bigint | undefined } {

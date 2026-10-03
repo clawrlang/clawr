@@ -3,6 +3,7 @@ import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
 import { Context, ContextWithDomain, Expression } from '.'
+import { unionRange } from './division'
 import { AnyIsolationLevel, ISOLATED } from './isolation-level'
 import { IntegerRange, ValueSet } from './value-set'
 
@@ -39,7 +40,7 @@ export class Modulus implements Expression {
         ])
         if (collected.isError) return collected
         const [dividend, divisor] = collected.value
-        return this.div(dividend, divisor)
+        return this.mod(dividend, divisor)
     }
 
     currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
@@ -49,7 +50,7 @@ export class Modulus implements Expression {
         ])
         if (collected.isError) return collected
         const [dividend, divisor] = collected.value
-        return this.div(dividend, divisor)
+        return this.mod(dividend, divisor)
     }
 
     toCIRExpression(
@@ -58,7 +59,7 @@ export class Modulus implements Expression {
         throw new Error('Method not implemented.')
     }
 
-    private div(
+    private mod(
         dividend: ValueSet,
         divisor: ValueSet,
     ): SemanticResult<ValueSet> {
@@ -73,111 +74,86 @@ export class Modulus implements Expression {
         if (divisor.min === 0n || divisor.max === 0n)
             return SemanticErrorResult.failure('division by zero', this.span)
 
-        // A divisor range that merely spans zero (without having it as
-        // an exact bound) can't divide by zero at runtime, but the result
-        // is the union of what's achievable on either side of zero.
         const spansZero =
             (divisor.min === undefined || divisor.min < 0n) &&
             (divisor.max === undefined || divisor.max > 0n)
 
         const { min, max } = spansZero
             ? unionRange(
-                  integerModulusRange(
-                      dividend,
-                      IntegerRange.create({ min: divisor.min, max: -1n }),
-                  ),
-                  integerModulusRange(
-                      dividend,
-                      IntegerRange.create({ min: 1n, max: divisor.max }),
-                  ),
+                  modRange(dividend, { min: 1n, max: divisor.max }),
+                  modRange(dividend, { min: divisor.min, max: -1n }),
               )
-            : integerModulusRange(dividend, divisor)
+            : modRange(dividend, divisor)
         return Result.value(IntegerRange.create({ min, max }))
     }
 }
 
-// Rounds towards negative infinity, matching Clawr's integer division semantics.
-function floorDiv(n: bigint, d: bigint): bigint {
-    const quotient = n / d
-    const remainder = n % d
-    return remainder !== 0n && remainder < 0n !== d < 0n
-        ? quotient - 1n
-        : quotient
+type Bounds = { min: bigint | undefined; max: bigint | undefined }
+
+// Divisor ranges up to this many values are enumerated for exact bounds.
+const ENUMERATION_LIMIT = 256n
+
+const negate = (n: bigint | undefined) => (n === undefined ? undefined : -n)
+
+// Floored modulus for a positive divisor: always in [0, d).
+function floorMod(n: bigint, d: bigint): bigint {
+    return ((n % d) + d) % d
 }
 
-// floorDiv(n, d) as d grows without bound towards +infinity.
-function floorDivLimitPositiveDivisor(n: bigint): bigint {
-    return n >= 0n ? 0n : -1n
+// Range of `dividend % divisor` for a divisor range that excludes zero.
+function modRange(dividend: Bounds, divisor: Bounds): Bounds {
+    if (divisor.min !== undefined && divisor.min > 0n)
+        return modPositiveDivisor(dividend, divisor.min, divisor.max)
+
+    // n % d == -((-n) % -d)
+    const negated = modPositiveDivisor(
+        { min: negate(dividend.max), max: negate(dividend.min) },
+        -(divisor.max as bigint),
+        negate(divisor.min),
+    )
+    return { min: negate(negated.max), max: negate(negated.min) }
 }
 
-// floorDiv(n, d) as d shrinks without bound towards -infinity.
-function floorDivLimitNegativeDivisor(n: bigint): bigint {
-    return n > 0n ? -1n : 0n
-}
+// Range of `dividend % d` for d in [a, b], with 1 <= a and b possibly unbounded.
+function modPositiveDivisor(
+    dividend: Bounds,
+    a: bigint,
+    b: bigint | undefined,
+): Bounds {
+    const { min: lo, max: hi } = dividend
 
-function unionRange(
-    a: { min: bigint | undefined; max: bigint | undefined },
-    b: { min: bigint | undefined; max: bigint | undefined },
-): { min: bigint | undefined; max: bigint | undefined } {
-    return {
-        min:
-            a.min === undefined || b.min === undefined
-                ? undefined
-                : a.min < b.min
-                  ? a.min
-                  : b.min,
-        max:
-            a.max === undefined || b.max === undefined
-                ? undefined
-                : a.max > b.max
-                  ? a.max
-                  : b.max,
-    }
-}
-
-// Computes the exact range of floor(dividend / divisor), given that the
-// divisor range is known not to contain zero (so it is entirely positive
-// or entirely negative).
-function integerModulusRange(
-    dividend: IntegerRange<bigint | undefined, bigint | undefined>,
-    divisor: IntegerRange<bigint | undefined, bigint | undefined>,
-): { min: bigint | undefined; max: bigint | undefined } {
-    const nMin = dividend.min
-    const nMax = dividend.max
-    const isNegativeDivisor = divisor.max !== undefined && divisor.max < 0n
-
-    const maxIsInfinite = isNegativeDivisor
-        ? nMin === undefined
-        : nMax === undefined
-    const minIsInfinite = isNegativeDivisor
-        ? nMax === undefined
-        : nMin === undefined
-
-    // The divisor bound nearest zero is always defined (the range can't
-    // straddle zero); the bound farthest from zero may be unbounded, in
-    // which case the quotient approaches (but can still attain) a limit.
-    const dNear = (isNegativeDivisor ? divisor.max : divisor.min) as bigint
-    const dFar = isNegativeDivisor ? divisor.min : divisor.max
-
-    const candidates: bigint[] = []
-    for (const n of [nMin, nMax]) {
-        if (n === undefined) continue
-        candidates.push(floorDiv(n, dNear))
-        candidates.push(
-            dFar !== undefined
-                ? floorDiv(n, dFar)
-                : isNegativeDivisor
-                  ? floorDivLimitNegativeDivisor(n)
-                  : floorDivLimitPositiveDivisor(n),
-        )
+    if (
+        lo !== undefined &&
+        hi !== undefined &&
+        b !== undefined &&
+        b - a < ENUMERATION_LIMIT
+    ) {
+        let min = b
+        let max = 0n
+        for (let d = a; d <= b; d++) {
+            // Both ends in the same multiple of d: the dividend doesn't wrap.
+            const wraps = lo - floorMod(lo, d) !== hi - floorMod(hi, d)
+            const dMin = wraps ? 0n : floorMod(lo, d)
+            const dMax = wraps ? d - 1n : floorMod(hi, d)
+            if (dMin < min) min = dMin
+            if (dMax > max) max = dMax
+        }
+        return { min, max }
     }
 
-    return {
-        min: minIsInfinite
-            ? undefined
-            : candidates.reduce((a, b) => (a < b ? a : b)),
-        max: maxIsInfinite
-            ? undefined
-            : candidates.reduce((a, b) => (a > b ? a : b)),
+    // Sound but not necessarily tight.
+    const upper = b === undefined ? undefined : b - 1n
+    if (lo !== undefined && lo >= 0n) {
+        if (hi !== undefined && hi < a) return { min: lo, max: hi }
+        const max =
+            hi === undefined
+                ? upper
+                : upper === undefined || hi < upper
+                  ? hi
+                  : upper
+        return { min: 0n, max }
     }
+    if (lo !== undefined && hi !== undefined && hi < 0n && -lo <= a)
+        return { min: lo + a, max: b === undefined ? undefined : hi + b }
+    return { min: 0n, max: upper }
 }

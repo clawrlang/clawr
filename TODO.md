@@ -5,7 +5,7 @@
   - [ ] Logical AND `&&`
   - [ ] Comparison (`==`/`===`/`!=`/`!==`/`>`/`<`/`<=`/`>=`/`≤`/`≥`/`≠`) — non-associative
   - [x] Additive (`+`/`-`)
-  - [ ] Modulus `%`
+  - [x] Modulus `%`
   - [x] Multiplicative (`*`/`/`) — left-associative
   - [x] Exponential `^` - right-associative
 - `Exponential.toCIRExpression()`

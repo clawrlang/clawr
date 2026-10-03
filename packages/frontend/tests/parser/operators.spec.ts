@@ -3,6 +3,7 @@ import { Expression } from '@/model'
 import { Addition } from '@/model/addition'
 import { Division } from '@/model/division'
 import { Exponential } from '@/model/exponential'
+import { Modulus } from '@/model/modulus'
 import { Multiplication } from '@/model/multiplication'
 import { Subtraction } from '@/model/subtraction'
 import { ExpressionParser } from '@/parser/expression-parser'
@@ -45,6 +46,15 @@ describe('Expression Parser (Operators)', () => {
         it('parses simple division', () => {
             const expr = parseExpression('2/3')
             expect(expr).toBeInstanceOf(Division)
+            expect(expr).toMatchObject({
+                dividend: { value: { min: 2n, max: 2n } },
+                divisor: { value: { min: 3n, max: 3n } },
+            })
+        })
+
+        it('parses simple modulus', () => {
+            const expr = parseExpression('2%3')
+            expect(expr).toBeInstanceOf(Modulus)
             expect(expr).toMatchObject({
                 dividend: { value: { min: 2n, max: 2n } },
                 divisor: { value: { min: 3n, max: 3n } },

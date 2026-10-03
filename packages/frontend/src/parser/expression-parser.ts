@@ -6,6 +6,7 @@ import { Exponential } from '@/model/exponential'
 import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral } from '@/model/integer-literal'
+import { Modulus } from '@/model/modulus'
 import { Multiplication } from '@/model/multiplication'
 import { Subtraction } from '@/model/subtraction'
 import { TruthValueLiteral } from '@/model/truthvalue-literal'
@@ -59,21 +60,22 @@ export class ExpressionParser {
 
     parseMultiplicativeOperation(stream: TokenStream): Expression {
         let expr = this.parseExponentialExpression(stream)
-        while (stream.isNext('OPERATOR', '*', '/')) {
-            const operator = stream.expect('OPERATOR', '*', '/').operator
+        while (stream.isNext('OPERATOR', '*', '/', '%')) {
+            const operator = stream.expect('OPERATOR', '*', '/', '%').operator
             const right = this.parseExponentialExpression(stream)
+            const config = {
+                left: expr,
+                dividend: expr,
+                right,
+                divisor: right,
+                span: { start: expr.span.start, end: right.span.end },
+            }
             expr =
                 operator == '*'
-                    ? Multiplication.create({
-                          left: expr,
-                          right,
-                          span: { start: expr.span.start, end: right.span.end },
-                      })
-                    : Division.create({
-                          dividend: expr,
-                          divisor: right,
-                          span: { start: expr.span.start, end: right.span.end },
-                      })
+                    ? Multiplication.create(config)
+                    : operator == '%'
+                      ? Modulus.create(config)
+                      : Division.create(config)
         }
         return expr
     }

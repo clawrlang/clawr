@@ -1,9 +1,14 @@
 import { Context, ContextWithDomain, Expression } from '@/model'
 import { AnyIsolationLevel, ISOLATED } from '@/model/isolation-level'
-import { ValueSet } from '@/model/value-set'
+import {
+    IntegerRange,
+    truthvalue,
+    TruthvalueSet,
+    ValueSet,
+} from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools'
 import { Result } from '@/tools/result'
-import { SemanticResult } from '@/tools/source-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
 
 export class Comparison implements Expression {
@@ -48,17 +53,65 @@ export class Comparison implements Expression {
     }
 
     domain(context: ContextWithDomain): SemanticResult<ValueSet> {
-        throw new Error('Method not implemented.')
+        const collected = SemanticResult.collect([
+            this.left.domain(context),
+            this.right.domain(context),
+        ])
+        if (collected.isError) return collected
+        const [left, right] = collected.value
+        return this.compare(left, right)
     }
 
     currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
-        throw new Error('Method not implemented.')
+        const collected = SemanticResult.collect([
+            this.left.currentValue(context),
+            this.right.currentValue(context),
+        ])
+        if (collected.isError) return collected
+        const [left, right] = collected.value
+        return this.compare(left, right)
     }
 
     toCIRExpression(
         context: ContextWithDomain,
     ): SemanticResult<cir.Expression> {
         throw new Error('Method not implemented.')
+    }
+
+    private compare(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
+        if (this.operator !== '==')
+            return SemanticErrorResult.failure('not supported', this.span)
+
+        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+            const values: truthvalue[] =
+                left.min !== left.max ||
+                right.min !== right.max ||
+                left.min === undefined ||
+                right.min === undefined
+                    ? ['false', 'true']
+                    : left.min === right.min
+                      ? ['true']
+                      : ['false']
+            return Result.value(TruthvalueSet.create(values))
+        } else if (
+            left instanceof TruthvalueSet &&
+            right instanceof TruthvalueSet
+        ) {
+            const canBeTrue = left.values.some((l: truthvalue) =>
+                right.values.some((r: truthvalue) => r === l),
+            )
+            const canBeFalse = left.values.some((l: truthvalue) =>
+                right.values.some((r: truthvalue) => r !== l),
+            )
+            const values: truthvalue[] = []
+            if (canBeFalse) values.push('false')
+            if (canBeTrue) values.push('true')
+            return Result.value(TruthvalueSet.create(values))
+        } else
+            return SemanticErrorResult.failure(
+                `addition between ${left.toString()} and ${right.toString()} is not supported`,
+                this.span,
+            )
     }
 }
 

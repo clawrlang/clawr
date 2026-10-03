@@ -1,5 +1,5 @@
 object O {
-    func a(const y: integer) => self->x
+    func a(y: integer) => self->x * y
     func b(y: O) => copy(of: y)
 mutating:
     func do() { self->z = true }

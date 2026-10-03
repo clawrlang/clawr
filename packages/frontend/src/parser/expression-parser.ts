@@ -1,6 +1,7 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { Addition } from '@/model/addition'
+import { Comparison } from '@/model/comparison'
 import { Division } from '@/model/division'
 import { Exponential } from '@/model/exponential'
 import { FieldReference } from '@/model/field-reference'
@@ -34,7 +35,20 @@ export class ExpressionParser {
     }
 
     parse(stream: TokenStream): Expression {
-        return this.parseAdditiveOperation(stream)
+        return this.parseComparisonOperation(stream)
+    }
+
+    parseComparisonOperation(stream: TokenStream): Expression {
+        const left = this.parseAdditiveOperation(stream)
+        if (!stream.isNext('OPERATOR', ...Comparison.operators)) return left
+        const operatorToken = stream.expect('OPERATOR', ...Comparison.operators)
+        const right = this.parseAdditiveOperation(stream)
+        return Comparison.create({
+            operator: operatorToken.operator,
+            left,
+            right,
+            span: { start: left.span.start, end: right.span.end },
+        })
     }
 
     parseAdditiveOperation(stream: TokenStream): Expression {

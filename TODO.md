@@ -1,12 +1,12 @@
 # TODO
 
 - Parse binary operator expressions
-  - [ ] Boolean OR `||`
-  - [ ] Boolean AND `&&`
-  - [ ] Comparison (`==`/`>`/`<`…)
+  - [ ] Logical OR `||`
+  - [ ] Logical AND `&&`
+  - [ ] Comparison (`==`/`===`/`!=`/`!==`/`>`/`<`/`<=`/`>=`/`≤`/`≥`/`≠`) — non-associative
   - [x] Additive (`+`/`-`)
   - [x] Multiplicative (`*`/`/`) — left-associative
-  - [x] Exponent `^` - right-associative
+  - [x] Exponential `^` - right-associative
 - `Exponential.toCIRExpression()`
 - `real` operands
 

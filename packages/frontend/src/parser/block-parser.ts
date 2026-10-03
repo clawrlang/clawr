@@ -1,5 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { Statement } from '@/model'
+import { SourceError } from '@/tools'
 import { Context } from '.'
 import { AssignmentParser } from './assignment-parser'
 import { FunctionCallParser } from './function-call-parser'
@@ -44,10 +45,10 @@ export class BlockParser {
         )
         if (!parser) {
             const { start, end } = stream.peek()!!
-            this.context.errorReporter.reportFatalError(
-                'No suitable parser found for the next statement',
-                { start, end },
-            )
+            throw SourceError.create({
+                message: 'No suitable parser found for the next statement',
+                span: { start, end },
+            })
         }
         return parser
     }

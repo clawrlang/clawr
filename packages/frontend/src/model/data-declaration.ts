@@ -1,5 +1,5 @@
 import { Result } from '@/tools/result'
-import { SemanticResult } from '@/tools/semantic-result'
+import { SemanticResult } from '@/tools/source-result'
 import { Context, Declaration, Expression } from '.'
 import { DomainDeclaration } from './domain-declaration'
 import { IsolationLevel } from './isolation-level'

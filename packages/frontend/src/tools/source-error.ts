@@ -1,6 +1,6 @@
 import { SourceCodeSpan } from './diagnostics'
 
-export class SemanticError extends Error {
+export class SourceError extends Error {
     private constructor(
         message: string,
         public readonly span: SourceCodeSpan,
@@ -15,20 +15,20 @@ export class SemanticError extends Error {
         message: string
         span: SourceCodeSpan
     }) {
-        return new SemanticError(message, span)
+        return new SourceError(message, span)
     }
 }
 
-export class SemanticErrorCollection extends Error {
-    private constructor(public readonly errors: SemanticError[]) {
+export class SourceErrorCollection extends Error {
+    private constructor(public readonly errors: SourceError[]) {
         super(errors.map((e) => e.message).join('\n'))
     }
 
-    static create(errors: SemanticError[]): SemanticErrorCollection {
-        return new SemanticErrorCollection(errors)
+    static create(errors: SourceError[]): SourceErrorCollection {
+        return new SourceErrorCollection(errors)
     }
 
-    add(...errors: SemanticError[]): void {
+    add(...errors: SourceError[]): void {
         this.errors.push(...errors)
         this.message = this.errors.map((e) => e.message).join('\n')
     }

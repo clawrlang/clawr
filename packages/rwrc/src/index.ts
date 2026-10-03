@@ -10,11 +10,10 @@ import { TokenStream } from '@clawr/frontend/lexer'
 import { Scope } from '@clawr/frontend/model/scope'
 import { ModuleParser } from '@clawr/frontend/parser'
 import {
-    SemanticError,
-    SemanticErrorCollection,
     SourceCodeSpan,
+    SourceError,
+    SourceErrorCollection,
 } from '@clawr/frontend/tools'
-import { RWRCErrorReporter } from './error-reporter'
 
 const exeDir = path.dirname(process.execPath)
 const program = new Command()
@@ -34,9 +33,9 @@ program
             await compileCIR(outputFilePath)
         } catch (err) {
             const errors =
-                err instanceof SemanticErrorCollection
+                err instanceof SourceErrorCollection
                     ? err.errors
-                    : err instanceof SemanticError
+                    : err instanceof SourceError
                       ? [err]
                       : undefined
             if (errors)
@@ -57,13 +56,12 @@ async function parseToCIR({
     outputFilePath: string
 }) {
     const context = {
-        errorReporter: new RWRCErrorReporter(file),
         scope: Scope.createRoot(),
     }
 
     const sourceCode = await fs.readFile(file, 'utf-8')
-    const stream = TokenStream.read(sourceCode, context.errorReporter)
-    const cir = ModuleParser.create(context).parse(stream).toCIR(context)
+    const stream = TokenStream.read(sourceCode)
+    const cir = ModuleParser.create({}).parse(stream).toCIR(context)
 
     await ensureDirectoryExists(path.dirname(outputFilePath))
     await fs.writeFile(outputFilePath, JSON.stringify(cir))

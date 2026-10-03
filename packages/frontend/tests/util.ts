@@ -8,13 +8,7 @@ import { TruthValueLiteral } from '@/model/truthvalue-literal'
 import { TypeName } from '@/model/type-name'
 import { IntegerRange, truthvalue, ValueSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
-import { ErrorReporter, SourceCodeSpan } from '@/tools/diagnostics'
 
-export class TestErrorReporter implements ErrorReporter {
-    reportFatalError(message: string, location: SourceCodeSpan): never {
-        throw new Error(message)
-    }
-}
 export function newSemanticContext(): Context {
     return {
         scope: Scope.createRoot(),

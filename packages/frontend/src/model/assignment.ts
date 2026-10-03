@@ -1,6 +1,6 @@
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
-import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import { Context, Expression, Statement } from '.'
 import { DataLiteral } from './data-literal'
 import { FieldReference } from './field-reference'

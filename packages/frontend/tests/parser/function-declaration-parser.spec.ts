@@ -1,7 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { FunctionDeclarationParser } from '@/parser/function-declaration-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('Function Declaration Parser', () => {
@@ -207,10 +206,7 @@ describe('Function Declaration Parser', () => {
 })
 
 function parseFunction(code: string) {
-    const errorReporter = new TestErrorReporter()
-    const stream = TokenStream.read(code, errorReporter)
-    const parser = FunctionDeclarationParser.create({
-        errorReporter,
-    })
+    const stream = TokenStream.read(code)
+    const parser = FunctionDeclarationParser.create({})
     return parser.parse(stream)
 }

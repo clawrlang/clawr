@@ -1,5 +1,5 @@
 import { Result } from '@/tools/result'
-import { SemanticErrorResult, SemanticResult } from '@/tools/semantic-result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import { someCodeSpan } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 

@@ -2,7 +2,6 @@ import { TokenStream } from '@/lexer'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { IntegerRange, TruthvalueSet } from '@/model/value-set'
 import { DataDeclarationParser } from '@/parser/data-declaration-parser'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 describe('DataDeclarationParser', () => {
@@ -12,10 +11,7 @@ describe('DataDeclarationParser', () => {
                 field1: integer
                 field2: truthvalue
             }`
-        const errorReporter = new TestErrorReporter()
-        const tokenStream = TokenStream.read(code, errorReporter)
-        const parser = DataDeclarationParser.create({ errorReporter })
-        const result = parser.parse(tokenStream)
+        const result = parseDataDeclaration(code)
         expect(result).toMatchObject({
             name: { name: 'MyData' },
             fields: [
@@ -41,10 +37,7 @@ describe('DataDeclarationParser', () => {
                 ref field1: integer
                 const field2: truthvalue
             }`
-        const errorReporter = new TestErrorReporter()
-        const tokenStream = TokenStream.read(code, errorReporter)
-        const parser = DataDeclarationParser.create({ errorReporter })
-        const result = parser.parse(tokenStream)
+        const result = parseDataDeclaration(code)
         expect(result).toMatchObject({
             name: { name: 'MyData' },
             fields: [
@@ -64,3 +57,9 @@ describe('DataDeclarationParser', () => {
         expect(result.fields[1].domain).toBeInstanceOf(TruthvalueSet)
     })
 })
+
+function parseDataDeclaration(code: string) {
+    const tokenStream = TokenStream.read(code)
+    const parser = DataDeclarationParser.create({})
+    return parser.parse(tokenStream)
+}

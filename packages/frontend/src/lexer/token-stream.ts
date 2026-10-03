@@ -1,4 +1,5 @@
-import { ErrorReporter, Position } from '@/tools/diagnostics'
+import { SourceError } from '@/tools'
+import { Position } from '@/tools/diagnostics'
 import { decimal } from 'decimalish'
 import type {
     Annotation,
@@ -33,15 +34,12 @@ export class TokenStream {
     private source: Source
     private previousToken: Token | undefined
 
-    private constructor(
-        source: string | Source,
-        private readonly errorReporter: ErrorReporter,
-    ) {
+    private constructor(source: string | Source) {
         this.source = typeof source === 'string' ? new Source(source) : source
     }
 
-    static read(source: string, errorReporter: ErrorReporter) {
-        return new TokenStream(source, errorReporter)
+    static read(source: string) {
+        return new TokenStream(source)
     }
 
     attempt<T>(parse: (clone: TokenStream) => T): T {
@@ -53,7 +51,7 @@ export class TokenStream {
     }
 
     clone() {
-        const clone = new TokenStream(this.source.clone(), this.errorReporter)
+        const clone = new TokenStream(this.source.clone())
         clone.previousToken = this.previousToken
         return clone
     }
@@ -93,13 +91,13 @@ export class TokenStream {
     expectToken(): Token {
         const token = this.next()
         if (!token) {
-            this.errorReporter.reportFatalError(
-                `Expected token, but got end of file`,
-                {
+            throw SourceError.create({
+                message: `Expected token, but got end of file`,
+                span: {
                     start: this.source.location,
                     end: this.source.location,
                 },
-            )
+            })
         }
         return token
     }
@@ -131,13 +129,13 @@ export class TokenStream {
         )
 
         if (!token)
-            this.errorReporter.reportFatalError(
-                `Expected ${values?.map((v) => `'${v}'`).join(', ') ?? kind}, but got end of file`,
-                {
+            throw SourceError.create({
+                message: `Expected ${values?.map((v) => `'${v}'`).join(', ') ?? kind}, but got end of file`,
+                span: {
                     start: this.source.location,
                     end: this.source.location,
                 },
-            )
+            })
 
         const actual =
             token.kind === 'PUNCTUATION'
@@ -151,27 +149,29 @@ export class TokenStream {
                       : undefined
 
         if (token.kind !== kind)
-            this.errorReporter.reportFatalError(
-                values && values.length > 0
-                    ? `Expected ${values.map((v) => `'${v}'`).join(', ')}, but got ${token.kind} ${actual ? `'${actual.value}'` : ''}`
-                    : `Expected ${kind}, but got ${token.kind} ${actual ? `'${actual.value}'` : ''}`,
-                {
+            throw SourceError.create({
+                message:
+                    values && values.length > 0
+                        ? `Expected ${values.map((v) => `'${v}'`).join(', ')}, but got ${token.kind} ${actual ? `'${actual.value}'` : ''}`
+                        : `Expected ${kind}, but got ${token.kind} ${actual ? `'${actual.value}'` : ''}`,
+                span: {
                     start: token.start,
                     end: token.end,
                 },
-            )
+            })
 
         if (!values || values.length === 0) return token
-
         if (!actual || values.includes(actual.value)) return token
 
-        const message =
-            values.length > 1
-                ? `Expected one of: ${values.map((v) => `'${v}'`).join(', ')}, but got '${actual.value}'`
-                : `Expected '${values[0]}', but got '${actual.value}'`
-        throw this.errorReporter.reportFatalError(message, {
-            start: token.start,
-            end: token.end,
+        throw SourceError.create({
+            message:
+                values.length > 1
+                    ? `Expected one of: ${values.map((v) => `'${v}'`).join(', ')}, but got '${actual.value}'`
+                    : `Expected '${values[0]}', but got '${actual.value}'`,
+            span: {
+                start: token.start,
+                end: token.end,
+            },
         })
     }
 
@@ -196,13 +196,13 @@ export class TokenStream {
 
         const current = this.source.peek(1)
         if (isReservedImplementationGlyph(current)) {
-            this.errorReporter.reportFatalError(
-                `Reserved implementation glyph '${current}' is not allowed in Clawr identifiers`,
-                {
+            throw SourceError.create({
+                message: `Reserved implementation glyph '${current}' is not allowed in Clawr identifiers`,
+                span: {
                     start: this.source.location,
                     end: this.source.location,
                 },
-            )
+            })
         }
 
         if (current === '@') {
@@ -210,21 +210,21 @@ export class TokenStream {
             this.source.skip(1)
             const identifier = this.readIdentifier()
             if (!identifier) {
-                this.errorReporter.reportFatalError(
-                    `Expected annotation name after '@'`,
-                    { start: loc, end: loc },
-                )
+                throw SourceError.create({
+                    message: `Expected annotation name after '@'`,
+                    span: { start: loc, end: loc },
+                })
             } else if (identifier !== 'main') {
-                this.errorReporter.reportFatalError(
-                    `Unknown annotation '@${identifier}'`,
-                    {
+                throw SourceError.create({
+                    message: `Unknown annotation '@${identifier}'`,
+                    span: {
                         start: loc,
                         end: {
                             line: loc.line,
                             column: loc.column + identifier.length,
                         },
                     },
-                )
+                })
             }
 
             this.source.skip(identifier.length)
@@ -237,8 +237,6 @@ export class TokenStream {
                     column: this.source.location.column,
                 },
             }
-
-            return asToken(`@${identifier}`, loc)
         }
 
         if (current === '"') return this.consumeStringLiteral()
@@ -300,13 +298,13 @@ export class TokenStream {
                     line: this.source.location.line,
                     column: this.source.location.column + [...offset].length,
                 }
-                this.errorReporter.reportFatalError(
-                    `Reserved implementation glyph '${char}' is not allowed in Clawr identifiers`,
-                    {
+                throw SourceError.create({
+                    message: `Reserved implementation glyph '${char}' is not allowed in Clawr identifiers`,
+                    span: {
                         start: location,
                         end: location,
                     },
-                )
+                })
             }
 
             if (isForbiddenUnicodeCodePoint(char)) {
@@ -315,13 +313,13 @@ export class TokenStream {
                     line: this.source.location.line,
                     column: this.source.location.column + [...offset].length,
                 }
-                this.errorReporter.reportFatalError(
-                    `Forbidden Unicode character '${char}' in identifier`,
-                    {
+                throw SourceError.create({
+                    message: `Forbidden Unicode character '${char}' in identifier`,
+                    span: {
                         start: location,
                         end: location,
                     },
-                )
+                })
             }
 
             if (!isIdentifierContinue(char)) break

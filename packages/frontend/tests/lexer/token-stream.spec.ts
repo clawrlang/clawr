@@ -1,5 +1,4 @@
 import { Token, TokenStream } from '@/lexer'
-import { TestErrorReporter } from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 import { decimal } from 'decimalish'
 
@@ -475,11 +474,8 @@ describe('TokenStream', () => {
         })
     })
 
-    let errorReporter: TestErrorReporter
-
     function* tokenize(source: string): Generator<Token> {
-        errorReporter = new TestErrorReporter()
-        const stream = TokenStream.read(source, errorReporter)
+        const stream = TokenStream.read(source)
         while (true) {
             const t = stream.next({ stopAtNewline: true })
             if (!t) return

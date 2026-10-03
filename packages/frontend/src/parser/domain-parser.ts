@@ -9,6 +9,7 @@ import {
     StringSet,
     TruthvalueSet,
 } from '@/model/value-set'
+import { SourceError } from '@/tools'
 import { Context } from '.'
 import { ExpressionParser } from './expression-parser'
 
@@ -62,10 +63,10 @@ export class DomainParser {
         if (!stream.isNext('OPERATOR', '...', '..<')) {
             const minExpression = expressionParser.parse(stream)
             if (!(minExpression instanceof IntegerLiteral))
-                this.context.errorReporter.reportFatalError(
-                    'Expected an integer literal',
-                    minExpression.span,
-                )
+                throw SourceError.create({
+                    message: 'Expected an integer literal',
+                    span: minExpression.span,
+                })
 
             min = minExpression.value.min
         }
@@ -74,10 +75,10 @@ export class DomainParser {
         if (operatorToken.operator === '..<') {
             const maxExpression = expressionParser.parse(stream)
             if (!(maxExpression instanceof IntegerLiteral))
-                this.context.errorReporter.reportFatalError(
-                    'Expected an integer literal',
-                    maxExpression.span,
-                )
+                throw SourceError.create({
+                    message: 'Expected an integer literal',
+                    span: maxExpression.span,
+                })
 
             max = maxExpression.value.max - 1n
         }
@@ -85,10 +86,10 @@ export class DomainParser {
         if (!stream.isNext('PUNCTUATION', ')')) {
             const maxExpression = expressionParser.parse(stream)
             if (!(maxExpression instanceof IntegerLiteral))
-                this.context.errorReporter.reportFatalError(
-                    'Expected an integer literal',
-                    maxExpression.span,
-                )
+                throw SourceError.create({
+                    message: 'Expected an integer literal',
+                    span: maxExpression.span,
+                })
 
             max = maxExpression.value.max
         }

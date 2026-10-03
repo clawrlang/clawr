@@ -1,10 +1,10 @@
+import { Context, ContextWithDomain, Expression } from '@/model'
+import { AnyIsolationLevel, ISOLATED } from '@/model/isolation-level'
+import { ValueSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools'
 import { Result } from '@/tools/result'
 import { SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
-import { Context, ContextWithDomain, Expression } from '.'
-import { AnyIsolationLevel, ISOLATED } from './isolation-level'
-import { ValueSet } from './value-set'
 
 export class Comparison implements Expression {
     static readonly operators = [

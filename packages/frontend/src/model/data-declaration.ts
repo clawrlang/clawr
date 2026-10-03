@@ -1,9 +1,9 @@
+import { Context, Declaration, Expression } from '@/model'
+import { DomainDeclaration } from '@/model/domain-declaration'
+import { IsolationLevel } from '@/model/isolation-level'
+import { TypeName } from '@/model/type-name'
 import { Result } from '@/tools/result'
 import { SemanticResult } from '@/tools/source-result'
-import { Context, Declaration, Expression } from '.'
-import { DomainDeclaration } from './domain-declaration'
-import { IsolationLevel } from './isolation-level'
-import { TypeName } from './type-name'
 
 export type DataField = {
     isImmutable: boolean

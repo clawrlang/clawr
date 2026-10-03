@@ -3,11 +3,11 @@ import { Assignment } from '@/model/assignment'
 import { FieldReference } from '@/model/field-reference'
 import { SelfAssignment } from '@/model/self-assignment'
 import { VariableReference } from '@/model/variable-reference'
+import { Context } from '@/parser'
+import { DataLiteralParser } from '@/parser/data-literal-parser'
+import { ExpressionParser } from '@/parser/expression-parser'
+import { StatementParser } from '@/parser/statement-parser'
 import { SourceError } from '@/tools'
-import { Context } from '.'
-import { DataLiteralParser } from './data-literal-parser'
-import { ExpressionParser } from './expression-parser'
-import { StatementParser } from './statement-parser'
 
 export class AssignmentParser implements StatementParser<
     Assignment | SelfAssignment

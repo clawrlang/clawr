@@ -1,4 +1,4 @@
-import { SourceCodeSpan } from './diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 
 export type SemanticTokenKind =
     'variable' | 'parameter' | 'field' | 'type' | 'function'

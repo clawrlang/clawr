@@ -1,11 +1,11 @@
+import { Context, ContextWithDomain, Expression } from '@/model'
+import { AnyIsolationLevel, ISOLATED } from '@/model/isolation-level'
+import { unionRange } from '@/model/operators/division'
+import { IntegerRange, ValueSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
-import { Context, ContextWithDomain, Expression } from '.'
-import { unionRange } from './division'
-import { AnyIsolationLevel, ISOLATED } from './isolation-level'
-import { IntegerRange, ValueSet } from './value-set'
 
 export class Modulus implements Expression {
     private constructor(

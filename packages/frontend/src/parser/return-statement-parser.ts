@@ -1,8 +1,8 @@
 import { TokenStream } from '@/lexer'
 import { ReturnStatement } from '@/model/return-statement'
-import { Context } from '.'
-import { ExpressionParser } from './expression-parser'
-import { StatementParser } from './statement-parser'
+import { Context } from '@/parser'
+import { ExpressionParser } from '@/parser/expression-parser'
+import { StatementParser } from '@/parser/statement-parser'
 
 export class ReturnStatementParser implements StatementParser<ReturnStatement> {
     private constructor(private context: Context) {}

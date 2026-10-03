@@ -1,20 +1,17 @@
-import { SourceError } from '@/tools'
-import { Position } from '@/tools/diagnostics'
-import { decimal } from 'decimalish'
 import type {
     Annotation,
     Keyword,
     Operator,
     PunctuationSymbol,
     TruthvalueLiteral,
-} from './kinds'
+} from '@/lexer/kinds'
 import {
     keywords,
     operators,
     punctuationChars,
     punctuationSymbols,
     truthValues,
-} from './kinds'
+} from '@/lexer/kinds'
 import type {
     AnnotationToken,
     IdentifierToken,
@@ -28,7 +25,10 @@ import type {
     StringLiteralToken,
     Token,
     TruthvalueLiteralToken,
-} from './token'
+} from '@/lexer/token'
+import { SourceError } from '@/tools'
+import { Position } from '@/tools/diagnostics'
+import { decimal } from 'decimalish'
 
 export class TokenStream {
     private source: Source

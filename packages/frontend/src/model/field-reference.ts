@@ -1,11 +1,11 @@
+import { Context, Expression, isStorage } from '@/model'
+import { DataDeclaration } from '@/model/data-declaration'
+import { ISOLATED, IsolationLevel, SHARED } from '@/model/isolation-level'
+import { RCTypeSet, ValueSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
-import { Context, Expression, isStorage } from '.'
-import { DataDeclaration } from './data-declaration'
-import { ISOLATED, IsolationLevel, SHARED } from './isolation-level'
-import { RCTypeSet, ValueSet } from './value-set'
 
 export class FieldReference implements Expression {
     private constructor(

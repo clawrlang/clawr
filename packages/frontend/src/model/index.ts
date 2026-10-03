@@ -1,12 +1,16 @@
+import { FieldReference } from '@/model/field-reference'
+import {
+    AnyIsolationLevel,
+    IsolationLevel,
+    UNIQUE,
+} from '@/model/isolation-level'
+import { Scope } from '@/model/scope'
+import { ValueSet } from '@/model/value-set'
+import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { HighlightRecorder } from '@/tools/highlights'
 import { SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
-import { FieldReference } from './field-reference'
-import { AnyIsolationLevel, IsolationLevel, UNIQUE } from './isolation-level'
-import { Scope } from './scope'
-import { ValueSet } from './value-set'
-import { VariableReference } from './variable-reference'
 
 export type Context = {
     scope: Scope

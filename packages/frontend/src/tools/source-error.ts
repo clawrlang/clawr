@@ -1,4 +1,4 @@
-import { SourceCodeSpan } from './diagnostics'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 
 export class SourceError extends Error {
     private constructor(

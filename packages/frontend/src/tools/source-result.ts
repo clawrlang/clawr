@@ -1,6 +1,6 @@
-import { SourceCodeSpan } from './diagnostics'
-import { ErrorResult, Result, SuccessResult } from './result'
-import { SourceError, SourceErrorCollection } from './source-error'
+import { SourceCodeSpan } from '@/tools/diagnostics'
+import { ErrorResult, Result, SuccessResult } from '@/tools/result'
+import { SourceError, SourceErrorCollection } from '@/tools/source-error'
 
 export type SemanticResult<T = undefined> =
     SuccessResult<T> | ErrorResult<SourceErrorCollection>

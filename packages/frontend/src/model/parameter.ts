@@ -1,7 +1,7 @@
+import { Expression } from '@/model'
+import { DomainDeclaration } from '@/model/domain-declaration'
+import { IsolationLevel, UNKNOWN } from '@/model/isolation-level'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { Expression } from '.'
-import { DomainDeclaration } from './domain-declaration'
-import { IsolationLevel, UNKNOWN } from './isolation-level'
 
 export class Parameter {
     private constructor(

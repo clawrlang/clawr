@@ -1,13 +1,13 @@
+import { Context, Expression, Statement } from '@/model'
+import { DataLiteral } from '@/model/data-literal'
+import { FieldReference } from '@/model/field-reference'
+import { UNIQUE, UNKNOWN } from '@/model/isolation-level'
+import { Retain } from '@/model/retain'
+import { RCTypeSet } from '@/model/value-set'
+import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
-import { Context, Expression, Statement } from '.'
-import { DataLiteral } from './data-literal'
-import { FieldReference } from './field-reference'
-import { UNIQUE, UNKNOWN } from './isolation-level'
-import { Retain } from './retain'
-import { RCTypeSet } from './value-set'
-import { VariableReference } from './variable-reference'
 
 export class Assignment implements Statement {
     private constructor(

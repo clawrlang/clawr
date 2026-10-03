@@ -1,6 +1,6 @@
+import { Context, Declaration, Statement } from '@/model'
 import { SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
-import { Context, Declaration, Statement } from '.'
 
 export class Module {
     private constructor(

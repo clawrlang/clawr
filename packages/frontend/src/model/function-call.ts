@@ -1,12 +1,12 @@
+import { Context, Expression, Statement } from '@/model'
+import { FunctionName } from '@/model/function-name'
+import { AnyIsolationLevel, UNIQUE } from '@/model/isolation-level'
+import { RCTypeSet, ValueSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
 import { Result, SuccessResult } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
-import { Context, Expression, Statement } from '.'
-import { FunctionName } from './function-name'
-import { AnyIsolationLevel, UNIQUE } from './isolation-level'
-import { RCTypeSet, ValueSet } from './value-set'
 
 export class FunctionCall implements Expression, Statement {
     private arguments: Expression[]

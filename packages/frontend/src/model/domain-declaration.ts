@@ -1,5 +1,5 @@
+import { ValueSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { ValueSet } from './value-set'
 
 export type DomainDeclaration = ValueSet & { span: SourceCodeSpan }
 

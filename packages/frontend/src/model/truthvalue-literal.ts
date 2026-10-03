@@ -1,9 +1,9 @@
+import { Expression } from '@/model'
+import { ISOLATED } from '@/model/isolation-level'
+import { TruthvalueSet, ValueSet, truthvalue } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import * as cir from '@clawr/cir'
-import { Expression } from '.'
-import { ISOLATED } from './isolation-level'
-import { TruthvalueSet, ValueSet, truthvalue } from './value-set'
 
 export class TruthValueLiteral<Value extends truthvalue> implements Expression {
     private constructor(

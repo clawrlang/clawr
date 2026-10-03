@@ -1,8 +1,8 @@
+import { Context, Expression, Statement } from '@/model'
+import { Retain } from '@/model/retain'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
-import { Context, Expression, Statement } from '.'
-import { Retain } from './retain'
 
 export class ReturnStatement implements Statement {
     private constructor(

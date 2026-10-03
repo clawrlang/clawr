@@ -1,5 +1,5 @@
+import { TypeName } from '@/model/type-name'
 import * as cir from '@clawr/cir'
-import { TypeName } from './type-name'
 
 export interface ValueSet {
     unconstrained(): ValueSet

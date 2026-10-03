@@ -1,5 +1,5 @@
 import { ISOLATED } from '@/model/isolation-level'
-import { Modulus } from '@/model/modulus'
+import { Modulus } from '@/model/operators/modulus'
 import { IntegerRange } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, test } from 'bun:test'

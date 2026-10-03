@@ -1,10 +1,10 @@
+import { Context, Expression } from '@/model'
+import { IsolationLevel, UNKNOWN } from '@/model/isolation-level'
+import { ValueSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
-import { Context, Expression } from '.'
-import { IsolationLevel, UNKNOWN } from './isolation-level'
-import { ValueSet } from './value-set'
 
 export class VariableReference implements Expression {
     private constructor(

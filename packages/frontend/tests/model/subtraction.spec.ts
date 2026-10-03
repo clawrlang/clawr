@@ -1,5 +1,5 @@
 import { ISOLATED } from '@/model/isolation-level'
-import { Subtraction } from '@/model/subtraction'
+import { Subtraction } from '@/model/operators/subtraction'
 import { IntegerRange } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, test } from 'bun:test'

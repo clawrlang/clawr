@@ -1,22 +1,22 @@
-import { mapFilter } from '@/tools/map-filter'
-import { Result } from '@/tools/result'
-import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
-import * as cir from '@clawr/cir'
-import { Context, Declaration, Expression, Statement } from '.'
-import { DataLiteral } from './data-literal'
-import { DomainDeclaration } from './domain-declaration'
-import { FunctionName } from './function-name'
+import { Context, Declaration, Expression, Statement } from '@/model'
+import { DataLiteral } from '@/model/data-literal'
+import { DomainDeclaration } from '@/model/domain-declaration'
+import { FunctionName } from '@/model/function-name'
 import {
     AnyIsolationLevel,
     IsolationLevel,
     UNIQUE,
     UNKNOWN,
-} from './isolation-level'
-import { Parameter } from './parameter'
-import { ReturnStatement } from './return-statement'
-import { Scope } from './scope'
-import { SelfAssignment } from './self-assignment'
-import { RCTypeSet, ValueSet } from './value-set'
+} from '@/model/isolation-level'
+import { Parameter } from '@/model/parameter'
+import { ReturnStatement } from '@/model/return-statement'
+import { Scope } from '@/model/scope'
+import { SelfAssignment } from '@/model/self-assignment'
+import { RCTypeSet, ValueSet } from '@/model/value-set'
+import { mapFilter } from '@/tools/map-filter'
+import { Result } from '@/tools/result'
+import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
+import * as cir from '@clawr/cir'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(

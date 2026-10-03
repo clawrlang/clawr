@@ -1,5 +1,5 @@
-import { Division } from '@/model/division'
 import { ISOLATED } from '@/model/isolation-level'
+import { Division } from '@/model/operators/division'
 import { IntegerRange } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, test } from 'bun:test'

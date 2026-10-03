@@ -1,5 +1,5 @@
 import { ISOLATED } from '@/model/isolation-level'
-import { Multiplication } from '@/model/multiplication'
+import { Multiplication } from '@/model/operators/multiplication'
 import { IntegerRange } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, test } from 'bun:test'

@@ -1,11 +1,11 @@
+import { Context, Declaration } from '@/model'
+import { DataField } from '@/model/data-declaration'
+import { FunctionDeclaration } from '@/model/function-declaration'
+import { FunctionName } from '@/model/function-name'
+import { TypeName } from '@/model/type-name'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticResult } from '@/tools/source-result'
-import { Context, Declaration } from '.'
-import { DataField } from './data-declaration'
-import { FunctionDeclaration } from './function-declaration'
-import { FunctionName } from './function-name'
-import { TypeName } from './type-name'
 
 export class ObjectDeclaration implements Declaration {
     private constructor(

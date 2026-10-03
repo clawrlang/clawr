@@ -1,12 +1,12 @@
 import { TokenStream } from '@/lexer'
 import { Statement } from '@/model'
+import { Context } from '@/parser'
+import { AssignmentParser } from '@/parser/assignment-parser'
+import { FunctionCallParser } from '@/parser/function-call-parser'
+import { ReturnStatementParser } from '@/parser/return-statement-parser'
+import { StatementParser } from '@/parser/statement-parser'
+import { VariableDeclarationParser } from '@/parser/variable-declaration-parser'
 import { SourceError } from '@/tools'
-import { Context } from '.'
-import { AssignmentParser } from './assignment-parser'
-import { FunctionCallParser } from './function-call-parser'
-import { ReturnStatementParser } from './return-statement-parser'
-import { StatementParser } from './statement-parser'
-import { VariableDeclarationParser } from './variable-declaration-parser'
 
 export class BlockParser {
     private statementParsers: StatementParser<Statement>[]

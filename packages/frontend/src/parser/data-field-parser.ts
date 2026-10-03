@@ -1,13 +1,13 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { DataField } from '@/model/data-declaration'
-import { Context } from '.'
-import { DomainParser } from './domain-parser'
-import { ExpressionParser } from './expression-parser'
+import { Context } from '@/parser'
+import { DomainParser } from '@/parser/domain-parser'
+import { ExpressionParser } from '@/parser/expression-parser'
 import {
     SemanticsKeyword,
     SemanticsKeywordParser,
-} from './semantics-keyword-parser'
+} from '@/parser/semantics-keyword-parser'
 
 export class DataFieldParser {
     private constructor(private context: Context) {}

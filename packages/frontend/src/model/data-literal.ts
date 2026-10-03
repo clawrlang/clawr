@@ -1,12 +1,12 @@
+import { Context, ContextWithDomain, Expression } from '@/model'
+import { FunctionCall } from '@/model/function-call'
+import { UNIQUE } from '@/model/isolation-level'
+import { TypeName } from '@/model/type-name'
+import { RCTypeSet, ValueSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
-import { Context, ContextWithDomain, Expression } from '.'
-import { FunctionCall } from './function-call'
-import { UNIQUE } from './isolation-level'
-import { TypeName } from './type-name'
-import { RCTypeSet, ValueSet } from './value-set'
 
 export class DataLiteral implements Expression {
     private constructor(

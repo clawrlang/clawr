@@ -1,3 +1,3 @@
-export type { Keyword, Operator, PunctuationSymbol } from './kinds'
-export type { Token } from './token'
-export { TokenStream } from './token-stream'
+export type { Keyword, Operator, PunctuationSymbol } from '@/lexer/kinds'
+export type { Token } from '@/lexer/token'
+export { TokenStream } from '@/lexer/token-stream'

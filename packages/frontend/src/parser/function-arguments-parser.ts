@@ -1,8 +1,8 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
+import { Context } from '@/parser'
+import { ExpressionParser } from '@/parser/expression-parser'
 import { Position } from '@/tools/diagnostics'
-import { Context } from '.'
-import { ExpressionParser } from './expression-parser'
 
 export class FunctionArgumentsParser {
     private constructor(private readonly expressionParser: ExpressionParser) {}

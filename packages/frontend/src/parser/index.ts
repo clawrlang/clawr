@@ -9,7 +9,7 @@ export type Context = {
     isolationLevel?: (cir.Expression & { kind: 'ALLOCATION' })['isolationLevel']
 }
 
-export { ModuleParser } from './module-parser'
+export { ModuleParser } from '@/parser/module-parser'
 
 export interface DeclarationParser<Decl extends Declaration> {
     isNext(stream: TokenStream): boolean

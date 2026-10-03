@@ -1,12 +1,12 @@
+import { DataDeclaration } from '@/model/data-declaration'
+import { FunctionDeclaration } from '@/model/function-declaration'
+import { FunctionName } from '@/model/function-name'
+import { IsolationLevel, SHARED, UNKNOWN } from '@/model/isolation-level'
+import { ObjectDeclaration } from '@/model/object-declaration'
+import { TypeName } from '@/model/type-name'
+import { RCTypeSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 import * as cir from '@clawr/cir'
-import { DataDeclaration } from './data-declaration'
-import { FunctionDeclaration } from './function-declaration'
-import { FunctionName } from './function-name'
-import { IsolationLevel, SHARED, UNKNOWN } from './isolation-level'
-import { ObjectDeclaration } from './object-declaration'
-import { TypeName } from './type-name'
-import { RCTypeSet, ValueSet } from './value-set'
 
 class RootScope {
     private readonly variables: Map<string, Variable> = new Map()

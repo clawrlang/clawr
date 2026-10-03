@@ -1,13 +1,13 @@
 import { TokenStream } from '@/lexer'
 import { Declaration, Statement } from '@/model'
 import { Module } from '@/model/module'
+import { Context, DeclarationParser } from '@/parser'
+import { BlockParser } from '@/parser/block-parser'
+import { DataDeclarationParser } from '@/parser/data-declaration-parser'
+import { FunctionDeclarationParser } from '@/parser/function-declaration-parser'
+import { ObjectDeclarationParser } from '@/parser/object-declaration-parser'
+import { VariableDeclarationParser } from '@/parser/variable-declaration-parser'
 import { SourceError } from '@/tools'
-import { Context, DeclarationParser } from '.'
-import { BlockParser } from './block-parser'
-import { DataDeclarationParser } from './data-declaration-parser'
-import { FunctionDeclarationParser } from './function-declaration-parser'
-import { ObjectDeclarationParser } from './object-declaration-parser'
-import { VariableDeclarationParser } from './variable-declaration-parser'
 
 export class ModuleParser {
     private blockParser: BlockParser

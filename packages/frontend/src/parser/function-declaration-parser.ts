@@ -4,14 +4,14 @@ import { DomainDeclaration } from '@/model/domain-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { Parameter } from '@/model/parameter'
-import { Context, DeclarationParser } from '.'
-import { BlockParser } from './block-parser'
-import { DomainParser } from './domain-parser'
-import { ExpressionParser } from './expression-parser'
+import { Context, DeclarationParser } from '@/parser'
+import { BlockParser } from '@/parser/block-parser'
+import { DomainParser } from '@/parser/domain-parser'
+import { ExpressionParser } from '@/parser/expression-parser'
 import {
     SemanticsKeyword,
     SemanticsKeywordParser,
-} from './semantics-keyword-parser'
+} from '@/parser/semantics-keyword-parser'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
     private readonly domainParser: DomainParser

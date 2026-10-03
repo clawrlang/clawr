@@ -1,5 +1,5 @@
-import { Exponential } from '@/model/exponential'
 import { ISOLATED } from '@/model/isolation-level'
+import { Exponential } from '@/model/operators/exponential'
 import { IntegerRange } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, test } from 'bun:test'

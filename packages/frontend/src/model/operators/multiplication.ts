@@ -1,10 +1,10 @@
+import { Context, ContextWithDomain, Expression } from '@/model'
+import { AnyIsolationLevel, ISOLATED } from '@/model/isolation-level'
+import { IntegerRange, ValueSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
-import { Context, ContextWithDomain, Expression } from '.'
-import { AnyIsolationLevel, ISOLATED } from './isolation-level'
-import { IntegerRange, ValueSet } from './value-set'
 
 export class Multiplication implements Expression {
     private constructor(

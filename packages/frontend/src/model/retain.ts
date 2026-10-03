@@ -1,12 +1,12 @@
+import { Context, ContextWithDomain, Expression, isStorage } from '@/model'
+import { FieldReference } from '@/model/field-reference'
+import { AnyIsolationLevel } from '@/model/isolation-level'
+import { RCTypeSet, ValueSet } from '@/model/value-set'
+import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import { SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
-import { Context, ContextWithDomain, Expression, isStorage } from '.'
-import { FieldReference } from './field-reference'
-import { AnyIsolationLevel } from './isolation-level'
-import { RCTypeSet, ValueSet } from './value-set'
-import { VariableReference } from './variable-reference'
 
 export class Retain implements Expression {
     get span(): SourceCodeSpan {

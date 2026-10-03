@@ -3,10 +3,10 @@ import { DataField } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
+import { Context } from '@/parser'
+import { DataFieldParser } from '@/parser/data-field-parser'
+import { FunctionDeclarationParser } from '@/parser/function-declaration-parser'
 import { SourceError } from '@/tools'
-import { Context } from '.'
-import { DataFieldParser } from './data-field-parser'
-import { FunctionDeclarationParser } from './function-declaration-parser'
 
 export class ObjectDeclarationParser {
     private readonly functionParser: FunctionDeclarationParser

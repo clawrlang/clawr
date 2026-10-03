@@ -1,8 +1,8 @@
 import { TokenStream } from '@/lexer'
 import { DataDeclaration, DataField } from '@/model/data-declaration'
 import { TypeName } from '@/model/type-name'
-import { Context } from '.'
-import { DataFieldParser } from './data-field-parser'
+import { Context } from '@/parser'
+import { DataFieldParser } from '@/parser/data-field-parser'
 
 export class DataDeclarationParser {
     private constructor(private context: Context) {}

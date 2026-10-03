@@ -9,9 +9,9 @@ import {
     StringSet,
     TruthvalueSet,
 } from '@/model/value-set'
+import { Context } from '@/parser'
+import { ExpressionParser } from '@/parser/expression-parser'
 import { SourceError } from '@/tools'
-import { Context } from '.'
-import { ExpressionParser } from './expression-parser'
 
 export class DomainParser {
     private constructor(private context: Context) {}

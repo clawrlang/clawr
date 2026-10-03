@@ -4,11 +4,11 @@ import {
     VARIABLE_SEMANTICS,
     VariableDeclaration,
 } from '@/model/variable-declaration'
-import { Context } from '.'
-import { DomainParser } from './domain-parser'
-import { ExpressionParser } from './expression-parser'
-import { SemanticsKeyword } from './semantics-keyword-parser'
-import { StatementParser } from './statement-parser'
+import { Context } from '@/parser'
+import { DomainParser } from '@/parser/domain-parser'
+import { ExpressionParser } from '@/parser/expression-parser'
+import { SemanticsKeyword } from '@/parser/semantics-keyword-parser'
+import { StatementParser } from '@/parser/statement-parser'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser

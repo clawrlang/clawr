@@ -1,12 +1,12 @@
-import { SourceCodeSpan } from '@/tools/diagnostics'
-import { decimal } from 'decimalish'
 import type {
     Annotation,
     Keyword,
     Operator,
     PunctuationSymbol,
     TruthvalueLiteral,
-} from './kinds'
+} from '@/lexer/kinds'
+import { SourceCodeSpan } from '@/tools/diagnostics'
+import { decimal } from 'decimalish'
 
 export type Token =
     | NewlineToken

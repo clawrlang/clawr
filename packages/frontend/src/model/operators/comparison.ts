@@ -44,11 +44,11 @@ export class Comparison implements Expression {
         return new Comparison(operator, left, right, span)
     }
 
-    isEffectivelyConst(context: Context): SemanticResult<boolean> {
+    isEffectivelyConst(_: Context): SemanticResult<boolean> {
         return Result.true
     }
 
-    isolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
+    isolationLevel(_: Context): SemanticResult<AnyIsolationLevel> {
         return Result.value(ISOLATED)
     }
 
@@ -79,34 +79,73 @@ export class Comparison implements Expression {
     }
 
     private compare(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
-        if (this.operator !== '==')
-            return SemanticErrorResult.failure('not supported', this.span)
-
         if (left instanceof IntegerRange && right instanceof IntegerRange) {
-            const values: truthvalue[] =
-                left.min !== left.max ||
-                right.min !== right.max ||
-                left.min === undefined ||
-                right.min === undefined
-                    ? ['false', 'true']
-                    : left.min === right.min
-                      ? ['true']
-                      : ['false']
-            return Result.value(TruthvalueSet.create(values))
+            switch (this.operator) {
+                case '==': {
+                    const values: truthvalue[] =
+                        left.min !== left.max ||
+                        right.min !== right.max ||
+                        left.min === undefined ||
+                        right.min === undefined
+                            ? ['false', 'true']
+                            : left.min === right.min
+                              ? ['true']
+                              : ['false']
+                    return Result.value(TruthvalueSet.create(values))
+                }
+                case '!=': {
+                    const values: truthvalue[] =
+                        left.min !== left.max ||
+                        right.min !== right.max ||
+                        left.min === undefined ||
+                        right.min === undefined
+                            ? ['false', 'true']
+                            : left.min === right.min
+                              ? ['false']
+                              : ['true']
+                    return Result.value(TruthvalueSet.create(values))
+                }
+                default:
+                    return SemanticErrorResult.failure(
+                        'not supported',
+                        this.span,
+                    )
+            }
         } else if (
             left instanceof TruthvalueSet &&
             right instanceof TruthvalueSet
         ) {
-            const canBeTrue = left.values.some((l: truthvalue) =>
-                right.values.some((r: truthvalue) => r === l),
-            )
-            const canBeFalse = left.values.some((l: truthvalue) =>
-                right.values.some((r: truthvalue) => r !== l),
-            )
-            const values: truthvalue[] = []
-            if (canBeFalse) values.push('false')
-            if (canBeTrue) values.push('true')
-            return Result.value(TruthvalueSet.create(values))
+            switch (this.operator) {
+                case '==': {
+                    const canBeTrue = left.values.some((l: truthvalue) =>
+                        right.values.some((r: truthvalue) => r === l),
+                    )
+                    const canBeFalse = left.values.some((l: truthvalue) =>
+                        right.values.some((r: truthvalue) => r !== l),
+                    )
+                    const values: truthvalue[] = []
+                    if (canBeFalse) values.push('false')
+                    if (canBeTrue) values.push('true')
+                    return Result.value(TruthvalueSet.create(values))
+                }
+                case '!=': {
+                    const canBeTrue = left.values.some((l: truthvalue) =>
+                        right.values.some((r: truthvalue) => r !== l),
+                    )
+                    const canBeFalse = left.values.some((l: truthvalue) =>
+                        right.values.some((r: truthvalue) => r === l),
+                    )
+                    const values: truthvalue[] = []
+                    if (canBeFalse) values.push('false')
+                    if (canBeTrue) values.push('true')
+                    return Result.value(TruthvalueSet.create(values))
+                }
+                default:
+                    return SemanticErrorResult.failure(
+                        'not supported',
+                        this.span,
+                    )
+            }
         } else
             return SemanticErrorResult.failure(
                 `addition between ${left.toString()} and ${right.toString()} is not supported`,

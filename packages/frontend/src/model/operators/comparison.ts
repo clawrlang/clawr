@@ -79,76 +79,81 @@ export class Comparison implements Expression {
     }
 
     private compare(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
+        switch (this.operator) {
+            case '==':
+                return this.equals(left, right)
+            case '!=':
+                return this.areNotEqual(left, right)
+            default:
+                return SemanticErrorResult.failure('not supported', this.span)
+        }
+    }
+
+    private equals(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
         if (left instanceof IntegerRange && right instanceof IntegerRange) {
-            switch (this.operator) {
-                case '==': {
-                    const values: truthvalue[] =
-                        left.min !== left.max ||
-                        right.min !== right.max ||
-                        left.min === undefined ||
-                        right.min === undefined
-                            ? ['false', 'true']
-                            : left.min === right.min
-                              ? ['true']
-                              : ['false']
-                    return Result.value(TruthvalueSet.create(values))
-                }
-                case '!=': {
-                    const values: truthvalue[] =
-                        left.min !== left.max ||
-                        right.min !== right.max ||
-                        left.min === undefined ||
-                        right.min === undefined
-                            ? ['false', 'true']
-                            : left.min === right.min
-                              ? ['false']
-                              : ['true']
-                    return Result.value(TruthvalueSet.create(values))
-                }
-                default:
-                    return SemanticErrorResult.failure(
-                        'not supported',
-                        this.span,
-                    )
-            }
+            const values: truthvalue[] =
+                left.min !== left.max ||
+                right.min !== right.max ||
+                left.min === undefined ||
+                right.min === undefined
+                    ? ['false', 'true']
+                    : left.min === right.min
+                      ? ['true']
+                      : ['false']
+            return Result.value(TruthvalueSet.create(values))
         } else if (
             left instanceof TruthvalueSet &&
             right instanceof TruthvalueSet
         ) {
-            switch (this.operator) {
-                case '==': {
-                    const canBeTrue = left.values.some((l: truthvalue) =>
-                        right.values.some((r: truthvalue) => r === l),
-                    )
-                    const canBeFalse = left.values.some((l: truthvalue) =>
-                        right.values.some((r: truthvalue) => r !== l),
-                    )
-                    const values: truthvalue[] = []
-                    if (canBeFalse) values.push('false')
-                    if (canBeTrue) values.push('true')
-                    return Result.value(TruthvalueSet.create(values))
-                }
-                case '!=': {
-                    const canBeTrue = left.values.some((l: truthvalue) =>
-                        right.values.some((r: truthvalue) => r !== l),
-                    )
-                    const canBeFalse = left.values.some((l: truthvalue) =>
-                        right.values.some((r: truthvalue) => r === l),
-                    )
-                    const values: truthvalue[] = []
-                    if (canBeFalse) values.push('false')
-                    if (canBeTrue) values.push('true')
-                    return Result.value(TruthvalueSet.create(values))
-                }
-                default:
-                    return SemanticErrorResult.failure(
-                        'not supported',
-                        this.span,
-                    )
-            }
+            const canBeTrue = left.values.some((l: truthvalue) =>
+                right.values.some((r: truthvalue) => r === l),
+            )
+            const canBeFalse = left.values.some((l: truthvalue) =>
+                right.values.some((r: truthvalue) => r !== l),
+            )
+            const values: truthvalue[] = []
+            if (canBeFalse) values.push('false')
+            if (canBeTrue) values.push('true')
+            return Result.value(TruthvalueSet.create(values))
         } else
             return SemanticErrorResult.failure(
-                `addition between ${left.toString()} and ${right.toString()} is not supported`,
+                `A(n) ${left.toString()} and a(n) ${right.toString()} can never be equal`,
+                this.span,
+            )
+    }
+
+    private areNotEqual(
+        left: ValueSet,
+        right: ValueSet,
+    ): SemanticResult<ValueSet> {
+        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+            const values: truthvalue[] =
+                left.min !== left.max ||
+                right.min !== right.max ||
+                left.min === undefined ||
+                right.min === undefined
+                    ? ['false', 'true']
+                    : left.min === right.min
+                      ? ['false']
+                      : ['true']
+            return Result.value(TruthvalueSet.create(values))
+        } else if (
+            left instanceof TruthvalueSet &&
+            right instanceof TruthvalueSet
+        ) {
+            const canBeTrue = left.values.some((l: truthvalue) =>
+                right.values.some((r: truthvalue) => r !== l),
+            )
+            const canBeFalse = left.values.some((l: truthvalue) =>
+                right.values.some((r: truthvalue) => r === l),
+            )
+            const values: truthvalue[] = []
+            if (canBeFalse) values.push('false')
+            if (canBeTrue) values.push('true')
+            return Result.value(TruthvalueSet.create(values))
+        } else
+            return SemanticErrorResult.failure(
+                `A(n) ${left.toString()} and a(n) ${right.toString()} can never be equal`,
                 this.span,
             )
     }

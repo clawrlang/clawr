@@ -12,6 +12,8 @@ import {
     Multiplication,
     Subtraction,
 } from '@/model/operators'
+import { LogicalAND } from '@/model/operators/logical-and'
+import { LogicalOR } from '@/model/operators/logical-or'
 import { VariableReference } from '@/model/variable-reference'
 import { Context } from '@/parser'
 import { FunctionArgumentsParser } from '@/parser/function-arguments-parser'
@@ -36,7 +38,35 @@ export class ExpressionParser {
     }
 
     parse(stream: TokenStream): Expression {
-        return this.parseComparisonOperation(stream)
+        return this.parseLogicalOR(stream)
+    }
+
+    parseLogicalOR(stream: TokenStream): Expression {
+        let expr = this.parseLogicalAND(stream)
+        while (stream.isNext('OPERATOR', '||')) {
+            stream.expect('OPERATOR', '||')
+            const right = this.parseLogicalAND(stream)
+            expr = LogicalOR.create({
+                left: expr,
+                right,
+                span: { start: expr.span.start, end: right.span.end },
+            })
+        }
+        return expr
+    }
+
+    parseLogicalAND(stream: TokenStream): Expression {
+        let expr = this.parseComparisonOperation(stream)
+        while (stream.isNext('OPERATOR', '&&')) {
+            stream.expect('OPERATOR', '&&')
+            const right = this.parseComparisonOperation(stream)
+            expr = LogicalAND.create({
+                left: expr,
+                right,
+                span: { start: expr.span.start, end: right.span.end },
+            })
+        }
+        return expr
     }
 
     parseComparisonOperation(stream: TokenStream): Expression {

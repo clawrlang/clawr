@@ -9,6 +9,8 @@ import {
     Multiplication,
     Subtraction,
 } from '@/model/operators'
+import { LogicalAND } from '@/model/operators/logical-and'
+import { LogicalOR } from '@/model/operators/logical-or'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { describe, expect, it, test } from 'bun:test'
 
@@ -173,6 +175,86 @@ describe('Expression Parser (Operators)', () => {
             const tokenStream = TokenStream.read('2 == 3 == 4')
             ExpressionParser.create({}).parse(tokenStream)
             expect(tokenStream.peek()?.kind).toEqual('OPERATOR')
+        })
+    })
+
+    describe('Logical AND', () => {
+        it('parses simple AND', () => {
+            const expr = parseExpression('true && false')
+            expect(expr).toBeInstanceOf(LogicalAND)
+            expect(expr).toMatchObject({
+                left: { value: { values: ['true'] } },
+                right: { value: { values: ['false'] } },
+            })
+        })
+
+        it('is preceded by comparison', () => {
+            const expr = parseExpression(
+                'true == ambiguous && ambiguous == false',
+            )
+            expect(expr).toBeInstanceOf(LogicalAND)
+            expect(expr).toMatchObject({
+                left: {
+                    left: { value: { values: ['true'] } },
+                    right: { value: { values: ['ambiguous'] } },
+                },
+                right: {
+                    left: { value: { values: ['ambiguous'] } },
+                    right: { value: { values: ['false'] } },
+                },
+            })
+        })
+
+        it('is left associative', () => {
+            const expr = parseExpression('true && false && ambiguous')
+            expect(expr).toBeInstanceOf(LogicalAND)
+            expect(expr).toMatchObject({
+                left: {
+                    left: { value: { values: ['true'] } },
+                    right: { value: { values: ['false'] } },
+                },
+                right: { value: { values: ['ambiguous'] } },
+            })
+        })
+    })
+
+    describe('Logical OR', () => {
+        it('parses simple OR', () => {
+            const expr = parseExpression('true || false')
+            expect(expr).toBeInstanceOf(LogicalOR)
+            expect(expr).toMatchObject({
+                left: { value: { values: ['true'] } },
+                right: { value: { values: ['false'] } },
+            })
+        })
+
+        it('is preceded by AND', () => {
+            const expr = parseExpression(
+                'true && ambiguous || ambiguous && false',
+            )
+            expect(expr).toBeInstanceOf(LogicalOR)
+            expect(expr).toMatchObject({
+                left: {
+                    left: { value: { values: ['true'] } },
+                    right: { value: { values: ['ambiguous'] } },
+                },
+                right: {
+                    left: { value: { values: ['ambiguous'] } },
+                    right: { value: { values: ['false'] } },
+                },
+            })
+        })
+
+        it('is left associative', () => {
+            const expr = parseExpression('true || false || ambiguous')
+            expect(expr).toBeInstanceOf(LogicalOR)
+            expect(expr).toMatchObject({
+                left: {
+                    left: { value: { values: ['true'] } },
+                    right: { value: { values: ['false'] } },
+                },
+                right: { value: { values: ['ambiguous'] } },
+            })
         })
     })
 })

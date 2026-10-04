@@ -1,14 +1,13 @@
 # TODO
 
-- Parse binary operator expressions
-  - [ ] Logical OR `||`
-  - [ ] Logical AND `&&`
-  - [x] Comparison (`==`/`!=`/`>`/`<`…) — non-associative
-  - [x] Additive (`+`/`-`)
-  - [x] Modulus `%`
-  - [x] Multiplicative (`*`/`/`) — left-associative
-  - [x] Exponential `^` - right-associative
-- `Exponential.toCIRExpression()`
+- Implement `.toCIRExpression()`
+  - Logical OR `||`
+  - Logical AND `&&`
+  - Comparison (`==`/`!=`/`>`/`<`…) — non-associative
+  - Additive (`+`/`-`)
+  - Modulus `%`
+  - Multiplicative (`*`/`/`) — left-associative
+  - Exponential `^` - right-associative
 - `real` operands
 
 ## `object`/`service`
@@ -70,3 +69,4 @@
 - Use `${npm_package_version%%.*}` and `process.env.npm_package_version!.split('.')[0]`?
   - Better to use a separate _compatibility version_ and use the package version as _current version_?
   - Consider libSystem.B.dylib (compatibility version 1.0.0, current version 1356.0.0). Always considered compatible.
+- binary/ternary data (`tword`/`bword`)

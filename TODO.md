@@ -3,7 +3,7 @@
 - Parse binary operator expressions
   - [ ] Logical OR `||`
   - [ ] Logical AND `&&`
-  - [ ] Comparison (`==`/`===`/`!=`/`!==`/`>`/`<`/`<=`/`>=`/`≤`/`≥`/`≠`) — non-associative
+  - [x] Comparison (`==`/`!=`/`>`/`<`…) — non-associative
   - [x] Additive (`+`/`-`)
   - [x] Modulus `%`
   - [x] Multiplicative (`*`/`/`) — left-associative

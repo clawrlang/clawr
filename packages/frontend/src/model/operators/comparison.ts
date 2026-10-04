@@ -84,6 +84,14 @@ export class Comparison implements Expression {
                 return this.equals(left, right)
             case '!=':
                 return this.areNotEqual(left, right)
+            case '<':
+                return this.leftIsLess(left, right)
+            case '<=':
+                return this.leftIsLessOrEqual(left, right)
+            case '>':
+                return this.leftIsGreater(left, right)
+            case '>=':
+                return this.leftIsGreaterOrEqual(left, right)
             default:
                 return SemanticErrorResult.failure('not supported', this.span)
         }
@@ -154,6 +162,102 @@ export class Comparison implements Expression {
         } else
             return SemanticErrorResult.failure(
                 `A(n) ${left.toString()} and a(n) ${right.toString()} can never be equal`,
+                this.span,
+            )
+    }
+
+    private leftIsLess(
+        left: ValueSet,
+        right: ValueSet,
+    ): SemanticResult<ValueSet> {
+        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+            const canBeTrue =
+                left.min === undefined ||
+                right.max === undefined ||
+                left.min < right.max
+            const canBeFalse =
+                left.max === undefined ||
+                right.min === undefined ||
+                left.max >= right.min
+            const values: truthvalue[] = []
+            if (canBeFalse) values.push('false')
+            if (canBeTrue) values.push('true')
+            return Result.value(TruthvalueSet.create(values))
+        } else
+            return SemanticErrorResult.failure(
+                `${left.toString()} and ${right.toString()} do not support ordering`,
+                this.span,
+            )
+    }
+
+    private leftIsLessOrEqual(
+        left: ValueSet,
+        right: ValueSet,
+    ): SemanticResult<ValueSet> {
+        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+            const canBeTrue =
+                left.min === undefined ||
+                right.max === undefined ||
+                left.min <= right.max
+            const canBeFalse =
+                left.max === undefined ||
+                right.min === undefined ||
+                left.max > right.min
+            const values: truthvalue[] = []
+            if (canBeFalse) values.push('false')
+            if (canBeTrue) values.push('true')
+            return Result.value(TruthvalueSet.create(values))
+        } else
+            return SemanticErrorResult.failure(
+                `${left.toString()} and ${right.toString()} do not support ordering`,
+                this.span,
+            )
+    }
+
+    private leftIsGreater(
+        left: ValueSet,
+        right: ValueSet,
+    ): SemanticResult<ValueSet> {
+        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+            const canBeTrue =
+                left.max === undefined ||
+                right.min === undefined ||
+                left.max > right.min
+            const canBeFalse =
+                left.min === undefined ||
+                right.max === undefined ||
+                left.min <= right.max
+            const values: truthvalue[] = []
+            if (canBeFalse) values.push('false')
+            if (canBeTrue) values.push('true')
+            return Result.value(TruthvalueSet.create(values))
+        } else
+            return SemanticErrorResult.failure(
+                `${left.toString()} and ${right.toString()} do not support ordering`,
+                this.span,
+            )
+    }
+
+    private leftIsGreaterOrEqual(
+        left: ValueSet,
+        right: ValueSet,
+    ): SemanticResult<ValueSet> {
+        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+            const canBeTrue =
+                left.max === undefined ||
+                right.min === undefined ||
+                left.max >= right.min
+            const canBeFalse =
+                left.min === undefined ||
+                right.max === undefined ||
+                left.min < right.max
+            const values: truthvalue[] = []
+            if (canBeFalse) values.push('false')
+            if (canBeTrue) values.push('true')
+            return Result.value(TruthvalueSet.create(values))
+        } else
+            return SemanticErrorResult.failure(
+                `${left.toString()} and ${right.toString()} do not support ordering`,
                 this.span,
             )
     }

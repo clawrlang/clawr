@@ -1,5 +1,5 @@
+import { BinaryOperation } from '@/model/binary-operation'
 import { ISOLATED } from '@/model/isolation-level'
-import { Exponential } from '@/model/operators'
 import { IntegerRange } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, test } from 'bun:test'
@@ -7,9 +7,10 @@ import { describe, expect, test } from 'bun:test'
 describe('Exponential', () => {
     describe('integer operands', () => {
         describe('evaluates integer literals as a single value', () => {
-            const expr = Exponential.create({
-                base: util.integerLiteral(2),
-                exponent: util.integerLiteral(3),
+            const expr = BinaryOperation.create({
+                operator: '^',
+                left: util.integerLiteral(2),
+                right: util.integerLiteral(3),
                 span: util.someCodeSpan,
             })
             test('domain', () => {
@@ -103,9 +104,10 @@ describe('Exponential', () => {
                         domain: IntegerRange.create(exponent),
                     })
 
-                    const expr = Exponential.create({
-                        base: util.variableRef('base'),
-                        exponent: util.variableRef('exponent'),
+                    const expr = BinaryOperation.create({
+                        operator: '^',
+                        left: util.variableRef('base'),
+                        right: util.variableRef('exponent'),
                         span: util.someCodeSpan,
                     })
                     test('domain', () => {
@@ -143,9 +145,10 @@ describe('Exponential', () => {
                     domain: IntegerRange.create({ min: 0n, max: 0n }),
                 })
 
-                const expr = Exponential.create({
-                    base: util.variableRef('base'),
-                    exponent: util.variableRef('exponent'),
+                const expr = BinaryOperation.create({
+                    operator: '^',
+                    left: util.variableRef('base'),
+                    right: util.variableRef('exponent'),
                     span: util.someCodeSpan,
                 })
                 test('domain', () => {
@@ -171,9 +174,10 @@ describe('Exponential', () => {
             })
 
             describe('disallows negative integer exponent', () => {
-                const expr = Exponential.create({
-                    base: util.integerLiteral(2),
-                    exponent: util.integerLiteral(-3),
+                const expr = BinaryOperation.create({
+                    operator: '^',
+                    left: util.integerLiteral(2),
+                    right: util.integerLiteral(-3),
                     span: util.someCodeSpan,
                 })
                 test('domain', () => {

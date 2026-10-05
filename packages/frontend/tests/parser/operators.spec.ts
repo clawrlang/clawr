@@ -1,16 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
-import {
-    Addition,
-    Comparison,
-    Division,
-    Exponential,
-    Modulus,
-    Multiplication,
-    Subtraction,
-} from '@/model/operators'
-import { LogicalAND } from '@/model/operators/logical-and'
-import { LogicalOR } from '@/model/operators/logical-or'
+import { BinaryOperation } from '@/model/binary-operation'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { describe, expect, it, test } from 'bun:test'
 
@@ -18,21 +8,24 @@ describe('Expression Parser (Operators)', () => {
     describe('Exponentials', () => {
         it('parses simple exponential expression', () => {
             const expr = parseExpression('2^3')
-            expect(expr).toBeInstanceOf(Exponential)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
-                base: { value: { min: 2n, max: 2n } },
-                exponent: { value: { min: 3n, max: 3n } },
+                left: { value: { min: 2n, max: 2n } },
+                operator: '^',
+                right: { value: { min: 3n, max: 3n } },
             })
         })
 
         it('is right associative', () => {
             const expr = parseExpression('2^3^4')
-            expect(expr).toBeInstanceOf(Exponential)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
-                base: { value: { min: 2n, max: 2n } },
-                exponent: {
-                    base: { value: { min: 3n, max: 3n } },
-                    exponent: { value: { min: 4n, max: 4n } },
+                left: { value: { min: 2n, max: 2n } },
+                operator: '^',
+                right: {
+                    left: { value: { min: 3n, max: 3n } },
+                    operator: '^',
+                    right: { value: { min: 4n, max: 4n } },
                 },
             })
         })
@@ -41,55 +34,63 @@ describe('Expression Parser (Operators)', () => {
     describe('Multiplicative', () => {
         it('parses simple multiplication', () => {
             const expr = parseExpression('2*3')
-            expect(expr).toBeInstanceOf(Multiplication)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: { value: { min: 2n, max: 2n } },
+                operator: '*',
                 right: { value: { min: 3n, max: 3n } },
             })
         })
 
         it('parses simple division', () => {
             const expr = parseExpression('2/3')
-            expect(expr).toBeInstanceOf(Division)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
-                dividend: { value: { min: 2n, max: 2n } },
-                divisor: { value: { min: 3n, max: 3n } },
+                left: { value: { min: 2n, max: 2n } },
+                operator: '/',
+                right: { value: { min: 3n, max: 3n } },
             })
         })
 
         it('parses simple modulus', () => {
             const expr = parseExpression('2%3')
-            expect(expr).toBeInstanceOf(Modulus)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
-                dividend: { value: { min: 2n, max: 2n } },
-                divisor: { value: { min: 3n, max: 3n } },
+                left: { value: { min: 2n, max: 2n } },
+                operator: '%',
+                right: { value: { min: 3n, max: 3n } },
             })
         })
 
         it('is preceded by exponentiation', () => {
             const expr = parseExpression('2^3*3^4')
-            expect(expr).toBeInstanceOf(Multiplication)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: {
-                    base: { value: { min: 2n, max: 2n } },
-                    exponent: { value: { min: 3n, max: 3n } },
+                    left: { value: { min: 2n, max: 2n } },
+                    operator: '^',
+                    right: { value: { min: 3n, max: 3n } },
                 },
+                operator: '*',
                 right: {
-                    base: { value: { min: 3n, max: 3n } },
-                    exponent: { value: { min: 4n, max: 4n } },
+                    left: { value: { min: 3n, max: 3n } },
+                    operator: '^',
+                    right: { value: { min: 4n, max: 4n } },
                 },
             })
         })
 
         it('is left associative', () => {
             const expr = parseExpression('2*3/4')
-            expect(expr).toBeInstanceOf(Division)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
-                dividend: {
+                left: {
                     left: { value: { min: 2n, max: 2n } },
+                    operator: '*',
                     right: { value: { min: 3n, max: 3n } },
                 },
-                divisor: { value: { min: 4n, max: 4n } },
+                operator: '/',
+                right: { value: { min: 4n, max: 4n } },
             })
         })
     })
@@ -97,32 +98,37 @@ describe('Expression Parser (Operators)', () => {
     describe('Additive', () => {
         it('parses simple addition', () => {
             const expr = parseExpression('2+3')
-            expect(expr).toBeInstanceOf(Addition)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: { value: { min: 2n, max: 2n } },
+                operator: '+',
                 right: { value: { min: 3n, max: 3n } },
             })
         })
 
         it('parses simple subtraction', () => {
             const expr = parseExpression('2-3')
-            expect(expr).toBeInstanceOf(Subtraction)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
-                minuend: { value: { min: 2n, max: 2n } },
-                subtrahend: { value: { min: 3n, max: 3n } },
+                left: { value: { min: 2n, max: 2n } },
+                operator: '-',
+                right: { value: { min: 3n, max: 3n } },
             })
         })
 
         it('is preceded by muliplication', () => {
             const expr = parseExpression('2*3+3*4')
-            expect(expr).toBeInstanceOf(Addition)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: {
                     left: { value: { min: 2n, max: 2n } },
+                    operator: '*',
                     right: { value: { min: 3n, max: 3n } },
                 },
+                operator: '+',
                 right: {
                     left: { value: { min: 3n, max: 3n } },
+                    operator: '*',
                     right: { value: { min: 4n, max: 4n } },
                 },
             })
@@ -130,13 +136,15 @@ describe('Expression Parser (Operators)', () => {
 
         it('is left associative', () => {
             const expr = parseExpression('2+3-4')
-            expect(expr).toBeInstanceOf(Subtraction)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
-                minuend: {
+                left: {
                     left: { value: { min: 2n, max: 2n } },
+                    operator: '+',
                     right: { value: { min: 3n, max: 3n } },
                 },
-                subtrahend: { value: { min: 4n, max: 4n } },
+                operator: '-',
+                right: { value: { min: 4n, max: 4n } },
             })
         })
     })
@@ -147,10 +155,10 @@ describe('Expression Parser (Operators)', () => {
             for (const operator of operators)
                 test(operator, () => {
                     const expr = parseExpression(`2 ${operator} 3`)
-                    expect(expr).toBeInstanceOf(Comparison)
+                    expect(expr).toBeInstanceOf(BinaryOperation)
                     expect(expr).toMatchObject({
-                        operator,
                         left: { value: { min: 2n, max: 2n } },
+                        operator,
                         right: { value: { min: 3n, max: 3n } },
                     })
                 })
@@ -158,14 +166,17 @@ describe('Expression Parser (Operators)', () => {
 
         it('is preceded by addition', () => {
             const expr = parseExpression('2+3 == 3+4')
-            expect(expr).toBeInstanceOf(Comparison)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: {
                     left: { value: { min: 2n, max: 2n } },
+                    operator: '+',
                     right: { value: { min: 3n, max: 3n } },
                 },
+                operator: '==',
                 right: {
                     left: { value: { min: 3n, max: 3n } },
+                    operator: '+',
                     right: { value: { min: 4n, max: 4n } },
                 },
             })
@@ -181,9 +192,10 @@ describe('Expression Parser (Operators)', () => {
     describe('Logical AND', () => {
         it('parses simple AND', () => {
             const expr = parseExpression('true && false')
-            expect(expr).toBeInstanceOf(LogicalAND)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: { value: { values: ['true'] } },
+                operator: '&&',
                 right: { value: { values: ['false'] } },
             })
         })
@@ -192,14 +204,17 @@ describe('Expression Parser (Operators)', () => {
             const expr = parseExpression(
                 'true == ambiguous && ambiguous == false',
             )
-            expect(expr).toBeInstanceOf(LogicalAND)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: {
                     left: { value: { values: ['true'] } },
+                    operator: '==',
                     right: { value: { values: ['ambiguous'] } },
                 },
+                operator: '&&',
                 right: {
                     left: { value: { values: ['ambiguous'] } },
+                    operator: '==',
                     right: { value: { values: ['false'] } },
                 },
             })
@@ -207,12 +222,14 @@ describe('Expression Parser (Operators)', () => {
 
         it('is left associative', () => {
             const expr = parseExpression('true && false && ambiguous')
-            expect(expr).toBeInstanceOf(LogicalAND)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: {
                     left: { value: { values: ['true'] } },
+                    operator: '&&',
                     right: { value: { values: ['false'] } },
                 },
+                operator: '&&',
                 right: { value: { values: ['ambiguous'] } },
             })
         })
@@ -221,9 +238,10 @@ describe('Expression Parser (Operators)', () => {
     describe('Logical OR', () => {
         it('parses simple OR', () => {
             const expr = parseExpression('true || false')
-            expect(expr).toBeInstanceOf(LogicalOR)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: { value: { values: ['true'] } },
+                operator: '||',
                 right: { value: { values: ['false'] } },
             })
         })
@@ -232,14 +250,17 @@ describe('Expression Parser (Operators)', () => {
             const expr = parseExpression(
                 'true && ambiguous || ambiguous && false',
             )
-            expect(expr).toBeInstanceOf(LogicalOR)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: {
                     left: { value: { values: ['true'] } },
+                    operator: '&&',
                     right: { value: { values: ['ambiguous'] } },
                 },
+                operator: '||',
                 right: {
                     left: { value: { values: ['ambiguous'] } },
+                    operator: '&&',
                     right: { value: { values: ['false'] } },
                 },
             })
@@ -247,12 +268,14 @@ describe('Expression Parser (Operators)', () => {
 
         it('is left associative', () => {
             const expr = parseExpression('true || false || ambiguous')
-            expect(expr).toBeInstanceOf(LogicalOR)
+            expect(expr).toBeInstanceOf(BinaryOperation)
             expect(expr).toMatchObject({
                 left: {
                     left: { value: { values: ['true'] } },
+                    operator: '||',
                     right: { value: { values: ['false'] } },
                 },
+                operator: '||',
                 right: { value: { values: ['ambiguous'] } },
             })
         })

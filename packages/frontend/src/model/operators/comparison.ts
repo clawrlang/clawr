@@ -1,17 +1,13 @@
-import { Context, ContextWithDomain, Expression } from '@/model'
-import { AnyIsolationLevel, ISOLATED } from '@/model/isolation-level'
 import {
     IntegerRange,
     truthvalue,
     TruthvalueSet,
     ValueSet,
 } from '@/model/value-set'
-import { SourceCodeSpan } from '@/tools'
-import { Result } from '@/tools/result'
-import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
-import * as cir from '@clawr/cir'
+import { ErrorResult, Result } from '@/tools/result'
+import { BinaryOperator } from '../binary-operation'
 
-export class Comparison implements Expression {
+export class Comparison implements BinaryOperator {
     static readonly operators = [
         '==',
         '===',
@@ -23,62 +19,13 @@ export class Comparison implements Expression {
         '>=',
     ] as const
 
-    private constructor(
-        private readonly operator: Operator,
-        private readonly left: Expression,
-        private readonly right: Expression,
-        public readonly span: SourceCodeSpan,
-    ) {}
+    private constructor(private readonly operator: Operator) {}
 
-    static create({
-        operator,
-        left,
-        right,
-        span,
-    }: {
-        operator: Operator
-        left: Expression
-        right: Expression
-        span: SourceCodeSpan
-    }): Comparison {
-        return new Comparison(operator, left, right, span)
+    static create({ operator }: { operator: Operator }): Comparison {
+        return new Comparison(operator)
     }
 
-    isEffectivelyConst(_: Context): SemanticResult<boolean> {
-        return Result.true
-    }
-
-    isolationLevel(_: Context): SemanticResult<AnyIsolationLevel> {
-        return Result.value(ISOLATED)
-    }
-
-    domain(context: ContextWithDomain): SemanticResult<ValueSet> {
-        const collected = SemanticResult.collect([
-            this.left.domain(context),
-            this.right.domain(context),
-        ])
-        if (collected.isError) return collected
-        const [left, right] = collected.value
-        return this.compare(left, right)
-    }
-
-    currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
-        const collected = SemanticResult.collect([
-            this.left.currentValue(context),
-            this.right.currentValue(context),
-        ])
-        if (collected.isError) return collected
-        const [left, right] = collected.value
-        return this.compare(left, right)
-    }
-
-    toCIRExpression(
-        context: ContextWithDomain,
-    ): SemanticResult<cir.Expression> {
-        throw new Error('Method not implemented.')
-    }
-
-    private compare(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
+    compute(left: ValueSet, right: ValueSet): Result<ValueSet> {
         switch (this.operator) {
             case '==':
                 return this.equals(left, right)
@@ -93,11 +40,11 @@ export class Comparison implements Expression {
             case '>=':
                 return this.leftIsGreaterOrEqual(left, right)
             default:
-                return SemanticErrorResult.failure('not supported', this.span)
+                return ErrorResult.failure('not supported')
         }
     }
 
-    private equals(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
+    private equals(left: ValueSet, right: ValueSet): Result<ValueSet> {
         if (left instanceof IntegerRange && right instanceof IntegerRange) {
             const values: truthvalue[] =
                 left.min !== left.max ||
@@ -124,16 +71,12 @@ export class Comparison implements Expression {
             if (canBeTrue) values.push('true')
             return Result.value(TruthvalueSet.create(values))
         } else
-            return SemanticErrorResult.failure(
+            return ErrorResult.failure(
                 `A(n) ${left.toString()} and a(n) ${right.toString()} can never be equal`,
-                this.span,
             )
     }
 
-    private areNotEqual(
-        left: ValueSet,
-        right: ValueSet,
-    ): SemanticResult<ValueSet> {
+    private areNotEqual(left: ValueSet, right: ValueSet): Result<ValueSet> {
         if (left instanceof IntegerRange && right instanceof IntegerRange) {
             const values: truthvalue[] =
                 left.min !== left.max ||
@@ -160,16 +103,12 @@ export class Comparison implements Expression {
             if (canBeTrue) values.push('true')
             return Result.value(TruthvalueSet.create(values))
         } else
-            return SemanticErrorResult.failure(
+            return ErrorResult.failure(
                 `A(n) ${left.toString()} and a(n) ${right.toString()} can never be equal`,
-                this.span,
             )
     }
 
-    private leftIsLess(
-        left: ValueSet,
-        right: ValueSet,
-    ): SemanticResult<ValueSet> {
+    private leftIsLess(left: ValueSet, right: ValueSet): Result<ValueSet> {
         if (left instanceof IntegerRange && right instanceof IntegerRange) {
             const canBeTrue =
                 left.min === undefined ||
@@ -184,16 +123,15 @@ export class Comparison implements Expression {
             if (canBeTrue) values.push('true')
             return Result.value(TruthvalueSet.create(values))
         } else
-            return SemanticErrorResult.failure(
+            return ErrorResult.failure(
                 `${left.toString()} and ${right.toString()} do not support ordering`,
-                this.span,
             )
     }
 
     private leftIsLessOrEqual(
         left: ValueSet,
         right: ValueSet,
-    ): SemanticResult<ValueSet> {
+    ): Result<ValueSet> {
         if (left instanceof IntegerRange && right instanceof IntegerRange) {
             const canBeTrue =
                 left.min === undefined ||
@@ -208,16 +146,12 @@ export class Comparison implements Expression {
             if (canBeTrue) values.push('true')
             return Result.value(TruthvalueSet.create(values))
         } else
-            return SemanticErrorResult.failure(
+            return ErrorResult.failure(
                 `${left.toString()} and ${right.toString()} do not support ordering`,
-                this.span,
             )
     }
 
-    private leftIsGreater(
-        left: ValueSet,
-        right: ValueSet,
-    ): SemanticResult<ValueSet> {
+    private leftIsGreater(left: ValueSet, right: ValueSet): Result<ValueSet> {
         if (left instanceof IntegerRange && right instanceof IntegerRange) {
             const canBeTrue =
                 left.max === undefined ||
@@ -232,16 +166,15 @@ export class Comparison implements Expression {
             if (canBeTrue) values.push('true')
             return Result.value(TruthvalueSet.create(values))
         } else
-            return SemanticErrorResult.failure(
+            return ErrorResult.failure(
                 `${left.toString()} and ${right.toString()} do not support ordering`,
-                this.span,
             )
     }
 
     private leftIsGreaterOrEqual(
         left: ValueSet,
         right: ValueSet,
-    ): SemanticResult<ValueSet> {
+    ): Result<ValueSet> {
         if (left instanceof IntegerRange && right instanceof IntegerRange) {
             const canBeTrue =
                 left.max === undefined ||
@@ -256,9 +189,8 @@ export class Comparison implements Expression {
             if (canBeTrue) values.push('true')
             return Result.value(TruthvalueSet.create(values))
         } else
-            return SemanticErrorResult.failure(
+            return ErrorResult.failure(
                 `${left.toString()} and ${right.toString()} do not support ordering`,
-                this.span,
             )
     }
 }

@@ -1,77 +1,22 @@
-import { Context, ContextWithDomain, Expression } from '@/model'
-import { AnyIsolationLevel, ISOLATED } from '@/model/isolation-level'
 import { IntegerRange, ValueSet } from '@/model/value-set'
-import { SourceCodeSpan } from '@/tools'
-import { Result } from '@/tools/result'
-import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
-import * as cir from '@clawr/cir'
+import { ErrorResult, Result } from '@/tools/result'
+import { BinaryOperator } from '../binary-operation'
 
-export class Division implements Expression {
-    private constructor(
-        private readonly dividend: Expression,
-        private readonly divisor: Expression,
-        public readonly span: SourceCodeSpan,
-    ) {}
-
-    static create({
-        dividend,
-        divisor,
-        span,
-    }: {
-        dividend: Expression
-        divisor: Expression
-        span: SourceCodeSpan
-    }): Division {
-        return new Division(dividend, divisor, span)
+export class Division implements BinaryOperator {
+    static create() {
+        return new Division()
     }
 
-    isEffectivelyConst(_: Context): SemanticResult<boolean> {
-        return Result.true
-    }
-    isolationLevel(_: Context): SemanticResult<AnyIsolationLevel> {
-        return Result.value(ISOLATED)
-    }
-
-    domain(context: ContextWithDomain): SemanticResult<ValueSet> {
-        const collected = SemanticResult.collect([
-            this.dividend.domain(context),
-            this.divisor.domain(context),
-        ])
-        if (collected.isError) return collected
-        const [dividend, divisor] = collected.value
-        return this.div(dividend, divisor)
-    }
-
-    currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
-        const collected = SemanticResult.collect([
-            this.dividend.currentValue(context),
-            this.divisor.currentValue(context),
-        ])
-        if (collected.isError) return collected
-        const [dividend, divisor] = collected.value
-        return this.div(dividend, divisor)
-    }
-
-    toCIRExpression(
-        context: ContextWithDomain,
-    ): SemanticResult<cir.Expression> {
-        throw new Error('Method not implemented.')
-    }
-
-    private div(
-        dividend: ValueSet,
-        divisor: ValueSet,
-    ): SemanticResult<ValueSet> {
+    compute(dividend: ValueSet, divisor: ValueSet): Result<ValueSet> {
         if (!(
             dividend instanceof IntegerRange && divisor instanceof IntegerRange
         ))
-            return SemanticErrorResult.failure(
+            return ErrorResult.failure(
                 `division between ${dividend.toString()} and ${divisor.toString()} is not supported`,
-                this.span,
             )
 
         if (divisor.min === 0n || divisor.max === 0n)
-            return SemanticErrorResult.failure('division by zero', this.span)
+            return ErrorResult.failure('division by zero')
 
         // A divisor range that merely spans zero (without having it as
         // an exact bound) can't divide by zero at runtime, but the result

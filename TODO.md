@@ -1,13 +1,7 @@
 # TODO
 
-- Implement `.toCIRExpression()`
-  - Logical OR `||`
-  - Logical AND `&&`
-  - Comparison (`==`/`!=`/`>`/`<`…) — non-associative
-  - Additive (`+`/`-`)
-  - Modulus `%`
-  - Multiplicative (`*`/`/`) — left-associative
-  - Exponential `^` - right-associative
+- Test Operators directly
+- Implement `BinaryOperation.toCIRExpression()`
 - `real` operands
 
 ## `object`/`service`

@@ -1,6 +1,5 @@
+import { BinaryOperation } from '@/model/binary-operation'
 import { ISOLATED } from '@/model/isolation-level'
-import { LogicalAND } from '@/model/operators/logical-and'
-import { LogicalOR } from '@/model/operators/logical-or'
 import { truthvalue, TruthvalueSet } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, describe as it, test } from 'bun:test'
@@ -25,7 +24,8 @@ describe('Logical', () => {
             ] as const
             for (const { left, right, expected } of examples) {
                 describe(`[${left}] || [${right}] -> [${expected}]`, () => {
-                    const expr = LogicalOR.create({
+                    const expr = BinaryOperation.create({
+                        operator: '||',
                         left: util.truthvalueLiteral(left),
                         right: util.truthvalueLiteral(right),
                         span: util.someCodeSpan,
@@ -81,7 +81,8 @@ describe('Logical', () => {
                         domain: TruthvalueSet.create(right),
                     })
 
-                    const expr = LogicalOR.create({
+                    const expr = BinaryOperation.create({
+                        operator: '||',
                         left: util.variableRef('left'),
                         right: util.variableRef('right'),
                         span: util.someCodeSpan,
@@ -119,7 +120,8 @@ describe('Logical', () => {
             ] as const
             for (const { left, right, expected } of examples) {
                 describe(`[${left}] && [${right}] -> [${expected}]`, () => {
-                    const expr = LogicalAND.create({
+                    const expr = BinaryOperation.create({
+                        operator: '&&',
                         left: util.truthvalueLiteral(left),
                         right: util.truthvalueLiteral(right),
                         span: util.someCodeSpan,
@@ -175,7 +177,8 @@ describe('Logical', () => {
                         domain: TruthvalueSet.create(right),
                     })
 
-                    const expr = LogicalAND.create({
+                    const expr = BinaryOperation.create({
+                        operator: '&&',
                         left: util.variableRef('left'),
                         right: util.variableRef('right'),
                         span: util.someCodeSpan,

@@ -1,5 +1,5 @@
+import { BinaryOperation } from '@/model/binary-operation'
 import { ISOLATED } from '@/model/isolation-level'
-import { Addition } from '@/model/operators'
 import { IntegerRange } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, test } from 'bun:test'
@@ -7,7 +7,8 @@ import { describe, expect, test } from 'bun:test'
 describe('Addition', () => {
     describe('integer operands', () => {
         describe('evaluates integer literals as a single value', () => {
-            const expr = Addition.create({
+            const expr = BinaryOperation.create({
+                operator: '+',
                 left: util.integerLiteral(2),
                 right: util.integerLiteral(3),
                 span: util.someCodeSpan,
@@ -81,7 +82,8 @@ describe('Addition', () => {
                         domain: IntegerRange.create(right),
                     })
 
-                    const expr = Addition.create({
+                    const expr = BinaryOperation.create({
+                        operator: '+',
                         left: util.variableRef('left'),
                         right: util.variableRef('right'),
                         span: util.someCodeSpan,

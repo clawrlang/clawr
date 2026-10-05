@@ -1,5 +1,5 @@
+import { BinaryOperation } from '@/model/binary-operation'
 import { ISOLATED } from '@/model/isolation-level'
-import { Modulus } from '@/model/operators'
 import { IntegerRange } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, test } from 'bun:test'
@@ -7,9 +7,10 @@ import { describe, expect, test } from 'bun:test'
 describe('Modulus', () => {
     describe('integer operands', () => {
         describe('evaluates integer literals as a single value', () => {
-            const expr = Modulus.create({
-                dividend: util.integerLiteral(21),
-                divisor: util.integerLiteral(3),
+            const expr = BinaryOperation.create({
+                operator: '%',
+                left: util.integerLiteral(21),
+                right: util.integerLiteral(3),
                 span: util.someCodeSpan,
             })
             test('domain', () => {
@@ -31,9 +32,10 @@ describe('Modulus', () => {
         })
 
         describe('rounds down', () => {
-            const expr = Modulus.create({
-                dividend: util.integerLiteral(-2),
-                divisor: util.integerLiteral(3),
+            const expr = BinaryOperation.create({
+                operator: '%',
+                left: util.integerLiteral(-2),
+                right: util.integerLiteral(3),
                 span: util.someCodeSpan,
             })
             test('domain', () => {
@@ -55,9 +57,10 @@ describe('Modulus', () => {
         })
 
         describe('rounds down', () => {
-            const expr = Modulus.create({
-                dividend: util.integerLiteral(2),
-                divisor: util.integerLiteral(-3),
+            const expr = BinaryOperation.create({
+                operator: '%',
+                left: util.integerLiteral(2),
+                right: util.integerLiteral(-3),
                 span: util.someCodeSpan,
             })
             test('domain', () => {
@@ -145,9 +148,10 @@ describe('Modulus', () => {
                         domain: IntegerRange.create(divisor),
                     })
 
-                    const expr = Modulus.create({
-                        dividend: util.variableRef('dividend'),
-                        divisor: util.variableRef('divisor'),
+                    const expr = BinaryOperation.create({
+                        operator: '%',
+                        left: util.variableRef('dividend'),
+                        right: util.variableRef('divisor'),
                         span: util.someCodeSpan,
                     })
 
@@ -175,9 +179,10 @@ describe('Modulus', () => {
                     domain: IntegerRange.singleton(0n),
                 })
 
-                const expr = Modulus.create({
-                    dividend: util.variableRef('dividend'),
-                    divisor: util.variableRef('divisor'),
+                const expr = BinaryOperation.create({
+                    operator: '%',
+                    left: util.variableRef('dividend'),
+                    right: util.variableRef('divisor'),
                     span: util.someCodeSpan,
                 })
                 test('domain', () => {

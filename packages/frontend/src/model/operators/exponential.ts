@@ -1,75 +1,21 @@
-import { Context, ContextWithDomain, Expression } from '@/model'
-import { ISOLATED } from '@/model/isolation-level'
 import { IntegerRange, ValueSet } from '@/model/value-set'
-import { SourceCodeSpan } from '@/tools'
-import { Result, SuccessResult } from '@/tools/result'
-import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
-import * as cir from '@clawr/cir'
+import { ErrorResult, Result } from '@/tools/result'
+import { BinaryOperator } from '../binary-operation'
 
-export class Exponential implements Expression {
-    private constructor(
-        public readonly base: Expression,
-        public readonly exponent: Expression,
-        public readonly span: SourceCodeSpan,
-    ) {}
-
-    public static create({
-        base,
-        exponent,
-        span,
-    }: {
-        base: Expression
-        exponent: Expression
-        span: SourceCodeSpan
-    }): Exponential {
-        return new Exponential(base, exponent, span)
+export class Exponential implements BinaryOperator {
+    static create() {
+        return new Exponential()
     }
 
-    isEffectivelyConst(_: Context): SuccessResult<true> {
-        return Result.true
-    }
-
-    isolationLevel(_: Context): SuccessResult<ISOLATED> {
-        return Result.value(ISOLATED)
-    }
-
-    domain(context: ContextWithDomain): SemanticResult<ValueSet> {
-        const collected = SemanticResult.collect([
-            this.base.domain(context),
-            this.exponent.domain(context),
-        ])
-        if (collected.isError) return collected
-        const [base, exponent] = collected.value
-        return this.exp(base, exponent)
-    }
-
-    currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
-        const collected = SemanticResult.collect([
-            this.base.currentValue(context),
-            this.exponent.currentValue(context),
-        ])
-        if (collected.isError) return collected
-        const [base, exponent] = collected.value
-        return this.exp(base, exponent)
-    }
-
-    toCIRExpression(
-        context: ContextWithDomain,
-    ): SemanticResult<cir.Expression> {
-        throw new Error('Method not implemented.')
-    }
-
-    private exp(base: ValueSet, exponent: ValueSet): SemanticResult<ValueSet> {
+    compute(base: ValueSet, exponent: ValueSet): Result<ValueSet> {
         if (!(base instanceof IntegerRange && exponent instanceof IntegerRange))
-            return SemanticErrorResult.failure(
+            return ErrorResult.failure(
                 `exponentiation between ${base} and ${exponent} is not supported`,
-                this.span,
             )
 
         if (exponent.min === undefined || exponent.min < 0)
-            return SemanticErrorResult.failure(
+            return ErrorResult.failure(
                 'negative exponent is not supported for integers',
-                this.span,
             )
 
         if (
@@ -78,9 +24,8 @@ export class Exponential implements Expression {
             exponent.min === 0n &&
             exponent.max === 0n
         )
-            return SemanticErrorResult.failure(
+            return ErrorResult.failure(
                 'The expression always evaluates to 0^0, which is undefined and will crash at runtime',
-                this.span,
             )
 
         const { min, max } = integerExponentRange(base, exponent)

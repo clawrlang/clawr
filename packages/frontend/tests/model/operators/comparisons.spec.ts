@@ -1,5 +1,5 @@
+import { BinaryOperation } from '@/model/binary-operation'
 import { ISOLATED } from '@/model/isolation-level'
-import { Comparison } from '@/model/operators'
 import { IntegerRange, truthvalue, TruthvalueSet } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, describe as it, test } from 'bun:test'
@@ -8,7 +8,7 @@ describe('Comparisons', () => {
     describe('Value Equal (==)', () => {
         describe('integer operands', () => {
             it('evaluates equal integer literals as a singleton true', () => {
-                const expr = Comparison.create({
+                const expr = BinaryOperation.create({
                     operator: '==',
                     left: util.integerLiteral(2),
                     right: util.integerLiteral(2),
@@ -31,7 +31,7 @@ describe('Comparisons', () => {
             })
 
             it('evaluates different integer literals as a singleton false', () => {
-                const expr = Comparison.create({
+                const expr = BinaryOperation.create({
                     operator: '==',
                     left: util.integerLiteral(2),
                     right: util.integerLiteral(3),
@@ -75,7 +75,7 @@ describe('Comparisons', () => {
                             domain: IntegerRange.create(right),
                         })
 
-                        const expr = Comparison.create({
+                        const expr = BinaryOperation.create({
                             operator: '==',
                             left: util.variableRef('left'),
                             right: util.variableRef('right'),
@@ -99,7 +99,7 @@ describe('Comparisons', () => {
 
         describe('truthvalue operands', () => {
             it('evaluates equal truthvalue literals as a singleton true', () => {
-                const expr = Comparison.create({
+                const expr = BinaryOperation.create({
                     operator: '==',
                     left: util.truthvalueLiteral('ambiguous'),
                     right: util.truthvalueLiteral('ambiguous'),
@@ -122,7 +122,7 @@ describe('Comparisons', () => {
             })
 
             it('evaluates different truthvalue literals as a singleton false', () => {
-                const expr = Comparison.create({
+                const expr = BinaryOperation.create({
                     operator: '==',
                     left: util.truthvalueLiteral('true'),
                     right: util.truthvalueLiteral('ambiguous'),
@@ -171,7 +171,7 @@ describe('Comparisons', () => {
                             domain: TruthvalueSet.create(right),
                         })
 
-                        const expr = Comparison.create({
+                        const expr = BinaryOperation.create({
                             operator: '==',
                             left: util.variableRef('left'),
                             right: util.variableRef('right'),
@@ -197,7 +197,7 @@ describe('Comparisons', () => {
     describe('Value Not Equal (!=)', () => {
         describe('integer operands', () => {
             it('evaluates equal integer literals as a singleton false', () => {
-                const expr = Comparison.create({
+                const expr = BinaryOperation.create({
                     operator: '!=',
                     left: util.integerLiteral(2),
                     right: util.integerLiteral(2),
@@ -220,7 +220,7 @@ describe('Comparisons', () => {
             })
 
             it('evaluates different integer literals as a singleton true', () => {
-                const expr = Comparison.create({
+                const expr = BinaryOperation.create({
                     operator: '!=',
                     left: util.integerLiteral(2),
                     right: util.integerLiteral(3),
@@ -264,7 +264,7 @@ describe('Comparisons', () => {
                             domain: IntegerRange.create(right),
                         })
 
-                        const expr = Comparison.create({
+                        const expr = BinaryOperation.create({
                             operator: '!=',
                             left: util.variableRef('left'),
                             right: util.variableRef('right'),
@@ -288,7 +288,7 @@ describe('Comparisons', () => {
 
         describe('truthvalue operands', () => {
             it('evaluates equal truthvalue literals as a singleton false', () => {
-                const expr = Comparison.create({
+                const expr = BinaryOperation.create({
                     operator: '!=',
                     left: util.truthvalueLiteral('ambiguous'),
                     right: util.truthvalueLiteral('ambiguous'),
@@ -311,7 +311,7 @@ describe('Comparisons', () => {
             })
 
             it('evaluates different truthvalue literals as a singleton true', () => {
-                const expr = Comparison.create({
+                const expr = BinaryOperation.create({
                     operator: '!=',
                     left: util.truthvalueLiteral('true'),
                     right: util.truthvalueLiteral('ambiguous'),
@@ -360,7 +360,7 @@ describe('Comparisons', () => {
                             domain: TruthvalueSet.create(right),
                         })
 
-                        const expr = Comparison.create({
+                        const expr = BinaryOperation.create({
                             operator: '!=',
                             left: util.variableRef('left'),
                             right: util.variableRef('right'),
@@ -385,7 +385,7 @@ describe('Comparisons', () => {
 
     describe('Value Less Than (<)', () => {
         it('evaluates equal integer literals as a singleton false', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '<',
                 left: util.integerLiteral(2),
                 right: util.integerLiteral(2),
@@ -408,7 +408,7 @@ describe('Comparisons', () => {
         })
 
         it('evaluates different integer literals as a singleton true', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '<',
                 left: util.integerLiteral(2),
                 right: util.integerLiteral(3),
@@ -431,7 +431,7 @@ describe('Comparisons', () => {
         })
 
         it('evaluates different integer literals as a singleton false', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '<',
                 left: util.integerLiteral(4),
                 right: util.integerLiteral(3),
@@ -488,7 +488,7 @@ describe('Comparisons', () => {
                         domain: IntegerRange.create(right),
                     })
 
-                    const expr = Comparison.create({
+                    const expr = BinaryOperation.create({
                         operator: '<',
                         left: util.variableRef('left'),
                         right: util.variableRef('right'),
@@ -510,7 +510,7 @@ describe('Comparisons', () => {
 
     describe('Value Less Than Or Equal (<=)', () => {
         it('evaluates equal integer literals as a singleton true', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '<=',
                 left: util.integerLiteral(2),
                 right: util.integerLiteral(2),
@@ -533,7 +533,7 @@ describe('Comparisons', () => {
         })
 
         it('evaluates different integer literals as a singleton true', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '<=',
                 left: util.integerLiteral(2),
                 right: util.integerLiteral(3),
@@ -556,7 +556,7 @@ describe('Comparisons', () => {
         })
 
         it('evaluates different integer literals as a singleton false', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '<=',
                 left: util.integerLiteral(4),
                 right: util.integerLiteral(3),
@@ -613,7 +613,7 @@ describe('Comparisons', () => {
                         domain: IntegerRange.create(right),
                     })
 
-                    const expr = Comparison.create({
+                    const expr = BinaryOperation.create({
                         operator: '<=',
                         left: util.variableRef('left'),
                         right: util.variableRef('right'),
@@ -635,7 +635,7 @@ describe('Comparisons', () => {
 
     describe('Value Greater Than (>)', () => {
         it('evaluates equal integer literals as a singleton false', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '>',
                 left: util.integerLiteral(2),
                 right: util.integerLiteral(2),
@@ -658,7 +658,7 @@ describe('Comparisons', () => {
         })
 
         it('evaluates different integer literals as a singleton true', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '>',
                 left: util.integerLiteral(4),
                 right: util.integerLiteral(3),
@@ -681,7 +681,7 @@ describe('Comparisons', () => {
         })
 
         it('evaluates different integer literals as a singleton false', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '>',
                 left: util.integerLiteral(2),
                 right: util.integerLiteral(3),
@@ -738,7 +738,7 @@ describe('Comparisons', () => {
                         domain: IntegerRange.create(right),
                     })
 
-                    const expr = Comparison.create({
+                    const expr = BinaryOperation.create({
                         operator: '>',
                         left: util.variableRef('left'),
                         right: util.variableRef('right'),
@@ -760,7 +760,7 @@ describe('Comparisons', () => {
 
     describe('Value Greater Than Or Equal (<=)', () => {
         it('evaluates equal integer literals as a singleton true', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '>=',
                 left: util.integerLiteral(2),
                 right: util.integerLiteral(2),
@@ -783,7 +783,7 @@ describe('Comparisons', () => {
         })
 
         it('evaluates different integer literals as a singleton true', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '>=',
                 left: util.integerLiteral(4),
                 right: util.integerLiteral(3),
@@ -806,7 +806,7 @@ describe('Comparisons', () => {
         })
 
         it('evaluates different integer literals as a singleton false', () => {
-            const expr = Comparison.create({
+            const expr = BinaryOperation.create({
                 operator: '>=',
                 left: util.integerLiteral(2),
                 right: util.integerLiteral(3),
@@ -863,7 +863,7 @@ describe('Comparisons', () => {
                         domain: IntegerRange.create(right),
                     })
 
-                    const expr = Comparison.create({
+                    const expr = BinaryOperation.create({
                         operator: '>=',
                         left: util.variableRef('left'),
                         right: util.variableRef('right'),

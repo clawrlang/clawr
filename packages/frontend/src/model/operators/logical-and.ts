@@ -1,66 +1,15 @@
-import { Context, ContextWithDomain, Expression } from '@/model'
-import { AnyIsolationLevel, ISOLATED } from '@/model/isolation-level'
 import { truthvalue, TruthvalueSet, ValueSet } from '@/model/value-set'
-import { SourceCodeSpan } from '@/tools'
-import { Result } from '@/tools/result'
-import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
-import * as cir from '@clawr/cir'
+import { ErrorResult, Result } from '@/tools/result'
+import { BinaryOperator } from '../binary-operation'
 
-export class LogicalAND implements Expression {
-    private constructor(
-        private readonly left: Expression,
-        private readonly right: Expression,
-        public readonly span: SourceCodeSpan,
-    ) {}
-    static create({
-        left,
-        right,
-        span,
-    }: {
-        left: Expression
-        right: Expression
-        span: SourceCodeSpan
-    }): LogicalAND {
-        return new LogicalAND(left, right, span)
+export class LogicalAND implements BinaryOperator {
+    static create() {
+        return new LogicalAND()
     }
 
-    isEffectivelyConst(_: Context): SemanticResult<boolean> {
-        return Result.true
-    }
-
-    isolationLevel(_: Context): SemanticResult<AnyIsolationLevel> {
-        return Result.value(ISOLATED)
-    }
-
-    domain(context: ContextWithDomain): SemanticResult<ValueSet> {
-        const collected = SemanticResult.collect([
-            this.left.domain(context),
-            this.right.domain(context),
-        ])
-        if (collected.isError) return collected
-        const [left, right] = collected.value
-        return this.and(left, right)
-    }
-
-    currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
-        const collected = SemanticResult.collect([
-            this.left.currentValue(context),
-            this.right.currentValue(context),
-        ])
-        if (collected.isError) return collected
-        const [left, right] = collected.value
-        return this.and(left, right)
-    }
-
-    toCIRExpression(
-        context: ContextWithDomain,
-    ): SemanticResult<cir.Expression> {
-        throw new Error('Method not implemented.')
-    }
-
-    private and(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
+    compute(left: ValueSet, right: ValueSet): Result<ValueSet> {
         if (!(left instanceof TruthvalueSet && right instanceof TruthvalueSet))
-            return SemanticErrorResult.failure('Not logical types', this.span)
+            return ErrorResult.failure('Not logical types')
 
         const canBeFalse =
             left.values.includes('false') || right.values.includes('false')

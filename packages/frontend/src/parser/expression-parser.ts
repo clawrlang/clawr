@@ -1,19 +1,10 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
+import { BinaryOperation } from '@/model/binary-operation'
 import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral, TruthValueLiteral } from '@/model/literals'
-import {
-    Addition,
-    Comparison,
-    Division,
-    Exponential,
-    Modulus,
-    Multiplication,
-    Subtraction,
-} from '@/model/operators'
-import { LogicalAND } from '@/model/operators/logical-and'
-import { LogicalOR } from '@/model/operators/logical-or'
+import { Comparison } from '@/model/operators'
 import { VariableReference } from '@/model/variable-reference'
 import { Context } from '@/parser'
 import { FunctionArgumentsParser } from '@/parser/function-arguments-parser'
@@ -46,7 +37,8 @@ export class ExpressionParser {
         while (stream.isNext('OPERATOR', '||')) {
             stream.expect('OPERATOR', '||')
             const right = this.parseLogicalAND(stream)
-            expr = LogicalOR.create({
+            expr = BinaryOperation.create({
+                operator: '||',
                 left: expr,
                 right,
                 span: { start: expr.span.start, end: right.span.end },
@@ -60,7 +52,8 @@ export class ExpressionParser {
         while (stream.isNext('OPERATOR', '&&')) {
             stream.expect('OPERATOR', '&&')
             const right = this.parseComparisonOperation(stream)
-            expr = LogicalAND.create({
+            expr = BinaryOperation.create({
+                operator: '&&',
                 left: expr,
                 right,
                 span: { start: expr.span.start, end: right.span.end },
@@ -74,7 +67,7 @@ export class ExpressionParser {
         if (!stream.isNext('OPERATOR', ...Comparison.operators)) return left
         const operatorToken = stream.expect('OPERATOR', ...Comparison.operators)
         const right = this.parseAdditiveOperation(stream)
-        return Comparison.create({
+        return BinaryOperation.create({
             operator: operatorToken.operator,
             left,
             right,
@@ -87,18 +80,12 @@ export class ExpressionParser {
         while (stream.isNext('OPERATOR', '+', '-')) {
             const operator = stream.expect('OPERATOR', '+', '-').operator
             const right = this.parseMultiplicativeOperation(stream)
-            expr =
-                operator == '+'
-                    ? Addition.create({
-                          left: expr,
-                          right,
-                          span: { start: expr.span.start, end: right.span.end },
-                      })
-                    : Subtraction.create({
-                          minuend: expr,
-                          subtrahend: right,
-                          span: { start: expr.span.start, end: right.span.end },
-                      })
+            expr = BinaryOperation.create({
+                operator,
+                left: expr,
+                right,
+                span: { start: expr.span.start, end: right.span.end },
+            })
         }
         return expr
     }
@@ -109,18 +96,14 @@ export class ExpressionParser {
             const operator = stream.expect('OPERATOR', '*', '/', '%').operator
             const right = this.parseExponentialExpression(stream)
             const config = {
+                operator,
                 left: expr,
                 dividend: expr,
                 right,
                 divisor: right,
                 span: { start: expr.span.start, end: right.span.end },
             }
-            expr =
-                operator == '*'
-                    ? Multiplication.create(config)
-                    : operator == '%'
-                      ? Modulus.create(config)
-                      : Division.create(config)
+            expr = BinaryOperation.create(config)
         }
         return expr
     }
@@ -132,9 +115,10 @@ export class ExpressionParser {
         stream.expect('OPERATOR', '^')
 
         const exponent = this.parseExponentialExpression(stream)
-        return Exponential.create({
-            base,
-            exponent,
+        return BinaryOperation.create({
+            operator: '^',
+            left: base,
+            right: exponent,
             span: {
                 start: base.span.start,
                 end: exponent.span.end,

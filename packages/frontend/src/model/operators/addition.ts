@@ -3,9 +3,7 @@ import { IntegerRange, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 
 export class Addition implements BinaryOperator {
-    static create(): Addition {
-        return new Addition()
-    }
+    static readonly instance = new Addition()
 
     compute(left: ValueSet, right: ValueSet): Result<ValueSet> {
         if (!(left instanceof IntegerRange && right instanceof IntegerRange))

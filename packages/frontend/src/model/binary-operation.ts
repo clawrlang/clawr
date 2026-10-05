@@ -74,7 +74,7 @@ export class BinaryOperation implements Expression {
     }
 
     private compute(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
-        const strategy = OPERATORS[this.operator]()
+        const strategy = OPERATORS[this.operator]
         const result = strategy.compute(left, right)
         return result.isError
             ? SemanticErrorResult.failure(result.error.message, this.span)
@@ -83,22 +83,22 @@ export class BinaryOperation implements Expression {
 }
 
 const OPERATORS = {
-    '^': Exponential.create,
-    '*': Multiplication.create,
-    '/': Division.create,
-    '%': Modulus.create,
-    '+': Addition.create,
-    '-': Subtraction.create,
-    '==': () => Comparison.create({ operator: '==' }),
-    '!=': () => Comparison.create({ operator: '!=' }),
-    '===': () => Comparison.create({ operator: '==' }),
-    '!==': () => Comparison.create({ operator: '!=' }),
-    '<': () => Comparison.create({ operator: '<' }),
-    '<=': () => Comparison.create({ operator: '<=' }),
-    '>': () => Comparison.create({ operator: '>' }),
-    '>=': () => Comparison.create({ operator: '>=' }),
-    '&&': LogicalAND.create,
-    '||': LogicalOR.create,
+    '^': Exponential.instance,
+    '*': Multiplication.instance,
+    '/': Division.instance,
+    '%': Modulus.instance,
+    '+': Addition.instance,
+    '-': Subtraction.instance,
+    '==': Comparison.equals,
+    '!=': Comparison.doesNotEqual,
+    '===': Comparison.isSame,
+    '!==': Comparison.isNotSame,
+    '<': Comparison.isLessThan,
+    '<=': Comparison.isLessThanOrEqual,
+    '>': Comparison.isGreaterThan,
+    '>=': Comparison.isGreaterThanOrEqual,
+    '&&': LogicalAND.instance,
+    '||': LogicalOR.instance,
 }
 
 export interface BinaryOperator {

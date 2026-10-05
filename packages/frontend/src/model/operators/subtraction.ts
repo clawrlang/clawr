@@ -3,9 +3,7 @@ import { IntegerRange, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 
 export class Subtraction implements BinaryOperator {
-    static create() {
-        return new Subtraction()
-    }
+    static instance = new Subtraction()
 
     compute(minuend: ValueSet, subtrahend: ValueSet): Result<ValueSet> {
         if (!(

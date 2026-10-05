@@ -3,9 +3,7 @@ import { ErrorResult, Result } from '@/tools/result'
 import { BinaryOperator } from '../binary-operation'
 
 export class Exponential implements BinaryOperator {
-    static create() {
-        return new Exponential()
-    }
+    static instance = new Exponential()
 
     compute(base: ValueSet, exponent: ValueSet): Result<ValueSet> {
         if (!(base instanceof IntegerRange && exponent instanceof IntegerRange))

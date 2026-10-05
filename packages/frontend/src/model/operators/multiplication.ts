@@ -3,9 +3,7 @@ import { IntegerRange, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 
 export class Multiplication implements BinaryOperator {
-    static create() {
-        return new Multiplication()
-    }
+    static instance = new Multiplication()
 
     compute(left: ValueSet, right: ValueSet): Result<ValueSet> {
         if (!(left instanceof IntegerRange && right instanceof IntegerRange))

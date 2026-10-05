@@ -4,9 +4,7 @@ import { ErrorResult, Result } from '@/tools/result'
 import { BinaryOperator } from '../binary-operation'
 
 export class Modulus implements BinaryOperator {
-    static create() {
-        return new Modulus()
-    }
+    static instance = new Modulus()
 
     compute(dividend: ValueSet, divisor: ValueSet): Result<ValueSet> {
         if (!(

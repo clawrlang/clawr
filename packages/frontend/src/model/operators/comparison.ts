@@ -19,11 +19,16 @@ export class Comparison implements BinaryOperator {
         '>=',
     ] as const
 
-    private constructor(private readonly operator: Operator) {}
+    static readonly equals = new Comparison('==')
+    static readonly doesNotEqual = new Comparison('!=')
+    static readonly isSame = new Comparison('===')
+    static readonly isNotSame = new Comparison('!==')
+    static readonly isLessThan = new Comparison('<')
+    static readonly isLessThanOrEqual = new Comparison('<=')
+    static readonly isGreaterThan = new Comparison('>')
+    static readonly isGreaterThanOrEqual = new Comparison('>=')
 
-    static create({ operator }: { operator: Operator }): Comparison {
-        return new Comparison(operator)
-    }
+    private constructor(private readonly operator: Operator) {}
 
     compute(left: ValueSet, right: ValueSet): Result<ValueSet> {
         switch (this.operator) {

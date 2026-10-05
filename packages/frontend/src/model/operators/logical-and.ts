@@ -3,9 +3,7 @@ import { ErrorResult, Result } from '@/tools/result'
 import { BinaryOperator } from '../binary-operation'
 
 export class LogicalAND implements BinaryOperator {
-    static create() {
-        return new LogicalAND()
-    }
+    static readonly instance = new LogicalAND()
 
     compute(left: ValueSet, right: ValueSet): Result<ValueSet> {
         if (!(left instanceof TruthvalueSet && right instanceof TruthvalueSet))

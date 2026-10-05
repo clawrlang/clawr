@@ -3,9 +3,7 @@ import { ErrorResult, Result } from '@/tools/result'
 import { BinaryOperator } from '../binary-operation'
 
 export class Division implements BinaryOperator {
-    static create() {
-        return new Division()
-    }
+    static instance = new Division()
 
     compute(dividend: ValueSet, divisor: ValueSet): Result<ValueSet> {
         if (!(

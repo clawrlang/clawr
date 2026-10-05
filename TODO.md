@@ -1,6 +1,5 @@
 # TODO
 
-- Test Operators directly
 - Implement `BinaryOperation.toCIRExpression()`
 - `real` operands
 

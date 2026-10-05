@@ -1,33 +1,18 @@
-import { BinaryOperation } from '@/model/binary-operation'
-import { ISOLATED } from '@/model/isolation-level'
+import { Addition } from '@/model/operators'
 import { IntegerRange } from '@/model/value-set'
-import * as util from '@@/util'
-import { describe, expect, test } from 'bun:test'
+import { describe, expect } from 'bun:test'
 
 describe('Addition', () => {
     describe('integer operands', () => {
-        describe('evaluates integer literals as a single value', () => {
-            const expr = BinaryOperation.create({
-                operator: '+',
-                left: util.integerLiteral(2),
-                right: util.integerLiteral(3),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    min: 5n,
-                    max: 5n,
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    min: 5n,
-                    max: 5n,
-                })
+        describe('evaluates singleton integer ranges as a single value', () => {
+            const result = Addition.instance.compute(
+                IntegerRange.singleton(2n),
+                IntegerRange.singleton(3n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                min: 5n,
+                max: 5n,
             })
         })
 
@@ -69,35 +54,15 @@ describe('Addition', () => {
                 },
             ]
             for (const { left, right, expected } of examples)
-                describe(`[${left.min ?? 'inf'},${left.max ?? 'inf'}]/[${right.min ?? 'inf'},${right.max ?? 'inf'}] == [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
-                    const context = util.newSemanticContext()
-                    context.scope.addVariableDeclaration('left', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(left),
-                    })
-                    context.scope.addVariableDeclaration('right', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(right),
-                    })
-
-                    const expr = BinaryOperation.create({
-                        operator: '+',
-                        left: util.variableRef('left'),
-                        right: util.variableRef('right'),
-                        span: util.someCodeSpan,
-                    })
-
-                    test('domain', () => {
-                        const result = expr.domain(context)
-                        expect(
-                            result.isSuccess || result.error.errors,
-                        ).toBeTrue()
-                        expect(result.isSuccess && result.value).toMatchObject(
-                            expected,
-                        )
-                    })
+                describe(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] + [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
+                    const result = Addition.instance.compute(
+                        IntegerRange.create(left),
+                        IntegerRange.create(right),
+                    )
+                    expect(result.isSuccess || result.error).toBeTrue()
+                    expect(result.isSuccess && result.value).toMatchObject(
+                        expected,
+                    )
                 })
         })
     })

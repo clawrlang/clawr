@@ -1,55 +1,29 @@
-import { BinaryOperation } from '@/model/binary-operation'
-import { ISOLATED } from '@/model/isolation-level'
+import { Comparison } from '@/model/operators'
 import { IntegerRange, truthvalue, TruthvalueSet } from '@/model/value-set'
-import * as util from '@@/util'
-import { describe, expect, describe as it, test } from 'bun:test'
+import { describe, expect, it, test } from 'bun:test'
 
 describe('Comparisons', () => {
     describe('Value Equal (==)', () => {
         describe('integer operands', () => {
             it('evaluates equal integer literals as a singleton true', () => {
-                const expr = BinaryOperation.create({
-                    operator: '==',
-                    left: util.integerLiteral(2),
-                    right: util.integerLiteral(2),
-                    span: util.someCodeSpan,
-                })
-                test('domain', () => {
-                    const result = expr.domain(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['true'],
-                    })
-                })
-                test('currentValue', () => {
-                    const result = expr.currentValue(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['true'],
-                    })
+                const result = Comparison.equals.compute(
+                    IntegerRange.singleton(2n),
+                    IntegerRange.singleton(2n),
+                )
+                expect(result.isSuccess || result.error).toBeTrue()
+                expect(result.isSuccess && result.value).toMatchObject({
+                    values: ['true'],
                 })
             })
 
             it('evaluates different integer literals as a singleton false', () => {
-                const expr = BinaryOperation.create({
-                    operator: '==',
-                    left: util.integerLiteral(2),
-                    right: util.integerLiteral(3),
-                    span: util.someCodeSpan,
-                })
-                test('domain', () => {
-                    const result = expr.domain(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['false'],
-                    })
-                })
-                test('currentValue', () => {
-                    const result = expr.currentValue(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['false'],
-                    })
+                const result = Comparison.equals.compute(
+                    IntegerRange.singleton(2n),
+                    IntegerRange.singleton(3n),
+                )
+                expect(result.isSuccess || result.error).toBeTrue()
+                expect(result.isSuccess && result.value).toMatchObject({
+                    values: ['false'],
                 })
             })
 
@@ -62,36 +36,14 @@ describe('Comparisons', () => {
                     },
                 ]
                 for (const { left, right, expected } of examples)
-                    describe(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] == [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
-                        const context = util.newSemanticContext()
-                        context.scope.addVariableDeclaration('left', {
-                            isImmutable: true,
-                            isolationLevel: ISOLATED,
-                            domain: IntegerRange.create(left),
-                        })
-                        context.scope.addVariableDeclaration('right', {
-                            isImmutable: true,
-                            isolationLevel: ISOLATED,
-                            domain: IntegerRange.create(right),
-                        })
-
-                        const expr = BinaryOperation.create({
-                            operator: '==',
-                            left: util.variableRef('left'),
-                            right: util.variableRef('right'),
-                            span: util.someCodeSpan,
-                        })
-
-                        test('domain', () => {
-                            const result = expr.domain(context)
-                            expect(
-                                result.isSuccess || result.error.errors,
-                            ).toBeTrue()
-                            expect(
-                                result.isSuccess && result.value,
-                            ).toMatchObject({
-                                values: expect.arrayContaining(expected),
-                            })
+                    test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] == [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
+                        const result = Comparison.equals.compute(
+                            IntegerRange.create(left),
+                            IntegerRange.create(right),
+                        )
+                        expect(result.isSuccess || result.error).toBeTrue()
+                        expect(result.isSuccess && result.value).toMatchObject({
+                            values: expect.arrayContaining(expected),
                         })
                     })
             })
@@ -99,48 +51,24 @@ describe('Comparisons', () => {
 
         describe('truthvalue operands', () => {
             it('evaluates equal truthvalue literals as a singleton true', () => {
-                const expr = BinaryOperation.create({
-                    operator: '==',
-                    left: util.truthvalueLiteral('ambiguous'),
-                    right: util.truthvalueLiteral('ambiguous'),
-                    span: util.someCodeSpan,
-                })
-                test('domain', () => {
-                    const result = expr.domain(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['true'],
-                    })
-                })
-                test('currentValue', () => {
-                    const result = expr.currentValue(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['true'],
-                    })
+                const result = Comparison.equals.compute(
+                    TruthvalueSet.singleton('ambiguous'),
+                    TruthvalueSet.singleton('ambiguous'),
+                )
+                expect(result.isSuccess || result.error).toBeTrue()
+                expect(result.isSuccess && result.value).toMatchObject({
+                    values: ['true'],
                 })
             })
 
             it('evaluates different truthvalue literals as a singleton false', () => {
-                const expr = BinaryOperation.create({
-                    operator: '==',
-                    left: util.truthvalueLiteral('true'),
-                    right: util.truthvalueLiteral('ambiguous'),
-                    span: util.someCodeSpan,
-                })
-                test('domain', () => {
-                    const result = expr.domain(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['false'],
-                    })
-                })
-                test('currentValue', () => {
-                    const result = expr.currentValue(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['false'],
-                    })
+                const result = Comparison.equals.compute(
+                    TruthvalueSet.singleton('true'),
+                    TruthvalueSet.singleton('ambiguous'),
+                )
+                expect(result.isSuccess || result.error).toBeTrue()
+                expect(result.isSuccess && result.value).toMatchObject({
+                    values: ['false'],
                 })
             })
 
@@ -158,36 +86,14 @@ describe('Comparisons', () => {
                     },
                 ]
                 for (const { left, right, expected } of examples)
-                    describe(`[${left}] == [${right}]`, () => {
-                        const context = util.newSemanticContext()
-                        context.scope.addVariableDeclaration('left', {
-                            isImmutable: true,
-                            isolationLevel: ISOLATED,
-                            domain: TruthvalueSet.create(left),
-                        })
-                        context.scope.addVariableDeclaration('right', {
-                            isImmutable: true,
-                            isolationLevel: ISOLATED,
-                            domain: TruthvalueSet.create(right),
-                        })
-
-                        const expr = BinaryOperation.create({
-                            operator: '==',
-                            left: util.variableRef('left'),
-                            right: util.variableRef('right'),
-                            span: util.someCodeSpan,
-                        })
-
-                        test('domain', () => {
-                            const result = expr.domain(context)
-                            expect(
-                                result.isSuccess || result.error.errors,
-                            ).toBeTrue()
-                            expect(
-                                result.isSuccess && result.value,
-                            ).toMatchObject({
-                                values: expect.arrayContaining(expected),
-                            })
+                    test(`[${left}] == [${right}] -> [${expected}]`, () => {
+                        const result = Comparison.equals.compute(
+                            TruthvalueSet.create(left),
+                            TruthvalueSet.create(right),
+                        )
+                        expect(result.isSuccess || result.error).toBeTrue()
+                        expect(result.isSuccess && result.value).toMatchObject({
+                            values: expect.arrayContaining(expected),
                         })
                     })
             })
@@ -197,48 +103,24 @@ describe('Comparisons', () => {
     describe('Value Not Equal (!=)', () => {
         describe('integer operands', () => {
             it('evaluates equal integer literals as a singleton false', () => {
-                const expr = BinaryOperation.create({
-                    operator: '!=',
-                    left: util.integerLiteral(2),
-                    right: util.integerLiteral(2),
-                    span: util.someCodeSpan,
-                })
-                test('domain', () => {
-                    const result = expr.domain(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['false'],
-                    })
-                })
-                test('currentValue', () => {
-                    const result = expr.currentValue(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['false'],
-                    })
+                const result = Comparison.doesNotEqual.compute(
+                    IntegerRange.singleton(2n),
+                    IntegerRange.singleton(2n),
+                )
+                expect(result.isSuccess || result.error).toBeTrue()
+                expect(result.isSuccess && result.value).toMatchObject({
+                    values: ['false'],
                 })
             })
 
             it('evaluates different integer literals as a singleton true', () => {
-                const expr = BinaryOperation.create({
-                    operator: '!=',
-                    left: util.integerLiteral(2),
-                    right: util.integerLiteral(3),
-                    span: util.someCodeSpan,
-                })
-                test('domain', () => {
-                    const result = expr.domain(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['true'],
-                    })
-                })
-                test('currentValue', () => {
-                    const result = expr.currentValue(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['true'],
-                    })
+                const result = Comparison.doesNotEqual.compute(
+                    IntegerRange.singleton(2n),
+                    IntegerRange.singleton(3n),
+                )
+                expect(result.isSuccess || result.error).toBeTrue()
+                expect(result.isSuccess && result.value).toMatchObject({
+                    values: ['true'],
                 })
             })
 
@@ -251,36 +133,14 @@ describe('Comparisons', () => {
                     },
                 ]
                 for (const { left, right, expected } of examples)
-                    describe(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] != [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
-                        const context = util.newSemanticContext()
-                        context.scope.addVariableDeclaration('left', {
-                            isImmutable: true,
-                            isolationLevel: ISOLATED,
-                            domain: IntegerRange.create(left),
-                        })
-                        context.scope.addVariableDeclaration('right', {
-                            isImmutable: true,
-                            isolationLevel: ISOLATED,
-                            domain: IntegerRange.create(right),
-                        })
-
-                        const expr = BinaryOperation.create({
-                            operator: '!=',
-                            left: util.variableRef('left'),
-                            right: util.variableRef('right'),
-                            span: util.someCodeSpan,
-                        })
-
-                        test('domain', () => {
-                            const result = expr.domain(context)
-                            expect(
-                                result.isSuccess || result.error.errors,
-                            ).toBeTrue()
-                            expect(
-                                result.isSuccess && result.value,
-                            ).toMatchObject({
-                                values: expect.arrayContaining(expected),
-                            })
+                    test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] != [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
+                        const result = Comparison.doesNotEqual.compute(
+                            IntegerRange.create(left),
+                            IntegerRange.create(right),
+                        )
+                        expect(result.isSuccess || result.error).toBeTrue()
+                        expect(result.isSuccess && result.value).toMatchObject({
+                            values: expect.arrayContaining(expected),
                         })
                     })
             })
@@ -288,48 +148,24 @@ describe('Comparisons', () => {
 
         describe('truthvalue operands', () => {
             it('evaluates equal truthvalue literals as a singleton false', () => {
-                const expr = BinaryOperation.create({
-                    operator: '!=',
-                    left: util.truthvalueLiteral('ambiguous'),
-                    right: util.truthvalueLiteral('ambiguous'),
-                    span: util.someCodeSpan,
-                })
-                test('domain', () => {
-                    const result = expr.domain(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['false'],
-                    })
-                })
-                test('currentValue', () => {
-                    const result = expr.currentValue(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['false'],
-                    })
+                const result = Comparison.doesNotEqual.compute(
+                    TruthvalueSet.singleton('ambiguous'),
+                    TruthvalueSet.singleton('ambiguous'),
+                )
+                expect(result.isSuccess || result.error).toBeTrue()
+                expect(result.isSuccess && result.value).toMatchObject({
+                    values: ['false'],
                 })
             })
 
             it('evaluates different truthvalue literals as a singleton true', () => {
-                const expr = BinaryOperation.create({
-                    operator: '!=',
-                    left: util.truthvalueLiteral('true'),
-                    right: util.truthvalueLiteral('ambiguous'),
-                    span: util.someCodeSpan,
-                })
-                test('domain', () => {
-                    const result = expr.domain(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['true'],
-                    })
-                })
-                test('currentValue', () => {
-                    const result = expr.currentValue(util.newSemanticContext())
-                    expect(result.isSuccess || result.error.errors).toBeTrue()
-                    expect(result.isSuccess && result.value).toMatchObject({
-                        values: ['true'],
-                    })
+                const result = Comparison.doesNotEqual.compute(
+                    TruthvalueSet.singleton('true'),
+                    TruthvalueSet.singleton('ambiguous'),
+                )
+                expect(result.isSuccess || result.error).toBeTrue()
+                expect(result.isSuccess && result.value).toMatchObject({
+                    values: ['true'],
                 })
             })
 
@@ -347,36 +183,14 @@ describe('Comparisons', () => {
                     },
                 ]
                 for (const { left, right, expected } of examples)
-                    describe(`[${left}] == [${right}] -> [${expected}]`, () => {
-                        const context = util.newSemanticContext()
-                        context.scope.addVariableDeclaration('left', {
-                            isImmutable: true,
-                            isolationLevel: ISOLATED,
-                            domain: TruthvalueSet.create(left),
-                        })
-                        context.scope.addVariableDeclaration('right', {
-                            isImmutable: true,
-                            isolationLevel: ISOLATED,
-                            domain: TruthvalueSet.create(right),
-                        })
-
-                        const expr = BinaryOperation.create({
-                            operator: '!=',
-                            left: util.variableRef('left'),
-                            right: util.variableRef('right'),
-                            span: util.someCodeSpan,
-                        })
-
-                        test('domain', () => {
-                            const result = expr.domain(context)
-                            expect(
-                                result.isSuccess || result.error.errors,
-                            ).toBeTrue()
-                            expect(
-                                result.isSuccess && result.value,
-                            ).toMatchObject({
-                                values: expect.arrayContaining(expected),
-                            })
+                    test(`[${left}] != [${right}] -> [${expected}]`, () => {
+                        const result = Comparison.doesNotEqual.compute(
+                            TruthvalueSet.create(left),
+                            TruthvalueSet.create(right),
+                        )
+                        expect(result.isSuccess || result.error).toBeTrue()
+                        expect(result.isSuccess && result.value).toMatchObject({
+                            values: expect.arrayContaining(expected),
                         })
                     })
             })
@@ -385,71 +199,35 @@ describe('Comparisons', () => {
 
     describe('Value Less Than (<)', () => {
         it('evaluates equal integer literals as a singleton false', () => {
-            const expr = BinaryOperation.create({
-                operator: '<',
-                left: util.integerLiteral(2),
-                right: util.integerLiteral(2),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
+            const result = Comparison.isLessThan.compute(
+                IntegerRange.singleton(2n),
+                IntegerRange.singleton(2n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['false'],
             })
         })
 
         it('evaluates different integer literals as a singleton true', () => {
-            const expr = BinaryOperation.create({
-                operator: '<',
-                left: util.integerLiteral(2),
-                right: util.integerLiteral(3),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
+            const result = Comparison.isLessThan.compute(
+                IntegerRange.singleton(2n),
+                IntegerRange.singleton(3n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['true'],
             })
         })
 
         it('evaluates different integer literals as a singleton false', () => {
-            const expr = BinaryOperation.create({
-                operator: '<',
-                left: util.integerLiteral(4),
-                right: util.integerLiteral(3),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
+            const result = Comparison.isLessThan.compute(
+                IntegerRange.singleton(4n),
+                IntegerRange.singleton(3n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['false'],
             })
         })
 
@@ -475,34 +253,14 @@ describe('Comparisons', () => {
                 },
             ]
             for (const { left, right, expected } of examples)
-                describe(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] < [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
-                    const context = util.newSemanticContext()
-                    context.scope.addVariableDeclaration('left', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(left),
-                    })
-                    context.scope.addVariableDeclaration('right', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(right),
-                    })
-
-                    const expr = BinaryOperation.create({
-                        operator: '<',
-                        left: util.variableRef('left'),
-                        right: util.variableRef('right'),
-                        span: util.someCodeSpan,
-                    })
-
-                    test('domain', () => {
-                        const result = expr.domain(context)
-                        expect(
-                            result.isSuccess || result.error.errors,
-                        ).toBeTrue()
-                        expect(result.isSuccess && result.value).toMatchObject({
-                            values: expect.arrayContaining(expected),
-                        })
+                test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] < [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
+                    const result = Comparison.isLessThan.compute(
+                        IntegerRange.create(left),
+                        IntegerRange.create(right),
+                    )
+                    expect(result.isSuccess || result.error).toBeTrue()
+                    expect(result.isSuccess && result.value).toMatchObject({
+                        values: expect.arrayContaining(expected),
                     })
                 })
         })
@@ -510,71 +268,35 @@ describe('Comparisons', () => {
 
     describe('Value Less Than Or Equal (<=)', () => {
         it('evaluates equal integer literals as a singleton true', () => {
-            const expr = BinaryOperation.create({
-                operator: '<=',
-                left: util.integerLiteral(2),
-                right: util.integerLiteral(2),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
+            const result = Comparison.isLessThanOrEqual.compute(
+                IntegerRange.singleton(2n),
+                IntegerRange.singleton(2n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['true'],
             })
         })
 
         it('evaluates different integer literals as a singleton true', () => {
-            const expr = BinaryOperation.create({
-                operator: '<=',
-                left: util.integerLiteral(2),
-                right: util.integerLiteral(3),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
+            const result = Comparison.isLessThanOrEqual.compute(
+                IntegerRange.singleton(2n),
+                IntegerRange.singleton(3n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['true'],
             })
         })
 
         it('evaluates different integer literals as a singleton false', () => {
-            const expr = BinaryOperation.create({
-                operator: '<=',
-                left: util.integerLiteral(4),
-                right: util.integerLiteral(3),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
+            const result = Comparison.isLessThanOrEqual.compute(
+                IntegerRange.singleton(4n),
+                IntegerRange.singleton(3n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['false'],
             })
         })
 
@@ -600,34 +322,14 @@ describe('Comparisons', () => {
                 },
             ]
             for (const { left, right, expected } of examples)
-                describe(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] <= [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
-                    const context = util.newSemanticContext()
-                    context.scope.addVariableDeclaration('left', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(left),
-                    })
-                    context.scope.addVariableDeclaration('right', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(right),
-                    })
-
-                    const expr = BinaryOperation.create({
-                        operator: '<=',
-                        left: util.variableRef('left'),
-                        right: util.variableRef('right'),
-                        span: util.someCodeSpan,
-                    })
-
-                    test('domain', () => {
-                        const result = expr.domain(context)
-                        expect(
-                            result.isSuccess || result.error.errors,
-                        ).toBeTrue()
-                        expect(result.isSuccess && result.value).toMatchObject({
-                            values: expect.arrayContaining(expected),
-                        })
+                test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] <= [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
+                    const result = Comparison.isLessThanOrEqual.compute(
+                        IntegerRange.create(left),
+                        IntegerRange.create(right),
+                    )
+                    expect(result.isSuccess || result.error).toBeTrue()
+                    expect(result.isSuccess && result.value).toMatchObject({
+                        values: expect.arrayContaining(expected),
                     })
                 })
         })
@@ -635,71 +337,35 @@ describe('Comparisons', () => {
 
     describe('Value Greater Than (>)', () => {
         it('evaluates equal integer literals as a singleton false', () => {
-            const expr = BinaryOperation.create({
-                operator: '>',
-                left: util.integerLiteral(2),
-                right: util.integerLiteral(2),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
+            const result = Comparison.isGreaterThan.compute(
+                IntegerRange.singleton(2n),
+                IntegerRange.singleton(2n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['false'],
             })
         })
 
         it('evaluates different integer literals as a singleton true', () => {
-            const expr = BinaryOperation.create({
-                operator: '>',
-                left: util.integerLiteral(4),
-                right: util.integerLiteral(3),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
+            const result = Comparison.isGreaterThan.compute(
+                IntegerRange.singleton(4n),
+                IntegerRange.singleton(3n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['true'],
             })
         })
 
         it('evaluates different integer literals as a singleton false', () => {
-            const expr = BinaryOperation.create({
-                operator: '>',
-                left: util.integerLiteral(2),
-                right: util.integerLiteral(3),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
+            const result = Comparison.isGreaterThan.compute(
+                IntegerRange.singleton(2n),
+                IntegerRange.singleton(3n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['false'],
             })
         })
 
@@ -725,34 +391,14 @@ describe('Comparisons', () => {
                 },
             ]
             for (const { left, right, expected } of examples)
-                describe(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] > [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
-                    const context = util.newSemanticContext()
-                    context.scope.addVariableDeclaration('left', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(left),
-                    })
-                    context.scope.addVariableDeclaration('right', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(right),
-                    })
-
-                    const expr = BinaryOperation.create({
-                        operator: '>',
-                        left: util.variableRef('left'),
-                        right: util.variableRef('right'),
-                        span: util.someCodeSpan,
-                    })
-
-                    test('domain', () => {
-                        const result = expr.domain(context)
-                        expect(
-                            result.isSuccess || result.error.errors,
-                        ).toBeTrue()
-                        expect(result.isSuccess && result.value).toMatchObject({
-                            values: expect.arrayContaining(expected),
-                        })
+                test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] > [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
+                    const result = Comparison.isGreaterThan.compute(
+                        IntegerRange.create(left),
+                        IntegerRange.create(right),
+                    )
+                    expect(result.isSuccess || result.error).toBeTrue()
+                    expect(result.isSuccess && result.value).toMatchObject({
+                        values: expect.arrayContaining(expected),
                     })
                 })
         })
@@ -760,71 +406,35 @@ describe('Comparisons', () => {
 
     describe('Value Greater Than Or Equal (<=)', () => {
         it('evaluates equal integer literals as a singleton true', () => {
-            const expr = BinaryOperation.create({
-                operator: '>=',
-                left: util.integerLiteral(2),
-                right: util.integerLiteral(2),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
+            const result = Comparison.isGreaterThanOrEqual.compute(
+                IntegerRange.singleton(2n),
+                IntegerRange.singleton(2n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['true'],
             })
         })
 
         it('evaluates different integer literals as a singleton true', () => {
-            const expr = BinaryOperation.create({
-                operator: '>=',
-                left: util.integerLiteral(4),
-                right: util.integerLiteral(3),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['true'],
-                })
+            const result = Comparison.isGreaterThanOrEqual.compute(
+                IntegerRange.singleton(4n),
+                IntegerRange.singleton(3n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['true'],
             })
         })
 
         it('evaluates different integer literals as a singleton false', () => {
-            const expr = BinaryOperation.create({
-                operator: '>=',
-                left: util.integerLiteral(2),
-                right: util.integerLiteral(3),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    values: ['false'],
-                })
+            const result = Comparison.isGreaterThanOrEqual.compute(
+                IntegerRange.singleton(2n),
+                IntegerRange.singleton(3n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                values: ['false'],
             })
         })
 
@@ -850,34 +460,14 @@ describe('Comparisons', () => {
                 },
             ]
             for (const { left, right, expected } of examples)
-                describe(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] >= [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
-                    const context = util.newSemanticContext()
-                    context.scope.addVariableDeclaration('left', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(left),
-                    })
-                    context.scope.addVariableDeclaration('right', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(right),
-                    })
-
-                    const expr = BinaryOperation.create({
-                        operator: '>=',
-                        left: util.variableRef('left'),
-                        right: util.variableRef('right'),
-                        span: util.someCodeSpan,
-                    })
-
-                    test('domain', () => {
-                        const result = expr.domain(context)
-                        expect(
-                            result.isSuccess || result.error.errors,
-                        ).toBeTrue()
-                        expect(result.isSuccess && result.value).toMatchObject({
-                            values: expect.arrayContaining(expected),
-                        })
+                test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] >= [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
+                    const result = Comparison.isGreaterThan.compute(
+                        IntegerRange.create(left),
+                        IntegerRange.create(right),
+                    )
+                    expect(result.isSuccess || result.error).toBeTrue()
+                    expect(result.isSuccess && result.value).toMatchObject({
+                        values: expect.arrayContaining(expected),
                     })
                 })
         })

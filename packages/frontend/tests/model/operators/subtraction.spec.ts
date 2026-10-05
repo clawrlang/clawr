@@ -1,33 +1,18 @@
-import { BinaryOperation } from '@/model/binary-operation'
-import { ISOLATED } from '@/model/isolation-level'
+import { Subtraction } from '@/model/operators'
 import { IntegerRange } from '@/model/value-set'
-import * as util from '@@/util'
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, it, test } from 'bun:test'
 
 describe('Subtraction', () => {
     describe('integer operands', () => {
-        describe('evaluates integer literals as a single value', () => {
-            const expr = BinaryOperation.create({
-                operator: '-',
-                left: util.integerLiteral(2),
-                right: util.integerLiteral(3),
-                span: util.someCodeSpan,
-            })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    min: -1n,
-                    max: -1n,
-                })
-            })
-            test('currentValue', () => {
-                const result = expr.currentValue(util.newSemanticContext())
-                expect(result.isSuccess || result.error.errors).toBeTrue()
-                expect(result.isSuccess && result.value).toMatchObject({
-                    min: -1n,
-                    max: -1n,
-                })
+        it('evaluates integer literals as a single value', () => {
+            const result = Subtraction.instance.compute(
+                IntegerRange.singleton(2n),
+                IntegerRange.singleton(3n),
+            )
+            expect(result.isSuccess || result.error).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                min: -1n,
+                max: -1n,
             })
         })
 
@@ -69,35 +54,15 @@ describe('Subtraction', () => {
                 },
             ]
             for (const { minuend, subtrahend, expected } of examples)
-                describe(`[${minuend.min ?? 'inf'},${minuend.max ?? 'inf'}]/[${subtrahend.min ?? 'inf'},${subtrahend.max ?? 'inf'}] == [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
-                    const context = util.newSemanticContext()
-                    context.scope.addVariableDeclaration('minuend', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(minuend),
-                    })
-                    context.scope.addVariableDeclaration('subtrahend', {
-                        isImmutable: true,
-                        isolationLevel: ISOLATED,
-                        domain: IntegerRange.create(subtrahend),
-                    })
-
-                    const expr = BinaryOperation.create({
-                        operator: '-',
-                        left: util.variableRef('minuend'),
-                        right: util.variableRef('subtrahend'),
-                        span: util.someCodeSpan,
-                    })
-
-                    test('domain', () => {
-                        const result = expr.domain(context)
-                        expect(
-                            result.isSuccess || result.error.errors,
-                        ).toBeTrue()
-                        expect(result.isSuccess && result.value).toMatchObject(
-                            expected,
-                        )
-                    })
+                test(`[${minuend.min ?? 'inf'},${minuend.max ?? 'inf'}] - [${subtrahend.min ?? 'inf'},${subtrahend.max ?? 'inf'}] -> [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
+                    const result = Subtraction.instance.compute(
+                        IntegerRange.create(minuend),
+                        IntegerRange.create(subtrahend),
+                    )
+                    expect(result.isSuccess || result.error).toBeTrue()
+                    expect(result.isSuccess && result.value).toMatchObject(
+                        expected,
+                    )
                 })
         })
     })

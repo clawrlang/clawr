@@ -53,6 +53,8 @@ Records so far:
 - [ADR-021](./adr-021.md): Binary Operators and Precedence
 - [ADR-022](./adr-022.md): `integer` Exponentiation
 - [ADR-023](./adr-023.md): `integer` Division
+- [ADR-024](./adr-024.md): The `integer` Combinatorial Explosion
+- [ADR-025](./adr-025.md): The `real` Datatype
 
 Draft ideas with no ADR number:
 
@@ -70,7 +72,6 @@ Draft ideas with no ADR number:
 - [XXX-X13](./drafts/x-13.md): List Comprehensions and Generators
 - [ADA Inspirations](./drafts/clawr-ada.md)
 - [Visibility](./drafts/visibility.md)
-- [The `integer` Combinatorial Explosion](./drafts/bigint.md)
 - [Debug Information in the CIR](./drafts/debug.md)
 - [Disposing `service`](./drafts/deinit.md)
 - [External Access Only Through `service`](./drafts/services.md)
@@ -80,3 +81,4 @@ Draft ideas with no ADR number:
 - [Published Schema](./drafts/published-schema.md)
 - [Miscellaneous](./drafts/misc.md)
 - [`helper` Keyword](./drafts/helper.md)
+- [Syntax and `trait`s](./drafts/syntax-traits.md)

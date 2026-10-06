@@ -1,5 +1,6 @@
 # TODO
 
+- Lower `BinaryOperation` in backend
 - Implement `BinaryOperation.toCIRExpression()`
 - `real` operands
 
@@ -22,14 +23,6 @@
 - Fields are private (only accessible via `self`) — but `data` fields `MUST NOT` be private!
 - `data` fields `MUST NOT` have initial values nor be `const`
 - fields with initial value should be able to skip/infer value-set
-
-## Traits in stdlib
-
-- `Equatable`
-- `HashEquatable`
-- `HasStringRepresentation`
-- `Identifiable`
-- `Ordered`
 
 ## Function Parameters — Semantic Model
 

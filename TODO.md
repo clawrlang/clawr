@@ -11,8 +11,8 @@
 - Make 'self' a reserved identifier
 - Make `FunctionCall` support methods
   - [x] direct
-  - inherited
-  - conformance
+  - [ ] inherited
+  - [ ] conformance
 
 ### Frontend Semantic/Static Analysis
 

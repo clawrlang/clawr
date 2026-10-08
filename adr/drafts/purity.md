@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# ADR-X03: Nested Functions and Lambdas
+# Purity
 
 [ADRs](../README.md)
 
@@ -14,6 +14,11 @@
 ## Context
 
 ## Decision
+
+Pure functions and `FunctionCall`
+
+- Mark as pure or impure
+- Make `currentValue()` return a subset (if pure) depending on input values
 
 ## Rationale
 

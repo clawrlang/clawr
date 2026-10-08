@@ -58,18 +58,18 @@ Records so far:
 
 Draft ideas with no ADR number:
 
-- [XXX-X01](./drafts/x-1.md): `subset`
-- [XXX-X02](./drafts/x-2.md): Multi-Module Programs and Libraries
-- [XXX-X03](./drafts/x-3.md): Nested Functions and Lambdas
-- [XXX-X04](./drafts/x-4.md): Discard Label `_`
-- [XXX-X05](./drafts/x-5.md): Spread Operator
-- [XXX-X06](./drafts/x-6.md): Varargs Functions
-- [XXX-X07](./drafts/x-7.md): Threads and Processes
-- [XXX-X08](./drafts/x-8.md): Purity
-- [XXX-X10](./drafts/x-10.md): Unions and Enumerated Types
-- [XXX-X11](./drafts/x-11.md): Ternary Fields on Binary Hardware
-- [XXX-X12](./drafts/x-12.md): Real Numbers
-- [XXX-X13](./drafts/x-13.md): List Comprehensions and Generators
+- [`subset`](./drafts/subset.md)
+- [Multi-Module Programs and Libraries](./drafts/multi-module.md)
+- [Nested Functions and Lambdas](./drafts/lambdas.md)
+- [Discard Label `_`](./drafts/discard-label.md)
+- [Spread Operator](./drafts/spread-operator.md)
+- [Varargs Functions](./drafts/varargs.md)
+- [Threads and Processes](./drafts/threads.md)
+- [Purity](./drafts/purity.md)
+- [Unions and Enumerated Types](./drafts/union-enum.md)
+- [Ternary Fields on Binary Hardware](./drafts/fields.md)
+- [Unconstrained `real`](./drafts/unconstrained-real.md)
+- [List Comprehensions and Generators](./drafts/list-comprehension.md)
 - [ADA Inspirations](./drafts/clawr-ada.md)
 - [Visibility](./drafts/visibility.md)
 - [Debug Information in the CIR](./drafts/debug.md)

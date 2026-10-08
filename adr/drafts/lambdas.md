@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# ADR-X06: Varargs Functions
+# Nested Functions and Lambdas
 
 [ADRs](../README.md)
 
@@ -14,8 +14,6 @@
 ## Context
 
 ## Decision
-
-Allow `...` parameter declarations (varargs).
 
 ## Rationale
 

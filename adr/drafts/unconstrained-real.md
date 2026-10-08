@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# ADR-X12: Real Numbers
+# Unconstrained `real`
 
 [ADRs](../README.md)
 
@@ -45,3 +45,5 @@ Store mathematical and physical constants, such as π and e, with 50 digits. If 
 - Mathematical constants cannot be stored with an infinite decimal expansion so what precision to store is unclear.
 
 ## Related ADRs
+
+- [ADR-025](../adr-025.md) (The `real` Datatype)

@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# ADR-X01: `subset`
+# `subset`
 
 [ADRs](../README.md)
 

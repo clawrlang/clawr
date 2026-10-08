@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# ADR-X08: Purity
+# Threads and Processes
 
 [ADRs](../README.md)
 
@@ -15,10 +15,13 @@
 
 ## Decision
 
-Pure functions and `FunctionCall`
+Async contexts (`service` and free functions only — should free functions be annotated to allow it?)
 
-- Mark as pure or impure
-- Make `currentValue()` return a subset (if pure) depending on input values
+- `launchAsync(_: () -> void)` background threads
+- Launch with parameters?
+- `concurrent` = safe to execute in `async` context
+- `async`/`await`
+- `fork()`
 
 ## Rationale
 

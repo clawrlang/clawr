@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# ADR-X11: Ternary Fields on Binary Hardware
+# Ternary Fields on Binary Hardware
 
 [ADRs](../README.md)
 

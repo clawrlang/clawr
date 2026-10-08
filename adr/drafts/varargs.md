@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# ADR-X05: Spread Operator
+# Varargs Functions
 
 [ADRs](../README.md)
 
@@ -15,11 +15,7 @@
 
 ## Decision
 
-Allow spread operator in arrays, `data` literals and maybe even function calls (for varargs)
-
-Replace `copy(of:)` with `{...value}` as the recommended way to duplicate `data` structures?
-
-Keep `copy(of:)` around. It is necessary for `object` and `service` types.
+Allow `...` parameter declarations (varargs).
 
 ## Rationale
 

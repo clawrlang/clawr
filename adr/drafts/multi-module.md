@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# ADR-X02: Multi-Module Programs and Libraries
+# Multi-Module Programs and Libraries
 
 [ADRs](../README.md)
 

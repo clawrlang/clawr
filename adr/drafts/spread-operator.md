@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# ADR-X07: Threads and Processes
+# Spread Operator
 
 [ADRs](../README.md)
 
@@ -15,13 +15,11 @@
 
 ## Decision
 
-Async contexts (`service` and free functions only — should free functions be annotated to allow it?)
+Allow spread operator in arrays, `data` literals and maybe even function calls (for varargs)
 
-- `launchAsync(_: () -> void)` background threads
-- Launch with parameters?
-- `concurrent` = safe to execute in `async` context
-- `async`/`await`
-- `fork()`
+Replace `copy(of:)` with `{...value}` as the recommended way to duplicate `data` structures?
+
+Keep `copy(of:)` around. It is necessary for `object` and `service` types.
 
 ## Rationale
 

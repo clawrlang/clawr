@@ -1,8 +1,8 @@
 import { TokenStream } from '@/lexer'
-import { DataDeclaration, DataField } from '@/model/data-declaration'
+import { DataDeclaration, Property } from '@/model/data-declaration'
 import { TypeName } from '@/model/type-name'
 import { Context } from '@/parser'
-import { DataFieldParser } from '@/parser/data-field-parser'
+import { PropertyParser } from '@/parser/property-parser'
 
 export class DataDeclarationParser {
     private constructor(private context: Context) {}
@@ -16,20 +16,20 @@ export class DataDeclarationParser {
     }
 
     parse(stream: TokenStream): DataDeclaration {
-        const fieldParser = DataFieldParser.create(this.context)
+        const propertyParser = PropertyParser.create(this.context)
 
         stream.expect('KEYWORD', 'data')
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
         stream.expect('PUNCTUATION', '{')
-        const fields: DataField[] = []
+        const properties: Property[] = []
         while (!stream.isNext('PUNCTUATION', '}')) {
-            fields.push(fieldParser.parse(stream))
+            properties.push(propertyParser.parse(stream))
         }
         stream.expect('PUNCTUATION', '}')
         return DataDeclaration.create({
             name: TypeName.create({ name }),
-            fields,
+            properties: properties,
         })
     }
 }

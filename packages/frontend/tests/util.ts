@@ -1,8 +1,8 @@
 import { Context, Expression } from '@/model'
 import { decorateDomain } from '@/model/domain-declaration'
-import { FieldReference } from '@/model/field-reference'
 import { ISOLATED } from '@/model/isolation-level'
 import { IntegerLiteral, TruthValueLiteral } from '@/model/literals'
+import { PropertyReference } from '@/model/property-reference'
 import { Scope } from '@/model/scope'
 import { TypeName } from '@/model/type-name'
 import { IntegerRange, truthvalue, ValueSet } from '@/model/value-set'
@@ -27,8 +27,8 @@ export const someIntegerVariable = {
     domain: IntegerRange.unconstrained(),
 }
 
-export const someFieldDeclConfig = {
-    name: 'someField',
+export const somePropertyDeclConfig = {
+    name: 'someProperty',
     isImmutable: false,
     isolationLevel: ISOLATED,
     domain: decorateDomain(IntegerRange.unconstrained(), {
@@ -41,7 +41,7 @@ export const someObjectDeclConfig = {
     initializers: [],
     mutating: [],
     readonly: [],
-    fields: [],
+    properties: [],
     span: someCodeSpan,
 }
 
@@ -74,23 +74,23 @@ export function variableRef(name: string) {
     return VariableReference.create({ name, span: someCodeSpan })
 }
 
-export function isolatedFieldRef(object: Expression, field: string) {
-    return FieldReference.create({
+export function isolatedPropertyRef(object: Expression, property: string) {
+    return PropertyReference.create({
         object,
-        field,
+        property,
         operator: '.',
         span: someCodeSpan,
-        fieldSpan: someCodeSpan,
+        propertySpan: someCodeSpan,
     })
 }
 
-export function sharedFieldRef(object: Expression, field: string) {
-    return FieldReference.create({
+export function sharedPropertyRef(object: Expression, property: string) {
+    return PropertyReference.create({
         object,
-        field,
+        property,
         operator: '->',
         span: someCodeSpan,
-        fieldSpan: someCodeSpan,
+        propertySpan: someCodeSpan,
     })
 }
 

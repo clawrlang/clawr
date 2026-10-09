@@ -48,7 +48,9 @@ describe('FunctionDeclaration (initializer)', () => {
         context.scope.addObjectDeclaration(
             ObjectDeclaration.create({
                 ...util.someObjectDeclConfig,
-                fields: [{ ...util.someFieldDeclConfig, name: 'field' }],
+                properties: [
+                    { ...util.somePropertyDeclConfig, name: 'property' },
+                ],
                 name: util.simpleTypeName('Object'),
             }),
         )
@@ -60,7 +62,9 @@ describe('FunctionDeclaration (initializer)', () => {
             implementation: {
                 kind: 'implicit-return',
                 expression: DataLiteral.create({
-                    fields: [{ name: 'field', value: util.integerLiteral(42) }],
+                    properties: [
+                        { name: 'property', value: util.integerLiteral(42) },
+                    ],
                     span: util.someCodeSpan,
                 }),
             },
@@ -77,7 +81,7 @@ describe('FunctionDeclaration (initializer)', () => {
                     kind: 'SELF_ASSIGN',
                     value: {
                         kind: 'DATA',
-                        fields: [
+                        properties: [
                             { value: { value: { max: '42', min: '42' } } },
                         ],
                     },
@@ -127,7 +131,7 @@ describe('FunctionDeclaration (initializer)', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyData'),
-                fields: [],
+                properties: [],
             }),
         )
         context.scope.addVariableDeclaration('myVar', {
@@ -164,7 +168,7 @@ describe('FunctionDeclaration (initializer)', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyData'),
-                fields: [],
+                properties: [],
             }),
         )
         context.scope.addVariableDeclaration('myVar', {
@@ -202,7 +206,7 @@ describe('FunctionDeclaration (initializer)', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyData'),
-                fields: [],
+                properties: [],
             }),
         )
         context.scope.addVariableDeclaration('myVar', {
@@ -251,7 +255,7 @@ describe('FunctionDeclaration (initializer)', () => {
             implementation: {
                 kind: 'implicit-return',
                 expression: DataLiteral.create({
-                    fields: [],
+                    properties: [],
                     span: util.someCodeSpan,
                 }),
             },
@@ -278,9 +282,9 @@ describe('FunctionDeclaration (initializer)', () => {
             ObjectDeclaration.create({
                 ...util.someObjectDeclConfig,
                 name: util.simpleTypeName('Object'),
-                fields: [
+                properties: [
                     {
-                        name: 'field',
+                        name: 'property',
                         isImmutable: false,
                         isolationLevel: ISOLATED,
                         domain: util.spannedDomain(
@@ -306,7 +310,9 @@ describe('FunctionDeclaration (initializer)', () => {
             implementation: {
                 kind: 'implicit-return',
                 expression: DataLiteral.create({
-                    fields: [{ name: 'field', value: util.variableRef('x') }],
+                    properties: [
+                        { name: 'property', value: util.variableRef('x') },
+                    ],
                     span: util.someCodeSpan,
                 }),
             },
@@ -318,9 +324,9 @@ describe('FunctionDeclaration (initializer)', () => {
                 kind: 'SELF_ASSIGN',
                 value: {
                     kind: 'DATA',
-                    fields: [
+                    properties: [
                         {
-                            name: 'field',
+                            name: 'property',
                             value: {
                                 kind: 'VARIABLE_REF',
                                 name: 'x',
@@ -346,7 +352,9 @@ describe('FunctionDeclaration (initializer)', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [{ ...util.someFieldDeclConfig, name: 'field1' }],
+                    properties: [
+                        { ...util.somePropertyDeclConfig, name: 'property1' },
+                    ],
                 }),
             )
 
@@ -367,9 +375,9 @@ describe('FunctionDeclaration (initializer)', () => {
                                 }),
                             ),
                             initialValue: DataLiteral.create({
-                                fields: [
+                                properties: [
                                     {
-                                        name: 'field1',
+                                        name: 'property1',
                                         value: util.integerLiteral(42),
                                     },
                                 ],
@@ -397,7 +405,9 @@ describe('FunctionDeclaration (initializer)', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [{ ...util.someFieldDeclConfig, name: 'field1' }],
+                    properties: [
+                        { ...util.somePropertyDeclConfig, name: 'property1' },
+                    ],
                 }),
             )
 
@@ -421,9 +431,9 @@ describe('FunctionDeclaration (initializer)', () => {
                                 }),
                             ),
                             initialValue: DataLiteral.create({
-                                fields: [
+                                properties: [
                                     {
-                                        name: 'field1',
+                                        name: 'property1',
                                         value: util.integerLiteral(42),
                                     },
                                 ],
@@ -455,7 +465,7 @@ describe('FunctionDeclaration (initializer)', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [],
+                    properties: [],
                 }),
             )
 
@@ -483,7 +493,7 @@ describe('FunctionDeclaration (initializer)', () => {
                                 }),
                             ),
                             initialValue: DataLiteral.create({
-                                fields: [],
+                                properties: [],
                                 span: util.someCodeSpan,
                             }),
                         }),

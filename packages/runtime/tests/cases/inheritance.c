@@ -11,9 +11,9 @@
 //     height: integer
 // }
 // ```
-typedef struct Prismˇfields {
+typedef struct Prismˇproperties {
   int height;
-} Prismˇfields;
+} Prismˇproperties;
 typedef struct Prism {
   __rc_header header;
   int height;
@@ -32,7 +32,7 @@ typedef struct Prismˇvtable {
 Prism *Prism˛new_height(void *self, int height) {
   // Clawr: `self = { height }`
   memcpy(((__rc_header *)self) + 1,
-         &(Prismˇfields){
+         &(Prismˇproperties){
              .height = height,
          },
          sizeof(Prism) - sizeof(__rc_header));
@@ -52,18 +52,18 @@ int Prism·volume(Prism *self) {
 //     depth: integer
 // }
 // ```
-typedef struct RectBlockˇfields {
+typedef struct RectBlockˇproperties {
   int width;
   int depth;
-} RectBlockˇfields;
+} RectBlockˇproperties;
 typedef struct RectBlock {
   Prism super;
-  RectBlockˇfields fields;
+  RectBlockˇproperties properties;
 } RectBlock;
 
 // Clawr: `func area() => self.width * self.depth`
 int RectBlock·area(RectBlock *self) {
-  return self->fields.width * self->fields.depth;
+  return self->properties.width * self->properties.depth;
 }
 
 static __type_info RectBlockˇtype = {
@@ -80,13 +80,13 @@ static __type_info RectBlockˇtype = {
 // RectBlock`
 RectBlock *RectBlock¸new_width_depth_height(int width, int depth, int height) {
   RectBlock *result = allocInitRC(RectBlock, 0, __rc_ISOLATED);
-  memcpy(&result->fields,
-         &(RectBlockˇfields){
+  memcpy(&result->properties,
+         &(RectBlockˇproperties){
              .width = width,
              .depth = depth,
 
          },
-         sizeof(RectBlockˇfields));
+         sizeof(RectBlockˇproperties));
   Prism˛new_height(result, height);
   return result;
 }

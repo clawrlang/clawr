@@ -1,9 +1,9 @@
-import { FieldReference } from '@/model/field-reference'
 import {
     AnyIsolationLevel,
     IsolationLevel,
     UNIQUE,
 } from '@/model/isolation-level'
+import { PropertyReference } from '@/model/property-reference'
 import { Scope } from '@/model/scope'
 import { ValueSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
@@ -47,6 +47,8 @@ export interface Declaration {
 }
 export function isStorage(
     value: any,
-): value is VariableReference | FieldReference {
-    return value instanceof VariableReference || value instanceof FieldReference
+): value is VariableReference | PropertyReference {
+    return (
+        value instanceof VariableReference || value instanceof PropertyReference
+    )
 }

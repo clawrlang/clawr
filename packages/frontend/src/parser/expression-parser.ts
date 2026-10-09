@@ -1,10 +1,10 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { BinaryOperation } from '@/model/binary-operation'
-import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral, TruthValueLiteral } from '@/model/literals'
 import { Comparison } from '@/model/operators'
+import { PropertyReference } from '@/model/property-reference'
 import { VariableReference } from '@/model/variable-reference'
 import { Context } from '@/parser'
 import { FunctionArgumentsParser } from '@/parser/function-arguments-parser'
@@ -157,11 +157,11 @@ export class ExpressionParser {
                     continue
                 }
 
-                if (expression instanceof FieldReference) {
+                if (expression instanceof PropertyReference) {
                     const { arguments: args, end } =
                         this.argsParser.parse(stream)
                     expression = FunctionCall.create({
-                        baseName: expression.field,
+                        baseName: expression.property,
                         recipient: expression.object,
                         arguments: args,
                         span: {
@@ -177,18 +177,18 @@ export class ExpressionParser {
 
             if (stream.isNext('OPERATOR', '.', '->')) {
                 const operator = stream.expect('OPERATOR', '.', '->').operator
-                const fieldToken = stream.expect('IDENTIFIER')
-                expression = FieldReference.create({
+                const propertyToken = stream.expect('IDENTIFIER')
+                expression = PropertyReference.create({
                     object: expression,
                     operator,
-                    field: fieldToken.identifier,
+                    property: propertyToken.identifier,
                     span: {
                         start: expression.span.start,
-                        end: fieldToken.end,
+                        end: propertyToken.end,
                     },
-                    fieldSpan: {
-                        start: fieldToken.start,
-                        end: fieldToken.end,
+                    propertySpan: {
+                        start: propertyToken.start,
+                        end: propertyToken.end,
                     },
                 })
                 continue

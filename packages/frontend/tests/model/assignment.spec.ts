@@ -1,11 +1,11 @@
 import { Assignment } from '@/model/assignment'
 import { DataDeclaration } from '@/model/data-declaration'
-import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { DataLiteral, IntegerLiteral } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
+import { PropertyReference } from '@/model/property-reference'
 import { IntegerRange, RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import * as util from '@@/util'
@@ -43,21 +43,25 @@ describe('Assignment', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyData'),
-                fields: [{ ...util.someFieldDeclConfig, name: 'field' }],
+                properties: [
+                    { ...util.somePropertyDeclConfig, name: 'property' },
+                ],
             }),
         )
         context.scope.addVariableDeclaration('x', {
             ...util.someIntegerVariable,
             domain: RCTypeSet.create({
                 type: util.simpleTypeName('MyData'),
-                fields: { field: IntegerRange.singleton(12n) },
+                properties: { property: IntegerRange.singleton(12n) },
             }),
         })
 
         const assignment = Assignment.create({
             target: util.variableRef('x'),
             value: DataLiteral.create({
-                fields: [{ name: 'field', value: util.integerLiteral(1) }],
+                properties: [
+                    { name: 'property', value: util.integerLiteral(1) },
+                ],
                 span: util.someCodeSpan,
             }),
             span: util.someCodeSpan,
@@ -70,9 +74,9 @@ describe('Assignment', () => {
                 kind: 'ASSIGN',
                 target: { kind: 'VARIABLE_REF', name: 'x' },
                 value: {
-                    fields: [
+                    properties: [
                         {
-                            name: 'field',
+                            name: 'property',
                             domain: { min: '1', max: '1' },
                             value: {
                                 kind: 'INTEGER_LITERAL',
@@ -86,23 +90,26 @@ describe('Assignment', () => {
     })
 
     describe('injects RELEASE/RETAIN statements', () => {
-        test('for a FieldReference', () => {
+        test('for a PropertyReference', () => {
             const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('InnerType'),
-                    fields: [
-                        { ...util.someFieldDeclConfig, name: 'innerField' },
+                    properties: [
+                        {
+                            ...util.somePropertyDeclConfig,
+                            name: 'innerProperty',
+                        },
                     ],
                 }),
             )
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('OuterType'),
-                    fields: [
+                    properties: [
                         {
-                            ...util.someFieldDeclConfig,
-                            name: 'field',
+                            ...util.somePropertyDeclConfig,
+                            name: 'property',
                             domain: util.spannedDomain(
                                 RCTypeSet.create({
                                     type: util.simpleTypeName('InnerType'),
@@ -127,7 +134,10 @@ describe('Assignment', () => {
 
             const assignment = Assignment.create({
                 target: util.variableRef('foo'),
-                value: util.isolatedFieldRef(util.variableRef('bar'), 'field'),
+                value: util.isolatedPropertyRef(
+                    util.variableRef('bar'),
+                    'property',
+                ),
                 span: util.someCodeSpan,
             })
 
@@ -151,9 +161,9 @@ describe('Assignment', () => {
                     value: {
                         kind: 'RETAIN',
                         object: {
-                            kind: 'FIELD_REF',
+                            kind: 'PROPERTY_REF',
                             object: { kind: 'VARIABLE_REF', name: 'bar' },
-                            field: 'field',
+                            property: 'property',
                         },
                     },
                 },
@@ -172,7 +182,7 @@ describe('Assignment', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyType'),
-                    fields: [],
+                    properties: [],
                 }),
             )
             context.scope.addVariableDeclaration('bar', {
@@ -231,7 +241,7 @@ describe('Assignment', () => {
     })
 
     describe('outputs an initializer literal as CALL', () => {
-        test('for a FieldReference', () => {
+        test('for a PropertyReference', () => {
             const context = util.newSemanticContext()
             context.scope.rootScope.addObjectDeclaration(
                 ObjectDeclaration.create({
@@ -250,10 +260,10 @@ describe('Assignment', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [
+                    properties: [
                         {
-                            ...util.someFieldDeclConfig,
-                            name: 'field',
+                            ...util.somePropertyDeclConfig,
+                            name: 'property',
                             domain: util.spannedDomain(
                                 RCTypeSet.create({
                                     type: util.simpleTypeName('MyType'),
@@ -271,14 +281,17 @@ describe('Assignment', () => {
             })
 
             const assignment = Assignment.create({
-                target: util.isolatedFieldRef(util.variableRef('x'), 'field'),
+                target: util.isolatedPropertyRef(
+                    util.variableRef('x'),
+                    'property',
+                ),
                 value: DataLiteral.create({
                     initializerCall: FunctionCall.create({
                         baseName: 'new',
                         arguments: [],
                         span: util.someCodeSpan,
                     }),
-                    fields: [],
+                    properties: [],
                     span: util.someCodeSpan,
                 }),
                 span: util.someCodeSpan,
@@ -290,10 +303,10 @@ describe('Assignment', () => {
                 {
                     kind: 'ASSIGN',
                     target: {
-                        field: 'field',
+                        property: 'property',
                         object: { name: 'x' },
                     },
-                    value: { fields: [] },
+                    value: { properties: [] },
                 },
                 {
                     kind: 'CALL',
@@ -305,8 +318,8 @@ describe('Assignment', () => {
                     receiver: {
                         dispatch: 'direct',
                         object: {
-                            kind: 'FIELD_REF',
-                            field: 'field',
+                            kind: 'PROPERTY_REF',
+                            property: 'property',
                             object: { name: 'x' },
                         },
                     },
@@ -345,7 +358,7 @@ describe('Assignment', () => {
                         arguments: [],
                         span: util.someCodeSpan,
                     }),
-                    fields: [],
+                    properties: [],
                     span: util.someCodeSpan,
                 }),
                 span: util.someCodeSpan,
@@ -356,7 +369,7 @@ describe('Assignment', () => {
                 {
                     kind: 'ASSIGN',
                     target: { name: 'x' },
-                    value: { fields: [] },
+                    value: { properties: [] },
                 },
                 {
                     kind: 'CALL',
@@ -379,7 +392,9 @@ describe('Assignment', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyType'),
-                fields: [{ ...util.someFieldDeclConfig, name: 'field' }],
+                properties: [
+                    { ...util.somePropertyDeclConfig, name: 'property' },
+                ],
             }),
         )
         context.scope.addVariableDeclaration('foo', {
@@ -390,7 +405,10 @@ describe('Assignment', () => {
         })
 
         const assignment = Assignment.create({
-            target: util.isolatedFieldRef(util.variableRef('foo'), 'field'),
+            target: util.isolatedPropertyRef(
+                util.variableRef('foo'),
+                'property',
+            ),
             value: util.integerLiteral(42),
             span: util.someCodeSpan,
         })
@@ -413,7 +431,7 @@ describe('Assignment', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyType'),
-                fields: [],
+                properties: [],
             }),
         )
         context.scope.rootScope.addFunctionDeclaration(
@@ -503,7 +521,7 @@ describe('Assignment', () => {
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
                         name: util.simpleTypeName('MyType'),
-                        fields: [],
+                        properties: [],
                     }),
                 )
                 context.scope.addVariableDeclaration('target', {
@@ -546,12 +564,14 @@ describe('Assignment', () => {
         }
     })
 
-    it('throws if the target field is effectively const (ISOLATED)', () => {
+    it('throws if the target property is effectively const (ISOLATED)', () => {
         const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyType'),
-                fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
+                properties: [
+                    { ...util.somePropertyDeclConfig, name: 'myProperty' },
+                ],
             }),
         )
         context.scope.addVariableDeclaration('x', {
@@ -563,15 +583,15 @@ describe('Assignment', () => {
         })
 
         const assignment = Assignment.create({
-            target: FieldReference.create({
+            target: PropertyReference.create({
                 object: util.variableRef('x'),
                 operator: '.',
-                field: 'myField',
+                property: 'myProperty',
                 span: {
                     start: { line: 1, column: 3 },
                     end: { line: 1, column: 4 },
                 },
-                fieldSpan: util.someCodeSpan,
+                propertySpan: util.someCodeSpan,
             }),
             value: util.integerLiteral(42),
             span: util.someCodeSpan,
@@ -581,7 +601,7 @@ describe('Assignment', () => {
         expect(result.isError && result.error.errors).toMatchObject([
             {
                 message:
-                    'Cannot mutate field myField of a reference type object',
+                    'Cannot mutate property myProperty of a reference type object',
                 span: {
                     start: { line: 1, column: 3 },
                     end: { line: 1, column: 4 },
@@ -590,12 +610,14 @@ describe('Assignment', () => {
         ])
     })
 
-    it('throws if the target field is effectively const (UNKNOWN isolation level)', () => {
+    it('throws if the target property is effectively const (UNKNOWN isolation level)', () => {
         const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyType'),
-                fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
+                properties: [
+                    { ...util.somePropertyDeclConfig, name: 'myProperty' },
+                ],
             }),
         )
         context.scope.addVariableDeclaration('x', {
@@ -607,15 +629,15 @@ describe('Assignment', () => {
         })
 
         const assignment = Assignment.create({
-            target: FieldReference.create({
+            target: PropertyReference.create({
                 object: util.variableRef('x'),
                 operator: '.',
-                field: 'myField',
+                property: 'myProperty',
                 span: {
                     start: { line: 1, column: 3 },
                     end: { line: 1, column: 4 },
                 },
-                fieldSpan: util.someCodeSpan,
+                propertySpan: util.someCodeSpan,
             }),
             value: IntegerLiteral.create({
                 value: 42n,
@@ -628,7 +650,7 @@ describe('Assignment', () => {
         expect(result.isError && result.error.errors).toMatchObject([
             {
                 message:
-                    'Cannot mutate field myField of a reference type object',
+                    'Cannot mutate property myProperty of a reference type object',
                 span: {
                     start: { line: 1, column: 3 },
                     end: { line: 1, column: 4 },
@@ -649,8 +671,11 @@ describe('Assignment', () => {
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
                         name: util.simpleTypeName('MyType'),
-                        fields: [
-                            { ...util.someFieldDeclConfig, name: 'myField' },
+                        properties: [
+                            {
+                                ...util.somePropertyDeclConfig,
+                                name: 'myProperty',
+                            },
                         ],
                     }),
                 )
@@ -690,7 +715,7 @@ describe('Assignment', () => {
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
                         name: util.simpleTypeName('MyType'),
-                        fields: [],
+                        properties: [],
                     }),
                 )
                 context.scope.addVariableDeclaration('target', {
@@ -748,12 +773,14 @@ describe('Assignment', () => {
             })
         })
 
-        test('field-reference', () => {
+        test('property-reference', () => {
             const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyType'),
-                    fields: [{ ...util.someFieldDeclConfig, name: 'field' }],
+                    properties: [
+                        { ...util.somePropertyDeclConfig, name: 'property' },
+                    ],
                 }),
             )
             context.scope.addVariableDeclaration('x', {
@@ -767,12 +794,15 @@ describe('Assignment', () => {
                 'x',
                 RCTypeSet.create({
                     type: util.simpleTypeName('MyType'),
-                    fields: {},
+                    properties: {},
                 }),
             )
 
             const assignment = Assignment.create({
-                target: util.sharedFieldRef(util.variableRef('x'), 'field'),
+                target: util.sharedPropertyRef(
+                    util.variableRef('x'),
+                    'property',
+                ),
                 value: util.integerLiteral(42),
                 span: util.someCodeSpan,
             })
@@ -780,7 +810,7 @@ describe('Assignment', () => {
             expect(result.isError && result.error.errors).toBeFalse()
             expect(context.scope.currentValue('x')).not.toBeNil()
             expect(context.scope.currentValue('x')).toMatchObject({
-                fields: { field: { min: 42n, max: 42n } },
+                properties: { property: { min: 42n, max: 42n } },
             })
         })
     })

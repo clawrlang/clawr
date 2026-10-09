@@ -11,20 +11,20 @@ import * as cir from '@clawr/cir'
 export class DataLiteral implements Expression {
     private constructor(
         readonly initializerCall: FunctionCall | undefined,
-        private readonly fields: FieldValue[],
+        private readonly properties: PropertyValue[],
         public readonly span: SourceCodeSpan,
     ) {}
 
     static create({
         initializerCall,
-        fields,
+        properties,
         span,
     }: {
         initializerCall?: FunctionCall
-        fields: FieldValue[]
+        properties: PropertyValue[]
         span: SourceCodeSpan
     }): DataLiteral {
-        return new DataLiteral(initializerCall, fields, span)
+        return new DataLiteral(initializerCall, properties, span)
     }
 
     isEffectivelyConst(): SuccessResult<true> {
@@ -51,30 +51,31 @@ export class DataLiteral implements Expression {
                 this.span,
             )
 
-        const fieldValuesResult = SemanticResult.collect(
-            this.fields.map((field) => {
-                const fieldDeclaration = decl.fields.find(
-                    (declaredField) => declaredField.name === field.name,
+        const propertyValuesResult = SemanticResult.collect(
+            this.properties.map((property) => {
+                const propertyDeclaration = decl.properties.find(
+                    (declaredProperty) =>
+                        declaredProperty.name === property.name,
                 )
-                if (!fieldDeclaration)
+                if (!propertyDeclaration)
                     return SemanticErrorResult.failure(
-                        `DataLiteral.currentValue: field ${field.name} not found on type ${explicitDomain.type.name}`,
+                        `DataLiteral.currentValue: property ${property.name} not found on type ${explicitDomain.type.name}`,
                         this.span,
                     )
-                return field.value.currentValue({
+                return property.value.currentValue({
                     ...context,
-                    explicitDomain: fieldDeclaration.domain,
+                    explicitDomain: propertyDeclaration.domain,
                 })
             }),
         )
-        if (fieldValuesResult.isError) return fieldValuesResult
-        const fieldValues = fieldValuesResult.value
+        if (propertyValuesResult.isError) return propertyValuesResult
+        const propertyValues = propertyValuesResult.value
         return Result.value(
             RCTypeSet.create({
                 type: decl.name,
-                fields: Object.fromEntries(
-                    fieldValues.map((value, index) => [
-                        this.fields[index].name,
+                properties: Object.fromEntries(
+                    propertyValues.map((value, index) => [
+                        this.properties[index].name,
                         value,
                     ]),
                 ),
@@ -92,8 +93,11 @@ export class DataLiteral implements Expression {
         return Result.value(
             RCTypeSet.create({
                 type: decl.name,
-                fields: Object.fromEntries(
-                    decl.fields.map((field) => [field.name, field.domain]),
+                properties: Object.fromEntries(
+                    decl.properties.map((property) => [
+                        property.name,
+                        property.domain,
+                    ]),
                 ),
             }),
         )
@@ -122,39 +126,42 @@ export class DataLiteral implements Expression {
                 `DataLiteral.toCIRExpression: target type ${explicitDomain.type.name} not found in scope`,
                 this.span,
             )
-        const fieldDeclarations = new Map(
-            targetType.fields.map((field) => [field.name, field]),
+        const propertyDeclarations = new Map(
+            targetType.properties.map((property) => [property.name, property]),
         )
 
-        const fieldValuesResult = SemanticResult.collect(
-            this.fields.map((field) => {
-                const fieldDeclaration = fieldDeclarations.get(field.name)
-                if (!fieldDeclaration)
+        const propertyValuesResult = SemanticResult.collect(
+            this.properties.map((property) => {
+                const propertyDeclaration = propertyDeclarations.get(
+                    property.name,
+                )
+                if (!propertyDeclaration)
                     return SemanticErrorResult.failure(
-                        `field ${field.name} not found on type ${explicitDomain.type.canonical()}`,
+                        `Property ${property.name} not found on type ${explicitDomain.type.canonical()}`,
                         this.span,
                     )
                 const nestedContext: ContextWithDomain = {
                     ...context,
-                    explicitDomain: fieldDeclaration.domain,
-                    isolationLevel: fieldDeclaration.isolationLevel,
+                    explicitDomain: propertyDeclaration.domain,
+                    isolationLevel: propertyDeclaration.isolationLevel,
                 }
-                const valueResult = field.value.toCIRExpression(nestedContext)
+                const valueResult =
+                    property.value.toCIRExpression(nestedContext)
                 if (valueResult.isError) return valueResult
                 return Result.value({
-                    name: field.name,
+                    name: property.name,
                     value: valueResult.value,
                     domain: valueResult.value.value,
                 })
             }),
         )
-        if (fieldValuesResult.isError) return fieldValuesResult
+        if (propertyValuesResult.isError) return propertyValuesResult
 
-        const fields = fieldValuesResult.value
+        const properties = propertyValuesResult.value
         return Result.value({
             kind: 'ALLOCATION',
             isolationLevel: context.isolationLevel!,
-            fields,
+            properties,
             value: {
                 type: 'rc-type',
                 ...explicitDomain.type.toCIR(),
@@ -163,7 +170,7 @@ export class DataLiteral implements Expression {
     }
 }
 
-type FieldValue = {
+type PropertyValue = {
     name: string
     value: Expression
 }

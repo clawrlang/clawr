@@ -19,7 +19,7 @@ export class DataLiteralParser {
     }
 
     parse(stream: TokenStream): DataLiteral {
-        const fields: DataLiteral['fields'] = []
+        const properties: DataLiteral['properties'] = []
         const startToken = stream.expect('PUNCTUATION', '{')
 
         const initializerCall = stream.attempt((clone) => {
@@ -33,7 +33,7 @@ export class DataLiteralParser {
         while (!stream.isNext('PUNCTUATION', '}')) {
             const key = stream.expect('IDENTIFIER').identifier
             stream.expect('PUNCTUATION', ':')
-            fields.push({
+            properties.push({
                 name: key,
                 value: this.expressionParser.parse(stream),
             })
@@ -45,7 +45,7 @@ export class DataLiteralParser {
         }
         const endToken = stream.expect('PUNCTUATION', '}')
         return DataLiteral.create({
-            fields,
+            properties,
             initializerCall,
             span: {
                 start: startToken.start,

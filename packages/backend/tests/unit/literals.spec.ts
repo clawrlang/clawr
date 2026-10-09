@@ -49,9 +49,9 @@ describe('Lowering Literals', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
                 isolationLevel: ISOLATED,
-                fields: [
+                properties: [
                     {
-                        name: 'field',
+                        name: 'property',
                         value: {
                             kind: 'VARIABLE_REF',
                             name: 'var',
@@ -63,16 +63,16 @@ describe('Lowering Literals', () => {
             }
             const result = lowerExpr(expr)
             expect(result).toContain('allocInitRC(MyData, 0,')
-            expect(result).toContain('.field = var')
+            expect(result).toContain('.property = var')
         })
 
         it('lowers as allocInitRC', () => {
             const expr: Expression = {
                 kind: 'ALLOCATION',
                 isolationLevel: ISOLATED,
-                fields: [
+                properties: [
                     {
-                        name: 'field',
+                        name: 'property',
                         value: {
                             kind: 'VARIABLE_REF',
                             name: 'var',
@@ -84,7 +84,7 @@ describe('Lowering Literals', () => {
             }
             const result = lowerExpr(expr)
             expect(result).toContain('allocInitRC(MyObject, 0')
-            expect(result).toContain('.field = var')
+            expect(result).toContain('.property = var')
         })
     })
 })

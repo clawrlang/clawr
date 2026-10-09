@@ -1,11 +1,11 @@
 import { TokenStream } from '@/lexer'
-import { DataField } from '@/model/data-declaration'
+import { Property } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
 import { Context } from '@/parser'
-import { DataFieldParser } from '@/parser/data-field-parser'
 import { FunctionDeclarationParser } from '@/parser/function-declaration-parser'
+import { PropertyParser } from '@/parser/property-parser'
 import { SourceError } from '@/tools'
 
 export class ObjectDeclarationParser {
@@ -39,18 +39,18 @@ export class ObjectDeclarationParser {
         const readonly = this.parseMethods(stream)
         let mutating: FunctionDeclaration[] | undefined
         let initializers: FunctionDeclaration[] | undefined
-        let fields: DataField[] | undefined
+        let properties: Property[] | undefined
 
         while (!stream.isNext('PUNCTUATION', '}')) {
             if (stream.isNext('KEYWORD', 'state')) {
                 const dataToken = stream.expect('KEYWORD', 'state')
                 stream.expect('PUNCTUATION', ':')
-                if (fields)
+                if (properties)
                     throw SourceError.create({
                         message: `Repeated state section`,
                         span: { ...dataToken },
                     })
-                fields = this.parseFields(stream)
+                properties = this.parseProperties(stream)
             }
             if (stream.isNext('KEYWORD', 'init')) {
                 const inheritanceToken = stream.expect('KEYWORD', 'init')
@@ -82,7 +82,7 @@ export class ObjectDeclarationParser {
             readonly,
             mutating: mutating ?? [],
             initializers: initializers ?? [],
-            fields: fields ?? [],
+            properties: properties ?? [],
             span: {
                 start: startToken.start,
                 end: endToken.end,
@@ -99,14 +99,14 @@ export class ObjectDeclarationParser {
         return methods
     }
 
-    private parseFields(stream: TokenStream) {
-        const fields: DataField[] = []
-        const fieldParser = DataFieldParser.create({})
+    private parseProperties(stream: TokenStream) {
+        const properties: Property[] = []
+        const propertyParser = PropertyParser.create({})
 
         while (!this.isSectionEnd(stream))
-            fields.push(fieldParser.parse(stream))
+            properties.push(propertyParser.parse(stream))
 
-        return fields
+        return properties
     }
 
     private isSectionEnd(stream: TokenStream) {

@@ -1,8 +1,8 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
-import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { IntegerLiteral, TruthValueLiteral } from '@/model/literals'
+import { PropertyReference } from '@/model/property-reference'
 import { VariableReference } from '@/model/variable-reference'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { describe, expect, it } from 'bun:test'
@@ -40,7 +40,7 @@ describe('Expression Parser', () => {
             }`
         const result = parseExpression(code)
         expect(result).toMatchObject({
-            fields: [
+            properties: [
                 { name: 'x', value: { value: { max: 42n, min: 42n } } },
                 { name: 'y', value: { value: { max: 17n, min: 17n } } },
             ],
@@ -54,24 +54,24 @@ describe('Expression Parser', () => {
         expect(variableRef).toBeInstanceOf(VariableReference)
     })
 
-    it('parses field lookup expressions', () => {
-        const input = 'myVar.field'
-        const fieldAccess = parseExpression(input)
-        expect(fieldAccess).toMatchObject({
+    it('parses property lookup expressions', () => {
+        const input = 'myVar.property'
+        const propertyAccess = parseExpression(input)
+        expect(propertyAccess).toMatchObject({
             object: { name: 'myVar' },
-            field: 'field',
+            property: 'property',
         })
-        expect(fieldAccess).toBeInstanceOf(FieldReference)
+        expect(propertyAccess).toBeInstanceOf(PropertyReference)
     })
 
-    it('parses field lookup expressions', () => {
-        const input = 'myVar->field1->field2'
-        const fieldAccess = parseExpression(input)
-        expect(fieldAccess).toMatchObject({
-            object: { object: { name: 'myVar' }, field: 'field1' },
-            field: 'field2',
+    it('parses property lookup expressions', () => {
+        const input = 'myVar->property1->property2'
+        const propertyAccess = parseExpression(input)
+        expect(propertyAccess).toMatchObject({
+            object: { object: { name: 'myVar' }, property: 'property1' },
+            property: 'property2',
         })
-        expect(fieldAccess).toBeInstanceOf(FieldReference)
+        expect(propertyAccess).toBeInstanceOf(PropertyReference)
     })
 
     it('parses a function call', () => {

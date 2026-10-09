@@ -80,25 +80,34 @@
           },
           "Storage": {
             "oneOf": [
-              { "$ref": "#/$defs/OmitFieldReferencevalue" },
-              { "$ref": "#/$defs/OmitVariableReferencevalue" }
+              { "$ref": "#/$defs/OmitVariableReferencevalue" },
+              { "$ref": "#/$defs/OmitpropertyReferencevalue" }
             ],
             "discriminator": {
               "mapping": {
-                "FIELD_REF": "#/components/schemas/OmitFieldReferencevalue",
+                "PROPERTY_REF": "#/components/schemas/OmitpropertyReferencevalue",
                 "VARIABLE_REF": "#/components/schemas/OmitVariableReferencevalue"
               },
               "propertyName": "kind"
             }
           },
-          "OmitFieldReferencevalue": {
+          "OmitVariableReferencevalue": {
             "type": "object",
             "properties": {
-              "kind": { "const": "FIELD_REF" },
-              "object": { "$ref": "#/$defs/Expression" },
-              "field": { "type": "string" }
+              "kind": { "const": "VARIABLE_REF" },
+              "name": { "type": "string" }
             },
-            "required": ["kind", "object", "field"],
+            "required": ["kind", "name"],
+            "additionalProperties": false
+          },
+          "OmitpropertyReferencevalue": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "PROPERTY_REF" },
+              "object": { "$ref": "#/$defs/Expression" },
+              "property": { "type": "string" }
+            },
+            "required": ["kind", "object", "property"],
             "additionalProperties": false
           },
           "Expression": {
@@ -106,13 +115,13 @@
               { "$ref": "#/$defs/FunctionCall__type" },
               { "$ref": "#/$defs/AsShared" },
               { "$ref": "#/$defs/Box" },
-              { "$ref": "#/$defs/FieldReference" },
               { "$ref": "#/$defs/IntegerLiteralbigint" },
               { "$ref": "#/$defs/MemoryAllocation" },
               { "$ref": "#/$defs/MemoryRetention" },
               { "$ref": "#/$defs/StringLiteral" },
               { "$ref": "#/$defs/TruthvalueLiteraltruthvalue" },
-              { "$ref": "#/$defs/VariableReference" }
+              { "$ref": "#/$defs/VariableReference" },
+              { "$ref": "#/$defs/propertyReference" }
             ],
             "discriminator": {
               "mapping": {
@@ -120,8 +129,8 @@
                 "AS_SHARED": "#/components/schemas/AsShared",
                 "BOX": "#/components/schemas/Box",
                 "CALL": "#/components/schemas/FunctionCall__type",
-                "FIELD_REF": "#/components/schemas/FieldReference",
                 "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint",
+                "PROPERTY_REF": "#/components/schemas/propertyReference",
                 "RETAIN": "#/components/schemas/MemoryRetention",
                 "STRING_LITERAL": "#/components/schemas/StringLiteral",
                 "TRUTHVALUE_LITERAL": "#/components/schemas/TruthvalueLiteraltruthvalue",
@@ -166,13 +175,13 @@
                 "oneOf": [
                   { "$ref": "#/$defs/AsShared__type-o2" },
                   { "$ref": "#/$defs/Box__type-o2" },
-                  { "$ref": "#/$defs/FieldReference__type-o2" },
                   { "$ref": "#/$defs/IntegerLiteralbigint__type-o2" },
                   { "$ref": "#/$defs/MemoryAllocation__type-o2" },
                   { "$ref": "#/$defs/MemoryRetention__type-o2" },
                   { "$ref": "#/$defs/TruthvalueLiteraltruthvalue__type-o2" },
                   { "$ref": "#/$defs/StringLiteral__type-o2" },
                   { "$ref": "#/$defs/VariableReference__type-o2" },
+                  { "$ref": "#/$defs/propertyReference__type-o2" },
                   { "$ref": "#/$defs/FunctionCall__type__type-o2" }
                 ],
                 "discriminator": {
@@ -181,8 +190,8 @@
                     "AS_SHARED": "#/components/schemas/AsShared__type-o2",
                     "BOX": "#/components/schemas/Box__type-o2",
                     "CALL": "#/components/schemas/FunctionCall__type__type-o2",
-                    "FIELD_REF": "#/components/schemas/FieldReference__type-o2",
                     "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint__type-o2",
+                    "PROPERTY_REF": "#/components/schemas/propertyReference__type-o2",
                     "RETAIN": "#/components/schemas/MemoryRetention__type-o2",
                     "STRING_LITERAL": "#/components/schemas/StringLiteral__type-o2",
                     "TRUTHVALUE_LITERAL": "#/components/schemas/TruthvalueLiteraltruthvalue__type-o2",
@@ -667,19 +676,142 @@
             "required": ["kind", "name", "methods", "type", "boxed"],
             "additionalProperties": false
           },
-          "FieldReference__type-o2": {
+          "IntegerLiteralbigint__type-o2": {
             "type": "object",
             "properties": {
-              "kind": { "const": "FIELD_REF" },
-              "object": { "$ref": "#/$defs/Expression" },
-              "field": { "type": "string" },
+              "kind": { "const": "INTEGER_LITERAL" },
+              "value": {
+                "$ref": "#/$defs/__type__type__typeInterfaceDeclaration"
+              }
+            },
+            "required": ["kind", "value"],
+            "additionalProperties": false
+          },
+          "__type__type__typeInterfaceDeclaration": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "INTERFACE_DECL" },
+              "name": { "type": "string" },
+              "namespace": { "type": "string" },
+              "methods": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/FunctionSignature" }
+              },
+              "type": { "const": "integer" },
+              "boxed": { "const": true },
+              "min": { "type": "string", "pattern": "^-?\\d+$" },
+              "max": { "type": "string", "pattern": "^-?\\d+$" }
+            },
+            "required": ["kind", "name", "methods", "type", "min", "max"],
+            "additionalProperties": false
+          },
+          "MemoryAllocation__type-o2": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "ALLOCATION" },
+              "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
+              "properties": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/__type-o1" }
+              },
+              "value": { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" }
+            },
+            "required": ["kind", "isolationLevel", "value"],
+            "additionalProperties": false
+          },
+          "IsolationLevel": {
+            "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
+          },
+          "__type-o1": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "value": { "$ref": "#/$defs/Expression" }
+            },
+            "required": ["name", "value"],
+            "additionalProperties": false
+          },
+          "MemoryRetention__type-o2": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "RETAIN" },
+              "object": { "$ref": "#/$defs/Storage" },
+              "value": { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" }
+            },
+            "required": ["kind", "object", "value"],
+            "additionalProperties": false
+          },
+          "TruthvalueLiteraltruthvalue__type-o2": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "TRUTHVALUE_LITERAL" },
+              "value": {
+                "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration"
+              }
+            },
+            "required": ["kind", "value"],
+            "additionalProperties": false
+          },
+          "TruthvalueSettruthvalueInterfaceDeclaration": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "INTERFACE_DECL" },
+              "name": { "type": "string" },
+              "namespace": { "type": "string" },
+              "methods": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/FunctionSignature" }
+              },
+              "type": { "const": "truthvalue" },
+              "boxed": { "const": true },
+              "values": {
+                "type": "array",
+                "prefixItems": [{ "$ref": "#/$defs/truthvalue" }],
+                "additionalItems": false
+              }
+            },
+            "required": ["kind", "name", "methods", "type", "values"],
+            "additionalProperties": false
+          },
+          "StringLiteral__type-o2": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "STRING_LITERAL" },
+              "value": {
+                "$ref": "#/$defs/StringSet__typeInterfaceDeclaration-o1"
+              }
+            },
+            "required": ["kind", "value"],
+            "additionalProperties": false
+          },
+          "StringSet__typeInterfaceDeclaration-o1": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "INTERFACE_DECL" },
+              "name": { "type": "string" },
+              "namespace": { "type": "string" },
+              "methods": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/FunctionSignature" }
+              },
+              "type": { "const": "string" },
+              "value": { "type": "string" }
+            },
+            "required": ["kind", "name", "methods", "type", "value"],
+            "additionalProperties": false
+          },
+          "VariableReference__type-o2": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "VARIABLE_REF" },
+              "name": { "type": "string" },
               "value": {
                 "oneOf": [
                   { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" },
                   { "$ref": "#/$defs/InterfaceSetInterfaceDeclaration" },
                   { "$ref": "#/$defs/StringSetInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration"
+                    "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration-o1"
                   },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o7"
@@ -693,6 +825,7 @@
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o4"
                   },
+                  { "$ref": "#/$defs/__type__type__typeInterfaceDeclaration" },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o3"
                   },
@@ -701,12 +834,11 @@
                   },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o1"
-                  },
-                  { "$ref": "#/$defs/__type__type__typeInterfaceDeclaration" }
+                  }
                 ]
               }
             },
-            "required": ["kind", "object", "field", "value"],
+            "required": ["kind", "name", "value"],
             "additionalProperties": false
           },
           "InterfaceSetInterfaceDeclaration": {
@@ -740,7 +872,7 @@
             "required": ["kind", "name", "methods", "type"],
             "additionalProperties": false
           },
-          "TruthvalueSettruthvalueInterfaceDeclaration": {
+          "TruthvalueSettruthvalueInterfaceDeclaration-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -840,30 +972,12 @@
               },
               "type": { "const": "integer" },
               "boxed": { "const": true },
-              "min": { "type": "string", "pattern": "^-?\\d+$" },
-              "max": { "type": "string", "pattern": "^-?\\d+$" }
-            },
-            "required": ["kind", "name", "methods", "type", "min", "max"],
-            "additionalProperties": false
-          },
-          "__type__type__typeInterfaceDeclaration-o2": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "INTERFACE_DECL" },
-              "name": { "type": "string" },
-              "namespace": { "type": "string" },
-              "methods": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/FunctionSignature" }
-              },
-              "type": { "const": "integer" },
-              "boxed": { "const": true },
               "min": { "type": "string", "pattern": "^-?\\d+$" }
             },
             "required": ["kind", "name", "methods", "type", "min"],
             "additionalProperties": false
           },
-          "__type__type__typeInterfaceDeclaration-o1": {
+          "__type__type__typeInterfaceDeclaration-o2": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -880,7 +994,7 @@
             "required": ["kind", "name", "methods", "type", "max"],
             "additionalProperties": false
           },
-          "__type__type__typeInterfaceDeclaration": {
+          "__type__type__typeInterfaceDeclaration-o1": {
             "type": "object",
             "properties": {
               "kind": { "const": "INTERFACE_DECL" },
@@ -896,124 +1010,19 @@
             "required": ["kind", "name", "methods", "type"],
             "additionalProperties": false
           },
-          "IntegerLiteralbigint__type-o2": {
+          "propertyReference__type-o2": {
             "type": "object",
             "properties": {
-              "kind": { "const": "INTEGER_LITERAL" },
-              "value": {
-                "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o3"
-              }
-            },
-            "required": ["kind", "value"],
-            "additionalProperties": false
-          },
-          "MemoryAllocation__type-o2": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "ALLOCATION" },
-              "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
-              "fields": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/__type-o1" }
-              },
-              "value": { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" }
-            },
-            "required": ["kind", "isolationLevel", "value"],
-            "additionalProperties": false
-          },
-          "IsolationLevel": {
-            "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
-          },
-          "__type-o1": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string" },
-              "value": { "$ref": "#/$defs/Expression" }
-            },
-            "required": ["name", "value"],
-            "additionalProperties": false
-          },
-          "MemoryRetention__type-o2": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "RETAIN" },
-              "object": { "$ref": "#/$defs/Storage" },
-              "value": { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" }
-            },
-            "required": ["kind", "object", "value"],
-            "additionalProperties": false
-          },
-          "TruthvalueLiteraltruthvalue__type-o2": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "TRUTHVALUE_LITERAL" },
-              "value": {
-                "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration-o1"
-              }
-            },
-            "required": ["kind", "value"],
-            "additionalProperties": false
-          },
-          "TruthvalueSettruthvalueInterfaceDeclaration-o1": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "INTERFACE_DECL" },
-              "name": { "type": "string" },
-              "namespace": { "type": "string" },
-              "methods": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/FunctionSignature" }
-              },
-              "type": { "const": "truthvalue" },
-              "boxed": { "const": true },
-              "values": {
-                "type": "array",
-                "prefixItems": [{ "$ref": "#/$defs/truthvalue" }],
-                "additionalItems": false
-              }
-            },
-            "required": ["kind", "name", "methods", "type", "values"],
-            "additionalProperties": false
-          },
-          "StringLiteral__type-o2": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "STRING_LITERAL" },
-              "value": {
-                "$ref": "#/$defs/StringSet__typeInterfaceDeclaration-o1"
-              }
-            },
-            "required": ["kind", "value"],
-            "additionalProperties": false
-          },
-          "StringSet__typeInterfaceDeclaration-o1": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "INTERFACE_DECL" },
-              "name": { "type": "string" },
-              "namespace": { "type": "string" },
-              "methods": {
-                "type": "array",
-                "items": { "$ref": "#/$defs/FunctionSignature" }
-              },
-              "type": { "const": "string" },
-              "value": { "type": "string" }
-            },
-            "required": ["kind", "name", "methods", "type", "value"],
-            "additionalProperties": false
-          },
-          "VariableReference__type-o2": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "VARIABLE_REF" },
-              "name": { "type": "string" },
+              "kind": { "const": "PROPERTY_REF" },
+              "object": { "$ref": "#/$defs/Expression" },
+              "property": { "type": "string" },
               "value": {
                 "oneOf": [
                   { "$ref": "#/$defs/RCTypeSetInterfaceDeclaration" },
                   { "$ref": "#/$defs/InterfaceSetInterfaceDeclaration" },
                   { "$ref": "#/$defs/StringSetInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration"
+                    "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration-o1"
                   },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o7"
@@ -1027,6 +1036,7 @@
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o4"
                   },
+                  { "$ref": "#/$defs/__type__type__typeInterfaceDeclaration" },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o3"
                   },
@@ -1035,12 +1045,11 @@
                   },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o1"
-                  },
-                  { "$ref": "#/$defs/__type__type__typeInterfaceDeclaration" }
+                  }
                 ]
               }
             },
-            "required": ["kind", "name", "value"],
+            "required": ["kind", "object", "property", "value"],
             "additionalProperties": false
           },
           "FunctionCall__type__type-o2": {
@@ -1073,7 +1082,7 @@
                   { "$ref": "#/$defs/InterfaceSetInterfaceDeclaration" },
                   { "$ref": "#/$defs/StringSetInterfaceDeclaration" },
                   {
-                    "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration"
+                    "$ref": "#/$defs/TruthvalueSettruthvalueInterfaceDeclaration-o1"
                   },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o7"
@@ -1087,6 +1096,7 @@
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o4"
                   },
+                  { "$ref": "#/$defs/__type__type__typeInterfaceDeclaration" },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o3"
                   },
@@ -1095,8 +1105,7 @@
                   },
                   {
                     "$ref": "#/$defs/__type__type__typeInterfaceDeclaration-o1"
-                  },
-                  { "$ref": "#/$defs/__type__type__typeInterfaceDeclaration" }
+                  }
                 ]
               }
             },
@@ -1110,13 +1119,13 @@
                 "oneOf": [
                   { "$ref": "#/$defs/AsShared__type-o1" },
                   { "$ref": "#/$defs/Box__type-o1" },
-                  { "$ref": "#/$defs/FieldReference__type-o1" },
                   { "$ref": "#/$defs/IntegerLiteralbigint__type-o1" },
                   { "$ref": "#/$defs/MemoryAllocation__type-o1" },
                   { "$ref": "#/$defs/MemoryRetention__type-o1" },
                   { "$ref": "#/$defs/TruthvalueLiteraltruthvalue__type-o1" },
                   { "$ref": "#/$defs/StringLiteral__type-o1" },
                   { "$ref": "#/$defs/VariableReference__type-o1" },
+                  { "$ref": "#/$defs/propertyReference__type-o1" },
                   { "$ref": "#/$defs/FunctionCall__type__type-o1" }
                 ],
                 "discriminator": {
@@ -1125,8 +1134,8 @@
                     "AS_SHARED": "#/components/schemas/AsShared__type-o1",
                     "BOX": "#/components/schemas/Box__type-o1",
                     "CALL": "#/components/schemas/FunctionCall__type__type-o1",
-                    "FIELD_REF": "#/components/schemas/FieldReference__type-o1",
                     "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint__type-o1",
+                    "PROPERTY_REF": "#/components/schemas/propertyReference__type-o1",
                     "RETAIN": "#/components/schemas/MemoryRetention__type-o1",
                     "STRING_LITERAL": "#/components/schemas/StringLiteral__type-o1",
                     "TRUTHVALUE_LITERAL": "#/components/schemas/TruthvalueLiteraltruthvalue__type-o1",
@@ -1171,17 +1180,6 @@
             "required": ["boxed", "type", "name"],
             "additionalProperties": false
           },
-          "FieldReference__type-o1": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "FIELD_REF" },
-              "object": { "$ref": "#/$defs/Expression" },
-              "field": { "type": "string" },
-              "value": { "$ref": "#/$defs/RCTypeSet" }
-            },
-            "required": ["kind", "object", "field", "value"],
-            "additionalProperties": false
-          },
           "IntegerLiteralbigint__type-o1": {
             "type": "object",
             "properties": {
@@ -1202,7 +1200,7 @@
             "properties": {
               "kind": { "const": "ALLOCATION" },
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
-              "fields": {
+              "properties": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type-o1" }
               },
@@ -1261,6 +1259,17 @@
             "required": ["kind", "name", "value"],
             "additionalProperties": false
           },
+          "propertyReference__type-o1": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "PROPERTY_REF" },
+              "object": { "$ref": "#/$defs/Expression" },
+              "property": { "type": "string" },
+              "value": { "$ref": "#/$defs/RCTypeSet" }
+            },
+            "required": ["kind", "object", "property", "value"],
+            "additionalProperties": false
+          },
           "FunctionCall__type__type-o1": {
             "type": "object",
             "properties": {
@@ -1297,13 +1306,13 @@
                 "oneOf": [
                   { "$ref": "#/$defs/AsShared__type" },
                   { "$ref": "#/$defs/Box__type" },
-                  { "$ref": "#/$defs/FieldReference__type" },
                   { "$ref": "#/$defs/IntegerLiteralbigint__type" },
                   { "$ref": "#/$defs/MemoryAllocation__type" },
                   { "$ref": "#/$defs/MemoryRetention__type" },
                   { "$ref": "#/$defs/TruthvalueLiteraltruthvalue__type" },
                   { "$ref": "#/$defs/StringLiteral__type" },
                   { "$ref": "#/$defs/VariableReference__type" },
+                  { "$ref": "#/$defs/propertyReference__type" },
                   { "$ref": "#/$defs/FunctionCall__type__type" }
                 ],
                 "discriminator": {
@@ -1312,8 +1321,8 @@
                     "AS_SHARED": "#/components/schemas/AsShared__type",
                     "BOX": "#/components/schemas/Box__type",
                     "CALL": "#/components/schemas/FunctionCall__type__type",
-                    "FIELD_REF": "#/components/schemas/FieldReference__type",
                     "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint__type",
+                    "PROPERTY_REF": "#/components/schemas/propertyReference__type",
                     "RETAIN": "#/components/schemas/MemoryRetention__type",
                     "STRING_LITERAL": "#/components/schemas/StringLiteral__type",
                     "TRUTHVALUE_LITERAL": "#/components/schemas/TruthvalueLiteraltruthvalue__type",
@@ -1370,29 +1379,6 @@
             "required": ["boxed", "type", "name"],
             "additionalProperties": false
           },
-          "FieldReference__type": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "FIELD_REF" },
-              "object": { "$ref": "#/$defs/Expression" },
-              "field": { "type": "string" },
-              "value": {
-                "oneOf": [
-                  { "$ref": "#/$defs/InterfaceSet" },
-                  { "$ref": "#/$defs/RCTypeSet" }
-                ],
-                "discriminator": {
-                  "mapping": {
-                    "interface": "#/components/schemas/InterfaceSet",
-                    "rc-type": "#/components/schemas/RCTypeSet"
-                  },
-                  "propertyName": "type"
-                }
-              }
-            },
-            "required": ["kind", "object", "field", "value"],
-            "additionalProperties": false
-          },
           "IntegerLiteralbigint__type": {
             "type": "object",
             "properties": { "kind": { "const": "INTEGER_LITERAL" } },
@@ -1404,7 +1390,7 @@
             "properties": {
               "kind": { "const": "ALLOCATION" },
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
-              "fields": {
+              "properties": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type-o1" }
               },
@@ -1455,6 +1441,29 @@
               }
             },
             "required": ["kind", "name", "value"],
+            "additionalProperties": false
+          },
+          "propertyReference__type": {
+            "type": "object",
+            "properties": {
+              "kind": { "const": "PROPERTY_REF" },
+              "object": { "$ref": "#/$defs/Expression" },
+              "property": { "type": "string" },
+              "value": {
+                "oneOf": [
+                  { "$ref": "#/$defs/InterfaceSet" },
+                  { "$ref": "#/$defs/RCTypeSet" }
+                ],
+                "discriminator": {
+                  "mapping": {
+                    "interface": "#/components/schemas/InterfaceSet",
+                    "rc-type": "#/components/schemas/RCTypeSet"
+                  },
+                  "propertyName": "type"
+                }
+              }
+            },
+            "required": ["kind", "object", "property", "value"],
             "additionalProperties": false
           },
           "FunctionCall__type__type": {
@@ -1646,17 +1655,6 @@
             "required": ["type", "boxed"],
             "additionalProperties": false
           },
-          "FieldReference": {
-            "type": "object",
-            "properties": {
-              "kind": { "const": "FIELD_REF" },
-              "object": { "$ref": "#/$defs/Expression" },
-              "field": { "type": "string" },
-              "value": { "$ref": "#/$defs/ValueSet" }
-            },
-            "required": ["kind", "object", "field", "value"],
-            "additionalProperties": false
-          },
           "IntegerLiteralbigint": {
             "type": "object",
             "properties": {
@@ -1682,7 +1680,7 @@
             "properties": {
               "kind": { "const": "ALLOCATION" },
               "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
-              "fields": {
+              "properties": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type-o1" }
               },
@@ -1752,13 +1750,15 @@
             "required": ["kind", "name", "value"],
             "additionalProperties": false
           },
-          "OmitVariableReferencevalue": {
+          "propertyReference": {
             "type": "object",
             "properties": {
-              "kind": { "const": "VARIABLE_REF" },
-              "name": { "type": "string" }
+              "kind": { "const": "PROPERTY_REF" },
+              "object": { "$ref": "#/$defs/Expression" },
+              "property": { "type": "string" },
+              "value": { "$ref": "#/$defs/ValueSet" }
             },
-            "required": ["kind", "name"],
+            "required": ["kind", "object", "property", "value"],
             "additionalProperties": false
           },
           "EnsureUnique": {
@@ -1816,13 +1816,13 @@
                   { "$ref": "#/$defs/FunctionCall__type" },
                   { "$ref": "#/$defs/AsShared" },
                   { "$ref": "#/$defs/Box" },
-                  { "$ref": "#/$defs/FieldReference" },
                   { "$ref": "#/$defs/IntegerLiteralbigint" },
                   { "$ref": "#/$defs/MemoryAllocation" },
                   { "$ref": "#/$defs/MemoryRetention" },
                   { "$ref": "#/$defs/StringLiteral" },
                   { "$ref": "#/$defs/TruthvalueLiteraltruthvalue" },
-                  { "$ref": "#/$defs/VariableReference" }
+                  { "$ref": "#/$defs/VariableReference" },
+                  { "$ref": "#/$defs/propertyReference" }
                 ],
                 "discriminator": {
                   "mapping": {
@@ -1830,8 +1830,8 @@
                     "AS_SHARED": "#/components/schemas/AsShared",
                     "BOX": "#/components/schemas/Box",
                     "CALL": "#/components/schemas/FunctionCall__type",
-                    "FIELD_REF": "#/components/schemas/FieldReference",
                     "INTEGER_LITERAL": "#/components/schemas/IntegerLiteralbigint",
+                    "PROPERTY_REF": "#/components/schemas/propertyReference",
                     "RETAIN": "#/components/schemas/MemoryRetention",
                     "STRING_LITERAL": "#/components/schemas/StringLiteral",
                     "TRUTHVALUE_LITERAL": "#/components/schemas/TruthvalueLiteraltruthvalue",
@@ -1859,7 +1859,7 @@
             "type": "object",
             "properties": {
               "kind": { "const": "DATA" },
-              "fields": {
+              "properties": {
                 "type": "array",
                 "items": { "$ref": "#/$defs/__type-o1" }
               },
@@ -1888,7 +1888,7 @@
                   "kind": { "const": "RC_TYPE_DECL" },
                   "name": { "type": "string" },
                   "namespace": { "type": "string" },
-                  "fields": {
+                  "properties": {
                     "type": "array",
                     "items": {
                       "type": "object",
@@ -1926,7 +1926,7 @@
                     }
                   }
                 },
-                "required": ["kind", "name", "fields"],
+                "required": ["kind", "name", "properties"],
                 "additionalProperties": false
               },
               { "$ref": "#/$defs/__type__type" },
@@ -1959,7 +1959,7 @@
               "kind": { "const": "RC_TYPE_DECL" },
               "name": { "type": "string" },
               "namespace": { "type": "string" },
-              "fields": {
+              "properties": {
                 "type": "array",
                 "items": {
                   "type": "object",
@@ -2019,7 +2019,13 @@
                 }
               }
             },
-            "required": ["kind", "name", "fields", "methods", "initializers"],
+            "required": [
+              "kind",
+              "name",
+              "properties",
+              "methods",
+              "initializers"
+            ],
             "additionalProperties": false
           },
           "FunctionDeclaration": {

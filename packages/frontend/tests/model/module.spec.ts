@@ -51,9 +51,9 @@ describe('Module', () => {
             declarations: [
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [
-                        { ...util.someFieldDeclConfig, name: 'field1' },
-                        { ...util.someFieldDeclConfig, name: 'field2' },
+                    properties: [
+                        { ...util.somePropertyDeclConfig, name: 'property1' },
+                        { ...util.somePropertyDeclConfig, name: 'property2' },
                     ],
                 }),
             ],
@@ -97,11 +97,11 @@ describe('Module', () => {
             declarations: [
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [
-                        { ...util.someFieldDeclConfig, name: 'field1' },
+                    properties: [
+                        { ...util.somePropertyDeclConfig, name: 'property1' },
                         {
-                            ...util.someFieldDeclConfig,
-                            name: 'field2',
+                            ...util.somePropertyDeclConfig,
+                            name: 'property2',
                             domain: util.spannedDomain(
                                 TruthvalueSet.unconstrained(),
                             ),
@@ -117,13 +117,15 @@ describe('Module', () => {
         )
         expect(myDataDeclaration).toMatchObject({
             name: { name: 'MyData' },
-            fields: [
-                { name: 'field1', isImmutable: false },
-                { name: 'field2', isImmutable: false },
+            properties: [
+                { name: 'property1', isImmutable: false },
+                { name: 'property2', isImmutable: false },
             ],
         })
-        expect(myDataDeclaration?.fields[0].domain).toBeInstanceOf(IntegerRange)
-        expect(myDataDeclaration?.fields[1].domain).toBeInstanceOf(
+        expect(myDataDeclaration?.properties[0].domain).toBeInstanceOf(
+            IntegerRange,
+        )
+        expect(myDataDeclaration?.properties[1].domain).toBeInstanceOf(
             TruthvalueSet,
         )
     })

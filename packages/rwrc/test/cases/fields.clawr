@@ -1,28 +1,28 @@
 
 data Inner {
-    field: integer(0..<100)
+    property: integer(0..<100)
 }
 
 data Outer {
-    field1: integer(0..<100)
+    property1: integer(0..<100)
     ref inner: Inner
 }
 
 @main {
-    ref a: Outer = { field1: 42, inner: { field: 47 } }
+    ref a: Outer = { property1: 42, inner: { property: 47 } }
     ref b = a
 
     const c = copy(of: a)
     mut d = c
 
-    b->field1 = 0 // changes a
-    d.field1 = 1 // only chsnges d
+    b->property1 = 0 // changes a
+    d.property1 = 1 // only chsnges d
 
-    print(a->field1)
-    print(c.field1)
+    print(a->property1)
+    print(c.property1)
 
     ref e = c.inner
-    b->inner->field = 3
+    b->inner->property = 3
 
-    print(e->field)
+    print(e->property)
 }

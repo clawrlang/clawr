@@ -30,10 +30,10 @@ typedef const struct __data_type_info {
 
   /// @brief Abstract method that is called by copy-on-write.
   /// Implementation should call retainRC() on all nested structures.
-  void (*retain_nested_fields)(void *self);
+  void (*retain_nested_properties)(void *self);
   /// @brief Abstract method that is called by copy-on-write.
   /// Implementation should call releaseRC() on all nested structures.
-  void (*release_nested_fields)(void *self);
+  void (*release_nested_properties)(void *self);
 
   const __interface_conformance_entry
       **const conformances; // NULL-terminated array
@@ -99,9 +99,10 @@ void *_alloc_init_rc_structure(const __type_info *const type,
 /// flexible array members
 /// @param __semantics__ either __rc_ISOLATED or __rc_SHARED
 #define allocInitRC(__structure__, __ext_size__, __semantics__, ...)           \
-  _alloc_init_rc_structure(                                                    \
-      &__structure__##ˇtype, __ext_size__, (__semantics__),                    \
-      &(__structure__##ˇfields){__VA_ARGS__}, sizeof(__structure__##ˇfields))
+  _alloc_init_rc_structure(&__structure__##ˇtype, __ext_size__,                \
+                           (__semantics__),                                    \
+                           &(__structure__##ˇproperties){__VA_ARGS__},         \
+                           sizeof(__structure__##ˇproperties))
 
 /// @brief Retain a memory allocation (assign to a new variable)
 /// @param structure the memory structure

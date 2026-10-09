@@ -75,7 +75,9 @@ describe('Variable Reference', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyType'),
-                fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
+                properties: [
+                    { ...util.somePropertyDeclConfig, name: 'myProperty' },
+                ],
             }),
         )
 

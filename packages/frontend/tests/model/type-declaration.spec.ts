@@ -7,11 +7,11 @@ describe('DataDeclaration', () => {
     it('outputs the correct CIR', () => {
         const dataDecl = DataDeclaration.create({
             name: util.simpleTypeName('MyData'),
-            fields: [
-                { ...util.someFieldDeclConfig, name: 'field1' },
+            properties: [
+                { ...util.somePropertyDeclConfig, name: 'property1' },
                 {
-                    ...util.someFieldDeclConfig,
-                    name: 'field2',
+                    ...util.somePropertyDeclConfig,
+                    name: 'property2',
                     domain: util.spannedDomain(TruthvalueSet.unconstrained()),
                 },
             ],
@@ -22,9 +22,9 @@ describe('DataDeclaration', () => {
             {
                 kind: 'RC_TYPE_DECL',
                 name: 'MyData',
-                fields: [
+                properties: [
                     {
-                        name: 'field1',
+                        name: 'property1',
                         domain: {
                             type: 'integer',
                             min: undefined,
@@ -32,7 +32,7 @@ describe('DataDeclaration', () => {
                         },
                     },
                     {
-                        name: 'field2',
+                        name: 'property2',
                         domain: {
                             type: 'truthvalue',
                             values: ['false', 'ambiguous', 'true'],

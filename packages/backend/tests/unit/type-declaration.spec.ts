@@ -4,14 +4,14 @@ import { lowerDecl } from '@clawr/backend'
 import type * as cir from '@clawr/cir'
 
 describe('Type declaration', () => {
-    describe('fields', () => {
-        it('adds fields to the type struct', () => {
+    describe('properties', () => {
+        it('adds properties to the type struct', () => {
             const typeDecl: cir.Declaration = {
                 kind: 'RC_TYPE_DECL',
                 name: 'MyData',
-                fields: [
+                properties: [
                     {
-                        name: 'field',
+                        name: 'property',
                         domain: {
                             type: 'integer',
                             min: '0',
@@ -22,17 +22,17 @@ describe('Type declaration', () => {
             }
             const result = lowerDecl(typeDecl)
             expect(result).toContain('typedef struct')
-            expect(result).toContain('int64_t field;')
+            expect(result).toContain('int64_t property;')
         })
 
-        it('adds super fields to inherited types', () => {
+        it('adds super properties to inherited types', () => {
             const typeDecl: cir.Declaration = {
                 kind: 'RC_TYPE_DECL',
                 name: 'Sub',
                 base: { name: 'Super' },
-                fields: [
+                properties: [
                     {
-                        name: 'field',
+                        name: 'property',
                         domain: {
                             type: 'integer',
                             min: '0',
@@ -45,7 +45,7 @@ describe('Type declaration', () => {
             const result = lowerDecl(typeDecl)
             expect(result).toContain('typedef struct')
             expect(result).toContain('Super super;')
-            expect(result).toContain('int64_t field;')
+            expect(result).toContain('int64_t property;')
         })
     })
 
@@ -53,7 +53,7 @@ describe('Type declaration', () => {
         const typeDecl: cir.Declaration = {
             kind: 'RC_TYPE_DECL',
             name: 'MyType',
-            fields: [],
+            properties: [],
             methods: [
                 {
                     kind: 'FUNCTION_DECL',
@@ -75,7 +75,7 @@ describe('Type declaration', () => {
             kind: 'RC_TYPE_DECL',
             namespace: 'my_namespace',
             name: 'MyType',
-            fields: [],
+            properties: [],
             methods: [
                 {
                     kind: 'FUNCTION_DECL',
@@ -112,7 +112,7 @@ describe('Type declaration', () => {
         const typeDecl: cir.Declaration = {
             kind: 'RC_TYPE_DECL',
             name: 'MyType',
-            fields: [],
+            properties: [],
             methods: [
                 {
                     kind: 'FUNCTION_DECL',
@@ -151,7 +151,7 @@ describe('Type declaration', () => {
         const typeDecl: cir.Declaration = {
             kind: 'RC_TYPE_DECL',
             name: 'MyType',
-            fields: [],
+            properties: [],
             methods: [],
             dispatchTable: [
                 {
@@ -186,7 +186,7 @@ describe('Type declaration', () => {
             kind: 'RC_TYPE_DECL',
             name: 'Sub',
             base: { name: 'Super' },
-            fields: [],
+            properties: [],
             methods: [
                 {
                     kind: 'FUNCTION_DECL',
@@ -215,16 +215,16 @@ describe('Type declaration', () => {
         const typeDecl: cir.Declaration = {
             kind: 'RC_TYPE_DECL',
             name: 'Super',
-            fields: [],
+            properties: [],
             methods: [],
             initializers: [
                 {
                     kind: 'FUNCTION_DECL',
                     baseName: 'setup',
-                    labels: ['field'],
+                    labels: ['property'],
                     parameters: [
                         {
-                            name: 'field',
+                            name: 'property',
                             domain: {
                                 type: 'integer',
                                 min: '0',
@@ -237,12 +237,12 @@ describe('Type declaration', () => {
                             kind: 'SELF_ASSIGN',
                             value: {
                                 kind: 'DATA',
-                                fields: [
+                                properties: [
                                     {
-                                        name: 'field',
+                                        name: 'property',
                                         value: {
                                             kind: 'VARIABLE_REF',
-                                            name: 'field',
+                                            name: 'property',
                                             value: { type: 'integer' },
                                         },
                                     },
@@ -257,11 +257,13 @@ describe('Type declaration', () => {
 
         const result = lowerDecl(typeDecl)
         expect(result).toContain(
-            'void* Super·setup˛field(void* cˇself, int64_t field) {',
+            'void* Super·setup˛property(void* cˇself, int64_t property) {',
         )
         expect(result).toContain('Super* self = cˇself;')
-        expect(result).toContain('memcpy(&self->fields, &(Superˇfields){')
-        expect(result).toContain('.field = field')
+        expect(result).toContain(
+            'memcpy(&self->properties, &(Superˇproperties){',
+        )
+        expect(result).toContain('.property = property')
         expect(result).toContain('return self;')
     })
 })

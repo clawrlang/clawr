@@ -4,9 +4,9 @@
         {
             "kind": "RC_TYPE_DECL",
             "name": "Object",
-            "fields": [
+            "properties": [
                 {
-                    "name": "field",
+                    "name": "property",
                     "domain": {
                         "type": "integer",
                         "min": "42",
@@ -17,7 +17,7 @@
             "methods": [
                 {
                     "kind": "FUNCTION_DECL",
-                    "baseName": "field",
+                    "baseName": "property",
                     "labels": [],
                     "parameters": [],
                     "domain": {
@@ -29,7 +29,7 @@
                         {
                             "kind": "RETURN",
                             "value": {
-                                "kind": "FIELD_REF",
+                                "kind": "PROPERTY_REF",
                                 "object": {
                                     "kind": "VARIABLE_REF",
                                     "name": "self",
@@ -38,7 +38,7 @@
                                         "name": "Object"
                                     }
                                 },
-                                "field": "field",
+                                "property": "property",
                                 "value": {
                                     "type": "integer",
                                     "min": "42",
@@ -60,9 +60,9 @@
                             "kind": "SELF_ASSIGN",
                             "value": {
                                 "kind": "DATA",
-                                "fields": [
+                                "properties": [
                                     {
-                                        "name": "field",
+                                        "name": "property",
                                         "value": {
                                             "kind": "INTEGER_LITERAL",
                                             "value": {
@@ -111,9 +111,9 @@
                     "value": {
                         "kind": "ALLOCATION",
                         "isolationLevel": "ISOLATED",
-                        "fields": [
+                        "properties": [
                             {
-                                "name": "field",
+                                "name": "property",
                                 "value": {
                                     "kind": "INTEGER_LITERAL",
                                     "value": {
@@ -207,7 +207,7 @@
                         "dispatch": "direct"
                     },
                     "name": {
-                        "baseName": "field",
+                        "baseName": "property",
                         "labels": []
                     },
                     "arguments": [],

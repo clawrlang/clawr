@@ -11,11 +11,11 @@
 // RC hooks
 // ---------------------------------------------------------------------------
 
-static void retainNestedFields(void *self) {
+static void retainNestedProperties(void *self) {
   retainRC(((Real *)self)->significand);
 }
 
-static void releaseNestedFields(void *self) {
+static void releaseNestedProperties(void *self) {
   Real *real = (Real *)self;
   releaseRC(real->significand);
   if (real->string_cache)
@@ -26,8 +26,8 @@ __attribute__((visibility("default"))) const __type_info Realˇtype = {
     .data_type =
         {
             .size = sizeof(Real),
-            .retain_nested_fields = retainNestedFields,
-            .release_nested_fields = releaseNestedFields,
+            .retain_nested_properties = retainNestedProperties,
+            .release_nested_properties = releaseNestedProperties,
         },
 };
 
@@ -227,8 +227,8 @@ static String *formatReal(Integer *sig, int32_t exp) {
 // fromString
 // ---------------------------------------------------------------------------
 
-__attribute__((visibility("default"))) Real *
-Real¸fromString(const char *value) {
+__attribute__((visibility("default")))
+Real *Real¸fromString(const char *value) {
   // Strip readability underscores.
   size_t vlen = strlen(value);
   char *stripped = malloc(vlen + 1);
@@ -388,8 +388,8 @@ __attribute__((visibility("default"))) Real *Real¸add(Real *left, Real *right) 
   return realWithSigExp(sum, exp, left->context_precision);
 }
 
-__attribute__((visibility("default"))) Real *Real¸subtract(Real *left,
-                                                           Real *right) {
+__attribute__((visibility("default")))
+Real *Real¸subtract(Real *left, Real *right) {
   Integer *ls;
   Integer *rs;
   int32_t exp;
@@ -400,15 +400,15 @@ __attribute__((visibility("default"))) Real *Real¸subtract(Real *left,
   return realWithSigExp(diff, exp, left->context_precision);
 }
 
-__attribute__((visibility("default"))) Real *Real¸multiply(Real *left,
-                                                           Real *right) {
+__attribute__((visibility("default")))
+Real *Real¸multiply(Real *left, Real *right) {
   Integer *prod = Integer¸multiply(left->significand, right->significand);
   int32_t exp = left->exponent10 + right->exponent10;
   return realWithSigExp(prod, exp, left->context_precision);
 }
 
-__attribute__((visibility("default"))) Real *Real¸divide(Real *dividend,
-                                                         Real *divisor) {
+__attribute__((visibility("default")))
+Real *Real¸divide(Real *dividend, Real *divisor) {
   // Check for zero divisor.
   bool divisor_zero = true;
   for (size_t i = 0; i < divisor->significand->digits->count; i++) {
@@ -437,8 +437,8 @@ __attribute__((visibility("default"))) Real *Real¸divide(Real *dividend,
   return realWithSigExp(quotient, exp, prec);
 }
 
-__attribute__((visibility("default"))) Real *Real¸power(Real *base,
-                                                        Real *exponent) {
+__attribute__((visibility("default")))
+Real *Real¸power(Real *base, Real *exponent) {
   // Exponent must be a whole number: no negative exponent10 (fractional
   // digits).
   if (exponent->exponent10 < 0)

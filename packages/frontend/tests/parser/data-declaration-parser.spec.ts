@@ -8,53 +8,53 @@ describe('DataDeclarationParser', () => {
     it('parses a data declaration with default-mutability', () => {
         const code = `
             data MyData {
-                field1: integer
-                field2: truthvalue
+                property1: integer
+                property2: truthvalue
             }`
         const result = parseDataDeclaration(code)
         expect(result).toMatchObject({
             name: { name: 'MyData' },
-            fields: [
+            properties: [
                 {
-                    name: 'field1',
+                    name: 'property1',
                     isImmutable: false,
                     isolationLevel: ISOLATED,
                 },
                 {
-                    name: 'field2',
+                    name: 'property2',
                     isImmutable: false,
                     isolationLevel: ISOLATED,
                 },
             ],
         })
-        expect(result.fields[0].domain).toBeInstanceOf(IntegerRange)
-        expect(result.fields[1].domain).toBeInstanceOf(TruthvalueSet)
+        expect(result.properties[0].domain).toBeInstanceOf(IntegerRange)
+        expect(result.properties[1].domain).toBeInstanceOf(TruthvalueSet)
     })
 
     it('parses a data declaration with mixed semantics', () => {
         const code = `
             data MyData {
-                ref field1: integer
-                const field2: truthvalue
+                ref property1: integer
+                const property2: truthvalue
             }`
         const result = parseDataDeclaration(code)
         expect(result).toMatchObject({
             name: { name: 'MyData' },
-            fields: [
+            properties: [
                 {
-                    name: 'field1',
+                    name: 'property1',
                     isImmutable: true,
                     isolationLevel: SHARED,
                 },
                 {
-                    name: 'field2',
+                    name: 'property2',
                     isImmutable: true,
                     isolationLevel: ISOLATED,
                 },
             ],
         })
-        expect(result.fields[0].domain).toBeInstanceOf(IntegerRange)
-        expect(result.fields[1].domain).toBeInstanceOf(TruthvalueSet)
+        expect(result.properties[0].domain).toBeInstanceOf(IntegerRange)
+        expect(result.properties[1].domain).toBeInstanceOf(TruthvalueSet)
     })
 })
 

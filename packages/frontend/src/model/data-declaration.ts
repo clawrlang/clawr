@@ -5,7 +5,7 @@ import { TypeName } from '@/model/type-name'
 import { Result } from '@/tools/result'
 import { SemanticResult } from '@/tools/source-result'
 
-export type DataField = {
+export type Property = {
     isImmutable: boolean
     name: string
     isolationLevel: IsolationLevel
@@ -16,17 +16,17 @@ export type DataField = {
 export class DataDeclaration implements Declaration {
     private constructor(
         public name: TypeName,
-        public fields: DataField[],
+        public properties: Property[],
     ) {}
 
     static create({
         name,
-        fields,
+        properties,
     }: {
         name: TypeName
-        fields: DataField[]
+        properties: Property[]
     }): DataDeclaration {
-        return new DataDeclaration(name, fields)
+        return new DataDeclaration(name, properties)
     }
 
     emitDeclaration(context: Context): SemanticResult {
@@ -35,9 +35,9 @@ export class DataDeclaration implements Declaration {
             kind: 'RC_TYPE_DECL',
             name: this.name.name,
             namespace: this.name.namespace,
-            fields: this.fields.map((field) => ({
-                name: field.name,
-                domain: field.domain!.toCIR(),
+            properties: this.properties.map((property) => ({
+                name: property.name,
+                domain: property.domain!.toCIR(),
             })),
         })
         return Result.ok

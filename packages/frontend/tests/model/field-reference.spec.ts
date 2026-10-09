@@ -1,14 +1,14 @@
 import { DataDeclaration } from '@/model/data-declaration'
-import { FieldReference } from '@/model/field-reference'
 import { ISOLATED, SHARED, UNKNOWN } from '@/model/isolation-level'
 import { ObjectDeclaration } from '@/model/object-declaration'
+import { PropertyReference } from '@/model/property-reference'
 import { TypeName } from '@/model/type-name'
 import { IntegerRange, RCTypeSet } from '@/model/value-set'
 import { SemanticResult } from '@/tools/source-result'
 import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 
-describe('Field Reference', () => {
+describe('Property Reference', () => {
     it('infers its type from the context', () => {
         const context = util.newSemanticContext()
         context.scope.addVariableDeclaration('myVar', {
@@ -20,15 +20,17 @@ describe('Field Reference', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyType'),
-                fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
+                properties: [
+                    { ...util.somePropertyDeclConfig, name: 'myProperty' },
+                ],
             }),
         )
 
-        const fieldRef = util.isolatedFieldRef(
+        const propertyRef = util.isolatedPropertyRef(
             util.variableRef('myVar'),
-            'myField',
+            'myProperty',
         )
-        const result = fieldRef.domain(context)
+        const result = propertyRef.domain(context)
         expect(result.isSuccess && result.value.toCIR().type).toBe('integer')
     })
 
@@ -43,10 +45,10 @@ describe('Field Reference', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyType'),
-                fields: [
+                properties: [
                     {
                         isImmutable: true,
-                        name: 'myField',
+                        name: 'myProperty',
                         isolationLevel: SHARED,
                         domain: util.spannedDomain(
                             RCTypeSet.create({
@@ -58,11 +60,11 @@ describe('Field Reference', () => {
             }),
         )
 
-        const fieldRef = util.isolatedFieldRef(
+        const propertyRef = util.isolatedPropertyRef(
             util.variableRef('myVar'),
-            'myField',
+            'myProperty',
         )
-        const result = fieldRef.isolationLevel(context)
+        const result = propertyRef.isolationLevel(context)
         expect(result.isSuccess && result.value).toEqual(SHARED)
     })
 
@@ -103,16 +105,16 @@ describe('Field Reference', () => {
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
                         name: util.simpleTypeName('InnerType'),
-                        fields: [],
+                        properties: [],
                     }),
                 )
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
                         name: util.simpleTypeName('MyType'),
-                        fields: [
+                        properties: [
                             {
                                 isImmutable,
-                                name: 'myField',
+                                name: 'myProperty',
                                 isolationLevel: expected,
                                 domain: util.spannedDomain(
                                     RCTypeSet.create({
@@ -124,19 +126,19 @@ describe('Field Reference', () => {
                     }),
                 )
 
-                const fieldRef =
+                const propertyRef =
                     expected === SHARED
-                        ? util.sharedFieldRef(
+                        ? util.sharedPropertyRef(
                               util.variableRef('myVar'),
-                              'myField',
+                              'myProperty',
                           )
-                        : util.isolatedFieldRef(
+                        : util.isolatedPropertyRef(
                               util.variableRef('myVar'),
-                              'myField',
+                              'myProperty',
                           )
                 const result = SemanticResult.collect([
-                    fieldRef.isolationLevel(context),
-                    fieldRef.domain(context),
+                    propertyRef.isolationLevel(context),
+                    propertyRef.domain(context),
                 ])
 
                 expect(result.isSuccess && result.value).toMatchObject([
@@ -146,7 +148,7 @@ describe('Field Reference', () => {
             })
     })
 
-    it('throws if the field does not exist on the type', () => {
+    it('throws if the property does not exist on the type', () => {
         const context = util.newSemanticContext()
         context.scope.addVariableDeclaration('myVar', {
             ...util.someIntegerVariable,
@@ -157,18 +159,22 @@ describe('Field Reference', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyType'),
-                fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
+                properties: [
+                    { ...util.somePropertyDeclConfig, name: 'myProperty' },
+                ],
             }),
         )
 
-        const fieldRef = util.isolatedFieldRef(
+        const propertyRef = util.isolatedPropertyRef(
             util.variableRef('myVar'),
-            'nonExistentField',
+            'nonExistentProperty',
         )
-        const result = fieldRef.toCIRExpression(context)
+        const result = propertyRef.toCIRExpression(context)
         expect(
             result.isError && result.error.errors.map((e) => e.message),
-        ).toContain('Field nonExistentField does not exist on type MyType')
+        ).toContain(
+            'Property nonExistentProperty does not exist on type MyType',
+        )
     })
 
     describe('throws if the object’s isolation-level is not compatible with the operator', () => {
@@ -208,25 +214,28 @@ describe('Field Reference', () => {
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
                         name: util.simpleTypeName('MyType'),
-                        fields: [
-                            { ...util.someFieldDeclConfig, name: 'myField' },
+                        properties: [
+                            {
+                                ...util.somePropertyDeclConfig,
+                                name: 'myProperty',
+                            },
                         ],
                     }),
                 )
 
-                const fieldRef = FieldReference.create({
+                const propertyRef = PropertyReference.create({
                     object: util.variableRef('myVar'),
-                    field: 'myField',
+                    property: 'myProperty',
                     operator,
                     span: {
                         start: { line: 1, column: 1 },
                         end: { line: 1, column: 10 },
                     },
-                    fieldSpan: util.someCodeSpan,
+                    propertySpan: util.someCodeSpan,
                 })
-                const result = fieldRef.toCIRExpression(context)
+                const result = propertyRef.toCIRExpression(context)
                 expect(result.isError && result.error.errors[0]).toMatchObject({
-                    message: `Cannot access field myField of a ${isolationLevel} type object with "${operator}" operator`,
+                    message: `Cannot access property myProperty of a ${isolationLevel} type object with "${operator}" operator`,
                     span: {
                         start: { line: 1, column: 1 },
                         end: { line: 1, column: 10 },
@@ -273,21 +282,21 @@ describe('Field Reference', () => {
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
                         name: util.simpleTypeName('MyType'),
-                        fields: [
+                        properties: [
                             {
-                                ...util.someFieldDeclConfig,
-                                name: 'myField',
+                                ...util.somePropertyDeclConfig,
+                                name: 'myProperty',
                                 isImmutable,
                             },
                         ],
                     }),
                 )
 
-                const fieldRef = util.isolatedFieldRef(
+                const propertyRef = util.isolatedPropertyRef(
                     util.variableRef('myVar'),
-                    'myField',
+                    'myProperty',
                 )
-                const result = fieldRef.isEffectivelyConst(context)
+                const result = propertyRef.isEffectivelyConst(context)
                 expect(result.isSuccess && result.value).toBe(expected)
             })
         }
@@ -304,15 +313,17 @@ describe('Field Reference', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyType'),
-                    fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
+                    properties: [
+                        { ...util.somePropertyDeclConfig, name: 'myProperty' },
+                    ],
                 }),
             )
 
-            const fieldRef = util.isolatedFieldRef(
+            const propertyRef = util.isolatedPropertyRef(
                 util.variableRef('myVar'),
-                'myField',
+                'myProperty',
             )
-            const result = fieldRef.isEffectivelyConst(context)
+            const result = propertyRef.isEffectivelyConst(context)
             expect(result.isSuccess && result.value).toBeTrue()
         })
 
@@ -328,15 +339,17 @@ describe('Field Reference', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyType'),
-                    fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
+                    properties: [
+                        { ...util.somePropertyDeclConfig, name: 'myProperty' },
+                    ],
                 }),
             )
 
-            const fieldRef = util.isolatedFieldRef(
+            const propertyRef = util.isolatedPropertyRef(
                 util.variableRef('myVar'),
-                'myField',
+                'myProperty',
             )
-            const result = fieldRef.isEffectivelyConst(context)
+            const result = propertyRef.isEffectivelyConst(context)
             expect(result.isSuccess && result.value).toBeTrue()
         })
 
@@ -351,15 +364,17 @@ describe('Field Reference', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyType'),
-                    fields: [{ ...util.someFieldDeclConfig, name: 'myField' }],
+                    properties: [
+                        { ...util.somePropertyDeclConfig, name: 'myProperty' },
+                    ],
                 }),
             )
 
-            const fieldRef = util.isolatedFieldRef(
+            const propertyRef = util.isolatedPropertyRef(
                 util.variableRef('myVar'),
-                'myField',
+                'myProperty',
             )
-            const result = fieldRef.isEffectivelyConst(context)
+            const result = propertyRef.isEffectivelyConst(context)
             expect(result.isSuccess).toBeTrue()
             expect(result.isSuccess && result.value).toBeFalse()
         })
@@ -371,10 +386,10 @@ describe('Field Reference', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('Data'),
-                    fields: [
+                    properties: [
                         {
-                            ...util.someFieldDeclConfig,
-                            name: 'field',
+                            ...util.somePropertyDeclConfig,
+                            name: 'property',
                             domain: util.spannedDomain(
                                 IntegerRange.create({ max: 100n, min: 0n }),
                             ),
@@ -389,11 +404,11 @@ describe('Field Reference', () => {
                 }),
             })
 
-            const fieldRef = util.isolatedFieldRef(
+            const propertyRef = util.isolatedPropertyRef(
                 util.variableRef('myVar'),
-                'field',
+                'property',
             )
-            expect(fieldRef.currentValue(context)).toMatchObject({
+            expect(propertyRef.currentValue(context)).toMatchObject({
                 value: { min: 0n, max: 100n },
             })
         })
@@ -404,10 +419,10 @@ describe('Field Reference', () => {
                 ObjectDeclaration.create({
                     ...util.someObjectDeclConfig,
                     name: util.simpleTypeName('Object'),
-                    fields: [
+                    properties: [
                         {
-                            ...util.someFieldDeclConfig,
-                            name: 'field',
+                            ...util.somePropertyDeclConfig,
+                            name: 'property',
                             domain: util.spannedDomain(
                                 IntegerRange.create({ max: 100n, min: 0n }),
                             ),
@@ -422,11 +437,11 @@ describe('Field Reference', () => {
                 }),
             })
 
-            const fieldRef = util.isolatedFieldRef(
+            const propertyRef = util.isolatedPropertyRef(
                 util.variableRef('myVar'),
-                'field',
+                'property',
             )
-            expect(fieldRef.currentValue(context)).toMatchObject({
+            expect(propertyRef.currentValue(context)).toMatchObject({
                 value: { min: 0n, max: 100n },
             })
         })

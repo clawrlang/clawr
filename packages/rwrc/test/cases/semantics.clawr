@@ -1,11 +1,11 @@
 
 data EmptyData {}
 data MyData {
-    mut field1: integer(0..<100)
-    mutref field2: EmptyData
+    mut property1: integer(0..<100)
+    mutref property2: EmptyData
 }
 
-ref a: MyData = { field1: 42, field2: {} }
+ref a: MyData = { property1: 42, property2: {} }
 const b = copy(of: a)
 
 func getShared() -> ref MyData => a
@@ -13,7 +13,7 @@ func getIsolated() -> const MyData => b
 // func getUnique() -> MyData => b // not possible/allowed?
 
 func modify(ref _ x: MyData) {
-    x->field1 = 10
+    x->property1 = 10
 }
 func read(const _ x: MyData) {
 
@@ -22,11 +22,11 @@ func with(_ x: MyData) {} // either
 
 @main {
 
-    const c = a->field1 // incorrectly retained
-    const d = b.field1 // incorrectly retained
+    const c = a->property1 // incorrectly retained
+    const d = b.property1 // incorrectly retained
 
-    ref e = a->field2
-    ref f = b.field2
+    ref e = a->property2
+    ref f = b.property2
 
     ref g = copy(of: getIsolated())
     const h = getIsolated()

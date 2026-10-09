@@ -11,10 +11,10 @@ int main() {
 
   // Clawr: `original.x = 2`
   mutateRC(original);
-  original->fields.x = 2;
+  original->properties.x = 2;
 
-  printf("modified: %d, %d\n", original->fields.x, original->fields.y);
-  printf("isolated: %d, %d\n", isolated->fields.x, isolated->fields.y);
+  printf("modified: %d, %d\n", original->properties.x, original->properties.y);
+  printf("isolated: %d, %d\n", isolated->properties.x, isolated->properties.y);
 
   releaseRC(original);
   releaseRC(isolated);

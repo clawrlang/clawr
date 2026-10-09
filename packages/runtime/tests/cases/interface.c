@@ -22,13 +22,13 @@ typedef struct DataStructure {
   u_int8_t y;
 } DataStructure;
 
-typedef struct DataStructureˇfields {
+typedef struct DataStructureˇproperties {
   int8_t x;
   int8_t y;
-} DataStructureˇfields;
+} DataStructureˇproperties;
 
 static String *DataStructure·describe(void *self) {
-  DataStructure *fields = (DataStructure *)self;
+  DataStructure *properties = (DataStructure *)self;
   String *result = String¸fromCString("DataStructure { x: 1, y: 2 }");
   return result;
 }

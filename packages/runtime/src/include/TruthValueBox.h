@@ -7,7 +7,7 @@
 
 typedef struct {
   truthvalue_t value;
-} TruthvalueBoxˇfields;
+} TruthvalueBoxˇproperties;
 
 typedef struct {
   __rc_header header;

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void releaseNestedFields(void *self) {
+static void releaseNestedProperties(void *self) {
   String *s = (String *)self;
   if (s->data) {
     free(s->data);
@@ -18,12 +18,12 @@ __attribute__((visibility("default"))) const __type_info Stringˇtype = {
     .data_type =
         {
             .size = sizeof(String),
-            .release_nested_fields = releaseNestedFields,
+            .release_nested_properties = releaseNestedProperties,
         },
 };
 
-__attribute__((visibility("default"))) String *
-String¸fromCString(const char *value) {
+__attribute__((visibility("default")))
+String *String¸fromCString(const char *value) {
   if (!value)
     panic("String¸fromCString does not accept NULL");
 
@@ -36,8 +36,8 @@ String¸fromCString(const char *value) {
   return allocInitRC(String, 0, __rc_ISOLATED, .length = len, .data = data);
 }
 
-__attribute__((visibility("default"))) String *String¸concat(String *left,
-                                                             String *right) {
+__attribute__((visibility("default")))
+String *String¸concat(String *left, String *right) {
   if (!left || !right)
     panic("String¸concat does not accept NULL");
 
@@ -62,8 +62,8 @@ __attribute__((visibility("default"))) truthvalue_t String¸eq(String *left,
   return strcmp(left->data, right->data) == 0 ? c_true : c_false;
 }
 
-__attribute__((visibility("default"))) String *
-String¸readTextFile(String *path) {
+__attribute__((visibility("default")))
+String *String¸readTextFile(String *path) {
   if (!path)
     panic("String¸readTextFile does not accept NULL path");
 
@@ -106,8 +106,8 @@ String¸readTextFile(String *path) {
                      .data = data);
 }
 
-__attribute__((visibility("default"))) truthvalue_t
-String¸writeTextFile(String *path, String *content) {
+__attribute__((visibility("default")))
+truthvalue_t String¸writeTextFile(String *path, String *content) {
   if (!path || !content) {
     panic("String¸writeTextFile does not accept NULL arguments");
   }

@@ -1,6 +1,6 @@
 import { Context, ContextWithDomain, Expression, isStorage } from '@/model'
-import { FieldReference } from '@/model/field-reference'
 import { AnyIsolationLevel } from '@/model/isolation-level'
+import { PropertyReference } from '@/model/property-reference'
 import { RCTypeSet, ValueSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
@@ -14,7 +14,7 @@ export class Retain implements Expression {
     }
 
     private constructor(
-        public readonly value: VariableReference | FieldReference,
+        public readonly value: VariableReference | PropertyReference,
         private readonly valueSet: RCTypeSet,
     ) {}
 

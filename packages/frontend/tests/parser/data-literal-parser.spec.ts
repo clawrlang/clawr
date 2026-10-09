@@ -11,7 +11,7 @@ describe('DataLiteralParser', () => {
             }`
         const result = parseDataLiteral(code)
         expect(result).toMatchObject({
-            fields: [
+            properties: [
                 { name: 'x', value: { value: { min: 42n, max: 42n } } },
                 { name: 'y', value: { value: { min: 17n, max: 17n } } },
             ],
@@ -22,7 +22,7 @@ describe('DataLiteralParser', () => {
         const code = '{ x: 42, y: 17 }'
         const result = parseDataLiteral(code)
         expect(result).toMatchObject({
-            fields: [
+            properties: [
                 { name: 'x', value: { value: { min: 42n, max: 42n } } },
                 { name: 'y', value: { value: { min: 17n, max: 17n } } },
             ],

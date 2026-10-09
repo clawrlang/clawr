@@ -21,17 +21,20 @@ export function lowerDecl(decl: cir.Declaration): string {
     switch (decl.kind) {
         case 'RC_TYPE_DECL': {
             const mangledTypeName = mangleTypeName(decl)
-            const fields = decl.fields
-                .map((field) => `${lowerType(field.domain)} ${field.name};`)
+            const properties = decl.properties
+                .map(
+                    (property) =>
+                        `${lowerType(property.domain)} ${property.name};`,
+                )
                 .join('\n')
             if (!('methods' in decl))
                 return `typedef struct {
-                        ${fields}
-                    } ${mangledTypeName}ˇfields;
+                        ${properties}
+                    } ${mangledTypeName}ˇproperties;
 
                     typedef struct {
                         __rc_header header;
-                        ${mangledTypeName}ˇfields fields;
+                        ${mangledTypeName}ˇproperties properties;
                     } ${mangledTypeName};
                     static const __type_info ${mangledTypeName}ˇtype = {
                         .data_type = { .size = sizeof(${mangledTypeName}) }
@@ -61,12 +64,12 @@ export function lowerDecl(decl: cir.Declaration): string {
                     }`
                 : `.data_type = { .size = sizeof(${mangledTypeName}) }`
             return `typedef struct {
-                ${fields}
-            } ${mangledTypeName}ˇfields;
+                ${properties}
+            } ${mangledTypeName}ˇproperties;
 
             typedef struct {
                 ${decl.base ? `${mangleTypeName(decl.base)} super` : '__rc_header header'};
-                ${mangledTypeName}ˇfields fields;
+                ${mangledTypeName}ˇproperties properties;
             } ${mangledTypeName};
 
             ${vtableTypedefs.join('\n')}
@@ -261,17 +264,17 @@ export function lowerStmt(stmt: cir.Statement): string {
                 stmt.target.kind === 'VARIABLE_REF' &&
                 stmt.value.kind === 'ALLOCATION'
             )
-                return `memcpy(&${lowerStorage(stmt.target)}->fields, &(${mangleTypeName(stmt.value.value)}ˇfields){
-                        ${stmt.value.fields?.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ') ?? ''}
+                return `memcpy(&${lowerStorage(stmt.target)}->properties, &(${mangleTypeName(stmt.value.value)}ˇproperties){
+                        ${stmt.value.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
                     },
-                    sizeof(${mangleTypeName(stmt.value.value)}ˇfields));`
+                    sizeof(${mangleTypeName(stmt.value.value)}ˇproperties));`
             else
                 return `${lowerStorage(stmt.target)} = ${lowerExpr(stmt.value)};`
         case 'SELF_ASSIGN':
-            return `memcpy(&self->fields, &(${mangleTypeName(stmt.value.value)}ˇfields){
-                    ${stmt.value.fields?.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ') ?? ''}
+            return `memcpy(&self->properties, &(${mangleTypeName(stmt.value.value)}ˇproperties){
+                    ${stmt.value.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
                 },
-                sizeof(${mangleTypeName(stmt.value.value)}ˇfields));`
+                sizeof(${mangleTypeName(stmt.value.value)}ˇproperties));`
         case 'ENSURE_UNIQUE':
             return `mutateRC(${lowerStorage(stmt.object)});`
         case 'RELEASE':
@@ -306,8 +309,8 @@ export function lowerExpr(expr: cir.Expression): string {
             return lowerFunctionCall(expr)
         case 'VARIABLE_REF':
             return expr.name
-        case 'FIELD_REF':
-            return `${lowerExpr(expr.object)}->fields.${expr.field}`
+        case 'PROPERTY_REF':
+            return `${lowerExpr(expr.object)}->properties.${expr.property}`
         case 'AS_SHARED':
             return `shareRC(${lowerExpr(expr.object)})`
         case 'BOX':
@@ -324,7 +327,7 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'ALLOCATION':
             const mangledTypeName = mangleTypeName(expr.value)
             return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
-                ${expr.fields?.map((field) => `.${field.name} = ${lowerExpr(field.value)}`).join(', ') ?? ''}
+                ${expr.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
             )`
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
@@ -334,13 +337,13 @@ export function lowerExpr(expr: cir.Expression): string {
 export function lowerStorage(
     expr:
         | Omit<cir.Expression & { kind: 'VARIABLE_REF' }, 'value'>
-        | Omit<cir.Expression & { kind: 'FIELD_REF' }, 'value'>,
+        | Omit<cir.Expression & { kind: 'PROPERTY_REF' }, 'value'>,
 ): string {
     switch (expr.kind) {
         case 'VARIABLE_REF':
             return expr.name
-        case 'FIELD_REF':
-            return `${lowerExpr(expr.object)}->fields.${expr.field}`
+        case 'PROPERTY_REF':
+            return `${lowerExpr(expr.object)}->properties.${expr.property}`
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
     }

@@ -63,7 +63,7 @@ describe('ReturnStatement', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyData'),
-                fields: [],
+                properties: [],
             }),
         )
         context.scope.addVariableDeclaration('x', {

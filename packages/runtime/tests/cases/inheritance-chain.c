@@ -52,10 +52,10 @@ typedef struct RectBlock {
   int width;
   int depth;
 } RectBlock;
-typedef struct RectBlockˇfields {
+typedef struct RectBlockˇproperties {
   int width;
   int depth;
-} RectBlockˇfields;
+} RectBlockˇproperties;
 typedef struct RectBlockˇvtable {
   int (*area)(void *self);
   int (*offset)(void *self);
@@ -90,11 +90,11 @@ void RectBlock˛new_width_depth_height(RectBlock *self, int width, int depth,
                                       int height) {
   // Clawr: `const self = RectBlock { Prism.new(height: height), width, depth }`
   memcpy(((Prism *)self) + 1,
-         &(RectBlockˇfields){
+         &(RectBlockˇproperties){
              .width = width,
              .depth = depth,
          },
-         sizeof(RectBlockˇfields));
+         sizeof(RectBlockˇproperties));
   Prism˛new_height((Prism *)self, height);
 }
 
@@ -109,9 +109,9 @@ void RectBlock˛new_width_depth_height(RectBlock *self, int width, int depth,
 typedef struct SquareBlock {
   RectBlock super;
 } SquareBlock;
-typedef struct SquareBlockˇfields {
+typedef struct SquareBlockˇproperties {
 
-} SquareBlockˇfields;
+} SquareBlockˇproperties;
 
 // Clawr: `func offset() => 1`
 int SquareBlock·offset(void *self) { return 1; }

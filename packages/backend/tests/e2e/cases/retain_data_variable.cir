@@ -4,7 +4,7 @@
         {
             "kind": "RC_TYPE_DECL",
             "name": "FooData",
-            "fields": [
+            "properties": [
                 {
                     "name": "bar",
                     "domain": {
@@ -23,7 +23,7 @@
             "initialValue": {
                 "kind": "ALLOCATION",
                 "isolationLevel": "ISOLATED",
-                "fields": [
+                "properties": [
                     {
                         "name": "bar",
                         "value": {
@@ -73,7 +73,7 @@
         {
             "kind": "ASSIGN",
             "target": {
-                "kind": "FIELD_REF",
+                "kind": "PROPERTY_REF",
                 "object": {
                     "kind": "VARIABLE_REF",
                     "name": "one",
@@ -82,7 +82,7 @@
                         "name": "FooData"
                     }
                 },
-                "field": "bar"
+                "property": "bar"
             },
             "value": {
                 "kind": "INTEGER_LITERAL",
@@ -99,7 +99,7 @@
             "initialValue": {
                 "kind": "BOX",
                 "expression": {
-                    "kind": "FIELD_REF",
+                    "kind": "PROPERTY_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
                         "name": "two",
@@ -108,7 +108,7 @@
                             "name": "FooData"
                         }
                     },
-                    "field": "bar",
+                    "property": "bar",
                     "value": {
                         "type": "integer"
                     }
@@ -153,7 +153,7 @@
             "initialValue": {
                 "kind": "BOX",
                 "expression": {
-                    "kind": "FIELD_REF",
+                    "kind": "PROPERTY_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
                         "name": "one",
@@ -162,7 +162,7 @@
                             "name": "FooData"
                         }
                     },
-                    "field": "bar",
+                    "property": "bar",
                     "value": {
                         "type": "integer"
                     }

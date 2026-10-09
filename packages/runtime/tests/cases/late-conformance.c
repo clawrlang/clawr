@@ -13,7 +13,7 @@ typedef struct Describableˇwitness {
 __interface_info Describableˇtype = {.name = "Describable"};
 
 static String *DataStructure·describe(void *self) {
-  DataStructure *fields = (DataStructure *)self;
+  DataStructure *properties = (DataStructure *)self;
   String *result = String¸fromCString("DataStructure { x: 1, y: 2 }");
   return result;
 }

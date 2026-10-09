@@ -63,7 +63,7 @@ export class SelfAssignment implements Statement {
 
             value: {
                 kind: 'DATA',
-                fields: value.fields?.map((f) => ({
+                properties: value.properties?.map((f) => ({
                     name: f.name,
                     value: f.value,
                 })),

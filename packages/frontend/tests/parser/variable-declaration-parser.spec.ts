@@ -32,7 +32,7 @@ describe('VariableDeclarationParser', () => {
             isolationLevel: SHARED,
             domain: { type: { name: 'Type' } },
             initialValue: {
-                fields: [
+                properties: [
                     { name: 'x', value: { value: { min: 1n, max: 1n } } },
                     { name: 'y', value: { value: { min: 2n, max: 2n } } },
                 ],
@@ -48,7 +48,7 @@ describe('VariableDeclarationParser', () => {
             isolationLevel: SHARED,
             domain: { type: { name: 'Type' } },
             initialValue: {
-                fields: [
+                properties: [
                     { name: 'x', value: { value: { min: 1n, max: 1n } } },
                     { name: 'y', value: { value: { min: 2n, max: 2n } } },
                 ],
@@ -75,7 +75,7 @@ describe('VariableDeclarationParser', () => {
             name: 'r',
             isolationLevel: SHARED,
             domain: { type: { name: 'MyData' } },
-            initialValue: { fields: [] },
+            initialValue: { properties: [] },
         })
     })
 })

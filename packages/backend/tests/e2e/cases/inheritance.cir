@@ -4,9 +4,9 @@
         {
             "kind": "RC_TYPE_DECL",
             "name": "Super",
-            "fields": [
+            "properties": [
                 {
-                    "name": "field",
+                    "name": "property",
                     "domain": {
                         "type": "integer",
                         "min": "0",
@@ -29,7 +29,7 @@
                         {
                             "kind": "RETURN",
                             "value": {
-                                "kind": "FIELD_REF",
+                                "kind": "PROPERTY_REF",
                                 "object": {
                                     "kind": "VARIABLE_REF",
                                     "name": "self",
@@ -38,7 +38,7 @@
                                         "name": "Super"
                                     }
                                 },
-                                "field": "field",
+                                "property": "property",
                                 "value": {
                                     "type": "integer",
                                     "min": "0",
@@ -54,11 +54,11 @@
                     "kind": "FUNCTION_DECL",
                     "baseName": "init",
                     "labels": [
-                        "field"
+                        "property"
                     ],
                     "parameters": [
                         {
-                            "name": "field",
+                            "name": "property",
                             "domain": {
                                 "type": "integer",
                                 "min": "0",
@@ -75,12 +75,12 @@
                                     "type": "rc-type",
                                     "name": "Super"
                                 },
-                                "fields": [
+                                "properties": [
                                     {
-                                        "name": "field",
+                                        "name": "property",
                                         "value": {
                                             "kind": "VARIABLE_REF",
-                                            "name": "field",
+                                            "name": "property",
                                             "value": {
                                                 "type": "integer",
                                                 "min": "0",
@@ -121,9 +121,9 @@
             "base": {
                 "name": "Super"
             },
-            "fields": [
+            "properties": [
                 {
-                    "name": "field",
+                    "name": "property",
                     "domain": {
                         "type": "integer",
                         "min": "0",
@@ -146,7 +146,7 @@
                         {
                             "kind": "RETURN",
                             "value": {
-                                "kind": "FIELD_REF",
+                                "kind": "PROPERTY_REF",
                                 "object": {
                                     "kind": "VARIABLE_REF",
                                     "name": "self",
@@ -155,7 +155,7 @@
                                         "name": "Super"
                                     }
                                 },
-                                "field": "field",
+                                "property": "property",
                                 "value": {
                                     "type": "integer",
                                     "min": "0",
@@ -177,9 +177,9 @@
                             "kind": "SELF_ASSIGN",
                             "value": {
                                 "kind": "DATA",
-                                "fields": [
+                                "properties": [
                                     {
-                                        "name": "field",
+                                        "name": "property",
                                         "value": {
                                             "kind": "INTEGER_LITERAL",
                                             "value": {
@@ -212,7 +212,7 @@
                             "name": {
                                 "baseName": "init",
                                 "labels": [
-                                    "field"
+                                    "property"
                                 ]
                             },
                             "arguments": [
@@ -256,7 +256,7 @@
             "base": {
                 "name": "Super"
             },
-            "fields": [],
+            "properties": [],
             "methods": [],
             "initializers": [
                 {
@@ -291,7 +291,7 @@
                             "name": {
                                 "baseName": "init",
                                 "labels": [
-                                    "field"
+                                    "property"
                                 ]
                             },
                             "arguments": [

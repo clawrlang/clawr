@@ -12,23 +12,24 @@ typedef struct Array {
   size_t elem_size;
   unsigned char elements[];
 } Array;
-typedef struct Arrayˇfields {
+typedef struct Arrayˇproperties {
   size_t count;
   size_t elem_size;
   unsigned char elements[];
-} Arrayˇfields;
+} Arrayˇproperties;
 extern const __type_info Arrayˇtype;
 
 /// @brief An array with zero elements
 extern Array Array¸empty;
 
-Array *Array¸new(size_t count, size_t elem_size);
+Array *Array¸new (size_t count, size_t elem_size);
 size_t Array¸checkedIndex(int64_t index, const Array *array);
 
 #define ARRAY_ELEMENT_AT(index, array, type)                                   \
   ((type *)((array)->elements))[index]
 
 #define ARRAY_ELEMENT_AT_CHECKED(index, array, type)                           \
-  ARRAY_ELEMENT_AT(Array¸checkedIndex((int64_t)(index), (array)), (array), type)
+  ARRAY_ELEMENT_AT(Array¸checkedIndex((int64_t)(index), (array)), (array),     \
+                   type)
 
 #endif // ARRAY_H

@@ -46,7 +46,7 @@ type RCTypeDeclaration = {
     kind: 'RC_TYPE_DECL'
     name: string
     namespace?: string
-    fields: {
+    properties: {
         name: string
         domain: ValueSet
     }[]
@@ -144,7 +144,8 @@ export type Statement =
     | Assign
     | SelfAssign
 
-type Storage = Omit<VariableReference, 'value'> | Omit<FieldReference, 'value'>
+type Storage =
+    Omit<VariableReference, 'value'> | Omit<PropertyReference, 'value'>
 
 // -----------
 // Expressions
@@ -168,7 +169,7 @@ type TruthvalueLiteral<Value extends truthvalue = truthvalue> = {
 type MemoryAllocation = {
     kind: 'ALLOCATION'
     isolationLevel: IsolationLevel
-    fields?: {
+    properties?: {
         name: string
         value: Expression
     }[]
@@ -199,10 +200,10 @@ type VariableReference = {
     value: ValueSet
 }
 
-type FieldReference = {
-    kind: 'FIELD_REF'
+type PropertyReference = {
+    kind: 'PROPERTY_REF'
     object: Expression
-    field: string
+    property: string
     value: ValueSet
 }
 
@@ -215,7 +216,7 @@ export type Expression =
     | AsShared
     | Box
     | VariableReference
-    | FieldReference
+    | PropertyReference
     | (FunctionCall & { value: ValueSet })
 
 // ---------

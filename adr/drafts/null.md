@@ -18,7 +18,7 @@ This is a beautiful reframing. The lattice/subset approach turns the null questi
 
 **On the three syntax options you sketched:**
 
-1. **Anonymous structural type:** `const x: { value: integer, next: LinkedList }` — this is the "spell out the shape" approach. It works and it's compositional, but it's _structural_, not _nominal_, and it duplicates the case list in two places. If you add a field to `LinkedList`'s node case, this breaks silently or diverges. It also loses the domain name `node`, which matters for readability and for error messages.
+1. **Anonymous structural type:** `const x: { value: integer, next: LinkedList }` — this is the "spell out the shape" approach. It works and it's compositional, but it's _structural_, not _nominal_, and it duplicates the case list in two places. If you add a property to `LinkedList`'s node case, this breaks silently or diverges. It also loses the domain name `node`, which matters for readability and for error messages.
 
 2. **Minus-set syntax:** `LinkedList(\ end)` — reads as "LinkedList with `end` removed." This is _nominal_ (you name the type, then subtract), it's local (the exclusion is visible at the use site), and it's tolerant to adding new cases later: if you add a `dangling` case, the type `LinkedList(\ end)` automatically includes it, which is almost certainly what you want. The downside is that the syntax feels algebraic/mathematical, which is a stylistic call. It's also unbounded in what you can express: `LinkedList(\ end, dangling)` etc., which is a feature if you want it and a footgun if you don't.
 
@@ -29,7 +29,7 @@ This is a beautiful reframing. The lattice/subset approach turns the null questi
 - `LinkedList(\ end)` says "anything that isn't `end`." Survives adding cases gracefully.
 - `LinkedList(node)` says "specifically `node`." Precise, but brittle to schema evolution.
 
-You probably want _both_, because they're useful in different contexts. A "definitely has a next field" type wants the minus form; a "specifically a node with these properties" type wants the plus form. If you only ship one, I'd ship the minus form for this specific case, because "the list ends" is exactly the kind of terminal case you want to subtract out and forget about. But if you're already committed to `truthvalue(false|true)` as the subset syntax, then adding `\` as a second operator is a real inconsistency to justify.
+You probably want _both_, because they're useful in different contexts. A "definitely has a next property" type wants the minus form; a "specifically a node with these properties" type wants the plus form. If you only ship one, I'd ship the minus form for this specific case, because "the list ends" is exactly the kind of terminal case you want to subtract out and forget about. But if you're already committed to `truthvalue(false|true)` as the subset syntax, then adding `\` as a second operator is a real inconsistency to justify.
 
 **There's a third path worth considering:** make `truthvalue(false|true)` and `LinkedList(\ end)` _the same syntax_. I.e., `LinkedList(node|value)` is inclusion, and `LinkedList(\ end)` is the same as `LinkedList(node)` when there are only two cases. Then you don't have two subset operators — you have one, and `\` is just sugar over it when the complement is shorter. This is what some type systems do with "or" and "not" over finite sets. It keeps the syntax consistent while letting you write the more readable form in the common case.
 

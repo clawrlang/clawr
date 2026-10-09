@@ -1,5 +1,5 @@
 import { Context, Declaration } from '@/model'
-import { DataField } from '@/model/data-declaration'
+import { Property } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { FunctionName } from '@/model/function-name'
 import { TypeName } from '@/model/type-name'
@@ -15,7 +15,7 @@ export class ObjectDeclaration implements Declaration {
         private readonly readonly: FunctionDeclaration[],
         private readonly mutating: FunctionDeclaration[],
         private readonly initializers: FunctionDeclaration[],
-        public readonly fields: DataField[],
+        public readonly properties: Property[],
         private readonly span: SourceCodeSpan,
     ) {}
 
@@ -26,7 +26,7 @@ export class ObjectDeclaration implements Declaration {
         readonly,
         mutating,
         initializers,
-        fields,
+        properties,
         span,
     }: {
         kind: 'object' | 'service'
@@ -35,7 +35,7 @@ export class ObjectDeclaration implements Declaration {
         readonly: FunctionDeclaration[]
         mutating: FunctionDeclaration[]
         initializers: FunctionDeclaration[]
-        fields: DataField[]
+        properties: Property[]
         span: SourceCodeSpan
     }) {
         return new ObjectDeclaration(
@@ -45,7 +45,7 @@ export class ObjectDeclaration implements Declaration {
             readonly,
             mutating,
             initializers,
-            fields,
+            properties,
             span,
         )
     }
@@ -92,9 +92,9 @@ export class ObjectDeclaration implements Declaration {
             namespace: this.name.namespace,
             methods,
             initializers,
-            fields: this.fields.map((field) => ({
-                name: field.name,
-                domain: field.domain!.toCIR(),
+            properties: this.properties.map((property) => ({
+                name: property.name,
+                domain: property.domain!.toCIR(),
             })),
         })
         return Result.ok

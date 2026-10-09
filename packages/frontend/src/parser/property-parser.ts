@@ -1,6 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
-import { DataField } from '@/model/data-declaration'
+import { Property } from '@/model/data-declaration'
 import { Context } from '@/parser'
 import { DomainParser } from '@/parser/domain-parser'
 import { ExpressionParser } from '@/parser/expression-parser'
@@ -9,18 +9,18 @@ import {
     SemanticsKeywordParser,
 } from '@/parser/semantics-keyword-parser'
 
-export class DataFieldParser {
+export class PropertyParser {
     private constructor(private context: Context) {}
 
-    static create(context: Context): DataFieldParser {
-        return new DataFieldParser(context)
+    static create(context: Context): PropertyParser {
+        return new PropertyParser(context)
     }
 
-    parse(stream: TokenStream): DataField {
+    parse(stream: TokenStream): Property {
         let keyword =
             SemanticsKeywordParser.parse(stream) ?? SemanticsKeyword.mut
-        const fieldNameToken = stream.expect('IDENTIFIER')
-        const fieldName = fieldNameToken.identifier
+        const propertyNameToken = stream.expect('IDENTIFIER')
+        const propertyName = propertyNameToken.identifier
 
         stream.expect('PUNCTUATION', ':')
         const domain = DomainParser.create(this.context).parse(stream)
@@ -32,7 +32,7 @@ export class DataFieldParser {
         }
 
         return {
-            name: fieldName,
+            name: propertyName,
             isImmutable: keyword.isImmutable,
             isolationLevel: keyword.isolationLevel,
             domain,

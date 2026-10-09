@@ -67,7 +67,7 @@ end record;
 
 Clawr will perform this packing implicitly so that you as programmer do not need to worry about the details. All you need to do is give permission by using the `@packable` annotation.
 
-If you specify ranges for variables in a `data` structure or the `data:` section of an `object`, the compiler will know how many bits each field needs, and if the total size is small enough, the fields will be packed together.
+If you specify ranges for variables in a `data` structure or the `data:` section of an `object`, the compiler will know how many bits each property needs, and if the total size is small enough, the properties will be packed together.
 
 ```clawr
 @packable

@@ -6,7 +6,7 @@ import { toPosition } from './spans'
 const tokenTypeMap: Record<SemanticTokenKind, string> = {
     variable: 'variable',
     parameter: 'parameter',
-    field: 'property',
+    property: 'property',
     type: 'type',
     function: 'function',
 }

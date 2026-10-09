@@ -6,7 +6,7 @@ void printReference(__rc_proxy *proxy) {
   if (reference == NULL)
     printf("weak reference is NULL\n");
   else
-    printf("weak reference: %d\n", reference->fields.x);
+    printf("weak reference: %d\n", reference->properties.x);
 }
 
 int main() {

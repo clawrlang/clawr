@@ -19,10 +19,10 @@
 - `superType` matches initializer call
   - No `superType` => no initializer
   - `superType` must equal initializer `target`
-- Can `object` store a service in a field? Let's “no” for now.
-- Fields are private (only accessible via `self`) — but `data` fields `MUST NOT` be private!
-- `data` fields `MUST NOT` have initial values nor be `const`
-- fields with initial value should be able to skip/infer value-set
+- Can `object` store a service in a property? Let's “no” for now.
+- Properties are private (only accessible via `self`) — but `data` properties `MUST NOT` be private!
+- `data` properties `MUST NOT` have initial values nor be `const`
+- Properties with initial value should be able to skip/infer value-set
 
 ## Function Parameters — Semantic Model
 
@@ -45,11 +45,11 @@
 
 ## Advanced / Ice Box
 
-- `object` may not reach outside itself (its fields) except for calling `service` through a parameter
+- `object` may not reach outside itself (its properties) except for calling `service` through a parameter
 - `FunctionCall.domain()` should probably not return `currentValue()`
 - `VariableDeclaration.initialValue` — handle type mismatch
-- `DataLiteral` – handle field type mismatch
-- Get the field values from the declared domain when converting `SHARED` to `ISOLATED`
+- `DataLiteral` – handle property type mismatch
+- Get the property values from the declared domain when converting `SHARED` to `ISOLATED`
   - `SHARED` values cannot know their state
   - `ISOLATED` values can know their state intimately
 - Use `${npm_package_version%%.*}` and `process.env.npm_package_version!.split('.')[0]`?

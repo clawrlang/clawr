@@ -11,10 +11,11 @@ int main() {
 
   // Clawr: `original.x = 2`
   mutateRC(original);
-  original->fields.x = 2;
+  original->properties.x = 2;
 
-  printf("modified: %d, %d\n", original->fields.x, original->fields.y);
-  printf("reference: %d, %d\n", reference->fields.x, reference->fields.y);
+  printf("modified: %d, %d\n", original->properties.x, original->properties.y);
+  printf("reference: %d, %d\n", reference->properties.x,
+         reference->properties.y);
 
   releaseRC(original);
   releaseRC(reference);

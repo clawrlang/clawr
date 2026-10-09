@@ -60,15 +60,15 @@ describe('HighlightRecorder', () => {
         })
     })
 
-    it('records a field access', () => {
+    it('records a property access', () => {
         const highlightRecorder = new RecordingHighlightRecorder()
         const context = { ...util.newSemanticContext(), highlightRecorder }
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: TypeName.create({ name: 'MyType' }),
-                fields: [
+                properties: [
                     {
-                        name: 'field',
+                        name: 'property',
                         isImmutable: false,
                         isolationLevel: ISOLATED,
                         domain: util.spannedDomain(
@@ -89,16 +89,17 @@ describe('HighlightRecorder', () => {
             'obj',
             RCTypeSet.create({
                 type: TypeName.create({ name: 'MyType' }),
-                fields: {},
+                properties: {},
             }),
         )
 
-        util.isolatedFieldRef(util.variableRef('obj'), 'field').toCIRExpression(
-            context,
-        )
+        util.isolatedPropertyRef(
+            util.variableRef('obj'),
+            'property',
+        ).toCIRExpression(context)
 
         expect(highlightRecorder.recorded).toContainEqual({
-            kind: 'field',
+            kind: 'property',
             modifiers: [],
         })
     })

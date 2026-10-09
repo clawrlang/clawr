@@ -349,7 +349,7 @@ Mach-O supports both, and they serve different purposes.
 
 ### Versioning, the Mach-O way
 
-Every dylib carries two version fields in its `LC_ID_DYLIB`:
+Every dylib carries two version properties in its `LC_ID_DYLIB`:
 
 ```plain
 compatibility version X.Y.Z    # the ABI it's compatible with
@@ -395,7 +395,7 @@ install_name = @rpath/libClawr.1.dylib    # or full semver
 
 This gives you multi-version coexistence and ABI safety. Cost: your compiler has to manage symlinks or duplicate files, decide when the major bumps, and ensure the whole build tree uses consistent names. That's real complexity — but _you_ own it, not the programmer, which is fine.
 
-### Policy 2: semver only in the version fields, stable filename
+### Policy 2: semver only in the version properties, stable filename
 
 ```plain
 libClawr.dylib

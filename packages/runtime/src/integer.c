@@ -10,9 +10,11 @@
 
 #define INVALID_DIGIT (DIGIT_MIN - 1)
 
-void retainNestedFields(void *self) { retainRC(((Integer *)self)->digits); }
+void retainNestedProperties(void *self) { retainRC(((Integer *)self)->digits); }
 
-void releaseNestedFields(void *self) { releaseRC(((Integer *)self)->digits); }
+void releaseNestedProperties(void *self) {
+  releaseRC(((Integer *)self)->digits);
+}
 
 __attribute__((visibility("default")))
 const clawr¸HasStringRepresentationˇwitness
@@ -29,8 +31,8 @@ __attribute__((visibility("default"))) const __type_info Integerˇtype = {
     .data_type =
         {
             .size = sizeof(Integer),
-            .retain_nested_fields = retainNestedFields,
-            .release_nested_fields = releaseNestedFields,
+            .retain_nested_properties = retainNestedProperties,
+            .release_nested_properties = releaseNestedProperties,
             .conformances =
                 (const __interface_conformance_entry *[]){
                     &Integerˇclawr¸HasStringRepresentationˇconformance,

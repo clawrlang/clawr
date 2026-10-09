@@ -10,10 +10,10 @@ typedef struct String {
   size_t length;
   char *data;
 } String;
-typedef struct Stringˇfields {
+typedef struct Stringˇproperties {
   size_t length;
   char *data;
-} Stringˇfields;
+} Stringˇproperties;
 extern const __type_info Stringˇtype;
 
 String *String¸fromCString(const char *value);

@@ -11,9 +11,9 @@ typedef struct DataStructure {
   u_int8_t value;
 } DataStructure;
 
-typedef struct DataStructureˇfields {
+typedef struct DataStructureˇproperties {
   int8_t value;
-} DataStructureˇfields;
+} DataStructureˇproperties;
 
 static truthvalue_t DataStructure·equals(void *left, void *right) {
   return ((DataStructure *)left)->value == ((DataStructure *)right)->value

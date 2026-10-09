@@ -19,8 +19,8 @@ const sample: ClawrModule = {
                     type: 'rc-type',
                     name: 'Object',
                 },
-                fields: [
-                    // supertype fields
+                properties: [
+                    // supertype properties
                     {
                         name: 'a',
                         value: {
@@ -43,9 +43,9 @@ const sample: ClawrModule = {
                             },
                         },
                     },
-                    // subtype fields
+                    // subtype properties
                     {
-                        // Note: subtype can repeat field names from super
+                        // Note: subtype can repeat property names from super
                         name: 'a',
                         value: {
                             kind: 'INTEGER_LITERAL',
@@ -89,14 +89,14 @@ const sample: ClawrModule = {
 }
 ```
 
-The thing to note above is that the current CIR format does not allow explicitly identifying which type in the inheritance hierarchy each field belongs to. Unless we redesign the format, we will need to rely only on spatial order (supertype fields first subtype fields after).
+The thing to note above is that the current CIR format does not allow explicitly identifying which type in the inheritance hierarchy each property belongs to. Unless we redesign the format, we will need to rely only on spatial order (supertype properties first subtype properties after).
 
-I believe `memcpy` (or rather `struct` initializers in general) allows merely listing the fields in layout order. Matching field names is not strictly necessary, and duplicated field names cannot conflict if the fields are not named.
+I believe `memcpy` (or rather `struct` initializers in general) allows merely listing the properties in layout order. Matching property names is not strictly necessary, and duplicated property names cannot conflict if the properties are not named.
 
-But even so: we should perhaps allow for varying backend implementations. So the CiR should be redesigned so that each field can refer to its declaring type.
+But even so: we should perhaps allow for varying backend implementations. So the CiR should be redesigned so that each property can refer to its declaring type.
 
 Or maybe we don't need that. Maybe it can be the CIR specification: allocation is always complete. If so, the `self` allocations should be removed from the initializers (only the super initializer call would remains).
 
-Well, we’ll still need to distinguish owner type for each field. The fields are named because the backend doesn’t _have_ to use `memcpy`. (And it doesn’t need to layout field in the order they are declared.) It should be allowed to set each field individually by name. But if it cannot separate the fields by type, the names will conflict.
+Well, we’ll still need to distinguish owner type for each property. The properties are named because the backend doesn’t _have_ to use `memcpy`. (And it doesn’t need to layout property in the order they are declared.) It should be allowed to set each property individually by name. But if it cannot separate the properties by type, the names will conflict.
 
 Besides: the layout within each type cannot be known by the frontend. The ordering cannot be guaranteed to be compatible. It can only be guaranteed to be _consistent_ with other parts of the CIR.

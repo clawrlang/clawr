@@ -25,7 +25,7 @@ But you cannot make it closed without a bootstrap. If every external access must
 A strict version would be:
 
 - `data`: no methods, no external access.
-- `object`: pure methods only; no service fields, no service parameters, no `async`, no I/O.
+- `object`: pure methods only; no service properties, no service parameters, no `async`, no I/O.
 - `pure func`: no service parameters, no `extern`, no I/O.
 - `service`: may hold service references, may call native/extern primitives, may be `async`.
 - `@main`: special; may instantiate root services and call them.

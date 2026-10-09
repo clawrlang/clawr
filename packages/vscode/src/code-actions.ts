@@ -7,7 +7,7 @@ const MAX_SUGGESTION_DISTANCE = 2
 
 const UNKNOWN_VARIABLE =
     /^Variable (\S+) is not defined in the current context$/
-const UNKNOWN_FIELD = /^Field (\S+) does not exist on type /
+const UNKNOWN_PROPERTY = /^Property (\S+) does not exist on type /
 
 export class ClawrCodeActionProvider implements vscode.CodeActionProvider {
     provideCodeActions(
@@ -26,7 +26,7 @@ export class ClawrCodeActionProvider implements vscode.CodeActionProvider {
         for (const diagnostic of context.diagnostics) {
             const match =
                 UNKNOWN_VARIABLE.exec(diagnostic.message) ??
-                UNKNOWN_FIELD.exec(diagnostic.message)
+                UNKNOWN_PROPERTY.exec(diagnostic.message)
             if (!match) continue
 
             const unknownName = match[1]

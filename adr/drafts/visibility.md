@@ -7,13 +7,13 @@ There are no visibility modifiers. Well, okay there is one: `helper`.
 
 ## Sane Visibility by Default
 
-All types are public by default. All `data` fields are public as the purpose of a data structure is to expose data. Enum cases must be public if the `enum` itself is; there cannot be private values that are only known to a few. The same is true for `union` types: if you can reference a `union`, you must be able to access all its variants.
+All types are public by default. All `data` properties are public as the purpose of a data structure is to expose data. Enum cases must be public if the `enum` itself is; there cannot be private values that are only known to a few. The same is true for `union` types: if you can reference a `union`, you must be able to access all its variants.
 
-Encapsulated types (`object` and `service`) hide their data. Their fields are always hidden from code that isn't the type itself (or its `companion` object). All methods, on the other hand, are publicly visible by default.
+Encapsulated types (`object` and `service`) hide their data. Their properties are always hidden from code that isn't the type itself (or its `companion` object). All methods, on the other hand, are publicly visible by default.
 
 ## Hide Code by Marking it as `helper`
 
-There is no way to make a hidden member visible other than indirectly. You can always define a new method that returns the value of a private field. But that is just what encapsulation does already — just indirectly.
+There is no way to make a hidden member visible other than indirectly. You can always define a new method that returns the value of a private property. But that is just what encapsulation does already — just indirectly.
 
 You cannot increase visibility, but you can hide what would otherwise be visible. When tagged as a `helper`…
 

@@ -13,7 +13,7 @@ describe('ObjectDeclaration Parser', () => {
             readonly: [],
             mutating: [],
             initializers: [],
-            fields: [],
+            properties: [],
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 12 },
@@ -31,7 +31,7 @@ describe('ObjectDeclaration Parser', () => {
             readonly: [],
             mutating: [],
             initializers: [],
-            fields: [],
+            properties: [],
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 21 },
@@ -47,7 +47,7 @@ describe('ObjectDeclaration Parser', () => {
             readonly: [],
             mutating: [],
             initializers: [],
-            fields: [],
+            properties: [],
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 13 },
@@ -107,16 +107,16 @@ describe('ObjectDeclaration Parser', () => {
         })
     })
 
-    it('parses fields', () => {
+    it('parses properties', () => {
         const code = `
             object O {
             state:
-                field1: integer
-                field2: truthvalue
+                property1: integer
+                property2: truthvalue
             }`
 
         expect(parseObject(code)).toMatchObject({
-            fields: [{ name: 'field1' }, { name: 'field2' }],
+            properties: [{ name: 'property1' }, { name: 'property2' }],
             span: {
                 start: { line: 2, column: 13 },
                 end: { line: 6, column: 14 },
@@ -124,24 +124,24 @@ describe('ObjectDeclaration Parser', () => {
         })
     })
 
-    it('parses default field values', () => {
+    it('parses default property values', () => {
         const code = `
             object O {
             state:
-                const field1: integer = 10
-                const field2: truthvalue = true
+                const property1: integer = 10
+                const property2: truthvalue = true
             }`
 
         expect(parseObject(code)).toMatchObject({
-            fields: [
+            properties: [
                 {
-                    name: 'field1',
+                    name: 'property1',
                     isImmutable: true,
                     isolationLevel: ISOLATED,
                     defaultValue: { value: { min: 10n, max: 10n } },
                 },
                 {
-                    name: 'field2',
+                    name: 'property2',
                     isImmutable: true,
                     isolationLevel: ISOLATED,
                     defaultValue: { value: { values: ['true'] } },
@@ -158,8 +158,8 @@ describe('ObjectDeclaration Parser', () => {
         const code = `
             object O {
             state:
-                field1: integer
-                field2: truthvalue
+                property1: integer
+                property2: truthvalue
             init:
                 func setup() => {}
             mutating:
@@ -167,7 +167,7 @@ describe('ObjectDeclaration Parser', () => {
             }`
 
         expect(parseObject(code)).toMatchObject({
-            fields: [{ name: 'field1' }, { name: 'field2' }],
+            properties: [{ name: 'property1' }, { name: 'property2' }],
             initializers: [{ baseName: 'setup' }],
             mutating: [{ baseName: 'method' }],
             span: {

@@ -7,29 +7,35 @@ import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
 
-export class FieldReference implements Expression {
+export class PropertyReference implements Expression {
     private constructor(
         public readonly object: Expression,
         private readonly operator: '.' | '->',
-        public readonly field: string,
+        public readonly property: string,
         public readonly span: SourceCodeSpan,
-        private readonly fieldSpan: SourceCodeSpan,
+        private readonly propertySpan: SourceCodeSpan,
     ) {}
 
     static create({
         object,
         operator,
-        field,
+        property,
         span,
-        fieldSpan,
+        propertySpan,
     }: {
         object: Expression
         operator: '.' | '->'
-        field: string
+        property: string
         span: SourceCodeSpan
-        fieldSpan: SourceCodeSpan
-    }): FieldReference {
-        return new FieldReference(object, operator, field, span, fieldSpan)
+        propertySpan: SourceCodeSpan
+    }): PropertyReference {
+        return new PropertyReference(
+            object,
+            operator,
+            property,
+            span,
+            propertySpan,
+        )
     }
 
     assignmentPrelude(context: Context): SemanticResult<cir.Statement[]> {
@@ -37,7 +43,7 @@ export class FieldReference implements Expression {
         if (constResult.isError) return constResult
         if (constResult.value)
             return SemanticErrorResult.failure(
-                `Cannot mutate field ${this.field} of a reference type object`,
+                `Cannot mutate property ${this.property} of a reference type object`,
                 this.span,
             )
 
@@ -64,18 +70,18 @@ export class FieldReference implements Expression {
     }
 
     isolationLevel(context: Context): SemanticResult<IsolationLevel> {
-        const fieldResult = this.getFieldFromContext(context)
-        if (fieldResult.isError) return fieldResult
-        const field = fieldResult.value
-        return field.domain instanceof RCTypeSet
-            ? Result.value(field.isolationLevel ?? ISOLATED)
+        const propertyResult = this.getPropertyFromContext(context)
+        if (propertyResult.isError) return propertyResult
+        const property = propertyResult.value
+        return property.domain instanceof RCTypeSet
+            ? Result.value(property.isolationLevel ?? ISOLATED)
             : Result.value(ISOLATED)
     }
 
     domain(context: Context): SemanticResult<ValueSet> {
-        const fieldResult = this.getFieldFromContext(context)
-        if (fieldResult.isError) return fieldResult
-        return Result.value(fieldResult.value.domain!)
+        const propertyResult = this.getPropertyFromContext(context)
+        if (propertyResult.isError) return propertyResult
+        return Result.value(propertyResult.value.domain!)
     }
 
     currentValue(context: Context): SemanticResult<ValueSet> {
@@ -87,8 +93,8 @@ export class FieldReference implements Expression {
                 `${objectValue.toCIR().type} is not an rc-type`,
                 this.object.span,
             )
-        if (objectValue.fields)
-            return Result.value(objectValue.fields[this.field])
+        if (objectValue.properties)
+            return Result.value(objectValue.properties[this.property])
 
         return this.domain(context)
     }
@@ -98,7 +104,8 @@ export class FieldReference implements Expression {
         if (objectvalueResult.isError) return objectvalueResult
         const objectValue = objectvalueResult.value
         if (objectValue instanceof RCTypeSet) {
-            if (objectValue.fields) objectValue.fields[this.field] = value
+            if (objectValue.properties)
+                objectValue.properties[this.property] = value
 
             const object: Expression = this.object
             const result = object.setCurrentValue?.(context, objectValue)
@@ -109,33 +116,33 @@ export class FieldReference implements Expression {
 
     toCIRExpression(
         context: Context,
-    ): SemanticResult<cir.Expression & { kind: 'FIELD_REF' }> {
+    ): SemanticResult<cir.Expression & { kind: 'PROPERTY_REF' }> {
         const compatibilityResult = this.checkOperatorCompatibility(context)
         if (compatibilityResult.isError) return compatibilityResult
-        const fieldResult = this.getFieldFromContext(context)
-        if (fieldResult.isError) return fieldResult
-        const field = fieldResult.value
+        const propertyResult = this.getPropertyFromContext(context)
+        if (propertyResult.isError) return propertyResult
+        const property = propertyResult.value
         const cirResult = this.object.toCIRExpression(context)
         if (cirResult.isError) return cirResult
         const object: cir.Expression = cirResult.value
 
         context.highlightRecorder?.record(
-            'field',
-            this.fieldSpan,
+            'property',
+            this.propertySpan,
             this.operator === '->' ? ['shared'] : [],
         )
 
         return Result.value({
-            kind: 'FIELD_REF',
+            kind: 'PROPERTY_REF',
             object,
-            field: this.field,
-            value: field.domain.toCIR(),
+            property: this.property,
+            value: property.domain.toCIR(),
         } satisfies cir.Expression)
     }
 
-    private getFieldFromContext(
+    private getPropertyFromContext(
         context: Context,
-    ): SemanticResult<DataDeclaration['fields'][number]> {
+    ): SemanticResult<DataDeclaration['properties'][number]> {
         const objectValueResult = this.object.domain(context)
         if (objectValueResult.isError) return objectValueResult
         const objectValue = objectValueResult.value
@@ -147,12 +154,14 @@ export class FieldReference implements Expression {
         const type =
             context.scope.dataDeclaration(objectValue.type) ||
             context.scope.objectDeclaration(objectValue.type)
-        const field = type?.fields.find((field) => field.name === this.field)
-        return field
-            ? Result.value(field)
+        const property = type?.properties.find(
+            (property) => property.name === this.property,
+        )
+        return property
+            ? Result.value(property)
             : SemanticErrorResult.failure(
-                  `Field ${this.field} does not exist on type ${type?.name.canonical()}`,
-                  this.fieldSpan,
+                  `Property ${this.property} does not exist on type ${type?.name.canonical()}`,
+                  this.propertySpan,
               )
     }
 
@@ -162,7 +171,7 @@ export class FieldReference implements Expression {
         const isolationLevel = isolationLevelResult.value
         if ((isolationLevel === SHARED) !== (this.operator === '->')) {
             return SemanticErrorResult.failure(
-                `Cannot access field ${this.field} of a ${isolationLevel} type object with "${this.operator}" operator`,
+                `Cannot access property ${this.property} of a ${isolationLevel} type object with "${this.operator}" operator`,
                 this.span,
             )
         } else return Result.ok

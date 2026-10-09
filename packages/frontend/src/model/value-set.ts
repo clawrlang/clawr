@@ -125,27 +125,26 @@ export class StringSet implements ValueSet {
 export class RCTypeSet implements ValueSet {
     private constructor(
         public readonly type: TypeName,
-        public readonly fields: Record<string, ValueSet> | undefined,
+        public readonly properties: Record<string, ValueSet> | undefined,
     ) {}
 
     static create({
         type,
-        fields,
+        properties,
     }: {
         type: TypeName
-        fields?: Record<string, ValueSet>
+        properties?: Record<string, ValueSet>
     }): RCTypeSet {
-        return new RCTypeSet(type, fields)
+        return new RCTypeSet(type, properties)
     }
 
     unconstrained(): RCTypeSet {
         return RCTypeSet.create({
             type: this.type,
-            fields: Object.fromEntries(
-                Object.entries(this.fields ?? {}).map(([name, field]) => [
-                    name,
-                    field.unconstrained(),
-                ]),
+            properties: Object.fromEntries(
+                Object.entries(this.properties ?? {}).map(
+                    ([name, property]) => [name, property.unconstrained()],
+                ),
             ),
         })
     }

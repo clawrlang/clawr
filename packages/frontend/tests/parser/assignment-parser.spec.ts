@@ -13,13 +13,13 @@ describe('Assignment Parser', () => {
         })
     })
 
-    it('parses an assignment with a field lookup', () => {
-        const code = 'obj.field = true'
+    it('parses an assignment with a property lookup', () => {
+        const code = 'obj.property = true'
         const result = parseAssignment(code)
         expect(result).toMatchObject({
             target: {
                 object: { name: 'obj' },
-                field: 'field',
+                property: 'property',
             },
             value: { value: { values: ['true'] } },
         })
@@ -31,7 +31,7 @@ describe('Assignment Parser', () => {
         expect(result).toBeInstanceOf(SelfAssignment)
         expect(result).toMatchObject({
             value: {
-                fields: [
+                properties: [
                     { name: 'c', value: { value: { min: 12n, max: 12n } } },
                 ],
             },

@@ -1,6 +1,5 @@
 import { DataDeclaration } from '@/model/data-declaration'
 import { decorateDomain } from '@/model/domain-declaration'
-import { FieldReference } from '@/model/field-reference'
 import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
@@ -10,6 +9,7 @@ import {
     TruthValueLiteral,
 } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
+import { PropertyReference } from '@/model/property-reference'
 import { TypeName } from '@/model/type-name'
 import { IntegerRange, RCTypeSet, TruthvalueSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
@@ -84,9 +84,9 @@ describe('VariableDeclaration', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
-                    fields: [
+                    properties: [
                         {
-                            name: 'field',
+                            name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
@@ -139,9 +139,9 @@ describe('VariableDeclaration', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
-                    fields: [
+                    properties: [
                         {
-                            name: 'field',
+                            name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
@@ -161,14 +161,14 @@ describe('VariableDeclaration', () => {
     })
 
     describe('injects RETAIN statement', () => {
-        test('for a FieldReference', () => {
+        test('for a propertyReference', () => {
             const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'InnerType' }),
-                    fields: [
+                    properties: [
                         {
-                            name: 'innerField',
+                            name: 'innerProperty',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
@@ -182,9 +182,9 @@ describe('VariableDeclaration', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'OuterType' }),
-                    fields: [
+                    properties: [
                         {
-                            name: 'field',
+                            name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
@@ -210,11 +210,11 @@ describe('VariableDeclaration', () => {
                 'bar',
                 RCTypeSet.create({
                     type: TypeName.create({ name: 'OuterType' }),
-                    fields: {
-                        field: RCTypeSet.create({
+                    properties: {
+                        property: RCTypeSet.create({
                             type: TypeName.create({ name: 'InnerType' }),
-                            fields: {
-                                innerField: IntegerRange.create({
+                            properties: {
+                                innerProperty: IntegerRange.create({
                                     min: 42n,
                                     max: 42n,
                                 }),
@@ -234,15 +234,15 @@ describe('VariableDeclaration', () => {
                     }),
                     { span: util.someCodeSpan },
                 ),
-                initialValue: FieldReference.create({
+                initialValue: PropertyReference.create({
                     object: VariableReference.create({
                         name: 'bar',
                         span: util.someCodeSpan,
                     }),
-                    field: 'field',
+                    property: 'property',
                     operator: '.',
                     span: util.someCodeSpan,
-                    fieldSpan: util.someCodeSpan,
+                    propertySpan: util.someCodeSpan,
                 }),
                 nameSpan: util.someCodeSpan,
                 span: util.someCodeSpan,
@@ -252,12 +252,12 @@ describe('VariableDeclaration', () => {
                 initialValue: {
                     kind: 'RETAIN',
                     object: {
-                        kind: 'FIELD_REF',
+                        kind: 'PROPERTY_REF',
                         object: {
                             kind: 'VARIABLE_REF',
                             name: 'bar',
                         },
-                        field: 'field',
+                        property: 'property',
                     },
                 },
             })
@@ -268,9 +268,9 @@ describe('VariableDeclaration', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
-                    fields: [
+                    properties: [
                         {
-                            name: 'field',
+                            name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
@@ -292,8 +292,8 @@ describe('VariableDeclaration', () => {
                 'bar',
                 RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    fields: {
-                        field: IntegerRange.create({
+                    properties: {
+                        property: IntegerRange.create({
                             min: 42n,
                             max: 42n,
                         }),
@@ -330,14 +330,14 @@ describe('VariableDeclaration', () => {
             })
         })
 
-        test('but not for non-RC fields', () => {
+        test('but not for non-RC properties', () => {
             const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
-                    fields: [
+                    properties: [
                         {
-                            name: 'field',
+                            name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
@@ -359,8 +359,8 @@ describe('VariableDeclaration', () => {
                 'bar',
                 RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
-                    fields: {
-                        field: IntegerRange.create({
+                    properties: {
+                        property: IntegerRange.create({
                             min: 42n,
                             max: 42n,
                         }),
@@ -375,15 +375,15 @@ describe('VariableDeclaration', () => {
                 domain: decorateDomain(IntegerRange.unconstrained(), {
                     span: util.someCodeSpan,
                 }),
-                initialValue: FieldReference.create({
+                initialValue: PropertyReference.create({
                     object: VariableReference.create({
                         name: 'bar',
                         span: util.someCodeSpan,
                     }),
-                    field: 'field',
+                    property: 'property',
                     operator: '.',
                     span: util.someCodeSpan,
-                    fieldSpan: util.someCodeSpan,
+                    propertySpan: util.someCodeSpan,
                 }),
                 nameSpan: util.someCodeSpan,
                 span: util.someCodeSpan,
@@ -391,12 +391,12 @@ describe('VariableDeclaration', () => {
             decl.emitStatement(context)
             expect(context.scope.emitted[0]).toMatchObject({
                 initialValue: {
-                    kind: 'FIELD_REF',
+                    kind: 'PROPERTY_REF',
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'bar',
                     },
-                    field: 'field',
+                    property: 'property',
                 },
             })
         })
@@ -418,7 +418,7 @@ describe('VariableDeclaration', () => {
                 ],
                 mutating: [],
                 readonly: [],
-                fields: [],
+                properties: [],
                 span: util.someCodeSpan,
             }),
         )
@@ -439,7 +439,7 @@ describe('VariableDeclaration', () => {
                     arguments: [],
                     span: util.someCodeSpan,
                 }),
-                fields: [],
+                properties: [],
                 span: util.someCodeSpan,
             }),
             nameSpan: util.someCodeSpan,
@@ -459,7 +459,7 @@ describe('VariableDeclaration', () => {
                 initialValue: {
                     kind: 'ALLOCATION',
                     isolationLevel: 'ISOLATED',
-                    fields: [],
+                    properties: [],
                     value: {
                         type: 'rc-type',
                         name: 'Object',
@@ -518,10 +518,10 @@ describe('VariableDeclaration', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'InnerType' }),
-                    fields: [
+                    properties: [
                         {
                             isImmutable: false,
-                            name: 'innerField',
+                            name: 'innerProperty',
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
                                 IntegerRange.unconstrained(),
@@ -534,9 +534,9 @@ describe('VariableDeclaration', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'OuterType' }),
-                    fields: [
+                    properties: [
                         {
-                            name: 'field',
+                            name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
                             domain: decorateDomain(
@@ -563,13 +563,13 @@ describe('VariableDeclaration', () => {
                     { span: util.someCodeSpan },
                 ),
                 initialValue: DataLiteral.create({
-                    fields: [
+                    properties: [
                         {
-                            name: 'field',
+                            name: 'property',
                             value: DataLiteral.create({
-                                fields: [
+                                properties: [
                                     {
-                                        name: 'innerField',
+                                        name: 'innerProperty',
                                         value: IntegerLiteral.create({
                                             value: 42n,
                                             span: util.someCodeSpan,
@@ -590,11 +590,11 @@ describe('VariableDeclaration', () => {
 
             expect(context.scope.currentValue('target')).toMatchObject({
                 type: { name: 'OuterType' },
-                fields: {
-                    field: {
+                properties: {
+                    property: {
                         type: { name: 'InnerType' },
-                        fields: {
-                            innerField: {
+                        properties: {
+                            innerProperty: {
                                 min: 42n,
                                 max: 42n,
                             },
@@ -609,7 +609,7 @@ describe('VariableDeclaration', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyType' }),
-                    fields: [],
+                    properties: [],
                 }),
             )
 
@@ -624,7 +624,7 @@ describe('VariableDeclaration', () => {
                     { span: util.someCodeSpan },
                 ),
                 initialValue: DataLiteral.create({
-                    fields: [],
+                    properties: [],
                     span: util.someCodeSpan,
                 }),
                 nameSpan: util.someCodeSpan,
@@ -639,7 +639,7 @@ describe('VariableDeclaration', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: TypeName.create({ name: 'MyData' }),
-                    fields: [],
+                    properties: [],
                 }),
             )
             context.scope.addVariableDeclaration('c', {
@@ -692,9 +692,9 @@ describe('VariableDeclaration', () => {
                 context.scope.rootScope.addDataDeclaration(
                     DataDeclaration.create({
                         name: TypeName.create({ name: 'MyType' }),
-                        fields: [
+                        properties: [
                             {
-                                name: 'myField',
+                                name: 'myProperty',
                                 isImmutable: false,
                                 isolationLevel: ISOLATED,
                                 domain: decorateDomain(
@@ -716,8 +716,8 @@ describe('VariableDeclaration', () => {
                     'value',
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
-                        fields: {
-                            myField: IntegerRange.create({
+                        properties: {
+                            myProperty: IntegerRange.create({
                                 min: 42n,
                                 max: 42n,
                             }),

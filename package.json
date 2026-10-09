@@ -31,6 +31,6 @@
     "test:runtime": "npm test --workspace=@clawr/runtime",
     "build:vscode": "npm run build --workspace=@clawr/vscode",
     "test:vscode": "npm test --workspace=@clawr/vscode",
-    "test": "npm test --workspace=@clawr/frontend && npm run test:backend && npm run test:e2e"
+    "test": "npm test --workspace=@clawr/frontend && npm run build:runtime && npm run test:backend && npm run test:e2e"
   }
 }

@@ -97,7 +97,7 @@ describe('FunctionCall', () => {
                     implementation: {
                         kind: 'implicit-return',
                         expression: DataLiteral.create({
-                            fields: [],
+                            properties: [],
                             span: util.someCodeSpan,
                         }),
                     },
@@ -298,18 +298,18 @@ describe('FunctionCall', () => {
                         baseName: 'read',
                         implementation: {
                             kind: 'implicit-return',
-                            expression: util.sharedFieldRef(
+                            expression: util.sharedPropertyRef(
                                 util.variableRef('self'),
-                                'field',
+                                'property',
                             ),
                         },
                     }),
                 ],
-                fields: [
+                properties: [
                     {
-                        ...util.someFieldDeclConfig,
+                        ...util.somePropertyDeclConfig,
                         isImmutable: true,
-                        name: 'field',
+                        name: 'property',
                     },
                 ],
             }),

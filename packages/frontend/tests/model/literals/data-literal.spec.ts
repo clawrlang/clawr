@@ -12,15 +12,15 @@ describe('DataLiteral', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: TypeName.create({ name: 'MyType' }),
-                fields: [
-                    { ...util.someFieldDeclConfig, name: 'x' },
-                    { ...util.someFieldDeclConfig, name: 'y' },
+                properties: [
+                    { ...util.somePropertyDeclConfig, name: 'x' },
+                    { ...util.somePropertyDeclConfig, name: 'y' },
                 ],
             }),
         )
 
         const dataLiteral = DataLiteral.create({
-            fields: [
+            properties: [
                 { name: 'x', value: util.integerLiteral(42) },
                 { name: 'y', value: util.integerLiteral(17) },
             ],
@@ -36,7 +36,7 @@ describe('DataLiteral', () => {
         })
         expect(result.isSuccess && result.value).toMatchObject({
             kind: 'ALLOCATION',
-            fields: [
+            properties: [
                 {
                     name: 'x',
                     value: {
@@ -60,15 +60,15 @@ describe('DataLiteral', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyType'),
-                fields: [
-                    { ...util.someFieldDeclConfig, name: 'x' },
-                    { ...util.someFieldDeclConfig, name: 'y' },
+                properties: [
+                    { ...util.somePropertyDeclConfig, name: 'x' },
+                    { ...util.somePropertyDeclConfig, name: 'y' },
                 ],
             }),
         )
 
         const dataLiteral = DataLiteral.create({
-            fields: [
+            properties: [
                 { name: 'x', value: util.integerLiteral(42) },
                 { name: 'y', value: util.integerLiteral(17) },
             ],
@@ -83,21 +83,21 @@ describe('DataLiteral', () => {
         })
         expect(result.isSuccess && result.value).toMatchObject({
             type: { name: 'MyType' },
-            fields: {
+            properties: {
                 x: { min: 42n, max: 42n },
                 y: { min: 17n, max: 17n },
             },
         })
     })
 
-    it('returns a failure from a nested field value', () => {
+    it('returns a failure from a nested property value', () => {
         const context = util.newSemanticContext()
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('OuterType'),
-                fields: [
+                properties: [
                     {
-                        ...util.someFieldDeclConfig,
+                        ...util.somePropertyDeclConfig,
                         name: 'inner',
                         domain: util.spannedDomain(
                             RCTypeSet.create({
@@ -110,11 +110,11 @@ describe('DataLiteral', () => {
         )
 
         const dataLiteral = DataLiteral.create({
-            fields: [
+            properties: [
                 {
                     name: 'inner',
                     value: DataLiteral.create({
-                        fields: [
+                        properties: [
                             {
                                 name: 'value',
                                 value: util.integerLiteral(7),

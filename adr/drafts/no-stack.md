@@ -24,7 +24,7 @@ Maybe it is possible to detect this and adorn the type with an indirection flag?
 
 > A backend on a stack-only target sees this attribute and knows: I can still stack-allocate the _outer_ node (it has a finite size), I just can't stack-allocate the whole spine. Which is exactly what you'd want anyway — the head node lives on the stack, its `next` boxes live wherever the backend wants.
 
-Is it? I’m not sure. A `const` variable can be assigned to a field. If the variable is stack allocated, the value must be copied immediately, but if the field uses indirection, it can be assigned to other fields with copy-on-write. This sounds complicated, but maybe it is reasonable?
+Is it? I’m not sure. A `const` variable can be assigned to a property. If the variable is stack allocated, the value must be copied immediately, but if the property uses indirection, it can be assigned to other properties with copy-on-write. This sounds complicated, but maybe it is reasonable?
 
 ## What is `null`?
 

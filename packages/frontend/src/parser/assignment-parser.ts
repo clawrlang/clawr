@@ -1,6 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { Assignment } from '@/model/assignment'
-import { FieldReference } from '@/model/field-reference'
+import { PropertyReference } from '@/model/property-reference'
 import { SelfAssignment } from '@/model/self-assignment'
 import { VariableReference } from '@/model/variable-reference'
 import { Context } from '@/parser'
@@ -41,7 +41,7 @@ export class AssignmentParser implements StatementParser<
             })
         } else if (
             target instanceof VariableReference ||
-            target instanceof FieldReference
+            target instanceof PropertyReference
         ) {
             const equalsToken = stream.expect('PUNCTUATION', '=')
             const value = expressionParser.parse(stream)
@@ -53,7 +53,7 @@ export class AssignmentParser implements StatementParser<
         } else {
             throw SourceError.create({
                 message:
-                    'Invalid assignment target. Only variables and fields are allowed.',
+                    'Invalid assignment target. Only variables and properties are allowed.',
                 span: {
                     start: stream.peek()!!.start,
                     end: stream.peek()!!.end,

@@ -4,9 +4,9 @@
         {
             "kind": "RC_TYPE_DECL",
             "name": "MyData",
-            "fields": [
+            "properties": [
                 {
-                    "name": "field",
+                    "name": "property",
                     "domain": {
                         "type": "integer"
                     }
@@ -33,9 +33,9 @@
                             "type": "rc-type",
                             "name": "MyData"
                         },
-                        "fields": [
+                        "properties": [
                             {
-                                "name": "field",
+                                "name": "property",
                                 "value": {
                                     "kind": "INTEGER_LITERAL",
                                     "value": {
@@ -100,7 +100,7 @@
             "initialValue": {
                 "kind": "BOX",
                 "expression": {
-                    "kind": "FIELD_REF",
+                    "kind": "PROPERTY_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
                         "name": "var",
@@ -108,7 +108,7 @@
                             "type": "integer"
                         }
                     },
-                    "field": "field",
+                    "property": "property",
                     "value": {
                         "type": "integer"
                     }

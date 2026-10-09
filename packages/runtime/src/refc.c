@@ -62,7 +62,7 @@ _release_rc_structure(void *const structure) {
       _release_proxy(proxy);
     }
     void (*releaseNested)(void *self) =
-        header->is_a->data_type.release_nested_fields;
+        header->is_a->data_type.release_nested_properties;
     if (releaseNested)
       releaseNested(structure);
     free(structure);
@@ -94,7 +94,7 @@ void *_performCopying(void *const structure, refs_t const semantics) {
   atomic_init(&clone->refs, semantics | 1);
 
   void (*retainNested)(void *self) =
-      header->is_a->data_type.retain_nested_fields;
+      header->is_a->data_type.retain_nested_properties;
   if (retainNested)
     retainNested(structure);
 

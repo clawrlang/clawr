@@ -1,7 +1,7 @@
 import { Context, Expression, Statement } from '@/model'
-import { FieldReference } from '@/model/field-reference'
 import { UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
+import { PropertyReference } from '@/model/property-reference'
 import { Retain } from '@/model/retain'
 import { RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
@@ -11,7 +11,7 @@ import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 
 export class Assignment implements Statement {
     private constructor(
-        public target: FieldReference | VariableReference,
+        public target: PropertyReference | VariableReference,
         public value: Expression,
         public span: SourceCodeSpan,
     ) {}
@@ -21,7 +21,7 @@ export class Assignment implements Statement {
         value,
         span,
     }: {
-        target: FieldReference | VariableReference
+        target: PropertyReference | VariableReference
         value: Expression
         span: SourceCodeSpan
     }) {

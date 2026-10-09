@@ -13,9 +13,9 @@ describe('ObjectDeclaration', () => {
             ...util.someObjectDeclConfig,
             name: util.simpleTypeName('Object'),
             superType: 'Super',
-            fields: [
+            properties: [
                 {
-                    name: 'field',
+                    name: 'property',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
                     domain: util.spannedDomain(IntegerRange.singleton(20n)),
@@ -34,9 +34,9 @@ describe('ObjectDeclaration', () => {
             {
                 kind: 'RC_TYPE_DECL',
                 name: 'Object',
-                fields: [
+                properties: [
                     {
-                        name: 'field',
+                        name: 'property',
                         domain: {
                             max: '20',
                             min: '20',
@@ -86,9 +86,9 @@ describe('ObjectDeclaration', () => {
                     ],
                 }),
             ],
-            fields: [
+            properties: [
                 {
-                    name: 'field',
+                    name: 'property',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
                     domain: util.spannedDomain(IntegerRange.singleton(20n)),
@@ -141,9 +141,9 @@ describe('ObjectDeclaration', () => {
                     implementation: {
                         kind: 'implicit-return',
                         expression: DataLiteral.create({
-                            fields: [
+                            properties: [
                                 {
-                                    name: 'field',
+                                    name: 'property',
                                     value: util.integerLiteral(1),
                                 },
                             ],
@@ -165,9 +165,9 @@ describe('ObjectDeclaration', () => {
                         statements: [
                             SelfAssignment.create({
                                 value: DataLiteral.create({
-                                    fields: [
+                                    properties: [
                                         {
-                                            name: 'field',
+                                            name: 'property',
                                             value: util.integerLiteral(1),
                                         },
                                     ],
@@ -180,9 +180,9 @@ describe('ObjectDeclaration', () => {
                     result: undefined,
                 }),
             ],
-            fields: [
+            properties: [
                 {
-                    name: 'field',
+                    name: 'property',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
                     domain: util.spannedDomain(IntegerRange.singleton(20n)),

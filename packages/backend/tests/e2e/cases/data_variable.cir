@@ -4,7 +4,7 @@
         {
             "kind": "RC_TYPE_DECL",
             "name": "FooData",
-            "fields": [
+            "properties": [
                 {
                     "name": "bar",
                     "domain": {
@@ -27,7 +27,7 @@
                     "name": "FooData"
                 },
                 "isolationLevel": "SHARED",
-                "fields": [
+                "properties": [
                     {
                         "name": "bar",
                         "value": {
@@ -47,7 +47,7 @@
         {
             "kind": "ASSIGN",
             "target": {
-                "kind": "FIELD_REF",
+                "kind": "PROPERTY_REF",
                 "object": {
                     "kind": "VARIABLE_REF",
                     "name": "foo",
@@ -56,7 +56,7 @@
                         "name": "FooData"
                     }
                 },
-                "field": "bar"
+                "property": "bar"
             },
             "value": {
                 "kind": "INTEGER_LITERAL",
@@ -73,7 +73,7 @@
             "initialValue": {
                 "kind": "BOX",
                 "expression": {
-                    "kind": "FIELD_REF",
+                    "kind": "PROPERTY_REF",
                     "object": {
                         "kind": "VARIABLE_REF",
                         "name": "foo",
@@ -82,7 +82,7 @@
                             "name": "FooData"
                         }
                     },
-                    "field": "bar",
+                    "property": "bar",
                     "value": {
                         "type": "integer"
                     }

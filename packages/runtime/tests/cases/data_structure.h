@@ -5,14 +5,14 @@
 //     value: integer @range(0..255)
 // }
 // ```
-typedef struct DataStructureˇfields {
+typedef struct DataStructureˇproperties {
   int8_t x;
   int8_t y;
-} DataStructureˇfields;
+} DataStructureˇproperties;
 
 typedef struct DataStructure {
   __rc_header header;
-  DataStructureˇfields fields;
+  DataStructureˇproperties properties;
 } DataStructure;
 static const __type_info DataStructureˇtype = {
     .data_type = {.size = sizeof(DataStructure)},

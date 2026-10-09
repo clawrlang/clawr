@@ -110,7 +110,7 @@ describe('FunctionDeclaration (method)', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyData'),
-                fields: [],
+                properties: [],
             }),
         )
         context.scope.addVariableDeclaration('myVar', {
@@ -148,7 +148,7 @@ describe('FunctionDeclaration (method)', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyData'),
-                fields: [],
+                properties: [],
             }),
         )
         context.scope.addVariableDeclaration('myVar', {
@@ -186,7 +186,7 @@ describe('FunctionDeclaration (method)', () => {
         context.scope.rootScope.addDataDeclaration(
             DataDeclaration.create({
                 name: util.simpleTypeName('MyData'),
-                fields: [],
+                properties: [],
             }),
         )
         context.scope.addVariableDeclaration('myVar', {
@@ -256,7 +256,7 @@ describe('FunctionDeclaration (method)', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [],
+                    properties: [],
                 }),
             )
             context.scope.addVariableDeclaration('myVar', {
@@ -293,7 +293,7 @@ describe('FunctionDeclaration (method)', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [],
+                    properties: [],
                 }),
             )
             context.scope.addVariableDeclaration('myVar', {
@@ -364,7 +364,9 @@ describe('FunctionDeclaration (method)', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [{ ...util.someFieldDeclConfig, name: 'field1' }],
+                    properties: [
+                        { ...util.somePropertyDeclConfig, name: 'property1' },
+                    ],
                 }),
             )
 
@@ -384,9 +386,9 @@ describe('FunctionDeclaration (method)', () => {
                                 }),
                             ),
                             initialValue: DataLiteral.create({
-                                fields: [
+                                properties: [
                                     {
-                                        name: 'field1',
+                                        name: 'property1',
                                         value: util.integerLiteral(42),
                                     },
                                 ],
@@ -414,7 +416,9 @@ describe('FunctionDeclaration (method)', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [{ ...util.someFieldDeclConfig, name: 'field1' }],
+                    properties: [
+                        { ...util.somePropertyDeclConfig, name: 'property1' },
+                    ],
                 }),
             )
 
@@ -438,9 +442,9 @@ describe('FunctionDeclaration (method)', () => {
                                 }),
                             ),
                             initialValue: DataLiteral.create({
-                                fields: [
+                                properties: [
                                     {
-                                        name: 'field1',
+                                        name: 'property1',
                                         value: util.integerLiteral(42),
                                     },
                                 ],
@@ -471,7 +475,7 @@ describe('FunctionDeclaration (method)', () => {
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
                     name: util.simpleTypeName('MyData'),
-                    fields: [],
+                    properties: [],
                 }),
             )
 
@@ -499,7 +503,7 @@ describe('FunctionDeclaration (method)', () => {
                                 }),
                             ),
                             initialValue: DataLiteral.create({
-                                fields: [],
+                                properties: [],
                                 span: util.someCodeSpan,
                             }),
                         }),

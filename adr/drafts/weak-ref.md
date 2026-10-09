@@ -16,7 +16,7 @@ There is already an `__rc_proxy` type in the backend code anticipating the need 
 
 ## Decision
 
-Add the keyword `weak` for use with fields: `weak ref`/`weak mutref`.
+Add the keyword `weak` for use with properties: `weak ref`/`weak mutref`.
 Also allow `weak` references in closures.
 
 A `weak` reference does not claim the value it points at. The memory can be deallocated causing the `weak` reference to be set to `null`.

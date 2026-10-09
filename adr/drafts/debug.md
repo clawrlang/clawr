@@ -1,5 +1,5 @@
 <!-- markdownlint-disable MD041 MD033 -->
-<img src="./images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
+<img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
 # Debug Information in the CIR
 
@@ -11,9 +11,9 @@
 
 ## Context
 
-The frontend performs aggressive optimization ([ADR-005](./adr-005.md), [ADR-015](./adr-015.md)).
+The frontend performs aggressive optimization ([ADR-005](../adr-005.md), [ADR-015](../adr-015.md)).
 Source correspondence can be lost. The CIR is the interchange format
-([ADR-001](./adr-001.md)) and must carry enough information for a debugger to map
+([ADR-001](../adr-001.md)) and must carry enough information for a debugger to map
 runtime state back to source.
 
 ## Decision
@@ -35,14 +35,14 @@ The frontend MUST NOT erase provenance when folding. It MAY omit
 provenance entirely (no debug info), but if it emits any, the chain
 must be consistent.
 
-Implicit backend boxing ([ADR-016](./adr-016.md)) is backend-private and MUST NOT
+Implicit backend boxing ([ADR-016](../adr-016.md)) is backend-private and MUST NOT
 appear in debug metadata as a source-level operation.
 
 ## Rationale
 
 - Debug info must be decided before CIR is frozen.
 - Provenance preserves the user's mental model under optimization.
-- Keeping debug info out of backend obligations keeps [ADR-001](./adr-001.md) intact.
+- Keeping debug info out of backend obligations keeps [ADR-001](../adr-001.md) intact.
 - A CIR interpreter with provenance is a platform-independent debugger.
 
 ## Alternatives Considered
@@ -67,7 +67,7 @@ appear in debug metadata as a source-level operation.
 
 ## Related ADRs
 
-- [ADR-001](./adr-001.md) (Syntax, Semantics and CIR)
-- [ADR-005](./adr-005.md) (Types are Sets)
-- [ADR-015](./adr-015.md) (Basic ARC Rules)
-- [ADR-016](./adr-016.md) (Backend-Managed Boxing)
+- [ADR-001](../adr-001.md) (Syntax, Semantics and CIR)
+- [ADR-005](../adr-005.md) (Types are Sets)
+- [ADR-015](../adr-015.md) (Basic ARC Rules)
+- [ADR-016](../adr-016.md) (Backend-Managed Boxing)

@@ -23,7 +23,7 @@ Fields operate using truth-values rather than numerically.
 
 ## Rationale
 
-1. [ADR-000](adr-000.md) mandates platform agnosticity
+1. [ADR-000](../adr-000.md) mandates platform agnosticity
 2. Reading ternary data on a binary computer (and vice versa) should be possible
 3. Ternary computers are not yet commercially available. Ternary storage might be made available earlier.
 4. Supporting binary fields on ternary chipsets is trivial, supporting ternary on binary is possible through emulation.

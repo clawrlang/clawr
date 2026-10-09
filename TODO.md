@@ -55,4 +55,4 @@
 - Use `${npm_package_version%%.*}` and `process.env.npm_package_version!.split('.')[0]`?
   - Better to use a separate _compatibility version_ and use the package version as _current version_?
   - Consider libSystem.B.dylib (compatibility version 1.0.0, current version 1356.0.0). Always considered compatible.
-- binary/ternary data (`tword`/`bword`)
+- binary/ternary data (`tritfield`/`bitfield`)

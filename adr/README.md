@@ -19,6 +19,8 @@ Many design decisions are made implicitly by the TDD principle “make it work.�
 
 [Tenets](./tenets.md)
 
+[Terminology](./terminology.md)
+
 Statuses used in this documentation:
 
 - ✍🏼 **Draft**: A rough sketch of an idea

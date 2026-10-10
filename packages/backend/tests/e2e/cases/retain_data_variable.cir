@@ -1,219 +1,140 @@
-{
-    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
-    "declarations": [
-        {
-            "kind": "RC_TYPE_DECL",
-            "name": "FooData",
-            "properties": [
-                {
-                    "name": "bar",
-                    "domain": {
-                        "type": "integer"
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "two",
-            "domain": {
-                "type": "rc-type",
-                "name": "FooData"
-            },
-            "initialValue": {
-                "kind": "ALLOCATION",
-                "isolationLevel": "ISOLATED",
-                "properties": [
-                    {
-                        "name": "bar",
-                        "value": {
-                            "kind": "INTEGER_LITERAL",
-                            "domain": {
-                                "type": "integer",
-                                "min": "2",
-                                "max": "2"
-                            }
-                        }
-                    }
-                ],
-                "domain": {
-                    "type": "rc-type",
-                    "name": "FooData"
-                }
-            }
-        }
-    ],
-    "startBlock": [
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "one",
-            "domain": {
-                "type": "rc-type",
-                "name": "FooData"
-            },
-            "initialValue": {
-                "kind": "RETAIN",
-                "object": {
-                    "kind": "VARIABLE_REF",
-                    "name": "two"
-                },
-                "domain": {
-                    "type": "rc-type",
-                    "name": "FooData"
-                }
-            }
-        },
-        {
-            "kind": "ENSURE_UNIQUE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "one"
-            }
-        },
-        {
-            "kind": "ASSIGN",
-            "target": {
-                "kind": "PROPERTY_REF",
-                "object": {
-                    "kind": "VARIABLE_REF",
-                    "name": "one",
-                    "domain": {
-                        "type": "rc-type",
-                        "name": "FooData"
-                    }
-                },
-                "property": "bar"
-            },
-            "value": {
-                "kind": "INTEGER_LITERAL",
-                "domain": {
-                    "type": "integer",
-                    "min": "1",
-                    "max": "1"
-                }
-            }
-        },
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "__tempˇ0",
-            "initialValue": {
-                "kind": "BOX",
-                "expression": {
-                    "kind": "PROPERTY_REF",
-                    "object": {
-                        "kind": "VARIABLE_REF",
-                        "name": "two",
-                        "domain": {
-                            "type": "rc-type",
-                            "name": "FooData"
-                        }
-                    },
-                    "property": "bar",
-                    "domain": {
-                        "type": "integer"
-                    }
-                },
-                "domain": {
-                    "type": "integer",
-                    "boxed": true
-                }
-            },
-            "domain": {
-                "type": "integer",
-                "boxed": true
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "print",
-                "labels": []
-            },
-            "arguments": [
-                {
-                    "kind": "VARIABLE_REF",
-                    "name": "__tempˇ0",
-                    "domain": {
-                        "type": "integer",
-                        "boxed": true
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "__tempˇ0"
-            }
-        },
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "__tempˇ1",
-            "initialValue": {
-                "kind": "BOX",
-                "expression": {
-                    "kind": "PROPERTY_REF",
-                    "object": {
-                        "kind": "VARIABLE_REF",
-                        "name": "one",
-                        "domain": {
-                            "type": "rc-type",
-                            "name": "FooData"
-                        }
-                    },
-                    "property": "bar",
-                    "domain": {
-                        "type": "integer"
-                    }
-                },
-                "domain": {
-                    "type": "integer",
-                    "boxed": true
-                }
-            },
-            "domain": {
-                "type": "integer",
-                "boxed": true
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "print",
-                "labels": []
-            },
-            "arguments": [
-                {
-                    "kind": "VARIABLE_REF",
-                    "name": "__tempˇ1",
-                    "domain": {
-                        "type": "integer",
-                        "boxed": true
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "__tempˇ1"
-            }
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "one"
-            }
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "two"
-            }
-        }
-    ]
-}
+# yaml-language-server: $schema=../../../../cir/dist/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: RC_TYPE_DECL
+    name: FooData
+    properties:
+      - name: bar
+        domain:
+          type: integer
+  - kind: VARIABLE_DECL
+    name: two
+    domain:
+      type: rc-type
+      name: FooData
+    initialValue:
+      kind: ALLOCATION
+      isolationLevel: ISOLATED
+      properties:
+        - name: bar
+          value:
+            kind: INTEGER_LITERAL
+            domain:
+              type: integer
+              min: '2'
+              max: '2'
+      domain:
+        type: rc-type
+        name: FooData
+startBlock:
+  - kind: VARIABLE_DECL
+    name: one
+    domain:
+      type: rc-type
+      name: FooData
+    initialValue:
+      kind: RETAIN
+      object:
+        kind: VARIABLE_REF
+        name: two
+      domain:
+        type: rc-type
+        name: FooData
+  - kind: ENSURE_UNIQUE
+    object:
+      kind: VARIABLE_REF
+      name: one
+  - kind: ASSIGN
+    target:
+      kind: PROPERTY_REF
+      object:
+        kind: VARIABLE_REF
+        name: one
+        domain:
+          type: rc-type
+          name: FooData
+      property: bar
+    value:
+      kind: INTEGER_LITERAL
+      domain:
+        type: integer
+        min: '1'
+        max: '1'
+  - kind: VARIABLE_DECL
+    name: __tempˇ0
+    initialValue:
+      kind: BOX
+      expression:
+        kind: PROPERTY_REF
+        object:
+          kind: VARIABLE_REF
+          name: two
+          domain:
+            type: rc-type
+            name: FooData
+        property: bar
+        domain:
+          type: integer
+      domain:
+        type: integer
+        boxed: true
+    domain:
+      type: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ0
+        domain:
+          type: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ0
+  - kind: VARIABLE_DECL
+    name: __tempˇ1
+    initialValue:
+      kind: BOX
+      expression:
+        kind: PROPERTY_REF
+        object:
+          kind: VARIABLE_REF
+          name: one
+          domain:
+            type: rc-type
+            name: FooData
+        property: bar
+        domain:
+          type: integer
+      domain:
+        type: integer
+        boxed: true
+    domain:
+      type: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ1
+        domain:
+          type: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ1
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: one
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: two

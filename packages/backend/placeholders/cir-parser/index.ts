@@ -5,15 +5,24 @@
 
 import { ClawrModule } from '@clawr/cir'
 import typia from 'typia'
+import YAML from 'yaml'
 
 export default class CIRParser {
     static parse(input: string): ClawrModule {
-        const result = typia.validate<ClawrModule>(JSON.parse(input))
+        const result = typia.validate<ClawrModule>(parse(input))
         if (result.success) return result.data
 
         const details = result.errors
             .map((error) => `${error.path} expected ${error.expected}`)
             .join('; ')
         throw new Error(`Invalid CIR: ${details}`)
+    }
+}
+
+function parse(input: string) {
+    try {
+        return JSON.parse(input)
+    } catch {
+        return YAML.parse(input)
     }
 }

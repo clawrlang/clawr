@@ -1,151 +1,97 @@
-{
-    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
-    "declarations": [
-        {
-            "kind": "RC_TYPE_DECL",
-            "name": "MyData",
-            "properties": [
-                {
-                    "name": "property",
-                    "domain": {
-                        "type": "integer"
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "FUNCTION_DECL",
-            "baseName": "f",
-            "labels": [],
-            "parameters": [],
-            "body": [
-                {
-                    "kind": "VARIABLE_DECL",
-                    "name": "var",
-                    "domain": {
-                        "type": "rc-type",
-                        "name": "MyData"
-                    },
-                    "initialValue": {
-                        "kind": "ALLOCATION",
-                        "isolationLevel": "ISOLATED",
-                        "domain": {
-                            "type": "rc-type",
-                            "name": "MyData"
-                        },
-                        "properties": [
-                            {
-                                "name": "property",
-                                "value": {
-                                    "kind": "INTEGER_LITERAL",
-                                    "domain": {
-                                        "type": "integer",
-                                        "max": "42",
-                                        "min": "42"
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    "kind": "RETURN",
-                    "value": {
-                        "kind": "VARIABLE_REF",
-                        "name": "var",
-                        "domain": {
-                            "type": "rc-type",
-                            "name": "MyData"
-                        }
-                    }
-                }
-            ],
-            "domain": {
-                "type": "rc-type",
-                "name": "MyData"
-            }
-        }
-    ],
-    "startBlock": [
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "var",
-            "domain": {
-                "type": "rc-type",
-                "name": "MyData"
-            },
-            "initialValue": {
-                "kind": "AS_SHARED",
-                "object": {
-                    "kind": "CALL",
-                    "name": {
-                        "baseName": "f",
-                        "labels": []
-                    },
-                    "arguments": [],
-                    "domain": {
-                        "type": "rc-type",
-                        "name": "MyData"
-                    }
-                },
-                "domain": {
-                    "type": "rc-type",
-                    "name": "MyData"
-                }
-            }
-        },
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "__tempˇ0",
-            "initialValue": {
-                "kind": "BOX",
-                "expression": {
-                    "kind": "PROPERTY_REF",
-                    "object": {
-                        "kind": "VARIABLE_REF",
-                        "name": "var",
-                        "domain": {
-                            "type": "integer"
-                        }
-                    },
-                    "property": "property",
-                    "domain": {
-                        "type": "integer"
-                    }
-                },
-                "domain": {
-                    "type": "integer",
-                    "boxed": true
-                }
-            },
-            "domain": {
-                "type": "integer",
-                "boxed": true
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "print",
-                "labels": []
-            },
-            "arguments": [
-                {
-                    "kind": "VARIABLE_REF",
-                    "name": "__tempˇ0",
-                    "domain": {
-                        "type": "integer",
-                        "boxed": true
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "__tempˇ0"
-            }
-        }
-    ]
-}
+# yaml-language-server: $schema=../../../../cir/dist/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: RC_TYPE_DECL
+    name: MyData
+    properties:
+      - name: property
+        domain:
+          type: integer
+  - kind: FUNCTION_DECL
+    baseName: f
+    labels: []
+    parameters: []
+    body:
+      - kind: VARIABLE_DECL
+        name: var
+        domain:
+          type: rc-type
+          name: MyData
+        initialValue:
+          kind: ALLOCATION
+          isolationLevel: ISOLATED
+          domain:
+            type: rc-type
+            name: MyData
+          properties:
+            - name: property
+              value:
+                kind: INTEGER_LITERAL
+                domain:
+                  type: integer
+                  max: '42'
+                  min: '42'
+      - kind: RETURN
+        value:
+          kind: VARIABLE_REF
+          name: var
+          domain:
+            type: rc-type
+            name: MyData
+    domain:
+      type: rc-type
+      name: MyData
+startBlock:
+  - kind: VARIABLE_DECL
+    name: var
+    domain:
+      type: rc-type
+      name: MyData
+    initialValue:
+      kind: AS_SHARED
+      object:
+        kind: CALL
+        name:
+          baseName: f
+          labels: []
+        arguments: []
+        domain:
+          type: rc-type
+          name: MyData
+      domain:
+        type: rc-type
+        name: MyData
+  - kind: VARIABLE_DECL
+    name: __tempˇ0
+    initialValue:
+      kind: BOX
+      expression:
+        kind: PROPERTY_REF
+        object:
+          kind: VARIABLE_REF
+          name: var
+          domain:
+            type: integer
+        property: property
+        domain:
+          type: integer
+      domain:
+        type: integer
+        boxed: true
+    domain:
+      type: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ0
+        domain:
+          type: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ0

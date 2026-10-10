@@ -1,103 +1,64 @@
-{
-    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
-    "declarations": [
-        {
-            "kind": "FUNCTION_DECL",
-            "baseName": "f",
-            "labels": [
-                "l"
-            ],
-            "parameters": [
-                {
-                    "name": "var",
-                    "domain": {
-                        "type": "integer"
-                    }
-                }
-            ],
-            "body": [
-                {
-                    "kind": "RETURN",
-                    "value": {
-                        "kind": "INTEGER_LITERAL",
-                        "domain": {
-                            "type": "integer",
-                            "min": "42",
-                            "max": "42"
-                        }
-                    }
-                }
-            ],
-            "domain": {
-                "type": "integer",
-                "max": "42",
-                "min": "42"
-            }
-        }
-    ],
-    "startBlock": [
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "__tempˇ0",
-            "initialValue": {
-                "kind": "BOX",
-                "expression": {
-                    "kind": "CALL",
-                    "name": {
-                        "baseName": "f",
-                        "labels": [
-                            "l"
-                        ]
-                    },
-                    "arguments": [
-                        {
-                            "kind": "INTEGER_LITERAL",
-                            "domain": {
-                                "type": "integer",
-                                "min": "1",
-                                "max": "1"
-                            }
-                        }
-                    ],
-                    "domain": {
-                        "type": "integer",
-                        "max": "42",
-                        "min": "42"
-                    }
-                },
-                "domain": {
-                    "type": "integer",
-                    "boxed": true
-                }
-            },
-            "domain": {
-                "type": "integer",
-                "boxed": true
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "print",
-                "labels": []
-            },
-            "arguments": [
-                {
-                    "kind": "VARIABLE_REF",
-                    "name": "__tempˇ0",
-                    "domain": {
-                        "type": "integer",
-                        "boxed": true
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "__tempˇ0"
-            }
-        }
-    ]
-}
+# yaml-language-server: $schema=../../../../cir/dist/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: FUNCTION_DECL
+    baseName: f
+    labels:
+      - l
+    parameters:
+      - name: var
+        domain:
+          type: integer
+    body:
+      - kind: RETURN
+        value:
+          kind: INTEGER_LITERAL
+          domain:
+            type: integer
+            min: '42'
+            max: '42'
+    domain:
+      type: integer
+      max: '42'
+      min: '42'
+startBlock:
+  - kind: VARIABLE_DECL
+    name: __tempˇ0
+    initialValue:
+      kind: BOX
+      expression:
+        kind: CALL
+        name:
+          baseName: f
+          labels:
+            - l
+        arguments:
+          - kind: INTEGER_LITERAL
+            domain:
+              type: integer
+              min: '1'
+              max: '1'
+        domain:
+          type: integer
+          max: '42'
+          min: '42'
+      domain:
+        type: integer
+        boxed: true
+    domain:
+      type: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ0
+        domain:
+          type: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ0

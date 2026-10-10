@@ -53,7 +53,7 @@ async function main() {
     await fs.mkdir(path.dirname(outPath), { recursive: true })
     await fs.writeFile(outPath, JSON.stringify(schema, null, 2) + '\n')
 
-    await updateVSCodeSchemaSettings(schema)
+    // await updateVSCodeSchemaSettings(schema)
 }
 
 main().catch((error) => {

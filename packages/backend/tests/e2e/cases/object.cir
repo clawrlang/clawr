@@ -1,255 +1,167 @@
-{
-    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
-    "declarations": [
-        {
-            "kind": "RC_TYPE_DECL",
-            "name": "Object",
-            "properties": [
-                {
-                    "name": "property",
-                    "domain": {
-                        "type": "integer",
-                        "min": "42",
-                        "max": "42"
-                    }
-                }
-            ],
-            "methods": [
-                {
-                    "kind": "FUNCTION_DECL",
-                    "baseName": "property",
-                    "labels": [],
-                    "parameters": [],
-                    "domain": {
-                        "type": "integer",
-                        "min": "42",
-                        "max": "42"
-                    },
-                    "body": [
-                        {
-                            "kind": "RETURN",
-                            "value": {
-                                "kind": "PROPERTY_REF",
-                                "object": {
-                                    "kind": "VARIABLE_REF",
-                                    "name": "self",
-                                    "domain": {
-                                        "type": "rc-type",
-                                        "name": "Object"
-                                    }
-                                },
-                                "property": "property",
-                                "domain": {
-                                    "type": "integer",
-                                    "min": "42",
-                                    "max": "42"
-                                }
-                            }
-                        }
-                    ]
-                }
-            ],
-            "initializers": [
-                {
-                    "kind": "FUNCTION_DECL",
-                    "baseName": "new",
-                    "labels": [],
-                    "parameters": [],
-                    "body": [
-                        {
-                            "kind": "SELF_ASSIGN",
-                            "value": {
-                                "kind": "DATA",
-                                "properties": [
-                                    {
-                                        "name": "property",
-                                        "value": {
-                                            "kind": "INTEGER_LITERAL",
-                                            "domain": {
-                                                "type": "integer",
-                                                "min": "42",
-                                                "max": "42"
-                                            }
-                                        }
-                                    }
-                                ],
-                                "domain": {
-                                    "type": "rc-type",
-                                    "name": "Object"
-                                }
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "kind": "FUNCTION_DECL",
-            "namespace": "Object",
-            "baseName": "new",
-            "labels": [],
-            "parameters": [],
-            "body": [
-                {
-                    "kind": "VARIABLE_DECL",
-                    "name": "__tempˇ0",
-                    "domain": {
-                        "type": "rc-type",
-                        "name": "Object"
-                    },
-                    "initialValue": {
-                        "kind": "ALLOCATION",
-                        "isolationLevel": "ISOLATED",
-                        "domain": {
-                            "type": "rc-type",
-                            "name": "Object"
-                        }
-                    }
-                },
-                {
-                    "kind": "ASSIGN",
-                    "value": {
-                        "kind": "ALLOCATION",
-                        "isolationLevel": "ISOLATED",
-                        "properties": [
-                            {
-                                "name": "property",
-                                "value": {
-                                    "kind": "INTEGER_LITERAL",
-                                    "domain": {
-                                        "type": "integer",
-                                        "min": "42",
-                                        "max": "42"
-                                    }
-                                }
-                            }
-                        ],
-                        "domain": {
-                            "type": "rc-type",
-                            "name": "Object"
-                        }
-                    },
-                    "target": {
-                        "kind": "VARIABLE_REF",
-                        "name": "__tempˇ0"
-                    }
-                },
-                {
-                    "kind": "RETURN",
-                    "value": {
-                        "kind": "VARIABLE_REF",
-                        "name": "__tempˇ0",
-                        "domain": {
-                            "type": "rc-type",
-                            "name": "Object"
-                        }
-                    }
-                }
-            ],
-            "domain": {
-                "type": "rc-type",
-                "name": "Object"
-            }
-        }
-    ],
-    "startBlock": [
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "obj",
-            "domain": {
-                "type": "rc-type",
-                "name": "Object"
-            },
-            "initialValue": {
-                "kind": "ALLOCATION",
-                "isolationLevel": "ISOLATED",
-                "domain": {
-                    "type": "rc-type",
-                    "name": "Object"
-                }
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "new",
-                "labels": []
-            },
-            "arguments": [],
-            "receiver": {
-                "dispatch": "direct",
-                "object": {
-                    "kind": "VARIABLE_REF",
-                    "name": "obj",
-                    "domain": {
-                        "type": "rc-type",
-                        "name": "Object"
-                    }
-                }
-            }
-        },
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "__tempˇ0",
-            "initialValue": {
-                "kind": "BOX",
-                "expression": {
-                    "kind": "CALL",
-                    "receiver": {
-                        "object": {
-                            "kind": "VARIABLE_REF",
-                            "name": "obj",
-                            "domain": {
-                                "type": "rc-type",
-                                "name": "Object"
-                            }
-                        },
-                        "dispatch": "direct"
-                    },
-                    "name": {
-                        "baseName": "property",
-                        "labels": []
-                    },
-                    "arguments": [],
-                    "domain": {
-                        "type": "integer",
-                        "min": "42",
-                        "max": "42"
-                    }
-                },
-                "domain": {
-                    "type": "integer",
-                    "boxed": true
-                }
-            },
-            "domain": {
-                "type": "integer",
-                "boxed": true
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "print",
-                "labels": []
-            },
-            "arguments": [
-                {
-                    "kind": "VARIABLE_REF",
-                    "name": "__tempˇ0",
-                    "domain": {
-                        "type": "integer",
-                        "boxed": true
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "__tempˇ0"
-            }
-        }
-    ]
-}
+# yaml-language-server: $schema=../../../../cir/dist/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: RC_TYPE_DECL
+    name: Object
+    properties:
+      - name: property
+        domain:
+          type: integer
+          min: '42'
+          max: '42'
+    methods:
+      - kind: FUNCTION_DECL
+        baseName: property
+        labels: []
+        parameters: []
+        domain:
+          type: integer
+          min: '42'
+          max: '42'
+        body:
+          - kind: RETURN
+            value:
+              kind: PROPERTY_REF
+              object:
+                kind: VARIABLE_REF
+                name: self
+                domain:
+                  type: rc-type
+                  name: Object
+              property: property
+              domain:
+                type: integer
+                min: '42'
+                max: '42'
+    initializers:
+      - kind: FUNCTION_DECL
+        baseName: new
+        labels: []
+        parameters: []
+        body:
+          - kind: SELF_ASSIGN
+            value:
+              kind: DATA
+              properties:
+                - name: property
+                  value:
+                    kind: INTEGER_LITERAL
+                    domain:
+                      type: integer
+                      min: '42'
+                      max: '42'
+              domain:
+                type: rc-type
+                name: Object
+  - kind: FUNCTION_DECL
+    namespace: Object
+    baseName: new
+    labels: []
+    parameters: []
+    body:
+      - kind: VARIABLE_DECL
+        name: __tempˇ0
+        domain:
+          type: rc-type
+          name: Object
+        initialValue:
+          kind: ALLOCATION
+          isolationLevel: ISOLATED
+          domain:
+            type: rc-type
+            name: Object
+      - kind: ASSIGN
+        value:
+          kind: ALLOCATION
+          isolationLevel: ISOLATED
+          properties:
+            - name: property
+              value:
+                kind: INTEGER_LITERAL
+                domain:
+                  type: integer
+                  min: '42'
+                  max: '42'
+          domain:
+            type: rc-type
+            name: Object
+        target:
+          kind: VARIABLE_REF
+          name: __tempˇ0
+      - kind: RETURN
+        value:
+          kind: VARIABLE_REF
+          name: __tempˇ0
+          domain:
+            type: rc-type
+            name: Object
+    domain:
+      type: rc-type
+      name: Object
+startBlock:
+  - kind: VARIABLE_DECL
+    name: obj
+    domain:
+      type: rc-type
+      name: Object
+    initialValue:
+      kind: ALLOCATION
+      isolationLevel: ISOLATED
+      domain:
+        type: rc-type
+        name: Object
+  - kind: CALL
+    name:
+      baseName: new
+      labels: []
+    arguments: []
+    receiver:
+      dispatch: direct
+      object:
+        kind: VARIABLE_REF
+        name: obj
+        domain:
+          type: rc-type
+          name: Object
+  - kind: VARIABLE_DECL
+    name: __tempˇ0
+    initialValue:
+      kind: BOX
+      expression:
+        kind: CALL
+        receiver:
+          object:
+            kind: VARIABLE_REF
+            name: obj
+            domain:
+              type: rc-type
+              name: Object
+          dispatch: direct
+        name:
+          baseName: property
+          labels: []
+        arguments: []
+        domain:
+          type: integer
+          min: '42'
+          max: '42'
+      domain:
+        type: integer
+        boxed: true
+    domain:
+      type: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ0
+        domain:
+          type: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ0

@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:schema": "npm run build && rm -rf .typia-temp && ttsc -p tsconfig.typia.json && node .typia-temp/src/generate-cir-schema.js && npx prettier --write ../../.vscode/settings.json",
+    "build:schema": "npm run build && rm -rf .typia-temp && ttsc -p tsconfig.typia.json && node .typia-temp/src/generate-cir-schema.js",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {

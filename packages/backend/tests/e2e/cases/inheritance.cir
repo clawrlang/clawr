@@ -1,531 +1,344 @@
-{
-    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
-    "declarations": [
-        {
-            "kind": "RC_TYPE_DECL",
-            "name": "Super",
-            "properties": [
-                {
-                    "name": "property",
-                    "domain": {
-                        "type": "integer",
-                        "min": "0",
-                        "max": "100"
-                    }
-                }
-            ],
-            "methods": [
-                {
-                    "kind": "FUNCTION_DECL",
-                    "baseName": "f",
-                    "labels": [],
-                    "parameters": [],
-                    "domain": {
-                        "type": "integer",
-                        "min": "0",
-                        "max": "100"
-                    },
-                    "body": [
-                        {
-                            "kind": "RETURN",
-                            "value": {
-                                "kind": "PROPERTY_REF",
-                                "object": {
-                                    "kind": "VARIABLE_REF",
-                                    "name": "self",
-                                    "domain": {
-                                        "type": "rc-type",
-                                        "name": "Super"
-                                    }
-                                },
-                                "property": "property",
-                                "domain": {
-                                    "type": "integer",
-                                    "min": "0",
-                                    "max": "100"
-                                }
-                            }
-                        }
-                    ]
-                }
-            ],
-            "initializers": [
-                {
-                    "kind": "FUNCTION_DECL",
-                    "baseName": "init",
-                    "labels": [
-                        "property"
-                    ],
-                    "parameters": [
-                        {
-                            "name": "property",
-                            "domain": {
-                                "type": "integer",
-                                "min": "0",
-                                "max": "100"
-                            }
-                        }
-                    ],
-                    "body": [
-                        {
-                            "kind": "SELF_ASSIGN",
-                            "value": {
-                                "kind": "DATA",
-                                "domain": {
-                                    "type": "rc-type",
-                                    "name": "Super"
-                                },
-                                "properties": [
-                                    {
-                                        "name": "property",
-                                        "value": {
-                                            "kind": "VARIABLE_REF",
-                                            "name": "property",
-                                            "domain": {
-                                                "type": "integer",
-                                                "min": "0",
-                                                "max": "100"
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                }
-            ],
-            "dispatchTable": [
-                {
-                    "slot": {
-                        "baseName": "f",
-                        "labels": [],
-                        "parameters": [],
-                        "domain": {
-                            "type": "integer",
-                            "min": "0",
-                            "max": "100"
-                        }
-                    },
-                    "declaredIn": {
-                        "name": "Super"
-                    },
-                    "implementation": {
-                        "name": "Super"
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RC_TYPE_DECL",
-            "name": "Sub1",
-            "base": {
-                "name": "Super"
-            },
-            "properties": [
-                {
-                    "name": "property",
-                    "domain": {
-                        "type": "integer",
-                        "min": "0",
-                        "max": "100"
-                    }
-                }
-            ],
-            "methods": [
-                {
-                    "kind": "FUNCTION_DECL",
-                    "baseName": "f",
-                    "labels": [],
-                    "parameters": [],
-                    "domain": {
-                        "type": "integer",
-                        "min": "43",
-                        "max": "43"
-                    },
-                    "body": [
-                        {
-                            "kind": "RETURN",
-                            "value": {
-                                "kind": "PROPERTY_REF",
-                                "object": {
-                                    "kind": "VARIABLE_REF",
-                                    "name": "self",
-                                    "domain": {
-                                        "type": "rc-type",
-                                        "name": "Super"
-                                    }
-                                },
-                                "property": "property",
-                                "domain": {
-                                    "type": "integer",
-                                    "min": "0",
-                                    "max": "100"
-                                }
-                            }
-                        }
-                    ]
-                }
-            ],
-            "initializers": [
-                {
-                    "kind": "FUNCTION_DECL",
-                    "baseName": "new",
-                    "labels": [],
-                    "parameters": [],
-                    "body": [
-                        {
-                            "kind": "SELF_ASSIGN",
-                            "value": {
-                                "kind": "DATA",
-                                "properties": [
-                                    {
-                                        "name": "property",
-                                        "value": {
-                                            "kind": "INTEGER_LITERAL",
-                                            "domain": {
-                                                "type": "integer",
-                                                "min": "43",
-                                                "max": "43"
-                                            }
-                                        }
-                                    }
-                                ],
-                                "domain": {
-                                    "type": "rc-type",
-                                    "name": "Sub1"
-                                }
-                            }
-                        },
-                        {
-                            "kind": "CALL",
-                            "receiver": {
-                                "object": {
-                                    "kind": "VARIABLE_REF",
-                                    "name": "self",
-                                    "domain": {
-                                        "type": "rc-type",
-                                        "name": "Super"
-                                    }
-                                },
-                                "dispatch": "direct"
-                            },
-                            "name": {
-                                "baseName": "init",
-                                "labels": [
-                                    "property"
-                                ]
-                            },
-                            "arguments": [
-                                {
-                                    "kind": "INTEGER_LITERAL",
-                                    "domain": {
-                                        "type": "integer",
-                                        "min": "42",
-                                        "max": "42"
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ],
-            "dispatchTable": [
-                {
-                    "slot": {
-                        "baseName": "f",
-                        "labels": [],
-                        "parameters": [],
-                        "domain": {
-                            "type": "integer",
-                            "min": "0",
-                            "max": "100"
-                        }
-                    },
-                    "declaredIn": {
-                        "name": "Super"
-                    },
-                    "implementation": {
-                        "name": "Sub1"
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RC_TYPE_DECL",
-            "name": "Sub2",
-            "base": {
-                "name": "Super"
-            },
-            "properties": [],
-            "methods": [],
-            "initializers": [
-                {
-                    "kind": "FUNCTION_DECL",
-                    "baseName": "new",
-                    "labels": [],
-                    "parameters": [],
-                    "body": [
-                        {
-                            "kind": "SELF_ASSIGN",
-                            "value": {
-                                "kind": "DATA",
-                                "domain": {
-                                    "type": "rc-type",
-                                    "name": "Sub2"
-                                }
-                            }
-                        },
-                        {
-                            "kind": "CALL",
-                            "receiver": {
-                                "object": {
-                                    "kind": "VARIABLE_REF",
-                                    "name": "self",
-                                    "domain": {
-                                        "type": "rc-type",
-                                        "name": "Super"
-                                    }
-                                },
-                                "dispatch": "direct"
-                            },
-                            "name": {
-                                "baseName": "init",
-                                "labels": [
-                                    "property"
-                                ]
-                            },
-                            "arguments": [
-                                {
-                                    "kind": "INTEGER_LITERAL",
-                                    "domain": {
-                                        "type": "integer",
-                                        "max": "42",
-                                        "min": "42"
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ],
-            "dispatchTable": [
-                {
-                    "slot": {
-                        "baseName": "f",
-                        "labels": [],
-                        "parameters": [],
-                        "domain": {
-                            "type": "integer",
-                            "min": "0",
-                            "max": "100"
-                        }
-                    },
-                    "declaredIn": {
-                        "name": "Super"
-                    },
-                    "implementation": {
-                        "name": "Super"
-                    }
-                }
-            ]
-        }
-    ],
-    "startBlock": [
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "obj1",
-            "domain": {
-                "type": "rc-type",
-                "name": "Sub1"
-            },
-            "initialValue": {
-                "kind": "ALLOCATION",
-                "isolationLevel": "ISOLATED",
-                "domain": {
-                    "type": "rc-type",
-                    "name": "Sub1"
-                }
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "new",
-                "labels": []
-            },
-            "arguments": [],
-            "receiver": {
-                "dispatch": "direct",
-                "object": {
-                    "kind": "VARIABLE_REF",
-                    "name": "obj1",
-                    "domain": {
-                        "type": "rc-type",
-                        "name": "Sub1"
-                    }
-                }
-            }
-        },
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "obj2",
-            "domain": {
-                "type": "rc-type",
-                "name": "Sub2"
-            },
-            "initialValue": {
-                "kind": "ALLOCATION",
-                "isolationLevel": "ISOLATED",
-                "domain": {
-                    "type": "rc-type",
-                    "name": "Sub2"
-                }
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "new",
-                "labels": []
-            },
-            "arguments": [],
-            "receiver": {
-                "dispatch": "direct",
-                "object": {
-                    "kind": "VARIABLE_REF",
-                    "name": "obj2",
-                    "domain": {
-                        "type": "rc-type",
-                        "name": "Sub2"
-                    }
-                }
-            }
-        },
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "__tempˇ0",
-            "initialValue": {
-                "kind": "BOX",
-                "expression": {
-                    "kind": "CALL",
-                    "receiver": {
-                        "object": {
-                            "kind": "VARIABLE_REF",
-                            "name": "obj1",
-                            "domain": {
-                                "type": "rc-type",
-                                "name": "Sub1"
-                            }
-                        },
-                        "dispatch": "direct"
-                    },
-                    "name": {
-                        "baseName": "f",
-                        "labels": []
-                    },
-                    "arguments": [],
-                    "domain": {
-                        "type": "integer",
-                        "min": "0",
-                        "max": "100"
-                    }
-                },
-                "domain": {
-                    "type": "integer",
-                    "boxed": true
-                }
-            },
-            "domain": {
-                "type": "integer",
-                "boxed": true
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "print",
-                "labels": []
-            },
-            "arguments": [
-                {
-                    "kind": "VARIABLE_REF",
-                    "name": "__tempˇ0",
-                    "domain": {
-                        "type": "integer",
-                        "boxed": true
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "__tempˇ0"
-            }
-        },
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "__tempˇ1",
-            "initialValue": {
-                "kind": "BOX",
-                "expression": {
-                    "kind": "CALL",
-                    "receiver": {
-                        "object": {
-                            "kind": "VARIABLE_REF",
-                            "name": "obj2",
-                            "domain": {
-                                "type": "rc-type",
-                                "name": "Super"
-                            }
-                        },
-                        "dispatch": "inherited"
-                    },
-                    "name": {
-                        "baseName": "f",
-                        "labels": []
-                    },
-                    "arguments": [],
-                    "domain": {
-                        "type": "integer",
-                        "min": "0",
-                        "max": "100"
-                    }
-                },
-                "domain": {
-                    "type": "integer",
-                    "boxed": true
-                }
-            },
-            "domain": {
-                "type": "integer",
-                "boxed": true
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "print",
-                "labels": []
-            },
-            "arguments": [
-                {
-                    "kind": "VARIABLE_REF",
-                    "name": "__tempˇ1",
-                    "domain": {
-                        "type": "integer",
-                        "boxed": true
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "__tempˇ1"
-            }
-        }
-    ]
-}
+# yaml-language-server: $schema=../../../../cir/dist/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: RC_TYPE_DECL
+    name: Super
+    properties:
+      - name: property
+        domain:
+          type: integer
+          min: '0'
+          max: '100'
+    methods:
+      - kind: FUNCTION_DECL
+        baseName: f
+        labels: []
+        parameters: []
+        domain:
+          type: integer
+          min: '0'
+          max: '100'
+        body:
+          - kind: RETURN
+            value:
+              kind: PROPERTY_REF
+              object:
+                kind: VARIABLE_REF
+                name: self
+                domain:
+                  type: rc-type
+                  name: Super
+              property: property
+              domain:
+                type: integer
+                min: '0'
+                max: '100'
+    initializers:
+      - kind: FUNCTION_DECL
+        baseName: init
+        labels:
+          - property
+        parameters:
+          - name: property
+            domain:
+              type: integer
+              min: '0'
+              max: '100'
+        body:
+          - kind: SELF_ASSIGN
+            value:
+              kind: DATA
+              domain:
+                type: rc-type
+                name: Super
+              properties:
+                - name: property
+                  value:
+                    kind: VARIABLE_REF
+                    name: property
+                    domain:
+                      type: integer
+                      min: '0'
+                      max: '100'
+    dispatchTable:
+      - slot:
+          baseName: f
+          labels: []
+          parameters: []
+          domain:
+            type: integer
+            min: '0'
+            max: '100'
+        declaredIn:
+          name: Super
+        implementation:
+          name: Super
+  - kind: RC_TYPE_DECL
+    name: Sub1
+    base:
+      name: Super
+    properties:
+      - name: property
+        domain:
+          type: integer
+          min: '0'
+          max: '100'
+    methods:
+      - kind: FUNCTION_DECL
+        baseName: f
+        labels: []
+        parameters: []
+        domain:
+          type: integer
+          min: '43'
+          max: '43'
+        body:
+          - kind: RETURN
+            value:
+              kind: PROPERTY_REF
+              object:
+                kind: VARIABLE_REF
+                name: self
+                domain:
+                  type: rc-type
+                  name: Super
+              property: property
+              domain:
+                type: integer
+                min: '0'
+                max: '100'
+    initializers:
+      - kind: FUNCTION_DECL
+        baseName: new
+        labels: []
+        parameters: []
+        body:
+          - kind: SELF_ASSIGN
+            value:
+              kind: DATA
+              properties:
+                - name: property
+                  value:
+                    kind: INTEGER_LITERAL
+                    domain:
+                      type: integer
+                      min: '43'
+                      max: '43'
+              domain:
+                type: rc-type
+                name: Sub1
+          - kind: CALL
+            receiver:
+              object:
+                kind: VARIABLE_REF
+                name: self
+                domain:
+                  type: rc-type
+                  name: Super
+              dispatch: direct
+            name:
+              baseName: init
+              labels:
+                - property
+            arguments:
+              - kind: INTEGER_LITERAL
+                domain:
+                  type: integer
+                  min: '42'
+                  max: '42'
+    dispatchTable:
+      - slot:
+          baseName: f
+          labels: []
+          parameters: []
+          domain:
+            type: integer
+            min: '0'
+            max: '100'
+        declaredIn:
+          name: Super
+        implementation:
+          name: Sub1
+  - kind: RC_TYPE_DECL
+    name: Sub2
+    base:
+      name: Super
+    properties: []
+    methods: []
+    initializers:
+      - kind: FUNCTION_DECL
+        baseName: new
+        labels: []
+        parameters: []
+        body:
+          - kind: SELF_ASSIGN
+            value:
+              kind: DATA
+              domain:
+                type: rc-type
+                name: Sub2
+          - kind: CALL
+            receiver:
+              object:
+                kind: VARIABLE_REF
+                name: self
+                domain:
+                  type: rc-type
+                  name: Super
+              dispatch: direct
+            name:
+              baseName: init
+              labels:
+                - property
+            arguments:
+              - kind: INTEGER_LITERAL
+                domain:
+                  type: integer
+                  max: '42'
+                  min: '42'
+    dispatchTable:
+      - slot:
+          baseName: f
+          labels: []
+          parameters: []
+          domain:
+            type: integer
+            min: '0'
+            max: '100'
+        declaredIn:
+          name: Super
+        implementation:
+          name: Super
+startBlock:
+  - kind: VARIABLE_DECL
+    name: obj1
+    domain:
+      type: rc-type
+      name: Sub1
+    initialValue:
+      kind: ALLOCATION
+      isolationLevel: ISOLATED
+      domain:
+        type: rc-type
+        name: Sub1
+  - kind: CALL
+    name:
+      baseName: new
+      labels: []
+    arguments: []
+    receiver:
+      dispatch: direct
+      object:
+        kind: VARIABLE_REF
+        name: obj1
+        domain:
+          type: rc-type
+          name: Sub1
+  - kind: VARIABLE_DECL
+    name: obj2
+    domain:
+      type: rc-type
+      name: Sub2
+    initialValue:
+      kind: ALLOCATION
+      isolationLevel: ISOLATED
+      domain:
+        type: rc-type
+        name: Sub2
+  - kind: CALL
+    name:
+      baseName: new
+      labels: []
+    arguments: []
+    receiver:
+      dispatch: direct
+      object:
+        kind: VARIABLE_REF
+        name: obj2
+        domain:
+          type: rc-type
+          name: Sub2
+  - kind: VARIABLE_DECL
+    name: __tempˇ0
+    initialValue:
+      kind: BOX
+      expression:
+        kind: CALL
+        receiver:
+          object:
+            kind: VARIABLE_REF
+            name: obj1
+            domain:
+              type: rc-type
+              name: Sub1
+          dispatch: direct
+        name:
+          baseName: f
+          labels: []
+        arguments: []
+        domain:
+          type: integer
+          min: '0'
+          max: '100'
+      domain:
+        type: integer
+        boxed: true
+    domain:
+      type: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ0
+        domain:
+          type: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ0
+  - kind: VARIABLE_DECL
+    name: __tempˇ1
+    initialValue:
+      kind: BOX
+      expression:
+        kind: CALL
+        receiver:
+          object:
+            kind: VARIABLE_REF
+            name: obj2
+            domain:
+              type: rc-type
+              name: Super
+          dispatch: inherited
+        name:
+          baseName: f
+          labels: []
+        arguments: []
+        domain:
+          type: integer
+          min: '0'
+          max: '100'
+      domain:
+        type: integer
+        boxed: true
+    domain:
+      type: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ1
+        domain:
+          type: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ1

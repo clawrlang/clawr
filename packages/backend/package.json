@@ -25,14 +25,15 @@
     "start": "node ./dist/cli.js"
   },
   "dependencies": {
-    "@clawr/cir": "^0.1.0"
+    "@clawr/cir": "^0.1.0",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@ttsc/paths": "^0.28.4",
     "@types/bun": "^1.4.0",
     "bun": "^1.4.0",
     "ttsc": "^0.28.4",
-    "typia": "^14.0.4",
-    "typescript": "^7.0.0"
+    "typescript": "^7.0.0",
+    "typia": "^14.0.4"
   }
 }

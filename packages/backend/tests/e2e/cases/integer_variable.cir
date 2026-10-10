@@ -1,72 +1,47 @@
-{
-    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
-    "declarations": [
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "foo",
-            "domain": {
-                "type": "integer",
-                "max": "1",
-                "min": "1"
-            },
-            "initialValue": {
-                "kind": "INTEGER_LITERAL",
-                "domain": {
-                    "type": "integer",
-                    "max": "1",
-                    "min": "1"
-                }
-            }
-        }
-    ],
-    "startBlock": [
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "__tempˇ0",
-            "initialValue": {
-                "kind": "BOX",
-                "expression": {
-                    "kind": "VARIABLE_REF",
-                    "name": "foo",
-                    "domain": {
-                        "type": "integer",
-                        "max": "1",
-                        "min": "1"
-                    }
-                },
-                "domain": {
-                    "type": "integer",
-                    "boxed": true
-                }
-            },
-            "domain": {
-                "type": "integer",
-                "boxed": true
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "print",
-                "labels": []
-            },
-            "arguments": [
-                {
-                    "kind": "VARIABLE_REF",
-                    "name": "__tempˇ0",
-                    "domain": {
-                        "type": "integer",
-                        "boxed": true
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "__tempˇ0"
-            }
-        }
-    ]
-}
+# yaml-language-server: $schema=../../../../cir/dist/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: VARIABLE_DECL
+    name: foo
+    domain:
+      type: integer
+      max: '1'
+      min: '1'
+    initialValue:
+      kind: INTEGER_LITERAL
+      domain:
+        type: integer
+        max: '1'
+        min: '1'
+startBlock:
+  - kind: VARIABLE_DECL
+    name: __tempˇ0
+    initialValue:
+      kind: BOX
+      expression:
+        kind: VARIABLE_REF
+        name: foo
+        domain:
+          type: integer
+          max: '1'
+          min: '1'
+      domain:
+        type: integer
+        boxed: true
+    domain:
+      type: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ0
+        domain:
+          type: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ0

@@ -1,60 +1,38 @@
-{
-    "$schema": "http://clawr.lang/schema/cir/DRAFT-0",
-    "startBlock": [
-        {
-            "kind": "VARIABLE_DECL",
-            "name": "__tempˇ0",
-            "domain": {
-                "type": "truthvalue",
-                "boxed": true,
-                "values": [
-                    "ambiguous"
-                ]
-            },
-            "initialValue": {
-                "kind": "BOX",
-                "expression": {
-                    "kind": "TRUTHVALUE_LITERAL",
-                    "domain": {
-                        "type": "truthvalue",
-                        "values": [
-                            "ambiguous"
-                        ]
-                    }
-                },
-                "domain": {
-                    "type": "truthvalue",
-                    "boxed": true,
-                    "values": [
-                        "ambiguous"
-                    ]
-                }
-            }
-        },
-        {
-            "kind": "CALL",
-            "name": {
-                "baseName": "print",
-                "labels": []
-            },
-            "arguments": [
-                {
-                    "kind": "VARIABLE_REF",
-                    "name": "__tempˇ0",
-                    "domain": {
-                        "type": "rc-type",
-                        "name": "TruthvalueBox",
-                        "namespace": "clawr"
-                    }
-                }
-            ]
-        },
-        {
-            "kind": "RELEASE",
-            "object": {
-                "kind": "VARIABLE_REF",
-                "name": "__tempˇ0"
-            }
-        }
-    ]
-}
+# yaml-language-server: $schema=../../../../cir/dist/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+startBlock:
+  - kind: VARIABLE_DECL
+    name: __tempˇ0
+    domain:
+      type: truthvalue
+      boxed: true
+      values:
+        - ambiguous
+    initialValue:
+      kind: BOX
+      expression:
+        kind: TRUTHVALUE_LITERAL
+        domain:
+          type: truthvalue
+          values:
+            - ambiguous
+      domain:
+        type: truthvalue
+        boxed: true
+        values:
+          - ambiguous
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ0
+        domain:
+          type: rc-type
+          name: TruthvalueBox
+          namespace: clawr
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ0

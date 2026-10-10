@@ -12,5 +12,8 @@ indent_size = 4
 [*.json]
 indent_size = 2
 
+[*.cir]
+indent_size = 2
+
 [*.md]
 indent_size = 2

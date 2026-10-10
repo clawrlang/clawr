@@ -22,7 +22,7 @@
             },
             "initialValue": {
                 "kind": "ALLOCATION",
-                "value": {
+                "domain": {
                     "type": "rc-type",
                     "name": "FooData"
                 },
@@ -32,7 +32,7 @@
                         "name": "bar",
                         "value": {
                             "kind": "INTEGER_LITERAL",
-                            "value": {
+                            "domain": {
                                 "type": "integer",
                                 "max": "2",
                                 "min": "2"
@@ -51,7 +51,7 @@
                 "object": {
                     "kind": "VARIABLE_REF",
                     "name": "foo",
-                    "value": {
+                    "domain": {
                         "type": "rc-type",
                         "name": "FooData"
                     }
@@ -60,7 +60,7 @@
             },
             "value": {
                 "kind": "INTEGER_LITERAL",
-                "value": {
+                "domain": {
                     "type": "integer",
                     "max": "1",
                     "min": "1"
@@ -77,17 +77,17 @@
                     "object": {
                         "kind": "VARIABLE_REF",
                         "name": "foo",
-                        "value": {
+                        "domain": {
                             "type": "rc-type",
                             "name": "FooData"
                         }
                     },
                     "property": "bar",
-                    "value": {
+                    "domain": {
                         "type": "integer"
                     }
                 },
-                "value": {
+                "domain": {
                     "type": "integer",
                     "boxed": true
                 }
@@ -107,7 +107,7 @@
                 {
                     "kind": "VARIABLE_REF",
                     "name": "__tempˇ0",
-                    "value": {
+                    "domain": {
                         "type": "integer",
                         "boxed": true
                     }

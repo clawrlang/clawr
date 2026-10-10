@@ -33,13 +33,13 @@
                                 "object": {
                                     "kind": "VARIABLE_REF",
                                     "name": "self",
-                                    "value": {
+                                    "domain": {
                                         "type": "rc-type",
                                         "name": "Super"
                                     }
                                 },
                                 "property": "property",
-                                "value": {
+                                "domain": {
                                     "type": "integer",
                                     "min": "0",
                                     "max": "100"
@@ -71,7 +71,7 @@
                             "kind": "SELF_ASSIGN",
                             "value": {
                                 "kind": "DATA",
-                                "value": {
+                                "domain": {
                                     "type": "rc-type",
                                     "name": "Super"
                                 },
@@ -81,7 +81,7 @@
                                         "value": {
                                             "kind": "VARIABLE_REF",
                                             "name": "property",
-                                            "value": {
+                                            "domain": {
                                                 "type": "integer",
                                                 "min": "0",
                                                 "max": "100"
@@ -150,13 +150,13 @@
                                 "object": {
                                     "kind": "VARIABLE_REF",
                                     "name": "self",
-                                    "value": {
+                                    "domain": {
                                         "type": "rc-type",
                                         "name": "Super"
                                     }
                                 },
                                 "property": "property",
-                                "value": {
+                                "domain": {
                                     "type": "integer",
                                     "min": "0",
                                     "max": "100"
@@ -182,7 +182,7 @@
                                         "name": "property",
                                         "value": {
                                             "kind": "INTEGER_LITERAL",
-                                            "value": {
+                                            "domain": {
                                                 "type": "integer",
                                                 "min": "43",
                                                 "max": "43"
@@ -190,7 +190,7 @@
                                         }
                                     }
                                 ],
-                                "value": {
+                                "domain": {
                                     "type": "rc-type",
                                     "name": "Sub1"
                                 }
@@ -202,7 +202,7 @@
                                 "object": {
                                     "kind": "VARIABLE_REF",
                                     "name": "self",
-                                    "value": {
+                                    "domain": {
                                         "type": "rc-type",
                                         "name": "Super"
                                     }
@@ -218,7 +218,7 @@
                             "arguments": [
                                 {
                                     "kind": "INTEGER_LITERAL",
-                                    "value": {
+                                    "domain": {
                                         "type": "integer",
                                         "min": "42",
                                         "max": "42"
@@ -269,7 +269,7 @@
                             "kind": "SELF_ASSIGN",
                             "value": {
                                 "kind": "DATA",
-                                "value": {
+                                "domain": {
                                     "type": "rc-type",
                                     "name": "Sub2"
                                 }
@@ -281,7 +281,7 @@
                                 "object": {
                                     "kind": "VARIABLE_REF",
                                     "name": "self",
-                                    "value": {
+                                    "domain": {
                                         "type": "rc-type",
                                         "name": "Super"
                                     }
@@ -297,7 +297,7 @@
                             "arguments": [
                                 {
                                     "kind": "INTEGER_LITERAL",
-                                    "value": {
+                                    "domain": {
                                         "type": "integer",
                                         "max": "42",
                                         "min": "42"
@@ -341,7 +341,7 @@
             "initialValue": {
                 "kind": "ALLOCATION",
                 "isolationLevel": "ISOLATED",
-                "value": {
+                "domain": {
                     "type": "rc-type",
                     "name": "Sub1"
                 }
@@ -359,7 +359,7 @@
                 "object": {
                     "kind": "VARIABLE_REF",
                     "name": "obj1",
-                    "value": {
+                    "domain": {
                         "type": "rc-type",
                         "name": "Sub1"
                     }
@@ -376,7 +376,7 @@
             "initialValue": {
                 "kind": "ALLOCATION",
                 "isolationLevel": "ISOLATED",
-                "value": {
+                "domain": {
                     "type": "rc-type",
                     "name": "Sub2"
                 }
@@ -394,7 +394,7 @@
                 "object": {
                     "kind": "VARIABLE_REF",
                     "name": "obj2",
-                    "value": {
+                    "domain": {
                         "type": "rc-type",
                         "name": "Sub2"
                     }
@@ -412,7 +412,7 @@
                         "object": {
                             "kind": "VARIABLE_REF",
                             "name": "obj1",
-                            "value": {
+                            "domain": {
                                 "type": "rc-type",
                                 "name": "Sub1"
                             }
@@ -424,13 +424,13 @@
                         "labels": []
                     },
                     "arguments": [],
-                    "value": {
+                    "domain": {
                         "type": "integer",
                         "min": "0",
                         "max": "100"
                     }
                 },
-                "value": {
+                "domain": {
                     "type": "integer",
                     "boxed": true
                 }
@@ -450,7 +450,7 @@
                 {
                     "kind": "VARIABLE_REF",
                     "name": "__tempˇ0",
-                    "value": {
+                    "domain": {
                         "type": "integer",
                         "boxed": true
                     }
@@ -475,7 +475,7 @@
                         "object": {
                             "kind": "VARIABLE_REF",
                             "name": "obj2",
-                            "value": {
+                            "domain": {
                                 "type": "rc-type",
                                 "name": "Super"
                             }
@@ -487,13 +487,13 @@
                         "labels": []
                     },
                     "arguments": [],
-                    "value": {
+                    "domain": {
                         "type": "integer",
                         "min": "0",
                         "max": "100"
                     }
                 },
-                "value": {
+                "domain": {
                     "type": "integer",
                     "boxed": true
                 }
@@ -513,7 +513,7 @@
                 {
                     "kind": "VARIABLE_REF",
                     "name": "__tempˇ1",
-                    "value": {
+                    "domain": {
                         "type": "integer",
                         "boxed": true
                     }

@@ -73,7 +73,7 @@ describe('FunctionCall', () => {
             arguments: [
                 {
                     kind: 'INTEGER_LITERAL',
-                    value: { max: '42', min: '42' },
+                    domain: { max: '42', min: '42' },
                 },
             ],
         })
@@ -168,7 +168,7 @@ describe('FunctionCall', () => {
                     kind: 'BOX',
                     expression: {
                         kind: 'INTEGER_LITERAL',
-                        value: { max: '1', min: '1' },
+                        domain: { max: '1', min: '1' },
                     },
                 },
             },
@@ -212,9 +212,9 @@ describe('FunctionCall', () => {
                     kind: 'BOX',
                     expression: {
                         kind: 'TRUTHVALUE_LITERAL',
-                        value: { type: 'truthvalue', values: ['true'] },
+                        domain: { type: 'truthvalue', values: ['true'] },
                     },
-                    value: { type: 'truthvalue', values: ['true'] },
+                    domain: { type: 'truthvalue', values: ['true'] },
                 },
             },
             {

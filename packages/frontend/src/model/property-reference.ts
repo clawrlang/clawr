@@ -136,7 +136,7 @@ export class PropertyReference implements Expression {
             kind: 'PROPERTY_REF',
             object,
             property: this.property,
-            value: property.domain.toCIR(),
+            domain: property.domain.toCIR(),
         } satisfies cir.Expression)
     }
 

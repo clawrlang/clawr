@@ -32,7 +32,7 @@ describe('Assignment', () => {
                 target: { kind: 'VARIABLE_REF', name: 'x' },
                 value: {
                     kind: 'INTEGER_LITERAL',
-                    value: { min: '42', max: '42' },
+                    domain: { min: '42', max: '42' },
                 },
             },
         ])
@@ -80,7 +80,7 @@ describe('Assignment', () => {
                             domain: { min: '1', max: '1' },
                             value: {
                                 kind: 'INTEGER_LITERAL',
-                                value: { min: '1', max: '1' },
+                                domain: { min: '1', max: '1' },
                             },
                         },
                     ],

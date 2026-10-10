@@ -41,7 +41,7 @@ describe('VariableDeclaration', () => {
             domain: { type: 'integer', min: '1', max: '1' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
-                value: { type: 'integer', min: '1', max: '1' },
+                domain: { type: 'integer', min: '1', max: '1' },
             },
         })
     })
@@ -460,7 +460,7 @@ describe('VariableDeclaration', () => {
                     kind: 'ALLOCATION',
                     isolationLevel: 'ISOLATED',
                     properties: [],
-                    value: {
+                    domain: {
                         type: 'rc-type',
                         name: 'Object',
                     },
@@ -478,7 +478,7 @@ describe('VariableDeclaration', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'x',
-                        value: {
+                        domain: {
                             type: 'rc-type',
                             name: 'Object',
                         },

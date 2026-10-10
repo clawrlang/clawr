@@ -64,7 +64,7 @@ export class ReturnStatement implements Statement {
                 value: {
                     kind: 'VARIABLE_REF',
                     name: temp,
-                    value: retainedValueCIR.value,
+                    domain: retainedValueCIR.domain,
                 },
             })
         } else {

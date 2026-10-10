@@ -141,7 +141,7 @@ export class Assignment implements Statement {
                 value: {
                     kind: 'AS_SHARED',
                     object: retainedValueCIR,
-                    value: targetDomain.toCIR(),
+                    domain: targetDomain.toCIR(),
                 },
             })
         } else {

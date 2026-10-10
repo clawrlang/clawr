@@ -12,7 +12,7 @@
             },
             "initialValue": {
                 "kind": "TRUTHVALUE_LITERAL",
-                "value": {
+                "domain": {
                     "type": "truthvalue",
                     "values": [
                         "ambiguous"
@@ -37,7 +37,7 @@
                 "expression": {
                     "kind": "VARIABLE_REF",
                     "name": "foo",
-                    "value": {
+                    "domain": {
                         "type": "truthvalue",
                         "values": [
                             "false",
@@ -46,7 +46,7 @@
                         ]
                     }
                 },
-                "value": {
+                "domain": {
                     "type": "truthvalue",
                     "boxed": true,
                     "values": [
@@ -67,7 +67,7 @@
                 {
                     "kind": "VARIABLE_REF",
                     "name": "__tempˇ0",
-                    "value": {
+                    "domain": {
                         "type": "rc-type",
                         "name": "TruthvalueBox",
                         "namespace": "clawr"

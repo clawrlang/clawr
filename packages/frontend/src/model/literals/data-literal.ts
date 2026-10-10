@@ -151,7 +151,7 @@ export class DataLiteral implements Expression {
                 return Result.value({
                     name: property.name,
                     value: valueResult.value,
-                    domain: valueResult.value.value,
+                    domain: valueResult.value.domain,
                 })
             }),
         )
@@ -162,7 +162,7 @@ export class DataLiteral implements Expression {
             kind: 'ALLOCATION',
             isolationLevel: context.isolationLevel!,
             properties,
-            value: {
+            domain: {
                 type: 'rc-type',
                 ...explicitDomain.type.toCIR(),
             },

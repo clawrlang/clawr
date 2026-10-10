@@ -38,7 +38,7 @@ export class TruthValueLiteral<Value extends truthvalue> implements Expression {
     > {
         return Result.value({
             kind: 'TRUTHVALUE_LITERAL',
-            value: this.value.toCIR(),
+            domain: this.value.toCIR(),
         })
     }
 

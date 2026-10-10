@@ -29,7 +29,7 @@
                     "initialValue": {
                         "kind": "ALLOCATION",
                         "isolationLevel": "ISOLATED",
-                        "value": {
+                        "domain": {
                             "type": "rc-type",
                             "name": "MyData"
                         },
@@ -38,7 +38,7 @@
                                 "name": "property",
                                 "value": {
                                     "kind": "INTEGER_LITERAL",
-                                    "value": {
+                                    "domain": {
                                         "type": "integer",
                                         "max": "42",
                                         "min": "42"
@@ -53,7 +53,7 @@
                     "value": {
                         "kind": "VARIABLE_REF",
                         "name": "var",
-                        "value": {
+                        "domain": {
                             "type": "rc-type",
                             "name": "MyData"
                         }
@@ -83,12 +83,12 @@
                         "labels": []
                     },
                     "arguments": [],
-                    "value": {
+                    "domain": {
                         "type": "rc-type",
                         "name": "MyData"
                     }
                 },
-                "value": {
+                "domain": {
                     "type": "rc-type",
                     "name": "MyData"
                 }
@@ -104,16 +104,16 @@
                     "object": {
                         "kind": "VARIABLE_REF",
                         "name": "var",
-                        "value": {
+                        "domain": {
                             "type": "integer"
                         }
                     },
                     "property": "property",
-                    "value": {
+                    "domain": {
                         "type": "integer"
                     }
                 },
-                "value": {
+                "domain": {
                     "type": "integer",
                     "boxed": true
                 }
@@ -133,7 +133,7 @@
                 {
                     "kind": "VARIABLE_REF",
                     "name": "__tempˇ0",
-                    "value": {
+                    "domain": {
                         "type": "integer",
                         "boxed": true
                     }

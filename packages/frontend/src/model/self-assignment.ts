@@ -67,7 +67,7 @@ export class SelfAssignment implements Statement {
                     name: f.name,
                     value: f.value,
                 })),
-                value: value.value,
+                domain: value.domain,
             },
         })
         return Result.ok

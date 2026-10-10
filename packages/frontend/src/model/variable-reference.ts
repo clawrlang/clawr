@@ -73,7 +73,7 @@ export class VariableReference implements Expression {
     ): SemanticResult<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
         const variableResult = this.lookupInScope(context)
         if (variableResult.isError) return variableResult
-        const valueResult = this.currentValue(context)
+        const valueResult = this.domain(context)
         if (valueResult.isError) return valueResult
         context.highlightRecorder?.record(
             'variable',
@@ -83,7 +83,7 @@ export class VariableReference implements Expression {
         return Result.value({
             kind: 'VARIABLE_REF' as const,
             name: this.name,
-            value: valueResult.value.toCIR(),
+            domain: valueResult.value.toCIR(),
         })
     }
 

@@ -82,7 +82,7 @@ describe('FunctionDeclaration (initializer)', () => {
                     value: {
                         kind: 'DATA',
                         properties: [
-                            { value: { value: { max: '42', min: '42' } } },
+                            { value: { domain: { max: '42', min: '42' } } },
                         ],
                     },
                 },
@@ -120,7 +120,7 @@ describe('FunctionDeclaration (initializer)', () => {
             body: [
                 {
                     kind: 'RETURN',
-                    value: { value: { max: '42', min: '42' } },
+                    value: { domain: { max: '42', min: '42' } },
                 },
             ],
         })
@@ -330,13 +330,13 @@ describe('FunctionDeclaration (initializer)', () => {
                             value: {
                                 kind: 'VARIABLE_REF',
                                 name: 'x',
-                                value: {
+                                domain: {
                                     type: 'string',
                                 },
                             },
                         },
                     ],
-                    value: {
+                    domain: {
                         type: 'rc-type',
                         name: 'Object',
                         namespace: undefined,

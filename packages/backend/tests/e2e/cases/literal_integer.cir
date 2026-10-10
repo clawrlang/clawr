@@ -8,13 +8,13 @@
                 "kind": "BOX",
                 "expression": {
                     "kind": "INTEGER_LITERAL",
-                    "value": {
+                    "domain": {
                         "type": "integer",
                         "max": "1",
                         "min": "1"
                     }
                 },
-                "value": {
+                "domain": {
                     "type": "integer",
                     "boxed": true
                 }
@@ -34,7 +34,7 @@
                 {
                     "kind": "VARIABLE_REF",
                     "name": "__tempˇ0",
-                    "value": {
+                    "domain": {
                         "type": "integer",
                         "boxed": true
                     }

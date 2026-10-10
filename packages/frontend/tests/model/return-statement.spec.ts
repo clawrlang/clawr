@@ -24,7 +24,7 @@ describe('ReturnStatement', () => {
 
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'RETURN',
-            value: { value: { max: '42', min: '42' } },
+            value: { domain: { max: '42', min: '42' } },
         })
     })
 

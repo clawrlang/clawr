@@ -54,7 +54,7 @@ export class Retain implements Expression {
         return Result.value({
             kind: 'RETAIN' as const,
             object: objectResult.value,
-            value: this.valueSet.toCIR(),
+            domain: this.valueSet.toCIR(),
         })
     }
 }

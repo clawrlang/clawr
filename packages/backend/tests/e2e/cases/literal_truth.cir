@@ -15,14 +15,14 @@
                 "kind": "BOX",
                 "expression": {
                     "kind": "TRUTHVALUE_LITERAL",
-                    "value": {
+                    "domain": {
                         "type": "truthvalue",
                         "values": [
                             "ambiguous"
                         ]
                     }
                 },
-                "value": {
+                "domain": {
                     "type": "truthvalue",
                     "boxed": true,
                     "values": [
@@ -41,7 +41,7 @@
                 {
                     "kind": "VARIABLE_REF",
                     "name": "__tempˇ0",
-                    "value": {
+                    "domain": {
                         "type": "rc-type",
                         "name": "TruthvalueBox",
                         "namespace": "clawr"

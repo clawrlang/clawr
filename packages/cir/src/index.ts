@@ -100,15 +100,15 @@ type Release = {
 
 type Receiver =
     | {
-          object: Expression & { value: RCTypeSet | InterfaceSet }
+          object: Expression & { domain: RCTypeSet | InterfaceSet }
           dispatch: 'direct'
       }
     | {
-          object: Expression & { value: RCTypeSet }
+          object: Expression & { domain: RCTypeSet }
           dispatch: 'inherited'
       }
     | {
-          object: Expression & { value: InterfaceDeclaration }
+          object: Expression & { domain: InterfaceDeclaration }
           dispatch: 'conformance'
       }
 
@@ -145,7 +145,7 @@ export type Statement =
     | SelfAssign
 
 type Storage =
-    Omit<VariableReference, 'value'> | Omit<PropertyReference, 'value'>
+    Omit<VariableReference, 'domain'> | Omit<PropertyReference, 'domain'>
 
 // -----------
 // Expressions
@@ -153,17 +153,17 @@ type Storage =
 
 type StringLiteral = {
     kind: 'STRING_LITERAL'
-    value: StringSet & { value: string }
+    domain: StringSet & { value: string }
 }
 
 type IntegerLiteral<Value extends bigint = bigint> = {
     kind: 'INTEGER_LITERAL'
-    value: IntegerRange<Value, Value>
+    domain: IntegerRange<Value, Value>
 }
 
 type TruthvalueLiteral<Value extends truthvalue = truthvalue> = {
     kind: 'TRUTHVALUE_LITERAL'
-    value: TruthvalueSet<[Value]>
+    domain: TruthvalueSet<[Value]>
 }
 
 type MemoryAllocation = {
@@ -173,38 +173,38 @@ type MemoryAllocation = {
         name: string
         value: Expression
     }[]
-    value: RCTypeSet
+    domain: RCTypeSet
 }
 
 type MemoryRetention = {
     kind: 'RETAIN'
     object: Storage
-    value: RCTypeSet
+    domain: RCTypeSet
 }
 
 type AsShared = {
     kind: 'AS_SHARED'
     object: FunctionCall & Expression
-    value: RCTypeSet
+    domain: RCTypeSet
 }
 
 type Box = {
     kind: 'BOX'
     expression: Expression
-    value: ValueSet & { boxed: true }
+    domain: ValueSet & { boxed: true }
 }
 
 type VariableReference = {
     kind: 'VARIABLE_REF'
     name: string
-    value: ValueSet
+    domain: ValueSet
 }
 
 type PropertyReference = {
     kind: 'PROPERTY_REF'
     object: Expression
     property: string
-    value: ValueSet
+    domain: ValueSet
 }
 
 export type Expression =
@@ -217,7 +217,7 @@ export type Expression =
     | Box
     | VariableReference
     | PropertyReference
-    | (FunctionCall & { value: ValueSet })
+    | (FunctionCall & { domain: ValueSet })
 
 // ---------
 // ValueSets

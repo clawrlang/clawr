@@ -41,14 +41,14 @@ describe('DataLiteral', () => {
                     name: 'x',
                     value: {
                         kind: 'INTEGER_LITERAL',
-                        value: { max: '42', min: '42' },
+                        domain: { max: '42', min: '42' },
                     },
                 },
                 {
                     name: 'y',
                     value: {
                         kind: 'INTEGER_LITERAL',
-                        value: { max: '17', min: '17' },
+                        domain: { max: '17', min: '17' },
                     },
                 },
             ],

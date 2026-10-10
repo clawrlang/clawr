@@ -264,17 +264,17 @@ export function lowerStmt(stmt: cir.Statement): string {
                 stmt.target.kind === 'VARIABLE_REF' &&
                 stmt.value.kind === 'ALLOCATION'
             )
-                return `memcpy(&${lowerStorage(stmt.target)}->properties, &(${mangleTypeName(stmt.value.value)}ˇproperties){
+                return `memcpy(&${lowerStorage(stmt.target)}->properties, &(${mangleTypeName(stmt.value.domain)}ˇproperties){
                         ${stmt.value.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
                     },
-                    sizeof(${mangleTypeName(stmt.value.value)}ˇproperties));`
+                    sizeof(${mangleTypeName(stmt.value.domain)}ˇproperties));`
             else
                 return `${lowerStorage(stmt.target)} = ${lowerExpr(stmt.value)};`
         case 'SELF_ASSIGN':
-            return `memcpy(&self->properties, &(${mangleTypeName(stmt.value.value)}ˇproperties){
+            return `memcpy(&self->properties, &(${mangleTypeName(stmt.value.domain)}ˇproperties){
                     ${stmt.value.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
                 },
-                sizeof(${mangleTypeName(stmt.value.value)}ˇproperties));`
+                sizeof(${mangleTypeName(stmt.value.domain)}ˇproperties));`
         case 'ENSURE_UNIQUE':
             return `mutateRC(${lowerStorage(stmt.object)});`
         case 'RELEASE':
@@ -300,9 +300,9 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'RETAIN':
             return `retainRC(${lowerStorage(expr.object)})`
         case 'STRING_LITERAL':
-            return `"${expr.value.value}"`
+            return `"${expr.domain.value}"`
         case 'INTEGER_LITERAL':
-            return expr.value.max
+            return expr.domain.max
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
         case 'CALL':
@@ -314,18 +314,18 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'AS_SHARED':
             return `shareRC(${lowerExpr(expr.object)})`
         case 'BOX':
-            switch (expr.value.type) {
+            switch (expr.domain.type) {
                 case 'truthvalue':
                     return `boxTruthvalue(${lowerExpr(expr.expression)})`
                 case 'integer':
                     return `integerWithDigits(1, ${lowerExpr(expr.expression)})`
                 default:
                     throw new Error(
-                        `Unknown box type: ${expr.expression.value.type}`,
+                        `Unknown box type: ${expr.expression.domain.type}`,
                     )
             }
         case 'ALLOCATION':
-            const mangledTypeName = mangleTypeName(expr.value)
+            const mangledTypeName = mangleTypeName(expr.domain)
             return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
                 ${expr.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
             )`
@@ -336,8 +336,8 @@ export function lowerExpr(expr: cir.Expression): string {
 
 export function lowerStorage(
     expr:
-        | Omit<cir.Expression & { kind: 'VARIABLE_REF' }, 'value'>
-        | Omit<cir.Expression & { kind: 'PROPERTY_REF' }, 'value'>,
+        | Omit<cir.Expression & { kind: 'VARIABLE_REF' }, 'domain'>
+        | Omit<cir.Expression & { kind: 'PROPERTY_REF' }, 'domain'>,
 ): string {
     switch (expr.kind) {
         case 'VARIABLE_REF':
@@ -358,12 +358,12 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
             return `${name}(${args.join(', ')})`
         }
         case 'direct': {
-            const name = mangleNameWithLabels(call.name, receiver.object.value)
+            const name = mangleNameWithLabels(call.name, receiver.object.domain)
             return `${name}(${[lowerExpr(receiver.object), ...args].join(', ')})`
         }
         case 'inherited': {
             const targetName = lowerExpr(receiver.object)
-            const declarationType = mangleTypeName(receiver.object.value)
+            const declarationType = mangleTypeName(receiver.object.domain)
             const slotName = mangleNameWithLabels({
                 ...call.name,
                 namespace: undefined,
@@ -381,7 +381,7 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
 export function lowerTruthvalueLiteral(
     expr: Extract<cir.Expression, { kind: 'TRUTHVALUE_LITERAL' }>,
 ): string {
-    return `c_${expr.value.values[0]}`
+    return `c_${expr.domain.values[0]}`
 }
 
 function mangleNameWithParameters(

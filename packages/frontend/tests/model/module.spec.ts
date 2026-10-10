@@ -33,11 +33,11 @@ describe('Module', () => {
                     arguments: [
                         {
                             kind: 'INTEGER_LITERAL',
-                            value: { max: '1', min: '1' },
+                            domain: { max: '1', min: '1' },
                         },
                         {
                             kind: 'INTEGER_LITERAL',
-                            value: { max: '2', min: '2' },
+                            domain: { max: '2', min: '2' },
                         },
                     ],
                 },

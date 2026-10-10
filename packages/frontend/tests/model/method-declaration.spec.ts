@@ -63,7 +63,7 @@ describe('FunctionDeclaration (method)', () => {
             body: [
                 {
                     kind: 'RETURN',
-                    value: { value: { max: '42', min: '42' } },
+                    value: { domain: { max: '42', min: '42' } },
                 },
             ],
         })
@@ -99,7 +99,7 @@ describe('FunctionDeclaration (method)', () => {
             body: [
                 {
                     kind: 'RETURN',
-                    value: { value: { max: '42', min: '42' } },
+                    value: { domain: { max: '42', min: '42' } },
                 },
             ],
         })
@@ -245,7 +245,7 @@ describe('FunctionDeclaration (method)', () => {
                 body: [
                     {
                         kind: 'RETURN',
-                        value: { value: { max: '42', min: '42' } },
+                        value: { domain: { max: '42', min: '42' } },
                     },
                 ],
             })

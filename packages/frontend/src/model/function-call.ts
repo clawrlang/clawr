@@ -151,10 +151,10 @@ export class FunctionCall implements Expression, Statement {
                 receiver: {
                     dispatch: 'direct',
                     object: recipient as cir.Expression & {
-                        value: { type: 'rc-type' | 'interface' }
+                        domain: { type: 'rc-type' | 'interface' }
                     },
                 },
-                value: value.toCIR(),
+                domain: value.toCIR(),
             } satisfies cir.Expression)
         } else {
             const argsResult = SemanticResult.collect([
@@ -169,7 +169,7 @@ export class FunctionCall implements Expression, Statement {
                 kind: 'CALL',
                 name: this.name.toCIR(),
                 arguments: args,
-                value: value.toCIR(),
+                domain: value.toCIR(),
             } satisfies cir.Expression)
         }
     }
@@ -183,7 +183,7 @@ export class FunctionCall implements Expression, Statement {
         const _name = this.name.toCIR()
         if (_name.baseName === 'print') {
             const tempName = context.scope.nextTempVar()
-            const boxDomain = { ...args[0].value, boxed: true as const }
+            const boxDomain = { ...args[0].domain, boxed: true as const }
             context.scope.emitted.push(
                 {
                     kind: 'VARIABLE_DECL',
@@ -192,7 +192,7 @@ export class FunctionCall implements Expression, Statement {
                     initialValue: {
                         kind: 'BOX',
                         expression: args[0],
-                        value: boxDomain,
+                        domain: boxDomain,
                     },
                 },
                 {
@@ -202,7 +202,7 @@ export class FunctionCall implements Expression, Statement {
                         {
                             kind: 'VARIABLE_REF',
                             name: tempName,
-                            value: boxDomain,
+                            domain: boxDomain,
                         },
                     ],
                 },

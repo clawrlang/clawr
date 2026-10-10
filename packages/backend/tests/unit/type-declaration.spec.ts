@@ -243,11 +243,11 @@ describe('Type declaration', () => {
                                         value: {
                                             kind: 'VARIABLE_REF',
                                             name: 'property',
-                                            value: { type: 'integer' },
+                                            domain: { type: 'integer' },
                                         },
                                     },
                                 ],
-                                value: { type: 'rc-type', name: 'Super' },
+                                domain: { type: 'rc-type', name: 'Super' },
                             },
                         },
                     ],

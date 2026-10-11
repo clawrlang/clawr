@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../cir/dist/cir.schema.json
+# yaml-language-server: $schema=../../../../cir/cir.schema.json
 $schema: http://clawr.lang/schema/cir/DRAFT-0
 declarations:
   - kind: RC_TYPE_DECL

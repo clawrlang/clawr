@@ -1,0 +1,685 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/ClawrModule",
+  "$defs": {
+    "ClawrModule": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "const": "http://clawr.lang/schema/cir/DRAFT-0"
+        },
+        "startBlock": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Statement"
+          }
+        },
+        "declarations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Declaration"
+          }
+        }
+      },
+      "required": ["$schema"],
+      "additionalProperties": false
+    },
+
+    "Statement": {
+      "oneOf": [
+        { "$ref": "#/$defs/Assign" },
+        { "$ref": "#/$defs/EnsureUnique" },
+        { "$ref": "#/$defs/FunctionCallStatement" },
+        { "$ref": "#/$defs/Release" },
+        { "$ref": "#/$defs/Return" },
+        { "$ref": "#/$defs/SelfAssign" },
+        { "$ref": "#/$defs/VariableDeclaration" }
+      ]
+    },
+
+    "Assign": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "ASSIGN" },
+        "target": { "$ref": "#/$defs/Storage" },
+        "value": { "$ref": "#/$defs/Expression" }
+      },
+      "required": ["kind", "target", "value"],
+      "additionalProperties": false
+    },
+
+    "Storage": {
+      "oneOf": [
+        { "$ref": "#/$defs/PropertyReferenceStorage" },
+        { "$ref": "#/$defs/VariableReferenceStorage" }
+      ]
+    },
+
+    "PropertyReferenceStorage": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "PROPERTY_REF" },
+        "object": { "$ref": "#/$defs/Expression" },
+        "property": { "type": "string" },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["kind", "object", "property"],
+      "additionalProperties": false
+    },
+
+    "VariableReferenceStorage": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "VARIABLE_REF" },
+        "name": { "type": "string" },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["kind", "name"],
+      "additionalProperties": false
+    },
+
+    "EnsureUnique": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "ENSURE_UNIQUE" },
+        "object": { "$ref": "#/$defs/Storage" }
+      },
+      "required": ["kind", "object"],
+      "additionalProperties": false
+    },
+
+    "Release": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "RELEASE" },
+        "object": { "$ref": "#/$defs/Storage" }
+      },
+      "required": ["kind", "object"],
+      "additionalProperties": false
+    },
+
+    "Return": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "RETURN" },
+        "value": { "$ref": "#/$defs/Expression" }
+      },
+      "required": ["kind"],
+      "additionalProperties": false
+    },
+
+    "SelfAssign": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "SELF_ASSIGN" },
+        "value": { "$ref": "#/$defs/SelfAssignValue" }
+      },
+      "required": ["kind", "value"],
+      "additionalProperties": false
+    },
+
+    "SelfAssignValue": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "DATA" },
+        "properties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PropertyInitializer" }
+        },
+        "domain": { "$ref": "#/$defs/RCTypeSet" }
+      },
+      "required": ["kind", "domain"],
+      "additionalProperties": false
+    },
+
+    "VariableDeclaration": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "VARIABLE_DECL" },
+        "name": { "type": "string" },
+        "namespace": { "type": "string" },
+        "domain": { "$ref": "#/$defs/ValueSet" },
+        "initialValue": { "$ref": "#/$defs/Expression" }
+      },
+      "required": ["kind", "name", "domain", "initialValue"],
+      "additionalProperties": false
+    },
+
+    "FunctionCallStatement": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "CALL" },
+        "receiver": { "$ref": "#/$defs/Receiver" },
+        "name": { "$ref": "#/$defs/FunctionName" },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Expression" }
+        }
+      },
+      "required": ["kind", "name", "arguments"],
+      "additionalProperties": false
+    },
+
+    "Receiver": {
+      "type": "object",
+      "properties": {
+        "object": { "$ref": "#/$defs/Expression" },
+        "dispatch": {
+          "enum": ["conformance", "direct", "inherited"]
+        }
+      },
+      "required": ["object", "dispatch"],
+      "additionalProperties": false
+    },
+
+    "Expression": {
+      "oneOf": [
+        { "$ref": "#/$defs/BinaryOperation" },
+        { "$ref": "#/$defs/FunctionCallExpression" },
+        { "$ref": "#/$defs/Literal" },
+        { "$ref": "#/$defs/MemoryExpression" },
+        { "$ref": "#/$defs/PropertyReference" },
+        { "$ref": "#/$defs/VariableReference" }
+      ]
+    },
+
+    "MemoryExpression": {
+      "oneOf": [
+        { "$ref": "#/$defs/AsShared" },
+        { "$ref": "#/$defs/Box" },
+        { "$ref": "#/$defs/MemoryAllocation" },
+        { "$ref": "#/$defs/MemoryRetention" }
+      ]
+    },
+
+    "BinaryOperation": {
+      "oneOf": [
+        { "$ref": "#/$defs/Arithmetic" },
+        { "$ref": "#/$defs/Equality" },
+        { "$ref": "#/$defs/LogicalOperation" },
+        { "$ref": "#/$defs/OrderComparison" },
+        { "$ref": "#/$defs/RefComparison" }
+      ]
+    },
+
+    "Literal": {
+      "oneOf": [
+        { "$ref": "#/$defs/IntegerLiteral" },
+        { "$ref": "#/$defs/TruthvalueLiteral" },
+        { "$ref": "#/$defs/StringLiteral" }
+      ]
+    },
+
+    "FunctionCallExpression": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "CALL" },
+        "receiver": { "$ref": "#/$defs/Receiver" },
+        "name": { "$ref": "#/$defs/FunctionName" },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Expression" }
+        },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["kind", "name", "arguments", "domain"],
+      "additionalProperties": false
+    },
+
+    "Equality": {
+      "type": "object",
+      "properties": {
+        "kind": { "enum": ["EQUAL", "NOT_EQUAL"] },
+        "left": { "$ref": "#/$defs/Expression" },
+        "right": { "$ref": "#/$defs/Expression" },
+        "domain": { "$ref": "#/$defs/TruthvalueSet" }
+      },
+      "required": ["kind", "domain", "left", "right"],
+      "additionalProperties": false
+    },
+
+    "Arithmetic": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "ADDITION",
+            "DIVISION",
+            "EXPONENTIAL",
+            "MODULUS",
+            "MULTIPLICATION",
+            "SUBTRACTION"
+          ]
+        },
+        "left": { "$ref": "#/$defs/Expression" },
+        "right": { "$ref": "#/$defs/Expression" },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["kind", "left", "right", "domain"],
+      "additionalProperties": false
+    },
+
+    "AsShared": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "AS_SHARED" },
+        "object": { "$ref": "#/$defs/FunctionCallExpression" },
+        "domain": { "$ref": "#/$defs/RCTypeSet" }
+      },
+      "required": ["kind", "object", "domain"],
+      "additionalProperties": false
+    },
+
+    "Box": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "BOX" },
+        "expression": { "$ref": "#/$defs/Expression" },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["kind", "expression", "domain"],
+      "additionalProperties": false
+    },
+
+    "IntegerLiteral": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "INTEGER_LITERAL" },
+        "domain": { "$ref": "#/$defs/IntegerRange" }
+      },
+      "required": ["kind"],
+      "additionalProperties": false
+    },
+
+    "LogicalOperation": {
+      "type": "object",
+      "properties": {
+        "kind": { "enum": ["AND", "OR"] },
+        "left": { "$ref": "#/$defs/Expression" },
+        "right": { "$ref": "#/$defs/Expression" },
+        "domain": { "$ref": "#/$defs/TruthvalueSet" }
+      },
+      "required": ["kind", "left", "right", "domain"],
+      "additionalProperties": false
+    },
+
+    "MemoryAllocation": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "ALLOCATION" },
+        "isolationLevel": { "$ref": "#/$defs/IsolationLevel" },
+        "properties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PropertyInitializer" }
+        },
+        "domain": { "$ref": "#/$defs/RCTypeSet" }
+      },
+      "required": ["kind", "isolationLevel", "domain"],
+      "additionalProperties": false
+    },
+
+    "MemoryRetention": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "RETAIN" },
+        "object": { "$ref": "#/$defs/Storage" },
+        "domain": { "$ref": "#/$defs/RCTypeSet" }
+      },
+      "required": ["kind", "object", "domain"],
+      "additionalProperties": false
+    },
+
+    "OrderComparison": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "GREATER_THAN",
+            "GREATER_THAN_OR_EQUAL",
+            "LESS_THAN",
+            "LESS_THAN_OR_EQUAL"
+          ]
+        },
+        "left": { "$ref": "#/$defs/Expression" },
+        "right": { "$ref": "#/$defs/Expression" },
+        "domain": { "$ref": "#/$defs/TruthvalueSet" }
+      },
+      "required": ["kind", "left", "right", "domain"],
+      "additionalProperties": false
+    },
+
+    "PropertyReference": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "PROPERTY_REF" },
+        "object": { "$ref": "#/$defs/Expression" },
+        "property": { "type": "string" },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["kind", "object", "property", "domain"],
+      "additionalProperties": false
+    },
+
+    "RefComparison": {
+      "type": "object",
+      "properties": {
+        "kind": { "enum": ["NOT_SAME", "SAME"] },
+        "left": { "$ref": "#/$defs/Expression" },
+        "right": { "$ref": "#/$defs/Expression" },
+        "domain": { "$ref": "#/$defs/TruthvalueSet" }
+      },
+      "required": ["kind", "left", "right", "domain"],
+      "additionalProperties": false
+    },
+
+    "StringLiteral": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "STRING_LITERAL" },
+        "domain": { "$ref": "#/$defs/StringSet" }
+      },
+      "required": ["kind", "domain"],
+      "additionalProperties": false
+    },
+
+    "TruthvalueLiteral": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "TRUTHVALUE_LITERAL" },
+        "domain": { "$ref": "#/$defs/TruthvalueSet" }
+      },
+      "required": ["kind"],
+      "additionalProperties": false
+    },
+
+    "VariableReference": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "VARIABLE_REF" },
+        "name": { "type": "string" },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["kind", "name", "domain"],
+      "additionalProperties": false
+    },
+
+    "PropertyInitializer": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "value": { "$ref": "#/$defs/Expression" }
+      },
+      "required": ["name", "value"],
+      "additionalProperties": false
+    },
+
+    "ValueSet": {
+      "oneOf": [
+        { "$ref": "#/$defs/IntegerRange" },
+        { "$ref": "#/$defs/RealRange" },
+        { "$ref": "#/$defs/InterfaceSet" },
+        { "$ref": "#/$defs/RCTypeSet" },
+        { "$ref": "#/$defs/StringSet" },
+        { "$ref": "#/$defs/TruthvalueSet" }
+      ]
+    },
+
+    "IntegerRange": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "integer" },
+        "boxed": { "const": true },
+        "min": { "type": "string", "pattern": "^-?\\d+$" },
+        "max": { "type": "string", "pattern": "^-?\\d+$" }
+      },
+      "required": ["type"],
+      "additionalProperties": false
+    },
+
+    "RealRange": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "real" },
+        "boxed": { "const": true },
+        "min": { "type": "string", "pattern": "^-?\\d+.\\d+$" },
+        "max": { "type": "string", "pattern": "^-?\\d+.\\d+$" }
+      },
+      "required": ["type"],
+      "additionalProperties": false
+    },
+
+    "InterfaceSet": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "interface" },
+        "namespace": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["type", "name"],
+      "additionalProperties": false
+    },
+
+    "RCTypeSet": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "rc-type" },
+        "namespace": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["type", "name"],
+      "additionalProperties": false
+    },
+
+    "StringSet": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "string" },
+        "value": { "type": "string" }
+      },
+      "required": ["type"],
+      "additionalProperties": false
+    },
+
+    "TruthvalueSet": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "truthvalue" },
+        "boxed": { "const": true },
+        "values": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Truthvalue" }
+        }
+      },
+      "required": ["type", "values"],
+      "additionalProperties": false
+    },
+
+    "Truthvalue": {
+      "oneOf": [
+        { "const": "ambiguous" },
+        { "const": "false" },
+        { "const": "true" }
+      ]
+    },
+
+    "IsolationLevel": {
+      "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
+    },
+
+    "FunctionName": {
+      "type": "object",
+      "properties": {
+        "baseName": { "type": "string" },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "namespace": { "type": "string" }
+      },
+      "required": ["baseName", "labels"],
+      "additionalProperties": false
+    },
+
+    "CanonicalName": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "namespace": { "type": "string" }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+
+    "Declaration": {
+      "oneOf": [
+        { "$ref": "#/$defs/RCTypeDeclaration" },
+        { "$ref": "#/$defs/InterfaceDeclaration" },
+        { "$ref": "#/$defs/VariableDeclaration" },
+        { "$ref": "#/$defs/FunctionDeclaration" }
+      ]
+    },
+
+    "RCTypeDeclaration": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "RC_TYPE_DECL" },
+        "name": { "type": "string" },
+        "namespace": { "type": "string" },
+        "properties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PropertyDeclaration" }
+        },
+        "conformances": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Conformance" }
+        },
+        "base": { "$ref": "#/$defs/CanonicalName" },
+        "methods": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FunctionDeclaration" }
+        },
+        "initializers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FunctionDeclaration" }
+        },
+        "dispatchTable": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DispatchTableEntry" }
+        }
+      },
+      "required": ["kind", "name", "properties"],
+      "additionalProperties": false
+    },
+
+    "PropertyDeclaration": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["name", "domain"],
+      "additionalProperties": false
+    },
+
+    "Conformance": {
+      "type": "object",
+      "properties": {
+        "interface": { "$ref": "#/$defs/CanonicalName" },
+        "fulfillments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Fulfillment" }
+        }
+      },
+      "required": ["interface", "fulfillments"],
+      "additionalProperties": false
+    },
+
+    "Fulfillment": {
+      "type": "object",
+      "properties": {
+        "requirement": { "$ref": "#/$defs/FunctionName" },
+        "implementation": { "$ref": "#/$defs/FunctionName" }
+      },
+      "required": ["requirement", "implementation"],
+      "additionalProperties": false
+    },
+
+    "DispatchTableEntry": {
+      "type": "object",
+      "properties": {
+        "slot": { "$ref": "#/$defs/FunctionSignature" },
+        "declaredIn": { "$ref": "#/$defs/CanonicalName" },
+        "implementation": { "$ref": "#/$defs/CanonicalName" }
+      },
+      "required": ["slot", "declaredIn"],
+      "additionalProperties": false
+    },
+
+    "InterfaceDeclaration": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "INTERFACE_DECL" },
+        "name": { "type": "string" },
+        "namespace": { "type": "string" },
+        "methods": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FunctionSignature" }
+        }
+      },
+      "required": ["kind", "name", "methods"],
+      "additionalProperties": false
+    },
+
+    "FunctionSignature": {
+      "type": "object",
+      "properties": {
+        "baseName": { "type": "string" },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "parameters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Parameter" }
+        },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["baseName", "labels", "parameters"],
+      "additionalProperties": false
+    },
+
+    "Parameter": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["name", "domain"],
+      "additionalProperties": false
+    },
+
+    "FunctionDeclaration": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "FUNCTION_DECL" },
+        "body": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Statement" }
+        },
+        "namespace": { "type": "string" },
+        "baseName": { "type": "string" },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "parameters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Parameter" }
+        },
+        "domain": { "$ref": "#/$defs/ValueSet" }
+      },
+      "required": ["kind", "body", "baseName", "labels", "parameters"],
+      "additionalProperties": false
+    }
+  }
+}

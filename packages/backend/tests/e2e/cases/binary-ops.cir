@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../cir/dist/cir.schema.json
+# yaml-language-server: $schema=../../../../cir/cir.schema.json
 $schema: 'http://clawr.lang/schema/cir/DRAFT-0'
 startBlock:
   - kind: VARIABLE_DECL
@@ -21,6 +21,10 @@ startBlock:
               type: integer
               min: '2'
               max: '2'
+          domain:
+            type: integer
+            min: '6'
+            max: '6'
         right:
           kind: MODULUS
           left:

@@ -16,24 +16,22 @@
     "dist"
   ],
   "scripts": {
-    "pretest": "npm run build:typia && npm run build",
+    "pretest": "npm run build",
     "test": "bun test ./tests",
     "pretest:unit": "ttsc",
     "test:unit": "tsc --noEmit && BUN_JSC_useTailCalls=0 bun test ./tests/unit",
     "build": "ttsc",
-    "build:typia": "rm -rf generated/cir-parser && npx ttsc -p tsconfig.typia.generated.json",
     "start": "node ./dist/cli.js"
   },
   "dependencies": {
     "@clawr/cir": "^0.1.0",
+    "ajv": "^8.17.1",
     "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "@ttsc/paths": "^0.28.4",
     "@types/bun": "^1.4.0",
     "bun": "^1.4.0",
     "ttsc": "^0.28.4",
-    "typescript": "^7.0.0",
-    "typia": "^14.0.4"
+    "typescript": "^7.0.0"
   }
 }

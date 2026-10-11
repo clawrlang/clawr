@@ -1,5 +1,4 @@
 import { decimal } from 'decimalish'
-import { tags } from 'typia'
 
 export type ClawrModule = {
     $schema: 'http://clawr.lang/schema/cir/DRAFT-0'
@@ -298,12 +297,8 @@ type IntegerRange<
 > = {
     type: 'integer'
     boxed?: true
-} & (Min extends undefined
-    ? { min?: undefined }
-    : { min: `${Min}` & tags.Pattern<'^-?\\d+$'> }) &
-    (Max extends undefined
-        ? { max?: undefined }
-        : { max: `${Max}` & tags.Pattern<'^-?\\d+$'> })
+} & (Min extends undefined ? { min?: undefined } : { min: `${Min}` }) &
+    (Max extends undefined ? { max?: undefined } : { max: `${Max}` })
 
 type RealRange<
     Min extends decimal | undefined = decimal | undefined,
@@ -311,12 +306,8 @@ type RealRange<
 > = {
     type: 'real'
     boxed?: true
-} & (Min extends undefined
-    ? { min?: undefined }
-    : { min: `${Min}` & tags.Pattern<'^-?\\d+\.\\d+$'> }) &
-    (Max extends undefined
-        ? { max?: undefined }
-        : { max: `${Max}` & tags.Pattern<'^-?\\d+\.\\d+$'> })
+} & (Min extends undefined ? { min?: undefined } : { min: `${Min}` }) &
+    (Max extends undefined ? { max?: undefined } : { max: `${Max}` })
 
 type TruthvalueSet<Values extends truthvalue[] = truthvalue[]> = {
     type: 'truthvalue'
@@ -348,37 +339,3 @@ export type ValueSet =
 
 type IsolationLevel = 'ISOLATED' | 'SHARED'
 export type truthvalue = 'false' | 'ambiguous' | 'true'
-
-const BINARY_OPERATORS = [
-    // Logic
-    '||',
-    '&&',
-
-    // Comparison
-    '==',
-    '!=',
-    '===',
-    '!==',
-    '<',
-    '>',
-    '<=',
-    '>=',
-
-    /*
-    // Field
-    '|',
-    '&',
-    '<<',
-    '>>',
-    */
-
-    // Arithmetics
-    '+',
-    '-',
-    '*',
-    '/',
-    '%',
-    '^',
-] as const
-
-type BinaryOperator = (typeof BINARY_OPERATORS)[number]

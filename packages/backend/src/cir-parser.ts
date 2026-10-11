@@ -4,16 +4,21 @@
  */
 
 import { ClawrModule } from '@clawr/cir'
-import typia from 'typia'
+import { Ajv2020 } from 'ajv/dist/2020.js'
+import cirSchema from '@clawr/cir/cir.schema.json' with { type: 'json' }
 import YAML from 'yaml'
+
+const validate = new Ajv2020({ allErrors: true }).compile<ClawrModule>(
+    cirSchema,
+)
 
 export default class CIRParser {
     static parse(input: string): ClawrModule {
-        const result = typia.validate<ClawrModule>(parse(input))
-        if (result.success) return result.data
+        const data: unknown = parse(input)
+        if (validate(data)) return data
 
-        const details = result.errors
-            .map((error) => `${error.path} expected ${error.expected}`)
+        const details = (validate.errors ?? [])
+            .map((error) => `${error.instancePath || '/'} ${error.message}`)
             .join('; ')
         throw new Error(`Invalid CIR: ${details}`)
     }

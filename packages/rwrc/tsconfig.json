@@ -3,10 +3,11 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "dist",
-    "plugins": [
-      { "transform": "typia/lib/transform" },
-      { "transform": "@ttsc/paths" }
-    ]
+    "plugins": [{ "transform": "@ttsc/paths" }],
+    "declaration": true,
+    "declarationMap": false,
+    "sourceMap": false
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", ".build-temp"]
 }

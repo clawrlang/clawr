@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc --noEmit && npm run build:runtime && npm run build:rwrc",
     "build:runtime": "npm run build --workspace=@clawr/runtime && mkdir -p dist && cp -R ../runtime/dist/include dist/include && cp ../runtime/dist/libClawr.0.dylib dist/libClawr.0.dylib",
-    "build:rwrc": "rm -rf .typia-temp && ttsc -p tsconfig.typia.json && bun build .typia-temp/index.js --compile --outfile dist/rwrc",
+    "build:rwrc": "ttsc && bun build ./dist/src/index.js --compile --outfile dist/rwrc",
     "pretest": "npm run build",
     "test": "npm run build && bun test"
   },

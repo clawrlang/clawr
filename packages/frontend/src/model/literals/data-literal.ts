@@ -151,7 +151,6 @@ export class DataLiteral implements Expression {
                 return Result.value({
                     name: property.name,
                     value: valueResult.value,
-                    domain: valueResult.value.domain,
                 })
             }),
         )

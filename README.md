@@ -49,18 +49,12 @@ npm run test:unit     # Quick unit tests only
 npm run test:backend  # Run backend tests
 npm run test:e2e      # Run end-to-end tests
 
-npm run build:schema  # Add a JSON schema file to .vscode/settings.json to help editing test cases
-
-# IMPORTANT: Remember to run build:schema whenever you edit the @clawr/cir package.
-# And also remember to commit the changes to .vscode/settings.json.
-
-# NOTE: The schema can also be found in packages/frontend/dist/cir.schema.json.
-# Unfortunataly, VS Code does not support linking to a file in the project, but the entire schema
-# must be pasted into .vscode/settings.json which is makes Git source history messy. At least it
-# is done automatically by the build:schema script. Just remember to commit the changes.
-
 npx bun test packages/frontend/tests/unit/parser/module-parser.spec.ts # Run a single test fixture
 ```
+
+The CIR schema in `packages/cir/cir.schema.json` is the source for both editor validation of `.cir`
+fixtures and runtime validation by the backend parser. Update that schema directly when the CIR
+format changes.
 
 ### Runtime
 

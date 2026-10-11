@@ -8,20 +8,20 @@
     ".": {
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
-    }
+    },
+    "./cir.schema.json": "./cir.schema.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "cir.schema.json"
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:schema": "npm run build && rm -rf .typia-temp && ttsc -p tsconfig.typia.json && node .typia-temp/src/generate-cir-schema.js",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
     "decimalish": "^0.1.2",
-    "prettier": "^3.9.9",
-    "typia": "^15.0.1"
+    "prettier": "^3.9.9"
   },
   "devDependencies": {
     "typescript": "^7.0.0"

@@ -77,7 +77,6 @@ describe('Assignment', () => {
                     properties: [
                         {
                             name: 'property',
-                            domain: { min: '1', max: '1' },
                             value: {
                                 kind: 'INTEGER_LITERAL',
                                 domain: { min: '1', max: '1' },

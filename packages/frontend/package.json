@@ -48,15 +48,14 @@
     "dist"
   ],
   "scripts": {
-    "pretest": "npm run build",
+    "pretest": "npm run build --workspace=@clawr/cir  && npm run build",
     "test": "tsc --noEmit && BUN_JSC_useTailCalls=0 bun test ./tests",
-    "build": "ttsc -p tsconfig.json",
+    "build": "ttsc",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
     "@clawr/cir": "^0.1.0",
-    "decimalish": "^0.1.2",
-    "typia": "^14.0.4"
+    "decimalish": "^0.1.2"
   },
   "devDependencies": {
     "@ttsc/paths": "^0.28.4",

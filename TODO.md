@@ -1,8 +1,8 @@
 # TODO
 
-- Lower `BinaryOperation` in backend
 - Implement `BinaryOperation.toCIRExpression()`
 - `real` operands
+- Lower to appropriate types `Integer*`, `double`, etc
 
 ## `object`/`service`
 

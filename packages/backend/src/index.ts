@@ -329,6 +329,42 @@ export function lowerExpr(expr: cir.Expression): string {
             return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
                 ${expr.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
             )`
+        case 'OR':
+            // Cast necessary because of shared mutable state. TypeScript cannot merge Truth[] and (false | true)[] into one type as they are contra-variant.
+            // Of course, `includes()` is a read-only operation, which is always safe, but TypeScript is incapable of drawing that conclusion.
+            const values: cir.truthvalue[] = expr.left.domain.values
+            if (values.includes('ambiguous'))
+                throw new Error('ambiguity not yet supported')
+            return `(${lowerExpr(expr.left)}) || (${lowerExpr(expr.right)})`
+        case 'AND':
+            return `(${lowerExpr(expr.left)}) && (${lowerExpr(expr.right)})`
+        case 'EQUAL':
+            return `(${lowerExpr(expr.left)}) == (${lowerExpr(expr.right)})`
+        case 'NOT_EQUAL':
+            return `(${lowerExpr(expr.left)}) != (${lowerExpr(expr.right)})`
+        case 'LESS_THAN':
+            return `(${lowerExpr(expr.left)}) < (${lowerExpr(expr.right)})`
+        case 'GREATER_THAN':
+            return `(${lowerExpr(expr.left)}) > (${lowerExpr(expr.right)})`
+        case 'LESS_THAN_OR_EQUAL':
+            return `(${lowerExpr(expr.left)}) <= (${lowerExpr(expr.right)})`
+        case 'GREATER_THAN_OR_EQUAL':
+            return `(${lowerExpr(expr.left)}) >= (${lowerExpr(expr.right)})`
+        case 'SAME':
+            return `(${lowerExpr(expr.left)}) == (${lowerExpr(expr.right)})`
+        case 'NOT_SAME':
+            return `(${lowerExpr(expr.left)}) != (${lowerExpr(expr.right)})`
+        case 'ADDITION':
+            return `(${lowerExpr(expr.left)}) + (${lowerExpr(expr.right)})`
+        case 'SUBTRACTION':
+            return `(${lowerExpr(expr.left)}) - (${lowerExpr(expr.right)})`
+        case 'MULTIPLICATION':
+            return `(${lowerExpr(expr.left)}) * (${lowerExpr(expr.right)})`
+        case 'DIVISION':
+            return `(${lowerExpr(expr.left)}) / (${lowerExpr(expr.right)})`
+        case 'MODULUS':
+            return `(${lowerExpr(expr.left)}) % (${lowerExpr(expr.right)})`
+        case 'EXPONENTIAL':
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
     }

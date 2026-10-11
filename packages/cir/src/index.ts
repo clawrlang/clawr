@@ -207,6 +207,70 @@ type PropertyReference = {
     domain: ValueSet
 }
 
+type ArithmeticOperation = {
+    kind:
+        | 'ADDITION'
+        | 'SUBTRACTION'
+        | 'MULTIPLICATION'
+        | 'DIVISION'
+        | 'MODULUS'
+        | 'EXPONENTIAL'
+} & (
+    | {
+          left: Expression & { domain: { type: 'integer' } }
+          right: Expression & { domain: { type: 'integer' } }
+          domain: IntegerRange
+      }
+    | {
+          left: Expression & { domain: { type: 'integer' | 'real' } }
+          right: Expression & { domain: { type: 'integer' | 'real' } }
+          domain: RealRange
+      }
+)
+
+type EqualityComparison = {
+    kind: 'EQUAL' | 'NOT_EQUAL'
+    domain: TruthvalueSet<['false', 'true']>
+} & (
+    | {
+          left: Expression & { domain: { type: 'integer' } }
+          right: Expression & { domain: { type: 'integer' } }
+      }
+    | {
+          left: Expression & { domain: { type: 'real' } }
+          right: Expression & { domain: { type: 'real' } }
+      }
+    | {
+          left: Expression & { domain: { type: 'truthvalue' } }
+          right: Expression & { domain: { type: 'truthvalue' } }
+      }
+)
+
+type OrderComparison = {
+    kind:
+        | 'LESS_THAN'
+        | 'GREATER_THAN'
+        | 'LESS_THAN_OR_EQUAL'
+        | 'GREATER_THAN_OR_EQUAL'
+    left: Expression & { domain: { type: 'integer' | 'real' } }
+    right: Expression & { domain: { type: 'integer' | 'real' } }
+    domain: TruthvalueSet<['false', 'true']>
+}
+
+type RefComparison = {
+    kind: 'SAME' | 'NOT_SAME'
+    left: Expression & { domain: { type: 'rc-type' | 'interface' } }
+    right: Expression & { domain: { type: 'rc-type' | 'interface' } }
+    domain: TruthvalueSet<['false', 'true']>
+}
+
+type LogicalOperation = {
+    kind: 'AND' | 'OR'
+    left: Expression & { domain: { type: 'truthvalue' } }
+    right: Expression & { domain: { type: 'truthvalue' } }
+    domain: TruthvalueSet<['false', 'true']>
+}
+
 export type Expression =
     | StringLiteral
     | IntegerLiteral
@@ -218,6 +282,11 @@ export type Expression =
     | VariableReference
     | PropertyReference
     | (FunctionCall & { domain: ValueSet })
+    | ArithmeticOperation
+    | EqualityComparison
+    | OrderComparison
+    | RefComparison
+    | LogicalOperation
 
 // ---------
 // ValueSets
@@ -278,4 +347,38 @@ export type ValueSet =
     | InterfaceSet
 
 type IsolationLevel = 'ISOLATED' | 'SHARED'
-type truthvalue = 'false' | 'ambiguous' | 'true'
+export type truthvalue = 'false' | 'ambiguous' | 'true'
+
+const BINARY_OPERATORS = [
+    // Logic
+    '||',
+    '&&',
+
+    // Comparison
+    '==',
+    '!=',
+    '===',
+    '!==',
+    '<',
+    '>',
+    '<=',
+    '>=',
+
+    /*
+    // Field
+    '|',
+    '&',
+    '<<',
+    '>>',
+    */
+
+    // Arithmetics
+    '+',
+    '-',
+    '*',
+    '/',
+    '%',
+    '^',
+] as const
+
+type BinaryOperator = (typeof BINARY_OPERATORS)[number]

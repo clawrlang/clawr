@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=../../../../cir/dist/cir.schema.json
+$schema: 'http://clawr.lang/schema/cir/DRAFT-0'
+startBlock:
+  - kind: VARIABLE_DECL
+    name: __tempˇ0
+    initialValue:
+      kind: BOX
+      expression:
+        kind: MULTIPLICATION
+        left:
+          kind: ADDITION
+          left:
+            kind: INTEGER_LITERAL
+            domain:
+              type: integer
+              min: '4'
+              max: '4'
+          right:
+            kind: INTEGER_LITERAL
+            domain:
+              type: integer
+              min: '2'
+              max: '2'
+        right:
+          kind: MODULUS
+          left:
+            kind: INTEGER_LITERAL
+            domain:
+              type: integer
+              min: '37'
+              max: '37'
+          right:
+            kind: INTEGER_LITERAL
+            domain:
+              type: integer
+              min: '10'
+              max: '10'
+          domain:
+            type: integer
+            boxed: true
+            min: '0'
+            max: '100'
+        domain:
+          type: integer
+          boxed: true
+          min: '0'
+          max: '100'
+      domain:
+        type: integer
+        boxed: true
+    domain:
+      type: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ0
+        domain:
+          type: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ0

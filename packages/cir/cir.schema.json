@@ -386,7 +386,7 @@
       "type": "object",
       "properties": {
         "kind": { "const": "TRUTHVALUE_LITERAL" },
-        "domain": { "$ref": "#/$defs/TruthvalueSet" }
+        "domain": { "$ref": "#/$defs/TruthvalueSingleton" }
       },
       "required": ["kind"],
       "additionalProperties": false
@@ -508,16 +508,32 @@
     },
 
     "TruthvalueSet": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "truthvalue" },
+            "boxed": { "const": true },
+            "values": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Truthvalue" }
+            }
+          },
+          "required": ["type", "values"],
+          "additionalProperties": false
+        },
+        { "$ref": "#/$defs/TruthvalueSingleton" }
+      ]
+    },
+
+    "TruthvalueSingleton": {
       "type": "object",
       "properties": {
         "type": { "const": "truthvalue" },
         "boxed": { "const": true },
-        "values": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/Truthvalue" }
-        }
+        "value": { "$ref": "#/$defs/Truthvalue" }
       },
-      "required": ["type", "values"],
+      "required": ["type", "value"],
       "additionalProperties": false
     },
 

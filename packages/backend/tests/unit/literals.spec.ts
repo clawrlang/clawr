@@ -35,7 +35,7 @@ describe('Lowering Literals', () => {
                     kind: 'TRUTHVALUE_LITERAL',
                     domain: {
                         type: 'truthvalue',
-                        values: [input as truthvalue],
+                        value: input as truthvalue,
                     },
                 }
                 const result = lowerExpr(expr)

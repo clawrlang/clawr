@@ -117,7 +117,7 @@ describe('VariableDeclaration', () => {
             decl.emitStatement(context)
             expect((context.scope.emitted[0] as any).domain).toEqual({
                 type: 'truthvalue',
-                values: ['true'],
+                value: 'true',
             })
         })
 

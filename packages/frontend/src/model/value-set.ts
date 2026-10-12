@@ -91,11 +91,16 @@ export class TruthvalueSet<Values extends truthvalue[]> implements ValueSet {
         )
     }
 
-    toCIR(): cir.ValueSet & { type: 'truthvalue'; values: Values } {
-        return {
-            type: 'truthvalue',
-            values: this.values,
-        }
+    toCIR(): cir.ValueSet & { type: 'truthvalue' } {
+        return this.values.length === 1
+            ? {
+                  type: 'truthvalue',
+                  value: this.values[0],
+              }
+            : {
+                  type: 'truthvalue',
+                  values: this.values,
+              }
     }
 
     toString(): string {

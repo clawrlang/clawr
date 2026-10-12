@@ -207,14 +207,14 @@ describe('FunctionCall', () => {
             {
                 kind: 'VARIABLE_DECL',
                 name: expect.stringMatching(/^__tempˇ\d+$/),
-                domain: { type: 'truthvalue', values: ['true'] },
+                domain: { type: 'truthvalue', value: 'true' },
                 initialValue: {
                     kind: 'BOX',
                     expression: {
                         kind: 'TRUTHVALUE_LITERAL',
-                        domain: { type: 'truthvalue', values: ['true'] },
+                        domain: { type: 'truthvalue', value: 'true' },
                     },
-                    domain: { type: 'truthvalue', values: ['true'] },
+                    domain: { type: 'truthvalue', value: 'true' },
                 },
             },
             {

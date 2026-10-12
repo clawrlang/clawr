@@ -162,7 +162,7 @@ type IntegerLiteral<Value extends bigint = bigint> = {
 
 type TruthvalueLiteral<Value extends truthvalue = truthvalue> = {
     kind: 'TRUTHVALUE_LITERAL'
-    domain: TruthvalueSet<[Value]>
+    domain: TruthvalueSingleton<Value>
 }
 
 type MemoryAllocation = {
@@ -317,10 +317,18 @@ type RealRange<
 } & (Min extends undefined ? { min?: undefined } : { min: `${Min}` }) &
     (Max extends undefined ? { max?: undefined } : { max: `${Max}` })
 
-type TruthvalueSet<Values extends truthvalue[] = truthvalue[]> = {
+type TruthvalueSet<Values extends truthvalue[] = truthvalue[]> =
+    | {
+          type: 'truthvalue'
+          boxed?: true
+          values: Values
+      }
+    | TruthvalueSingleton<Values[number]>
+
+type TruthvalueSingleton<Value extends truthvalue = truthvalue> = {
     type: 'truthvalue'
     boxed?: true
-    values: Values
+    value: Value
 }
 
 type StringSet = { type: 'string'; value?: string }

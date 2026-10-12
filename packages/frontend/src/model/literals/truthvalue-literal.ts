@@ -36,9 +36,12 @@ export class TruthValueLiteral<Value extends truthvalue> implements Expression {
     toCIRExpression(): SuccessResult<
         cir.Expression & { kind: 'TRUTHVALUE_LITERAL' }
     > {
+        const domain = this.value.toCIR()
+        if (!('value' in domain)) throw new Error('expected singleton domain')
+
         return Result.value({
             kind: 'TRUTHVALUE_LITERAL',
-            domain: this.value.toCIR(),
+            domain,
         })
     }
 

@@ -334,7 +334,10 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'OR':
             // Cast necessary because of shared mutable state. TypeScript cannot merge Truth[] and (false | true)[] into one type as they are contra-variant.
             // Of course, `includes()` is a read-only operation, which is always safe, but TypeScript is incapable of drawing that conclusion.
-            const values: cir.truthvalue[] = expr.left.domain.values
+            const values: cir.truthvalue[] =
+                'value' in expr.left.domain
+                    ? [expr.left.domain.value]
+                    : expr.left.domain.values
             if (values.includes('ambiguous'))
                 throw new Error('ambiguity not yet supported')
             return `(${lowerExpr(expr.left)}) || (${lowerExpr(expr.right)})`
@@ -419,7 +422,7 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
 export function lowerTruthvalueLiteral(
     expr: Extract<cir.Expression, { kind: 'TRUTHVALUE_LITERAL' }>,
 ): string {
-    return `c_${expr.domain.values[0]}`
+    return `c_${expr.domain.value}`
 }
 
 function mangleNameWithParameters(

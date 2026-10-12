@@ -11,8 +11,7 @@ declarations:
       kind: TRUTHVALUE_LITERAL
       domain:
         type: truthvalue
-        values:
-          - ambiguous
+        value: ambiguous
 startBlock:
   - kind: VARIABLE_DECL
     name: __tempˇ0

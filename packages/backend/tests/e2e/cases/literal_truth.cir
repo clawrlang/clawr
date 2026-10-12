@@ -14,13 +14,11 @@ startBlock:
         kind: TRUTHVALUE_LITERAL
         domain:
           type: truthvalue
-          values:
-            - ambiguous
+          value: ambiguous
       domain:
         type: truthvalue
         boxed: true
-        values:
-          - ambiguous
+        value: ambiguous
   - kind: CALL
     name:
       baseName: print

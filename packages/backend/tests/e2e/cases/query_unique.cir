@@ -29,8 +29,7 @@ declarations:
                 kind: INTEGER_LITERAL
                 domain:
                   type: integer
-                  max: '42'
-                  min: '42'
+                  value: '42'
       - kind: RETURN
         value:
           kind: VARIABLE_REF

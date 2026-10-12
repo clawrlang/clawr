@@ -1,12 +1,12 @@
 import { BinaryOperator } from '@/model/binary-operation'
-import { IntegerRange, ValueSet } from '@/model/value-set'
+import { IntegerSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 
 export class Addition implements BinaryOperator {
     static readonly instance = new Addition()
 
     compute(left: ValueSet, right: ValueSet): Result<ValueSet> {
-        if (!(left instanceof IntegerRange && right instanceof IntegerRange))
+        if (!(left instanceof IntegerSet && right instanceof IntegerSet))
             return ErrorResult.failure(
                 `addition between ${left.toString()} and ${right.toString()} is not supported`,
             )
@@ -18,6 +18,6 @@ export class Addition implements BinaryOperator {
             left.max === undefined || right.max === undefined
                 ? undefined
                 : left.max + right.max
-        return Result.value(IntegerRange.create({ min, max }))
+        return Result.value(IntegerSet.range({ min, max }))
     }
 }

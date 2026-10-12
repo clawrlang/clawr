@@ -3,7 +3,7 @@ import { ISOLATED } from '@/model/isolation-level'
 import { DataLiteral, IntegerLiteral } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { SelfAssignment } from '@/model/self-assignment'
-import { IntegerRange } from '@/model/value-set'
+import { IntegerSet } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
@@ -18,7 +18,7 @@ describe('ObjectDeclaration', () => {
                     name: 'property',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
-                    domain: util.spannedDomain(IntegerRange.singleton(20n)),
+                    domain: util.spannedDomain(IntegerSet.singleton(20n)),
                     defaultValue: util.integerLiteral(20),
                 },
             ],
@@ -37,11 +37,7 @@ describe('ObjectDeclaration', () => {
                 properties: [
                     {
                         name: 'property',
-                        domain: {
-                            max: '20',
-                            min: '20',
-                            type: 'integer',
-                        },
+                        domain: { type: 'integer', value: '20' },
                     },
                 ],
             },
@@ -69,7 +65,7 @@ describe('ObjectDeclaration', () => {
                     },
                     result: {
                         isolationLevel: ISOLATED,
-                        domain: util.spannedDomain(IntegerRange.singleton(42n)),
+                        domain: util.spannedDomain(IntegerSet.singleton(42n)),
                     },
                 }),
             ],
@@ -91,7 +87,7 @@ describe('ObjectDeclaration', () => {
                     name: 'property',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
-                    domain: util.spannedDomain(IntegerRange.singleton(20n)),
+                    domain: util.spannedDomain(IntegerSet.singleton(20n)),
                     defaultValue: util.integerLiteral(20),
                 },
             ],
@@ -185,7 +181,7 @@ describe('ObjectDeclaration', () => {
                     name: 'property',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
-                    domain: util.spannedDomain(IntegerRange.singleton(20n)),
+                    domain: util.spannedDomain(IntegerSet.singleton(20n)),
                     defaultValue: IntegerLiteral.create({
                         value: 20n,
                         span: util.someCodeSpan,

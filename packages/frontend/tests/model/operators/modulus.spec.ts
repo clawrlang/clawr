@@ -1,5 +1,5 @@
 import { Modulus } from '@/model/operators'
-import { IntegerRange } from '@/model/value-set'
+import { IntegerSet } from '@/model/value-set'
 import { describe, expect, test } from 'bun:test'
 import { it } from 'node:test'
 
@@ -7,8 +7,8 @@ describe('Modulus', () => {
     describe('integer operands', () => {
         it('evaluates integer literals as a single value', () => {
             const result = Modulus.instance.compute(
-                IntegerRange.singleton(21n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(21n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -19,8 +19,8 @@ describe('Modulus', () => {
 
         it('rounds down', () => {
             const result = Modulus.instance.compute(
-                IntegerRange.singleton(-2n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(-2n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -31,8 +31,8 @@ describe('Modulus', () => {
 
         it('rounds down', () => {
             const result = Modulus.instance.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(-3n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(-3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -97,8 +97,8 @@ describe('Modulus', () => {
             for (const { dividend: dividend, divisor, expected } of examples)
                 test(`[${dividend.min ?? 'inf'},${dividend.max ?? 'inf'}] % [${divisor.min ?? 'inf'},${divisor.max ?? 'inf'}] -> [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
                     const result = Modulus.instance.compute(
-                        IntegerRange.create(dividend),
-                        IntegerRange.create(divisor),
+                        IntegerSet.range(dividend),
+                        IntegerSet.range(divisor),
                     )
                     expect(result.isSuccess || result.error).toBeTrue()
                     expect(result.isSuccess && result.value).toMatchObject(
@@ -108,8 +108,8 @@ describe('Modulus', () => {
 
             it('disallows zero divisor', () => {
                 const result = Modulus.instance.compute(
-                    IntegerRange.singleton(1n),
-                    IntegerRange.singleton(0n),
+                    IntegerSet.singleton(1n),
+                    IntegerSet.singleton(0n),
                 )
                 expect(result.isError || result.value).toBeTrue()
                 expect(result.isError && result.error.message).toContain(

@@ -1,13 +1,13 @@
 import { Addition } from '@/model/operators'
-import { IntegerRange } from '@/model/value-set'
+import { IntegerSet } from '@/model/value-set'
 import { describe, expect } from 'bun:test'
 
 describe('Addition', () => {
     describe('integer operands', () => {
         describe('evaluates singleton integer ranges as a single value', () => {
             const result = Addition.instance.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -56,8 +56,8 @@ describe('Addition', () => {
             for (const { left, right, expected } of examples)
                 describe(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] + [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
                     const result = Addition.instance.compute(
-                        IntegerRange.create(left),
-                        IntegerRange.create(right),
+                        IntegerSet.range(left),
+                        IntegerSet.range(right),
                     )
                     expect(result.isSuccess || result.error).toBeTrue()
                     expect(result.isSuccess && result.value).toMatchObject(

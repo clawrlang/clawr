@@ -1,4 +1,4 @@
-import { IntegerRange, ValueSet } from '@/model/value-set'
+import { IntegerSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 import { BinaryOperator } from '../binary-operation'
 
@@ -6,7 +6,7 @@ export class Exponential implements BinaryOperator {
     static instance = new Exponential()
 
     compute(base: ValueSet, exponent: ValueSet): Result<ValueSet> {
-        if (!(base instanceof IntegerRange && exponent instanceof IntegerRange))
+        if (!(base instanceof IntegerSet && exponent instanceof IntegerSet))
             return ErrorResult.failure(
                 `exponentiation between ${base} and ${exponent} is not supported`,
             )
@@ -27,7 +27,7 @@ export class Exponential implements BinaryOperator {
             )
 
         const { min, max } = integerExponentRange(base, exponent)
-        return Result.value(IntegerRange.create({ min, max }))
+        return Result.value(IntegerSet.range({ min, max }))
     }
 }
 
@@ -48,8 +48,8 @@ function hasExponent(
 // Computes the exact range of base^exponent for integer ranges, where
 // exponent.min is known to be defined and non-negative.
 function integerExponentRange(
-    base: IntegerRange<bigint | undefined, bigint | undefined>,
-    exponent: IntegerRange<bigint | undefined, bigint | undefined>,
+    base: IntegerSet<bigint | undefined, bigint | undefined>,
+    exponent: IntegerSet<bigint | undefined, bigint | undefined>,
 ): { min: bigint | undefined; max: bigint | undefined } {
     const bMin = base.min
     const bMax = base.max

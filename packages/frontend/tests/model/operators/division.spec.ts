@@ -1,13 +1,13 @@
 import { Division } from '@/model/operators'
-import { IntegerRange } from '@/model/value-set'
+import { IntegerSet } from '@/model/value-set'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Division', () => {
     describe('integer operands', () => {
         it('evaluates integer literals as a single value', () => {
             const result = Division.instance.compute(
-                IntegerRange.singleton(21n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(21n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -18,8 +18,8 @@ describe('Division', () => {
 
         it('rounds down', () => {
             const result = Division.instance.compute(
-                IntegerRange.singleton(-2n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(-2n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -30,8 +30,8 @@ describe('Division', () => {
 
         it('rounds down', () => {
             const result = Division.instance.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(-3n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(-3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -98,8 +98,8 @@ describe('Division', () => {
             for (const { dividend: dividend, divisor, expected } of examples)
                 test(`[${dividend.min ?? 'inf'},${dividend.max ?? 'inf'}] / [${divisor.min ?? 'inf'},${divisor.max ?? 'inf'}] -> [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
                     const result = Division.instance.compute(
-                        IntegerRange.create(dividend),
-                        IntegerRange.create(divisor),
+                        IntegerSet.range(dividend),
+                        IntegerSet.range(divisor),
                     )
                     expect(result.isSuccess || result.error).toBeTrue()
                     expect(result.isSuccess && result.value).toMatchObject(
@@ -109,8 +109,8 @@ describe('Division', () => {
 
             describe('disallows zero divisor', () => {
                 const result = Division.instance.compute(
-                    IntegerRange.singleton(1n),
-                    IntegerRange.singleton(0n),
+                    IntegerSet.singleton(1n),
+                    IntegerSet.singleton(0n),
                 )
                 expect(result.isError || result.value).toBeTrue()
                 expect(result.isError && result.error.message).toEqual(

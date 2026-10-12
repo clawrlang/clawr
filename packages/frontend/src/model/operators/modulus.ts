@@ -1,5 +1,5 @@
 import { unionRange } from '@/model/operators/division'
-import { IntegerRange, ValueSet } from '@/model/value-set'
+import { IntegerSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 import { BinaryOperator } from '../binary-operation'
 
@@ -7,9 +7,7 @@ export class Modulus implements BinaryOperator {
     static instance = new Modulus()
 
     compute(dividend: ValueSet, divisor: ValueSet): Result<ValueSet> {
-        if (!(
-            dividend instanceof IntegerRange && divisor instanceof IntegerRange
-        ))
+        if (!(dividend instanceof IntegerSet && divisor instanceof IntegerSet))
             return ErrorResult.failure(
                 `division between ${dividend.toString()} and ${divisor.toString()} is not supported`,
             )
@@ -27,7 +25,7 @@ export class Modulus implements BinaryOperator {
                   modRange(dividend, { min: divisor.min, max: -1n }),
               )
             : modRange(dividend, divisor)
-        return Result.value(IntegerRange.create({ min, max }))
+        return Result.value(IntegerSet.range({ min, max }))
     }
 }
 

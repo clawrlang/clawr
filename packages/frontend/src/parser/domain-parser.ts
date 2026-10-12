@@ -4,7 +4,7 @@ import { decorateDomain, DomainDeclaration } from '@/model/domain-declaration'
 import { IntegerLiteral } from '@/model/literals'
 import { TypeName } from '@/model/type-name'
 import {
-    IntegerRange,
+    IntegerSet,
     RCTypeSet,
     StringSet,
     TruthvalueSet,
@@ -50,7 +50,7 @@ export class DomainParser {
         typeToken: Token,
     ): DomainDeclaration {
         if (!stream.isNext('PUNCTUATION', '('))
-            return decorateDomain(IntegerRange.unconstrained(), {
+            return decorateDomain(IntegerSet.unconstrained(), {
                 span: { start: typeToken.start, end: typeToken.end },
             })
 
@@ -96,7 +96,7 @@ export class DomainParser {
 
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return decorateDomain(IntegerRange.create({ min, max }), {
+        return decorateDomain(IntegerSet.range({ min, max }), {
             span: { start: typeToken.start, end: endToken.end },
         })
     }

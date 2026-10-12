@@ -17,7 +17,7 @@ describe('Lowering Literals', () => {
     it('lowers integer literals correctly', () => {
         const expr: Expression = {
             kind: 'INTEGER_LITERAL',
-            domain: { type: 'integer', max: '42', min: '42' },
+            domain: { type: 'integer', value: '42' },
         }
         const result = lowerExpr(expr)
         expect(result).toBe('42')

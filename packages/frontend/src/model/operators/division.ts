@@ -1,4 +1,4 @@
-import { IntegerRange, ValueSet } from '@/model/value-set'
+import { IntegerSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 import { BinaryOperator } from '../binary-operation'
 
@@ -6,9 +6,7 @@ export class Division implements BinaryOperator {
     static instance = new Division()
 
     compute(dividend: ValueSet, divisor: ValueSet): Result<ValueSet> {
-        if (!(
-            dividend instanceof IntegerRange && divisor instanceof IntegerRange
-        ))
+        if (!(dividend instanceof IntegerSet && divisor instanceof IntegerSet))
             return ErrorResult.failure(
                 `division between ${dividend.toString()} and ${divisor.toString()} is not supported`,
             )
@@ -27,15 +25,15 @@ export class Division implements BinaryOperator {
             ? unionRange(
                   integerDivisionRange(
                       dividend,
-                      IntegerRange.create({ min: divisor.min, max: -1n }),
+                      IntegerSet.range({ min: divisor.min, max: -1n }),
                   ),
                   integerDivisionRange(
                       dividend,
-                      IntegerRange.create({ min: 1n, max: divisor.max }),
+                      IntegerSet.range({ min: 1n, max: divisor.max }),
                   ),
               )
             : integerDivisionRange(dividend, divisor)
-        return Result.value(IntegerRange.create({ min, max }))
+        return Result.value(IntegerSet.range({ min, max }))
     }
 }
 
@@ -82,8 +80,8 @@ export function unionRange(
 // divisor range is known not to contain zero (so it is entirely positive
 // or entirely negative).
 function integerDivisionRange(
-    dividend: IntegerRange<bigint | undefined, bigint | undefined>,
-    divisor: IntegerRange<bigint | undefined, bigint | undefined>,
+    dividend: IntegerSet<bigint | undefined, bigint | undefined>,
+    divisor: IntegerSet<bigint | undefined, bigint | undefined>,
 ): { min: bigint | undefined; max: bigint | undefined } {
     const nMin = dividend.min
     const nMax = dividend.max

@@ -1,6 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { IntegerRange, TruthvalueSet } from '@/model/value-set'
+import { IntegerSet, TruthvalueSet } from '@/model/value-set'
 import { DataDeclarationParser } from '@/parser/data-declaration-parser'
 import { describe, expect, it } from 'bun:test'
 
@@ -27,7 +27,7 @@ describe('DataDeclarationParser', () => {
                 },
             ],
         })
-        expect(result.properties[0].domain).toBeInstanceOf(IntegerRange)
+        expect(result.properties[0].domain).toBeInstanceOf(IntegerSet)
         expect(result.properties[1].domain).toBeInstanceOf(TruthvalueSet)
     })
 
@@ -53,7 +53,7 @@ describe('DataDeclarationParser', () => {
                 },
             ],
         })
-        expect(result.properties[0].domain).toBeInstanceOf(IntegerRange)
+        expect(result.properties[0].domain).toBeInstanceOf(IntegerSet)
         expect(result.properties[1].domain).toBeInstanceOf(TruthvalueSet)
     })
 })

@@ -14,7 +14,7 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        domain: { type: 'integer', min: '42', max: '42' },
+                        domain: { type: 'integer', value: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
@@ -37,7 +37,7 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        domain: { type: 'integer', min: '42', max: '42' },
+                        domain: { type: 'integer', value: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
@@ -61,7 +61,7 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        domain: { type: 'integer', min: '42', max: '42' },
+                        domain: { type: 'integer', value: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
@@ -84,7 +84,7 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        domain: { type: 'integer', min: '42', max: '42' },
+                        domain: { type: 'integer', value: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',

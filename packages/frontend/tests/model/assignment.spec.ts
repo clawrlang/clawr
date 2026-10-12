@@ -6,7 +6,7 @@ import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { DataLiteral, IntegerLiteral } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { PropertyReference } from '@/model/property-reference'
-import { IntegerRange, RCTypeSet } from '@/model/value-set'
+import { IntegerSet, RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
@@ -15,7 +15,7 @@ describe('Assignment', () => {
     it('outputs the correct CIR representation', () => {
         const context = util.newSemanticContext()
         context.scope.addVariableDeclaration('x', util.someIntegerVariable)
-        context.scope.setCurrentValue('x', IntegerRange.singleton(0n))
+        context.scope.setCurrentValue('x', IntegerSet.singleton(0n))
 
         const assignment = Assignment.create({
             target: util.variableRef('x'),
@@ -32,7 +32,7 @@ describe('Assignment', () => {
                 target: { kind: 'VARIABLE_REF', name: 'x' },
                 value: {
                     kind: 'INTEGER_LITERAL',
-                    domain: { min: '42', max: '42' },
+                    domain: { value: '42' },
                 },
             },
         ])
@@ -52,7 +52,7 @@ describe('Assignment', () => {
             ...util.someIntegerVariable,
             domain: RCTypeSet.create({
                 type: util.simpleTypeName('MyData'),
-                properties: { property: IntegerRange.singleton(12n) },
+                properties: { property: IntegerSet.singleton(12n) },
             }),
         })
 
@@ -79,7 +79,7 @@ describe('Assignment', () => {
                             name: 'property',
                             value: {
                                 kind: 'INTEGER_LITERAL',
-                                domain: { min: '1', max: '1' },
+                                domain: { value: '1' },
                             },
                         },
                     ],

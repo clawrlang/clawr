@@ -5,7 +5,7 @@ import { IntegerLiteral, TruthValueLiteral } from '@/model/literals'
 import { PropertyReference } from '@/model/property-reference'
 import { Scope } from '@/model/scope'
 import { TypeName } from '@/model/type-name'
-import { IntegerRange, truthvalue, ValueSet } from '@/model/value-set'
+import { IntegerSet, truthvalue, ValueSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 
 export function newSemanticContext(): Context {
@@ -24,14 +24,14 @@ export const someCodeSpan = {
 export const someIntegerVariable = {
     isImmutable: false,
     isolationLevel: ISOLATED,
-    domain: IntegerRange.unconstrained(),
+    domain: IntegerSet.unconstrained(),
 }
 
 export const somePropertyDeclConfig = {
     name: 'someProperty',
     isImmutable: false,
     isolationLevel: ISOLATED,
-    domain: decorateDomain(IntegerRange.unconstrained(), {
+    domain: decorateDomain(IntegerSet.unconstrained(), {
         span: someCodeSpan,
     }),
 }
@@ -55,7 +55,7 @@ export const someParameterDeclConfig = {
     label: undefined,
     isImmutable: true,
     isolationLevel: ISOLATED,
-    domain: spannedDomain(IntegerRange.unconstrained()),
+    domain: spannedDomain(IntegerSet.unconstrained()),
     span: someCodeSpan,
 }
 

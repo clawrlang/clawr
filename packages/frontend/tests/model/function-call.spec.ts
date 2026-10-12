@@ -73,7 +73,7 @@ describe('FunctionCall', () => {
             arguments: [
                 {
                     kind: 'INTEGER_LITERAL',
-                    domain: { max: '42', min: '42' },
+                    domain: { value: '42' },
                 },
             ],
         })
@@ -168,7 +168,7 @@ describe('FunctionCall', () => {
                     kind: 'BOX',
                     expression: {
                         kind: 'INTEGER_LITERAL',
-                        domain: { max: '1', min: '1' },
+                        domain: { value: '1' },
                     },
                 },
             },

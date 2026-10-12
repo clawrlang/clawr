@@ -1,18 +1,18 @@
 import { BinaryOperator } from '@/model/binary-operation'
-import { IntegerRange, ValueSet } from '@/model/value-set'
+import { IntegerSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 
 export class Multiplication implements BinaryOperator {
     static instance = new Multiplication()
 
     compute(left: ValueSet, right: ValueSet): Result<ValueSet> {
-        if (!(left instanceof IntegerRange && right instanceof IntegerRange))
+        if (!(left instanceof IntegerSet && right instanceof IntegerSet))
             return ErrorResult.failure(
                 `multiplication between ${left.toString()} and ${right.toString()} is not supported`,
             )
 
         const { min, max } = integerMultiplicationRange(left, right)
-        return Result.value(IntegerRange.create({ min, max }))
+        return Result.value(IntegerSet.range({ min, max }))
     }
 }
 
@@ -78,8 +78,8 @@ function maxBound(a: Bound, b: Bound): Bound {
 // The product of two intervals is bounded by its four corner products,
 // since multiplication by a fixed-sign factor is monotonic.
 function integerMultiplicationRange(
-    left: IntegerRange,
-    right: IntegerRange,
+    left: IntegerSet,
+    right: IntegerSet,
 ): { min: bigint | undefined; max: bigint | undefined } {
     const lMin = lowerBound(left.min)
     const lMax = upperBound(left.max)

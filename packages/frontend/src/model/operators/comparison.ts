@@ -1,5 +1,5 @@
 import {
-    IntegerRange,
+    IntegerSet,
     truthvalue,
     TruthvalueSet,
     ValueSet,
@@ -50,7 +50,7 @@ export class Comparison implements BinaryOperator {
     }
 
     private equals(left: ValueSet, right: ValueSet): Result<ValueSet> {
-        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+        if (left instanceof IntegerSet && right instanceof IntegerSet) {
             const values: truthvalue[] =
                 left.min !== left.max ||
                 right.min !== right.max ||
@@ -82,7 +82,7 @@ export class Comparison implements BinaryOperator {
     }
 
     private areNotEqual(left: ValueSet, right: ValueSet): Result<ValueSet> {
-        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+        if (left instanceof IntegerSet && right instanceof IntegerSet) {
             const values: truthvalue[] =
                 left.min !== left.max ||
                 right.min !== right.max ||
@@ -114,7 +114,7 @@ export class Comparison implements BinaryOperator {
     }
 
     private leftIsLess(left: ValueSet, right: ValueSet): Result<ValueSet> {
-        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+        if (left instanceof IntegerSet && right instanceof IntegerSet) {
             const canBeTrue =
                 left.min === undefined ||
                 right.max === undefined ||
@@ -137,7 +137,7 @@ export class Comparison implements BinaryOperator {
         left: ValueSet,
         right: ValueSet,
     ): Result<ValueSet> {
-        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+        if (left instanceof IntegerSet && right instanceof IntegerSet) {
             const canBeTrue =
                 left.min === undefined ||
                 right.max === undefined ||
@@ -157,7 +157,7 @@ export class Comparison implements BinaryOperator {
     }
 
     private leftIsGreater(left: ValueSet, right: ValueSet): Result<ValueSet> {
-        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+        if (left instanceof IntegerSet && right instanceof IntegerSet) {
             const canBeTrue =
                 left.max === undefined ||
                 right.min === undefined ||
@@ -180,7 +180,7 @@ export class Comparison implements BinaryOperator {
         left: ValueSet,
         right: ValueSet,
     ): Result<ValueSet> {
-        if (left instanceof IntegerRange && right instanceof IntegerRange) {
+        if (left instanceof IntegerSet && right instanceof IntegerSet) {
             const canBeTrue =
                 left.max === undefined ||
                 right.min === undefined ||

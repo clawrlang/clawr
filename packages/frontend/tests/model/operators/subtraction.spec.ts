@@ -1,13 +1,13 @@
 import { Subtraction } from '@/model/operators'
-import { IntegerRange } from '@/model/value-set'
+import { IntegerSet } from '@/model/value-set'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Subtraction', () => {
     describe('integer operands', () => {
         it('evaluates integer literals as a single value', () => {
             const result = Subtraction.instance.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -56,8 +56,8 @@ describe('Subtraction', () => {
             for (const { minuend, subtrahend, expected } of examples)
                 test(`[${minuend.min ?? 'inf'},${minuend.max ?? 'inf'}] - [${subtrahend.min ?? 'inf'},${subtrahend.max ?? 'inf'}] -> [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
                     const result = Subtraction.instance.compute(
-                        IntegerRange.create(minuend),
-                        IntegerRange.create(subtrahend),
+                        IntegerSet.range(minuend),
+                        IntegerSet.range(subtrahend),
                     )
                     expect(result.isSuccess || result.error).toBeTrue()
                     expect(result.isSuccess && result.value).toMatchObject(

@@ -1,6 +1,6 @@
 import { ISOLATED } from '@/model/isolation-level'
 import { Scope } from '@/model/scope'
-import { IntegerRange } from '@/model/value-set'
+import { IntegerSet } from '@/model/value-set'
 import { describe, expect, it } from 'bun:test'
 
 describe('Scope', () => {
@@ -10,7 +10,7 @@ describe('Scope', () => {
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerRange.unconstrained(),
+                domain: IntegerSet.unconstrained(),
             })
 
             expect(scope.currentValue('v')).toMatchObject({
@@ -24,12 +24,11 @@ describe('Scope', () => {
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerRange.unconstrained(),
+                domain: IntegerSet.unconstrained(),
             })
 
             expect(
-                scope.setCurrentValue('v', IntegerRange.singleton(12n))
-                    .isSuccess,
+                scope.setCurrentValue('v', IntegerSet.singleton(12n)).isSuccess,
             ).toBeTrue()
 
             expect(scope.currentValue('v')).toMatchObject({
@@ -43,11 +42,11 @@ describe('Scope', () => {
             parent.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerRange.unconstrained(),
+                domain: IntegerSet.unconstrained(),
             })
 
             expect(
-                parent.setCurrentValue('v', IntegerRange.singleton(12n))
+                parent.setCurrentValue('v', IntegerSet.singleton(12n))
                     .isSuccess,
             ).toBeTrue()
 
@@ -63,11 +62,11 @@ describe('Scope', () => {
             parent.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerRange.unconstrained(),
+                domain: IntegerSet.unconstrained(),
             })
 
             expect(
-                parent.setCurrentValue('v', IntegerRange.singleton(12n))
+                parent.setCurrentValue('v', IntegerSet.singleton(12n))
                     .isSuccess,
             ).toBeTrue()
 
@@ -75,7 +74,7 @@ describe('Scope', () => {
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerRange.unconstrained(),
+                domain: IntegerSet.unconstrained(),
             })
             expect(scope.currentValue('v')).toMatchObject({
                 min: undefined,
@@ -88,12 +87,12 @@ describe('Scope', () => {
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerRange.singleton(12n),
+                domain: IntegerSet.singleton(12n),
             })
 
             const result = scope.setCurrentValue(
                 'v',
-                IntegerRange.unconstrained(),
+                IntegerSet.unconstrained(),
             )
             expect(result.isSuccess && result.value).toBeFalse()
 
@@ -108,7 +107,7 @@ describe('Scope', () => {
 
             const result = scope.setCurrentValue(
                 'v',
-                IntegerRange.unconstrained(),
+                IntegerSet.unconstrained(),
             )
             expect(result.isSuccess && result.value).toBeFalse()
 
@@ -122,7 +121,7 @@ describe('Scope', () => {
             scope.rootScope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerRange.unconstrained(),
+                domain: IntegerSet.unconstrained(),
             })
 
             expect(scope.currentValue('v')).toMatchObject({
@@ -136,12 +135,11 @@ describe('Scope', () => {
             scope.rootScope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerRange.unconstrained(),
+                domain: IntegerSet.unconstrained(),
             })
 
             expect(
-                scope.setCurrentValue('v', IntegerRange.singleton(12n))
-                    .isSuccess,
+                scope.setCurrentValue('v', IntegerSet.singleton(12n)).isSuccess,
             ).toBeTrue()
 
             expect(scope.currentValue('v')).toMatchObject({
@@ -155,12 +153,12 @@ describe('Scope', () => {
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerRange.singleton(12n),
+                domain: IntegerSet.singleton(12n),
             })
 
             const result = scope.setCurrentValue(
                 'v',
-                IntegerRange.unconstrained(),
+                IntegerSet.unconstrained(),
             )
             expect(result.isSuccess && result.value).toBeFalse()
 

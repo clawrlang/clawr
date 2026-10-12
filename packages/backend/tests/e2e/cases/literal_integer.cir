@@ -9,8 +9,7 @@ startBlock:
         kind: INTEGER_LITERAL
         domain:
           type: integer
-          max: '1'
-          min: '1'
+          value: '1'
       domain:
         type: integer
         boxed: true

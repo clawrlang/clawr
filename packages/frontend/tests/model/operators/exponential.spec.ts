@@ -1,12 +1,12 @@
 import { Exponential } from '@/model/operators'
-import { IntegerRange } from '@/model/value-set'
+import { IntegerSet } from '@/model/value-set'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Exponential', () => {
     it('evaluates integer singletons as a single value', () => {
         const result = Exponential.instance.compute(
-            IntegerRange.singleton(2n),
-            IntegerRange.singleton(3n),
+            IntegerSet.singleton(2n),
+            IntegerSet.singleton(3n),
         )
         expect(result.isSuccess || result.error).toBeTrue()
         expect(result.isSuccess && result.value).toMatchObject({
@@ -77,8 +77,8 @@ describe('Exponential', () => {
         for (const { base, exponent, expected } of examples) {
             test(`[${base.min ?? 'inf'},${base.max ?? 'inf'}]^[${exponent.min ?? 'inf'},${exponent.max ?? 'inf'}] -> [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
                 const result = Exponential.instance.compute(
-                    IntegerRange.create(base),
-                    IntegerRange.create(exponent),
+                    IntegerSet.range(base),
+                    IntegerSet.range(exponent),
                 )
                 expect(result.isSuccess || result.error).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject(expected)
@@ -87,8 +87,8 @@ describe('Exponential', () => {
 
         it('disallows 0^0 when both value sets are singletons', () => {
             const result = Exponential.instance.compute(
-                IntegerRange.singleton(0n),
-                IntegerRange.singleton(0n),
+                IntegerSet.singleton(0n),
+                IntegerSet.singleton(0n),
             )
             expect(result.isError || result.value).toBeTrue()
             expect(result.isError && result.error.message).toEqual(
@@ -98,8 +98,8 @@ describe('Exponential', () => {
 
         it('disallows negative integer exponent', () => {
             const result = Exponential.instance.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(-3n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(-3n),
             )
             expect(result.isError || result.value).toBeTrue()
             expect(result.isError && result.error.message).toEqual(

@@ -2,7 +2,7 @@ import { DataDeclaration } from '@/model/data-declaration'
 import { FunctionCall } from '@/model/function-call'
 import { ISOLATED } from '@/model/isolation-level'
 import { Module } from '@/model/module'
-import { IntegerRange, TruthvalueSet } from '@/model/value-set'
+import { IntegerSet, TruthvalueSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import * as util from '@@/util'
 import { describe, expect, it } from 'bun:test'
@@ -33,11 +33,11 @@ describe('Module', () => {
                     arguments: [
                         {
                             kind: 'INTEGER_LITERAL',
-                            domain: { max: '1', min: '1' },
+                            domain: { value: '1' },
                         },
                         {
                             kind: 'INTEGER_LITERAL',
-                            domain: { max: '2', min: '2' },
+                            domain: { value: '2' },
                         },
                     ],
                 },
@@ -77,7 +77,7 @@ describe('Module', () => {
                     ...util.someVariableDeclConfig,
                     isImmutable: true,
                     name: 'x',
-                    domain: util.spannedDomain(IntegerRange.unconstrained()),
+                    domain: util.spannedDomain(IntegerSet.unconstrained()),
                     initialValue: util.integerLiteral(42),
                 }),
             ],
@@ -87,7 +87,7 @@ describe('Module', () => {
         expect(context.scope.variableDeclaration('x')).toEqual({
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: IntegerRange.create({ min: 42n, max: 42n }),
+            domain: IntegerSet.range({ min: 42n, max: 42n }),
         })
     })
 
@@ -123,7 +123,7 @@ describe('Module', () => {
             ],
         })
         expect(myDataDeclaration?.properties[0].domain).toBeInstanceOf(
-            IntegerRange,
+            IntegerSet,
         )
         expect(myDataDeclaration?.properties[1].domain).toBeInstanceOf(
             TruthvalueSet,

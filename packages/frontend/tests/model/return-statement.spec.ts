@@ -2,7 +2,7 @@ import { Context } from '@/model'
 import { DataDeclaration } from '@/model/data-declaration'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { ReturnStatement } from '@/model/return-statement'
-import { IntegerRange, RCTypeSet, TruthvalueSet } from '@/model/value-set'
+import { IntegerSet, RCTypeSet, TruthvalueSet } from '@/model/value-set'
 import * as util from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
@@ -16,7 +16,7 @@ describe('ReturnStatement', () => {
         const context: Context = {
             ...util.newSemanticContext(),
             calleeResult: {
-                domain: IntegerRange.unconstrained(),
+                domain: IntegerSet.unconstrained(),
                 isolationLevel: ISOLATED,
             },
         }
@@ -24,7 +24,7 @@ describe('ReturnStatement', () => {
 
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'RETURN',
-            value: { domain: { max: '42', min: '42' } },
+            value: { domain: { value: '42' } },
         })
     })
 

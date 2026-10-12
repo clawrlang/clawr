@@ -1,5 +1,5 @@
 import {
-    IntegerRange,
+    IntegerSet,
     RCTypeSet,
     StringSet,
     TruthvalueSet,
@@ -10,7 +10,7 @@ import { describe, expect, it } from 'bun:test'
 describe('ValueSet', () => {
     describe('toCIR', () => {
         it('converts constrained integer to CIR correctly', () => {
-            const valueSet = IntegerRange.create({
+            const valueSet = IntegerSet.range({
                 min: 1n,
                 max: 10n,
             })
@@ -23,7 +23,7 @@ describe('ValueSet', () => {
         })
 
         it('converts unconstrained integer to CIR correctly', () => {
-            const valueSet = IntegerRange.unconstrained()
+            const valueSet = IntegerSet.unconstrained()
 
             expect(valueSet.toCIR()).toEqual({
                 type: 'integer',
@@ -33,7 +33,7 @@ describe('ValueSet', () => {
         })
 
         it('converts integer with min constraint only to CIR correctly', () => {
-            const valueSet = IntegerRange.create({ min: 1n })
+            const valueSet = IntegerSet.range({ min: 1n })
 
             expect(valueSet.toCIR()).toEqual({
                 type: 'integer',
@@ -43,7 +43,7 @@ describe('ValueSet', () => {
         })
 
         it('converts integer with max constraint only to CIR correctly', () => {
-            const valueSet = IntegerRange.create({ max: 10n })
+            const valueSet = IntegerSet.range({ max: 10n })
 
             expect(valueSet.toCIR()).toEqual({
                 type: 'integer',

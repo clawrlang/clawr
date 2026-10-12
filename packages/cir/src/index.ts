@@ -157,7 +157,7 @@ type StringLiteral = {
 
 type IntegerLiteral<Value extends bigint = bigint> = {
     kind: 'INTEGER_LITERAL'
-    domain: IntegerRange<Value, Value>
+    domain: IntegerSingleton<Value>
 }
 
 type TruthvalueLiteral<Value extends truthvalue = truthvalue> = {
@@ -218,7 +218,7 @@ type ArithmeticOperation = {
     | {
           left: Expression & { domain: { type: 'integer' } }
           right: Expression & { domain: { type: 'integer' } }
-          domain: IntegerRange
+          domain: IntegerSet
       }
     | {
           left: Expression & { domain: { type: 'integer' | 'real' } }
@@ -291,14 +291,22 @@ export type Expression =
 // ValueSets
 // ---------
 
+type IntegerSet = IntegerRange | IntegerSingleton
+
 type IntegerRange<
     Min extends bigint | undefined = bigint | undefined,
     Max extends bigint | undefined = bigint | undefined,
 > = {
     type: 'integer'
     boxed?: true
-} & (Min extends undefined ? { min?: undefined } : { min: `${Min}` }) &
-    (Max extends undefined ? { max?: undefined } : { max: `${Max}` })
+} & ((Min extends undefined ? { min?: undefined } : { min: `${Min}` }) &
+    (Max extends undefined ? { max?: undefined } : { max: `${Max}` }))
+
+type IntegerSingleton<Value extends bigint = bigint> = {
+    type: 'integer'
+    boxed?: true
+    value: `${Value}`
+}
 
 type RealRange<
     Min extends decimal | undefined = decimal | undefined,
@@ -330,7 +338,7 @@ type InterfaceSet = {
 }
 
 export type ValueSet =
-    | IntegerRange
+    | IntegerSet
     | RealRange
     | TruthvalueSet
     | StringSet

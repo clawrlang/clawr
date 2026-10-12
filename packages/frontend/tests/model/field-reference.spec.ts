@@ -3,7 +3,7 @@ import { ISOLATED, SHARED, UNKNOWN } from '@/model/isolation-level'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { PropertyReference } from '@/model/property-reference'
 import { TypeName } from '@/model/type-name'
-import { IntegerRange, RCTypeSet } from '@/model/value-set'
+import { IntegerSet, RCTypeSet } from '@/model/value-set'
 import { SemanticResult } from '@/tools/source-result'
 import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
@@ -391,7 +391,7 @@ describe('Property Reference', () => {
                             ...util.somePropertyDeclConfig,
                             name: 'property',
                             domain: util.spannedDomain(
-                                IntegerRange.create({ max: 100n, min: 0n }),
+                                IntegerSet.range({ max: 100n, min: 0n }),
                             ),
                         },
                     ],
@@ -424,7 +424,7 @@ describe('Property Reference', () => {
                             ...util.somePropertyDeclConfig,
                             name: 'property',
                             domain: util.spannedDomain(
-                                IntegerRange.create({ max: 100n, min: 0n }),
+                                IntegerSet.range({ max: 100n, min: 0n }),
                             ),
                         },
                     ],

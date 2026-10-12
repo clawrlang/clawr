@@ -1,6 +1,6 @@
 import { Expression } from '@/model'
 import { ISOLATED } from '@/model/isolation-level'
-import { IntegerRange } from '@/model/value-set'
+import { IntegerSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import * as cir from '@clawr/cir'
@@ -14,7 +14,7 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
     }
 
     private constructor(
-        public readonly value: IntegerRange<Value, Value>,
+        public readonly value: IntegerSet<Value, Value>,
         public readonly span: SourceCodeSpan,
     ) {}
 
@@ -26,7 +26,7 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         span: SourceCodeSpan
     }) {
         return new IntegerLiteral(
-            IntegerRange.create({ min: value, max: value }),
+            IntegerSet.range({ min: value, max: value }),
             span,
         )
     }
@@ -35,24 +35,23 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         return Result.value(ISOLATED)
     }
 
-    currentValue(): SuccessResult<IntegerRange<Value, Value>> {
+    currentValue(): SuccessResult<IntegerSet<Value, Value>> {
         return Result.value(this.value)
     }
 
-    domain(): SuccessResult<IntegerRange<Value, Value>> {
+    domain(): SuccessResult<IntegerSet<Value, Value>> {
         return Result.value(this.value)
     }
 
     toCIRExpression(): SuccessResult<
         cir.Expression & { kind: 'INTEGER_LITERAL' }
     > {
+        const domain = this.value.toCIR()
+        if (!('value' in domain)) throw new Error('Expected singleton domain')
+
         return Result.value({
             kind: 'INTEGER_LITERAL',
-            domain: this.value.toCIR() as cir.ValueSet & {
-                type: 'integer'
-                min: `${Value}`
-                max: `${Value}`
-            },
+            domain,
         })
     }
 

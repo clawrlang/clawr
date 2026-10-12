@@ -1,6 +1,6 @@
 import { TokenStream } from '@/lexer'
 import {
-    IntegerRange,
+    IntegerSet,
     RCTypeSet,
     StringSet,
     TruthvalueSet,
@@ -11,7 +11,7 @@ import { describe, expect, it } from 'bun:test'
 describe('DomainParser', () => {
     it('parses unconstrained integer type', () => {
         const domain = parseDomain('integer')
-        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toBeInstanceOf(IntegerSet)
         expect(domain).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
@@ -22,7 +22,7 @@ describe('DomainParser', () => {
 
     it('parses integer type with min constraint only', () => {
         const domain = parseDomain('integer(1...)')
-        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toBeInstanceOf(IntegerSet)
         expect(domain).toMatchObject({
             min: 1n,
             span: {
@@ -34,7 +34,7 @@ describe('DomainParser', () => {
 
     it('parses integer type with (exclusive) max constraint only', () => {
         const domain = parseDomain('integer(..<10)')
-        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toBeInstanceOf(IntegerSet)
         expect(domain).toMatchObject({
             max: 9n,
             span: {
@@ -46,7 +46,7 @@ describe('DomainParser', () => {
 
     it('parses integer type with (inclusive) max constraint only', () => {
         const domain = parseDomain('integer(...10)')
-        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toBeInstanceOf(IntegerSet)
         expect(domain).toMatchObject({
             max: 10n,
             span: {
@@ -58,7 +58,7 @@ describe('DomainParser', () => {
 
     it('parses integer type with min and (inclusive) max constraints', () => {
         const domain = parseDomain('integer(1...10)')
-        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toBeInstanceOf(IntegerSet)
         expect(domain).toMatchObject({
             min: 1n,
             max: 10n,
@@ -71,7 +71,7 @@ describe('DomainParser', () => {
 
     it('parses integer type with min and (exclusive) max constraints', () => {
         const domain = parseDomain('integer(1..<10)')
-        expect(domain).toBeInstanceOf(IntegerRange)
+        expect(domain).toBeInstanceOf(IntegerSet)
         expect(domain).toMatchObject({
             min: 1n,
             max: 9n,

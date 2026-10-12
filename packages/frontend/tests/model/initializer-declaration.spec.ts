@@ -5,7 +5,7 @@ import { DataLiteral } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { Parameter } from '@/model/parameter'
 import { ReturnStatement } from '@/model/return-statement'
-import { IntegerRange, RCTypeSet, StringSet } from '@/model/value-set'
+import { IntegerSet, RCTypeSet, StringSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
@@ -81,9 +81,7 @@ describe('FunctionDeclaration (initializer)', () => {
                     kind: 'SELF_ASSIGN',
                     value: {
                         kind: 'DATA',
-                        properties: [
-                            { value: { domain: { max: '42', min: '42' } } },
-                        ],
+                        properties: [{ value: { domain: { value: '42' } } }],
                     },
                 },
             ],
@@ -95,7 +93,7 @@ describe('FunctionDeclaration (initializer)', () => {
             baseName: 'makeNew',
             parameters: [],
             result: {
-                domain: util.spannedDomain(IntegerRange.unconstrained()),
+                domain: util.spannedDomain(IntegerSet.unconstrained()),
                 isolationLevel: ISOLATED,
             },
             implementation: {
@@ -120,7 +118,7 @@ describe('FunctionDeclaration (initializer)', () => {
             body: [
                 {
                     kind: 'RETURN',
-                    value: { domain: { max: '42', min: '42' } },
+                    value: { domain: { value: '42' } },
                 },
             ],
         })
@@ -287,9 +285,7 @@ describe('FunctionDeclaration (initializer)', () => {
                         name: 'property',
                         isImmutable: false,
                         isolationLevel: ISOLATED,
-                        domain: util.spannedDomain(
-                            IntegerRange.unconstrained(),
-                        ),
+                        domain: util.spannedDomain(IntegerSet.unconstrained()),
                     },
                 ],
             }),
@@ -415,7 +411,7 @@ describe('FunctionDeclaration (initializer)', () => {
                 baseName: 'makeNew',
                 parameters: [],
                 result: {
-                    domain: util.spannedDomain(IntegerRange.unconstrained()),
+                    domain: util.spannedDomain(IntegerSet.unconstrained()),
                     isolationLevel: ISOLATED,
                 },
                 implementation: {

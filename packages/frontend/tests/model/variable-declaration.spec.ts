@@ -11,7 +11,7 @@ import {
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { PropertyReference } from '@/model/property-reference'
 import { TypeName } from '@/model/type-name'
-import { IntegerRange, RCTypeSet, TruthvalueSet } from '@/model/value-set'
+import { IntegerSet, RCTypeSet, TruthvalueSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import { VariableReference } from '@/model/variable-reference'
 import * as util from '@@/util'
@@ -23,7 +23,7 @@ describe('VariableDeclaration', () => {
             isImmutable: true,
             name: 'foo',
             isolationLevel: ISOLATED,
-            domain: decorateDomain(IntegerRange.unconstrained(), {
+            domain: decorateDomain(IntegerSet.unconstrained(), {
                 span: util.someCodeSpan,
             }),
             initialValue: IntegerLiteral.create({
@@ -38,10 +38,10 @@ describe('VariableDeclaration', () => {
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'VARIABLE_DECL',
             name: 'foo',
-            domain: { type: 'integer', min: '1', max: '1' },
+            domain: { type: 'integer', value: '1' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
-                domain: { type: 'integer', min: '1', max: '1' },
+                domain: { type: 'integer', value: '1' },
             },
         })
     })
@@ -63,8 +63,7 @@ describe('VariableDeclaration', () => {
             decl.emitStatement(context)
             expect((context.scope.emitted[0] as any).domain).toEqual({
                 type: 'integer',
-                min: '1',
-                max: '1',
+                value: '1',
             })
         })
 
@@ -89,10 +88,9 @@ describe('VariableDeclaration', () => {
                             name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: util.someCodeSpan },
-                            ),
+                            domain: decorateDomain(IntegerSet.unconstrained(), {
+                                span: util.someCodeSpan,
+                            }),
                         },
                     ],
                 }),
@@ -171,10 +169,9 @@ describe('VariableDeclaration', () => {
                             name: 'innerProperty',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: util.someCodeSpan },
-                            ),
+                            domain: decorateDomain(IntegerSet.unconstrained(), {
+                                span: util.someCodeSpan,
+                            }),
                         },
                     ],
                 }),
@@ -214,7 +211,7 @@ describe('VariableDeclaration', () => {
                         property: RCTypeSet.create({
                             type: TypeName.create({ name: 'InnerType' }),
                             properties: {
-                                innerProperty: IntegerRange.create({
+                                innerProperty: IntegerSet.range({
                                     min: 42n,
                                     max: 42n,
                                 }),
@@ -273,10 +270,9 @@ describe('VariableDeclaration', () => {
                             name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: util.someCodeSpan },
-                            ),
+                            domain: decorateDomain(IntegerSet.unconstrained(), {
+                                span: util.someCodeSpan,
+                            }),
                         },
                     ],
                 }),
@@ -293,7 +289,7 @@ describe('VariableDeclaration', () => {
                 RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
                     properties: {
-                        property: IntegerRange.create({
+                        property: IntegerSet.range({
                             min: 42n,
                             max: 42n,
                         }),
@@ -340,10 +336,9 @@ describe('VariableDeclaration', () => {
                             name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: util.someCodeSpan },
-                            ),
+                            domain: decorateDomain(IntegerSet.unconstrained(), {
+                                span: util.someCodeSpan,
+                            }),
                         },
                     ],
                 }),
@@ -360,7 +355,7 @@ describe('VariableDeclaration', () => {
                 RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
                     properties: {
-                        property: IntegerRange.create({
+                        property: IntegerSet.range({
                             min: 42n,
                             max: 42n,
                         }),
@@ -372,7 +367,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: false,
                 name: 'foo',
                 isolationLevel: ISOLATED,
-                domain: decorateDomain(IntegerRange.unconstrained(), {
+                domain: decorateDomain(IntegerSet.unconstrained(), {
                     span: util.someCodeSpan,
                 }),
                 initialValue: PropertyReference.create({
@@ -494,7 +489,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: true,
                 name: 'x',
                 isolationLevel: ISOLATED,
-                domain: decorateDomain(IntegerRange.unconstrained(), {
+                domain: decorateDomain(IntegerSet.unconstrained(), {
                     span: util.someCodeSpan,
                 }),
                 initialValue: IntegerLiteral.create({
@@ -509,7 +504,7 @@ describe('VariableDeclaration', () => {
             expect(context.scope.variableDeclaration('x')).toEqual({
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                domain: IntegerRange.create({ min: 42n, max: 42n }),
+                domain: IntegerSet.range({ min: 42n, max: 42n }),
             })
         })
 
@@ -523,10 +518,9 @@ describe('VariableDeclaration', () => {
                             isImmutable: false,
                             name: 'innerProperty',
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(
-                                IntegerRange.unconstrained(),
-                                { span: util.someCodeSpan },
-                            ),
+                            domain: decorateDomain(IntegerSet.unconstrained(), {
+                                span: util.someCodeSpan,
+                            }),
                         },
                     ],
                 }),
@@ -698,7 +692,7 @@ describe('VariableDeclaration', () => {
                                 isImmutable: false,
                                 isolationLevel: ISOLATED,
                                 domain: decorateDomain(
-                                    IntegerRange.unconstrained(),
+                                    IntegerSet.unconstrained(),
                                     { span: util.someCodeSpan },
                                 ),
                             },
@@ -717,7 +711,7 @@ describe('VariableDeclaration', () => {
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
                         properties: {
-                            myProperty: IntegerRange.create({
+                            myProperty: IntegerSet.range({
                                 min: 42n,
                                 max: 42n,
                             }),

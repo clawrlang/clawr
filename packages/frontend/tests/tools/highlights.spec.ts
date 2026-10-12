@@ -4,7 +4,7 @@ import { ISOLATED } from '@/model/isolation-level'
 import { IntegerLiteral } from '@/model/literals'
 import { Parameter } from '@/model/parameter'
 import { TypeName } from '@/model/type-name'
-import { IntegerRange, RCTypeSet } from '@/model/value-set'
+import { IntegerSet, RCTypeSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import { HighlightRecorder, SemanticTokenKind } from '@/tools/highlights'
 import * as util from '@@/util'
@@ -48,9 +48,9 @@ describe('HighlightRecorder', () => {
         context.scope.addVariableDeclaration('foo', {
             isImmutable: false,
             isolationLevel: ISOLATED,
-            domain: IntegerRange.unconstrained(),
+            domain: IntegerSet.unconstrained(),
         })
-        context.scope.setCurrentValue('foo', IntegerRange.unconstrained())
+        context.scope.setCurrentValue('foo', IntegerSet.unconstrained())
 
         util.variableRef('foo').toCIRExpression(context)
 
@@ -71,9 +71,7 @@ describe('HighlightRecorder', () => {
                         name: 'property',
                         isImmutable: false,
                         isolationLevel: ISOLATED,
-                        domain: util.spannedDomain(
-                            IntegerRange.unconstrained(),
-                        ),
+                        domain: util.spannedDomain(IntegerSet.unconstrained()),
                     },
                 ],
             }),
@@ -115,7 +113,7 @@ describe('HighlightRecorder', () => {
                     varName: 'x',
                     isolationLevel: ISOLATED,
                     isImmutable: true,
-                    domain: util.spannedDomain(IntegerRange.unconstrained()),
+                    domain: util.spannedDomain(IntegerSet.unconstrained()),
                     span: util.someCodeSpan,
                 }),
             ],

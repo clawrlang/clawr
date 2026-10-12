@@ -1,5 +1,5 @@
 import { BinaryOperator } from '@/model/binary-operation'
-import { IntegerRange, ValueSet } from '@/model/value-set'
+import { IntegerSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 
 export class Subtraction implements BinaryOperator {
@@ -7,8 +7,7 @@ export class Subtraction implements BinaryOperator {
 
     compute(minuend: ValueSet, subtrahend: ValueSet): Result<ValueSet> {
         if (!(
-            minuend instanceof IntegerRange &&
-            subtrahend instanceof IntegerRange
+            minuend instanceof IntegerSet && subtrahend instanceof IntegerSet
         ))
             return ErrorResult.failure(
                 `subtraction between ${minuend.toString()} and ${subtrahend.toString()} is not supported`,
@@ -21,6 +20,6 @@ export class Subtraction implements BinaryOperator {
             minuend.max === undefined || subtrahend.min === undefined
                 ? undefined
                 : (((minuend.max as bigint) - subtrahend.min) as bigint)
-        return Result.value(IntegerRange.create({ min, max }))
+        return Result.value(IntegerSet.range({ min, max }))
     }
 }

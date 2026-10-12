@@ -285,7 +285,7 @@
       "type": "object",
       "properties": {
         "kind": { "const": "INTEGER_LITERAL" },
-        "domain": { "$ref": "#/$defs/IntegerRange" }
+        "domain": { "$ref": "#/$defs/IntegerSingleton" }
       },
       "required": ["kind"],
       "additionalProperties": false
@@ -424,13 +424,31 @@
 
     "ValueSet": {
       "oneOf": [
-        { "$ref": "#/$defs/IntegerRange" },
+        { "$ref": "#/$defs/IntegerSet" },
         { "$ref": "#/$defs/RealRange" },
         { "$ref": "#/$defs/InterfaceSet" },
         { "$ref": "#/$defs/RCTypeSet" },
         { "$ref": "#/$defs/StringSet" },
         { "$ref": "#/$defs/TruthvalueSet" }
       ]
+    },
+
+    "IntegerSet": {
+      "oneOf": [
+        { "$ref": "#/$defs/IntegerRange" },
+        { "$ref": "#/$defs/IntegerSingleton" }
+      ]
+    },
+
+    "IntegerSingleton": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "integer" },
+        "boxed": { "const": true },
+        "value": { "type": "string", "pattern": "^-?\\d+$" }
+      },
+      "required": ["type", "value"],
+      "additionalProperties": false
     },
 
     "IntegerRange": {
@@ -450,8 +468,8 @@
       "properties": {
         "type": { "const": "real" },
         "boxed": { "const": true },
-        "min": { "type": "string", "pattern": "^-?\\d+.\\d+$" },
-        "max": { "type": "string", "pattern": "^-?\\d+.\\d+$" }
+        "min": { "type": "string", "pattern": "^-?\\d+\\.\\d+$" },
+        "max": { "type": "string", "pattern": "^-?\\d+\\.\\d+$" }
       },
       "required": ["type"],
       "additionalProperties": false

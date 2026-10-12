@@ -50,8 +50,7 @@ declarations:
                     kind: INTEGER_LITERAL
                     domain:
                       type: integer
-                      min: '42'
-                      max: '42'
+                      value: '42'
               domain:
                 type: rc-type
                 name: Object
@@ -82,8 +81,7 @@ declarations:
                 kind: INTEGER_LITERAL
                 domain:
                   type: integer
-                  min: '42'
-                  max: '42'
+                  value: '42'
           domain:
             type: rc-type
             name: Object

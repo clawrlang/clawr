@@ -124,8 +124,7 @@ declarations:
                     kind: INTEGER_LITERAL
                     domain:
                       type: integer
-                      min: '43'
-                      max: '43'
+                      value: '43'
               domain:
                 type: rc-type
                 name: Sub1
@@ -146,8 +145,7 @@ declarations:
               - kind: INTEGER_LITERAL
                 domain:
                   type: integer
-                  min: '42'
-                  max: '42'
+                  value: '42'
         domain:
           type: void
     dispatchTable:
@@ -198,8 +196,7 @@ declarations:
               - kind: INTEGER_LITERAL
                 domain:
                   type: integer
-                  max: '42'
-                  min: '42'
+                  value: '42'
         domain:
           type: void
     dispatchTable:

@@ -304,7 +304,7 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'STRING_LITERAL':
             return `"${expr.domain.value}"`
         case 'INTEGER_LITERAL':
-            return expr.domain.max
+            return expr.domain.value
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
         case 'CALL':

@@ -1,13 +1,13 @@
 import { Multiplication } from '@/model/operators'
-import { IntegerRange } from '@/model/value-set'
+import { IntegerSet } from '@/model/value-set'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Multiplication', () => {
     describe('integer operands', () => {
         it('evaluates integer literals as a single value', () => {
             const result = Multiplication.instance.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -67,8 +67,8 @@ describe('Multiplication', () => {
             for (const { left, right, expected } of examples)
                 test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] * [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> [${expected.min ?? 'inf'},${expected.max ?? 'inf'}]`, () => {
                     const result = Multiplication.instance.compute(
-                        IntegerRange.create(left),
-                        IntegerRange.create(right),
+                        IntegerSet.range(left),
+                        IntegerSet.range(right),
                     )
                     expect(result.isSuccess || result.error).toBeTrue()
                     expect(result.isSuccess && result.value).toMatchObject(

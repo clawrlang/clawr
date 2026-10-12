@@ -1,6 +1,6 @@
 import { DataDeclaration } from '@/model/data-declaration'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { IntegerRange, RCTypeSet } from '@/model/value-set'
+import { IntegerSet, RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
@@ -11,7 +11,7 @@ describe('Variable Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: IntegerRange.create({ min: 10n, max: 10n }),
+            domain: IntegerSet.range({ min: 10n, max: 10n }),
         })
 
         const variableRef = util.variableRef('myVar')
@@ -42,13 +42,13 @@ describe('Variable Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: IntegerRange.create({ min: 10n, max: 10n }),
+            domain: IntegerSet.range({ min: 10n, max: 10n }),
         })
 
         const variableRef = util.variableRef('myVar')
         const result = variableRef.domain(context)
         expect(result.isSuccess && result.value).toEqual(
-            IntegerRange.create({ min: 10n, max: 10n }),
+            IntegerSet.range({ min: 10n, max: 10n }),
         )
     })
 
@@ -57,7 +57,7 @@ describe('Variable Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: IntegerRange.create({ min: 10n, max: 10n }),
+            domain: IntegerSet.range({ min: 10n, max: 10n }),
         })
 
         const variableRef = util.variableRef('myVar')

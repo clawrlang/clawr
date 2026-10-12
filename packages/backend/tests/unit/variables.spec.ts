@@ -10,7 +10,7 @@ describe('Lowering Variables', () => {
             domain: { type: 'integer' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
-                domain: { type: 'integer', max: '42', min: '42' },
+                domain: { type: 'integer', value: '42' },
             },
         }
         const result = lowerStmt(decl)

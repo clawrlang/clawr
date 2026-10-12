@@ -1,5 +1,5 @@
 import { Comparison } from '@/model/operators'
-import { IntegerRange, truthvalue, TruthvalueSet } from '@/model/value-set'
+import { IntegerSet, truthvalue, TruthvalueSet } from '@/model/value-set'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Comparisons', () => {
@@ -7,8 +7,8 @@ describe('Comparisons', () => {
         describe('integer operands', () => {
             it('evaluates equal integer literals as a singleton true', () => {
                 const result = Comparison.equals.compute(
-                    IntegerRange.singleton(2n),
-                    IntegerRange.singleton(2n),
+                    IntegerSet.singleton(2n),
+                    IntegerSet.singleton(2n),
                 )
                 expect(result.isSuccess || result.error).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
@@ -18,8 +18,8 @@ describe('Comparisons', () => {
 
             it('evaluates different integer literals as a singleton false', () => {
                 const result = Comparison.equals.compute(
-                    IntegerRange.singleton(2n),
-                    IntegerRange.singleton(3n),
+                    IntegerSet.singleton(2n),
+                    IntegerSet.singleton(3n),
                 )
                 expect(result.isSuccess || result.error).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
@@ -38,8 +38,8 @@ describe('Comparisons', () => {
                 for (const { left, right, expected } of examples)
                     test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] == [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
                         const result = Comparison.equals.compute(
-                            IntegerRange.create(left),
-                            IntegerRange.create(right),
+                            IntegerSet.range(left),
+                            IntegerSet.range(right),
                         )
                         expect(result.isSuccess || result.error).toBeTrue()
                         expect(result.isSuccess && result.value).toMatchObject({
@@ -104,8 +104,8 @@ describe('Comparisons', () => {
         describe('integer operands', () => {
             it('evaluates equal integer literals as a singleton false', () => {
                 const result = Comparison.doesNotEqual.compute(
-                    IntegerRange.singleton(2n),
-                    IntegerRange.singleton(2n),
+                    IntegerSet.singleton(2n),
+                    IntegerSet.singleton(2n),
                 )
                 expect(result.isSuccess || result.error).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
@@ -115,8 +115,8 @@ describe('Comparisons', () => {
 
             it('evaluates different integer literals as a singleton true', () => {
                 const result = Comparison.doesNotEqual.compute(
-                    IntegerRange.singleton(2n),
-                    IntegerRange.singleton(3n),
+                    IntegerSet.singleton(2n),
+                    IntegerSet.singleton(3n),
                 )
                 expect(result.isSuccess || result.error).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
@@ -135,8 +135,8 @@ describe('Comparisons', () => {
                 for (const { left, right, expected } of examples)
                     test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] != [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
                         const result = Comparison.doesNotEqual.compute(
-                            IntegerRange.create(left),
-                            IntegerRange.create(right),
+                            IntegerSet.range(left),
+                            IntegerSet.range(right),
                         )
                         expect(result.isSuccess || result.error).toBeTrue()
                         expect(result.isSuccess && result.value).toMatchObject({
@@ -200,8 +200,8 @@ describe('Comparisons', () => {
     describe('Value Less Than (<)', () => {
         it('evaluates equal integer literals as a singleton false', () => {
             const result = Comparison.isLessThan.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(2n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(2n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -211,8 +211,8 @@ describe('Comparisons', () => {
 
         it('evaluates different integer literals as a singleton true', () => {
             const result = Comparison.isLessThan.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -222,8 +222,8 @@ describe('Comparisons', () => {
 
         it('evaluates different integer literals as a singleton false', () => {
             const result = Comparison.isLessThan.compute(
-                IntegerRange.singleton(4n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(4n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -255,8 +255,8 @@ describe('Comparisons', () => {
             for (const { left, right, expected } of examples)
                 test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] < [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
                     const result = Comparison.isLessThan.compute(
-                        IntegerRange.create(left),
-                        IntegerRange.create(right),
+                        IntegerSet.range(left),
+                        IntegerSet.range(right),
                     )
                     expect(result.isSuccess || result.error).toBeTrue()
                     expect(result.isSuccess && result.value).toMatchObject({
@@ -269,8 +269,8 @@ describe('Comparisons', () => {
     describe('Value Less Than Or Equal (<=)', () => {
         it('evaluates equal integer literals as a singleton true', () => {
             const result = Comparison.isLessThanOrEqual.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(2n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(2n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -280,8 +280,8 @@ describe('Comparisons', () => {
 
         it('evaluates different integer literals as a singleton true', () => {
             const result = Comparison.isLessThanOrEqual.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -291,8 +291,8 @@ describe('Comparisons', () => {
 
         it('evaluates different integer literals as a singleton false', () => {
             const result = Comparison.isLessThanOrEqual.compute(
-                IntegerRange.singleton(4n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(4n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -324,8 +324,8 @@ describe('Comparisons', () => {
             for (const { left, right, expected } of examples)
                 test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] <= [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
                     const result = Comparison.isLessThanOrEqual.compute(
-                        IntegerRange.create(left),
-                        IntegerRange.create(right),
+                        IntegerSet.range(left),
+                        IntegerSet.range(right),
                     )
                     expect(result.isSuccess || result.error).toBeTrue()
                     expect(result.isSuccess && result.value).toMatchObject({
@@ -338,8 +338,8 @@ describe('Comparisons', () => {
     describe('Value Greater Than (>)', () => {
         it('evaluates equal integer literals as a singleton false', () => {
             const result = Comparison.isGreaterThan.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(2n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(2n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -349,8 +349,8 @@ describe('Comparisons', () => {
 
         it('evaluates different integer literals as a singleton true', () => {
             const result = Comparison.isGreaterThan.compute(
-                IntegerRange.singleton(4n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(4n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -360,8 +360,8 @@ describe('Comparisons', () => {
 
         it('evaluates different integer literals as a singleton false', () => {
             const result = Comparison.isGreaterThan.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -393,8 +393,8 @@ describe('Comparisons', () => {
             for (const { left, right, expected } of examples)
                 test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] > [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
                     const result = Comparison.isGreaterThan.compute(
-                        IntegerRange.create(left),
-                        IntegerRange.create(right),
+                        IntegerSet.range(left),
+                        IntegerSet.range(right),
                     )
                     expect(result.isSuccess || result.error).toBeTrue()
                     expect(result.isSuccess && result.value).toMatchObject({
@@ -407,8 +407,8 @@ describe('Comparisons', () => {
     describe('Value Greater Than Or Equal (<=)', () => {
         it('evaluates equal integer literals as a singleton true', () => {
             const result = Comparison.isGreaterThanOrEqual.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(2n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(2n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -418,8 +418,8 @@ describe('Comparisons', () => {
 
         it('evaluates different integer literals as a singleton true', () => {
             const result = Comparison.isGreaterThanOrEqual.compute(
-                IntegerRange.singleton(4n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(4n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -429,8 +429,8 @@ describe('Comparisons', () => {
 
         it('evaluates different integer literals as a singleton false', () => {
             const result = Comparison.isGreaterThanOrEqual.compute(
-                IntegerRange.singleton(2n),
-                IntegerRange.singleton(3n),
+                IntegerSet.singleton(2n),
+                IntegerSet.singleton(3n),
             )
             expect(result.isSuccess || result.error).toBeTrue()
             expect(result.isSuccess && result.value).toMatchObject({
@@ -462,8 +462,8 @@ describe('Comparisons', () => {
             for (const { left, right, expected } of examples)
                 test(`[${left.min ?? 'inf'},${left.max ?? 'inf'}] >= [${right.min ?? 'inf'},${right.max ?? 'inf'}] -> ${expected}`, () => {
                     const result = Comparison.isGreaterThan.compute(
-                        IntegerRange.create(left),
-                        IntegerRange.create(right),
+                        IntegerSet.range(left),
+                        IntegerSet.range(right),
                     )
                     expect(result.isSuccess || result.error).toBeTrue()
                     expect(result.isSuccess && result.value).toMatchObject({

@@ -4,7 +4,7 @@ import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import { Parameter } from '@/model/parameter'
 import { ReturnStatement } from '@/model/return-statement'
-import { IntegerRange, RCTypeSet, StringSet } from '@/model/value-set'
+import { IntegerSet, RCTypeSet, StringSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import * as util from '@@/util'
 import * as cir from '@clawr/cir'
@@ -59,11 +59,11 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            domain: { type: 'integer', min: '42', max: '42' },
+            domain: { type: 'integer', value: '42' },
             body: [
                 {
                     kind: 'RETURN',
-                    value: { domain: { max: '42', min: '42' } },
+                    value: { domain: { value: '42' } },
                 },
             ],
         })
@@ -74,7 +74,7 @@ describe('FunctionDeclaration', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                domain: util.spannedDomain(IntegerRange.unconstrained()),
+                domain: util.spannedDomain(IntegerSet.unconstrained()),
                 isolationLevel: ISOLATED,
             },
             implementation: {
@@ -98,7 +98,7 @@ describe('FunctionDeclaration', () => {
             body: [
                 {
                     kind: 'RETURN',
-                    value: { domain: { max: '42', min: '42' } },
+                    value: { domain: { value: '42' } },
                 },
             ],
         })
@@ -237,13 +237,12 @@ describe('FunctionDeclaration', () => {
                 parameters: [],
                 domain: {
                     type: 'integer',
-                    min: '42',
-                    max: '42',
+                    value: '42',
                 },
                 body: [
                     {
                         kind: 'RETURN',
-                        value: { domain: { max: '42', min: '42' } },
+                        value: { domain: { value: '42' } },
                     },
                 ],
             })
@@ -440,7 +439,7 @@ describe('FunctionDeclaration', () => {
                 baseName: 'myFunction',
                 parameters: [],
                 result: {
-                    domain: util.spannedDomain(IntegerRange.unconstrained()),
+                    domain: util.spannedDomain(IntegerSet.unconstrained()),
                     isolationLevel: ISOLATED,
                 },
                 implementation: {

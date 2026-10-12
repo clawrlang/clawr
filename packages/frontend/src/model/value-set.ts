@@ -8,7 +8,7 @@ export interface ValueSet {
     toString(): string
 }
 
-export class IntegerRange<
+export class IntegerSet<
     Min extends bigint | undefined = bigint | undefined,
     Max extends bigint | undefined = bigint | undefined,
 > implements ValueSet {
@@ -18,27 +18,27 @@ export class IntegerRange<
     ) {}
 
     static unconstrained() {
-        return new IntegerRange(undefined, undefined)
+        return new IntegerSet(undefined, undefined)
     }
 
     static singleton<Value extends bigint>(v: Value) {
-        return new IntegerRange(v, v)
+        return new IntegerSet(v, v)
     }
 
-    static create<
+    static range<
         Min extends bigint | undefined,
         Max extends bigint | undefined,
     >({ min, max }: { min?: Min; max?: Max }) {
-        return new IntegerRange<Min, Max>(min as Min, max as Max)
+        return new IntegerSet<Min, Max>(min as Min, max as Max)
     }
 
     unconstrained(): ValueSet {
-        return IntegerRange.create({ min: undefined, max: undefined })
+        return IntegerSet.range({ min: undefined, max: undefined })
     }
 
     isSupersetTo(other: ValueSet): boolean {
         return (
-            other instanceof IntegerRange &&
+            other instanceof IntegerSet &&
             (this.min === undefined ||
                 (other.min !== undefined && other.min >= this.min)) &&
             (this.max === undefined ||
@@ -47,6 +47,11 @@ export class IntegerRange<
     }
 
     toCIR(): cir.ValueSet & { type: 'integer' } {
+        if (this.min !== undefined && (this.min as bigint) === this.max)
+            return {
+                type: 'integer' as const,
+                value: this.min.toString() as any,
+            }
         return {
             type: 'integer' as const,
             min: this.min?.toString() as any,

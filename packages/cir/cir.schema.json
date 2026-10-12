@@ -413,6 +413,15 @@
       "additionalProperties": false
     },
 
+    "Void": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "void" }
+      },
+      "required": ["type"],
+      "additionalProperties": false
+    },
+
     "ValueSet": {
       "oneOf": [
         { "$ref": "#/$defs/IntegerRange" },
@@ -642,9 +651,11 @@
           "type": "array",
           "items": { "$ref": "#/$defs/Parameter" }
         },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "domain": {
+          "oneOf": [{ "$ref": "#/$defs/ValueSet" }, { "$ref": "#/$defs/Void" }]
+        }
       },
-      "required": ["baseName", "labels", "parameters"],
+      "required": ["baseName", "labels", "parameters", "domain"],
       "additionalProperties": false
     },
 
@@ -676,9 +687,18 @@
           "type": "array",
           "items": { "$ref": "#/$defs/Parameter" }
         },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "domain": {
+          "oneOf": [{ "$ref": "#/$defs/ValueSet" }, { "$ref": "#/$defs/Void" }]
+        }
       },
-      "required": ["kind", "body", "baseName", "labels", "parameters"],
+      "required": [
+        "kind",
+        "body",
+        "baseName",
+        "labels",
+        "parameters",
+        "domain"
+      ],
       "additionalProperties": false
     }
   }

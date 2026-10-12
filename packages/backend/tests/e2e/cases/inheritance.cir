@@ -60,6 +60,8 @@ declarations:
                       type: integer
                       min: '0'
                       max: '100'
+        domain:
+          type: void
     dispatchTable:
       - slot:
           baseName: f
@@ -146,6 +148,8 @@ declarations:
                   type: integer
                   min: '42'
                   max: '42'
+        domain:
+          type: void
     dispatchTable:
       - slot:
           baseName: f
@@ -196,6 +200,8 @@ declarations:
                   type: integer
                   max: '42'
                   min: '42'
+        domain:
+          type: void
     dispatchTable:
       - slot:
           baseName: f

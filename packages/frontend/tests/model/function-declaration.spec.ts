@@ -38,7 +38,7 @@ describe('FunctionDeclaration', () => {
                     domain: { type: 'string' },
                 },
             ],
-            domain: undefined,
+            domain: { type: 'void' },
             body: [],
         })
     })

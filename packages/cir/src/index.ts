@@ -37,7 +37,7 @@ type FunctionSignature = {
         name: string
         domain: ValueSet
     }[]
-    domain?: ValueSet
+    domain: ValueSet | { type: 'void' }
 }
 
 type RCTypeDeclaration = {
@@ -60,7 +60,7 @@ type RCTypeDeclaration = {
     | {
           base?: CanonicalName
           methods: FunctionDeclaration[]
-          initializers: (FunctionDeclaration & { domain?: undefined })[]
+          initializers: (FunctionDeclaration & { domain: { type: 'void' } })[]
           dispatchTable?: {
               slot: FunctionSignature
               declaredIn: CanonicalName

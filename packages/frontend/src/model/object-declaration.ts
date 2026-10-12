@@ -94,7 +94,7 @@ export class ObjectDeclaration implements Declaration {
             initializers,
             properties: this.properties.map((property) => ({
                 name: property.name,
-                domain: property.domain!.toCIR(),
+                domain: property.domain.toCIR(),
             })),
         })
         return Result.ok

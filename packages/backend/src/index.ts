@@ -130,11 +130,11 @@ function lowerAbstractSlot(slot: FunctionSignature) {
     const paramDecls = params
         .map((param) => `${lowerType(param.domain)} ${param.name}`)
         .join(', ')
-    return `${slot.domain ? lowerType(slot.domain) : 'void'} (*${slotName})(${paramDecls});`
+    return `${lowerType(slot.domain)} (*${slotName})(${paramDecls});`
 }
 
 function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
-    const returnType = slot.domain ? lowerType(slot.domain) : 'void'
+    const returnType = lowerType(slot.domain)
 
     const params: FunctionSignature['parameters'] = [
         {
@@ -240,7 +240,7 @@ function lowerInit(
     }`
 }
 
-function lowerType(valueSet: cir.ValueSet): string {
+function lowerType(valueSet: cir.ValueSet | { type: 'void' }): string {
     switch (valueSet.type) {
         case 'integer':
             return valueSet.boxed ? 'Integer*' : 'int64_t'
@@ -248,6 +248,8 @@ function lowerType(valueSet: cir.ValueSet): string {
             return valueSet.boxed ? 'TruthvalueBox*' : 'truthvalue_t'
         case 'rc-type':
             return `${valueSet.name}*`
+        case 'void':
+            return 'void'
         default:
             throw new Error(`Unknown value set type: ${(valueSet as any).type}`)
     }
@@ -427,16 +429,6 @@ function mangleNameWithParameters(
     return mangleNameWithLabels(decl, receiver)
 }
 
-type FunctionSignature = {
-    baseName: string
-    labels: string[]
-    parameters: {
-        name: string
-        domain: cir.ValueSet
-    }[]
-    domain?: cir.ValueSet
-}
-
 function mangleNameWithLabels(
     decl: {
         namespace?: string
@@ -474,3 +466,7 @@ type DispatchSlot = NonNullable<
         { dispatchTable?: any }
     >['dispatchTable']
 >[number]
+
+type FunctionSignature = (cir.Declaration & {
+    kind: 'INTERFACE_DECL'
+})['methods'][number]

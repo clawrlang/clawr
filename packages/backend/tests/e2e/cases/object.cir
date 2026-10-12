@@ -38,6 +38,8 @@ declarations:
         baseName: new
         labels: []
         parameters: []
+        domain:
+          type: void
         body:
           - kind: SELF_ASSIGN
             value:

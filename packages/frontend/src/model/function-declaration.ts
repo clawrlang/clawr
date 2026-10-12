@@ -183,7 +183,7 @@ export class FunctionDeclaration implements Declaration {
     emitInitializer(
         context: Context,
     ): SemanticResult<
-        cir.Declaration & { kind: 'FUNCTION_DECL'; domain: undefined }
+        cir.Declaration & { kind: 'FUNCTION_DECL'; domain: { type: 'void' } }
     > {
         const bodyContextResult = this.makeBodyContext(context)
         if (bodyContextResult.isError) return bodyContextResult
@@ -213,7 +213,7 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const cirFuncDecl: cir.Declaration & { domain: undefined } = {
+        const cirFuncDecl = {
             kind: 'FUNCTION_DECL',
             baseName: this.baseName,
             labels: mapFilter(this.parameters, (p) => p.label),
@@ -221,9 +221,9 @@ export class FunctionDeclaration implements Declaration {
                 name: param.varName,
                 domain: param.domain!.toCIR(),
             })),
-            domain: undefined,
+            domain: { type: 'void' } as const,
             body: bodyContext.scope.emitted,
-        }
+        } satisfies cir.Declaration
 
         return Result.value(cirFuncDecl)
     }
@@ -322,9 +322,10 @@ export class FunctionDeclaration implements Declaration {
 
     private resultDomain(
         context: Context,
-    ): SemanticResult<cir.ValueSet | undefined> {
+    ): SemanticResult<cir.ValueSet | { type: 'void' }> {
         if (this.result) return Result.value(this.result.domain.toCIR())
-        if (this.implementation.kind === 'body') return Result.value(undefined)
+        if (this.implementation.kind === 'body')
+            return Result.value({ type: 'void' })
         const domainResult =
             this.implementation.expression.currentValue(context)
         if (domainResult.isError) return domainResult

@@ -425,7 +425,7 @@
     "ValueSet": {
       "oneOf": [
         { "$ref": "#/$defs/IntegerSet" },
-        { "$ref": "#/$defs/RealRange" },
+        { "$ref": "#/$defs/RealSet" },
         { "$ref": "#/$defs/InterfaceSet" },
         { "$ref": "#/$defs/RCTypeSet" },
         { "$ref": "#/$defs/StringSet" },
@@ -460,6 +460,24 @@
         "max": { "type": "string", "pattern": "^-?\\d+$" }
       },
       "required": ["type"],
+      "additionalProperties": false
+    },
+
+    "RealSet": {
+      "oneOf": [
+        { "$ref": "#/$defs/RealRange" },
+        { "$ref": "#/$defs/RealSingleton" }
+      ]
+    },
+
+    "RealSingleton": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "real" },
+        "boxed": { "const": true },
+        "value": { "type": "string", "pattern": "^-?\\d+\\.\\d+$" }
+      },
+      "required": ["type", "value"],
       "additionalProperties": false
     },
 

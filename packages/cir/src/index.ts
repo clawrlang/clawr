@@ -160,6 +160,11 @@ type IntegerLiteral<Value extends bigint = bigint> = {
     domain: IntegerSingleton<Value>
 }
 
+type RealLiteral<Value extends decimal = decimal> = {
+    kind: 'REAL_LITERAL'
+    domain: RealSingleton<Value>
+}
+
 type TruthvalueLiteral<Value extends truthvalue = truthvalue> = {
     kind: 'TRUTHVALUE_LITERAL'
     domain: TruthvalueSingleton<Value>
@@ -273,6 +278,7 @@ type LogicalOperation = {
 export type Expression =
     | StringLiteral
     | IntegerLiteral
+    | RealLiteral
     | TruthvalueLiteral
     | MemoryAllocation
     | MemoryRetention
@@ -308,6 +314,8 @@ type IntegerSingleton<Value extends bigint = bigint> = {
     value: `${Value}`
 }
 
+type RealSet = RealRange | RealSingleton
+
 type RealRange<
     Min extends decimal | undefined = decimal | undefined,
     Max extends decimal | undefined = decimal | undefined,
@@ -316,6 +324,12 @@ type RealRange<
     boxed?: true
 } & (Min extends undefined ? { min?: undefined } : { min: `${Min}` }) &
     (Max extends undefined ? { max?: undefined } : { max: `${Max}` })
+
+type RealSingleton<Value extends decimal = decimal> = {
+    type: 'real'
+    boxed?: true
+    value: `${Value}`
+}
 
 type TruthvalueSet<Values extends truthvalue[] = truthvalue[]> =
     | {
@@ -346,12 +360,7 @@ type InterfaceSet = {
 }
 
 export type ValueSet =
-    | IntegerSet
-    | RealRange
-    | TruthvalueSet
-    | StringSet
-    | RCTypeSet
-    | InterfaceSet
+    IntegerSet | RealSet | TruthvalueSet | StringSet | RCTypeSet | InterfaceSet
 
 type IsolationLevel = 'ISOLATED' | 'SHARED'
 export type truthvalue = 'false' | 'ambiguous' | 'true'

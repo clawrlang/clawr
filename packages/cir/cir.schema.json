@@ -635,7 +635,7 @@
         },
         "initializers": {
           "type": "array",
-          "items": { "$ref": "#/$defs/FunctionDeclaration" }
+          "items": { "$ref": "#/$defs/FunctionDeclarationVoid" }
         },
         "dispatchTable": {
           "type": "array",
@@ -736,6 +736,39 @@
     },
 
     "FunctionDeclaration": {
+      "oneOf": [
+        { "$ref": "#/$defs/FunctionDeclarationVoid" },
+        { "$ref": "#/$defs/FunctionDeclarationNonvoid" }
+      ]
+    },
+
+    "FunctionDeclarationVoid": {
+      "allOf": [
+        { "$ref": "#/$defs/FunctionDeclCommon" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "$ref": "#/$defs/Void" }
+          },
+          "required": ["type"]
+        }
+      ]
+    },
+
+    "FunctionDeclarationNonvoid": {
+      "allOf": [
+        { "$ref": "#/$defs/FunctionDeclCommon" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "$ref": "#/$defs/ValueSet" }
+          },
+          "required": ["type"]
+        }
+      ]
+    },
+
+    "FunctionDeclCommon": {
       "type": "object",
       "properties": {
         "kind": { "const": "FUNCTION_DECL" },

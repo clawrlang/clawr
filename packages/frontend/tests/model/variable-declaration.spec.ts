@@ -38,10 +38,10 @@ describe('VariableDeclaration', () => {
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'VARIABLE_DECL',
             name: 'foo',
-            domain: { type: 'integer', value: '1' },
+            domain: { universe: 'integer', value: '1' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
-                domain: { type: 'integer', value: '1' },
+                domain: { universe: 'integer', value: '1' },
             },
         })
     })
@@ -62,7 +62,7 @@ describe('VariableDeclaration', () => {
             const context = util.newSemanticContext()
             decl.emitStatement(context)
             expect((context.scope.emitted[0] as any).domain).toEqual({
-                type: 'integer',
+                universe: 'integer',
                 value: '1',
             })
         })
@@ -97,7 +97,7 @@ describe('VariableDeclaration', () => {
             )
             decl.emitStatement(context)
             expect((context.scope.emitted[0] as any).domain).toEqual({
-                type: 'integer',
+                universe: 'integer',
             })
         })
 
@@ -116,7 +116,7 @@ describe('VariableDeclaration', () => {
             const context = util.newSemanticContext()
             decl.emitStatement(context)
             expect((context.scope.emitted[0] as any).domain).toEqual({
-                type: 'truthvalue',
+                universe: 'truthvalue',
                 value: 'true',
             })
         })
@@ -152,7 +152,7 @@ describe('VariableDeclaration', () => {
             )
             decl.emitStatement(context)
             expect((context.scope.emitted[0] as any).domain).toEqual({
-                type: 'truthvalue',
+                universe: 'truthvalue',
                 values: ['false', 'ambiguous', 'true'],
             })
         })
@@ -448,7 +448,7 @@ describe('VariableDeclaration', () => {
                 kind: 'VARIABLE_DECL',
                 name: 'x',
                 domain: {
-                    type: 'rc-type',
+                    universe: 'rc-type',
                     name: 'Object',
                 },
                 initialValue: {
@@ -456,7 +456,7 @@ describe('VariableDeclaration', () => {
                     isolationLevel: 'ISOLATED',
                     properties: [],
                     domain: {
-                        type: 'rc-type',
+                        universe: 'rc-type',
                         name: 'Object',
                     },
                 },
@@ -474,7 +474,7 @@ describe('VariableDeclaration', () => {
                         kind: 'VARIABLE_REF',
                         name: 'x',
                         domain: {
-                            type: 'rc-type',
+                            universe: 'rc-type',
                             name: 'Object',
                         },
                     },

@@ -90,7 +90,7 @@ export class PropertyReference implements Expression {
         const objectValue = objectValueResult.value
         if (!(objectValue instanceof RCTypeSet))
             return SemanticErrorResult.failure(
-                `${objectValue.toCIR().type} is not an rc-type`,
+                `${objectValue.toCIR().universe} is not an rc-type`,
                 this.object.span,
             )
         if (objectValue.properties)

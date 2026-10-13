@@ -121,7 +121,7 @@ function lowerAbstractSlot(slot: FunctionSignature) {
         {
             name: 'self',
             domain: {
-                type: 'rc-type',
+                universe: 'rc-type',
                 name: 'void',
             },
         },
@@ -140,7 +140,7 @@ function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
         {
             name: 'self',
             domain: {
-                type: 'rc-type',
+                universe: 'rc-type',
                 name: 'void',
             },
         },
@@ -167,7 +167,7 @@ function lowerMethod(
                 {
                     name: 'self',
                     domain: {
-                        type: 'rc-type',
+                        universe: 'rc-type',
                         namespace: receiverType.namespace,
                         name: receiverType.name,
                     },
@@ -185,7 +185,7 @@ function lowerInitializer(
 ): string {
     const mangledFunctionName = mangleNameWithParameters(decl, receiverType)
     const domain = {
-        type: 'rc-type' as const,
+        universe: 'rc-type' as const,
         namespace: receiverType.namespace,
         name: receiverType.name,
     }
@@ -198,7 +198,7 @@ function lowerInitializer(
     return lowerFunction(
         {
             ...decl,
-            domain: { type: 'rc-type', name: 'void', namespace: undefined },
+            domain: { universe: 'rc-type', name: 'void', namespace: undefined },
             parameters: [self, ...decl.parameters],
             body: [...decl.body, { kind: 'RETURN', value: self }],
         },
@@ -212,7 +212,7 @@ function lowerFunction(
 ) {
     const params = decl.parameters
         .map((param) => {
-            return param.domain.type === 'rc-type'
+            return param.domain.universe === 'rc-type'
                 ? `void* cˇ${param.name}`
                 : `${lowerType(param.domain)} ${param.name}`
         })
@@ -222,7 +222,7 @@ function lowerFunction(
     return `${returnType} ${mangledName}(${params}) {
         ${[
             ...decl.parameters
-                .filter((param) => param.domain.type === 'rc-type')
+                .filter((param) => param.domain.universe === 'rc-type')
                 .map(
                     (param) =>
                         `${lowerType(param.domain)} ${param.name} = cˇ${param.name};\n`,
@@ -240,8 +240,8 @@ function lowerInit(
     }`
 }
 
-function lowerType(valueSet: cir.ValueSet | { type: 'void' }): string {
-    switch (valueSet.type) {
+function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
+    switch (valueSet.universe) {
         case 'integer':
             return valueSet.boxed ? 'Integer*' : 'int64_t'
         case 'truthvalue':
@@ -251,7 +251,9 @@ function lowerType(valueSet: cir.ValueSet | { type: 'void' }): string {
         case 'void':
             return 'void'
         default:
-            throw new Error(`Unknown value set type: ${(valueSet as any).type}`)
+            throw new Error(
+                `Unknown value set universe: ${(valueSet as any).universe}`,
+            )
     }
 }
 
@@ -316,14 +318,14 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'AS_SHARED':
             return `shareRC(${lowerExpr(expr.object)})`
         case 'BOX':
-            switch (expr.domain.type) {
+            switch (expr.domain.universe) {
                 case 'truthvalue':
                     return `boxTruthvalue(${lowerExpr(expr.expression)})`
                 case 'integer':
                     return `integerWithDigits(1, ${lowerExpr(expr.expression)})`
                 default:
                     throw new Error(
-                        `Unknown box type: ${expr.expression.domain.type}`,
+                        `Unknown box universe: ${expr.expression.domain.universe}`,
                     )
             }
         case 'ALLOCATION':

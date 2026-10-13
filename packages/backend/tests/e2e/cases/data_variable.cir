@@ -6,16 +6,16 @@ declarations:
     properties:
       - name: bar
         domain:
-          type: integer
+          universe: integer
   - kind: VARIABLE_DECL
     name: foo
     domain:
-      type: rc-type
+      universe: rc-type
       name: FooData
     initialValue:
       kind: ALLOCATION
       domain:
-        type: rc-type
+        universe: rc-type
         name: FooData
       isolationLevel: SHARED
       properties:
@@ -23,7 +23,7 @@ declarations:
           value:
             kind: INTEGER_LITERAL
             domain:
-              type: integer
+              universe: integer
               value: '2'
 startBlock:
   - kind: ASSIGN
@@ -33,13 +33,13 @@ startBlock:
         kind: VARIABLE_REF
         name: foo
         domain:
-          type: rc-type
+          universe: rc-type
           name: FooData
       property: bar
     value:
       kind: INTEGER_LITERAL
       domain:
-        type: integer
+        universe: integer
         value: '1'
   - kind: VARIABLE_DECL
     name: __tempˇ0
@@ -51,16 +51,16 @@ startBlock:
           kind: VARIABLE_REF
           name: foo
           domain:
-            type: rc-type
+            universe: rc-type
             name: FooData
         property: bar
         domain:
-          type: integer
+          universe: integer
       domain:
-        type: integer
+        universe: integer
         boxed: true
     domain:
-      type: integer
+      universe: integer
       boxed: true
   - kind: CALL
     name:
@@ -70,7 +70,7 @@ startBlock:
       - kind: VARIABLE_REF
         name: __tempˇ0
         domain:
-          type: integer
+          universe: integer
           boxed: true
   - kind: RELEASE
     object:

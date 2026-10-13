@@ -13,7 +13,7 @@ describe('Type declaration', () => {
                     {
                         name: 'property',
                         domain: {
-                            type: 'integer',
+                            universe: 'integer',
                             min: '0',
                             max: '100',
                         },
@@ -34,7 +34,7 @@ describe('Type declaration', () => {
                     {
                         name: 'property',
                         domain: {
-                            type: 'integer',
+                            universe: 'integer',
                             min: '0',
                             max: '100',
                         },
@@ -120,7 +120,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    domain: { type: 'integer' },
+                    domain: { universe: 'integer' },
                 },
             ],
             dispatchTable: [
@@ -129,7 +129,7 @@ describe('Type declaration', () => {
                         baseName: 'f',
                         labels: [],
                         parameters: [],
-                        domain: { type: 'integer' },
+                        domain: { universe: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
                     implementation: { name: 'MyType' },
@@ -161,10 +161,10 @@ describe('Type declaration', () => {
                         parameters: [
                             {
                                 name: 'v',
-                                domain: { type: 'integer' },
+                                domain: { universe: 'integer' },
                             },
                         ],
-                        domain: { type: 'integer' },
+                        domain: { universe: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
                     implementation: { name: 'MyType' },
@@ -194,7 +194,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    domain: { type: 'integer' },
+                    domain: { universe: 'integer' },
                 },
             ],
             dispatchTable: [
@@ -226,7 +226,7 @@ describe('Type declaration', () => {
                         {
                             name: 'property',
                             domain: {
-                                type: 'integer',
+                                universe: 'integer',
                                 min: '0',
                                 max: '100',
                             },
@@ -243,11 +243,11 @@ describe('Type declaration', () => {
                                         value: {
                                             kind: 'VARIABLE_REF',
                                             name: 'property',
-                                            domain: { type: 'integer' },
+                                            domain: { universe: 'integer' },
                                         },
                                     },
                                 ],
-                                domain: { type: 'rc-type', name: 'Super' },
+                                domain: { universe: 'rc-type', name: 'Super' },
                             },
                         },
                     ],

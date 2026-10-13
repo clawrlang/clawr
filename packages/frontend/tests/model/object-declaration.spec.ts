@@ -37,7 +37,7 @@ describe('ObjectDeclaration', () => {
                 properties: [
                     {
                         name: 'property',
-                        domain: { type: 'integer', value: '20' },
+                        domain: { universe: 'integer', value: '20' },
                     },
                 ],
             },
@@ -118,7 +118,7 @@ describe('ObjectDeclaration', () => {
                         labels: ['label'],
                         parameters: [{ name: 'var' }],
                         body: [],
-                        domain: { type: 'void' },
+                        domain: { universe: 'void' },
                     },
                 ],
             }, //satisfies cir.Declaration,
@@ -212,7 +212,7 @@ describe('ObjectDeclaration', () => {
                                 value: {},
                             },
                         ],
-                        domain: { type: 'void' },
+                        domain: { universe: 'void' },
                     },
                     {
                         kind: 'FUNCTION_DECL',
@@ -225,7 +225,7 @@ describe('ObjectDeclaration', () => {
                                 value: {},
                             },
                         ],
-                        domain: { type: 'void' },
+                        domain: { universe: 'void' },
                     },
                 ],
             },

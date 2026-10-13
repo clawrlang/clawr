@@ -35,10 +35,10 @@ describe('FunctionDeclaration (initializer)', () => {
             parameters: [
                 {
                     name: 'x',
-                    domain: { type: 'string' },
+                    domain: { universe: 'string' },
                 },
             ],
-            domain: { type: 'void' },
+            domain: { universe: 'void' },
             body: [],
         })
     })
@@ -75,7 +75,7 @@ describe('FunctionDeclaration (initializer)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'makeNew',
             parameters: [],
-            domain: { type: 'void' },
+            domain: { universe: 'void' },
             body: [
                 {
                     kind: 'SELF_ASSIGN',
@@ -114,7 +114,7 @@ describe('FunctionDeclaration (initializer)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'makeNew',
             parameters: [],
-            domain: { type: 'void' },
+            domain: { universe: 'void' },
             body: [
                 {
                     kind: 'RETURN',
@@ -264,7 +264,7 @@ describe('FunctionDeclaration (initializer)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'makeNew',
             parameters: [],
-            domain: { type: 'void' },
+            domain: { universe: 'void' },
             body: [
                 {
                     kind: 'SELF_ASSIGN',
@@ -327,13 +327,13 @@ describe('FunctionDeclaration (initializer)', () => {
                                 kind: 'VARIABLE_REF',
                                 name: 'x',
                                 domain: {
-                                    type: 'string',
+                                    universe: 'string',
                                 },
                             },
                         },
                     ],
                     domain: {
-                        type: 'rc-type',
+                        universe: 'rc-type',
                         name: 'Object',
                         namespace: undefined,
                     },

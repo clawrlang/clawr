@@ -16,7 +16,7 @@ describe('ValueSet', () => {
             })
 
             expect(valueSet.toCIR()).toEqual({
-                type: 'integer',
+                universe: 'integer',
                 min: '1',
                 max: '10',
             })
@@ -26,7 +26,7 @@ describe('ValueSet', () => {
             const valueSet = IntegerSet.unconstrained()
 
             expect(valueSet.toCIR()).toEqual({
-                type: 'integer',
+                universe: 'integer',
                 min: undefined,
                 max: undefined,
             })
@@ -36,7 +36,7 @@ describe('ValueSet', () => {
             const valueSet = IntegerSet.range({ min: 1n })
 
             expect(valueSet.toCIR()).toEqual({
-                type: 'integer',
+                universe: 'integer',
                 min: '1',
                 max: undefined,
             })
@@ -46,7 +46,7 @@ describe('ValueSet', () => {
             const valueSet = IntegerSet.range({ max: 10n })
 
             expect(valueSet.toCIR()).toEqual({
-                type: 'integer',
+                universe: 'integer',
                 min: undefined,
                 max: '10',
             })
@@ -56,7 +56,7 @@ describe('ValueSet', () => {
             const valueSet = TruthvalueSet.create(['true', 'false'])
 
             expect(valueSet.toCIR()).toEqual({
-                type: 'truthvalue',
+                universe: 'truthvalue',
                 values: ['true', 'false'],
             })
         })
@@ -65,7 +65,7 @@ describe('ValueSet', () => {
             const valueSet = TruthvalueSet.unconstrained()
 
             expect(valueSet.toCIR()).toEqual({
-                type: 'truthvalue',
+                universe: 'truthvalue',
                 values: ['false', 'ambiguous', 'true'],
             })
         })
@@ -73,7 +73,7 @@ describe('ValueSet', () => {
         it('converts string to CIR correctly', () => {
             const valueSet = StringSet.create()
 
-            expect(valueSet.toCIR()).toEqual({ type: 'string' })
+            expect(valueSet.toCIR()).toEqual({ universe: 'string' })
         })
 
         it('converts rc-type to CIR correctly', () => {
@@ -82,7 +82,7 @@ describe('ValueSet', () => {
             })
 
             expect(valueSet.toCIR()).toEqual({
-                type: 'rc-type',
+                universe: 'rc-type',
                 name: 'MyType',
             })
         })

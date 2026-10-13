@@ -26,7 +26,7 @@ describe('DataDeclaration', () => {
                     {
                         name: 'property1',
                         domain: {
-                            type: 'integer',
+                            universe: 'integer',
                             min: undefined,
                             max: undefined,
                         },
@@ -34,7 +34,7 @@ describe('DataDeclaration', () => {
                     {
                         name: 'property2',
                         domain: {
-                            type: 'truthvalue',
+                            universe: 'truthvalue',
                             values: ['false', 'ambiguous', 'true'],
                         },
                     },

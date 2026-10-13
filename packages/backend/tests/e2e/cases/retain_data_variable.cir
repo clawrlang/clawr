@@ -6,11 +6,11 @@ declarations:
     properties:
       - name: bar
         domain:
-          type: integer
+          universe: integer
   - kind: VARIABLE_DECL
     name: two
     domain:
-      type: rc-type
+      universe: rc-type
       name: FooData
     initialValue:
       kind: ALLOCATION
@@ -20,16 +20,16 @@ declarations:
           value:
             kind: INTEGER_LITERAL
             domain:
-              type: integer
+              universe: integer
               value: '2'
       domain:
-        type: rc-type
+        universe: rc-type
         name: FooData
 startBlock:
   - kind: VARIABLE_DECL
     name: one
     domain:
-      type: rc-type
+      universe: rc-type
       name: FooData
     initialValue:
       kind: RETAIN
@@ -37,7 +37,7 @@ startBlock:
         kind: VARIABLE_REF
         name: two
       domain:
-        type: rc-type
+        universe: rc-type
         name: FooData
   - kind: ENSURE_UNIQUE
     object:
@@ -50,13 +50,13 @@ startBlock:
         kind: VARIABLE_REF
         name: one
         domain:
-          type: rc-type
+          universe: rc-type
           name: FooData
       property: bar
     value:
       kind: INTEGER_LITERAL
       domain:
-        type: integer
+        universe: integer
         value: '1'
   - kind: VARIABLE_DECL
     name: __tempˇ0
@@ -68,16 +68,16 @@ startBlock:
           kind: VARIABLE_REF
           name: two
           domain:
-            type: rc-type
+            universe: rc-type
             name: FooData
         property: bar
         domain:
-          type: integer
+          universe: integer
       domain:
-        type: integer
+        universe: integer
         boxed: true
     domain:
-      type: integer
+      universe: integer
       boxed: true
   - kind: CALL
     name:
@@ -87,7 +87,7 @@ startBlock:
       - kind: VARIABLE_REF
         name: __tempˇ0
         domain:
-          type: integer
+          universe: integer
           boxed: true
   - kind: RELEASE
     object:
@@ -103,16 +103,16 @@ startBlock:
           kind: VARIABLE_REF
           name: one
           domain:
-            type: rc-type
+            universe: rc-type
             name: FooData
         property: bar
         domain:
-          type: integer
+          universe: integer
       domain:
-        type: integer
+        universe: integer
         boxed: true
     domain:
-      type: integer
+      universe: integer
       boxed: true
   - kind: CALL
     name:
@@ -122,7 +122,7 @@ startBlock:
       - kind: VARIABLE_REF
         name: __tempˇ1
         domain:
-          type: integer
+          universe: integer
           boxed: true
   - kind: RELEASE
     object:

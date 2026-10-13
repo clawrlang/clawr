@@ -37,7 +37,7 @@ type FunctionSignature = {
         name: string
         domain: ValueSet
     }[]
-    domain: ValueSet | { type: 'void' }
+    domain: ValueSet | { universe: 'void' }
 }
 
 type RCTypeDeclaration = {
@@ -60,7 +60,9 @@ type RCTypeDeclaration = {
     | {
           base?: CanonicalName
           methods: FunctionDeclaration[]
-          initializers: (FunctionDeclaration & { domain: { type: 'void' } })[]
+          initializers: (FunctionDeclaration & {
+              domain: { universe: 'void' }
+          })[]
           dispatchTable?: {
               slot: FunctionSignature
               declaredIn: CanonicalName
@@ -221,13 +223,13 @@ type ArithmeticOperation = {
         | 'EXPONENTIAL'
 } & (
     | {
-          left: Expression & { domain: { type: 'integer' } }
-          right: Expression & { domain: { type: 'integer' } }
+          left: Expression & { domain: { universe: 'integer' } }
+          right: Expression & { domain: { universe: 'integer' } }
           domain: IntegerSet
       }
     | {
-          left: Expression & { domain: { type: 'integer' | 'real' } }
-          right: Expression & { domain: { type: 'integer' | 'real' } }
+          left: Expression & { domain: { universe: 'integer' | 'real' } }
+          right: Expression & { domain: { universe: 'integer' | 'real' } }
           domain: RealRange
       }
 )
@@ -237,16 +239,16 @@ type EqualityComparison = {
     domain: TruthvalueSet<['false', 'true']>
 } & (
     | {
-          left: Expression & { domain: { type: 'integer' } }
-          right: Expression & { domain: { type: 'integer' } }
+          left: Expression & { domain: { universe: 'integer' } }
+          right: Expression & { domain: { universe: 'integer' } }
       }
     | {
-          left: Expression & { domain: { type: 'real' } }
-          right: Expression & { domain: { type: 'real' } }
+          left: Expression & { domain: { universe: 'real' } }
+          right: Expression & { domain: { universe: 'real' } }
       }
     | {
-          left: Expression & { domain: { type: 'truthvalue' } }
-          right: Expression & { domain: { type: 'truthvalue' } }
+          left: Expression & { domain: { universe: 'truthvalue' } }
+          right: Expression & { domain: { universe: 'truthvalue' } }
       }
 )
 
@@ -256,22 +258,22 @@ type OrderComparison = {
         | 'GREATER_THAN'
         | 'LESS_THAN_OR_EQUAL'
         | 'GREATER_THAN_OR_EQUAL'
-    left: Expression & { domain: { type: 'integer' | 'real' } }
-    right: Expression & { domain: { type: 'integer' | 'real' } }
+    left: Expression & { domain: { universe: 'integer' | 'real' } }
+    right: Expression & { domain: { universe: 'integer' | 'real' } }
     domain: TruthvalueSet<['false', 'true']>
 }
 
 type RefComparison = {
     kind: 'SAME' | 'NOT_SAME'
-    left: Expression & { domain: { type: 'rc-type' | 'interface' } }
-    right: Expression & { domain: { type: 'rc-type' | 'interface' } }
+    left: Expression & { domain: { universe: 'rc-type' | 'interface' } }
+    right: Expression & { domain: { universe: 'rc-type' | 'interface' } }
     domain: TruthvalueSet<['false', 'true']>
 }
 
 type LogicalOperation = {
     kind: 'AND' | 'OR'
-    left: Expression & { domain: { type: 'truthvalue' } }
-    right: Expression & { domain: { type: 'truthvalue' } }
+    left: Expression & { domain: { universe: 'truthvalue' } }
+    right: Expression & { domain: { universe: 'truthvalue' } }
     domain: TruthvalueSet<['false', 'true']>
 }
 
@@ -303,13 +305,13 @@ type IntegerRange<
     Min extends bigint | undefined = bigint | undefined,
     Max extends bigint | undefined = bigint | undefined,
 > = {
-    type: 'integer'
+    universe: 'integer'
     boxed?: true
 } & ((Min extends undefined ? { min?: undefined } : { min: `${Min}` }) &
     (Max extends undefined ? { max?: undefined } : { max: `${Max}` }))
 
 type IntegerSingleton<Value extends bigint = bigint> = {
-    type: 'integer'
+    universe: 'integer'
     boxed?: true
     value: `${Value}`
 }
@@ -320,41 +322,41 @@ type RealRange<
     Min extends decimal | undefined = decimal | undefined,
     Max extends decimal | undefined = decimal | undefined,
 > = {
-    type: 'real'
+    universe: 'real'
     boxed?: true
 } & (Min extends undefined ? { min?: undefined } : { min: `${Min}` }) &
     (Max extends undefined ? { max?: undefined } : { max: `${Max}` })
 
 type RealSingleton<Value extends decimal = decimal> = {
-    type: 'real'
+    universe: 'real'
     boxed?: true
     value: `${Value}`
 }
 
 type TruthvalueSet<Values extends truthvalue[] = truthvalue[]> =
     | {
-          type: 'truthvalue'
+          universe: 'truthvalue'
           boxed?: true
           values: Values
       }
     | TruthvalueSingleton<Values[number]>
 
 type TruthvalueSingleton<Value extends truthvalue = truthvalue> = {
-    type: 'truthvalue'
+    universe: 'truthvalue'
     boxed?: true
     value: Value
 }
 
-type StringSet = { type: 'string'; value?: string }
+type StringSet = { universe: 'string'; value?: string }
 
 type RCTypeSet = {
-    type: 'rc-type'
+    universe: 'rc-type'
     namespace?: string
     name: string
 }
 
 type InterfaceSet = {
-    type: 'interface'
+    universe: 'interface'
     namespace?: string
     name: string
 }

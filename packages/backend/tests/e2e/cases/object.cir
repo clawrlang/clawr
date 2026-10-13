@@ -6,7 +6,7 @@ declarations:
     properties:
       - name: property
         domain:
-          type: integer
+          universe: integer
           min: '42'
           max: '42'
     methods:
@@ -15,7 +15,7 @@ declarations:
         labels: []
         parameters: []
         domain:
-          type: integer
+          universe: integer
           min: '42'
           max: '42'
         body:
@@ -26,11 +26,11 @@ declarations:
                 kind: VARIABLE_REF
                 name: self
                 domain:
-                  type: rc-type
+                  universe: rc-type
                   name: Object
               property: property
               domain:
-                type: integer
+                universe: integer
                 min: '42'
                 max: '42'
     initializers:
@@ -39,7 +39,7 @@ declarations:
         labels: []
         parameters: []
         domain:
-          type: void
+          universe: void
         body:
           - kind: SELF_ASSIGN
             value:
@@ -49,10 +49,10 @@ declarations:
                   value:
                     kind: INTEGER_LITERAL
                     domain:
-                      type: integer
+                      universe: integer
                       value: '42'
               domain:
-                type: rc-type
+                universe: rc-type
                 name: Object
   - kind: FUNCTION_DECL
     namespace: Object
@@ -63,13 +63,13 @@ declarations:
       - kind: VARIABLE_DECL
         name: __tempˇ0
         domain:
-          type: rc-type
+          universe: rc-type
           name: Object
         initialValue:
           kind: ALLOCATION
           isolationLevel: ISOLATED
           domain:
-            type: rc-type
+            universe: rc-type
             name: Object
       - kind: ASSIGN
         value:
@@ -80,10 +80,10 @@ declarations:
               value:
                 kind: INTEGER_LITERAL
                 domain:
-                  type: integer
+                  universe: integer
                   value: '42'
           domain:
-            type: rc-type
+            universe: rc-type
             name: Object
         target:
           kind: VARIABLE_REF
@@ -93,22 +93,22 @@ declarations:
           kind: VARIABLE_REF
           name: __tempˇ0
           domain:
-            type: rc-type
+            universe: rc-type
             name: Object
     domain:
-      type: rc-type
+      universe: rc-type
       name: Object
 startBlock:
   - kind: VARIABLE_DECL
     name: obj
     domain:
-      type: rc-type
+      universe: rc-type
       name: Object
     initialValue:
       kind: ALLOCATION
       isolationLevel: ISOLATED
       domain:
-        type: rc-type
+        universe: rc-type
         name: Object
   - kind: CALL
     name:
@@ -121,7 +121,7 @@ startBlock:
         kind: VARIABLE_REF
         name: obj
         domain:
-          type: rc-type
+          universe: rc-type
           name: Object
   - kind: VARIABLE_DECL
     name: __tempˇ0
@@ -134,7 +134,7 @@ startBlock:
             kind: VARIABLE_REF
             name: obj
             domain:
-              type: rc-type
+              universe: rc-type
               name: Object
           dispatch: direct
         name:
@@ -142,14 +142,14 @@ startBlock:
           labels: []
         arguments: []
         domain:
-          type: integer
+          universe: integer
           min: '42'
           max: '42'
       domain:
-        type: integer
+        universe: integer
         boxed: true
     domain:
-      type: integer
+      universe: integer
       boxed: true
   - kind: CALL
     name:
@@ -159,7 +159,7 @@ startBlock:
       - kind: VARIABLE_REF
         name: __tempˇ0
         domain:
-          type: integer
+          universe: integer
           boxed: true
   - kind: RELEASE
     object:

@@ -14,14 +14,14 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        domain: { type: 'integer', value: '42' },
+                        domain: { universe: 'integer', value: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
-                        domain: { type: 'string', value: 'Hello' },
+                        domain: { universe: 'string', value: 'Hello' },
                     },
                 ],
-                domain: { type: 'integer' },
+                domain: { universe: 'integer' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myFunction˛param1˛param2(42, "Hello")')
@@ -37,11 +37,11 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        domain: { type: 'integer', value: '42' },
+                        domain: { universe: 'integer', value: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
-                        domain: { type: 'string', value: 'Hello' },
+                        domain: { universe: 'string', value: 'Hello' },
                     },
                 ],
             }
@@ -61,14 +61,14 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        domain: { type: 'integer', value: '42' },
+                        domain: { universe: 'integer', value: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
-                        domain: { type: 'string', value: 'Hello' },
+                        domain: { universe: 'string', value: 'Hello' },
                     },
                 ],
-                domain: { type: 'string' },
+                domain: { universe: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myFunction˛param1(42, "Hello")')
@@ -84,11 +84,11 @@ describe('Function Calls', () => {
                 arguments: [
                     {
                         kind: 'INTEGER_LITERAL',
-                        domain: { type: 'integer', value: '42' },
+                        domain: { universe: 'integer', value: '42' },
                     },
                     {
                         kind: 'STRING_LITERAL',
-                        domain: { type: 'string', value: 'Hello' },
+                        domain: { universe: 'string', value: 'Hello' },
                     },
                 ],
             }
@@ -106,7 +106,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                domain: { type: 'string' },
+                domain: { universe: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('noParamFunction()')
@@ -136,7 +136,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                domain: { type: 'string' },
+                domain: { universe: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('myNamespace¸myFunction()')
@@ -165,7 +165,7 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        domain: { type: 'rc-type', name: 'Object' },
+                        domain: { universe: 'rc-type', name: 'Object' },
                     },
                     dispatch: 'direct',
                 },
@@ -174,7 +174,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                domain: { type: 'string' },
+                domain: { universe: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('Object·myMethod(myObject)')
@@ -187,7 +187,7 @@ describe('Function Calls', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
-                        domain: { type: 'rc-type', name: 'Object' },
+                        domain: { universe: 'rc-type', name: 'Object' },
                     },
                     dispatch: 'direct',
                 },
@@ -211,7 +211,7 @@ describe('Function Calls', () => {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
                         domain: {
-                            type: 'rc-type',
+                            universe: 'rc-type',
                             name: 'Super',
                             namespace: 'ns',
                         },
@@ -223,7 +223,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                domain: { type: 'string' },
+                domain: { universe: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe(
@@ -239,7 +239,7 @@ describe('Function Calls', () => {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
                         domain: {
-                            type: 'rc-type',
+                            universe: 'rc-type',
                             name: 'Super',
                             namespace: 'ns',
                         },
@@ -268,7 +268,7 @@ describe('Function Calls', () => {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
                         domain: {
-                            type: 'rc-type',
+                            universe: 'rc-type',
                             name: 'Object',
                             namespace: 'ns',
                         },
@@ -280,7 +280,7 @@ describe('Function Calls', () => {
                     labels: [],
                 },
                 arguments: [],
-                domain: { type: 'string' },
+                domain: { universe: 'string' },
             }
             const result = lowerExpr(expr)
             expect(result).toBe('ns¸Object·myMethod(myObject)')
@@ -294,7 +294,7 @@ describe('Function Calls', () => {
                         kind: 'VARIABLE_REF',
                         name: 'myObject',
                         domain: {
-                            type: 'rc-type',
+                            universe: 'rc-type',
                             name: 'Object',
                             namespace: 'ns',
                         },

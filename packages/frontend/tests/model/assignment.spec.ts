@@ -146,7 +146,7 @@ describe('Assignment', () => {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
                     domain: {
-                        type: 'rc-type',
+                        universe: 'rc-type',
                         name: 'InnerType',
                     },
                     initialValue: {
@@ -209,7 +209,7 @@ describe('Assignment', () => {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
                     domain: {
-                        type: 'rc-type',
+                        universe: 'rc-type',
                         name: 'MyType',
                     },
                     initialValue: {

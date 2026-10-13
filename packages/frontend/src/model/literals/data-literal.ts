@@ -162,7 +162,7 @@ export class DataLiteral implements Expression {
             isolationLevel: context.isolationLevel!,
             properties,
             domain: {
-                type: 'rc-type',
+                universe: 'rc-type',
                 ...explicitDomain.type.toCIR(),
             },
         } satisfies cir.Expression)

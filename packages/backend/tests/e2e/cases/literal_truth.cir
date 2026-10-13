@@ -4,7 +4,7 @@ startBlock:
   - kind: VARIABLE_DECL
     name: __tempˇ0
     domain:
-      type: truthvalue
+      universe: truthvalue
       boxed: true
       values:
         - ambiguous
@@ -13,10 +13,10 @@ startBlock:
       expression:
         kind: TRUTHVALUE_LITERAL
         domain:
-          type: truthvalue
+          universe: truthvalue
           value: ambiguous
       domain:
-        type: truthvalue
+        universe: truthvalue
         boxed: true
         value: ambiguous
   - kind: CALL
@@ -27,7 +27,7 @@ startBlock:
       - kind: VARIABLE_REF
         name: __tempˇ0
         domain:
-          type: rc-type
+          universe: rc-type
           name: TruthvalueBox
           namespace: clawr
   - kind: RELEASE

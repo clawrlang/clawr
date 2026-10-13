@@ -151,7 +151,7 @@ export class FunctionCall implements Expression, Statement {
                 receiver: {
                     dispatch: 'direct',
                     object: recipient as cir.Expression & {
-                        domain: { type: 'rc-type' | 'interface' }
+                        domain: { universe: 'rc-type' | 'interface' }
                     },
                 },
                 domain: value.toCIR(),

@@ -7,10 +7,10 @@ describe('Lowering Variables', () => {
         const decl: Declaration = {
             kind: 'VARIABLE_DECL',
             name: 'x',
-            domain: { type: 'integer' },
+            domain: { universe: 'integer' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
-                domain: { type: 'integer', value: '42' },
+                domain: { universe: 'integer', value: '42' },
             },
         }
         const result = lowerStmt(decl)
@@ -21,7 +21,7 @@ describe('Lowering Variables', () => {
         const expr: Expression = {
             kind: 'VARIABLE_REF',
             name: 'foo',
-            domain: { type: 'integer', max: '42', min: '42' },
+            domain: { universe: 'integer', max: '42', min: '42' },
         }
         const result = lowerExpr(expr)
         expect(result).toBe('foo')

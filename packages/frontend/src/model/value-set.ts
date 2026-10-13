@@ -46,14 +46,14 @@ export class IntegerSet<
         )
     }
 
-    toCIR(): cir.ValueSet & { type: 'integer' } {
+    toCIR(): cir.ValueSet & { universe: 'integer' } {
         if (this.min !== undefined && (this.min as bigint) === this.max)
             return {
-                type: 'integer' as const,
+                universe: 'integer' as const,
                 value: this.min.toString() as any,
             }
         return {
-            type: 'integer' as const,
+            universe: 'integer' as const,
             min: this.min?.toString() as any,
             max: this.max?.toString() as any,
         }
@@ -91,14 +91,14 @@ export class TruthvalueSet<Values extends truthvalue[]> implements ValueSet {
         )
     }
 
-    toCIR(): cir.ValueSet & { type: 'truthvalue' } {
+    toCIR(): cir.ValueSet & { universe: 'truthvalue' } {
         return this.values.length === 1
             ? {
-                  type: 'truthvalue',
+                  universe: 'truthvalue',
                   value: this.values[0],
               }
             : {
-                  type: 'truthvalue',
+                  universe: 'truthvalue',
                   values: this.values,
               }
     }
@@ -123,8 +123,8 @@ export class StringSet implements ValueSet {
         return other instanceof StringSet
     }
 
-    toCIR(): cir.ValueSet & { type: 'string' } {
-        return { type: 'string' }
+    toCIR(): cir.ValueSet & { universe: 'string' } {
+        return { universe: 'string' }
     }
 
     toString(): string {
@@ -166,9 +166,9 @@ export class RCTypeSet implements ValueSet {
         )
     }
 
-    toCIR(): cir.ValueSet & { type: 'rc-type' } {
+    toCIR(): cir.ValueSet & { universe: 'rc-type' } {
         return {
-            type: 'rc-type',
+            universe: 'rc-type',
             name: this.type.name,
             namespace: this.type.namespace,
         }

@@ -416,9 +416,9 @@
     "Void": {
       "type": "object",
       "properties": {
-        "type": { "const": "void" }
+        "universe": { "const": "void" }
       },
-      "required": ["type"],
+      "required": ["universe"],
       "additionalProperties": false
     },
 
@@ -443,23 +443,23 @@
     "IntegerSingleton": {
       "type": "object",
       "properties": {
-        "type": { "const": "integer" },
+        "universe": { "const": "integer" },
         "boxed": { "const": true },
         "value": { "type": "string", "pattern": "^-?\\d+$" }
       },
-      "required": ["type", "value"],
+      "required": ["universe", "value"],
       "additionalProperties": false
     },
 
     "IntegerRange": {
       "type": "object",
       "properties": {
-        "type": { "const": "integer" },
+        "universe": { "const": "integer" },
         "boxed": { "const": true },
         "min": { "type": "string", "pattern": "^-?\\d+$" },
         "max": { "type": "string", "pattern": "^-?\\d+$" }
       },
-      "required": ["type"],
+      "required": ["universe"],
       "additionalProperties": false
     },
 
@@ -473,55 +473,55 @@
     "RealSingleton": {
       "type": "object",
       "properties": {
-        "type": { "const": "real" },
+        "universe": { "const": "real" },
         "boxed": { "const": true },
         "value": { "type": "string", "pattern": "^-?\\d+\\.\\d+$" }
       },
-      "required": ["type", "value"],
+      "required": ["universe", "value"],
       "additionalProperties": false
     },
 
     "RealRange": {
       "type": "object",
       "properties": {
-        "type": { "const": "real" },
+        "universe": { "const": "real" },
         "boxed": { "const": true },
         "min": { "type": "string", "pattern": "^-?\\d+\\.\\d+$" },
         "max": { "type": "string", "pattern": "^-?\\d+\\.\\d+$" }
       },
-      "required": ["type"],
+      "required": ["universe"],
       "additionalProperties": false
     },
 
     "InterfaceSet": {
       "type": "object",
       "properties": {
-        "type": { "const": "interface" },
+        "universe": { "const": "interface" },
         "namespace": { "type": "string" },
         "name": { "type": "string" }
       },
-      "required": ["type", "name"],
+      "required": ["universe", "name"],
       "additionalProperties": false
     },
 
     "RCTypeSet": {
       "type": "object",
       "properties": {
-        "type": { "const": "rc-type" },
+        "universe": { "const": "rc-type" },
         "namespace": { "type": "string" },
         "name": { "type": "string" }
       },
-      "required": ["type", "name"],
+      "required": ["universe", "name"],
       "additionalProperties": false
     },
 
     "StringSet": {
       "type": "object",
       "properties": {
-        "type": { "const": "string" },
+        "universe": { "const": "string" },
         "value": { "type": "string" }
       },
-      "required": ["type"],
+      "required": ["universe"],
       "additionalProperties": false
     },
 
@@ -530,14 +530,14 @@
         {
           "type": "object",
           "properties": {
-            "type": { "const": "truthvalue" },
+            "universe": { "const": "truthvalue" },
             "boxed": { "const": true },
             "values": {
               "type": "array",
               "items": { "$ref": "#/$defs/Truthvalue" }
             }
           },
-          "required": ["type", "values"],
+          "required": ["universe", "values"],
           "additionalProperties": false
         },
         { "$ref": "#/$defs/TruthvalueSingleton" }
@@ -547,11 +547,11 @@
     "TruthvalueSingleton": {
       "type": "object",
       "properties": {
-        "type": { "const": "truthvalue" },
+        "universe": { "const": "truthvalue" },
         "boxed": { "const": true },
         "value": { "$ref": "#/$defs/Truthvalue" }
       },
-      "required": ["type", "value"],
+      "required": ["universe", "value"],
       "additionalProperties": false
     },
 

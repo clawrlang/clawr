@@ -34,10 +34,10 @@ describe('FunctionDeclaration (method)', () => {
             parameters: [
                 {
                     name: 'x',
-                    domain: { type: 'string' },
+                    domain: { universe: 'string' },
                 },
             ],
-            domain: { type: 'void' },
+            domain: { universe: 'void' },
             body: [],
         })
     })
@@ -59,7 +59,7 @@ describe('FunctionDeclaration (method)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            domain: { type: 'integer', value: '42' },
+            domain: { universe: 'integer', value: '42' },
             body: [
                 {
                     kind: 'RETURN',
@@ -95,7 +95,7 @@ describe('FunctionDeclaration (method)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            domain: { type: 'integer', min: undefined, max: undefined },
+            domain: { universe: 'integer', min: undefined, max: undefined },
             body: [
                 {
                     kind: 'RETURN',
@@ -238,7 +238,7 @@ describe('FunctionDeclaration (method)', () => {
                 baseName: 'myFunction',
                 parameters: [],
                 domain: {
-                    type: 'integer',
+                    universe: 'integer',
                     value: '42',
                 },
                 body: [
@@ -281,7 +281,7 @@ describe('FunctionDeclaration (method)', () => {
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 domain: {
-                    type: 'rc-type',
+                    universe: 'rc-type',
                     name: 'MyData',
                 },
             })
@@ -317,7 +317,7 @@ describe('FunctionDeclaration (method)', () => {
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 domain: {
-                    type: 'rc-type',
+                    universe: 'rc-type',
                     name: 'MyData',
                 },
             })

@@ -31,7 +31,9 @@ describe('Property Reference', () => {
             'myProperty',
         )
         const result = propertyRef.domain(context)
-        expect(result.isSuccess && result.value.toCIR().type).toBe('integer')
+        expect(result.isSuccess && result.value.toCIR().universe).toBe(
+            'integer',
+        )
     })
 
     it('infers its isolation level from the context', () => {

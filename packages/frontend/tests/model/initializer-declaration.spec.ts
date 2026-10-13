@@ -38,7 +38,7 @@ describe('FunctionDeclaration (initializer)', () => {
                     type: { universe: 'string' },
                 },
             ],
-            type: { universe: 'void' },
+            returnType: { universe: 'void' },
             body: [],
         })
     })
@@ -75,7 +75,7 @@ describe('FunctionDeclaration (initializer)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'makeNew',
             parameters: [],
-            type: { universe: 'void' },
+            returnType: { universe: 'void' },
             body: [
                 {
                     kind: 'SELF_ASSIGN',
@@ -114,7 +114,7 @@ describe('FunctionDeclaration (initializer)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'makeNew',
             parameters: [],
-            type: { universe: 'void' },
+            returnType: { universe: 'void' },
             body: [
                 {
                     kind: 'RETURN',
@@ -264,7 +264,7 @@ describe('FunctionDeclaration (initializer)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'makeNew',
             parameters: [],
-            type: { universe: 'void' },
+            returnType: { universe: 'void' },
             body: [
                 {
                     kind: 'SELF_ASSIGN',

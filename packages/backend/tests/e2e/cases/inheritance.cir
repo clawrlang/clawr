@@ -14,7 +14,7 @@ declarations:
         baseName: f
         labels: []
         parameters: []
-        type:
+        returnType:
           universe: integer
           min: '0'
           max: '100'
@@ -60,14 +60,14 @@ declarations:
                       universe: integer
                       min: '0'
                       max: '100'
-        type:
+        returnType:
           universe: void
     dispatchTable:
       - slot:
           baseName: f
           labels: []
           parameters: []
-          type:
+          returnType:
             universe: integer
             min: '0'
             max: '100'
@@ -90,7 +90,7 @@ declarations:
         baseName: f
         labels: []
         parameters: []
-        type:
+        returnType:
           universe: integer
           min: '43'
           max: '43'
@@ -146,14 +146,14 @@ declarations:
                 type:
                   universe: integer
                   value: '42'
-        type:
+        returnType:
           universe: void
     dispatchTable:
       - slot:
           baseName: f
           labels: []
           parameters: []
-          type:
+          returnType:
             universe: integer
             min: '0'
             max: '100'
@@ -197,14 +197,14 @@ declarations:
                 type:
                   universe: integer
                   value: '42'
-        type:
+        returnType:
           universe: void
     dispatchTable:
       - slot:
           baseName: f
           labels: []
           parameters: []
-          type:
+          returnType:
             universe: integer
             min: '0'
             max: '100'

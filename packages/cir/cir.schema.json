@@ -717,11 +717,11 @@
           "type": "array",
           "items": { "$ref": "#/$defs/Parameter" }
         },
-        "type": {
+        "returnType": {
           "oneOf": [{ "$ref": "#/$defs/ValueSet" }, { "$ref": "#/$defs/Void" }]
         }
       },
-      "required": ["baseName", "labels", "parameters", "type"],
+      "required": ["baseName", "labels", "parameters", "returnType"],
       "unevaluatedProperties": false
     },
 
@@ -748,9 +748,8 @@
         {
           "type": "object",
           "properties": {
-            "type": { "$ref": "#/$defs/Void" }
-          },
-          "required": ["type"]
+            "returnType": { "$ref": "#/$defs/Void" }
+          }
         }
       ]
     },
@@ -761,9 +760,8 @@
         {
           "type": "object",
           "properties": {
-            "type": { "$ref": "#/$defs/ValueSet" }
-          },
-          "required": ["type"]
+            "returnType": { "$ref": "#/$defs/ValueSet" }
+          }
         }
       ]
     },
@@ -786,11 +784,18 @@
           "type": "array",
           "items": { "$ref": "#/$defs/Parameter" }
         },
-        "type": {
+        "returnType": {
           "oneOf": [{ "$ref": "#/$defs/ValueSet" }, { "$ref": "#/$defs/Void" }]
         }
       },
-      "required": ["kind", "body", "baseName", "labels", "parameters", "type"],
+      "required": [
+        "kind",
+        "body",
+        "baseName",
+        "labels",
+        "parameters",
+        "returnType"
+      ],
       "unevaluatedProperties": false
     }
   }

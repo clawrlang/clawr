@@ -20,7 +20,7 @@ describe('Interface Declaration', () => {
                             },
                         },
                     ],
-                    type: { universe: 'integer', max: '10', min: '0' },
+                    returnType: { universe: 'integer', max: '10', min: '0' },
                 },
             ],
         }

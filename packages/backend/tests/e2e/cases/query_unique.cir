@@ -37,7 +37,7 @@ declarations:
           type:
             universe: rc-type
             name: MyData
-    type:
+    returnType:
       universe: rc-type
       name: MyData
 startBlock:

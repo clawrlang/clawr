@@ -112,7 +112,7 @@ describe('ObjectDeclaration', () => {
                         labels: ['label'],
                         parameters: [{ name: 'var' }],
                         body: [{ kind: 'RETURN' }],
-                        type: {},
+                        returnType: {},
                     },
                     {
                         kind: 'FUNCTION_DECL',
@@ -120,10 +120,10 @@ describe('ObjectDeclaration', () => {
                         labels: ['label'],
                         parameters: [{ name: 'var' }],
                         body: [],
-                        type: { universe: 'void' },
+                        returnType: { universe: 'void' },
                     },
                 ],
-            }, //satisfies cir.Declaration,
+            },
         ])
     })
 
@@ -214,7 +214,7 @@ describe('ObjectDeclaration', () => {
                                 value: {},
                             },
                         ],
-                        type: { universe: 'void' },
+                        returnType: { universe: 'void' },
                     },
                     {
                         kind: 'FUNCTION_DECL',
@@ -227,7 +227,7 @@ describe('ObjectDeclaration', () => {
                                 value: {},
                             },
                         ],
-                        type: { universe: 'void' },
+                        returnType: { universe: 'void' },
                     },
                 ],
             },

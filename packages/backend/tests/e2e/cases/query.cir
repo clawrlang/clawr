@@ -16,7 +16,7 @@ declarations:
           type:
             universe: integer
             value: '42'
-    type:
+    returnType:
       universe: integer
       max: '42'
       min: '42'

@@ -38,7 +38,7 @@ describe('FunctionDeclaration', () => {
                     type: { universe: 'string' },
                 },
             ],
-            type: { universe: 'void' },
+            returnType: { universe: 'void' },
             body: [],
         })
     })
@@ -59,7 +59,7 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            type: { universe: 'integer', value: '42' },
+            returnType: { universe: 'integer', value: '42' },
             body: [
                 {
                     kind: 'RETURN',
@@ -94,7 +94,7 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            type: { universe: 'integer', min: undefined, max: undefined },
+            returnType: { universe: 'integer', min: undefined, max: undefined },
             body: [
                 {
                     kind: 'RETURN',
@@ -235,7 +235,7 @@ describe('FunctionDeclaration', () => {
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 parameters: [],
-                type: {
+                returnType: {
                     universe: 'integer',
                     value: '42',
                 },
@@ -276,7 +276,7 @@ describe('FunctionDeclaration', () => {
             expect(context.scope.rootScope.emitted[0]).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                type: {
+                returnType: {
                     universe: 'rc-type',
                     name: 'MyData',
                 },
@@ -311,7 +311,7 @@ describe('FunctionDeclaration', () => {
             expect(context.scope.rootScope.emitted[0]).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                type: {
+                returnType: {
                     universe: 'rc-type',
                     name: 'MyData',
                 },

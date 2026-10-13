@@ -130,11 +130,11 @@ function lowerAbstractSlot(slot: FunctionSignature) {
     const paramDecls = params
         .map((param) => `${lowerType(param.type)} ${param.name}`)
         .join(', ')
-    return `${lowerType(slot.type)} (*${slotName})(${paramDecls});`
+    return `${lowerType(slot.returnType)} (*${slotName})(${paramDecls});`
 }
 
 function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
-    const returnType = lowerType(slot.type)
+    const returnType = lowerType(slot.returnType)
 
     const params: FunctionSignature['parameters'] = [
         {
@@ -198,7 +198,11 @@ function lowerInitializer(
     return lowerFunction(
         {
             ...decl,
-            type: { universe: 'rc-type', name: 'void', namespace: undefined },
+            returnType: {
+                universe: 'rc-type',
+                name: 'void',
+                namespace: undefined,
+            },
             parameters: [self, ...decl.parameters],
             body: [...decl.body, { kind: 'RETURN', value: self }],
         },
@@ -217,7 +221,7 @@ function lowerFunction(
                 : `${lowerType(param.type)} ${param.name}`
         })
         .join(', ')
-    const returnType = lowerType(decl.type)
+    const returnType = lowerType(decl.returnType)
 
     return `${returnType} ${mangledName}(${params}) {
         ${[

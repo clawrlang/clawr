@@ -37,7 +37,7 @@ type FunctionSignature = {
         name: string
         type: ValueSet
     }[]
-    type: ValueSet | { universe: 'void' }
+    returnType: ValueSet | { universe: 'void' }
 }
 
 type RCTypeDeclaration = {
@@ -61,7 +61,7 @@ type RCTypeDeclaration = {
           base?: CanonicalName
           methods: FunctionDeclaration[]
           initializers: (FunctionDeclaration & {
-              type: { universe: 'void' }
+              returnType: { universe: 'void' }
           })[]
           dispatchTable?: {
               slot: FunctionSignature

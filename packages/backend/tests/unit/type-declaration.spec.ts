@@ -61,7 +61,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    type: { universe: 'void' },
+                    returnType: { universe: 'void' },
                 },
             ],
         }
@@ -84,7 +84,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    type: { universe: 'void' },
+                    returnType: { universe: 'void' },
                 },
             ],
         }
@@ -104,7 +104,7 @@ describe('Type declaration', () => {
             labels: [],
             parameters: [],
             body: [],
-            type: { universe: 'void' },
+            returnType: { universe: 'void' },
         }
 
         const result = lowerDecl(typeDecl)
@@ -123,7 +123,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    type: { universe: 'integer' },
+                    returnType: { universe: 'integer' },
                 },
             ],
             dispatchTable: [
@@ -132,7 +132,7 @@ describe('Type declaration', () => {
                         baseName: 'f',
                         labels: [],
                         parameters: [],
-                        type: { universe: 'integer' },
+                        returnType: { universe: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
                     implementation: { name: 'MyType' },
@@ -167,7 +167,7 @@ describe('Type declaration', () => {
                                 type: { universe: 'integer' },
                             },
                         ],
-                        type: { universe: 'integer' },
+                        returnType: { universe: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
                     implementation: { name: 'MyType' },
@@ -197,7 +197,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    type: { universe: 'integer' },
+                    returnType: { universe: 'integer' },
                 },
             ],
             dispatchTable: [
@@ -206,7 +206,7 @@ describe('Type declaration', () => {
                         baseName: 'f',
                         labels: [],
                         parameters: [],
-                        type: { universe: 'void' },
+                        returnType: { universe: 'void' },
                     },
                     declaredIn: { name: 'Super' },
                     implementation: { name: 'Sub' },
@@ -259,7 +259,7 @@ describe('Type declaration', () => {
                             },
                         },
                     ],
-                    type: { universe: 'void' },
+                    returnType: { universe: 'void' },
                 },
             ],
         }

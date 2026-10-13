@@ -37,7 +37,7 @@ describe('FunctionDeclaration (method)', () => {
                     type: { universe: 'string' },
                 },
             ],
-            type: { universe: 'void' },
+            returnType: { universe: 'void' },
             body: [],
         })
     })
@@ -59,7 +59,7 @@ describe('FunctionDeclaration (method)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            type: { universe: 'integer', value: '42' },
+            returnType: { universe: 'integer', value: '42' },
             body: [
                 {
                     kind: 'RETURN',
@@ -95,7 +95,7 @@ describe('FunctionDeclaration (method)', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            type: { universe: 'integer', min: undefined, max: undefined },
+            returnType: { universe: 'integer', min: undefined, max: undefined },
             body: [
                 {
                     kind: 'RETURN',
@@ -237,7 +237,7 @@ describe('FunctionDeclaration (method)', () => {
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 parameters: [],
-                type: {
+                returnType: {
                     universe: 'integer',
                     value: '42',
                 },
@@ -280,7 +280,7 @@ describe('FunctionDeclaration (method)', () => {
             expect(result.isSuccess && result.value).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                type: {
+                returnType: {
                     universe: 'rc-type',
                     name: 'MyData',
                 },
@@ -316,7 +316,7 @@ describe('FunctionDeclaration (method)', () => {
             expect(result.isSuccess && result.value).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                type: {
+                returnType: {
                     universe: 'rc-type',
                     name: 'MyData',
                 },

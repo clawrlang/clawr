@@ -116,7 +116,7 @@ export class FunctionDeclaration implements Declaration {
 
         const returnTypeResult = this.returnType(bodyContext)
         if (returnTypeResult.isError) return returnTypeResult
-        const type = returnTypeResult.value
+        const returnType = returnTypeResult.value
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -126,7 +126,7 @@ export class FunctionDeclaration implements Declaration {
                 name: param.varName,
                 type: param.type!.toCIR(),
             })),
-            type,
+            returnType,
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
@@ -161,9 +161,9 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const typeResult = this.returnType(bodyContext)
-        if (typeResult.isError) return typeResult
-        const type = typeResult.value
+        const returnTypeResult = this.returnType(bodyContext)
+        if (returnTypeResult.isError) return returnTypeResult
+        const returnType = returnTypeResult.value
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -173,7 +173,7 @@ export class FunctionDeclaration implements Declaration {
                 name: param.varName,
                 type: param.type!.toCIR(),
             })),
-            type,
+            returnType,
             body: bodyContext.scope.emitted,
         }
 
@@ -183,7 +183,7 @@ export class FunctionDeclaration implements Declaration {
     emitInitializer(context: Context): SemanticResult<
         cir.Declaration & {
             kind: 'FUNCTION_DECL'
-            type: { universe: 'void' }
+            returnType: { universe: 'void' }
         }
     > {
         const bodyContextResult = this.makeBodyContext(context)
@@ -222,7 +222,7 @@ export class FunctionDeclaration implements Declaration {
                 name: param.varName,
                 type: param.type!.toCIR(),
             })),
-            type: { universe: 'void' } as const,
+            returnType: { universe: 'void' } as const,
             body: bodyContext.scope.emitted,
         } satisfies cir.Declaration
 

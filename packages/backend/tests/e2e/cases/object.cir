@@ -14,7 +14,7 @@ declarations:
         baseName: property
         labels: []
         parameters: []
-        type:
+        returnType:
           universe: integer
           min: '42'
           max: '42'
@@ -38,7 +38,7 @@ declarations:
         baseName: new
         labels: []
         parameters: []
-        type:
+        returnType:
           universe: void
         body:
           - kind: SELF_ASSIGN
@@ -95,7 +95,7 @@ declarations:
           type:
             universe: rc-type
             name: Object
-    type:
+    returnType:
       universe: rc-type
       name: Object
 startBlock:

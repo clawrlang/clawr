@@ -287,7 +287,7 @@
         "kind": { "const": "INTEGER_LITERAL" },
         "type": { "$ref": "#/$defs/IntegerSingleton" }
       },
-      "required": ["kind"],
+      "required": ["kind", "type"],
       "additionalProperties": false
     },
 

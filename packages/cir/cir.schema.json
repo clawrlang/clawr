@@ -374,7 +374,7 @@
       "type": "object",
       "properties": {
         "kind": { "const": "STRING_LITERAL" },
-        "type": { "$ref": "#/$defs/StringSet" }
+        "type": { "$ref": "#/$defs/StringSingleton" }
       },
       "required": ["kind", "type"],
       "additionalProperties": false
@@ -514,12 +514,28 @@
     },
 
     "StringSet": {
+      "oneOf": [
+        { "$ref": "#/$defs/UnlimitedString" },
+        { "$ref": "#/$defs/StringSingleton" }
+      ]
+    },
+
+    "UnlimitedString": {
+      "type": "object",
+      "properties": {
+        "universe": { "const": "string" }
+      },
+      "required": ["universe"],
+      "additionalProperties": false
+    },
+
+    "StringSingleton": {
       "type": "object",
       "properties": {
         "universe": { "const": "string" },
         "value": { "type": "string" }
       },
-      "required": ["universe"],
+      "required": ["universe", "value"],
       "additionalProperties": false
     },
 

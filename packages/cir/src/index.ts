@@ -153,7 +153,7 @@ type Storage = Omit<VariableReference, 'type'> | Omit<PropertyReference, 'type'>
 
 type StringLiteral = {
     kind: 'STRING_LITERAL'
-    type: StringSet & { value: string }
+    type: StringSingleton
 }
 
 type IntegerLiteral<Value extends bigint = bigint> = {
@@ -346,7 +346,9 @@ type TruthvalueSingleton<Value extends truthvalue = truthvalue> = {
     value: Value
 }
 
-type StringSet = { universe: 'string'; value?: string }
+type StringSet = UnlimitedString | StringSingleton
+type UnlimitedString = { universe: 'string' }
+type StringSingleton = { universe: 'string'; value: string }
 
 type RCTypeSet = {
     universe: 'rc-type'

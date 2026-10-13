@@ -185,8 +185,8 @@
       "oneOf": [
         { "$ref": "#/$defs/AsShared" },
         { "$ref": "#/$defs/Box" },
-        { "$ref": "#/$defs/MemoryAllocation" },
-        { "$ref": "#/$defs/MemoryRetention" }
+        { "$ref": "#/$defs/Allocation" },
+        { "$ref": "#/$defs/Retain" }
       ]
     },
 
@@ -301,7 +301,7 @@
       "additionalProperties": false
     },
 
-    "MemoryAllocation": {
+    "Allocation": {
       "type": "object",
       "properties": {
         "kind": { "const": "ALLOCATION" },
@@ -316,7 +316,7 @@
       "additionalProperties": false
     },
 
-    "MemoryRetention": {
+    "Retain": {
       "type": "object",
       "properties": {
         "kind": { "const": "RETAIN" },

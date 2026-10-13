@@ -133,7 +133,7 @@ type Assign = {
 
 type SelfAssign = {
     kind: 'SELF_ASSIGN'
-    value: Omit<MemoryAllocation, 'kind' | 'isolationLevel'> & { kind: 'DATA' }
+    value: Omit<Allocation, 'kind' | 'isolationLevel'> & { kind: 'DATA' }
 }
 
 export type Statement =
@@ -171,7 +171,7 @@ type TruthvalueLiteral<Value extends truthvalue = truthvalue> = {
     type: TruthvalueSingleton<Value>
 }
 
-type MemoryAllocation = {
+type Allocation = {
     kind: 'ALLOCATION'
     isolationLevel: IsolationLevel
     properties?: {
@@ -181,7 +181,7 @@ type MemoryAllocation = {
     type: RCTypeSet
 }
 
-type MemoryRetention = {
+type Retain = {
     kind: 'RETAIN'
     object: Storage
     type: RCTypeSet
@@ -281,8 +281,8 @@ export type Expression =
     | IntegerLiteral
     | RealLiteral
     | TruthvalueLiteral
-    | MemoryAllocation
-    | MemoryRetention
+    | Allocation
+    | Retain
     | AsShared
     | Box
     | VariableReference

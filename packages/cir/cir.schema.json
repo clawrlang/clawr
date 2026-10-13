@@ -1,30 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$ref": "#/$defs/ClawrModule",
-  "$defs": {
-    "ClawrModule": {
-      "type": "object",
-      "properties": {
-        "$schema": {
-          "const": "http://clawr.lang/schema/cir/DRAFT-0"
-        },
-        "startBlock": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/Statement"
-          }
-        },
-        "declarations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/Declaration"
-          }
-        }
-      },
-      "required": ["$schema"],
-      "unevaluatedProperties": false
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "const": "http://clawr.lang/schema/cir/DRAFT-0"
     },
-
+    "startBlock": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Statement"
+      }
+    },
+    "declarations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Declaration"
+      }
+    }
+  },
+  "required": ["$schema"],
+  "unevaluatedProperties": false,
+  "$defs": {
     "Statement": {
       "oneOf": [
         { "$ref": "#/$defs/Assign" },

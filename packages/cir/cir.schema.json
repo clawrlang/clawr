@@ -707,6 +707,12 @@
 
     "FunctionSignature": {
       "type": "object",
+      "$ref": "#/$defs/FunctionSignatureCommon",
+      "unevaluatedProperties": false
+    },
+
+    "FunctionSignatureCommon": {
+      "type": "object",
       "properties": {
         "baseName": { "type": "string" },
         "labels": {
@@ -721,8 +727,7 @@
           "oneOf": [{ "$ref": "#/$defs/ValueSet" }, { "$ref": "#/$defs/Void" }]
         }
       },
-      "required": ["baseName", "labels", "parameters", "returnType"],
-      "unevaluatedProperties": false
+      "required": ["baseName", "labels", "parameters", "returnType"]
     },
 
     "Parameter": {
@@ -768,33 +773,20 @@
 
     "FunctionDeclCommon": {
       "type": "object",
-      "properties": {
-        "kind": { "const": "FUNCTION_DECL" },
-        "body": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/Statement" }
-        },
-        "namespace": { "type": "string" },
-        "baseName": { "type": "string" },
-        "labels": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "parameters": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/Parameter" }
-        },
-        "returnType": {
-          "oneOf": [{ "$ref": "#/$defs/ValueSet" }, { "$ref": "#/$defs/Void" }]
+      "allOf": [
+        { "$ref": "#/$defs/FunctionSignatureCommon" },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "FUNCTION_DECL" },
+            "body": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Statement" }
+            },
+            "namespace": { "type": "string" }
+          },
+          "required": ["kind", "body"]
         }
-      },
-      "required": [
-        "kind",
-        "body",
-        "baseName",
-        "labels",
-        "parameters",
-        "returnType"
       ],
       "unevaluatedProperties": false
     }

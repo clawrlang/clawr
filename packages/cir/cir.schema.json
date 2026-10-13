@@ -22,7 +22,7 @@
         }
       },
       "required": ["$schema"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Statement": {
@@ -45,7 +45,7 @@
         "value": { "$ref": "#/$defs/Expression" }
       },
       "required": ["kind", "target", "value"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Storage": {
@@ -64,7 +64,7 @@
         "type": { "$ref": "#/$defs/ValueSet" }
       },
       "required": ["kind", "object", "property"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "VariableReferenceStorage": {
@@ -75,7 +75,7 @@
         "type": { "$ref": "#/$defs/ValueSet" }
       },
       "required": ["kind", "name"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "EnsureUnique": {
@@ -85,7 +85,7 @@
         "object": { "$ref": "#/$defs/Storage" }
       },
       "required": ["kind", "object"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Release": {
@@ -95,7 +95,7 @@
         "object": { "$ref": "#/$defs/Storage" }
       },
       "required": ["kind", "object"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Return": {
@@ -105,7 +105,7 @@
         "value": { "$ref": "#/$defs/Expression" }
       },
       "required": ["kind"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "SelfAssignment": {
@@ -123,11 +123,11 @@
             "type": { "$ref": "#/$defs/RCTypeSet" }
           },
           "required": ["kind", "type"],
-          "additionalProperties": false
+          "unevaluatedProperties": false
         }
       },
       "required": ["kind", "value"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "VariableDeclaration": {
@@ -140,7 +140,7 @@
         "initialValue": { "$ref": "#/$defs/Expression" }
       },
       "required": ["kind", "name", "type", "initialValue"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "FunctionCallStatement": {
@@ -172,7 +172,7 @@
         }
       },
       "required": ["object", "dispatch"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Expression": {
@@ -237,7 +237,7 @@
         "type": { "$ref": "#/$defs/TruthvalueSet" }
       },
       "required": ["kind", "type", "left", "right"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Arithmetic": {
@@ -258,7 +258,7 @@
         "type": { "$ref": "#/$defs/ValueSet" }
       },
       "required": ["kind", "left", "right", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "AsShared": {
@@ -269,7 +269,7 @@
         "type": { "$ref": "#/$defs/RCTypeSet" }
       },
       "required": ["kind", "object", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Box": {
@@ -280,7 +280,7 @@
         "type": { "$ref": "#/$defs/ValueSet" }
       },
       "required": ["kind", "expression", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "IntegerLiteral": {
@@ -290,7 +290,7 @@
         "type": { "$ref": "#/$defs/IntegerSingleton" }
       },
       "required": ["kind", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "LogicalOperation": {
@@ -302,7 +302,7 @@
         "type": { "$ref": "#/$defs/TruthvalueSet" }
       },
       "required": ["kind", "left", "right", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Allocation": {
@@ -317,7 +317,7 @@
         "type": { "$ref": "#/$defs/RCTypeSet" }
       },
       "required": ["kind", "isolationLevel", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Retain": {
@@ -328,7 +328,7 @@
         "type": { "$ref": "#/$defs/RCTypeSet" }
       },
       "required": ["kind", "object", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "OrderComparison": {
@@ -347,7 +347,7 @@
         "type": { "$ref": "#/$defs/TruthvalueSet" }
       },
       "required": ["kind", "left", "right", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "PropertyReference": {
@@ -359,7 +359,7 @@
         "type": { "$ref": "#/$defs/ValueSet" }
       },
       "required": ["kind", "object", "property", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "RefComparison": {
@@ -371,7 +371,7 @@
         "type": { "$ref": "#/$defs/TruthvalueSet" }
       },
       "required": ["kind", "left", "right", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "StringLiteral": {
@@ -381,7 +381,7 @@
         "type": { "$ref": "#/$defs/StringSingleton" }
       },
       "required": ["kind", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "TruthvalueLiteral": {
@@ -391,7 +391,7 @@
         "type": { "$ref": "#/$defs/TruthvalueSingleton" }
       },
       "required": ["kind", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "VariableReference": {
@@ -402,7 +402,7 @@
         "type": { "$ref": "#/$defs/ValueSet" }
       },
       "required": ["kind", "name", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "PropertyInitializer": {
@@ -412,7 +412,7 @@
         "value": { "$ref": "#/$defs/Expression" }
       },
       "required": ["name", "value"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Void": {
@@ -421,7 +421,7 @@
         "universe": { "const": "void" }
       },
       "required": ["universe"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "ValueSet": {
@@ -450,7 +450,7 @@
         "value": { "type": "string", "pattern": "^-?\\d+$" }
       },
       "required": ["universe", "value"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "IntegerRange": {
@@ -462,7 +462,7 @@
         "max": { "type": "string", "pattern": "^-?\\d+$" }
       },
       "required": ["universe"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "RealSet": {
@@ -480,7 +480,7 @@
         "value": { "type": "string", "pattern": "^-?\\d+\\.\\d+$" }
       },
       "required": ["universe", "value"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "RealRange": {
@@ -492,7 +492,7 @@
         "max": { "type": "string", "pattern": "^-?\\d+\\.\\d+$" }
       },
       "required": ["universe"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "InterfaceSet": {
@@ -503,7 +503,7 @@
         "name": { "type": "string" }
       },
       "required": ["universe", "name"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "RCTypeSet": {
@@ -514,7 +514,7 @@
         "name": { "type": "string" }
       },
       "required": ["universe", "name"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "StringSet": {
@@ -530,7 +530,7 @@
         "universe": { "const": "string" }
       },
       "required": ["universe"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "StringSingleton": {
@@ -540,7 +540,7 @@
         "value": { "type": "string" }
       },
       "required": ["universe", "value"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "TruthvalueSet": {
@@ -556,7 +556,7 @@
             }
           },
           "required": ["universe", "values"],
-          "additionalProperties": false
+          "unevaluatedProperties": false
         },
         { "$ref": "#/$defs/TruthvalueSingleton" }
       ]
@@ -570,7 +570,7 @@
         "value": { "$ref": "#/$defs/Truthvalue" }
       },
       "required": ["universe", "value"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Truthvalue": {
@@ -596,7 +596,7 @@
         "namespace": { "type": "string" }
       },
       "required": ["baseName", "labels"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "CanonicalName": {
@@ -606,7 +606,7 @@
         "namespace": { "type": "string" }
       },
       "required": ["name"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Declaration": {
@@ -647,7 +647,7 @@
         }
       },
       "required": ["kind", "name", "properties"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "PropertyDeclaration": {
@@ -657,7 +657,7 @@
         "type": { "$ref": "#/$defs/ValueSet" }
       },
       "required": ["name", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Conformance": {
@@ -670,7 +670,7 @@
         }
       },
       "required": ["interface", "fulfillments"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Fulfillment": {
@@ -680,7 +680,7 @@
         "implementation": { "$ref": "#/$defs/FunctionName" }
       },
       "required": ["requirement", "implementation"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "DispatchTableEntry": {
@@ -691,7 +691,7 @@
         "implementation": { "$ref": "#/$defs/CanonicalName" }
       },
       "required": ["slot", "declaredIn"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "InterfaceDeclaration": {
@@ -706,7 +706,7 @@
         }
       },
       "required": ["kind", "name", "methods"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "FunctionSignature": {
@@ -726,7 +726,7 @@
         }
       },
       "required": ["baseName", "labels", "parameters", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "Parameter": {
@@ -736,7 +736,7 @@
         "type": { "$ref": "#/$defs/ValueSet" }
       },
       "required": ["name", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     },
 
     "FunctionDeclaration": {
@@ -762,7 +762,7 @@
         }
       },
       "required": ["kind", "body", "baseName", "labels", "parameters", "type"],
-      "additionalProperties": false
+      "unevaluatedProperties": false
     }
   }
 }

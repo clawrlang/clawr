@@ -515,12 +515,12 @@
 
     "StringSet": {
       "oneOf": [
-        { "$ref": "#/$defs/UnlimitedString" },
+        { "$ref": "#/$defs/UnconstrainedString" },
         { "$ref": "#/$defs/StringSingleton" }
       ]
     },
 
-    "UnlimitedString": {
+    "UnconstrainedString": {
       "type": "object",
       "properties": {
         "universe": { "const": "string" }

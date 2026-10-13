@@ -32,7 +32,7 @@
         { "$ref": "#/$defs/FunctionCallStatement" },
         { "$ref": "#/$defs/Release" },
         { "$ref": "#/$defs/Return" },
-        { "$ref": "#/$defs/SelfAssign" },
+        { "$ref": "#/$defs/SelfAssignment" },
         { "$ref": "#/$defs/VariableDeclaration" }
       ]
     },
@@ -108,27 +108,25 @@
       "additionalProperties": false
     },
 
-    "SelfAssign": {
+    "SelfAssignment": {
       "type": "object",
       "properties": {
         "kind": { "const": "SELF_ASSIGN" },
-        "value": { "$ref": "#/$defs/SelfAssignValue" }
+        "value": {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "DATA" },
+            "properties": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/PropertyInitializer" }
+            },
+            "type": { "$ref": "#/$defs/RCTypeSet" }
+          },
+          "required": ["kind", "type"],
+          "additionalProperties": false
+        }
       },
       "required": ["kind", "value"],
-      "additionalProperties": false
-    },
-
-    "SelfAssignValue": {
-      "type": "object",
-      "properties": {
-        "kind": { "const": "DATA" },
-        "properties": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/PropertyInitializer" }
-        },
-        "type": { "$ref": "#/$defs/RCTypeSet" }
-      },
-      "required": ["kind", "type"],
       "additionalProperties": false
     },
 

@@ -12,7 +12,9 @@ describe('DataDeclaration', () => {
                 {
                     ...util.somePropertyDeclConfig,
                     name: 'property2',
-                    domain: util.spannedDomain(TruthvalueSet.unconstrained()),
+                    type: util.spannedTypeConstraint(
+                        TruthvalueSet.unconstrained(),
+                    ),
                 },
             ],
         })
@@ -25,7 +27,7 @@ describe('DataDeclaration', () => {
                 properties: [
                     {
                         name: 'property1',
-                        domain: {
+                        type: {
                             universe: 'integer',
                             min: undefined,
                             max: undefined,
@@ -33,7 +35,7 @@ describe('DataDeclaration', () => {
                     },
                     {
                         name: 'property2',
-                        domain: {
+                        type: {
                             universe: 'truthvalue',
                             values: ['false', 'ambiguous', 'true'],
                         },

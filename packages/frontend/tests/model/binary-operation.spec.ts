@@ -21,8 +21,8 @@ describe('BinaryOperation', () => {
                         right: util.truthvalueLiteral(right),
                         span: util.someCodeSpan,
                     })
-                    test('domain', () => {
-                        const result = expr.domain(util.newSemanticContext())
+                    test('type', () => {
+                        const result = expr.type(util.newSemanticContext())
                         expect(
                             result.isSuccess || result.error.errors,
                         ).toBeTrue()
@@ -60,8 +60,8 @@ describe('BinaryOperation', () => {
                         right: util.truthvalueLiteral(right),
                         span: util.someCodeSpan,
                     })
-                    test('domain', () => {
-                        const result = expr.domain(util.newSemanticContext())
+                    test('type', () => {
+                        const result = expr.type(util.newSemanticContext())
                         expect(
                             result.isSuccess || result.error.errors,
                         ).toBeTrue()
@@ -93,8 +93,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(2),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     values: ['true'],
@@ -116,8 +116,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(2),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     values: ['false'],
@@ -139,8 +139,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(2),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     values: ['false'],
@@ -162,8 +162,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(2),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     values: ['true'],
@@ -185,8 +185,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(2),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     values: ['false'],
@@ -208,8 +208,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(2),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     values: ['true'],
@@ -233,8 +233,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(3),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     min: 5n,
@@ -260,8 +260,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(3),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     min: -1n,
@@ -287,8 +287,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(3),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     min: 6n,
@@ -314,8 +314,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(3),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     min: 7n,
@@ -342,8 +342,8 @@ describe('BinaryOperation', () => {
                     right: util.integerLiteral(3),
                     span: util.someCodeSpan,
                 })
-                test('domain', () => {
-                    const result = expr.domain(util.newSemanticContext())
+                test('type', () => {
+                    const result = expr.type(util.newSemanticContext())
                     expect(result.isSuccess || result.error.errors).toBeTrue()
                     expect(result.isSuccess && result.value).toMatchObject({
                         min: 0n,
@@ -370,8 +370,8 @@ describe('BinaryOperation', () => {
                 right: util.integerLiteral(3),
                 span: util.someCodeSpan,
             })
-            test('domain', () => {
-                const result = expr.domain(util.newSemanticContext())
+            test('type', () => {
+                const result = expr.type(util.newSemanticContext())
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value).toMatchObject({
                     min: 8n,

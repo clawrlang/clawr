@@ -1,4 +1,4 @@
-import { Context, ContextWithDomain, Expression, isStorage } from '@/model'
+import { Context, ContextWithType, Expression, isStorage } from '@/model'
 import { AnyIsolationLevel } from '@/model/isolation-level'
 import { PropertyReference } from '@/model/property-reference'
 import { RCTypeSet, ValueSet } from '@/model/value-set'
@@ -38,23 +38,21 @@ export class Retain implements Expression {
         return this.value.isolationLevel(context)
     }
 
-    domain(context: ContextWithDomain): SemanticResult<ValueSet> {
-        return this.value.domain(context)
+    type(context: ContextWithType): SemanticResult<ValueSet> {
+        return this.value.type(context)
     }
 
-    currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
+    currentValue(context: ContextWithType): SemanticResult<ValueSet> {
         return this.value.currentValue(context)
     }
 
-    toCIRExpression(
-        context: ContextWithDomain,
-    ): SemanticResult<cir.Expression> {
+    toCIRExpression(context: ContextWithType): SemanticResult<cir.Expression> {
         const objectResult = this.value.toCIRExpression(context)
         if (objectResult.isError) return objectResult
         return Result.value({
             kind: 'RETAIN' as const,
             object: objectResult.value,
-            domain: this.valueSet.toCIR(),
+            type: this.valueSet.toCIR(),
         })
     }
 }

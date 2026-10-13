@@ -10,7 +10,7 @@ describe('TruthvalueLiteral', () => {
             const result = literal.toCIRExpression()
             expect(result.isSuccess && result.value).toMatchObject({
                 kind: 'TRUTHVALUE_LITERAL',
-                domain: { value: input },
+                type: { value: input },
             })
         })
 

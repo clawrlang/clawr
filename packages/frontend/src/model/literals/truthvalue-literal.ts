@@ -29,19 +29,19 @@ export class TruthValueLiteral<Value extends truthvalue> implements Expression {
         return Result.value(this.value)
     }
 
-    domain(): SuccessResult<ValueSet> {
+    type(): SuccessResult<ValueSet> {
         return Result.value(this.value)
     }
 
     toCIRExpression(): SuccessResult<
         cir.Expression & { kind: 'TRUTHVALUE_LITERAL' }
     > {
-        const domain = this.value.toCIR()
-        if (!('value' in domain)) throw new Error('expected singleton domain')
+        const type = this.value.toCIR()
+        if (!('value' in type)) throw new Error('expected singleton type')
 
         return Result.value({
             kind: 'TRUTHVALUE_LITERAL',
-            domain,
+            type,
         })
     }
 

@@ -45,10 +45,10 @@ export class VariableReference implements Expression {
         return Result.value(variableResult.value.isolationLevel)
     }
 
-    domain(context: Context): SemanticResult<ValueSet> {
+    type(context: Context): SemanticResult<ValueSet> {
         const variableResult = this.lookupInScope(context)
         if (variableResult.isError) return variableResult
-        return Result.value(variableResult.value.domain)
+        return Result.value(variableResult.value.type)
     }
 
     currentValue(context: Context): SemanticResult<ValueSet> {
@@ -73,7 +73,7 @@ export class VariableReference implements Expression {
     ): SemanticResult<Extract<cir.Expression, { kind: 'VARIABLE_REF' }>> {
         const variableResult = this.lookupInScope(context)
         if (variableResult.isError) return variableResult
-        const valueResult = this.domain(context)
+        const valueResult = this.type(context)
         if (valueResult.isError) return valueResult
         context.highlightRecorder?.record(
             'variable',
@@ -83,7 +83,7 @@ export class VariableReference implements Expression {
         return Result.value({
             kind: 'VARIABLE_REF' as const,
             name: this.name,
-            domain: valueResult.value.toCIR(),
+            type: valueResult.value.toCIR(),
         })
     }
 

@@ -11,43 +11,43 @@ startBlock:
           kind: ADDITION
           left:
             kind: INTEGER_LITERAL
-            domain:
+            type:
               universe: integer
               value: '4'
           right:
             kind: INTEGER_LITERAL
-            domain:
+            type:
               universe: integer
               value: '2'
-          domain:
+          type:
             universe: integer
             value: '6'
         right:
           kind: MODULUS
           left:
             kind: INTEGER_LITERAL
-            domain:
+            type:
               universe: integer
               value: '37'
           right:
             kind: INTEGER_LITERAL
-            domain:
+            type:
               universe: integer
               value: '10'
-          domain:
+          type:
             universe: integer
             boxed: true
             min: '0'
             max: '100'
-        domain:
+        type:
           universe: integer
           boxed: true
           min: '0'
           max: '100'
-      domain:
+      type:
         universe: integer
         boxed: true
-    domain:
+    type:
       universe: integer
       boxed: true
   - kind: CALL
@@ -57,7 +57,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ0
-        domain:
+        type:
           universe: integer
           boxed: true
   - kind: RELEASE

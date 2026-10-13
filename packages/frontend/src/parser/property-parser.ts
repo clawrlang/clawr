@@ -2,12 +2,12 @@ import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { Property } from '@/model/data-declaration'
 import { Context } from '@/parser'
-import { DomainParser } from '@/parser/domain-parser'
 import { ExpressionParser } from '@/parser/expression-parser'
 import {
     SemanticsKeyword,
     SemanticsKeywordParser,
 } from '@/parser/semantics-keyword-parser'
+import { TypeConstraintParser } from '@/parser/type-constraint-parser'
 
 export class PropertyParser {
     private constructor(private context: Context) {}
@@ -23,7 +23,7 @@ export class PropertyParser {
         const propertyName = propertyNameToken.identifier
 
         stream.expect('PUNCTUATION', ':')
-        const domain = DomainParser.create(this.context).parse(stream)
+        const type = TypeConstraintParser.create(this.context).parse(stream)
 
         let defaultValue: Expression | undefined
         if (stream.isNext('PUNCTUATION', '=')) {
@@ -35,7 +35,7 @@ export class PropertyParser {
             name: propertyName,
             isImmutable: keyword.isImmutable,
             isolationLevel: keyword.isolationLevel,
-            domain,
+            type,
             defaultValue,
         }
     }

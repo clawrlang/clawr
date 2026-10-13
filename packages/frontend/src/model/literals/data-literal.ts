@@ -1,4 +1,4 @@
-import { Context, ContextWithDomain, Expression } from '@/model'
+import { Context, ContextWithType, Expression } from '@/model'
 import { FunctionCall } from '@/model/function-call'
 import { UNIQUE } from '@/model/isolation-level'
 import { TypeName } from '@/model/type-name'
@@ -35,19 +35,19 @@ export class DataLiteral implements Expression {
         return Result.value(UNIQUE)
     }
 
-    currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
-        const explicitDomain = context.explicitDomain
-        if (!(explicitDomain instanceof RCTypeSet))
+    currentValue(context: ContextWithType): SemanticResult<ValueSet> {
+        const explicitType = context.explicitType
+        if (!(explicitType instanceof RCTypeSet))
             return SemanticErrorResult.failure(
                 'Data Literal without explicit value set is not supported',
                 this.span,
             )
-        const dataDecl = context.scope.dataDeclaration(explicitDomain.type)
-        const objectDecl = context.scope.objectDeclaration(explicitDomain.type)
+        const dataDecl = context.scope.dataDeclaration(explicitType.type)
+        const objectDecl = context.scope.objectDeclaration(explicitType.type)
         const decl = dataDecl ?? objectDecl
         if (!decl)
             return SemanticErrorResult.failure(
-                `DataLiteral.currentValue: type ${explicitDomain.type.name} not found in scope`,
+                `DataLiteral.currentValue: type ${explicitType.type.name} not found in scope`,
                 this.span,
             )
 
@@ -59,12 +59,12 @@ export class DataLiteral implements Expression {
                 )
                 if (!propertyDeclaration)
                     return SemanticErrorResult.failure(
-                        `DataLiteral.currentValue: property ${property.name} not found on type ${explicitDomain.type.name}`,
+                        `DataLiteral.currentValue: property ${property.name} not found on type ${explicitType.type.name}`,
                         this.span,
                     )
                 return property.value.currentValue({
                     ...context,
-                    explicitDomain: propertyDeclaration.domain,
+                    explicitType: propertyDeclaration.type,
                 })
             }),
         )
@@ -83,11 +83,11 @@ export class DataLiteral implements Expression {
         )
     }
 
-    domain(context: Context & { type: TypeName }): SemanticResult<ValueSet> {
+    type(context: Context & { type: TypeName }): SemanticResult<ValueSet> {
         const decl = context.scope.dataDeclaration(context.type)
         if (!decl)
             return SemanticErrorResult.failure(
-                `DataLiteral.domain: type ${context.type.name} not found in scope`,
+                `DataLiteral.type: type ${context.type.name} not found in scope`,
                 this.span,
             )
         return Result.value(
@@ -96,7 +96,7 @@ export class DataLiteral implements Expression {
                 properties: Object.fromEntries(
                     decl.properties.map((property) => [
                         property.name,
-                        property.domain,
+                        property.type,
                     ]),
                 ),
             }),
@@ -104,10 +104,10 @@ export class DataLiteral implements Expression {
     }
 
     toCIRExpression(
-        context: ContextWithDomain,
+        context: ContextWithType,
     ): SemanticResult<cir.Expression & { kind: 'ALLOCATION' }> {
-        const explicitDomain = context.explicitDomain
-        if (!(explicitDomain instanceof RCTypeSet))
+        const explicitType = context.explicitType
+        if (!(explicitType instanceof RCTypeSet))
             return SemanticErrorResult.failure(
                 'DataLiteral.toCIRExpression: data literal without explicit type',
                 this.span,
@@ -119,11 +119,11 @@ export class DataLiteral implements Expression {
             )
 
         const targetType =
-            context.scope.dataDeclaration(explicitDomain.type) ??
-            context.scope.objectDeclaration(explicitDomain.type)
+            context.scope.dataDeclaration(explicitType.type) ??
+            context.scope.objectDeclaration(explicitType.type)
         if (!targetType)
             return SemanticErrorResult.failure(
-                `DataLiteral.toCIRExpression: target type ${explicitDomain.type.name} not found in scope`,
+                `DataLiteral.toCIRExpression: target type ${explicitType.type.name} not found in scope`,
                 this.span,
             )
         const propertyDeclarations = new Map(
@@ -137,12 +137,12 @@ export class DataLiteral implements Expression {
                 )
                 if (!propertyDeclaration)
                     return SemanticErrorResult.failure(
-                        `Property ${property.name} not found on type ${explicitDomain.type.canonical()}`,
+                        `Property ${property.name} not found on type ${explicitType.type.canonical()}`,
                         this.span,
                     )
-                const nestedContext: ContextWithDomain = {
+                const nestedContext: ContextWithType = {
                     ...context,
-                    explicitDomain: propertyDeclaration.domain,
+                    explicitType: propertyDeclaration.type,
                     isolationLevel: propertyDeclaration.isolationLevel,
                 }
                 const valueResult =
@@ -161,9 +161,9 @@ export class DataLiteral implements Expression {
             kind: 'ALLOCATION',
             isolationLevel: context.isolationLevel!,
             properties,
-            domain: {
+            type: {
                 universe: 'rc-type',
-                ...explicitDomain.type.toCIR(),
+                ...explicitType.type.toCIR(),
             },
         } satisfies cir.Expression)
     }

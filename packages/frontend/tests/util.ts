@@ -1,9 +1,9 @@
 import { Context, Expression } from '@/model'
-import { decorateDomain } from '@/model/domain-declaration'
 import { ISOLATED } from '@/model/isolation-level'
 import { IntegerLiteral, TruthValueLiteral } from '@/model/literals'
 import { PropertyReference } from '@/model/property-reference'
 import { Scope } from '@/model/scope'
+import { decorateTypeConstraint } from '@/model/type-constraint-declaration'
 import { TypeName } from '@/model/type-name'
 import { IntegerSet, truthvalue, ValueSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
@@ -24,14 +24,14 @@ export const someCodeSpan = {
 export const someIntegerVariable = {
     isImmutable: false,
     isolationLevel: ISOLATED,
-    domain: IntegerSet.unconstrained(),
+    type: IntegerSet.unconstrained(),
 }
 
 export const somePropertyDeclConfig = {
     name: 'someProperty',
     isImmutable: false,
     isolationLevel: ISOLATED,
-    domain: decorateDomain(IntegerSet.unconstrained(), {
+    type: decorateTypeConstraint(IntegerSet.unconstrained(), {
         span: someCodeSpan,
     }),
 }
@@ -55,7 +55,7 @@ export const someParameterDeclConfig = {
     label: undefined,
     isImmutable: true,
     isolationLevel: ISOLATED,
-    domain: spannedDomain(IntegerSet.unconstrained()),
+    type: spannedTypeConstraint(IntegerSet.unconstrained()),
     span: someCodeSpan,
 }
 
@@ -102,6 +102,6 @@ export function truthvalueLiteral(value: truthvalue) {
     return TruthValueLiteral.create({ value, span: someCodeSpan })
 }
 
-export function spannedDomain(domain: ValueSet) {
-    return decorateDomain(domain, { span: someCodeSpan })
+export function spannedTypeConstraint(type: ValueSet) {
+    return decorateTypeConstraint(type, { span: someCodeSpan })
 }

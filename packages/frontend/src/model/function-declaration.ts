@@ -1,5 +1,4 @@
 import { Context, Declaration, Expression, Statement } from '@/model'
-import { DomainDeclaration } from '@/model/domain-declaration'
 import { FunctionName } from '@/model/function-name'
 import {
     AnyIsolationLevel,
@@ -12,6 +11,7 @@ import { Parameter } from '@/model/parameter'
 import { ReturnStatement } from '@/model/return-statement'
 import { Scope } from '@/model/scope'
 import { SelfAssignment } from '@/model/self-assignment'
+import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { RCTypeSet, ValueSet } from '@/model/value-set'
 import { mapFilter } from '@/tools/map-filter'
 import { Result } from '@/tools/result'
@@ -24,7 +24,7 @@ export class FunctionDeclaration implements Declaration {
         public readonly parameters: Parameter[],
         public readonly result:
             | {
-                  domain: DomainDeclaration
+                  type: TypeConstraintDeclaration
                   isolationLevel: IsolationLevel | UNIQUE
               }
             | undefined,
@@ -43,7 +43,7 @@ export class FunctionDeclaration implements Declaration {
         parameters: Parameter[]
         result:
             | {
-                  domain: DomainDeclaration
+                  type: TypeConstraintDeclaration
                   isolationLevel: IsolationLevel | UNIQUE
               }
             | undefined
@@ -77,8 +77,8 @@ export class FunctionDeclaration implements Declaration {
             )
     }
 
-    domain(context: Context): SemanticResult<ValueSet | undefined> {
-        if (this.result) return Result.value(this.result.domain)
+    type(context: Context): SemanticResult<ValueSet | undefined> {
+        if (this.result) return Result.value(this.result.type)
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.currentValue(
                 this.bodyContext(context),
@@ -114,9 +114,9 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const domainResult = this.resultDomain(bodyContext)
-        if (domainResult.isError) return domainResult
-        const domain = domainResult.value
+        const returnTypeResult = this.returnType(bodyContext)
+        if (returnTypeResult.isError) return returnTypeResult
+        const type = returnTypeResult.value
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -124,9 +124,9 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                domain: param.domain!.toCIR(),
+                type: param.type!.toCIR(),
             })),
-            domain,
+            type,
             body: bodyContext.scope.emitted,
         }
         context.scope.rootScope.emitted.push(cirFuncDecl)
@@ -161,9 +161,9 @@ export class FunctionDeclaration implements Declaration {
         )
             bodyContext.scope.releaseVariables()
 
-        const domainResult = this.resultDomain(bodyContext)
-        if (domainResult.isError) return domainResult
-        const domain = domainResult.value
+        const typeResult = this.returnType(bodyContext)
+        if (typeResult.isError) return typeResult
+        const type = typeResult.value
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
@@ -171,21 +171,19 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                domain: param.domain!.toCIR(),
+                type: param.type!.toCIR(),
             })),
-            domain,
+            type,
             body: bodyContext.scope.emitted,
         }
 
         return Result.value(cirFuncDecl)
     }
 
-    emitInitializer(
-        context: Context,
-    ): SemanticResult<
+    emitInitializer(context: Context): SemanticResult<
         cir.Declaration & {
             kind: 'FUNCTION_DECL'
-            domain: { universe: 'void' }
+            type: { universe: 'void' }
         }
     > {
         const bodyContextResult = this.makeBodyContext(context)
@@ -222,9 +220,9 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                domain: param.domain!.toCIR(),
+                type: param.type!.toCIR(),
             })),
-            domain: { universe: 'void' } as const,
+            type: { universe: 'void' } as const,
             body: bodyContext.scope.emitted,
         } satisfies cir.Declaration
 
@@ -257,10 +255,10 @@ export class FunctionDeclaration implements Declaration {
         }
 
         const self = context.scope.selfVariable()
-        const explicitDomain =
+        const explicitType =
             this.implementation.kind === 'implicit-return' && self
                 ? RCTypeSet.create({
-                      type: (self.domain as RCTypeSet).type,
+                      type: (self.type as RCTypeSet).type,
                   })
                 : undefined
 
@@ -279,11 +277,11 @@ export class FunctionDeclaration implements Declaration {
                 // TODO: ??
                 this.implementation.expression.currentValue({
                     ...contextWithParameters,
-                    explicitDomain,
+                    explicitType: explicitType,
                 }),
             ])
             if (collected.isError) return collected
-            const [isolationLevel, domain] = collected.value
+            const [isolationLevel, type] = collected.value
             if (isolationLevel === UNKNOWN)
                 return SemanticErrorResult.failure(
                     'Returning UNKNOWN value',
@@ -292,7 +290,7 @@ export class FunctionDeclaration implements Declaration {
             const bodyContext = this.bodyContext({
                 ...context,
                 scope: parameterScopeResult.value,
-                calleeResult: { isolationLevel, domain },
+                calleeResult: { isolationLevel, type },
             })
             return Result.value(bodyContext)
         }
@@ -301,19 +299,19 @@ export class FunctionDeclaration implements Declaration {
     private scopeAddingParameters(context: Context): SemanticResult<Scope> {
         const parameterScope = context.scope.createChildScope()
         for (const param of this.parameters) {
-            const domainResult = param.defaultValue
+            const typeResult = param.defaultValue
                 ? param.defaultValue.currentValue(context)
-                : param.domain
-                  ? Result.value(param.domain)
+                : param.type
+                  ? Result.value(param.type)
                   : SemanticErrorResult.failure(
                         `Parameter ${param.varName} must have either an explicit value set or a default value.`,
                         param.span,
                     )
-            if (domainResult.isError) return domainResult
+            if (typeResult.isError) return typeResult
             parameterScope.addVariableDeclaration(param.varName, {
                 isImmutable: param.isImmutable,
                 isolationLevel: param.isolationLevel,
-                domain: domainResult.value,
+                type: typeResult.value,
             })
             context.highlightRecorder?.record('parameter', param.span, [
                 'declaration',
@@ -323,16 +321,15 @@ export class FunctionDeclaration implements Declaration {
         return Result.value(parameterScope)
     }
 
-    private resultDomain(
+    private returnType(
         context: Context,
     ): SemanticResult<cir.ValueSet | { universe: 'void' }> {
-        if (this.result) return Result.value(this.result.domain.toCIR())
+        if (this.result) return Result.value(this.result.type.toCIR())
         if (this.implementation.kind === 'body')
             return Result.value({ universe: 'void' })
-        const domainResult =
-            this.implementation.expression.currentValue(context)
-        if (domainResult.isError) return domainResult
-        return Result.value(domainResult.value.toCIR())
+        const typeResult = this.implementation.expression.currentValue(context)
+        if (typeResult.isError) return typeResult
+        return Result.value(typeResult.value.toCIR())
     }
 
     private bodyContext(context: Context): Context {

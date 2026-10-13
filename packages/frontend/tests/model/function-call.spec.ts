@@ -73,7 +73,7 @@ describe('FunctionCall', () => {
             arguments: [
                 {
                     kind: 'INTEGER_LITERAL',
-                    domain: { value: '42' },
+                    type: { value: '42' },
                 },
             ],
         })
@@ -88,7 +88,7 @@ describe('FunctionCall', () => {
                     baseName: 'foo',
                     result: {
                         isolationLevel: ISOLATED,
-                        domain: util.spannedDomain(
+                        type: util.spannedTypeConstraint(
                             RCTypeSet.create({
                                 type: util.simpleTypeName('MyData'),
                             }),
@@ -125,7 +125,7 @@ describe('FunctionCall', () => {
             context.scope.addVariableDeclaration('value', {
                 isImmutable: true,
                 isolationLevel: SHARED,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyData'),
                 }),
             })
@@ -168,7 +168,7 @@ describe('FunctionCall', () => {
                     kind: 'BOX',
                     expression: {
                         kind: 'INTEGER_LITERAL',
-                        domain: { value: '1' },
+                        type: { value: '1' },
                     },
                 },
             },
@@ -207,14 +207,14 @@ describe('FunctionCall', () => {
             {
                 kind: 'VARIABLE_DECL',
                 name: expect.stringMatching(/^__tempˇ\d+$/),
-                domain: { universe: 'truthvalue', value: 'true' },
+                type: { universe: 'truthvalue', value: 'true' },
                 initialValue: {
                     kind: 'BOX',
                     expression: {
                         kind: 'TRUTHVALUE_LITERAL',
-                        domain: { universe: 'truthvalue', value: 'true' },
+                        type: { universe: 'truthvalue', value: 'true' },
                     },
-                    domain: { universe: 'truthvalue', value: 'true' },
+                    type: { universe: 'truthvalue', value: 'true' },
                 },
             },
             {
@@ -316,7 +316,7 @@ describe('FunctionCall', () => {
         )
         context.scope.addVariableDeclaration('x', {
             ...util.someIntegerVariable,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('Object'),
             }),
         })

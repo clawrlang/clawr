@@ -5,7 +5,7 @@ declarations:
     name: Super
     properties:
       - name: property
-        domain:
+        type:
           universe: integer
           min: '0'
           max: '100'
@@ -14,7 +14,7 @@ declarations:
         baseName: f
         labels: []
         parameters: []
-        domain:
+        type:
           universe: integer
           min: '0'
           max: '100'
@@ -25,11 +25,11 @@ declarations:
               object:
                 kind: VARIABLE_REF
                 name: self
-                domain:
+                type:
                   universe: rc-type
                   name: Super
               property: property
-              domain:
+              type:
                 universe: integer
                 min: '0'
                 max: '100'
@@ -40,7 +40,7 @@ declarations:
           - property
         parameters:
           - name: property
-            domain:
+            type:
               universe: integer
               min: '0'
               max: '100'
@@ -48,7 +48,7 @@ declarations:
           - kind: SELF_ASSIGN
             value:
               kind: DATA
-              domain:
+              type:
                 universe: rc-type
                 name: Super
               properties:
@@ -56,18 +56,18 @@ declarations:
                   value:
                     kind: VARIABLE_REF
                     name: property
-                    domain:
+                    type:
                       universe: integer
                       min: '0'
                       max: '100'
-        domain:
+        type:
           universe: void
     dispatchTable:
       - slot:
           baseName: f
           labels: []
           parameters: []
-          domain:
+          type:
             universe: integer
             min: '0'
             max: '100'
@@ -81,7 +81,7 @@ declarations:
       name: Super
     properties:
       - name: property
-        domain:
+        type:
           universe: integer
           min: '0'
           max: '100'
@@ -90,7 +90,7 @@ declarations:
         baseName: f
         labels: []
         parameters: []
-        domain:
+        type:
           universe: integer
           min: '43'
           max: '43'
@@ -101,11 +101,11 @@ declarations:
               object:
                 kind: VARIABLE_REF
                 name: self
-                domain:
+                type:
                   universe: rc-type
                   name: Super
               property: property
-              domain:
+              type:
                 universe: integer
                 min: '0'
                 max: '100'
@@ -122,10 +122,10 @@ declarations:
                 - name: property
                   value:
                     kind: INTEGER_LITERAL
-                    domain:
+                    type:
                       universe: integer
                       value: '43'
-              domain:
+              type:
                 universe: rc-type
                 name: Sub1
           - kind: CALL
@@ -133,7 +133,7 @@ declarations:
               object:
                 kind: VARIABLE_REF
                 name: self
-                domain:
+                type:
                   universe: rc-type
                   name: Super
               dispatch: direct
@@ -143,17 +143,17 @@ declarations:
                 - property
             arguments:
               - kind: INTEGER_LITERAL
-                domain:
+                type:
                   universe: integer
                   value: '42'
-        domain:
+        type:
           universe: void
     dispatchTable:
       - slot:
           baseName: f
           labels: []
           parameters: []
-          domain:
+          type:
             universe: integer
             min: '0'
             max: '100'
@@ -176,7 +176,7 @@ declarations:
           - kind: SELF_ASSIGN
             value:
               kind: DATA
-              domain:
+              type:
                 universe: rc-type
                 name: Sub2
           - kind: CALL
@@ -184,7 +184,7 @@ declarations:
               object:
                 kind: VARIABLE_REF
                 name: self
-                domain:
+                type:
                   universe: rc-type
                   name: Super
               dispatch: direct
@@ -194,17 +194,17 @@ declarations:
                 - property
             arguments:
               - kind: INTEGER_LITERAL
-                domain:
+                type:
                   universe: integer
                   value: '42'
-        domain:
+        type:
           universe: void
     dispatchTable:
       - slot:
           baseName: f
           labels: []
           parameters: []
-          domain:
+          type:
             universe: integer
             min: '0'
             max: '100'
@@ -215,13 +215,13 @@ declarations:
 startBlock:
   - kind: VARIABLE_DECL
     name: obj1
-    domain:
+    type:
       universe: rc-type
       name: Sub1
     initialValue:
       kind: ALLOCATION
       isolationLevel: ISOLATED
-      domain:
+      type:
         universe: rc-type
         name: Sub1
   - kind: CALL
@@ -234,18 +234,18 @@ startBlock:
       object:
         kind: VARIABLE_REF
         name: obj1
-        domain:
+        type:
           universe: rc-type
           name: Sub1
   - kind: VARIABLE_DECL
     name: obj2
-    domain:
+    type:
       universe: rc-type
       name: Sub2
     initialValue:
       kind: ALLOCATION
       isolationLevel: ISOLATED
-      domain:
+      type:
         universe: rc-type
         name: Sub2
   - kind: CALL
@@ -258,7 +258,7 @@ startBlock:
       object:
         kind: VARIABLE_REF
         name: obj2
-        domain:
+        type:
           universe: rc-type
           name: Sub2
   - kind: VARIABLE_DECL
@@ -271,7 +271,7 @@ startBlock:
           object:
             kind: VARIABLE_REF
             name: obj1
-            domain:
+            type:
               universe: rc-type
               name: Sub1
           dispatch: direct
@@ -279,14 +279,14 @@ startBlock:
           baseName: f
           labels: []
         arguments: []
-        domain:
+        type:
           universe: integer
           min: '0'
           max: '100'
-      domain:
+      type:
         universe: integer
         boxed: true
-    domain:
+    type:
       universe: integer
       boxed: true
   - kind: CALL
@@ -296,7 +296,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ0
-        domain:
+        type:
           universe: integer
           boxed: true
   - kind: RELEASE
@@ -313,7 +313,7 @@ startBlock:
           object:
             kind: VARIABLE_REF
             name: obj2
-            domain:
+            type:
               universe: rc-type
               name: Super
           dispatch: inherited
@@ -321,14 +321,14 @@ startBlock:
           baseName: f
           labels: []
         arguments: []
-        domain:
+        type:
           universe: integer
           min: '0'
           max: '100'
-      domain:
+      type:
         universe: integer
         boxed: true
-    domain:
+    type:
       universe: integer
       boxed: true
   - kind: CALL
@@ -338,7 +338,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ1
-        domain:
+        type:
           universe: integer
           boxed: true
   - kind: RELEASE

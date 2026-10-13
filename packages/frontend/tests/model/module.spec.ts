@@ -33,11 +33,11 @@ describe('Module', () => {
                     arguments: [
                         {
                             kind: 'INTEGER_LITERAL',
-                            domain: { value: '1' },
+                            type: { value: '1' },
                         },
                         {
                             kind: 'INTEGER_LITERAL',
-                            domain: { value: '2' },
+                            type: { value: '2' },
                         },
                     ],
                 },
@@ -77,7 +77,9 @@ describe('Module', () => {
                     ...util.someVariableDeclConfig,
                     isImmutable: true,
                     name: 'x',
-                    domain: util.spannedDomain(IntegerSet.unconstrained()),
+                    type: util.spannedTypeConstraint(
+                        IntegerSet.unconstrained(),
+                    ),
                     initialValue: util.integerLiteral(42),
                 }),
             ],
@@ -87,7 +89,7 @@ describe('Module', () => {
         expect(context.scope.variableDeclaration('x')).toEqual({
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: IntegerSet.range({ min: 42n, max: 42n }),
+            type: IntegerSet.range({ min: 42n, max: 42n }),
         })
     })
 
@@ -102,7 +104,7 @@ describe('Module', () => {
                         {
                             ...util.somePropertyDeclConfig,
                             name: 'property2',
-                            domain: util.spannedDomain(
+                            type: util.spannedTypeConstraint(
                                 TruthvalueSet.unconstrained(),
                             ),
                         },
@@ -122,10 +124,8 @@ describe('Module', () => {
                 { name: 'property2', isImmutable: false },
             ],
         })
-        expect(myDataDeclaration?.properties[0].domain).toBeInstanceOf(
-            IntegerSet,
-        )
-        expect(myDataDeclaration?.properties[1].domain).toBeInstanceOf(
+        expect(myDataDeclaration?.properties[0].type).toBeInstanceOf(IntegerSet)
+        expect(myDataDeclaration?.properties[1].type).toBeInstanceOf(
             TruthvalueSet,
         )
     })

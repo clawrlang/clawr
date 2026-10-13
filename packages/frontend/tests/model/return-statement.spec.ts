@@ -16,7 +16,7 @@ describe('ReturnStatement', () => {
         const context: Context = {
             ...util.newSemanticContext(),
             calleeResult: {
-                domain: IntegerSet.unconstrained(),
+                type: IntegerSet.unconstrained(),
                 isolationLevel: ISOLATED,
             },
         }
@@ -24,7 +24,7 @@ describe('ReturnStatement', () => {
 
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'RETURN',
-            value: { domain: { value: '42' } },
+            value: { type: { value: '42' } },
         })
     })
 
@@ -49,7 +49,7 @@ describe('ReturnStatement', () => {
         const context: Context = {
             ...util.newSemanticContext(),
             calleeResult: {
-                domain: TruthvalueSet.unconstrained(),
+                type: TruthvalueSet.unconstrained(),
                 isolationLevel: ISOLATED,
             },
         }
@@ -69,7 +69,7 @@ describe('ReturnStatement', () => {
         context.scope.addVariableDeclaration('x', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyData'),
             }),
         })
@@ -81,7 +81,7 @@ describe('ReturnStatement', () => {
         const result = returnStatement.emitStatement({
             ...context,
             calleeResult: {
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyData'),
                 }),
                 isolationLevel: SHARED,

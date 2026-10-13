@@ -12,7 +12,7 @@ describe('Type declaration', () => {
                 properties: [
                     {
                         name: 'property',
-                        domain: {
+                        type: {
                             universe: 'integer',
                             min: '0',
                             max: '100',
@@ -33,7 +33,7 @@ describe('Type declaration', () => {
                 properties: [
                     {
                         name: 'property',
-                        domain: {
+                        type: {
                             universe: 'integer',
                             min: '0',
                             max: '100',
@@ -61,6 +61,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
+                    type: { universe: 'void' },
                 },
             ],
         }
@@ -83,6 +84,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
+                    type: { universe: 'void' },
                 },
             ],
         }
@@ -102,6 +104,7 @@ describe('Type declaration', () => {
             labels: [],
             parameters: [],
             body: [],
+            type: { universe: 'void' },
         }
 
         const result = lowerDecl(typeDecl)
@@ -120,7 +123,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    domain: { universe: 'integer' },
+                    type: { universe: 'integer' },
                 },
             ],
             dispatchTable: [
@@ -129,7 +132,7 @@ describe('Type declaration', () => {
                         baseName: 'f',
                         labels: [],
                         parameters: [],
-                        domain: { universe: 'integer' },
+                        type: { universe: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
                     implementation: { name: 'MyType' },
@@ -161,10 +164,10 @@ describe('Type declaration', () => {
                         parameters: [
                             {
                                 name: 'v',
-                                domain: { universe: 'integer' },
+                                type: { universe: 'integer' },
                             },
                         ],
-                        domain: { universe: 'integer' },
+                        type: { universe: 'integer' },
                     },
                     declaredIn: { name: 'MyType' },
                     implementation: { name: 'MyType' },
@@ -194,12 +197,17 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    domain: { universe: 'integer' },
+                    type: { universe: 'integer' },
                 },
             ],
             dispatchTable: [
                 {
-                    slot: { baseName: 'f', labels: [], parameters: [] },
+                    slot: {
+                        baseName: 'f',
+                        labels: [],
+                        parameters: [],
+                        type: { universe: 'void' },
+                    },
                     declaredIn: { name: 'Super' },
                     implementation: { name: 'Sub' },
                 },
@@ -225,7 +233,7 @@ describe('Type declaration', () => {
                     parameters: [
                         {
                             name: 'property',
-                            domain: {
+                            type: {
                                 universe: 'integer',
                                 min: '0',
                                 max: '100',
@@ -243,14 +251,15 @@ describe('Type declaration', () => {
                                         value: {
                                             kind: 'VARIABLE_REF',
                                             name: 'property',
-                                            domain: { universe: 'integer' },
+                                            type: { universe: 'integer' },
                                         },
                                     },
                                 ],
-                                domain: { universe: 'rc-type', name: 'Super' },
+                                type: { universe: 'rc-type', name: 'Super' },
                             },
                         },
                     ],
+                    type: { universe: 'void' },
                 },
             ],
         }

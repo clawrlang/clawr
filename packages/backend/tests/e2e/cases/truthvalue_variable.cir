@@ -3,19 +3,19 @@ $schema: http://clawr.lang/schema/cir/DRAFT-0
 declarations:
   - kind: VARIABLE_DECL
     name: foo
-    domain:
+    type:
       universe: truthvalue
       values:
         - ambiguous
     initialValue:
       kind: TRUTHVALUE_LITERAL
-      domain:
+      type:
         universe: truthvalue
         value: ambiguous
 startBlock:
   - kind: VARIABLE_DECL
     name: __tempˇ0
-    domain:
+    type:
       universe: truthvalue
       boxed: true
       values:
@@ -25,13 +25,13 @@ startBlock:
       expression:
         kind: VARIABLE_REF
         name: foo
-        domain:
+        type:
           universe: truthvalue
           values:
             - 'false'
             - ambiguous
             - 'true'
-      domain:
+      type:
         universe: truthvalue
         boxed: true
         values:
@@ -45,7 +45,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ0
-        domain:
+        type:
           universe: rc-type
           name: TruthvalueBox
           namespace: clawr

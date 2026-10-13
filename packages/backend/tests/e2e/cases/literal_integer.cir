@@ -7,13 +7,13 @@ startBlock:
       kind: BOX
       expression:
         kind: INTEGER_LITERAL
-        domain:
+        type:
           universe: integer
           value: '1'
-      domain:
+      type:
         universe: integer
         boxed: true
-    domain:
+    type:
       universe: integer
       boxed: true
   - kind: CALL
@@ -23,7 +23,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ0
-        domain:
+        type:
           universe: integer
           boxed: true
   - kind: RELEASE

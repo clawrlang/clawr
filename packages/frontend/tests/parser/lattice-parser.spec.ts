@@ -5,14 +5,14 @@ import {
     StringSet,
     TruthvalueSet,
 } from '@/model/value-set'
-import { DomainParser } from '@/parser/domain-parser'
+import { TypeConstraintParser } from '@/parser/type-constraint-parser'
 import { describe, expect, it } from 'bun:test'
 
-describe('DomainParser', () => {
+describe('TypeConstraintParser', () => {
     it('parses unconstrained integer type', () => {
-        const domain = parseDomain('integer')
-        expect(domain).toBeInstanceOf(IntegerSet)
-        expect(domain).toMatchObject({
+        const type = parseTypeConsstraint('integer')
+        expect(type).toBeInstanceOf(IntegerSet)
+        expect(type).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 8 },
@@ -21,9 +21,9 @@ describe('DomainParser', () => {
     })
 
     it('parses integer type with min constraint only', () => {
-        const domain = parseDomain('integer(1...)')
-        expect(domain).toBeInstanceOf(IntegerSet)
-        expect(domain).toMatchObject({
+        const type = parseTypeConsstraint('integer(1...)')
+        expect(type).toBeInstanceOf(IntegerSet)
+        expect(type).toMatchObject({
             min: 1n,
             span: {
                 start: { line: 1, column: 1 },
@@ -33,9 +33,9 @@ describe('DomainParser', () => {
     })
 
     it('parses integer type with (exclusive) max constraint only', () => {
-        const domain = parseDomain('integer(..<10)')
-        expect(domain).toBeInstanceOf(IntegerSet)
-        expect(domain).toMatchObject({
+        const type = parseTypeConsstraint('integer(..<10)')
+        expect(type).toBeInstanceOf(IntegerSet)
+        expect(type).toMatchObject({
             max: 9n,
             span: {
                 start: { line: 1, column: 1 },
@@ -45,9 +45,9 @@ describe('DomainParser', () => {
     })
 
     it('parses integer type with (inclusive) max constraint only', () => {
-        const domain = parseDomain('integer(...10)')
-        expect(domain).toBeInstanceOf(IntegerSet)
-        expect(domain).toMatchObject({
+        const type = parseTypeConsstraint('integer(...10)')
+        expect(type).toBeInstanceOf(IntegerSet)
+        expect(type).toMatchObject({
             max: 10n,
             span: {
                 start: { line: 1, column: 1 },
@@ -57,9 +57,9 @@ describe('DomainParser', () => {
     })
 
     it('parses integer type with min and (inclusive) max constraints', () => {
-        const domain = parseDomain('integer(1...10)')
-        expect(domain).toBeInstanceOf(IntegerSet)
-        expect(domain).toMatchObject({
+        const type = parseTypeConsstraint('integer(1...10)')
+        expect(type).toBeInstanceOf(IntegerSet)
+        expect(type).toMatchObject({
             min: 1n,
             max: 10n,
             span: {
@@ -70,9 +70,9 @@ describe('DomainParser', () => {
     })
 
     it('parses integer type with min and (exclusive) max constraints', () => {
-        const domain = parseDomain('integer(1..<10)')
-        expect(domain).toBeInstanceOf(IntegerSet)
-        expect(domain).toMatchObject({
+        const type = parseTypeConsstraint('integer(1..<10)')
+        expect(type).toBeInstanceOf(IntegerSet)
+        expect(type).toMatchObject({
             min: 1n,
             max: 9n,
             span: {
@@ -83,9 +83,9 @@ describe('DomainParser', () => {
     })
 
     it('parses unconstrained truthvalue type', () => {
-        const domain = parseDomain('truthvalue')
-        expect(domain).toBeInstanceOf(TruthvalueSet)
-        expect(domain).toMatchObject({
+        const type = parseTypeConsstraint('truthvalue')
+        expect(type).toBeInstanceOf(TruthvalueSet)
+        expect(type).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 11 },
@@ -94,9 +94,9 @@ describe('DomainParser', () => {
     })
 
     it('parses truthvalue type with constraints', () => {
-        const domain = parseDomain('truthvalue(true, false)')
-        expect(domain).toBeInstanceOf(TruthvalueSet)
-        expect(domain).toMatchObject({
+        const type = parseTypeConsstraint('truthvalue(true, false)')
+        expect(type).toBeInstanceOf(TruthvalueSet)
+        expect(type).toMatchObject({
             values: ['true', 'false'],
             span: {
                 start: { line: 1, column: 1 },
@@ -106,9 +106,9 @@ describe('DomainParser', () => {
     })
 
     it('parses unconstrained string type', () => {
-        const domain = parseDomain('string')
-        expect(domain).toBeInstanceOf(StringSet)
-        expect(domain).toMatchObject({
+        const type = parseTypeConsstraint('string')
+        expect(type).toBeInstanceOf(StringSet)
+        expect(type).toMatchObject({
             span: {
                 start: { line: 1, column: 1 },
                 end: { line: 1, column: 7 },
@@ -117,9 +117,9 @@ describe('DomainParser', () => {
     })
 
     it('parses rc-types', () => {
-        const domain = parseDomain('MyType')
-        expect(domain).toBeInstanceOf(RCTypeSet)
-        expect(domain).toMatchObject({
+        const type = parseTypeConsstraint('MyType')
+        expect(type).toBeInstanceOf(RCTypeSet)
+        expect(type).toMatchObject({
             type: { name: 'MyType' },
             span: {
                 start: { line: 1, column: 1 },
@@ -129,8 +129,8 @@ describe('DomainParser', () => {
     })
 })
 
-function parseDomain(input: string) {
+function parseTypeConsstraint(input: string) {
     const stream = TokenStream.read(input)
-    const parser = DomainParser.create({})
+    const parser = TypeConstraintParser.create({})
     return parser.parse(stream)
 }

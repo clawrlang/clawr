@@ -63,24 +63,22 @@ export class FunctionCall implements Expression, Statement {
         return decl.resultIsolationLevel(context)
     }
 
-    domain(context: Context): SemanticResult<ValueSet> {
+    type(context: Context): SemanticResult<ValueSet> {
         return this.currentValue(context)
     }
 
     currentValue(context: Context): SemanticResult<ValueSet> {
         if (this.recipient) {
-            const recipientDomainResult = this.recipient.domain(context)
-            if (recipientDomainResult.isError) return recipientDomainResult
-            const recipientDomain = recipientDomainResult.value
-            if (!(recipientDomain instanceof RCTypeSet))
+            const recipientTypeResult = this.recipient.type(context)
+            if (recipientTypeResult.isError) return recipientTypeResult
+            const recipientType = recipientTypeResult.value
+            if (!(recipientType instanceof RCTypeSet))
                 return SemanticErrorResult.failure(
                     'Recipient must be rc-type',
                     this.recipient.span,
                 )
 
-            const typeDecl = context.scope.objectDeclaration(
-                recipientDomain.type,
-            )
+            const typeDecl = context.scope.objectDeclaration(recipientType.type)
             if (!typeDecl)
                 return SemanticErrorResult.failure(
                     'Unknown type',
@@ -94,14 +92,14 @@ export class FunctionCall implements Expression, Statement {
                     this.span,
                 )
 
-            const domainResult = decl.domain(typeDecl.injectSelf(context))
-            if (domainResult.isError) return domainResult
-            if (!domainResult.value)
+            const typeResult = decl.type(typeDecl.injectSelf(context))
+            if (typeResult.isError) return typeResult
+            if (!typeResult.value)
                 return SemanticErrorResult.failure(
                     `Method has no result set: ${this.name.toString()}`,
                     this.span,
                 )
-            return Result.value(domainResult.value)
+            return Result.value(typeResult.value)
         } else {
             if (this.name.toString() === 'copy(of:)') {
                 const valueResult = this.arguments[0].currentValue(context)
@@ -122,14 +120,14 @@ export class FunctionCall implements Expression, Statement {
                     this.span,
                 )
 
-            const domainResult = decl.domain(context)
-            if (domainResult.isError) return domainResult
-            if (!domainResult.value)
+            const typeResult = decl.type(context)
+            if (typeResult.isError) return typeResult
+            if (!typeResult.value)
                 return SemanticErrorResult.failure(
                     `Function declaration has no result set: ${this.name.toString()}`,
                     this.span,
                 )
-            return Result.value(domainResult.value)
+            return Result.value(typeResult.value)
         }
     }
 
@@ -151,10 +149,10 @@ export class FunctionCall implements Expression, Statement {
                 receiver: {
                     dispatch: 'direct',
                     object: recipient as cir.Expression & {
-                        domain: { universe: 'rc-type' | 'interface' }
+                        type: { universe: 'rc-type' | 'interface' }
                     },
                 },
-                domain: value.toCIR(),
+                type: value.toCIR(),
             } satisfies cir.Expression)
         } else {
             const argsResult = SemanticResult.collect([
@@ -169,7 +167,7 @@ export class FunctionCall implements Expression, Statement {
                 kind: 'CALL',
                 name: this.name.toCIR(),
                 arguments: args,
-                domain: value.toCIR(),
+                type: value.toCIR(),
             } satisfies cir.Expression)
         }
     }
@@ -183,16 +181,16 @@ export class FunctionCall implements Expression, Statement {
         const _name = this.name.toCIR()
         if (_name.baseName === 'print') {
             const tempName = context.scope.nextTempVar()
-            const boxDomain = { ...args[0].domain, boxed: true as const }
+            const boxType = { ...args[0].type, boxed: true as const }
             context.scope.emitted.push(
                 {
                     kind: 'VARIABLE_DECL',
                     name: tempName,
-                    domain: boxDomain,
+                    type: boxType,
                     initialValue: {
                         kind: 'BOX',
                         expression: args[0],
-                        domain: boxDomain,
+                        type: boxType,
                     },
                 },
                 {
@@ -202,7 +200,7 @@ export class FunctionCall implements Expression, Statement {
                         {
                             kind: 'VARIABLE_REF',
                             name: tempName,
-                            domain: boxDomain,
+                            type: boxType,
                         },
                     ],
                 },
@@ -232,7 +230,7 @@ export class FunctionCall implements Expression, Statement {
     private maybeRecipientCIR(context: Context): cir.Expression | undefined {
         if (!this.recipient) return undefined
 
-        const recipientTypeResult = this.recipient.domain(context)
+        const recipientTypeResult = this.recipient.type(context)
         if (recipientTypeResult.isError) return undefined
         const recipientResult =
             recipientTypeResult.value instanceof RCTypeSet

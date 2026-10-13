@@ -37,7 +37,7 @@ export class ReturnStatement implements Statement {
             Retain.ifStorage(this.value, context),
         ])
         if (collected.isError) return collected
-        const [domain, retainedValue] = collected.value
+        const [type, retainedValue] = collected.value
 
         const cirResult = retainedValue.toCIRExpression(context)
         if (cirResult.isError) return cirResult
@@ -55,7 +55,7 @@ export class ReturnStatement implements Statement {
             context.scope.emitted.push({
                 kind: 'VARIABLE_DECL',
                 name: temp,
-                domain: domain.toCIR(),
+                type: type.toCIR(),
                 initialValue: retainedValueCIR,
             })
             context.scope.releaseVariables()
@@ -64,7 +64,7 @@ export class ReturnStatement implements Statement {
                 value: {
                     kind: 'VARIABLE_REF',
                     name: temp,
-                    domain: retainedValueCIR.domain,
+                    type: retainedValueCIR.type,
                 },
             })
         } else {
@@ -81,7 +81,7 @@ export class ReturnStatement implements Statement {
         if (!this.value) {
             return context.calleeResult
                 ? SemanticErrorResult.failure(
-                      `Must return a ${context.calleeResult.domain.toString()} value`,
+                      `Must return a ${context.calleeResult.type.toString()} value`,
                       this.span,
                   )
                 : Result.ok
@@ -100,7 +100,7 @@ export class ReturnStatement implements Statement {
         if (collected.isError) return collected
 
         const [currentValue, isolationLevel] = collected.value
-        if (!calleeResult.domain.isSupersetTo(currentValue))
+        if (!calleeResult.type.isSupersetTo(currentValue))
             return SemanticErrorResult.failure(
                 'Return value type mismatch',
                 this.value!.span,

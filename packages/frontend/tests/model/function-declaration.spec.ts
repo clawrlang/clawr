@@ -19,7 +19,7 @@ describe('FunctionDeclaration', () => {
                     ...util.someParameterDeclConfig,
                     label: 'param1',
                     varName: 'x',
-                    domain: util.spannedDomain(StringSet.create()),
+                    type: util.spannedTypeConstraint(StringSet.create()),
                 }),
             ],
             result: undefined,
@@ -35,10 +35,10 @@ describe('FunctionDeclaration', () => {
             parameters: [
                 {
                     name: 'x',
-                    domain: { universe: 'string' },
+                    type: { universe: 'string' },
                 },
             ],
-            domain: { universe: 'void' },
+            type: { universe: 'void' },
             body: [],
         })
     })
@@ -59,11 +59,11 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            domain: { universe: 'integer', value: '42' },
+            type: { universe: 'integer', value: '42' },
             body: [
                 {
                     kind: 'RETURN',
-                    value: { domain: { value: '42' } },
+                    value: { type: { value: '42' } },
                 },
             ],
         })
@@ -74,7 +74,7 @@ describe('FunctionDeclaration', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                domain: util.spannedDomain(IntegerSet.unconstrained()),
+                type: util.spannedTypeConstraint(IntegerSet.unconstrained()),
                 isolationLevel: ISOLATED,
             },
             implementation: {
@@ -94,11 +94,11 @@ describe('FunctionDeclaration', () => {
             kind: 'FUNCTION_DECL',
             baseName: 'myFunction',
             parameters: [],
-            domain: { universe: 'integer', min: undefined, max: undefined },
+            type: { universe: 'integer', min: undefined, max: undefined },
             body: [
                 {
                     kind: 'RETURN',
-                    value: { domain: { value: '42' } },
+                    value: { type: { value: '42' } },
                 },
             ],
         })
@@ -115,7 +115,7 @@ describe('FunctionDeclaration', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: SHARED,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyData'),
             }),
         })
@@ -124,7 +124,7 @@ describe('FunctionDeclaration', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                domain: util.spannedDomain(
+                type: util.spannedTypeConstraint(
                     RCTypeSet.create({
                         type: util.simpleTypeName('MyData'),
                     }),
@@ -153,7 +153,7 @@ describe('FunctionDeclaration', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyData'),
             }),
         })
@@ -162,7 +162,7 @@ describe('FunctionDeclaration', () => {
             baseName: 'myFunction',
             parameters: [],
             result: {
-                domain: util.spannedDomain(
+                type: util.spannedTypeConstraint(
                     RCTypeSet.create({
                         type: util.simpleTypeName('MyData'),
                     }),
@@ -191,7 +191,7 @@ describe('FunctionDeclaration', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyData'),
             }),
         })
@@ -201,7 +201,7 @@ describe('FunctionDeclaration', () => {
             parameters: [],
             result: {
                 isolationLevel: ISOLATED,
-                domain: util.spannedDomain(
+                type: util.spannedTypeConstraint(
                     RCTypeSet.create({
                         type: util.simpleTypeName('MyData'),
                     }),
@@ -235,14 +235,14 @@ describe('FunctionDeclaration', () => {
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
                 parameters: [],
-                domain: {
+                type: {
                     universe: 'integer',
                     value: '42',
                 },
                 body: [
                     {
                         kind: 'RETURN',
-                        value: { domain: { value: '42' } },
+                        value: { type: { value: '42' } },
                     },
                 ],
             })
@@ -259,7 +259,7 @@ describe('FunctionDeclaration', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyData'),
                 }),
             })
@@ -276,7 +276,7 @@ describe('FunctionDeclaration', () => {
             expect(context.scope.rootScope.emitted[0]).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                domain: {
+                type: {
                     universe: 'rc-type',
                     name: 'MyData',
                 },
@@ -294,7 +294,7 @@ describe('FunctionDeclaration', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: SHARED,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyData'),
                 }),
             })
@@ -311,7 +311,7 @@ describe('FunctionDeclaration', () => {
             expect(context.scope.rootScope.emitted[0]).toMatchObject({
                 kind: 'FUNCTION_DECL',
                 baseName: 'myFunction',
-                domain: {
+                type: {
                     universe: 'rc-type',
                     name: 'MyData',
                 },
@@ -346,7 +346,7 @@ describe('FunctionDeclaration', () => {
                     ...util.someParameterDeclConfig,
                     label: 'param1',
                     varName: 'x',
-                    domain: util.spannedDomain(StringSet.create()),
+                    type: util.spannedTypeConstraint(StringSet.create()),
                 }),
             ],
             result: undefined,
@@ -392,7 +392,7 @@ describe('FunctionDeclaration', () => {
                             ...util.someVariableDeclConfig,
                             isImmutable: true,
                             name: 'myVar',
-                            domain: util.spannedDomain(
+                            type: util.spannedTypeConstraint(
                                 RCTypeSet.create({
                                     type: util.simpleTypeName('MyData'),
                                 }),
@@ -439,7 +439,9 @@ describe('FunctionDeclaration', () => {
                 baseName: 'myFunction',
                 parameters: [],
                 result: {
-                    domain: util.spannedDomain(IntegerSet.unconstrained()),
+                    type: util.spannedTypeConstraint(
+                        IntegerSet.unconstrained(),
+                    ),
                     isolationLevel: ISOLATED,
                 },
                 implementation: {
@@ -449,7 +451,7 @@ describe('FunctionDeclaration', () => {
                             ...util.someVariableDeclConfig,
                             isImmutable: true,
                             name: 'myVar',
-                            domain: util.spannedDomain(
+                            type: util.spannedTypeConstraint(
                                 RCTypeSet.create({
                                     type: util.simpleTypeName('MyData'),
                                 }),
@@ -498,7 +500,7 @@ describe('FunctionDeclaration', () => {
                 ...util.someFunctionDeclConfig,
                 baseName: 'myFunction',
                 result: {
-                    domain: util.spannedDomain(
+                    type: util.spannedTypeConstraint(
                         RCTypeSet.create({
                             type: util.simpleTypeName('MyData'),
                         }),
@@ -512,7 +514,7 @@ describe('FunctionDeclaration', () => {
                             ...util.someVariableDeclConfig,
                             isImmutable: true,
                             name: 'myVar',
-                            domain: util.spannedDomain(
+                            type: util.spannedTypeConstraint(
                                 RCTypeSet.create({
                                     type: util.simpleTypeName('MyData'),
                                 }),

@@ -21,7 +21,7 @@ type VariableDeclaration = {
     kind: 'VARIABLE_DECL'
     name: string
     namespace?: string
-    domain: ValueSet
+    type: ValueSet
     initialValue: Expression
 }
 
@@ -35,9 +35,9 @@ type FunctionSignature = {
     labels: string[]
     parameters: {
         name: string
-        domain: ValueSet
+        type: ValueSet
     }[]
-    domain: ValueSet | { universe: 'void' }
+    type: ValueSet | { universe: 'void' }
 }
 
 type RCTypeDeclaration = {
@@ -47,7 +47,7 @@ type RCTypeDeclaration = {
     namespace?: string
     properties: {
         name: string
-        domain: ValueSet
+        type: ValueSet
     }[]
     conformances?: {
         interface: CanonicalName
@@ -61,7 +61,7 @@ type RCTypeDeclaration = {
           base?: CanonicalName
           methods: FunctionDeclaration[]
           initializers: (FunctionDeclaration & {
-              domain: { universe: 'void' }
+              type: { universe: 'void' }
           })[]
           dispatchTable?: {
               slot: FunctionSignature
@@ -101,15 +101,15 @@ type Release = {
 
 type Receiver =
     | {
-          object: Expression & { domain: RCTypeSet | InterfaceSet }
+          object: Expression & { type: RCTypeSet | InterfaceSet }
           dispatch: 'direct'
       }
     | {
-          object: Expression & { domain: RCTypeSet }
+          object: Expression & { type: RCTypeSet }
           dispatch: 'inherited'
       }
     | {
-          object: Expression & { domain: InterfaceDeclaration }
+          object: Expression & { type: InterfaceDeclaration }
           dispatch: 'conformance'
       }
 
@@ -145,8 +145,7 @@ export type Statement =
     | Assign
     | SelfAssign
 
-type Storage =
-    Omit<VariableReference, 'domain'> | Omit<PropertyReference, 'domain'>
+type Storage = Omit<VariableReference, 'type'> | Omit<PropertyReference, 'type'>
 
 // -----------
 // Expressions
@@ -154,22 +153,22 @@ type Storage =
 
 type StringLiteral = {
     kind: 'STRING_LITERAL'
-    domain: StringSet & { value: string }
+    type: StringSet & { value: string }
 }
 
 type IntegerLiteral<Value extends bigint = bigint> = {
     kind: 'INTEGER_LITERAL'
-    domain: IntegerSingleton<Value>
+    type: IntegerSingleton<Value>
 }
 
 type RealLiteral<Value extends decimal = decimal> = {
     kind: 'REAL_LITERAL'
-    domain: RealSingleton<Value>
+    type: RealSingleton<Value>
 }
 
 type TruthvalueLiteral<Value extends truthvalue = truthvalue> = {
     kind: 'TRUTHVALUE_LITERAL'
-    domain: TruthvalueSingleton<Value>
+    type: TruthvalueSingleton<Value>
 }
 
 type MemoryAllocation = {
@@ -179,38 +178,38 @@ type MemoryAllocation = {
         name: string
         value: Expression
     }[]
-    domain: RCTypeSet
+    type: RCTypeSet
 }
 
 type MemoryRetention = {
     kind: 'RETAIN'
     object: Storage
-    domain: RCTypeSet
+    type: RCTypeSet
 }
 
 type AsShared = {
     kind: 'AS_SHARED'
     object: FunctionCall & Expression
-    domain: RCTypeSet
+    type: RCTypeSet
 }
 
 type Box = {
     kind: 'BOX'
     expression: Expression
-    domain: ValueSet & { boxed: true }
+    type: ValueSet & { boxed: true }
 }
 
 type VariableReference = {
     kind: 'VARIABLE_REF'
     name: string
-    domain: ValueSet
+    type: ValueSet
 }
 
 type PropertyReference = {
     kind: 'PROPERTY_REF'
     object: Expression
     property: string
-    domain: ValueSet
+    type: ValueSet
 }
 
 type ArithmeticOperation = {
@@ -223,32 +222,32 @@ type ArithmeticOperation = {
         | 'EXPONENTIAL'
 } & (
     | {
-          left: Expression & { domain: { universe: 'integer' } }
-          right: Expression & { domain: { universe: 'integer' } }
-          domain: IntegerSet
+          left: Expression & { type: { universe: 'integer' } }
+          right: Expression & { type: { universe: 'integer' } }
+          type: IntegerSet
       }
     | {
-          left: Expression & { domain: { universe: 'integer' | 'real' } }
-          right: Expression & { domain: { universe: 'integer' | 'real' } }
-          domain: RealRange
+          left: Expression & { type: { universe: 'integer' | 'real' } }
+          right: Expression & { type: { universe: 'integer' | 'real' } }
+          type: RealRange
       }
 )
 
 type EqualityComparison = {
     kind: 'EQUAL' | 'NOT_EQUAL'
-    domain: TruthvalueSet<['false', 'true']>
+    type: TruthvalueSet<['false', 'true']>
 } & (
     | {
-          left: Expression & { domain: { universe: 'integer' } }
-          right: Expression & { domain: { universe: 'integer' } }
+          left: Expression & { type: { universe: 'integer' } }
+          right: Expression & { type: { universe: 'integer' } }
       }
     | {
-          left: Expression & { domain: { universe: 'real' } }
-          right: Expression & { domain: { universe: 'real' } }
+          left: Expression & { type: { universe: 'real' } }
+          right: Expression & { type: { universe: 'real' } }
       }
     | {
-          left: Expression & { domain: { universe: 'truthvalue' } }
-          right: Expression & { domain: { universe: 'truthvalue' } }
+          left: Expression & { type: { universe: 'truthvalue' } }
+          right: Expression & { type: { universe: 'truthvalue' } }
       }
 )
 
@@ -258,23 +257,23 @@ type OrderComparison = {
         | 'GREATER_THAN'
         | 'LESS_THAN_OR_EQUAL'
         | 'GREATER_THAN_OR_EQUAL'
-    left: Expression & { domain: { universe: 'integer' | 'real' } }
-    right: Expression & { domain: { universe: 'integer' | 'real' } }
-    domain: TruthvalueSet<['false', 'true']>
+    left: Expression & { type: { universe: 'integer' | 'real' } }
+    right: Expression & { type: { universe: 'integer' | 'real' } }
+    type: TruthvalueSet<['false', 'true']>
 }
 
 type RefComparison = {
     kind: 'SAME' | 'NOT_SAME'
-    left: Expression & { domain: { universe: 'rc-type' | 'interface' } }
-    right: Expression & { domain: { universe: 'rc-type' | 'interface' } }
-    domain: TruthvalueSet<['false', 'true']>
+    left: Expression & { type: { universe: 'rc-type' | 'interface' } }
+    right: Expression & { type: { universe: 'rc-type' | 'interface' } }
+    type: TruthvalueSet<['false', 'true']>
 }
 
 type LogicalOperation = {
     kind: 'AND' | 'OR'
-    left: Expression & { domain: { universe: 'truthvalue' } }
-    right: Expression & { domain: { universe: 'truthvalue' } }
-    domain: TruthvalueSet<['false', 'true']>
+    left: Expression & { type: { universe: 'truthvalue' } }
+    right: Expression & { type: { universe: 'truthvalue' } }
+    type: TruthvalueSet<['false', 'true']>
 }
 
 export type Expression =
@@ -288,7 +287,7 @@ export type Expression =
     | Box
     | VariableReference
     | PropertyReference
-    | (FunctionCall & { domain: ValueSet })
+    | (FunctionCall & { type: ValueSet })
     | ArithmeticOperation
     | EqualityComparison
     | OrderComparison

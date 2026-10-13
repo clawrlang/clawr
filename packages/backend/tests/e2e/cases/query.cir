@@ -7,16 +7,16 @@ declarations:
       - l
     parameters:
       - name: var
-        domain:
+        type:
           universe: integer
     body:
       - kind: RETURN
         value:
           kind: INTEGER_LITERAL
-          domain:
+          type:
             universe: integer
             value: '42'
-    domain:
+    type:
       universe: integer
       max: '42'
       min: '42'
@@ -33,17 +33,17 @@ startBlock:
             - l
         arguments:
           - kind: INTEGER_LITERAL
-            domain:
+            type:
               universe: integer
               value: '1'
-        domain:
+        type:
           universe: integer
           max: '42'
           min: '42'
-      domain:
+      type:
         universe: integer
         boxed: true
-    domain:
+    type:
       universe: integer
       boxed: true
   - kind: CALL
@@ -53,7 +53,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ0
-        domain:
+        type:
           universe: integer
           boxed: true
   - kind: RELEASE

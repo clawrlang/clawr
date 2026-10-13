@@ -29,8 +29,8 @@
 - Do not `ENSURE_UNIQUE` a `SHARED` return-value
 
 - Refactoring: improve encapsulation; `Parameter` does nothing
-  - Ensure that `domain` and `defaultValue` are compatible
-  - `FunctionCall`: Check `isolationLevel` and value/domains of arguments
+  - Ensure that `type` and `defaultValue` are compatible
+  - `FunctionCall`: Check `isolationLevel` and value/type of arguments
 
 - Ensure that variables with `undefined` `isolationLevel` are not modified
 - Ensure that variables with `undefined` `isolationLevel` are not assigned without `copy(of:)`
@@ -46,10 +46,10 @@
 ## Advanced / Ice Box
 
 - `object` may not reach outside itself (its properties) except for calling `service` through a parameter
-- `FunctionCall.domain()` should probably not return `currentValue()`
+- `FunctionCall.type()` should probably not return `currentValue()`
 - `VariableDeclaration.initialValue` — handle type mismatch
 - `DataLiteral` – handle property type mismatch
-- Get the property values from the declared domain when converting `SHARED` to `ISOLATED`
+- Get the property values from the declared type when converting `SHARED` to `ISOLATED`
   - `SHARED` values cannot know their state
   - `ISOLATED` values can know their state intimately
 - Use `${npm_package_version%%.*}` and `process.env.npm_package_version!.split('.')[0]`?

@@ -1,4 +1,4 @@
-import { Context, ContextWithDomain, Expression } from '@/model'
+import { Context, ContextWithType, Expression } from '@/model'
 import { AnyIsolationLevel, ISOLATED } from '@/model/isolation-level'
 import {
     Addition,
@@ -47,17 +47,17 @@ export class BinaryOperation implements Expression {
         return Result.value(ISOLATED)
     }
 
-    domain(context: ContextWithDomain): SemanticResult<ValueSet> {
+    type(context: ContextWithType): SemanticResult<ValueSet> {
         const collected = SemanticResult.collect([
-            this.left.domain(context),
-            this.right.domain(context),
+            this.left.type(context),
+            this.right.type(context),
         ])
         if (collected.isError) return collected
         const [left, right] = collected.value
         return this.compute(left, right)
     }
 
-    currentValue(context: ContextWithDomain): SemanticResult<ValueSet> {
+    currentValue(context: ContextWithType): SemanticResult<ValueSet> {
         const collected = SemanticResult.collect([
             this.left.currentValue(context),
             this.right.currentValue(context),
@@ -67,9 +67,7 @@ export class BinaryOperation implements Expression {
         return this.compute(left, right)
     }
 
-    toCIRExpression(
-        context: ContextWithDomain,
-    ): SemanticResult<cir.Expression> {
+    toCIRExpression(context: ContextWithType): SemanticResult<cir.Expression> {
         throw new Error('Method not implemented.')
     }
 

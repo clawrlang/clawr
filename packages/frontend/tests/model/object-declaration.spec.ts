@@ -18,7 +18,7 @@ describe('ObjectDeclaration', () => {
                     name: 'property',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
-                    domain: util.spannedDomain(IntegerSet.singleton(20n)),
+                    type: util.spannedTypeConstraint(IntegerSet.singleton(20n)),
                     defaultValue: util.integerLiteral(20),
                 },
             ],
@@ -37,7 +37,7 @@ describe('ObjectDeclaration', () => {
                 properties: [
                     {
                         name: 'property',
-                        domain: { universe: 'integer', value: '20' },
+                        type: { universe: 'integer', value: '20' },
                     },
                 ],
             },
@@ -65,7 +65,9 @@ describe('ObjectDeclaration', () => {
                     },
                     result: {
                         isolationLevel: ISOLATED,
-                        domain: util.spannedDomain(IntegerSet.singleton(42n)),
+                        type: util.spannedTypeConstraint(
+                            IntegerSet.singleton(42n),
+                        ),
                     },
                 }),
             ],
@@ -87,7 +89,7 @@ describe('ObjectDeclaration', () => {
                     name: 'property',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
-                    domain: util.spannedDomain(IntegerSet.singleton(20n)),
+                    type: util.spannedTypeConstraint(IntegerSet.singleton(20n)),
                     defaultValue: util.integerLiteral(20),
                 },
             ],
@@ -110,7 +112,7 @@ describe('ObjectDeclaration', () => {
                         labels: ['label'],
                         parameters: [{ name: 'var' }],
                         body: [{ kind: 'RETURN' }],
-                        domain: {},
+                        type: {},
                     },
                     {
                         kind: 'FUNCTION_DECL',
@@ -118,7 +120,7 @@ describe('ObjectDeclaration', () => {
                         labels: ['label'],
                         parameters: [{ name: 'var' }],
                         body: [],
-                        domain: { universe: 'void' },
+                        type: { universe: 'void' },
                     },
                 ],
             }, //satisfies cir.Declaration,
@@ -181,7 +183,7 @@ describe('ObjectDeclaration', () => {
                     name: 'property',
                     isImmutable: true,
                     isolationLevel: 'ISOLATED',
-                    domain: util.spannedDomain(IntegerSet.singleton(20n)),
+                    type: util.spannedTypeConstraint(IntegerSet.singleton(20n)),
                     defaultValue: IntegerLiteral.create({
                         value: 20n,
                         span: util.someCodeSpan,
@@ -212,7 +214,7 @@ describe('ObjectDeclaration', () => {
                                 value: {},
                             },
                         ],
-                        domain: { universe: 'void' },
+                        type: { universe: 'void' },
                     },
                     {
                         kind: 'FUNCTION_DECL',
@@ -225,7 +227,7 @@ describe('ObjectDeclaration', () => {
                                 value: {},
                             },
                         ],
-                        domain: { universe: 'void' },
+                        type: { universe: 'void' },
                     },
                 ],
             },

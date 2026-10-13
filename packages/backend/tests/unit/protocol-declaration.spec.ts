@@ -14,13 +14,13 @@ describe('Interface Declaration', () => {
                     parameters: [
                         {
                             name: 'p',
-                            domain: {
+                            type: {
                                 universe: 'truthvalue',
                                 values: ['false'],
                             },
                         },
                     ],
-                    domain: { universe: 'integer', max: '10', min: '0' },
+                    type: { universe: 'integer', max: '10', min: '0' },
                 },
             ],
         }

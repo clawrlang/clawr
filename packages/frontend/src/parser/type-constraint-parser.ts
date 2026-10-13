@@ -1,7 +1,10 @@
 import { Token, TokenStream } from '@/lexer'
 import { IdentifierToken } from '@/lexer/token'
-import { decorateDomain, DomainDeclaration } from '@/model/domain-declaration'
 import { IntegerLiteral } from '@/model/literals'
+import {
+    decorateTypeConstraint,
+    TypeConstraintDeclaration,
+} from '@/model/type-constraint-declaration'
 import { TypeName } from '@/model/type-name'
 import {
     IntegerSet,
@@ -13,28 +16,28 @@ import { Context } from '@/parser'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { SourceError } from '@/tools'
 
-export class DomainParser {
+export class TypeConstraintParser {
     private constructor(private context: Context) {}
 
-    static create(context: Context): DomainParser {
-        return new DomainParser(context)
+    static create(context: Context): TypeConstraintParser {
+        return new TypeConstraintParser(context)
     }
 
-    parse(stream: TokenStream): DomainDeclaration {
+    parse(stream: TokenStream): TypeConstraintDeclaration {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
 
         switch (type) {
             case 'integer':
-                return this.parseIntegerDomain(stream, typeToken)
+                return this.parseIntegerConstraint(stream, typeToken)
             case 'truthvalue':
-                return this.parseTruthvalueDomain(stream, typeToken)
+                return this.parseTruthvalueConstraint(stream, typeToken)
             case 'string':
-                return decorateDomain(StringSet.create(), {
+                return decorateTypeConstraint(StringSet.create(), {
                     span: { start: typeToken.start, end: typeToken.end },
                 })
             default:
-                return decorateDomain(
+                return decorateTypeConstraint(
                     RCTypeSet.create({
                         type: TypeName.create({ name: type }),
                     }),
@@ -45,12 +48,12 @@ export class DomainParser {
         }
     }
 
-    private parseIntegerDomain(
+    private parseIntegerConstraint(
         stream: TokenStream,
         typeToken: Token,
-    ): DomainDeclaration {
+    ): TypeConstraintDeclaration {
         if (!stream.isNext('PUNCTUATION', '('))
-            return decorateDomain(IntegerSet.unconstrained(), {
+            return decorateTypeConstraint(IntegerSet.unconstrained(), {
                 span: { start: typeToken.start, end: typeToken.end },
             })
 
@@ -96,17 +99,17 @@ export class DomainParser {
 
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return decorateDomain(IntegerSet.range({ min, max }), {
+        return decorateTypeConstraint(IntegerSet.range({ min, max }), {
             span: { start: typeToken.start, end: endToken.end },
         })
     }
 
-    private parseTruthvalueDomain(
+    private parseTruthvalueConstraint(
         stream: TokenStream,
         typeToken: IdentifierToken,
-    ): DomainDeclaration {
+    ): TypeConstraintDeclaration {
         if (!stream.isNext('PUNCTUATION', '('))
-            return decorateDomain(TruthvalueSet.unconstrained(), {
+            return decorateTypeConstraint(TruthvalueSet.unconstrained(), {
                 span: { start: typeToken.start, end: typeToken.end },
             })
 
@@ -121,7 +124,7 @@ export class DomainParser {
         }
         const endToken = stream.expect('PUNCTUATION', ')')
 
-        return decorateDomain(
+        return decorateTypeConstraint(
             values.length > 0
                 ? TruthvalueSet.create(values)
                 : TruthvalueSet.unconstrained(),

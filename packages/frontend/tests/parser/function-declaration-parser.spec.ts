@@ -25,7 +25,7 @@ describe('Function Declaration Parser', () => {
             parameters: [
                 {
                     varName: 'x',
-                    domain: { max: undefined, min: undefined },
+                    type: { max: undefined, min: undefined },
                     label: 'x',
                     span: {
                         start: { line: 1, column: 17 },
@@ -34,7 +34,7 @@ describe('Function Declaration Parser', () => {
                 },
                 {
                     varName: 'y',
-                    domain: { values: ['false', 'ambiguous', 'true'] },
+                    type: { values: ['false', 'ambiguous', 'true'] },
                     label: 'y',
                     span: {
                         start: { line: 1, column: 29 },
@@ -56,7 +56,7 @@ describe('Function Declaration Parser', () => {
             parameters: [
                 {
                     varName: 'x',
-                    domain: { max: undefined, min: undefined },
+                    type: { max: undefined, min: undefined },
                     label: undefined,
                     span: {
                         start: { line: 1, column: 17 },
@@ -65,7 +65,7 @@ describe('Function Declaration Parser', () => {
                 },
                 {
                     varName: 'y',
-                    domain: { values: ['false', 'ambiguous', 'true'] },
+                    type: { values: ['false', 'ambiguous', 'true'] },
                     label: 'label',
                     span: {
                         start: { line: 1, column: 31 },
@@ -98,7 +98,7 @@ describe('Function Declaration Parser', () => {
                 {
                     varName: 'y',
                     isolationLevel: ISOLATED,
-                    domain: { values: ['false', 'ambiguous', 'true'] },
+                    type: { values: ['false', 'ambiguous', 'true'] },
                     isImmutable: true,
                     span: {
                         start: { line: 1, column: 34 },
@@ -160,7 +160,7 @@ describe('Function Declaration Parser', () => {
         expect(result).toMatchObject({
             baseName: 'myFunction',
             parameters: [],
-            result: { domain: { max: undefined, min: undefined } },
+            result: { type: { max: undefined, min: undefined } },
             implementation: {
                 kind: 'body',
                 statements: [{ value: { value: { min: 42n, max: 42n } } }],

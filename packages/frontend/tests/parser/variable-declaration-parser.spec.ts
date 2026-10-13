@@ -9,7 +9,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
             name: 'foo',
-            domain: { min: undefined, max: undefined },
+            type: { min: undefined, max: undefined },
             initialValue: { value: { min: 1n, max: 1n } },
         })
     })
@@ -19,7 +19,7 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: false,
             name: 'foo',
-            domain: { min: undefined, max: undefined },
+            type: { min: undefined, max: undefined },
             initialValue: { value: { min: 1n, max: 1n } },
         })
     })
@@ -30,7 +30,7 @@ describe('VariableDeclarationParser', () => {
             isImmutable: false,
             name: 'foo',
             isolationLevel: SHARED,
-            domain: { type: { name: 'Type' } },
+            type: { type: { name: 'Type' } },
             initialValue: {
                 properties: [
                     { name: 'x', value: { value: { min: 1n, max: 1n } } },
@@ -46,7 +46,7 @@ describe('VariableDeclarationParser', () => {
             isImmutable: true,
             name: 'foo',
             isolationLevel: SHARED,
-            domain: { type: { name: 'Type' } },
+            type: { type: { name: 'Type' } },
             initialValue: {
                 properties: [
                     { name: 'x', value: { value: { min: 1n, max: 1n } } },
@@ -74,7 +74,7 @@ describe('VariableDeclarationParser', () => {
             isImmutable: true,
             name: 'r',
             isolationLevel: SHARED,
-            domain: { type: { name: 'MyData' } },
+            type: { type: { name: 'MyData' } },
             initialValue: { properties: [] },
         })
     })

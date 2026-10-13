@@ -1,23 +1,23 @@
 import { Token, TokenStream } from '@/lexer'
 import { Expression } from '@/model'
-import { DomainDeclaration } from '@/model/domain-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { Parameter } from '@/model/parameter'
+import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { Context, DeclarationParser } from '@/parser'
 import { BlockParser } from '@/parser/block-parser'
-import { DomainParser } from '@/parser/domain-parser'
 import { ExpressionParser } from '@/parser/expression-parser'
 import {
     SemanticsKeyword,
     SemanticsKeywordParser,
 } from '@/parser/semantics-keyword-parser'
+import { TypeConstraintParser } from '@/parser/type-constraint-parser'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
-    private readonly domainParser: DomainParser
+    private readonly typeConstraintParser: TypeConstraintParser
 
     private constructor(private context: Context) {
-        this.domainParser = DomainParser.create(context)
+        this.typeConstraintParser = TypeConstraintParser.create(context)
     }
 
     static create(context: Context): FunctionDeclarationParser {
@@ -34,7 +34,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         const baseName = nameToken.identifier
 
         const parameters = this.parseParameters(stream)
-        const result = this.parseResultDomain(stream)
+        const result = this.parseReturnType(stream)
 
         if (stream.isNext('PUNCTUATION', '=>')) {
             stream.expect('PUNCTUATION', '=>')
@@ -63,12 +63,12 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         })
     }
 
-    private parseResultDomain(stream: TokenStream) {
+    private parseReturnType(stream: TokenStream) {
         if (stream.isNext('OPERATOR', '->')) {
             stream.expect('OPERATOR', '->')
             const isolationLevel = this.parseIsolationlevel(stream)
             return {
-                domain: this.domainParser.parse(stream),
+                type: this.typeConstraintParser.parse(stream),
                 isolationLevel,
             }
         }
@@ -104,7 +104,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                 varNameToken = stream.expect('IDENTIFIER')
             else varNameToken = labelToken
 
-            const domain = this.parseDomain(stream)
+            const type = this.parseTypeConstraint(stream)
 
             let defaultValue: Expression | undefined
             if (stream.isNext('PUNCTUATION', '=')) {
@@ -123,13 +123,13 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                             : labelToken.identifier,
                     varName: varNameToken.identifier,
                     isolationLevel: semanticsKeyword?.isolationLevel ?? UNKNOWN,
-                    domain: domain,
+                    type: type,
                     defaultValue,
                     span: {
                         start: semanticsToken?.start ?? labelToken.start,
                         end:
                             defaultValue?.span.end ??
-                            domain?.span?.end ??
+                            type?.span?.end ??
                             varNameToken.end,
                     },
                 }),
@@ -142,9 +142,11 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         return parameters
     }
 
-    private parseDomain(stream: TokenStream): DomainDeclaration | undefined {
+    private parseTypeConstraint(
+        stream: TokenStream,
+    ): TypeConstraintDeclaration | undefined {
         if (!stream.isNext('PUNCTUATION', ':')) return undefined
         stream.expect('PUNCTUATION', ':')
-        return this.domainParser.parse(stream)
+        return this.typeConstraintParser.parse(stream)
     }
 }

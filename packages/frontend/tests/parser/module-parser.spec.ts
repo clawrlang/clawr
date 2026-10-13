@@ -35,13 +35,13 @@ describe('Module Parser', () => {
                 {
                     isImmutable: true,
                     name: 'x',
-                    domain: { min: undefined, max: undefined },
+                    type: { min: undefined, max: undefined },
                     initialValue: { value: { min: 10n, max: 10n } },
                 },
                 {
                     isImmutable: false,
                     name: 'y',
-                    domain: { min: undefined, max: undefined },
+                    type: { min: undefined, max: undefined },
                     initialValue: { value: { min: 20n, max: 20n } },
                 },
                 {
@@ -70,7 +70,7 @@ describe('Module Parser', () => {
                 {
                     isImmutable: false,
                     name: 'y',
-                    domain: {
+                    type: {
                         min: undefined,
                         max: undefined,
                     },

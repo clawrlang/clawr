@@ -8,7 +8,7 @@ describe('Lowering Literals', () => {
     it('lowers string literals correctly', () => {
         const expr: Expression = {
             kind: 'STRING_LITERAL',
-            domain: { universe: 'string', value: 'Hello, World!' },
+            type: { universe: 'string', value: 'Hello, World!' },
         }
         const result = lowerExpr(expr)
         expect(result).toBe('"Hello, World!"')
@@ -17,7 +17,7 @@ describe('Lowering Literals', () => {
     it('lowers integer literals correctly', () => {
         const expr: Expression = {
             kind: 'INTEGER_LITERAL',
-            domain: { universe: 'integer', value: '42' },
+            type: { universe: 'integer', value: '42' },
         }
         const result = lowerExpr(expr)
         expect(result).toBe('42')
@@ -33,7 +33,7 @@ describe('Lowering Literals', () => {
             test(`${input} -> ${expected}`, () => {
                 const expr: Expression = {
                     kind: 'TRUTHVALUE_LITERAL',
-                    domain: {
+                    type: {
                         universe: 'truthvalue',
                         value: input as truthvalue,
                     },
@@ -55,11 +55,11 @@ describe('Lowering Literals', () => {
                         value: {
                             kind: 'VARIABLE_REF',
                             name: 'var',
-                            domain: { universe: 'rc-type', name: 'MyType' },
+                            type: { universe: 'rc-type', name: 'MyType' },
                         },
                     },
                 ],
-                domain: { universe: 'rc-type', name: 'MyData' },
+                type: { universe: 'rc-type', name: 'MyData' },
             }
             const result = lowerExpr(expr)
             expect(result).toContain('allocInitRC(MyData, 0,')
@@ -76,7 +76,7 @@ describe('Lowering Literals', () => {
                         value: {
                             kind: 'VARIABLE_REF',
                             name: 'var',
-                            domain: {
+                            type: {
                                 universe: 'integer',
                                 max: '42',
                                 min: '42',
@@ -84,7 +84,7 @@ describe('Lowering Literals', () => {
                         },
                     },
                 ],
-                domain: { universe: 'rc-type', name: 'MyObject' },
+                type: { universe: 'rc-type', name: 'MyObject' },
             }
             const result = lowerExpr(expr)
             expect(result).toContain('allocInitRC(MyObject, 0')

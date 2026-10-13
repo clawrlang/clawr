@@ -5,12 +5,12 @@ import { describe, expect, it } from 'bun:test'
 
 describe('Scope', () => {
     describe('variables in current scope', () => {
-        it('defaults to the entire domain', () => {
+        it('defaults to the entire type', () => {
             const scope = Scope.createRoot()
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerSet.unconstrained(),
+                type: IntegerSet.unconstrained(),
             })
 
             expect(scope.currentValue('v')).toMatchObject({
@@ -19,12 +19,12 @@ describe('Scope', () => {
             })
         })
 
-        it('can set a subset of the domain', () => {
+        it('can set a subset of the type', () => {
             const scope = Scope.createRoot()
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerSet.unconstrained(),
+                type: IntegerSet.unconstrained(),
             })
 
             expect(
@@ -42,7 +42,7 @@ describe('Scope', () => {
             parent.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerSet.unconstrained(),
+                type: IntegerSet.unconstrained(),
             })
 
             expect(
@@ -62,7 +62,7 @@ describe('Scope', () => {
             parent.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerSet.unconstrained(),
+                type: IntegerSet.unconstrained(),
             })
 
             expect(
@@ -74,7 +74,7 @@ describe('Scope', () => {
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerSet.unconstrained(),
+                type: IntegerSet.unconstrained(),
             })
             expect(scope.currentValue('v')).toMatchObject({
                 min: undefined,
@@ -87,7 +87,7 @@ describe('Scope', () => {
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerSet.singleton(12n),
+                type: IntegerSet.singleton(12n),
             })
 
             const result = scope.setCurrentValue(
@@ -116,12 +116,12 @@ describe('Scope', () => {
     })
 
     describe('variables in root scope', () => {
-        it('defaults to the entire domain', () => {
+        it('defaults to the entire type', () => {
             const scope = Scope.createRoot()
             scope.rootScope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerSet.unconstrained(),
+                type: IntegerSet.unconstrained(),
             })
 
             expect(scope.currentValue('v')).toMatchObject({
@@ -135,7 +135,7 @@ describe('Scope', () => {
             scope.rootScope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerSet.unconstrained(),
+                type: IntegerSet.unconstrained(),
             })
 
             expect(
@@ -153,7 +153,7 @@ describe('Scope', () => {
             scope.addVariableDeclaration('v', {
                 isImmutable: false,
                 isolationLevel: ISOLATED,
-                domain: IntegerSet.singleton(12n),
+                type: IntegerSet.singleton(12n),
             })
 
             const result = scope.setCurrentValue(

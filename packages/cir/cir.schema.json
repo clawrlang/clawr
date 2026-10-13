@@ -61,7 +61,7 @@
         "kind": { "const": "PROPERTY_REF" },
         "object": { "$ref": "#/$defs/Expression" },
         "property": { "type": "string" },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "type": { "$ref": "#/$defs/ValueSet" }
       },
       "required": ["kind", "object", "property"],
       "additionalProperties": false
@@ -72,7 +72,7 @@
       "properties": {
         "kind": { "const": "VARIABLE_REF" },
         "name": { "type": "string" },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "type": { "$ref": "#/$defs/ValueSet" }
       },
       "required": ["kind", "name"],
       "additionalProperties": false
@@ -126,9 +126,9 @@
           "type": "array",
           "items": { "$ref": "#/$defs/PropertyInitializer" }
         },
-        "domain": { "$ref": "#/$defs/RCTypeSet" }
+        "type": { "$ref": "#/$defs/RCTypeSet" }
       },
-      "required": ["kind", "domain"],
+      "required": ["kind", "type"],
       "additionalProperties": false
     },
 
@@ -138,10 +138,10 @@
         "kind": { "const": "VARIABLE_DECL" },
         "name": { "type": "string" },
         "namespace": { "type": "string" },
-        "domain": { "$ref": "#/$defs/ValueSet" },
+        "type": { "$ref": "#/$defs/ValueSet" },
         "initialValue": { "$ref": "#/$defs/Expression" }
       },
-      "required": ["kind", "name", "domain", "initialValue"],
+      "required": ["kind", "name", "type", "initialValue"],
       "additionalProperties": false
     },
 
@@ -220,9 +220,9 @@
           "type": "array",
           "items": { "$ref": "#/$defs/Expression" }
         },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "type": { "$ref": "#/$defs/ValueSet" }
       },
-      "required": ["kind", "name", "arguments", "domain"],
+      "required": ["kind", "name", "arguments", "type"],
       "additionalProperties": false
     },
 
@@ -232,9 +232,9 @@
         "kind": { "enum": ["EQUAL", "NOT_EQUAL"] },
         "left": { "$ref": "#/$defs/Expression" },
         "right": { "$ref": "#/$defs/Expression" },
-        "domain": { "$ref": "#/$defs/TruthvalueSet" }
+        "type": { "$ref": "#/$defs/TruthvalueSet" }
       },
-      "required": ["kind", "domain", "left", "right"],
+      "required": ["kind", "type", "left", "right"],
       "additionalProperties": false
     },
 
@@ -253,9 +253,9 @@
         },
         "left": { "$ref": "#/$defs/Expression" },
         "right": { "$ref": "#/$defs/Expression" },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "type": { "$ref": "#/$defs/ValueSet" }
       },
-      "required": ["kind", "left", "right", "domain"],
+      "required": ["kind", "left", "right", "type"],
       "additionalProperties": false
     },
 
@@ -264,9 +264,9 @@
       "properties": {
         "kind": { "const": "AS_SHARED" },
         "object": { "$ref": "#/$defs/FunctionCallExpression" },
-        "domain": { "$ref": "#/$defs/RCTypeSet" }
+        "type": { "$ref": "#/$defs/RCTypeSet" }
       },
-      "required": ["kind", "object", "domain"],
+      "required": ["kind", "object", "type"],
       "additionalProperties": false
     },
 
@@ -275,9 +275,9 @@
       "properties": {
         "kind": { "const": "BOX" },
         "expression": { "$ref": "#/$defs/Expression" },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "type": { "$ref": "#/$defs/ValueSet" }
       },
-      "required": ["kind", "expression", "domain"],
+      "required": ["kind", "expression", "type"],
       "additionalProperties": false
     },
 
@@ -285,7 +285,7 @@
       "type": "object",
       "properties": {
         "kind": { "const": "INTEGER_LITERAL" },
-        "domain": { "$ref": "#/$defs/IntegerSingleton" }
+        "type": { "$ref": "#/$defs/IntegerSingleton" }
       },
       "required": ["kind"],
       "additionalProperties": false
@@ -297,9 +297,9 @@
         "kind": { "enum": ["AND", "OR"] },
         "left": { "$ref": "#/$defs/Expression" },
         "right": { "$ref": "#/$defs/Expression" },
-        "domain": { "$ref": "#/$defs/TruthvalueSet" }
+        "type": { "$ref": "#/$defs/TruthvalueSet" }
       },
-      "required": ["kind", "left", "right", "domain"],
+      "required": ["kind", "left", "right", "type"],
       "additionalProperties": false
     },
 
@@ -312,9 +312,9 @@
           "type": "array",
           "items": { "$ref": "#/$defs/PropertyInitializer" }
         },
-        "domain": { "$ref": "#/$defs/RCTypeSet" }
+        "type": { "$ref": "#/$defs/RCTypeSet" }
       },
-      "required": ["kind", "isolationLevel", "domain"],
+      "required": ["kind", "isolationLevel", "type"],
       "additionalProperties": false
     },
 
@@ -323,9 +323,9 @@
       "properties": {
         "kind": { "const": "RETAIN" },
         "object": { "$ref": "#/$defs/Storage" },
-        "domain": { "$ref": "#/$defs/RCTypeSet" }
+        "type": { "$ref": "#/$defs/RCTypeSet" }
       },
-      "required": ["kind", "object", "domain"],
+      "required": ["kind", "object", "type"],
       "additionalProperties": false
     },
 
@@ -342,9 +342,9 @@
         },
         "left": { "$ref": "#/$defs/Expression" },
         "right": { "$ref": "#/$defs/Expression" },
-        "domain": { "$ref": "#/$defs/TruthvalueSet" }
+        "type": { "$ref": "#/$defs/TruthvalueSet" }
       },
-      "required": ["kind", "left", "right", "domain"],
+      "required": ["kind", "left", "right", "type"],
       "additionalProperties": false
     },
 
@@ -354,9 +354,9 @@
         "kind": { "const": "PROPERTY_REF" },
         "object": { "$ref": "#/$defs/Expression" },
         "property": { "type": "string" },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "type": { "$ref": "#/$defs/ValueSet" }
       },
-      "required": ["kind", "object", "property", "domain"],
+      "required": ["kind", "object", "property", "type"],
       "additionalProperties": false
     },
 
@@ -366,9 +366,9 @@
         "kind": { "enum": ["NOT_SAME", "SAME"] },
         "left": { "$ref": "#/$defs/Expression" },
         "right": { "$ref": "#/$defs/Expression" },
-        "domain": { "$ref": "#/$defs/TruthvalueSet" }
+        "type": { "$ref": "#/$defs/TruthvalueSet" }
       },
-      "required": ["kind", "left", "right", "domain"],
+      "required": ["kind", "left", "right", "type"],
       "additionalProperties": false
     },
 
@@ -376,9 +376,9 @@
       "type": "object",
       "properties": {
         "kind": { "const": "STRING_LITERAL" },
-        "domain": { "$ref": "#/$defs/StringSet" }
+        "type": { "$ref": "#/$defs/StringSet" }
       },
-      "required": ["kind", "domain"],
+      "required": ["kind", "type"],
       "additionalProperties": false
     },
 
@@ -386,9 +386,9 @@
       "type": "object",
       "properties": {
         "kind": { "const": "TRUTHVALUE_LITERAL" },
-        "domain": { "$ref": "#/$defs/TruthvalueSingleton" }
+        "type": { "$ref": "#/$defs/TruthvalueSingleton" }
       },
-      "required": ["kind"],
+      "required": ["kind", "type"],
       "additionalProperties": false
     },
 
@@ -397,9 +397,9 @@
       "properties": {
         "kind": { "const": "VARIABLE_REF" },
         "name": { "type": "string" },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "type": { "$ref": "#/$defs/ValueSet" }
       },
-      "required": ["kind", "name", "domain"],
+      "required": ["kind", "name", "type"],
       "additionalProperties": false
     },
 
@@ -636,9 +636,9 @@
       "type": "object",
       "properties": {
         "name": { "type": "string" },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "type": { "$ref": "#/$defs/ValueSet" }
       },
-      "required": ["name", "domain"],
+      "required": ["name", "type"],
       "additionalProperties": false
     },
 
@@ -703,11 +703,11 @@
           "type": "array",
           "items": { "$ref": "#/$defs/Parameter" }
         },
-        "domain": {
+        "type": {
           "oneOf": [{ "$ref": "#/$defs/ValueSet" }, { "$ref": "#/$defs/Void" }]
         }
       },
-      "required": ["baseName", "labels", "parameters", "domain"],
+      "required": ["baseName", "labels", "parameters", "type"],
       "additionalProperties": false
     },
 
@@ -715,9 +715,9 @@
       "type": "object",
       "properties": {
         "name": { "type": "string" },
-        "domain": { "$ref": "#/$defs/ValueSet" }
+        "type": { "$ref": "#/$defs/ValueSet" }
       },
-      "required": ["name", "domain"],
+      "required": ["name", "type"],
       "additionalProperties": false
     },
 
@@ -739,18 +739,11 @@
           "type": "array",
           "items": { "$ref": "#/$defs/Parameter" }
         },
-        "domain": {
+        "type": {
           "oneOf": [{ "$ref": "#/$defs/ValueSet" }, { "$ref": "#/$defs/Void" }]
         }
       },
-      "required": [
-        "kind",
-        "body",
-        "baseName",
-        "labels",
-        "parameters",
-        "domain"
-      ],
+      "required": ["kind", "body", "baseName", "labels", "parameters", "type"],
       "additionalProperties": false
     }
   }

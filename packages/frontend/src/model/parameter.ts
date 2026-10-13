@@ -1,6 +1,6 @@
 import { Expression } from '@/model'
-import { DomainDeclaration } from '@/model/domain-declaration'
 import { IsolationLevel, UNKNOWN } from '@/model/isolation-level'
+import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 
 export class Parameter {
@@ -10,7 +10,7 @@ export class Parameter {
         public readonly varName: string,
         public readonly span: SourceCodeSpan,
         public readonly isolationLevel: IsolationLevel | UNKNOWN,
-        public readonly domain: DomainDeclaration | undefined,
+        public readonly type: TypeConstraintDeclaration | undefined,
         public readonly defaultValue?: Expression,
     ) {}
 
@@ -19,14 +19,14 @@ export class Parameter {
         label,
         varName,
         isolationLevel,
-        domain,
+        type,
         defaultValue,
         span,
     }: {
         label: string | undefined
         varName: string
         isolationLevel: IsolationLevel | UNKNOWN
-        domain?: DomainDeclaration
+        type?: TypeConstraintDeclaration
         isImmutable: boolean
         defaultValue?: Expression
         span: SourceCodeSpan
@@ -37,7 +37,7 @@ export class Parameter {
             varName,
             span,
             isolationLevel,
-            domain,
+            type,
             defaultValue,
         )
     }

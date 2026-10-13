@@ -73,15 +73,15 @@ export class PropertyReference implements Expression {
         const propertyResult = this.getPropertyFromContext(context)
         if (propertyResult.isError) return propertyResult
         const property = propertyResult.value
-        return property.domain instanceof RCTypeSet
+        return property.type instanceof RCTypeSet
             ? Result.value(property.isolationLevel ?? ISOLATED)
             : Result.value(ISOLATED)
     }
 
-    domain(context: Context): SemanticResult<ValueSet> {
+    type(context: Context): SemanticResult<ValueSet> {
         const propertyResult = this.getPropertyFromContext(context)
         if (propertyResult.isError) return propertyResult
-        return Result.value(propertyResult.value.domain!)
+        return Result.value(propertyResult.value.type!)
     }
 
     currentValue(context: Context): SemanticResult<ValueSet> {
@@ -96,7 +96,7 @@ export class PropertyReference implements Expression {
         if (objectValue.properties)
             return Result.value(objectValue.properties[this.property])
 
-        return this.domain(context)
+        return this.type(context)
     }
 
     setCurrentValue(context: Context, value: ValueSet): SemanticResult {
@@ -136,14 +136,14 @@ export class PropertyReference implements Expression {
             kind: 'PROPERTY_REF',
             object,
             property: this.property,
-            domain: property.domain.toCIR(),
+            type: property.type.toCIR(),
         } satisfies cir.Expression)
     }
 
     private getPropertyFromContext(
         context: Context,
     ): SemanticResult<DataDeclaration['properties'][number]> {
-        const objectValueResult = this.object.domain(context)
+        const objectValueResult = this.object.type(context)
         if (objectValueResult.isError) return objectValueResult
         const objectValue = objectValueResult.value
         if (!(objectValue instanceof RCTypeSet))

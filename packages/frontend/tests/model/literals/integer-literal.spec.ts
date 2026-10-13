@@ -9,7 +9,7 @@ describe('IntegerLiteral', () => {
             const result = literal.toCIRExpression()
             expect(result.isSuccess && result.value).toMatchObject({
                 kind: 'INTEGER_LITERAL',
-                domain: { value: input },
+                type: { value: input },
             })
         })
 

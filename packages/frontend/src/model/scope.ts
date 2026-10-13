@@ -118,13 +118,13 @@ export class Scope {
         this.addVariableDeclaration('self', {
             isImmutable: false,
             isolationLevel: SHARED,
-            domain: RCTypeSet.create({ type }),
+            type: RCTypeSet.create({ type }),
         })
     }
 
     releaseVariables() {
         const vars = [...this.variables.entries()]
-            .filter((v) => v[1].domain instanceof RCTypeSet)
+            .filter((v) => v[1].type instanceof RCTypeSet)
             .map((v) => v[0])
 
         for (const name of vars) {
@@ -142,15 +142,15 @@ export class Scope {
         const value = this.currentValues.get(name)
         if (value) return value
         const variable = this.variables.get(name)
-        if (variable) return variable.domain
+        if (variable) return variable.type
         if (this.parentScope) return this.parentScope.currentValue(name)
-        return this.rootScope.variableDeclaration(name)?.domain
+        return this.rootScope.variableDeclaration(name)?.type
     }
 
     setCurrentValue(name: string, valueSet: ValueSet): Result {
         const variable = this.variableDeclaration(name)
         if (!variable) return ErrorResult.failure(`Unknown variable: ${name}`)
-        if (!variable?.domain.isSupersetTo(valueSet))
+        if (!variable?.type.isSupersetTo(valueSet))
             return ErrorResult.failure(`Incompatible value for ${name}`)
         this.currentValues.set(name, valueSet)
         return Result.ok
@@ -160,5 +160,5 @@ export class Scope {
 type Variable = {
     isImmutable: boolean
     isolationLevel: IsolationLevel | UNKNOWN
-    domain: ValueSet
+    type: ValueSet
 }

@@ -1,9 +1,9 @@
 import { Context, Declaration, Expression, Statement } from '@/model'
-import { DomainDeclaration } from '@/model/domain-declaration'
 import { ISOLATED, IsolationLevel, UNIQUE } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import { Retain } from '@/model/retain'
 import { Scope } from '@/model/scope'
+import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { ValueSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
@@ -20,7 +20,7 @@ export class VariableDeclaration implements Statement, Declaration {
         private readonly isImmutable: boolean,
         private readonly name: string,
         private readonly isolationLevel: IsolationLevel,
-        private readonly domain: DomainDeclaration | undefined,
+        private readonly type: TypeConstraintDeclaration | undefined,
         private readonly initialValue: Expression,
         private readonly span: SourceCodeSpan,
         private readonly nameSpan: SourceCodeSpan,
@@ -30,7 +30,7 @@ export class VariableDeclaration implements Statement, Declaration {
         isImmutable,
         name,
         isolationLevel,
-        domain,
+        type,
         initialValue,
         span,
         nameSpan,
@@ -38,7 +38,7 @@ export class VariableDeclaration implements Statement, Declaration {
         isImmutable: boolean
         name: string
         isolationLevel: IsolationLevel
-        domain?: DomainDeclaration
+        type?: TypeConstraintDeclaration
         initialValue: Expression
         span: SourceCodeSpan
         nameSpan: SourceCodeSpan
@@ -47,7 +47,7 @@ export class VariableDeclaration implements Statement, Declaration {
             isImmutable,
             name,
             isolationLevel,
-            domain,
+            type,
             initialValue,
             span,
             nameSpan,
@@ -72,15 +72,15 @@ export class VariableDeclaration implements Statement, Declaration {
         const validityResult = this.checkValidity(initialValue, context)
         if (validityResult.isError) return validityResult
 
-        const domain =
+        const type =
             this.isImmutable && this.isolationLevel === ISOLATED
                 ? initialValue
-                : (this.domain ?? initialValue.unconstrained())
+                : (this.type ?? initialValue.unconstrained())
 
         scope.addVariableDeclaration(this.name, {
             isImmutable: this.isImmutable,
             isolationLevel: this.isolationLevel!!,
-            domain: domain,
+            type: type,
         })
         context.highlightRecorder?.record('variable', this.nameSpan, [
             'declaration',
@@ -88,7 +88,7 @@ export class VariableDeclaration implements Statement, Declaration {
         ])
         this.setCurrentValue(context, initialValue)
 
-        const emissionResult = this.emitCIRDeclaration(context, domain, scope)
+        const emissionResult = this.emitCIRDeclaration(context, type, scope)
         if (emissionResult.isError) return emissionResult
 
         return Result.ok
@@ -96,7 +96,7 @@ export class VariableDeclaration implements Statement, Declaration {
 
     private emitCIRDeclaration(
         context: Context,
-        domain: ValueSet,
+        type: ValueSet,
         scope: Scope | Scope['rootScope'],
     ): SemanticResult {
         const valueResult = Retain.ifStorage(this.initialValue, context)
@@ -105,7 +105,7 @@ export class VariableDeclaration implements Statement, Declaration {
 
         const initialValueResult = value.toCIRExpression({
             ...context,
-            explicitDomain: this.domain,
+            explicitType: this.type,
             isolationLevel: this.isolationLevel,
         })
         if (initialValueResult.isError) return initialValueResult
@@ -114,7 +114,7 @@ export class VariableDeclaration implements Statement, Declaration {
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,
             name: this.name,
-            domain: domain.toCIR(),
+            type: type.toCIR(),
             initialValue: initialValue,
         })
 
@@ -165,7 +165,7 @@ export class VariableDeclaration implements Statement, Declaration {
     }
 
     private isValidValue(currentValue: ValueSet) {
-        return !this.domain || this.domain.isSupersetTo(currentValue)
+        return !this.type || this.type.isSupersetTo(currentValue)
     }
 
     private currentValueFromInitial(
@@ -173,7 +173,7 @@ export class VariableDeclaration implements Statement, Declaration {
     ): SemanticResult<ValueSet> {
         return this.initialValue.currentValue({
             ...context,
-            explicitDomain: this.domain,
+            explicitType: this.type,
         })
     }
 }

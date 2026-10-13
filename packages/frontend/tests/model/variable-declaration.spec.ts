@@ -1,5 +1,4 @@
 import { DataDeclaration } from '@/model/data-declaration'
-import { decorateDomain } from '@/model/domain-declaration'
 import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
@@ -10,6 +9,7 @@ import {
 } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { PropertyReference } from '@/model/property-reference'
+import { decorateTypeConstraint } from '@/model/type-constraint-declaration'
 import { TypeName } from '@/model/type-name'
 import { IntegerSet, RCTypeSet, TruthvalueSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
@@ -23,7 +23,7 @@ describe('VariableDeclaration', () => {
             isImmutable: true,
             name: 'foo',
             isolationLevel: ISOLATED,
-            domain: decorateDomain(IntegerSet.unconstrained(), {
+            type: decorateTypeConstraint(IntegerSet.unconstrained(), {
                 span: util.someCodeSpan,
             }),
             initialValue: IntegerLiteral.create({
@@ -38,10 +38,10 @@ describe('VariableDeclaration', () => {
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'VARIABLE_DECL',
             name: 'foo',
-            domain: { universe: 'integer', value: '1' },
+            type: { universe: 'integer', value: '1' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
-                domain: { universe: 'integer', value: '1' },
+                type: { universe: 'integer', value: '1' },
             },
         })
     })
@@ -61,7 +61,7 @@ describe('VariableDeclaration', () => {
             })
             const context = util.newSemanticContext()
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).domain).toEqual({
+            expect((context.scope.emitted[0] as any).type).toEqual({
                 universe: 'integer',
                 value: '1',
             })
@@ -88,15 +88,18 @@ describe('VariableDeclaration', () => {
                             name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(IntegerSet.unconstrained(), {
-                                span: util.someCodeSpan,
-                            }),
+                            type: decorateTypeConstraint(
+                                IntegerSet.unconstrained(),
+                                {
+                                    span: util.someCodeSpan,
+                                },
+                            ),
                         },
                     ],
                 }),
             )
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).domain).toEqual({
+            expect((context.scope.emitted[0] as any).type).toEqual({
                 universe: 'integer',
             })
         })
@@ -115,7 +118,7 @@ describe('VariableDeclaration', () => {
             })
             const context = util.newSemanticContext()
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).domain).toEqual({
+            expect((context.scope.emitted[0] as any).type).toEqual({
                 universe: 'truthvalue',
                 value: 'true',
             })
@@ -142,7 +145,7 @@ describe('VariableDeclaration', () => {
                             name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(
+                            type: decorateTypeConstraint(
                                 TruthvalueSet.unconstrained(),
                                 { span: util.someCodeSpan },
                             ),
@@ -151,7 +154,7 @@ describe('VariableDeclaration', () => {
                 }),
             )
             decl.emitStatement(context)
-            expect((context.scope.emitted[0] as any).domain).toEqual({
+            expect((context.scope.emitted[0] as any).type).toEqual({
                 universe: 'truthvalue',
                 values: ['false', 'ambiguous', 'true'],
             })
@@ -169,9 +172,12 @@ describe('VariableDeclaration', () => {
                             name: 'innerProperty',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(IntegerSet.unconstrained(), {
-                                span: util.someCodeSpan,
-                            }),
+                            type: decorateTypeConstraint(
+                                IntegerSet.unconstrained(),
+                                {
+                                    span: util.someCodeSpan,
+                                },
+                            ),
                         },
                     ],
                 }),
@@ -184,7 +190,7 @@ describe('VariableDeclaration', () => {
                             name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(
+                            type: decorateTypeConstraint(
                                 RCTypeSet.create({
                                     type: TypeName.create({
                                         name: 'InnerType',
@@ -199,7 +205,7 @@ describe('VariableDeclaration', () => {
             context.scope.addVariableDeclaration('bar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: TypeName.create({ name: 'OuterType' }),
                 }),
             })
@@ -225,7 +231,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: false,
                 name: 'foo',
                 isolationLevel: ISOLATED,
-                domain: decorateDomain(
+                type: decorateTypeConstraint(
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'InnerType' }),
                     }),
@@ -270,9 +276,12 @@ describe('VariableDeclaration', () => {
                             name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(IntegerSet.unconstrained(), {
-                                span: util.someCodeSpan,
-                            }),
+                            type: decorateTypeConstraint(
+                                IntegerSet.unconstrained(),
+                                {
+                                    span: util.someCodeSpan,
+                                },
+                            ),
                         },
                     ],
                 }),
@@ -280,7 +289,7 @@ describe('VariableDeclaration', () => {
             context.scope.addVariableDeclaration('bar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
             })
@@ -301,7 +310,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: false,
                 name: 'foo',
                 isolationLevel: ISOLATED,
-                domain: decorateDomain(
+                type: decorateTypeConstraint(
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
@@ -336,9 +345,12 @@ describe('VariableDeclaration', () => {
                             name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(IntegerSet.unconstrained(), {
-                                span: util.someCodeSpan,
-                            }),
+                            type: decorateTypeConstraint(
+                                IntegerSet.unconstrained(),
+                                {
+                                    span: util.someCodeSpan,
+                                },
+                            ),
                         },
                     ],
                 }),
@@ -346,7 +358,7 @@ describe('VariableDeclaration', () => {
             context.scope.addVariableDeclaration('bar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyType' }),
                 }),
             })
@@ -367,7 +379,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: false,
                 name: 'foo',
                 isolationLevel: ISOLATED,
-                domain: decorateDomain(IntegerSet.unconstrained(), {
+                type: decorateTypeConstraint(IntegerSet.unconstrained(), {
                     span: util.someCodeSpan,
                 }),
                 initialValue: PropertyReference.create({
@@ -422,7 +434,7 @@ describe('VariableDeclaration', () => {
             name: 'x',
             isImmutable: false,
             isolationLevel: ISOLATED,
-            domain: decorateDomain(
+            type: decorateTypeConstraint(
                 RCTypeSet.create({
                     type: TypeName.create({ name: 'Object' }),
                 }),
@@ -447,7 +459,7 @@ describe('VariableDeclaration', () => {
             {
                 kind: 'VARIABLE_DECL',
                 name: 'x',
-                domain: {
+                type: {
                     universe: 'rc-type',
                     name: 'Object',
                 },
@@ -455,7 +467,7 @@ describe('VariableDeclaration', () => {
                     kind: 'ALLOCATION',
                     isolationLevel: 'ISOLATED',
                     properties: [],
-                    domain: {
+                    type: {
                         universe: 'rc-type',
                         name: 'Object',
                     },
@@ -473,7 +485,7 @@ describe('VariableDeclaration', () => {
                     object: {
                         kind: 'VARIABLE_REF',
                         name: 'x',
-                        domain: {
+                        type: {
                             universe: 'rc-type',
                             name: 'Object',
                         },
@@ -489,7 +501,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: true,
                 name: 'x',
                 isolationLevel: ISOLATED,
-                domain: decorateDomain(IntegerSet.unconstrained(), {
+                type: decorateTypeConstraint(IntegerSet.unconstrained(), {
                     span: util.someCodeSpan,
                 }),
                 initialValue: IntegerLiteral.create({
@@ -504,7 +516,7 @@ describe('VariableDeclaration', () => {
             expect(context.scope.variableDeclaration('x')).toEqual({
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                domain: IntegerSet.range({ min: 42n, max: 42n }),
+                type: IntegerSet.range({ min: 42n, max: 42n }),
             })
         })
 
@@ -518,9 +530,12 @@ describe('VariableDeclaration', () => {
                             isImmutable: false,
                             name: 'innerProperty',
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(IntegerSet.unconstrained(), {
-                                span: util.someCodeSpan,
-                            }),
+                            type: decorateTypeConstraint(
+                                IntegerSet.unconstrained(),
+                                {
+                                    span: util.someCodeSpan,
+                                },
+                            ),
                         },
                     ],
                 }),
@@ -533,7 +548,7 @@ describe('VariableDeclaration', () => {
                             name: 'property',
                             isImmutable: false,
                             isolationLevel: ISOLATED,
-                            domain: decorateDomain(
+                            type: decorateTypeConstraint(
                                 RCTypeSet.create({
                                     type: TypeName.create({
                                         name: 'InnerType',
@@ -550,7 +565,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: true,
                 name: 'target',
                 isolationLevel: ISOLATED,
-                domain: decorateDomain(
+                type: decorateTypeConstraint(
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'OuterType' }),
                     }),
@@ -611,7 +626,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: true,
                 name: 'foo',
                 isolationLevel: ISOLATED,
-                domain: decorateDomain(
+                type: decorateTypeConstraint(
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
@@ -639,7 +654,7 @@ describe('VariableDeclaration', () => {
             context.scope.addVariableDeclaration('c', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: TypeName.create({ name: 'MyData' }),
                 }),
             })
@@ -648,7 +663,7 @@ describe('VariableDeclaration', () => {
                 isImmutable: true,
                 name: 'r',
                 isolationLevel: SHARED,
-                domain: decorateDomain(
+                type: decorateTypeConstraint(
                     RCTypeSet.create({
                         type: TypeName.create({ name: 'MyData' }),
                     }),
@@ -691,7 +706,7 @@ describe('VariableDeclaration', () => {
                                 name: 'myProperty',
                                 isImmutable: false,
                                 isolationLevel: ISOLATED,
-                                domain: decorateDomain(
+                                type: decorateTypeConstraint(
                                     IntegerSet.unconstrained(),
                                     { span: util.someCodeSpan },
                                 ),
@@ -702,7 +717,7 @@ describe('VariableDeclaration', () => {
                 context.scope.addVariableDeclaration('value', {
                     isImmutable,
                     isolationLevel: SHARED,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: TypeName.create({ name: 'MyType' }),
                     }),
                 })
@@ -723,7 +738,7 @@ describe('VariableDeclaration', () => {
                     isImmutable: false,
                     name: 'target',
                     isolationLevel: ISOLATED,
-                    domain: decorateDomain(
+                    type: decorateTypeConstraint(
                         RCTypeSet.create({
                             type: TypeName.create({ name: 'MyType' }),
                         }),

@@ -1,14 +1,14 @@
 import { TokenStream } from '@/lexer'
-import { DomainDeclaration } from '@/model/domain-declaration'
+import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import {
     VARIABLE_SEMANTICS,
     VariableDeclaration,
 } from '@/model/variable-declaration'
 import { Context } from '@/parser'
-import { DomainParser } from '@/parser/domain-parser'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { SemanticsKeyword } from '@/parser/semantics-keyword-parser'
 import { StatementParser } from '@/parser/statement-parser'
+import { TypeConstraintParser } from '@/parser/type-constraint-parser'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
     private expressionParser: ExpressionParser
@@ -30,24 +30,26 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
         const semanticsKeyword = SemanticsKeyword[semanticsToken.keyword]
         const nameToken = stream.expect('IDENTIFIER')
         const name = nameToken.identifier
-        const domain = this.parseDomain(stream)
+        const type = this.parseTypeConstraint(stream)
         stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse(stream)
         return VariableDeclaration.create({
             ...semanticsKeyword,
             name,
             isolationLevel: semanticsKeyword.isolationLevel,
-            domain,
+            type,
             initialValue,
             nameSpan: { start: nameToken.start, end: nameToken.end },
             span: { start: semanticsToken.start, end: initialValue.span.end },
         })
     }
 
-    private parseDomain(stream: TokenStream): DomainDeclaration | undefined {
+    private parseTypeConstraint(
+        stream: TokenStream,
+    ): TypeConstraintDeclaration | undefined {
         if (!stream.isNext('PUNCTUATION', ':')) return undefined
 
         stream.expect('PUNCTUATION', ':')
-        return DomainParser.create(this.context).parse(stream)
+        return TypeConstraintParser.create(this.context).parse(stream)
     }
 }

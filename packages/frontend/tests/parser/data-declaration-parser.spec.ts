@@ -27,8 +27,8 @@ describe('DataDeclarationParser', () => {
                 },
             ],
         })
-        expect(result.properties[0].domain).toBeInstanceOf(IntegerSet)
-        expect(result.properties[1].domain).toBeInstanceOf(TruthvalueSet)
+        expect(result.properties[0].type).toBeInstanceOf(IntegerSet)
+        expect(result.properties[1].type).toBeInstanceOf(TruthvalueSet)
     })
 
     it('parses a data declaration with mixed semantics', () => {
@@ -53,8 +53,8 @@ describe('DataDeclarationParser', () => {
                 },
             ],
         })
-        expect(result.properties[0].domain).toBeInstanceOf(IntegerSet)
-        expect(result.properties[1].domain).toBeInstanceOf(TruthvalueSet)
+        expect(result.properties[0].type).toBeInstanceOf(IntegerSet)
+        expect(result.properties[1].type).toBeInstanceOf(TruthvalueSet)
     })
 })
 

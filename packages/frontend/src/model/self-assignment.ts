@@ -25,15 +25,15 @@ export class SelfAssignment implements Statement {
         const validityResult = this.checkValidity(context)
         if (validityResult.isError) return validityResult
 
-        const targetDomain = context.scope.selfVariable()?.domain
+        const targetType = context.scope.selfVariable()?.type
 
-        const explicitDomainContext = {
+        const explicitTypeContext = {
             ...context,
             isolationLevel: SHARED,
-            explicitDomain: targetDomain,
+            explicitType: targetType,
         }
 
-        const valueResult = this.value.currentValue(explicitDomainContext)
+        const valueResult = this.value.currentValue(explicitTypeContext)
         if (valueResult.isError) return valueResult
         const cirResults = this.emitCIRStatements(context)
         if (cirResults.isError) return cirResults
@@ -45,14 +45,14 @@ export class SelfAssignment implements Statement {
     }
 
     private emitCIRStatements(context: Context): SemanticResult {
-        const explicitDomainContext = {
+        const explicitTypeContext = {
             ...context,
             isolationLevel: SHARED,
-            explicitDomain: context.scope.selfVariable()?.domain,
+            explicitType: context.scope.selfVariable()?.type,
         }
         const valueCIRResult = this.value.toCIRExpression({
-            ...explicitDomainContext,
-            isolationLevel: explicitDomainContext.isolationLevel,
+            ...explicitTypeContext,
+            isolationLevel: explicitTypeContext.isolationLevel,
         })
         if (valueCIRResult.isError) return valueCIRResult
 
@@ -67,28 +67,26 @@ export class SelfAssignment implements Statement {
                     name: f.name,
                     value: f.value,
                 })),
-                domain: value.domain,
+                type: value.type,
             },
         })
         return Result.ok
     }
 
     private checkValidity(context: Context): SemanticResult {
-        const targetDomain = context.scope.selfVariable()?.domain
-        if (!targetDomain) throw new Error('`self` variable not added')
-        const explicitDomainContext = {
+        const targetType = context.scope.selfVariable()?.type
+        if (!targetType) throw new Error('`self` variable not added')
+        const explicitTypeContext = {
             ...context,
             isolationLevel: SHARED,
-            explicitDomain: targetDomain,
+            explicitType: targetType,
         }
-        const assignedValueResult = this.value.currentValue(
-            explicitDomainContext,
-        )
+        const assignedValueResult = this.value.currentValue(explicitTypeContext)
         if (assignedValueResult.isError) return assignedValueResult
         const assignedValue = assignedValueResult.value
-        if (!targetDomain.isSupersetTo(assignedValue))
+        if (!targetType.isSupersetTo(assignedValue))
             return SemanticErrorResult.failure(
-                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetDomain.toString()}`,
+                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetType.toString()}`,
                 this.span,
             )
         return Result.ok

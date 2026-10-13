@@ -3,13 +3,13 @@ $schema: http://clawr.lang/schema/cir/DRAFT-0
 declarations:
   - kind: VARIABLE_DECL
     name: foo
-    domain:
+    type:
       universe: integer
       max: '1'
       min: '1'
     initialValue:
       kind: INTEGER_LITERAL
-      domain:
+      type:
         universe: integer
         value: '1'
 startBlock:
@@ -20,14 +20,14 @@ startBlock:
       expression:
         kind: VARIABLE_REF
         name: foo
-        domain:
+        type:
           universe: integer
           max: '1'
           min: '1'
-      domain:
+      type:
         universe: integer
         boxed: true
-    domain:
+    type:
       universe: integer
       boxed: true
   - kind: CALL
@@ -37,7 +37,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ0
-        domain:
+        type:
           universe: integer
           boxed: true
   - kind: RELEASE

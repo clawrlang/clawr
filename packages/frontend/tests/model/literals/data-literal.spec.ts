@@ -29,7 +29,7 @@ describe('DataLiteral', () => {
 
         const result = dataLiteral.toCIRExpression({
             ...context,
-            explicitDomain: RCTypeSet.create({
+            explicitType: RCTypeSet.create({
                 type: util.simpleTypeName('MyType'),
             }),
             isolationLevel: SHARED,
@@ -41,14 +41,14 @@ describe('DataLiteral', () => {
                     name: 'x',
                     value: {
                         kind: 'INTEGER_LITERAL',
-                        domain: { value: '42' },
+                        type: { value: '42' },
                     },
                 },
                 {
                     name: 'y',
                     value: {
                         kind: 'INTEGER_LITERAL',
-                        domain: { value: '17' },
+                        type: { value: '17' },
                     },
                 },
             ],
@@ -77,7 +77,7 @@ describe('DataLiteral', () => {
 
         const result = dataLiteral.currentValue({
             ...context,
-            explicitDomain: RCTypeSet.create({
+            explicitType: RCTypeSet.create({
                 type: util.simpleTypeName('MyType'),
             }),
         })
@@ -99,7 +99,7 @@ describe('DataLiteral', () => {
                     {
                         ...util.somePropertyDeclConfig,
                         name: 'inner',
-                        domain: util.spannedDomain(
+                        type: util.spannedTypeConstraint(
                             RCTypeSet.create({
                                 type: util.simpleTypeName('MissingInnerType'),
                             }),
@@ -129,7 +129,7 @@ describe('DataLiteral', () => {
 
         const result = dataLiteral.currentValue({
             ...context,
-            explicitDomain: RCTypeSet.create({
+            explicitType: RCTypeSet.create({
                 type: util.simpleTypeName('OuterType'),
             }),
         })

@@ -39,19 +39,19 @@ export class IntegerLiteral<Value extends bigint> implements Expression {
         return Result.value(this.value)
     }
 
-    domain(): SuccessResult<IntegerSet<Value, Value>> {
+    type(): SuccessResult<IntegerSet<Value, Value>> {
         return Result.value(this.value)
     }
 
     toCIRExpression(): SuccessResult<
         cir.Expression & { kind: 'INTEGER_LITERAL' }
     > {
-        const domain = this.value.toCIR()
-        if (!('value' in domain)) throw new Error('Expected singleton domain')
+        const type = this.value.toCIR()
+        if (!('value' in type)) throw new Error('Expected singleton type')
 
         return Result.value({
             kind: 'INTEGER_LITERAL',
-            domain,
+            type,
         })
     }
 

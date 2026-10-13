@@ -32,7 +32,7 @@ describe('Assignment', () => {
                 target: { kind: 'VARIABLE_REF', name: 'x' },
                 value: {
                     kind: 'INTEGER_LITERAL',
-                    domain: { value: '42' },
+                    type: { value: '42' },
                 },
             },
         ])
@@ -50,7 +50,7 @@ describe('Assignment', () => {
         )
         context.scope.addVariableDeclaration('x', {
             ...util.someIntegerVariable,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyData'),
                 properties: { property: IntegerSet.singleton(12n) },
             }),
@@ -79,7 +79,7 @@ describe('Assignment', () => {
                             name: 'property',
                             value: {
                                 kind: 'INTEGER_LITERAL',
-                                domain: { value: '1' },
+                                type: { value: '1' },
                             },
                         },
                     ],
@@ -109,7 +109,7 @@ describe('Assignment', () => {
                         {
                             ...util.somePropertyDeclConfig,
                             name: 'property',
-                            domain: util.spannedDomain(
+                            type: util.spannedTypeConstraint(
                                 RCTypeSet.create({
                                     type: util.simpleTypeName('InnerType'),
                                 }),
@@ -120,13 +120,13 @@ describe('Assignment', () => {
             )
             context.scope.addVariableDeclaration('bar', {
                 ...util.someIntegerVariable,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('OuterType'),
                 }),
             })
             context.scope.addVariableDeclaration('foo', {
                 ...util.someIntegerVariable,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('InnerType'),
                 }),
             })
@@ -145,7 +145,7 @@ describe('Assignment', () => {
                 {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
-                    domain: {
+                    type: {
                         universe: 'rc-type',
                         name: 'InnerType',
                     },
@@ -186,13 +186,13 @@ describe('Assignment', () => {
             )
             context.scope.addVariableDeclaration('bar', {
                 ...util.someIntegerVariable,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyType'),
                 }),
             })
             context.scope.addVariableDeclaration('foo', {
                 ...util.someIntegerVariable,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyType'),
                 }),
             })
@@ -208,7 +208,7 @@ describe('Assignment', () => {
                 {
                     kind: 'VARIABLE_DECL',
                     name: '__tempˇ0',
-                    domain: {
+                    type: {
                         universe: 'rc-type',
                         name: 'MyType',
                     },
@@ -263,7 +263,7 @@ describe('Assignment', () => {
                         {
                             ...util.somePropertyDeclConfig,
                             name: 'property',
-                            domain: util.spannedDomain(
+                            type: util.spannedTypeConstraint(
                                 RCTypeSet.create({
                                     type: util.simpleTypeName('MyType'),
                                 }),
@@ -274,7 +274,7 @@ describe('Assignment', () => {
             )
             context.scope.addVariableDeclaration('x', {
                 ...util.someIntegerVariable,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyData'),
                 }),
             })
@@ -344,7 +344,7 @@ describe('Assignment', () => {
             )
             context.scope.addVariableDeclaration('x', {
                 ...util.someIntegerVariable,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyType'),
                 }),
             })
@@ -398,7 +398,7 @@ describe('Assignment', () => {
         )
         context.scope.addVariableDeclaration('foo', {
             ...util.someIntegerVariable,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyType'),
             }),
         })
@@ -437,7 +437,7 @@ describe('Assignment', () => {
             FunctionDeclaration.create({
                 baseName: 'myFunction',
                 result: {
-                    domain: util.spannedDomain(
+                    type: util.spannedTypeConstraint(
                         RCTypeSet.create({
                             type: util.simpleTypeName('MyType'),
                         }),
@@ -454,13 +454,13 @@ describe('Assignment', () => {
         context.scope.rootScope.addVariableDeclaration('refVar', {
             isImmutable: false,
             isolationLevel: SHARED,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyType'),
             }),
         })
         context.scope.rootScope.addVariableDeclaration('mutVar', {
             ...util.someIntegerVariable,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyType'),
             }),
         })
@@ -526,14 +526,14 @@ describe('Assignment', () => {
                 context.scope.addVariableDeclaration('target', {
                     isImmutable: true,
                     isolationLevel,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: util.simpleTypeName('MyType'),
                     }),
                 })
                 context.scope.addVariableDeclaration('value', {
                     isImmutable: true,
                     isolationLevel,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: util.simpleTypeName('MyType'),
                     }),
                 })
@@ -576,7 +576,7 @@ describe('Assignment', () => {
         context.scope.addVariableDeclaration('x', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyType'),
             }),
         })
@@ -622,7 +622,7 @@ describe('Assignment', () => {
         context.scope.addVariableDeclaration('x', {
             isImmutable: true,
             isolationLevel: UNKNOWN,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyType'),
             }),
         })
@@ -680,14 +680,14 @@ describe('Assignment', () => {
                 )
                 context.scope.addVariableDeclaration('target', {
                     ...util.someIntegerVariable,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: util.simpleTypeName('MyType'),
                     }),
                 })
                 context.scope.addVariableDeclaration('value', {
                     isImmutable,
                     isolationLevel: SHARED,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: util.simpleTypeName('MyType'),
                     }),
                 })
@@ -720,14 +720,14 @@ describe('Assignment', () => {
                 context.scope.addVariableDeclaration('target', {
                     isImmutable: false,
                     isolationLevel,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: util.simpleTypeName('MyType'),
                     }),
                 })
                 context.scope.addVariableDeclaration('value', {
                     isImmutable: true,
                     isolationLevel: UNKNOWN,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: util.simpleTypeName('MyType'),
                     }),
                 })
@@ -785,7 +785,7 @@ describe('Assignment', () => {
             context.scope.addVariableDeclaration('x', {
                 isImmutable: true,
                 isolationLevel: SHARED,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyType'),
                 }),
             })

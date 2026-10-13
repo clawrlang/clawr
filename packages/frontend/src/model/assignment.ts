@@ -34,24 +34,24 @@ export class Assignment implements Statement {
 
         const collected = SemanticResult.collect([
             this.target.isolationLevel(context),
-            this.target.domain(context),
+            this.target.type(context),
         ])
         if (collected.isError) return collected
 
-        const [targetIsolationLevel, targetDomain] = collected.value
+        const [targetIsolationLevel, targetType] = collected.value
         if (targetIsolationLevel === UNKNOWN)
             return SemanticErrorResult.failure(
                 'Cannot assign to target parameter with UNKNOWN isolation-level',
                 this.span,
             )
 
-        const explicitDomainContext = {
+        const explicitTypeContext = {
             ...context,
             isolationLevel: targetIsolationLevel,
-            explicitDomain: targetDomain,
+            explicitType: targetType,
         }
 
-        const value = this.value.currentValue(explicitDomainContext)
+        const value = this.value.currentValue(explicitTypeContext)
         if (value.isError) return value
         const cirResults = this.emitCIRStatements(context)
         if (cirResults.isError) return cirResults
@@ -67,35 +67,35 @@ export class Assignment implements Statement {
     private emitCIRStatements(context: Context): SemanticResult {
         const collectedTargetResults = SemanticResult.collect([
             this.target.isolationLevel(context),
-            this.target.domain(context),
+            this.target.type(context),
             this.target.toCIRExpression(context),
         ])
         if (collectedTargetResults.isError) return collectedTargetResults
-        const [targetIsolationLevel, targetDomain, target] =
+        const [targetIsolationLevel, targetType, target] =
             collectedTargetResults.value
 
-        const explicitDomainContext = {
+        const explicitTypeContext = {
             ...context,
             isolationLevel: targetIsolationLevel,
-            explicitDomain: targetDomain,
+            explicitType: targetType,
         }
 
         const collectedValueResults = SemanticResult.collect([
-            this.value.isolationLevel(explicitDomainContext),
+            this.value.isolationLevel(explicitTypeContext),
             Retain.ifStorage(this.value, context),
         ])
         if (collectedValueResults.isError) return collectedValueResults
 
         const [valueIsolationLevel, retainedValue] = collectedValueResults.value
-        if (explicitDomainContext.isolationLevel === UNKNOWN)
+        if (explicitTypeContext.isolationLevel === UNKNOWN)
             return SemanticErrorResult.failure(
                 'Cannot assign to parameter with UNKNOWN isolationLevel',
                 this.span,
             )
 
         const retainedValueCIRResult = retainedValue.toCIRExpression({
-            ...explicitDomainContext,
-            isolationLevel: explicitDomainContext.isolationLevel,
+            ...explicitTypeContext,
+            isolationLevel: explicitTypeContext.isolationLevel,
         })
         if (retainedValueCIRResult.isError) return retainedValueCIRResult
 
@@ -112,7 +112,7 @@ export class Assignment implements Statement {
             context.scope.emitted.push({
                 kind: 'VARIABLE_DECL' as const,
                 name: tempVar,
-                domain: targetDomain.toCIR(),
+                type: targetType.toCIR(),
                 initialValue: target,
             })
 
@@ -131,7 +131,7 @@ export class Assignment implements Statement {
                 },
             )
         } else if (
-            targetDomain instanceof RCTypeSet &&
+            targetType instanceof RCTypeSet &&
             retainedValueCIR?.kind === 'CALL' &&
             valueIsolationLevel === UNIQUE
         ) {
@@ -141,7 +141,7 @@ export class Assignment implements Statement {
                 value: {
                     kind: 'AS_SHARED',
                     object: retainedValueCIR,
-                    domain: targetDomain.toCIR(),
+                    type: targetType.toCIR(),
                 },
             })
         } else {
@@ -156,11 +156,11 @@ export class Assignment implements Statement {
 
     private checkValidity(context: Context): SemanticResult {
         const collected = SemanticResult.collect([
-            this.target.domain(context),
+            this.target.type(context),
             this.target.isolationLevel(context),
         ])
         if (collected.isError) return collected
-        const [targetDomain, targetIsolationLevel] = collected.value
+        const [targetType, targetIsolationLevel] = collected.value
 
         if (targetIsolationLevel === UNKNOWN)
             return SemanticErrorResult.failure(
@@ -168,19 +168,17 @@ export class Assignment implements Statement {
                 this.span,
             )
 
-        const explicitDomainContext = {
+        const explicitTypeContext = {
             ...context,
             isolationLevel: targetIsolationLevel,
-            explicitDomain: targetDomain,
+            explicitType: targetType,
         }
-        const assignedValueResult = this.value.currentValue(
-            explicitDomainContext,
-        )
+        const assignedValueResult = this.value.currentValue(explicitTypeContext)
         if (assignedValueResult.isError) return assignedValueResult
         const assignedValue = assignedValueResult.value
-        if (!targetDomain.isSupersetTo(assignedValue))
+        if (!targetType.isSupersetTo(assignedValue))
             return SemanticErrorResult.failure(
-                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetDomain.toString()}`,
+                `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetType.toString()}`,
                 this.span,
             )
         const valueIsolationLevelResult = this.value.isolationLevel(context)

@@ -5,7 +5,7 @@ declarations:
     name: MyData
     properties:
       - name: property
-        domain:
+        type:
           universe: integer
   - kind: FUNCTION_DECL
     baseName: f
@@ -14,36 +14,36 @@ declarations:
     body:
       - kind: VARIABLE_DECL
         name: var
-        domain:
+        type:
           universe: rc-type
           name: MyData
         initialValue:
           kind: ALLOCATION
           isolationLevel: ISOLATED
-          domain:
+          type:
             universe: rc-type
             name: MyData
           properties:
             - name: property
               value:
                 kind: INTEGER_LITERAL
-                domain:
+                type:
                   universe: integer
                   value: '42'
       - kind: RETURN
         value:
           kind: VARIABLE_REF
           name: var
-          domain:
+          type:
             universe: rc-type
             name: MyData
-    domain:
+    type:
       universe: rc-type
       name: MyData
 startBlock:
   - kind: VARIABLE_DECL
     name: var
-    domain:
+    type:
       universe: rc-type
       name: MyData
     initialValue:
@@ -54,10 +54,10 @@ startBlock:
           baseName: f
           labels: []
         arguments: []
-        domain:
+        type:
           universe: rc-type
           name: MyData
-      domain:
+      type:
         universe: rc-type
         name: MyData
   - kind: VARIABLE_DECL
@@ -69,15 +69,15 @@ startBlock:
         object:
           kind: VARIABLE_REF
           name: var
-          domain:
+          type:
             universe: integer
         property: property
-        domain:
+        type:
           universe: integer
-      domain:
+      type:
         universe: integer
         boxed: true
-    domain:
+    type:
       universe: integer
       boxed: true
   - kind: CALL
@@ -87,7 +87,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ0
-        domain:
+        type:
           universe: integer
           boxed: true
   - kind: RELEASE

@@ -13,7 +13,7 @@ describe('Property Reference', () => {
         const context = util.newSemanticContext()
         context.scope.addVariableDeclaration('myVar', {
             ...util.someIntegerVariable,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyType'),
             }),
         })
@@ -30,7 +30,7 @@ describe('Property Reference', () => {
             util.variableRef('myVar'),
             'myProperty',
         )
-        const result = propertyRef.domain(context)
+        const result = propertyRef.type(context)
         expect(result.isSuccess && result.value.toCIR().universe).toBe(
             'integer',
         )
@@ -40,7 +40,7 @@ describe('Property Reference', () => {
         const context = util.newSemanticContext()
         context.scope.addVariableDeclaration('myVar', {
             ...util.someIntegerVariable,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyType'),
             }),
         })
@@ -52,7 +52,7 @@ describe('Property Reference', () => {
                         isImmutable: true,
                         name: 'myProperty',
                         isolationLevel: SHARED,
-                        domain: util.spannedDomain(
+                        type: util.spannedTypeConstraint(
                             RCTypeSet.create({
                                 type: util.simpleTypeName('MyType'),
                             }),
@@ -100,7 +100,7 @@ describe('Property Reference', () => {
                 context.scope.addVariableDeclaration('myVar', {
                     isImmutable,
                     isolationLevel: expected,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: util.simpleTypeName('MyType'),
                     }),
                 })
@@ -118,7 +118,7 @@ describe('Property Reference', () => {
                                 isImmutable,
                                 name: 'myProperty',
                                 isolationLevel: expected,
-                                domain: util.spannedDomain(
+                                type: util.spannedTypeConstraint(
                                     RCTypeSet.create({
                                         type: util.simpleTypeName('InnerType'),
                                     }),
@@ -140,7 +140,7 @@ describe('Property Reference', () => {
                           )
                 const result = SemanticResult.collect([
                     propertyRef.isolationLevel(context),
-                    propertyRef.domain(context),
+                    propertyRef.type(context),
                 ])
 
                 expect(result.isSuccess && result.value).toMatchObject([
@@ -154,7 +154,7 @@ describe('Property Reference', () => {
         const context = util.newSemanticContext()
         context.scope.addVariableDeclaration('myVar', {
             ...util.someIntegerVariable,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: util.simpleTypeName('MyType'),
             }),
         })
@@ -209,7 +209,7 @@ describe('Property Reference', () => {
                 context.scope.addVariableDeclaration('myVar', {
                     isImmutable,
                     isolationLevel,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: util.simpleTypeName('MyType'),
                     }),
                 })
@@ -277,7 +277,7 @@ describe('Property Reference', () => {
                 context.scope.addVariableDeclaration('myVar', {
                     isImmutable,
                     isolationLevel,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: util.simpleTypeName('MyType'),
                     }),
                 })
@@ -308,7 +308,7 @@ describe('Property Reference', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyType'),
                 }),
             })
@@ -334,7 +334,7 @@ describe('Property Reference', () => {
             context.scope.addVariableDeclaration('myVar', {
                 isImmutable: true,
                 isolationLevel: UNKNOWN,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyType'),
                 }),
             })
@@ -359,7 +359,7 @@ describe('Property Reference', () => {
             const context = util.newSemanticContext()
             context.scope.addVariableDeclaration('myVar', {
                 ...util.someIntegerVariable,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: util.simpleTypeName('MyType'),
                 }),
             })
@@ -383,7 +383,7 @@ describe('Property Reference', () => {
     })
 
     describe('current value', () => {
-        it('returns the declared domain (Data)', () => {
+        it('returns the declared type (Data)', () => {
             const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
@@ -392,7 +392,7 @@ describe('Property Reference', () => {
                         {
                             ...util.somePropertyDeclConfig,
                             name: 'property',
-                            domain: util.spannedDomain(
+                            type: util.spannedTypeConstraint(
                                 IntegerSet.range({ max: 100n, min: 0n }),
                             ),
                         },
@@ -401,7 +401,7 @@ describe('Property Reference', () => {
             )
             context.scope.addVariableDeclaration('myVar', {
                 ...util.someIntegerVariable,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: TypeName.create({ name: 'Data' }),
                 }),
             })
@@ -415,7 +415,7 @@ describe('Property Reference', () => {
             })
         })
 
-        it('returns the declared domain (Object)', () => {
+        it('returns the declared type (Object)', () => {
             const context = util.newSemanticContext()
             context.scope.rootScope.addObjectDeclaration(
                 ObjectDeclaration.create({
@@ -425,7 +425,7 @@ describe('Property Reference', () => {
                         {
                             ...util.somePropertyDeclConfig,
                             name: 'property',
-                            domain: util.spannedDomain(
+                            type: util.spannedTypeConstraint(
                                 IntegerSet.range({ max: 100n, min: 0n }),
                             ),
                         },
@@ -434,7 +434,7 @@ describe('Property Reference', () => {
             )
             context.scope.addVariableDeclaration('myVar', {
                 ...util.someIntegerVariable,
-                domain: RCTypeSet.create({
+                type: RCTypeSet.create({
                     type: TypeName.create({ name: 'Object' }),
                 }),
             })

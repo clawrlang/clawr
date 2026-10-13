@@ -24,7 +24,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             const properties = decl.properties
                 .map(
                     (property) =>
-                        `${lowerType(property.domain)} ${property.name};`,
+                        `${lowerType(property.type)} ${property.name};`,
                 )
                 .join('\n')
             if (!('methods' in decl))
@@ -82,7 +82,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             `
         }
         case 'VARIABLE_DECL':
-            return `${lowerType(decl.domain)} ${decl.name};`
+            return `${lowerType(decl.type)} ${decl.name};`
 
         case 'FUNCTION_DECL':
             return lowerFunction(decl, mangleNameWithParameters(decl))
@@ -120,7 +120,7 @@ function lowerAbstractSlot(slot: FunctionSignature) {
     const params: FunctionSignature['parameters'] = [
         {
             name: 'self',
-            domain: {
+            type: {
                 universe: 'rc-type',
                 name: 'void',
             },
@@ -128,18 +128,18 @@ function lowerAbstractSlot(slot: FunctionSignature) {
         ...slot.parameters,
     ]
     const paramDecls = params
-        .map((param) => `${lowerType(param.domain)} ${param.name}`)
+        .map((param) => `${lowerType(param.type)} ${param.name}`)
         .join(', ')
-    return `${lowerType(slot.domain)} (*${slotName})(${paramDecls});`
+    return `${lowerType(slot.type)} (*${slotName})(${paramDecls});`
 }
 
 function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
-    const returnType = lowerType(slot.domain)
+    const returnType = lowerType(slot.type)
 
     const params: FunctionSignature['parameters'] = [
         {
             name: 'self',
-            domain: {
+            type: {
                 universe: 'rc-type',
                 name: 'void',
             },
@@ -150,7 +150,7 @@ function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
     const mangledName = mangleNameWithParameters(slot, declaredIn)
 
     const paramDecls = params
-        .map((param) => `${lowerType(param.domain)} ${param.name}`)
+        .map((param) => `${lowerType(param.type)} ${param.name}`)
         .join(', ')
     return `typedef ${returnType} (*${mangledName}ˇmethod)(${paramDecls});`
 }
@@ -166,7 +166,7 @@ function lowerMethod(
             parameters: [
                 {
                     name: 'self',
-                    domain: {
+                    type: {
                         universe: 'rc-type',
                         namespace: receiverType.namespace,
                         name: receiverType.name,
@@ -184,7 +184,7 @@ function lowerInitializer(
     receiverType: cir.Declaration & { kind: 'RC_TYPE_DECL' },
 ): string {
     const mangledFunctionName = mangleNameWithParameters(decl, receiverType)
-    const domain = {
+    const type = {
         universe: 'rc-type' as const,
         namespace: receiverType.namespace,
         name: receiverType.name,
@@ -192,13 +192,13 @@ function lowerInitializer(
     const self = {
         kind: 'VARIABLE_REF' as const,
         name: 'self',
-        value: domain,
-        domain,
+        value: type,
+        type,
     }
     return lowerFunction(
         {
             ...decl,
-            domain: { universe: 'rc-type', name: 'void', namespace: undefined },
+            type: { universe: 'rc-type', name: 'void', namespace: undefined },
             parameters: [self, ...decl.parameters],
             body: [...decl.body, { kind: 'RETURN', value: self }],
         },
@@ -212,20 +212,20 @@ function lowerFunction(
 ) {
     const params = decl.parameters
         .map((param) => {
-            return param.domain.universe === 'rc-type'
+            return param.type.universe === 'rc-type'
                 ? `void* cˇ${param.name}`
-                : `${lowerType(param.domain)} ${param.name}`
+                : `${lowerType(param.type)} ${param.name}`
         })
         .join(', ')
-    const returnType = decl.domain ? lowerType(decl.domain) : 'void'
+    const returnType = lowerType(decl.type)
 
     return `${returnType} ${mangledName}(${params}) {
         ${[
             ...decl.parameters
-                .filter((param) => param.domain.universe === 'rc-type')
+                .filter((param) => param.type.universe === 'rc-type')
                 .map(
                     (param) =>
-                        `${lowerType(param.domain)} ${param.name} = cˇ${param.name};\n`,
+                        `${lowerType(param.type)} ${param.name} = cˇ${param.name};\n`,
                 ),
             ...decl.body.map(lowerStmt),
         ].join('\n')}
@@ -262,23 +262,23 @@ export function lowerStmt(stmt: cir.Statement): string {
         case 'CALL':
             return `${lowerFunctionCall(stmt)};`
         case 'VARIABLE_DECL':
-            return `${lowerType(stmt.domain)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
+            return `${lowerType(stmt.type)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
         case 'ASSIGN':
             if (
                 stmt.target.kind === 'VARIABLE_REF' &&
                 stmt.value.kind === 'ALLOCATION'
             )
-                return `memcpy(&${lowerStorage(stmt.target)}->properties, &(${mangleTypeName(stmt.value.domain)}ˇproperties){
+                return `memcpy(&${lowerStorage(stmt.target)}->properties, &(${mangleTypeName(stmt.value.type)}ˇproperties){
                         ${stmt.value.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
                     },
-                    sizeof(${mangleTypeName(stmt.value.domain)}ˇproperties));`
+                    sizeof(${mangleTypeName(stmt.value.type)}ˇproperties));`
             else
                 return `${lowerStorage(stmt.target)} = ${lowerExpr(stmt.value)};`
         case 'SELF_ASSIGN':
-            return `memcpy(&self->properties, &(${mangleTypeName(stmt.value.domain)}ˇproperties){
+            return `memcpy(&self->properties, &(${mangleTypeName(stmt.value.type)}ˇproperties){
                     ${stmt.value.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
                 },
-                sizeof(${mangleTypeName(stmt.value.domain)}ˇproperties));`
+                sizeof(${mangleTypeName(stmt.value.type)}ˇproperties));`
         case 'ENSURE_UNIQUE':
             return `mutateRC(${lowerStorage(stmt.object)});`
         case 'RELEASE':
@@ -304,9 +304,9 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'RETAIN':
             return `retainRC(${lowerStorage(expr.object)})`
         case 'STRING_LITERAL':
-            return `"${expr.domain.value}"`
+            return `"${expr.type.value}"`
         case 'INTEGER_LITERAL':
-            return expr.domain.value
+            return expr.type.value
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
         case 'CALL':
@@ -318,18 +318,18 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'AS_SHARED':
             return `shareRC(${lowerExpr(expr.object)})`
         case 'BOX':
-            switch (expr.domain.universe) {
+            switch (expr.type.universe) {
                 case 'truthvalue':
                     return `boxTruthvalue(${lowerExpr(expr.expression)})`
                 case 'integer':
                     return `integerWithDigits(1, ${lowerExpr(expr.expression)})`
                 default:
                     throw new Error(
-                        `Unknown box universe: ${expr.expression.domain.universe}`,
+                        `Unknown box universe: ${expr.expression.type.universe}`,
                     )
             }
         case 'ALLOCATION':
-            const mangledTypeName = mangleTypeName(expr.domain)
+            const mangledTypeName = mangleTypeName(expr.type)
             return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
                 ${expr.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
             )`
@@ -337,9 +337,9 @@ export function lowerExpr(expr: cir.Expression): string {
             // Cast necessary because of shared mutable state. TypeScript cannot merge Truth[] and (false | true)[] into one type as they are contra-variant.
             // Of course, `includes()` is a read-only operation, which is always safe, but TypeScript is incapable of drawing that conclusion.
             const values: cir.truthvalue[] =
-                'value' in expr.left.domain
-                    ? [expr.left.domain.value]
-                    : expr.left.domain.values
+                'value' in expr.left.type
+                    ? [expr.left.type.value]
+                    : expr.left.type.values
             if (values.includes('ambiguous'))
                 throw new Error('ambiguity not yet supported')
             return `(${lowerExpr(expr.left)}) || (${lowerExpr(expr.right)})`
@@ -379,8 +379,8 @@ export function lowerExpr(expr: cir.Expression): string {
 
 export function lowerStorage(
     expr:
-        | Omit<cir.Expression & { kind: 'VARIABLE_REF' }, 'domain'>
-        | Omit<cir.Expression & { kind: 'PROPERTY_REF' }, 'domain'>,
+        | Omit<cir.Expression & { kind: 'VARIABLE_REF' }, 'type'>
+        | Omit<cir.Expression & { kind: 'PROPERTY_REF' }, 'type'>,
 ): string {
     switch (expr.kind) {
         case 'VARIABLE_REF':
@@ -401,12 +401,12 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
             return `${name}(${args.join(', ')})`
         }
         case 'direct': {
-            const name = mangleNameWithLabels(call.name, receiver.object.domain)
+            const name = mangleNameWithLabels(call.name, receiver.object.type)
             return `${name}(${[lowerExpr(receiver.object), ...args].join(', ')})`
         }
         case 'inherited': {
             const targetName = lowerExpr(receiver.object)
-            const declarationType = mangleTypeName(receiver.object.domain)
+            const declarationType = mangleTypeName(receiver.object.type)
             const slotName = mangleNameWithLabels({
                 ...call.name,
                 namespace: undefined,
@@ -424,7 +424,7 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
 export function lowerTruthvalueLiteral(
     expr: Extract<cir.Expression, { kind: 'TRUTHVALUE_LITERAL' }>,
 ): string {
-    return `c_${expr.domain.value}`
+    return `c_${expr.type.value}`
 }
 
 function mangleNameWithParameters(

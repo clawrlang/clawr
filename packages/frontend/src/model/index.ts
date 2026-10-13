@@ -16,13 +16,13 @@ export type Context = {
     scope: Scope
     highlightRecorder?: HighlightRecorder
     calleeResult?: {
-        domain: ValueSet
+        type: ValueSet
         isolationLevel: IsolationLevel | UNIQUE
     }
 }
 
-export type ContextWithDomain = Context & {
-    explicitDomain?: ValueSet
+export type ContextWithType = Context & {
+    explicitType?: ValueSet
     isolationLevel?: IsolationLevel
 }
 
@@ -31,9 +31,9 @@ export interface Expression {
 
     isEffectivelyConst(context: Context): SemanticResult<boolean>
     isolationLevel(context: Context): SemanticResult<AnyIsolationLevel>
-    domain(context: ContextWithDomain): SemanticResult<ValueSet>
-    currentValue(context: ContextWithDomain): SemanticResult<ValueSet>
-    toCIRExpression(context: ContextWithDomain): SemanticResult<cir.Expression>
+    type(context: ContextWithType): SemanticResult<ValueSet>
+    currentValue(context: ContextWithType): SemanticResult<ValueSet>
+    toCIRExpression(context: ContextWithType): SemanticResult<cir.Expression>
 
     setCurrentValue?(context: Context, value: ValueSet): SemanticResult
 }

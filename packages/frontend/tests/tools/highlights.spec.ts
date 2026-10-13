@@ -48,7 +48,7 @@ describe('HighlightRecorder', () => {
         context.scope.addVariableDeclaration('foo', {
             isImmutable: false,
             isolationLevel: ISOLATED,
-            domain: IntegerSet.unconstrained(),
+            type: IntegerSet.unconstrained(),
         })
         context.scope.setCurrentValue('foo', IntegerSet.unconstrained())
 
@@ -71,7 +71,9 @@ describe('HighlightRecorder', () => {
                         name: 'property',
                         isImmutable: false,
                         isolationLevel: ISOLATED,
-                        domain: util.spannedDomain(IntegerSet.unconstrained()),
+                        type: util.spannedTypeConstraint(
+                            IntegerSet.unconstrained(),
+                        ),
                     },
                 ],
             }),
@@ -79,7 +81,7 @@ describe('HighlightRecorder', () => {
         context.scope.addVariableDeclaration('obj', {
             isImmutable: false,
             isolationLevel: ISOLATED,
-            domain: RCTypeSet.create({
+            type: RCTypeSet.create({
                 type: TypeName.create({ name: 'MyType' }),
             }),
         })
@@ -113,7 +115,9 @@ describe('HighlightRecorder', () => {
                     varName: 'x',
                     isolationLevel: ISOLATED,
                     isImmutable: true,
-                    domain: util.spannedDomain(IntegerSet.unconstrained()),
+                    type: util.spannedTypeConstraint(
+                        IntegerSet.unconstrained(),
+                    ),
                     span: util.someCodeSpan,
                 }),
             ],

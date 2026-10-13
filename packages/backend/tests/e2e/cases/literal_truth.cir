@@ -3,7 +3,7 @@ $schema: http://clawr.lang/schema/cir/DRAFT-0
 startBlock:
   - kind: VARIABLE_DECL
     name: __tempˇ0
-    domain:
+    type:
       universe: truthvalue
       boxed: true
       values:
@@ -12,10 +12,10 @@ startBlock:
       kind: BOX
       expression:
         kind: TRUTHVALUE_LITERAL
-        domain:
+        type:
           universe: truthvalue
           value: ambiguous
-      domain:
+      type:
         universe: truthvalue
         boxed: true
         value: ambiguous
@@ -26,7 +26,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ0
-        domain:
+        type:
           universe: rc-type
           name: TruthvalueBox
           namespace: clawr

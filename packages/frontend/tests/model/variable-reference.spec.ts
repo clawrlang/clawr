@@ -11,7 +11,7 @@ describe('Variable Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: IntegerSet.range({ min: 10n, max: 10n }),
+            type: IntegerSet.range({ min: 10n, max: 10n }),
         })
 
         const variableRef = util.variableRef('myVar')
@@ -42,11 +42,11 @@ describe('Variable Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: IntegerSet.range({ min: 10n, max: 10n }),
+            type: IntegerSet.range({ min: 10n, max: 10n }),
         })
 
         const variableRef = util.variableRef('myVar')
-        const result = variableRef.domain(context)
+        const result = variableRef.type(context)
         expect(result.isSuccess && result.value).toEqual(
             IntegerSet.range({ min: 10n, max: 10n }),
         )
@@ -57,7 +57,7 @@ describe('Variable Reference', () => {
         context.scope.addVariableDeclaration('myVar', {
             isImmutable: true,
             isolationLevel: ISOLATED,
-            domain: IntegerSet.range({ min: 10n, max: 10n }),
+            type: IntegerSet.range({ min: 10n, max: 10n }),
         })
 
         const variableRef = util.variableRef('myVar')
@@ -86,7 +86,7 @@ describe('Variable Reference', () => {
                 context.scope.addVariableDeclaration('myVar', {
                     isImmutable: true,
                     isolationLevel,
-                    domain: RCTypeSet.create({
+                    type: RCTypeSet.create({
                         type: util.simpleTypeName('MyType'),
                     }),
                 })

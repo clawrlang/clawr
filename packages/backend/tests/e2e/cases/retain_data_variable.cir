@@ -5,11 +5,11 @@ declarations:
     name: FooData
     properties:
       - name: bar
-        domain:
+        type:
           universe: integer
   - kind: VARIABLE_DECL
     name: two
-    domain:
+    type:
       universe: rc-type
       name: FooData
     initialValue:
@@ -19,16 +19,16 @@ declarations:
         - name: bar
           value:
             kind: INTEGER_LITERAL
-            domain:
+            type:
               universe: integer
               value: '2'
-      domain:
+      type:
         universe: rc-type
         name: FooData
 startBlock:
   - kind: VARIABLE_DECL
     name: one
-    domain:
+    type:
       universe: rc-type
       name: FooData
     initialValue:
@@ -36,7 +36,7 @@ startBlock:
       object:
         kind: VARIABLE_REF
         name: two
-      domain:
+      type:
         universe: rc-type
         name: FooData
   - kind: ENSURE_UNIQUE
@@ -49,13 +49,13 @@ startBlock:
       object:
         kind: VARIABLE_REF
         name: one
-        domain:
+        type:
           universe: rc-type
           name: FooData
       property: bar
     value:
       kind: INTEGER_LITERAL
-      domain:
+      type:
         universe: integer
         value: '1'
   - kind: VARIABLE_DECL
@@ -67,16 +67,16 @@ startBlock:
         object:
           kind: VARIABLE_REF
           name: two
-          domain:
+          type:
             universe: rc-type
             name: FooData
         property: bar
-        domain:
+        type:
           universe: integer
-      domain:
+      type:
         universe: integer
         boxed: true
-    domain:
+    type:
       universe: integer
       boxed: true
   - kind: CALL
@@ -86,7 +86,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ0
-        domain:
+        type:
           universe: integer
           boxed: true
   - kind: RELEASE
@@ -102,16 +102,16 @@ startBlock:
         object:
           kind: VARIABLE_REF
           name: one
-          domain:
+          type:
             universe: rc-type
             name: FooData
         property: bar
-        domain:
+        type:
           universe: integer
-      domain:
+      type:
         universe: integer
         boxed: true
-    domain:
+    type:
       universe: integer
       boxed: true
   - kind: CALL
@@ -121,7 +121,7 @@ startBlock:
     arguments:
       - kind: VARIABLE_REF
         name: __tempˇ1
-        domain:
+        type:
           universe: integer
           boxed: true
   - kind: RELEASE

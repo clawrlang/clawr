@@ -145,6 +145,12 @@
 
     "FunctionCallStatement": {
       "type": "object",
+      "$ref": "#/$defs/FunctionCall",
+      "unevaluatedProperties": false
+    },
+
+    "FunctionCall": {
+      "type": "object",
       "properties": {
         "kind": { "const": "CALL" },
         "receiver": { "$ref": "#/$defs/Receiver" },
@@ -154,8 +160,7 @@
           "items": { "$ref": "#/$defs/Expression" }
         }
       },
-      "required": ["kind", "name", "arguments"],
-      "additionalProperties": false
+      "required": ["kind", "name", "arguments"]
     },
 
     "Receiver": {
@@ -210,18 +215,17 @@
 
     "FunctionCallExpression": {
       "type": "object",
-      "properties": {
-        "kind": { "const": "CALL" },
-        "receiver": { "$ref": "#/$defs/Receiver" },
-        "name": { "$ref": "#/$defs/FunctionName" },
-        "arguments": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/Expression" }
-        },
-        "type": { "$ref": "#/$defs/ValueSet" }
-      },
-      "required": ["kind", "name", "arguments", "type"],
-      "additionalProperties": false
+      "allOf": [
+        { "$ref": "#/$defs/FunctionCall" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "$ref": "#/$defs/ValueSet" }
+          },
+          "required": ["type"]
+        }
+      ],
+      "unevaluatedProperties": false
     },
 
     "Equality": {

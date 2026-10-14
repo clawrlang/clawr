@@ -242,21 +242,18 @@ describe('Type declaration', () => {
                     ],
                     body: [
                         {
-                            kind: 'SELF_ASSIGN',
-                            value: {
-                                kind: 'DATA',
-                                properties: [
-                                    {
+                            kind: 'SELF_INIT',
+                            type: { universe: 'rc-type', name: 'Super' },
+                            properties: [
+                                {
+                                    name: 'property',
+                                    value: {
+                                        kind: 'VARIABLE_REF',
                                         name: 'property',
-                                        value: {
-                                            kind: 'VARIABLE_REF',
-                                            name: 'property',
-                                            type: { universe: 'integer' },
-                                        },
+                                        type: { universe: 'integer' },
                                     },
-                                ],
-                                type: { universe: 'rc-type', name: 'Super' },
-                            },
+                                },
+                            ],
                         },
                     ],
                     returnType: { universe: 'void' },

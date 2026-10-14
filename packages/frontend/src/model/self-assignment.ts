@@ -59,16 +59,13 @@ export class SelfAssignment implements Statement {
         const { isolationLevel, ...value } = valueCIRResult.value
 
         context.scope.emitted.push({
-            kind: 'SELF_ASSIGN',
-
-            value: {
-                kind: 'DATA',
-                properties: value.properties?.map((f) => ({
+            kind: 'SELF_INIT',
+            type: value.type,
+            properties:
+                value.properties?.map((f) => ({
                     name: f.name,
                     value: f.value,
-                })),
-                type: value.type,
-            },
+                })) ?? [],
         })
         return Result.ok
     }

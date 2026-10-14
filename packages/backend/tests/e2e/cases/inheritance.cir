@@ -45,21 +45,19 @@ declarations:
               min: '0'
               max: '100'
         body:
-          - kind: SELF_ASSIGN
-            value:
-              kind: DATA
-              type:
-                universe: rc-type
-                name: Super
-              properties:
-                - name: property
-                  value:
-                    kind: VARIABLE_REF
-                    name: property
-                    type:
-                      universe: integer
-                      min: '0'
-                      max: '100'
+          - kind: SELF_INIT
+            type:
+              universe: rc-type
+              name: Super
+            properties:
+              - name: property
+                value:
+                  kind: VARIABLE_REF
+                  name: property
+                  type:
+                    universe: integer
+                    min: '0'
+                    max: '100'
         returnType:
           universe: void
     dispatchTable:
@@ -115,19 +113,17 @@ declarations:
         labels: []
         parameters: []
         body:
-          - kind: SELF_ASSIGN
-            value:
-              kind: DATA
-              properties:
-                - name: property
-                  value:
-                    kind: INTEGER_LITERAL
-                    type:
-                      universe: integer
-                      value: '43'
-              type:
-                universe: rc-type
-                name: Sub1
+          - kind: SELF_INIT
+            type:
+              universe: rc-type
+              name: Sub1
+            properties:
+              - name: property
+                value:
+                  kind: INTEGER_LITERAL
+                  type:
+                    universe: integer
+                    value: '43'
           - kind: CALL
             receiver:
               object:
@@ -173,12 +169,11 @@ declarations:
         labels: []
         parameters: []
         body:
-          - kind: SELF_ASSIGN
-            value:
-              kind: DATA
-              type:
-                universe: rc-type
-                name: Sub2
+          - kind: SELF_INIT
+            type:
+              universe: rc-type
+              name: Sub2
+            properties: []
           - kind: CALL
             receiver:
               object:

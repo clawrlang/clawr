@@ -41,19 +41,17 @@ declarations:
         returnType:
           universe: void
         body:
-          - kind: SELF_ASSIGN
-            value:
-              kind: DATA
-              properties:
-                - name: property
-                  value:
-                    kind: INTEGER_LITERAL
-                    type:
-                      universe: integer
-                      value: '42'
-              type:
-                universe: rc-type
-                name: Object
+          - kind: SELF_INIT
+            type:
+              universe: rc-type
+              name: Object
+            properties:
+              - name: property
+                value:
+                  kind: INTEGER_LITERAL
+                  type:
+                    universe: integer
+                    value: '42'
   - kind: FUNCTION_DECL
     namespace: Object
     baseName: new

@@ -208,12 +208,7 @@ describe('ObjectDeclaration', () => {
                         baseName: 'implicit',
                         labels: [],
                         parameters: [],
-                        body: [
-                            {
-                                kind: 'SELF_ASSIGN',
-                                value: {},
-                            },
-                        ],
+                        body: [{ kind: 'SELF_INIT' }],
                         returnType: { universe: 'void' },
                     },
                     {
@@ -221,12 +216,7 @@ describe('ObjectDeclaration', () => {
                         baseName: 'selfAssign',
                         labels: ['label'],
                         parameters: [{ name: 'var' }],
-                        body: [
-                            {
-                                kind: 'SELF_ASSIGN',
-                                value: {},
-                            },
-                        ],
+                        body: [{ kind: 'SELF_INIT' }],
                         returnType: { universe: 'void' },
                     },
                 ],

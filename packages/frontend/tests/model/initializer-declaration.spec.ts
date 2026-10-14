@@ -78,11 +78,8 @@ describe('FunctionDeclaration (initializer)', () => {
             returnType: { universe: 'void' },
             body: [
                 {
-                    kind: 'SELF_ASSIGN',
-                    value: {
-                        kind: 'DATA',
-                        properties: [{ value: { type: { value: '42' } } }],
-                    },
+                    kind: 'SELF_INIT',
+                    properties: [{ value: { type: { value: '42' } } }],
                 },
             ],
         })
@@ -265,12 +262,7 @@ describe('FunctionDeclaration (initializer)', () => {
             baseName: 'makeNew',
             parameters: [],
             returnType: { universe: 'void' },
-            body: [
-                {
-                    kind: 'SELF_ASSIGN',
-                    value: { kind: 'DATA' },
-                },
-            ],
+            body: [{ kind: 'SELF_INIT' }],
         })
     })
 
@@ -319,27 +311,20 @@ describe('FunctionDeclaration (initializer)', () => {
         expect(result.isSuccess || result.error.errors).toBeTrue()
         expect(result.isSuccess && result.value.body).toMatchObject([
             {
-                kind: 'SELF_ASSIGN',
-                value: {
-                    kind: 'DATA',
-                    properties: [
-                        {
-                            name: 'property',
-                            value: {
-                                kind: 'VARIABLE_REF',
-                                name: 'x',
-                                type: {
-                                    universe: 'string',
-                                },
+                kind: 'SELF_INIT',
+
+                properties: [
+                    {
+                        name: 'property',
+                        value: {
+                            kind: 'VARIABLE_REF',
+                            name: 'x',
+                            type: {
+                                universe: 'string',
                             },
                         },
-                    ],
-                    type: {
-                        universe: 'rc-type',
-                        name: 'Object',
-                        namespace: undefined,
                     },
-                },
+                ],
             },
         ])
     })

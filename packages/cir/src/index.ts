@@ -131,9 +131,13 @@ type Assign = {
     value: Expression
 }
 
-type SelfAssign = {
-    kind: 'SELF_ASSIGN'
-    value: Omit<Allocation, 'kind' | 'isolationLevel'> & { kind: 'DATA' }
+type SelfInitialization = {
+    kind: 'SELF_INIT'
+    type: RCTypeSet
+    properties: {
+        name: string
+        value: Expression
+    }[]
 }
 
 export type Statement =
@@ -143,7 +147,7 @@ export type Statement =
     | Return
     | VariableDeclaration
     | Assign
-    | SelfAssign
+    | SelfInitialization
 
 type Storage = Omit<VariableReference, 'type'> | Omit<PropertyReference, 'type'>
 

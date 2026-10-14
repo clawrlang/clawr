@@ -343,7 +343,9 @@ export function lowerExpr(expr: cir.Expression): string {
             const values: cir.truthvalue[] =
                 'value' in expr.left.type
                     ? [expr.left.type.value]
-                    : expr.left.type.values
+                    : 'values' in expr.left.type
+                      ? expr.left.type.values
+                      : ['false', 'ambiguous', 'true']
             if (values.includes('ambiguous'))
                 throw new Error('ambiguity not yet supported')
             return `(${lowerExpr(expr.left)}) || (${lowerExpr(expr.right)})`

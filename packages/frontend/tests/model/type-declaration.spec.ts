@@ -35,10 +35,7 @@ describe('DataDeclaration', () => {
                     },
                     {
                         name: 'property2',
-                        type: {
-                            universe: 'truthvalue',
-                            values: ['false', 'ambiguous', 'true'],
-                        },
+                        type: { universe: 'truthvalue' },
                     },
                 ],
             },

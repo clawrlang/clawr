@@ -239,7 +239,7 @@ type ArithmeticOperation = {
 
 type EqualityComparison = {
     kind: 'EQUAL' | 'NOT_EQUAL'
-    type: TruthvalueSet<['false', 'true']>
+    type: BooleanSet
 } & (
     | {
           left: Expression & { type: { universe: 'integer' } }
@@ -263,21 +263,21 @@ type OrderComparison = {
         | 'GREATER_THAN_OR_EQUAL'
     left: Expression & { type: { universe: 'integer' | 'real' } }
     right: Expression & { type: { universe: 'integer' | 'real' } }
-    type: TruthvalueSet<['false', 'true']>
+    type: BooleanSet
 }
 
 type RefComparison = {
     kind: 'SAME' | 'NOT_SAME'
     left: Expression & { type: { universe: 'rc-type' | 'interface' } }
     right: Expression & { type: { universe: 'rc-type' | 'interface' } }
-    type: TruthvalueSet<['false', 'true']>
+    type: BooleanSet
 }
 
 type LogicalOperation = {
     kind: 'AND' | 'OR'
     left: Expression & { type: { universe: 'truthvalue' } }
     right: Expression & { type: { universe: 'truthvalue' } }
-    type: TruthvalueSet<['false', 'true']>
+    type: BooleanSet
 }
 
 export type Expression =
@@ -336,13 +336,19 @@ type RealSingleton<Value extends decimal = decimal> = {
     value: `${Value}`
 }
 
-type TruthvalueSet<Values extends truthvalue[] = truthvalue[]> =
+type TruthvalueSet =
     | {
           universe: 'truthvalue'
           boxed?: true
-          values: Values
       }
-    | TruthvalueSingleton<Values[number]>
+    | BooleanSet
+    | TruthvalueSingleton
+
+type BooleanSet = {
+    universe: 'truthvalue'
+    boxed?: true
+    values: ('false' | 'true')[]
+}
 
 type TruthvalueSingleton<Value extends truthvalue = truthvalue> = {
     universe: 'truthvalue'

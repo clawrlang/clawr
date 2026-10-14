@@ -839,12 +839,29 @@
 
     "TruthvalueSet": {
       "oneOf": [
-        { "$ref": "#/$defs/TruthvalueSubset" },
+        { "$ref": "#/$defs/UnconstrainedTruthvalue" },
+        { "$ref": "#/$defs/BooleanSet" },
         { "$ref": "#/$defs/TruthvalueSingleton" }
       ]
     },
 
-    "TruthvalueSubset": {
+    "UnconstrainedTruthvalue": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "truthvalue"
+        },
+        "boxed": {
+          "$comment": "Present if the value is boxed.",
+          "const": true
+        }
+      },
+      "required": ["universe"],
+      "unevaluatedProperties": false
+    },
+
+    "BooleanSet": {
       "type": "object",
       "properties": {
         "universe": {
@@ -858,7 +875,7 @@
         "values": {
           "$comment": "The values in the set.",
           "type": "array",
-          "items": { "$ref": "#/$defs/Truthvalue" }
+          "items": { "$ref": "#/$defs/Boolean" }
         }
       },
       "required": ["universe", "values"],
@@ -883,6 +900,10 @@
       },
       "required": ["universe", "value"],
       "unevaluatedProperties": false
+    },
+
+    "Boolean": {
+      "oneOf": [{ "const": "false" }, { "const": "true" }]
     },
 
     "Truthvalue": {

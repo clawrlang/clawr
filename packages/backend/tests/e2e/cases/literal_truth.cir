@@ -6,8 +6,7 @@ startBlock:
     type:
       universe: truthvalue
       boxed: true
-      values:
-        - ambiguous
+      value: ambiguous
     initialValue:
       kind: BOX
       expression:

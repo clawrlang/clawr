@@ -64,10 +64,7 @@ describe('ValueSet', () => {
         it('converts unconstrained truthvalue to CIR correctly', () => {
             const valueSet = TruthvalueSet.unconstrained()
 
-            expect(valueSet.toCIR()).toEqual({
-                universe: 'truthvalue',
-                values: ['false', 'ambiguous', 'true'],
-            })
+            expect(valueSet.toCIR()).toEqual({ universe: 'truthvalue' })
         })
 
         it('converts string to CIR correctly', () => {

@@ -97,10 +97,12 @@ export class TruthvalueSet<Values extends truthvalue[]> implements ValueSet {
                   universe: 'truthvalue',
                   value: this.values[0],
               }
-            : {
-                  universe: 'truthvalue',
-                  values: this.values,
-              }
+            : this.values.includes('ambiguous')
+              ? { universe: 'truthvalue' }
+              : {
+                    universe: 'truthvalue',
+                    values: this.values as ('false' | 'true')[],
+                }
     }
 
     toString(): string {

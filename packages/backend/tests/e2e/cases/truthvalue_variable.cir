@@ -5,8 +5,7 @@ declarations:
     name: foo
     type:
       universe: truthvalue
-      values:
-        - ambiguous
+      value: ambiguous
     initialValue:
       kind: TRUTHVALUE_LITERAL
       type:
@@ -18,8 +17,7 @@ startBlock:
     type:
       universe: truthvalue
       boxed: true
-      values:
-        - ambiguous
+      value: ambiguous
     initialValue:
       kind: BOX
       expression:
@@ -27,17 +25,9 @@ startBlock:
         name: foo
         type:
           universe: truthvalue
-          values:
-            - 'false'
-            - ambiguous
-            - 'true'
       type:
         universe: truthvalue
         boxed: true
-        values:
-          - 'false'
-          - ambiguous
-          - 'true'
   - kind: CALL
     name:
       baseName: print

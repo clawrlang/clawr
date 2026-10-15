@@ -56,3 +56,5 @@
   - Better to use a separate _compatibility version_ and use the package version as _current version_?
   - Consider libSystem.B.dylib (compatibility version 1.0.0, current version 1356.0.0). Always considered compatible.
 - binary/ternary data (`tritfield`/`bitfield`)
+- should `truthvalue` be `Ordered` – `false < ambiguous < true`?
+- Evaluate a (pure) function call.

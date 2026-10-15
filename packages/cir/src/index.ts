@@ -1,6 +1,6 @@
 import { decimal } from 'decimalish'
 
-export type ClawrModule = {
+export type Module = {
     $schema: 'http://clawr.lang/schema/cir/DRAFT-0'
     startBlock?: Statement[]
     declarations?: Declaration[]

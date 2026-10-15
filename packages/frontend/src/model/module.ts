@@ -18,7 +18,7 @@ export class Module {
         return new Module(main ?? [], declarations ?? [])
     }
 
-    toCIR(context: Context): cir.ClawrModule {
+    toCIR(context: Context): cir.Module {
         const result = SemanticResult.collect([
             ...this.declarations.map((decl) => decl.emitDeclaration(context)),
             ...this.main.map((stmt) => stmt.emitStatement(context)),

@@ -101,7 +101,7 @@ export class TruthvalueSet<Values extends truthvalue[]> implements ValueSet {
               ? { universe: 'truthvalue' }
               : {
                     universe: 'truthvalue',
-                    values: this.values as ('false' | 'true')[],
+                    values: ['false', 'true'],
                 }
     }
 

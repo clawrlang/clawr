@@ -57,7 +57,7 @@ describe('ValueSet', () => {
 
             expect(valueSet.toCIR()).toEqual({
                 universe: 'truthvalue',
-                values: ['true', 'false'],
+                values: ['false', 'true'],
             })
         })
 

@@ -4,13 +4,20 @@
  */
 
 import { ClawrModule } from '@clawr/cir'
-import { Ajv2020 } from 'ajv/dist/2020.js'
 import cirSchema from '@clawr/cir/cir.schema.json' with { type: 'json' }
+import declarations from '@clawr/cir/declarations.json' with { type: 'json' }
+import expressions from '@clawr/cir/expressions.json' with { type: 'json' }
+import statements from '@clawr/cir/statements.json' with { type: 'json' }
+import valueSets from '@clawr/cir/valuesets.json' with { type: 'json' }
+import { Ajv2020 } from 'ajv/dist/2020.js'
 import YAML from 'yaml'
 
-const validate = new Ajv2020({ allErrors: true }).compile<ClawrModule>(
-    cirSchema,
-)
+const validate = new Ajv2020({ allErrors: true })
+    .addSchema(declarations, 'declarations.json')
+    .addSchema(statements, 'statements.json')
+    .addSchema(expressions, 'expressions.json')
+    .addSchema(valueSets, 'valuesets.json')
+    .compile<ClawrModule>(cirSchema)
 
 export default class CIRParser {
     static parse(input: string): ClawrModule {

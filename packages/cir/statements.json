@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/Assign" },
+    { "$ref": "#/$defs/EnsureUnique" },
+    { "$ref": "#/$defs/FunctionCallStatement" },
+    { "$ref": "#/$defs/Release" },
+    { "$ref": "#/$defs/Return" },
+    { "$ref": "#/$defs/SelfInitialization" },
+    { "$ref": "#/$defs/VariableDeclaration" }
+  ],
+  "$defs": {
+    "Assign": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "ASSIGN"
+        },
+        "target": {
+          "$comment": "Target to mutate.",
+          "$ref": "./expressions.json#/$defs/Storage"
+        },
+        "value": {
+          "$comment": "Value to assign to the target.",
+          "$ref": "./expressions.json#"
+        }
+      },
+      "required": ["kind", "target", "value"],
+      "unevaluatedProperties": false
+    },
+    "EnsureUnique": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "ENSURE_UNIQUE"
+        },
+        "object": {
+          "$comment": "The variable or field to isolate for mutation.",
+          "$ref": "./expressions.json#/$defs/Storage"
+        }
+      },
+      "required": ["kind", "object"],
+      "unevaluatedProperties": false
+    },
+    "FunctionCallStatement": {
+      "type": "object",
+      "$ref": "./expressions.json#/$defs/FunctionCall",
+      "unevaluatedProperties": false
+    },
+    "Release": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "RELEASE"
+        },
+        "object": {
+          "$comment": "The variable or field that exits scope.",
+          "$ref": "./expressions.json#/$defs/Storage"
+        }
+      },
+      "required": ["kind", "object"],
+      "unevaluatedProperties": false
+    },
+    "Return": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "RETURN"
+        },
+        "value": {
+          "$comment": "The value to return to the caller.",
+          "$ref": "./expressions.json#"
+        }
+      },
+      "required": ["kind"],
+      "unevaluatedProperties": false
+    },
+    "SelfInitialization": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "SELF_INIT"
+        },
+        "type": {
+          "$comment": "The type of the `self` variable.",
+          "$ref": "./valuesets.json#/$defs/RCTypeSet"
+        },
+        "properties": {
+          "$comment": "Property values for initialization discriminator.",
+          "type": "array",
+          "items": { "$ref": "./expressions.json#/$defs/PropertyInitializer" }
+        }
+      },
+      "required": ["kind", "type", "properties"],
+      "unevaluatedProperties": false
+    },
+    "VariableDeclaration": {
+      "$ref": "./declarations.json#/$defs/VariableDeclaration"
+    }
+  }
+}

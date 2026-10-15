@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/IntegerSet" },
+    { "$ref": "#/$defs/RealSet" },
+    { "$ref": "#/$defs/InterfaceSet" },
+    { "$ref": "#/$defs/RCTypeSet" },
+    { "$ref": "#/$defs/StringSet" },
+    { "$ref": "#/$defs/TruthvalueSet" }
+  ],
+  "$defs": {
+    "IntegerSet": {
+      "oneOf": [
+        { "$ref": "#/$defs/IntegerRange" },
+        { "$ref": "#/$defs/IntegerSingleton" }
+      ]
+    },
+
+    "IntegerSingleton": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "integer"
+        },
+        "boxed": {
+          "$comment": "Present if the value is boxed.",
+          "const": true
+        },
+        "value": {
+          "$comment": "The single value of the set.",
+          "type": "string",
+          "pattern": "^-?\\d+$"
+        }
+      },
+      "required": ["universe", "value"],
+      "unevaluatedProperties": false
+    },
+
+    "IntegerRange": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "integer"
+        },
+        "boxed": {
+          "$comment": "Present if the value is boxed.",
+          "const": true
+        },
+        "min": {
+          "$comment": "The lower bound of the range (inclusive).",
+          "type": "string",
+          "pattern": "^-?\\d+$"
+        },
+        "max": {
+          "$comment": "The upper bound of the range (inclusive).",
+          "type": "string",
+          "pattern": "^-?\\d+$"
+        }
+      },
+      "required": ["universe"],
+      "unevaluatedProperties": false
+    },
+
+    "RealSet": {
+      "oneOf": [
+        { "$ref": "#/$defs/RealRange" },
+        { "$ref": "#/$defs/RealSingleton" }
+      ]
+    },
+
+    "RealSingleton": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "real"
+        },
+        "boxed": {
+          "$comment": "Present if the value is boxed.",
+          "const": true
+        },
+        "value": {
+          "$comment": "The single value of the set.",
+          "type": "string",
+          "pattern": "^-?\\d+\\.\\d+$"
+        }
+      },
+      "required": ["universe", "value"],
+      "unevaluatedProperties": false
+    },
+
+    "RealRange": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "real"
+        },
+        "boxed": {
+          "$comment": "Present if the value is boxed.",
+          "const": true
+        },
+        "min": {
+          "$comment": "The lower bound of the range (inclusive).",
+          "type": "string",
+          "pattern": "^-?\\d+\\.\\d+$"
+        },
+        "max": {
+          "$comment": "The upper bound of the range (inclusive).",
+          "type": "string",
+          "pattern": "^-?\\d+\\.\\d+$"
+        }
+      },
+      "required": ["universe"],
+      "unevaluatedProperties": false
+    },
+
+    "InterfaceSet": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "interface"
+        },
+        "namespace": {
+          "$comment": "Optional namespace.",
+          "type": "string"
+        },
+        "name": {
+          "$comment": "The name of the interface.",
+          "type": "string"
+        }
+      },
+      "required": ["universe", "name"],
+      "unevaluatedProperties": false
+    },
+
+    "RCTypeSet": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "rc-type"
+        },
+        "namespace": {
+          "$comment": "Optional namespace.",
+          "type": "string"
+        },
+        "name": {
+          "$comment": "The name of the type.",
+          "type": "string"
+        }
+      },
+      "required": ["universe", "name"],
+      "unevaluatedProperties": false
+    },
+
+    "StringSet": {
+      "oneOf": [
+        { "$ref": "#/$defs/UnconstrainedString" },
+        { "$ref": "#/$defs/StringSingleton" }
+      ]
+    },
+
+    "UnconstrainedString": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "string"
+        }
+      },
+      "required": ["universe"],
+      "unevaluatedProperties": false
+    },
+
+    "StringSingleton": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "string"
+        },
+        "value": {
+          "$comment": "The single value in the set.",
+          "type": "string"
+        }
+      },
+      "required": ["universe", "value"],
+      "unevaluatedProperties": false
+    },
+
+    "TruthvalueSet": {
+      "oneOf": [
+        { "$ref": "#/$defs/UnconstrainedTruthvalue" },
+        { "$ref": "#/$defs/BooleanSet" },
+        { "$ref": "#/$defs/TruthvalueSingleton" }
+      ]
+    },
+
+    "UnconstrainedTruthvalue": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "truthvalue"
+        },
+        "boxed": {
+          "$comment": "Present if the value is boxed.",
+          "const": true
+        }
+      },
+      "required": ["universe"],
+      "unevaluatedProperties": false
+    },
+
+    "BooleanSet": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "truthvalue"
+        },
+        "boxed": {
+          "$comment": "Present if the value is boxed.",
+          "const": true
+        },
+        "values": {
+          "$comment": "The values in the set.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Boolean" }
+        }
+      },
+      "required": ["universe", "values"],
+      "unevaluatedProperties": false
+    },
+
+    "TruthvalueSingleton": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "truthvalue"
+        },
+        "boxed": {
+          "$comment": "Present if the value is boxed.",
+          "const": true
+        },
+        "value": {
+          "$comment": "The single value in the set.",
+          "$ref": "#/$defs/Truthvalue"
+        }
+      },
+      "required": ["universe", "value"],
+      "unevaluatedProperties": false
+    },
+
+    "Truthvalue": {
+      "oneOf": [{ "const": "ambiguous" }, { "$ref": "#/$defs/Boolean" }]
+    },
+
+    "Boolean": {
+      "oneOf": [{ "const": "false" }, { "const": "true" }]
+    }
+  }
+}

@@ -1,0 +1,483 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/BinaryOperation" },
+    { "$ref": "#/$defs/FunctionCallExpression" },
+    { "$ref": "#/$defs/Literal" },
+    { "$ref": "#/$defs/MemoryExpression" },
+    { "$ref": "#/$defs/PropertyReference" },
+    { "$ref": "#/$defs/VariableReference" }
+  ],
+  "$defs": {
+    "BinaryOperation": {
+      "oneOf": [
+        { "$ref": "#/$defs/Arithmetic" },
+        { "$ref": "#/$defs/Equality" },
+        { "$ref": "#/$defs/LogicalOperation" },
+        { "$ref": "#/$defs/OrderComparison" },
+        { "$ref": "#/$defs/RefComparison" }
+      ]
+    },
+    "FunctionCallExpression": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/FunctionCall" },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "$comment": "The type of the returned value.",
+              "$ref": "./valuesets.json#"
+            }
+          },
+          "required": ["type"]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Literal": {
+      "oneOf": [
+        { "$ref": "#/$defs/IntegerLiteral" },
+        { "$ref": "#/$defs/TruthvalueLiteral" },
+        { "$ref": "#/$defs/StringLiteral" }
+      ]
+    },
+    "MemoryExpression": {
+      "oneOf": [
+        { "$ref": "#/$defs/AsShared" },
+        { "$ref": "#/$defs/Box" },
+        { "$ref": "#/$defs/Allocation" },
+        { "$ref": "#/$defs/Retain" }
+      ]
+    },
+    "PropertyReference": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "PROPERTY_REF"
+        },
+        "object": {
+          "$comment": "The object that owns the property",
+          "$ref": "#"
+        },
+        "property": {
+          "$comment": "The name of the referenced property.",
+          "type": "string"
+        },
+        "type": {
+          "$comment": "The type of the referenced property.",
+          "$ref": "./valuesets.json#"
+        }
+      },
+      "required": ["kind", "object", "property", "type"],
+      "unevaluatedProperties": false
+    },
+    "VariableReference": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "VARIABLE_REF"
+        },
+        "name": {
+          "$comment": "The name of the referenced variable.",
+          "type": "string"
+        },
+        "type": {
+          "$comment": "The type of the variable.",
+          "$ref": "./valuesets.json#"
+        }
+      },
+      "required": ["kind", "name", "type"],
+      "unevaluatedProperties": false
+    },
+
+    "Arithmetic": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "enum": [
+            "ADDITION",
+            "DIVISION",
+            "EXPONENTIAL",
+            "MODULUS",
+            "MULTIPLICATION",
+            "SUBTRACTION"
+          ]
+        },
+        "left": {
+          "$comment": "The left operand.",
+          "$ref": "#"
+        },
+        "right": {
+          "$comment": "The right operand.",
+          "$ref": "#"
+        },
+        "type": {
+          "$comment": "The type of the expression.",
+          "oneOf": [
+            { "$ref": "./valuesets.json#/$defs/IntegerSet" },
+            { "$ref": "./valuesets.json#/$defs/RealSet" }
+          ]
+        }
+      },
+      "required": ["kind", "left", "right", "type"],
+      "unevaluatedProperties": false
+    },
+    "Equality": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "enum": ["EQUAL", "NOT_EQUAL"]
+        },
+        "left": {
+          "$comment": "The left operand.",
+          "$ref": "#"
+        },
+        "right": {
+          "$comment": "The right operand.",
+          "$ref": "#"
+        },
+        "type": {
+          "$comment": "The type of the expression.",
+          "$ref": "./valuesets.json#/$defs/TruthvalueSet"
+        }
+      },
+      "required": ["kind", "type", "left", "right"],
+      "unevaluatedProperties": false
+    },
+    "LogicalOperation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "enum": ["AND", "OR"]
+        },
+        "left": {
+          "$comment": "The left operand.",
+          "$ref": "#"
+        },
+        "right": {
+          "$comment": "The right operand.",
+          "$ref": "#"
+        },
+        "type": {
+          "$comment": "The type of the expression.",
+          "$ref": "./valuesets.json#/$defs/TruthvalueSet"
+        }
+      },
+      "required": ["kind", "left", "right", "type"],
+      "unevaluatedProperties": false
+    },
+    "OrderComparison": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "enum": [
+            "GREATER_THAN",
+            "GREATER_THAN_OR_EQUAL",
+            "LESS_THAN",
+            "LESS_THAN_OR_EQUAL"
+          ]
+        },
+        "left": {
+          "$comment": "The left operand.",
+          "$ref": "#"
+        },
+        "right": {
+          "$comment": "The right operand.",
+          "$ref": "#"
+        },
+        "type": {
+          "$comment": "The type of the expression.",
+          "$ref": "./valuesets.json#/$defs/TruthvalueSet"
+        }
+      },
+      "required": ["kind", "left", "right", "type"],
+      "unevaluatedProperties": false
+    },
+    "RefComparison": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "enum": ["NOT_SAME", "SAME"]
+        },
+        "left": {
+          "$comment": "The left operand.",
+          "$ref": "#"
+        },
+        "right": {
+          "$comment": "The right operand.",
+          "$ref": "#"
+        },
+        "type": {
+          "$comment": "The type of the expression.",
+          "$ref": "./valuesets.json#/$defs/TruthvalueSet"
+        }
+      },
+      "required": ["kind", "left", "right", "type"],
+      "unevaluatedProperties": false
+    },
+
+    "FunctionCall": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "CALL"
+        },
+        "receiver": {
+          "$comment": "The object whose method to call.",
+          "$ref": "#/$defs/Receiver"
+        },
+        "name": {
+          "$comment": "The name of the function to call.",
+          "$ref": "#/$defs/FunctionName"
+        },
+        "arguments": {
+          "$comment": "The arguments to send to the function.",
+          "type": "array",
+          "items": { "$ref": "#" }
+        }
+      },
+      "required": ["kind", "name", "arguments"]
+    },
+    "Receiver": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "$comment": "The object whose method to call.",
+          "$ref": "#"
+        },
+        "dispatch": {
+          "$comment": "The mode of dispatch to call the method.",
+          "enum": ["conformance", "direct", "inherited"]
+        }
+      },
+      "required": ["object", "dispatch"],
+      "unevaluatedProperties": false
+    },
+    "FunctionName": {
+      "type": "object",
+      "properties": {
+        "baseName": {
+          "$comment": "The base name of the function.",
+          "type": "string"
+        },
+        "labels": {
+          "$comment": "The parameter labels (part of the unique name).",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "namespace": {
+          "$comment": "Optional namespace.",
+          "type": "string"
+        }
+      },
+      "required": ["baseName", "labels"],
+      "unevaluatedProperties": false
+    },
+
+    "IntegerLiteral": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "INTEGER_LITERAL"
+        },
+        "type": {
+          "$comment": "The type of the literal (specified its exact value).",
+          "$ref": "./valuesets.json#/$defs/IntegerSingleton"
+        }
+      },
+      "required": ["kind", "type"],
+      "unevaluatedProperties": false
+    },
+    "TruthvalueLiteral": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "TRUTHVALUE_LITERAL"
+        },
+        "type": {
+          "$comment": "The type of the expression.",
+          "$ref": "./valuesets.json#/$defs/TruthvalueSingleton"
+        }
+      },
+      "required": ["kind", "type"],
+      "unevaluatedProperties": false
+    },
+    "StringLiteral": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "STRING_LITERAL"
+        },
+        "type": {
+          "$comment": "The type of the expression.",
+          "$ref": "./valuesets.json#/$defs/StringSingleton"
+        }
+      },
+      "required": ["kind", "type"],
+      "unevaluatedProperties": false
+    },
+
+    "AsShared": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "AS_SHARED"
+        },
+        "object": {
+          "$comment": "The entity to promote to sharing.",
+          "$ref": "#/$defs/FunctionCallExpression"
+        },
+        "type": {
+          "$comment": "The type of the entity.",
+          "$ref": "./valuesets.json#/$defs/RCTypeSet"
+        }
+      },
+      "required": ["kind", "object", "type"],
+      "unevaluatedProperties": false
+    },
+    "Box": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "BOX"
+        },
+        "expression": {
+          "$comment": "The primitive value to box.",
+          "$ref": "#"
+        },
+        "type": {
+          "$comment": "The type of the boxed value (with boxed flag set).",
+          "$ref": "./valuesets.json#"
+        }
+      },
+      "required": ["kind", "expression", "type"],
+      "unevaluatedProperties": false
+    },
+    "Allocation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "ALLOCATION"
+        },
+        "isolationLevel": {
+          "$comment": "The isolation level (ISOLATED or SHARED) of the allocated entity.",
+          "$ref": "#/$defs/IsolationLevel"
+        },
+        "properties": {
+          "$comment": "Property values for initialization.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/PropertyInitializer" }
+        },
+        "type": {
+          "$comment": "The type of the allocated entity.",
+          "$ref": "./valuesets.json#/$defs/RCTypeSet"
+        }
+      },
+      "required": ["kind", "isolationLevel", "type"],
+      "unevaluatedProperties": false
+    },
+    "Retain": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "RETAIN"
+        },
+        "object": {
+          "$comment": "The variable or field to retain.",
+          "$ref": "#/$defs/Storage"
+        },
+        "type": {
+          "$comment": "The type of the retained entity.",
+          "$ref": "./valuesets.json#/$defs/RCTypeSet"
+        }
+      },
+      "required": ["kind", "object", "type"],
+      "unevaluatedProperties": false
+    },
+
+    "Storage": {
+      "oneOf": [
+        { "$ref": "#/$defs/PropertyReferenceStorage" },
+        { "$ref": "#/$defs/VariableReferenceStorage" }
+      ]
+    },
+    "PropertyReferenceStorage": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "PROPERTY_REF"
+        },
+        "object": {
+          "$comment": "The object that owns the property",
+          "$ref": "./expressions.json#"
+        },
+        "property": {
+          "$comment": "The name of the property to assign to.",
+          "type": "string"
+        },
+        "type": {
+          "$comment": "The type of the property.",
+          "$ref": "./valuesets.json#"
+        }
+      },
+      "required": ["kind", "object", "property"],
+      "unevaluatedProperties": false
+    },
+    "VariableReferenceStorage": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "VARIABLE_REF"
+        },
+        "name": {
+          "$comment": "The name of the declared variable.",
+          "type": "string"
+        },
+        "type": {
+          "$comment": "The type of the declared variable.",
+          "$ref": "./valuesets.json#"
+        }
+      },
+      "required": ["kind", "name"],
+      "unevaluatedProperties": false
+    },
+
+    "IsolationLevel": {
+      "oneOf": [{ "const": "ISOLATED" }, { "const": "SHARED" }]
+    },
+    "PropertyInitializer": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$comment": "The name of the property.",
+          "type": "string"
+        },
+        "value": {
+          "$comment": "The type of the property.",
+          "$ref": "./expressions.json#"
+        }
+      },
+      "required": ["name", "value"],
+      "unevaluatedProperties": false
+    }
+  }
+}

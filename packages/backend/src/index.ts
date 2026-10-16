@@ -2,8 +2,93 @@ import * as cir from '@clawr/cir'
 import CIRParser from './cir-parser.js'
 
 // Storage references carry no type in the CIR, so remember declared variable types.
-const variableTypes = new Map<string, cir.ValueSet>()
+let variableTypes = new Map<string, cir.ValueSet>()
 const propertyTypes = new Map<string, cir.ValueSet>()
+
+type CallSignature = {
+    parameters: cir.ValueSet[]
+    returnType: cir.ValueSet | { universe: 'void' }
+}
+const signatures = new Map<string, CallSignature>()
+
+// Owned `Integer*` temporaries of the statement being lowered.
+let temps: { name: string; init: string }[] = []
+let tempCounter = 0
+// Implicit `Integer*` locals of the blocks being lowered, innermost last.
+const blockLocals: string[][] = []
+let currentReturnType: cir.ValueSet | { universe: 'void' } = {
+    universe: 'void',
+}
+
+function hoist(init: string): string {
+    const name = `tmpˇ${tempCounter++}`
+    temps.push({ name, init })
+    return name
+}
+
+function drainTemps(): { pre: string; post: string } {
+    const drained = temps
+    temps = []
+    return {
+        pre: drained.map((t) => `Integer* ${t.name} = ${t.init};`).join('\n'),
+        post: drained.map((t) => `releaseRC(${t.name});`).join('\n'),
+    }
+}
+
+function registerSignature(
+    key: string,
+    signature: {
+        parameters: cir.ValueSet[]
+        returnType: cir.ValueSet | { universe: 'void' }
+    },
+) {
+    signatures.set(key, signature)
+}
+
+function registerSignatures(declarations: cir.Declaration[]) {
+    for (const decl of declarations) {
+        switch (decl.kind) {
+            case 'FUNCTION_DECL':
+                registerSignature(mangleNameWithLabels(decl), {
+                    parameters: decl.parameters.map((p) => p.type),
+                    returnType: decl.returnType,
+                })
+                break
+            case 'INTERFACE_DECL':
+                for (const method of decl.methods)
+                    registerSignature(mangleNameWithLabels(method, decl), {
+                        parameters: method.parameters.map((p) => p.type),
+                        returnType: method.returnType,
+                    })
+                break
+            case 'RC_TYPE_DECL':
+                if (!('methods' in decl)) break
+                for (const method of [
+                    ...decl.methods,
+                    ...(decl.initializers ?? []),
+                ])
+                    registerSignature(mangleNameWithLabels(method, decl), {
+                        parameters: method.parameters.map((p) => p.type),
+                        returnType: method.returnType,
+                    })
+                for (const { slot } of decl.dispatchTable ?? [])
+                    registerSignature(mangleNameWithLabels(slot, decl), {
+                        parameters: slot.parameters.map((p) => p.type),
+                        returnType: slot.returnType,
+                    })
+                break
+        }
+    }
+}
+
+function propertyTypeOf(
+    owner: cir.ValueSet,
+    name: string,
+): cir.ValueSet | undefined {
+    return owner.universe === 'rc-type'
+        ? propertyTypes.get(`${mangleTypeName(owner)}.${name}`)
+        : undefined
+}
 
 function lowerPropertyValue(
     owner: cir.ValueSet,
@@ -27,8 +112,11 @@ function targetType(
 }
 
 export function lower(json: string): string {
-    variableTypes.clear()
+    variableTypes = new Map()
     propertyTypes.clear()
+    signatures.clear()
+    temps = []
+    blockLocals.length = 0
     const cir = CIRParser.parse(json)
     for (const decl of cir.declarations ?? [])
         if (decl.kind === 'RC_TYPE_DECL')
@@ -38,6 +126,8 @@ export function lower(json: string): string {
                     property.type,
                 )
 
+    registerSignatures(cir.declarations ?? [])
+
     const variableDecls =
         cir.declarations?.filter((decl) => decl.kind === 'VARIABLE_DECL') ?? []
     return `#include <stdio.h>
@@ -45,10 +135,36 @@ export function lower(json: string): string {
         ${cir.declarations ? cir.declarations.map(lowerDecl).join('\n') : ''}
         ${variableDecls?.length ? lowerInit(variableDecls) : ''}
         int main() {
-            ${cir.startBlock ? cir.startBlock.map(lowerStmt).join('\n') : ''}
+            ${cir.startBlock ? lowerBlock(cir.startBlock, { universe: 'void' }, []) : ''}
             return 0;
         }
         `
+}
+
+/**
+ * Properties holding implicit `Integer*` values are owned by the entity, so
+ * copy-on-write and deallocation must retain and release them.
+ */
+function lowerNestedHooks(
+    decl: cir.Declaration & { kind: 'RC_TYPE_DECL' },
+    bigProperties: { name: string }[],
+): { code: string; fields: string } {
+    const base = 'base' in decl ? decl.base : undefined
+    if (!bigProperties.length && !base) return { code: '', fields: '' }
+    const name = mangleTypeName(decl)
+    const hook = (action: 'retain' | 'release') => {
+        const baseHook = base
+            ? `{ void (*h)(void *) = ${mangleTypeName(base)}ˇtype.polymorphic_type.data.${action}_nested_properties; if (h) h(self); }`
+            : ''
+        return `static void ${name}ˇ${action}Nested(void *self) {
+            ${baseHook}
+            ${bigProperties.map((p) => `${action}RC(((${name} *)self)->properties.${p.name});`).join('\n')}
+        }`
+    }
+    return {
+        code: `${hook('retain')}\n${hook('release')}`,
+        fields: `, .retain_nested_properties = ${name}ˇretainNested, .release_nested_properties = ${name}ˇreleaseNested`,
+    }
 }
 
 export function lowerDecl(decl: cir.Declaration): string {
@@ -61,6 +177,10 @@ export function lowerDecl(decl: cir.Declaration): string {
                         `${lowerType(property.type)} ${property.name};`,
                 )
                 .join('\n')
+            const bigProperties = decl.properties.filter(
+                (property) => implicitRepresentation(property.type) === 'big',
+            )
+            const nestedHooks = lowerNestedHooks(decl, bigProperties)
             if (!('methods' in decl))
                 return `typedef struct {
                         ${properties}
@@ -70,8 +190,9 @@ export function lowerDecl(decl: cir.Declaration): string {
                         __rc_header header;
                         ${mangledTypeName}ˇproperties properties;
                     } ${mangledTypeName};
+                    ${nestedHooks.code}
                     static const __type_info ${mangledTypeName}ˇtype = {
-                        .data_type = { .size = sizeof(${mangledTypeName}) }
+                        .data_type = { .size = sizeof(${mangledTypeName}) ${nestedHooks.fields} }
                     };`
             const vtableTypedefs = (decl.dispatchTable ?? [])
                 ?.filter(
@@ -90,13 +211,13 @@ export function lowerDecl(decl: cir.Declaration): string {
                 .join('\n')
             const typeInfo = decl.dispatchTable
                 ? `.polymorphic_type = {
-                        .data = { .size = sizeof(${mangledTypeName}) },
+                        .data = { .size = sizeof(${mangledTypeName}) ${nestedHooks.fields} },
                         ${decl.base ? `.super = &${mangleTypeName(decl.base)}ˇtype.polymorphic_type,` : ''}
                         .vtable = &(${mangledTypeName}ˇvtable){
                             ${vtableMethods}
                         }
                     }`
-                : `.data_type = { .size = sizeof(${mangledTypeName}) }`
+                : `.data_type = { .size = sizeof(${mangledTypeName}) ${nestedHooks.fields} }`
             return `typedef struct {
                 ${properties}
             } ${mangledTypeName}ˇproperties;
@@ -108,6 +229,7 @@ export function lowerDecl(decl: cir.Declaration): string {
 
             ${vtableTypedefs.join('\n')}
             ${vtableStruct}
+            ${nestedHooks.code}
             ${decl.methods?.map((m) => lowerMethod(m, decl)).join('\n') ?? ''}
             static const __type_info ${mangledTypeName}ˇtype = {
                 ${typeInfo}
@@ -266,7 +388,7 @@ function lowerFunction(
                     (param) =>
                         `${lowerType(param.type)} ${param.name} = cˇ${param.name};\n`,
                 ),
-            ...decl.body.map(lowerStmt),
+            lowerBlock(decl.body, decl.returnType, decl.parameters),
         ].join('\n')}
     }`
 }
@@ -334,33 +456,126 @@ function isImplicitBig(valueSet: cir.ValueSet): boolean {
     )
 }
 
-/** Lowers `expr` and converts it to the representation of `target`. */
-function lowerConverted(expr: cir.Expression, target: cir.ValueSet): string {
+type Representation = 'native' | 'big'
+
+/** The representation of an implicit (backend-managed) integer, else undefined. */
+function implicitRepresentation(valueSet: cir.ValueSet) {
+    return valueSet.universe === 'integer' && !valueSet.boxed
+        ? rangeRepresentation(valueSet)
+        : undefined
+}
+
+/**
+ * The type that decides how `expr` is stored. For references that is the
+ * declared type, which may be wider than the (narrowed) type of the expression.
+ */
+function storageType(expr: cir.Expression): cir.ValueSet {
+    if (expr.kind === 'VARIABLE_REF')
+        return variableTypes.get(expr.name) ?? expr.type
+    if (expr.kind === 'PROPERTY_REF')
+        return propertyTypeOf(expr.object.type, expr.property) ?? expr.type
+    return expr.type
+}
+
+/** Does evaluating `expr` produce a new `Integer*` that someone must release? */
+function isOwnedBig(expr: cir.Expression): boolean {
+    return (
+        implicitRepresentation(storageType(expr)) === 'big' &&
+        expr.kind !== 'VARIABLE_REF' &&
+        expr.kind !== 'PROPERTY_REF'
+    )
+}
+
+/**
+ * Lowers an integer expression for temporary use in the representation `to`.
+ * The result is borrowed: owned intermediates are hoisted and released after
+ * the statement.
+ */
+function lowerBorrowed(expr: cir.Expression, to: Representation): string {
+    const from = implicitRepresentation(storageType(expr))
     const lowered = lowerExpr(expr)
-    if (target.universe !== 'integer' || expr.type.universe !== 'integer')
-        return lowered
-    const from = integerRepresentation(expr.type)
-    const to = integerRepresentation(target)
-    if (from === to) {
-        // Implicit big values are reference counted by the backend; sharing needs a retain.
-        const shares =
-            to === 'big' &&
-            isImplicitBig(target) &&
-            isImplicitBig(expr.type) &&
-            (expr.kind === 'VARIABLE_REF' || expr.kind === 'PROPERTY_REF')
-        return shares ? `retainRC(${lowered})` : lowered
+    if (from === undefined || from === to)
+        return from === 'big' && isOwnedBig(expr) ? hoist(lowered) : lowered
+    if (from === 'native') return hoist(`Integer¸fromInt64(${lowered})`)
+    return `Integer·toInt64(${isOwnedBig(expr) ? hoist(lowered) : lowered})`
+}
+
+/**
+ * Lowers an integer expression to a value that the receiver will own
+ * (stored in a variable or property, or returned).
+ */
+function lowerOwned(expr: cir.Expression, to: Representation): string {
+    const from = implicitRepresentation(storageType(expr))
+    if (from === undefined) return lowerExpr(expr)
+    if (from === 'native' && to === 'big')
+        return `Integer¸fromInt64(${lowerExpr(expr)})`
+    if (from === 'big' && to === 'native') return lowerBorrowed(expr, to)
+    if (from === 'big')
+        return isOwnedBig(expr)
+            ? lowerExpr(expr)
+            : `retainRC(${lowerExpr(expr)})`
+    return lowerExpr(expr)
+}
+
+/** Lowers `expr` for storing in a location of type `target`. */
+function lowerConverted(expr: cir.Expression, target: cir.ValueSet): string {
+    const to = implicitRepresentation(target)
+    return to === undefined ? lowerExpr(expr) : lowerOwned(expr, to)
+}
+
+/** Lowers a call argument for a parameter of type `parameter`. */
+function lowerArgument(expr: cir.Expression, parameter?: cir.ValueSet) {
+    const to = parameter && implicitRepresentation(parameter)
+    return to === undefined ? lowerExpr(expr) : lowerBorrowed(expr, to)
+}
+
+function lowerBlock(
+    statements: cir.Statement[],
+    returnType: cir.ValueSet | { universe: 'void' },
+    parameters: { name: string; type: cir.ValueSet }[],
+): string {
+    const savedVariables = variableTypes
+    const savedReturnType = currentReturnType
+    variableTypes = new Map(variableTypes)
+    for (const param of parameters) variableTypes.set(param.name, param.type)
+    currentReturnType = returnType
+    blockLocals.push([])
+    try {
+        const lowered = statements.map(lowerStmt)
+        const locals = blockLocals[blockLocals.length - 1]
+        if (statements[statements.length - 1]?.kind !== 'RETURN')
+            lowered.push(...locals.map((name) => `releaseRC(${name});`))
+        return lowered.join('\n')
+    } finally {
+        blockLocals.pop()
+        variableTypes = savedVariables
+        currentReturnType = savedReturnType
     }
-    return from === 'native'
-        ? `Integer¸fromInt64(${lowered})`
-        : `Integer·toInt64(${lowered})`
 }
 
 export function lowerStmt(stmt: cir.Statement): string {
+    const saved = temps
+    temps = []
+    const code = lowerStmtCore(stmt)
+    const { pre, post } = drainTemps()
+    temps = saved
+    return [pre, code, post].filter(Boolean).join('\n')
+}
+
+function lowerStmtCore(stmt: cir.Statement): string {
     switch (stmt.kind) {
-        case 'CALL':
-            return `${lowerFunctionCall(stmt)};`
+        case 'CALL': {
+            const call = lowerFunctionCall(stmt)
+            const returned = signatureOf(stmt)?.returnType
+            return returned &&
+                implicitRepresentation(returned as cir.ValueSet) === 'big'
+                ? (hoist(call), '')
+                : `${call};`
+        }
         case 'VARIABLE_DECL':
             variableTypes.set(stmt.name, stmt.type)
+            if (implicitRepresentation(stmt.type) === 'big')
+                blockLocals[blockLocals.length - 1]?.push(stmt.name)
             return `${lowerType(stmt.type)} ${stmt.name} = ${lowerConverted(stmt.initialValue, stmt.type)};`
         case 'ASSIGN':
             if (
@@ -371,9 +586,20 @@ export function lowerStmt(stmt: cir.Statement): string {
                         ${stmt.value.properties?.map((property) => `.${property.name} = ${lowerPropertyValue(stmt.value.type, property)}`).join(', ') ?? ''}
                     },
                     sizeof(${mangleTypeName(stmt.value.type)}ˇproperties));`
-            else if (stmt.target.kind === 'PROPERTY_REF')
-                return `${lowerStorage(stmt.target)} = ${lowerPropertyValue(stmt.target.object.type, { name: stmt.target.property, value: stmt.value })};`
-            else if (targetType(stmt.target) === undefined)
+            else if (stmt.target.kind === 'PROPERTY_REF') {
+                const target = lowerStorage(stmt.target)
+                const value = lowerPropertyValue(stmt.target.object.type, {
+                    name: stmt.target.property,
+                    value: stmt.value,
+                })
+                const type = propertyTypeOf(
+                    stmt.target.object.type,
+                    stmt.target.property,
+                )
+                return type && implicitRepresentation(type) === 'big'
+                    ? `{ Integer *oldˇ = ${target}; ${target} = ${value}; releaseRC(oldˇ); }`
+                    : `${target} = ${value};`
+            } else if (targetType(stmt.target) === undefined)
                 return `${lowerStorage(stmt.target)} = ${lowerExpr(stmt.value)};`
             else if (isImplicitBig(targetType(stmt.target)!))
                 // The backend owns implicit Integer* values and releases the old one.
@@ -389,8 +615,26 @@ export function lowerStmt(stmt: cir.Statement): string {
             return `mutateRC(${lowerStorage(stmt.object)});`
         case 'RELEASE':
             return `releaseRC(${lowerStorage(stmt.object)});`
-        case 'RETURN':
-            return stmt.value ? `return ${lowerExpr(stmt.value)};` : 'return;'
+        case 'RETURN': {
+            const value = stmt.value
+                ? lowerConverted(stmt.value, currentReturnType as cir.ValueSet)
+                : undefined
+            const { pre, post } = drainTemps()
+            const releases = (blockLocals[blockLocals.length - 1] ?? [])
+                .map((name) => `releaseRC(${name});`)
+                .join('\n')
+            if (!value) return [releases, 'return;'].filter(Boolean).join('\n')
+            if (!pre && !post && !releases) return `return ${value};`
+            return [
+                pre,
+                `${lowerType(currentReturnType)} retˇ = ${value};`,
+                post,
+                releases,
+                'return retˇ;',
+            ]
+                .filter(Boolean)
+                .join('\n')
+        }
         default:
             throw new Error(`Unknown statement kind: ${(stmt as any).kind}`)
     }
@@ -398,8 +642,14 @@ export function lowerStmt(stmt: cir.Statement): string {
 
 export function lowerInitStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
-        case 'VARIABLE_DECL':
-            return `${stmt.name} = ${lowerConverted(stmt.initialValue, stmt.type)};`
+        case 'VARIABLE_DECL': {
+            const saved = temps
+            temps = []
+            const assignment = `${stmt.name} = ${lowerConverted(stmt.initialValue, stmt.type)};`
+            const { pre, post } = drainTemps()
+            temps = saved
+            return [pre, assignment, post].filter(Boolean).join('\n')
+        }
         default:
             return lowerStmt(stmt)
     }
@@ -430,9 +680,8 @@ export function lowerExpr(expr: cir.Expression): string {
                 case 'truthvalue':
                     return `boxTruthvalue(${lowerExpr(expr.expression)})`
                 case 'integer':
-                    return expr.expression.type.universe === 'integer' &&
-                        rangeRepresentation(expr.expression.type) === 'big'
-                        ? `retainRC(${lowerExpr(expr.expression)})`
+                    return operandRepresentation(expr.expression) === 'big'
+                        ? lowerOwned(expr.expression, 'big')
                         : `integerWithDigits(1, ${lowerExpr(expr.expression)})`
                 default:
                     throw new Error(
@@ -459,35 +708,113 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'AND':
             return `(${lowerExpr(expr.left)}) && (${lowerExpr(expr.right)})`
         case 'EQUAL':
-            return `(${lowerExpr(expr.left)}) == (${lowerExpr(expr.right)})`
+            return (
+                lowerIntegerComparison(expr, 'eq', '==') ??
+                `(${lowerExpr(expr.left)}) == (${lowerExpr(expr.right)})`
+            )
         case 'NOT_EQUAL':
-            return `(${lowerExpr(expr.left)}) != (${lowerExpr(expr.right)})`
+            return (
+                lowerIntegerComparison(expr, 'ne', '!=') ??
+                `(${lowerExpr(expr.left)}) != (${lowerExpr(expr.right)})`
+            )
         case 'LESS_THAN':
-            return `(${lowerExpr(expr.left)}) < (${lowerExpr(expr.right)})`
+            return (
+                lowerIntegerComparison(expr, 'lt', '<') ??
+                `(${lowerExpr(expr.left)}) < (${lowerExpr(expr.right)})`
+            )
         case 'GREATER_THAN':
-            return `(${lowerExpr(expr.left)}) > (${lowerExpr(expr.right)})`
+            return (
+                lowerIntegerComparison(expr, 'gt', '>') ??
+                `(${lowerExpr(expr.left)}) > (${lowerExpr(expr.right)})`
+            )
         case 'LESS_THAN_OR_EQUAL':
-            return `(${lowerExpr(expr.left)}) <= (${lowerExpr(expr.right)})`
+            return (
+                lowerIntegerComparison(expr, 'le', '<=') ??
+                `(${lowerExpr(expr.left)}) <= (${lowerExpr(expr.right)})`
+            )
         case 'GREATER_THAN_OR_EQUAL':
-            return `(${lowerExpr(expr.left)}) >= (${lowerExpr(expr.right)})`
+            return (
+                lowerIntegerComparison(expr, 'ge', '>=') ??
+                `(${lowerExpr(expr.left)}) >= (${lowerExpr(expr.right)})`
+            )
         case 'SAME':
             return `(${lowerExpr(expr.left)}) == (${lowerExpr(expr.right)})`
         case 'NOT_SAME':
             return `(${lowerExpr(expr.left)}) != (${lowerExpr(expr.right)})`
         case 'ADDITION':
-            return `(${lowerExpr(expr.left)}) + (${lowerExpr(expr.right)})`
         case 'SUBTRACTION':
-            return `(${lowerExpr(expr.left)}) - (${lowerExpr(expr.right)})`
         case 'MULTIPLICATION':
-            return `(${lowerExpr(expr.left)}) * (${lowerExpr(expr.right)})`
         case 'DIVISION':
-            return `(${lowerExpr(expr.left)}) / (${lowerExpr(expr.right)})`
         case 'MODULUS':
-            return `(${lowerExpr(expr.left)}) % (${lowerExpr(expr.right)})`
         case 'EXPONENTIAL':
+            return lowerIntegerArithmetic(expr)
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
     }
+}
+
+const NATIVE_OPERATORS = {
+    ADDITION: '+',
+    SUBTRACTION: '-',
+    MULTIPLICATION: '*',
+} as const
+
+const BIG_ARITHMETIC = {
+    ADDITION: 'add',
+    SUBTRACTION: 'subtract',
+    MULTIPLICATION: 'multiply',
+    DIVISION: 'floorDivide',
+    MODULUS: 'modulus',
+    EXPONENTIAL: 'power',
+} as const
+
+function operandRepresentation(expr: cir.Expression): Representation {
+    const representation = implicitRepresentation(storageType(expr))
+    if (representation === undefined)
+        throw new Error(
+            `Arithmetic on ${expr.type.universe} values is not yet supported`,
+        )
+    return representation
+}
+
+function lowerIntegerArithmetic(
+    expr: cir.Expression & {
+        kind: keyof typeof BIG_ARITHMETIC
+    },
+): string {
+    const result = operandRepresentation(expr)
+    const left = operandRepresentation(expr.left)
+    const right = operandRepresentation(expr.right)
+    if (result === 'native' && left === 'native' && right === 'native') {
+        const l = lowerExpr(expr.left)
+        const r = lowerExpr(expr.right)
+        switch (expr.kind) {
+            case 'DIVISION':
+                return `floorDiv64(${l}, ${r})`
+            case 'MODULUS':
+                return `floorMod64(${l}, ${r})`
+            case 'EXPONENTIAL':
+                break
+            default:
+                return `(${l}) ${NATIVE_OPERATORS[expr.kind]} (${r})`
+        }
+    }
+    const call = `Integer¸${BIG_ARITHMETIC[expr.kind]}(${lowerBorrowed(expr.left, 'big')}, ${lowerBorrowed(expr.right, 'big')})`
+    return result === 'big' ? call : `Integer·toInt64(${hoist(call)})`
+}
+
+/** Lowers a comparison of implicit integers, or undefined for other operands. */
+function lowerIntegerComparison(
+    expr: cir.Expression & { left: cir.Expression; right: cir.Expression },
+    name: string,
+    operator: string,
+): string | undefined {
+    const left = implicitRepresentation(storageType(expr.left))
+    const right = implicitRepresentation(storageType(expr.right))
+    if (left === undefined || right === undefined) return undefined
+    if (left === 'native' && right === 'native')
+        return `((${lowerExpr(expr.left)}) ${operator} (${lowerExpr(expr.right)}) ? c_true : c_false)`
+    return `Integer¸${name}(${lowerBorrowed(expr.left, 'big')}, ${lowerBorrowed(expr.right, 'big')})`
 }
 
 export function lowerStorage(
@@ -505,9 +832,24 @@ export function lowerStorage(
     }
 }
 
+function signatureOf(call: cir.Statement & { kind: 'CALL' }) {
+    const receiver = call.receiver
+    return signatures.get(
+        mangleNameWithLabels(
+            call.name,
+            receiver && receiver.dispatch !== 'conformance'
+                ? (receiver.object.type as { name: string; namespace?: string })
+                : undefined,
+        ),
+    )
+}
+
 function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
     const receiver = call.receiver
-    const args = call.arguments.map(lowerExpr)
+    const signature = signatureOf(call)
+    const args = call.arguments.map((arg, i) =>
+        lowerArgument(arg, signature?.parameters[i]),
+    )
     switch (receiver?.dispatch) {
         case undefined: {
             const name = mangleNameWithLabels(call.name)

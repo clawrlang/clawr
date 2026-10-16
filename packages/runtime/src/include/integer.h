@@ -102,6 +102,14 @@ Integer *Integer¸multiply(Integer *left, Integer *right);
 /// quotient. Panics on division by zero.
 Integer *Integer¸divide(Integer *dividend, Integer *divisor);
 
+/// @brief Divide rounding towards negative infinity (ADR-023), returning the
+/// quotient. Panics on division by zero.
+Integer *Integer¸floorDivide(Integer *dividend, Integer *divisor);
+
+/// @brief Remainder matching Integer¸floorDivide: n - floor(n / d) * d.
+/// Panics on division by zero.
+Integer *Integer¸modulus(Integer *dividend, Integer *divisor);
+
 /// @brief Raise base to a non-negative integer exponent using binary
 /// exponentiation. Panics if exponent is negative.
 Integer *Integer¸power(Integer *base, Integer *exponent);

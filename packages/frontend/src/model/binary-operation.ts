@@ -68,7 +68,20 @@ export class BinaryOperation implements Expression {
     }
 
     toCIRExpression(context: ContextWithType): SemanticResult<cir.Expression> {
-        throw new Error('Method not implemented.')
+        const collected = SemanticResult.collect([
+            this.left.toCIRExpression(context),
+            this.right.toCIRExpression(context),
+            this.type(context),
+        ])
+        if (collected.isError) return collected
+        const [left, right, type] = collected.value
+        // The operator strategies already verified the operand types.
+        return Result.value({
+            kind: CIR_KINDS[this.operator],
+            left,
+            right,
+            type: type.toCIR(),
+        } as cir.Expression)
     }
 
     private compute(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
@@ -98,6 +111,25 @@ const OPERATORS = {
     '&&': LogicalAND.instance,
     '||': LogicalOR.instance,
 }
+
+const CIR_KINDS = {
+    '^': 'EXPONENTIAL',
+    '*': 'MULTIPLICATION',
+    '/': 'DIVISION',
+    '%': 'MODULUS',
+    '+': 'ADDITION',
+    '-': 'SUBTRACTION',
+    '==': 'EQUAL',
+    '!=': 'NOT_EQUAL',
+    '===': 'SAME',
+    '!==': 'NOT_SAME',
+    '<': 'LESS_THAN',
+    '<=': 'LESS_THAN_OR_EQUAL',
+    '>': 'GREATER_THAN',
+    '>=': 'GREATER_THAN_OR_EQUAL',
+    '&&': 'AND',
+    '||': 'OR',
+} as const satisfies Record<keyof typeof OPERATORS, cir.Expression['kind']>
 
 export interface BinaryOperator {
     compute(left: ValueSet, right: ValueSet): Result<ValueSet>

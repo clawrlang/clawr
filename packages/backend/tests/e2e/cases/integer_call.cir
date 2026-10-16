@@ -1,0 +1,156 @@
+# yaml-language-server: $schema=../../../../cir/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: FUNCTION_DECL
+    baseName: identity
+    labels: []
+    parameters:
+      - name: x
+        type:
+          universe: integer
+    returnType:
+      universe: integer
+    body:
+      - kind: VARIABLE_DECL
+        name: y
+        type:
+          universe: integer
+        initialValue:
+          kind: VARIABLE_REF
+          name: x
+          type:
+            universe: integer
+      - kind: RETURN
+        value:
+          kind: VARIABLE_REF
+          name: y
+          type:
+            universe: integer
+  - kind: FUNCTION_DECL
+    baseName: seven
+    labels: []
+    parameters: []
+    returnType:
+      universe: integer
+      min: '0'
+      max: '10'
+    body:
+      - kind: RETURN
+        value:
+          kind: INTEGER_LITERAL
+          type:
+            universe: integer
+            value: '7'
+  - kind: FUNCTION_DECL
+    baseName: narrow
+    labels: []
+    parameters:
+      - name: x
+        type:
+          universe: integer
+          min: '0'
+          max: '100'
+    returnType:
+      universe: integer
+      min: '0'
+      max: '100'
+    body:
+      - kind: RETURN
+        value:
+          kind: VARIABLE_REF
+          name: x
+          type:
+            universe: integer
+            min: '0'
+            max: '100'
+startBlock:
+  - kind: VARIABLE_DECL
+    name: a
+    type:
+      universe: integer
+    initialValue:
+      kind: CALL
+      name:
+        baseName: identity
+        labels: []
+      arguments:
+        - kind: INTEGER_LITERAL
+          type:
+            universe: integer
+            value: '5'
+      type:
+        universe: integer
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: a
+        type:
+          universe: integer
+  - kind: VARIABLE_DECL
+    name: b
+    type:
+      universe: integer
+    initialValue:
+      kind: CALL
+      name:
+        baseName: seven
+        labels: []
+      arguments: []
+      type:
+        universe: integer
+        min: '0'
+        max: '10'
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: b
+        type:
+          universe: integer
+  - kind: VARIABLE_DECL
+    name: c
+    type:
+      universe: integer
+      min: '0'
+      max: '100'
+    initialValue:
+      kind: CALL
+      name:
+        baseName: narrow
+        labels: []
+      arguments:
+        - kind: VARIABLE_REF
+          name: b
+          type:
+            universe: integer
+            min: '7'
+            max: '7'
+      type:
+        universe: integer
+        min: '0'
+        max: '100'
+  - kind: ASSIGN
+    target:
+      kind: VARIABLE_REF
+      name: a
+    value:
+      kind: VARIABLE_REF
+      name: c
+      type:
+        universe: integer
+        min: '0'
+        max: '100'
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: a
+        type:
+          universe: integer

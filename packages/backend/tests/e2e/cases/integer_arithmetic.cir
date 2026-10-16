@@ -1,0 +1,128 @@
+# yaml-language-server: $schema=../../../../cir/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+startBlock:
+  # a = 2^100 + 1 (does not fit in 64 bits)
+  - kind: VARIABLE_DECL
+    name: a
+    type: { universe: integer }
+    initialValue:
+      kind: ADDITION
+      left:
+        kind: INTEGER_LITERAL
+        type: { universe: integer, value: '1267650600228229401496703205376' }
+      right:
+        kind: INTEGER_LITERAL
+        type: { universe: integer, value: '1' }
+      type: { universe: integer }
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - { kind: VARIABLE_REF, name: a, type: { universe: integer } }
+  # b = -7 (native)
+  - kind: VARIABLE_DECL
+    name: b
+    type: { universe: integer, min: '-10', max: '10' }
+    initialValue:
+      kind: INTEGER_LITERAL
+      type: { universe: integer, value: '-7' }
+  # c = b / 2 (floored: -4), d = b % 2 (1)
+  - kind: VARIABLE_DECL
+    name: c
+    type: { universe: integer, min: '-10', max: '10' }
+    initialValue:
+      kind: DIVISION
+      left: { kind: VARIABLE_REF, name: b, type: { universe: integer, min: '-10', max: '10' } }
+      right:
+        kind: INTEGER_LITERAL
+        type: { universe: integer, value: '2' }
+      type: { universe: integer, min: '-10', max: '10' }
+  - kind: VARIABLE_DECL
+    name: box_c
+    type: { universe: integer, boxed: true }
+    initialValue:
+      kind: BOX
+      expression: { kind: VARIABLE_REF, name: c, type: { universe: integer, min: '-10', max: '10' } }
+      type: { universe: integer, boxed: true }
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - { kind: VARIABLE_REF, name: box_c, type: { universe: integer, boxed: true } }
+  - kind: RELEASE
+    object: { kind: VARIABLE_REF, name: box_c }
+  - kind: VARIABLE_DECL
+    name: d
+    type: { universe: integer, min: '-10', max: '10' }
+    initialValue:
+      kind: MODULUS
+      left: { kind: VARIABLE_REF, name: b, type: { universe: integer, min: '-10', max: '10' } }
+      right:
+        kind: INTEGER_LITERAL
+        type: { universe: integer, value: '2' }
+      type: { universe: integer, min: '-10', max: '10' }
+  - kind: VARIABLE_DECL
+    name: box_d
+    type: { universe: integer, boxed: true }
+    initialValue:
+      kind: BOX
+      expression: { kind: VARIABLE_REF, name: d, type: { universe: integer, min: '-10', max: '10' } }
+      type: { universe: integer, boxed: true }
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - { kind: VARIABLE_REF, name: box_d, type: { universe: integer, boxed: true } }
+  - kind: RELEASE
+    object: { kind: VARIABLE_REF, name: box_d }
+  # e = a * b (mixed big and native)
+  - kind: VARIABLE_DECL
+    name: e
+    type: { universe: integer }
+    initialValue:
+      kind: MULTIPLICATION
+      left: { kind: VARIABLE_REF, name: a, type: { universe: integer } }
+      right: { kind: VARIABLE_REF, name: b, type: { universe: integer, min: '-10', max: '10' } }
+      type: { universe: integer }
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - { kind: VARIABLE_REF, name: e, type: { universe: integer } }
+  # f = (a - 2^100) as a native value, narrowed from big operands
+  - kind: VARIABLE_DECL
+    name: f
+    type: { universe: integer, min: '0', max: '5' }
+    initialValue:
+      kind: SUBTRACTION
+      left: { kind: VARIABLE_REF, name: a, type: { universe: integer } }
+      right:
+        kind: INTEGER_LITERAL
+        type: { universe: integer, value: '1267650600228229401496703205376' }
+      type: { universe: integer, min: '0', max: '5' }
+  - kind: VARIABLE_DECL
+    name: box_f
+    type: { universe: integer, boxed: true }
+    initialValue:
+      kind: BOX
+      expression: { kind: VARIABLE_REF, name: f, type: { universe: integer, min: '0', max: '5' } }
+      type: { universe: integer, boxed: true }
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - { kind: VARIABLE_REF, name: box_f, type: { universe: integer, boxed: true } }
+  - kind: RELEASE
+    object: { kind: VARIABLE_REF, name: box_f }
+  # g = 2 ^ 70
+  - kind: VARIABLE_DECL
+    name: g
+    type: { universe: integer }
+    initialValue:
+      kind: EXPONENTIAL
+      left:
+        kind: INTEGER_LITERAL
+        type: { universe: integer, value: '2' }
+      right:
+        kind: INTEGER_LITERAL
+        type: { universe: integer, value: '70' }
+      type: { universe: integer }
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - { kind: VARIABLE_REF, name: g, type: { universe: integer } }

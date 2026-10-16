@@ -269,6 +269,36 @@ Integer *Integer¸withDigits(Array *const digits) {
   return integer;
 }
 
+__attribute__((visibility("default"))) Integer *
+Integer¸floorDivide(Integer *dividend, Integer *divisor) {
+  Integer *quotient = Integer¸divide(dividend, divisor);
+  Integer *product = Integer¸multiply(quotient, divisor);
+  Integer *remainder = Integer¸subtract(dividend, product);
+  releaseRC(product);
+  int remainderSign = Integer¸compare(remainder, &Integer¸zero);
+  int divisorSign = Integer¸compare(divisor, &Integer¸zero);
+  releaseRC(remainder);
+  if (remainderSign == 0 || remainderSign == divisorSign)
+    return quotient;
+
+  // Truncation rounded towards zero, but the quotient is negative.
+  Integer *one = Integer¸fromInt64(1);
+  Integer *rounded = Integer¸subtract(quotient, one);
+  releaseRC(one);
+  releaseRC(quotient);
+  return rounded;
+}
+
+__attribute__((visibility("default"))) Integer *
+Integer¸modulus(Integer *dividend, Integer *divisor) {
+  Integer *quotient = Integer¸floorDivide(dividend, divisor);
+  Integer *product = Integer¸multiply(quotient, divisor);
+  Integer *remainder = Integer¸subtract(dividend, product);
+  releaseRC(product);
+  releaseRC(quotient);
+  return remainder;
+}
+
 __attribute__((visibility("default")))
 Integer *Integer¸fromInt64(int64_t value) {
   if (value == INT64_MIN)

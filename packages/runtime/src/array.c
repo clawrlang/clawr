@@ -8,7 +8,7 @@ __attribute__((visibility("default"))) Array Array¸empty = {
     .header = {
         .allocation_size = sizeof(Array),
         .is_a = &Arrayˇtype,
-        .refs = 1 & __rc_ISOLATED,
+        .refs = 1 | __rc_ISOLATED,
     }};
 
 __attribute__((visibility("default"))) Array *Array¸new(size_t count,

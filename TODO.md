@@ -1,9 +1,6 @@
 # TODO
 
-- Implement `BinaryOperation.toCIRExpression()`
-- Lower arithmetic on integers: native `int64_t` when operands and result fit, otherwise `Integer¸add` etc. with hoisted temporaries that are released after use
-- Backend: convert integer representation at call arguments and `RETURN` (assignments, initializers and properties already convert)
-- Backend: release implicit `Integer*` locals at scope end (currently only released on reassignment)
+- Backend: temporaries are hoisted per statement, so `Integer*` temporaries in loop conditions are evaluated only once — hoist them into the loop
 - `real` operands — deferred until [ADR-025](adr/adr-025.md) settles precision and whether `Real*` is used
 
 ## `object`/`service`

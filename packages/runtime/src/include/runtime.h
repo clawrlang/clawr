@@ -10,6 +10,7 @@
 #include "interfaces.h"
 #include "lanes.h"
 #include "real.h"
+#include "panic.h"
 #include "refc.h"
 
 static void print(void *value) {
@@ -21,6 +22,26 @@ static void print(void *value) {
 }
 
 static void *copy˛of(void *value) { return copyRC(value, __rc_SHARED); }
+
+/// @brief Integer division rounding towards negative infinity (ADR-023)
+static inline int64_t floorDiv64(int64_t dividend, int64_t divisor) {
+  if (divisor == 0)
+    panic("Division by zero!");
+  int64_t quotient = dividend / divisor;
+  int64_t remainder = dividend % divisor;
+  return remainder != 0 && ((remainder < 0) != (divisor < 0)) ? quotient - 1
+                                                              : quotient;
+}
+
+/// @brief Remainder matching floorDiv64: n - floor(n / d) * d
+static inline int64_t floorMod64(int64_t dividend, int64_t divisor) {
+  if (divisor == 0)
+    panic("Division by zero!");
+  int64_t remainder = dividend % divisor;
+  return remainder != 0 && ((remainder < 0) != (divisor < 0))
+             ? remainder + divisor
+             : remainder;
+}
 
 Integer *integerWithDigits(const size_t count, ...) {
   Array *digits = Array¸new (count, sizeof(digit_t));

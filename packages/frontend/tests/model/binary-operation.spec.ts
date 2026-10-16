@@ -388,4 +388,62 @@ describe('BinaryOperation', () => {
             })
         })
     })
+
+    describe('toCIRExpression', () => {
+        it('lowers integer arithmetic with operand types and result range', () => {
+            const expr = BinaryOperation.create({
+                operator: '+',
+                left: util.integerLiteral(4),
+                right: util.integerLiteral(2),
+                span: util.someCodeSpan,
+            })
+            const result = expr.toCIRExpression(util.newSemanticContext())
+            expect(result.isSuccess || result.error.errors).toBeTrue()
+            expect(result.isSuccess && result.value).toMatchObject({
+                kind: 'ADDITION',
+                left: {
+                    kind: 'INTEGER_LITERAL',
+                    type: { universe: 'integer', value: '4' },
+                },
+                right: {
+                    kind: 'INTEGER_LITERAL',
+                    type: { universe: 'integer', value: '2' },
+                },
+                type: { universe: 'integer', value: '6' },
+            })
+        })
+
+        it('maps comparison operators to CIR kinds', () => {
+            const examples = [
+                ['==', 'EQUAL'],
+                ['!=', 'NOT_EQUAL'],
+                ['<', 'LESS_THAN'],
+                ['<=', 'LESS_THAN_OR_EQUAL'],
+                ['>', 'GREATER_THAN'],
+                ['>=', 'GREATER_THAN_OR_EQUAL'],
+            ] as const
+            for (const [operator, kind] of examples) {
+                const expr = BinaryOperation.create({
+                    operator,
+                    left: util.integerLiteral(1),
+                    right: util.integerLiteral(2),
+                    span: util.someCodeSpan,
+                })
+                const result = expr.toCIRExpression(util.newSemanticContext())
+                expect(result.isSuccess || result.error.errors).toBeTrue()
+                expect(result.isSuccess && result.value.kind).toBe(kind)
+            }
+        })
+
+        it('lowers logical operators', () => {
+            const expr = BinaryOperation.create({
+                operator: '&&',
+                left: util.truthvalueLiteral('true'),
+                right: util.truthvalueLiteral('false'),
+                span: util.someCodeSpan,
+            })
+            const result = expr.toCIRExpression(util.newSemanticContext())
+            expect(result.isSuccess && result.value.kind).toBe('AND')
+        })
+    })
 })

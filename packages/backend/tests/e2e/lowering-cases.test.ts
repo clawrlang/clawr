@@ -9,6 +9,9 @@ const OUTPUT_DIR = path.join(__dirname, '.out')
 
 describe('Lowering Tests', () => {
     const distDir = path.resolve(__dirname, '../../../runtime/dist')
+    const libName = fs
+        .readFileSync(path.join(distDir, 'libClawr.name'), 'utf-8')
+        .trim()
     const cases = fs
         .readdirSync(CASES_DIR, { withFileTypes: true })
         .map((f) => f.name)
@@ -31,7 +34,7 @@ describe('Lowering Tests', () => {
                 '-I',
                 path.join(distDir, 'include'),
                 path.join(OUTPUT_DIR, `${fileName.replace(/.cir$/, '.c')}`),
-                path.join(distDir, 'libClawr.0.dylib'),
+                path.join(distDir, libName),
                 `-Wl,-rpath,${distDir}`,
                 '-o',
                 exePath,

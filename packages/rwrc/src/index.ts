@@ -2,6 +2,7 @@
 
 import Bun from 'bun'
 import { Command } from 'commander'
+import { readFileSync } from 'fs'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -16,6 +17,7 @@ import {
 } from '@clawr/frontend/tools'
 
 const exeDir = path.dirname(process.execPath)
+const runtimeLibName = readFileSync(path.join(exeDir, 'libClawr.name'), 'utf-8').trim()
 const program = new Command()
 
 program.name('rwrc').description('Clawr language compiler').version('0.1.0')
@@ -80,7 +82,7 @@ async function compileCIR(cirFilePath: string) {
             '-I',
             path.join(exeDir, 'include'),
             cFilePath,
-            path.join(exeDir, 'libClawr.0.dylib'),
+            path.join(exeDir, runtimeLibName),
             `-Wl,-rpath,${exeDir}`,
             '-o',
             exePath,

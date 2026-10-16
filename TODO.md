@@ -52,9 +52,6 @@
 - Get the property values from the declared type when converting `SHARED` to `ISOLATED`
   - `SHARED` values cannot know their state
   - `ISOLATED` values can know their state intimately
-- Use `${npm_package_version%%.*}` and `process.env.npm_package_version!.split('.')[0]`?
-  - Better to use a separate _compatibility version_ and use the package version as _current version_?
-  - Consider libSystem.B.dylib (compatibility version 1.0.0, current version 1356.0.0). Always considered compatible.
 - binary/ternary data (`tritfield`/`bitfield`)
 - should `truthvalue` be `Ordered` – `false < ambiguous < true`?
 - Evaluate a (pure) function call.

@@ -4,8 +4,11 @@
   "description": "Clawr Runtime Library.",
   "license": "MIT",
   "type": "module",
+  "clawr": {
+    "compatibilityVersion": "0.1.0"
+  },
   "scripts": {
-    "build": "rm -rf dist && mkdir -p dist && cp -R src/include dist/include && clang -I dist/include src/*.c -dynamiclib -fvisibility=hidden -current_version $npm_package_version -compatibility_version $npm_package_version -Wl,-install_name,@rpath/libClawr.0.dylib -o dist/libClawr.0.dylib && otool -L dist/libClawr.0.dylib",
+    "build": "node scripts/build.mjs",
     "test": "npm run build && bun test ./tests/*.test.ts",
     "clean": "rm -rf dist *.tsbuildinfo"
   },

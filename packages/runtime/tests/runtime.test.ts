@@ -6,6 +6,7 @@ import path from 'path'
 const CASES_DIR = path.join(__dirname, 'cases')
 const OUTPUT_DIR = path.join(__dirname, '.out')
 const RUNTIME_DIR = path.join(__dirname, '../dist')
+const LIB_NAME = fs.readFileSync(path.join(RUNTIME_DIR, 'libClawr.name'), 'utf-8').trim()
 
 describe('Runtime Tests', () => {
     const cases = fs
@@ -55,7 +56,7 @@ async function runClang(filePath: string, exeFile: string) {
         '-I',
         path.join(RUNTIME_DIR, 'include'),
         filePath,
-        path.join(RUNTIME_DIR, 'libClawr.0.dylib'),
+        path.join(RUNTIME_DIR, LIB_NAME),
         `-Wl,-rpath,${RUNTIME_DIR}`,
         '-o',
         exeFile,

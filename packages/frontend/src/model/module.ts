@@ -19,6 +19,7 @@ export class Module {
     }
 
     toCIR(context: Context): cir.Module {
+        this.declarations.forEach((decl) => decl.registerDeclaration?.(context))
         const result = SemanticResult.collect([
             ...this.declarations.map((decl) => decl.emitDeclaration(context)),
             ...this.main.map((stmt) => stmt.emitStatement(context)),

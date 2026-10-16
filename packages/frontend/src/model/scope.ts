@@ -14,6 +14,15 @@ class RootScope {
     private readonly types: Map<string, DataDeclaration | ObjectDeclaration> =
         new Map()
     public readonly emitted: cir.Declaration[] = []
+    private readonly baseTypes: Set<string> = new Set()
+
+    markAsBase(name: TypeName) {
+        this.baseTypes.add(name.canonical())
+    }
+
+    isBase(name: TypeName): boolean {
+        return this.baseTypes.has(name.canonical())
+    }
 
     dataDeclaration(name: TypeName): DataDeclaration | undefined {
         const decl = this.types.get(name.canonical())
@@ -86,6 +95,14 @@ export class Scope {
 
     addObjectDeclaration(decl: ObjectDeclaration) {
         this.types.set(decl.name.canonical(), decl)
+    }
+
+    markAsBase(name: TypeName) {
+        this.rootScope.markAsBase(name)
+    }
+
+    isBase(name: TypeName): boolean {
+        return this.rootScope.isBase(name)
     }
 
     objectDeclaration(name: TypeName): ObjectDeclaration | undefined {

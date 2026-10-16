@@ -85,14 +85,16 @@ export class FunctionCall implements Expression, Statement {
                     this.recipient.span,
                 )
 
-            const decl = typeDecl.method(this.name)
-            if (!decl)
+            const found = typeDecl.lookupMethod(this.name, context)
+            if (!found)
                 return SemanticErrorResult.failure(
                     `Method declaration not found: ${this.name.toString()}`,
                     this.span,
                 )
 
-            const typeResult = decl.type(typeDecl.injectSelf(context))
+            const typeResult = found.declaration.type(
+                found.owner.injectSelf(context),
+            )
             if (typeResult.isError) return typeResult
             if (!typeResult.value)
                 return SemanticErrorResult.failure(
@@ -147,10 +149,8 @@ export class FunctionCall implements Expression, Statement {
                 name: this.name.toCIR(),
                 arguments: args,
                 receiver: {
-                    dispatch: 'direct',
-                    object: recipient as cir.Expression & {
-                        type: { universe: 'rc-type' | 'interface' }
-                    },
+                    dispatch: this.dispatchKind(context),
+                    object: recipient as any,
                 },
                 type: value.toCIR(),
             } satisfies cir.Expression)
@@ -219,12 +219,24 @@ export class FunctionCall implements Expression, Statement {
                 name: _name,
                 arguments: args,
                 receiver: recipientCIR && {
-                    dispatch: 'direct',
+                    dispatch: this.dispatchKind(context),
                     object: recipientCIR as any,
                 },
             })
         }
         return Result.ok
+    }
+
+    private dispatchKind(context: Context): 'direct' | 'inherited' {
+        const type = this.recipient?.type(context)
+        if (!type || type.isError || !(type.value instanceof RCTypeSet))
+            return 'direct'
+        const decl = context.scope.objectDeclaration(type.value.type)
+        // Initializers are not methods and are never dispatched dynamically
+        return decl?.lookupMethod(this.name, context) &&
+            decl.isPolymorphic(context)
+            ? 'inherited'
+            : 'direct'
     }
 
     private maybeRecipientCIR(context: Context): cir.Expression | undefined {

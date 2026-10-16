@@ -12,7 +12,6 @@ describe('ObjectDeclaration', () => {
         const object = ObjectDeclaration.create({
             ...util.someObjectDeclConfig,
             name: util.simpleTypeName('Object'),
-            superType: 'Super',
             properties: [
                 {
                     name: 'property',
@@ -48,7 +47,6 @@ describe('ObjectDeclaration', () => {
         const object = ObjectDeclaration.create({
             ...util.someObjectDeclConfig,
             name: util.simpleTypeName('Object'),
-            superType: 'Super',
             readonly: [
                 FunctionDeclaration.create({
                     baseName: 'read',
@@ -131,7 +129,6 @@ describe('ObjectDeclaration', () => {
         const object = ObjectDeclaration.create({
             ...util.someObjectDeclConfig,
             name: util.simpleTypeName('Object'),
-            superType: 'Super',
             initializers: [
                 FunctionDeclaration.create({
                     ...util.someFunctionDeclConfig,

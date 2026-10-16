@@ -57,6 +57,7 @@ Records so far:
 - [ADR-023](./adr-023.md): `integer` Division
 - [ADR-024](./adr-024.md): The `integer` Combinatorial Explosion
 - [ADR-025](./adr-025.md): The `real` Datatype
+- [ADR-026](./adr-026.md): Private Properties Are Per Type
 
 Draft ideas with no ADR number:
 

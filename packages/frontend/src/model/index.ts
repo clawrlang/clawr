@@ -43,6 +43,8 @@ export interface Statement {
 }
 
 export interface Declaration {
+    /** Called for all declarations of a module before any is emitted. */
+    registerDeclaration?(context: Context): void
     emitDeclaration(context: Context): SemanticResult
 }
 export function isStorage(

@@ -1,0 +1,22 @@
+object Super {
+    func value() => self->property
+    func describe() => 7
+init:
+    func new() => {property: 1}
+state:
+    property: integer(0..<100)
+}
+
+object Sub: Super {
+    func value() => self->property
+init:
+    func new() => {property: 2}
+state:
+    property: integer(0..<100)
+}
+
+@main {
+    const x: Sub = {Sub.new()}
+    print(x.value())
+    print(x.describe())
+}

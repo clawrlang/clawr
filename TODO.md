@@ -10,12 +10,13 @@
 - Make 'self' a reserved identifier
 - Make `FunctionCall` support methods
   - [x] direct
-  - [ ] inherited
+  - [x] inherited
   - [ ] conformance
 
 ### Frontend Semantic/Static Analysis
 
 - `superType` matches initializer call
+  - Subtype initializers must call a supertype initializer; today the supertype's properties are left uninitialized
   - No `superType` => no initializer
   - `superType` must equal initializer `target`
 - Can `object` store a service in a property? Let's “no” for now.

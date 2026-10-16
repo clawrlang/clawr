@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=../../../../cir/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: VARIABLE_DECL
+    name: big
+    type:
+      universe: integer
+    initialValue:
+      kind: INTEGER_LITERAL
+      type:
+        universe: integer
+        value: '340282366920938463426481119284349108225'
+startBlock:
+  - kind: VARIABLE_DECL
+    name: small
+    type:
+      universe: integer
+      min: '0'
+      max: '9223372036854775807'
+    initialValue:
+      kind: INTEGER_LITERAL
+      type:
+        universe: integer
+        value: '9223372036854775807'
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: big
+        type:
+          universe: integer
+  - kind: ASSIGN
+    target:
+      kind: VARIABLE_REF
+      name: big
+    value:
+      kind: VARIABLE_REF
+      name: small
+      type:
+        universe: integer
+        min: '0'
+        max: '9223372036854775807'
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: big
+        type:
+          universe: integer

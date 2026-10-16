@@ -9,6 +9,8 @@ declarations:
       - name: var
         type:
           universe: integer
+          min: '0'
+          max: '100'
     body:
       - kind: RETURN
         value:

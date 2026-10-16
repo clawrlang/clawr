@@ -123,7 +123,7 @@ describe('Type declaration', () => {
                     labels: [],
                     parameters: [],
                     body: [],
-                    returnType: { universe: 'integer' },
+                    returnType: { universe: 'integer', min: '0', max: '100' },
                 },
             ],
             dispatchTable: [
@@ -132,7 +132,11 @@ describe('Type declaration', () => {
                         baseName: 'f',
                         labels: [],
                         parameters: [],
-                        returnType: { universe: 'integer' },
+                        returnType: {
+                            universe: 'integer',
+                            min: '0',
+                            max: '100',
+                        },
                     },
                     declaredIn: { name: 'MyType' },
                     implementation: { name: 'MyType' },
@@ -164,10 +168,18 @@ describe('Type declaration', () => {
                         parameters: [
                             {
                                 name: 'v',
-                                type: { universe: 'integer' },
+                                type: {
+                                    universe: 'integer',
+                                    min: '0',
+                                    max: '100',
+                                },
                             },
                         ],
-                        returnType: { universe: 'integer' },
+                        returnType: {
+                            universe: 'integer',
+                            min: '0',
+                            max: '100',
+                        },
                     },
                     declaredIn: { name: 'MyType' },
                     implementation: { name: 'MyType' },

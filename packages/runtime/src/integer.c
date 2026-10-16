@@ -269,6 +269,28 @@ Integer *Integer¸withDigits(Array *const digits) {
   return integer;
 }
 
+__attribute__((visibility("default")))
+Integer *Integer¸fromInt64(int64_t value) {
+  if (value == INT64_MIN)
+    panic("Integer¸fromInt64: value out of range");
+  Integer *integer = allocInitRC(Integer, 0, __rc_ISOLATED,
+                                 .digits = Array¸new(1, sizeof(digit_t)));
+  ARRAY_ELEMENT_AT(0, integer->digits, digit_t) = value;
+  return integer;
+}
+
+__attribute__((visibility("default"))) int64_t
+Integer·toInt64(Integer *self) {
+  // Horner evaluation, most significant digit first, with overflow checks.
+  __int128 result = 0;
+  for (size_t i = self->digits->count; i > 0; i--) {
+    result = result * (__int128)BASE + ARRAY_ELEMENT_AT(i - 1, self->digits, digit_t);
+    if (result > INT64_MAX || result < -INT64_MAX)
+      panic("Integer·toInt64: value out of range");
+  }
+  return (int64_t)result;
+}
+
 Array *Array¸repeat(digit_t digit, size_t count) {
   Array *array = Array¸new(count, sizeof(digit_t));
   for (size_t i = 0; i < count; i++)

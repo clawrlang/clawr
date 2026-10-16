@@ -65,6 +65,12 @@ String *Integer·toStringRC(Integer *self);
 /// @return an owned Integer object
 Integer *Integer¸fromStringRC(String *str);
 
+/// @brief Create an Integer from a machine integer (owned result)
+Integer *Integer¸fromInt64(int64_t value);
+
+/// @brief Convert an Integer to a machine integer. Panics if it does not fit.
+int64_t Integer·toInt64(Integer *self);
+
 /// @brief Parse a decimal C string into an Integer (owned result)
 /// @param str decimal representation as C string
 /// @return an owned Integer object

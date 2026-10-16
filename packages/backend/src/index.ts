@@ -1,8 +1,42 @@
 import * as cir from '@clawr/cir'
 import CIRParser from './cir-parser.js'
 
+// Storage references carry no type in the CIR, so remember declared variable types.
+const variableTypes = new Map<string, cir.ValueSet>()
+const propertyTypes = new Map<string, cir.ValueSet>()
+
+function lowerPropertyValue(
+    owner: cir.ValueSet,
+    property: { name: string; value: cir.Expression },
+): string {
+    const type =
+        owner.universe === 'rc-type'
+            ? propertyTypes.get(`${mangleTypeName(owner)}.${property.name}`)
+            : undefined
+    return type
+        ? lowerConverted(property.value, type)
+        : lowerExpr(property.value)
+}
+
+function targetType(
+    target: Extract<cir.Statement, { kind: 'ASSIGN' }>['target'],
+): cir.ValueSet | undefined {
+    return target.kind === 'VARIABLE_REF'
+        ? variableTypes.get(target.name)
+        : undefined
+}
+
 export function lower(json: string): string {
+    variableTypes.clear()
+    propertyTypes.clear()
     const cir = CIRParser.parse(json)
+    for (const decl of cir.declarations ?? [])
+        if (decl.kind === 'RC_TYPE_DECL')
+            for (const property of decl.properties)
+                propertyTypes.set(
+                    `${mangleTypeName(decl)}.${property.name}`,
+                    property.type,
+                )
 
     const variableDecls =
         cir.declarations?.filter((decl) => decl.kind === 'VARIABLE_DECL') ?? []
@@ -82,6 +116,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             `
         }
         case 'VARIABLE_DECL':
+            variableTypes.set(decl.name, decl.type)
             return `${lowerType(decl.type)} ${decl.name};`
 
         case 'FUNCTION_DECL':
@@ -247,7 +282,9 @@ function lowerInit(
 function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
     switch (valueSet.universe) {
         case 'integer':
-            return valueSet.boxed ? 'Integer*' : 'int64_t'
+            return integerRepresentation(valueSet) === 'native'
+                ? 'int64_t'
+                : 'Integer*'
         case 'truthvalue':
             return valueSet.boxed ? 'TruthvalueBox*' : 'truthvalue_t'
         case 'rc-type':
@@ -261,26 +298,91 @@ function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
     }
 }
 
+const NATIVE_INTEGER_LIMIT = 2n ** 63n - 1n
+
+/**
+ * Chooses the machine representation of an integer value set (ADR-016). The
+ * range is symmetric because Integer digits cannot hold INT64_MIN.
+ */
+export function integerRepresentation(
+    valueSet: cir.ValueSet & { universe: 'integer' },
+): 'native' | 'big' {
+    return valueSet.boxed ? 'big' : rangeRepresentation(valueSet)
+}
+
+function rangeRepresentation(
+    valueSet: cir.ValueSet & { universe: 'integer' },
+): 'native' | 'big' {
+    const fits = (bound: string | undefined) =>
+        bound !== undefined &&
+        BigInt(bound) >= -NATIVE_INTEGER_LIMIT &&
+        BigInt(bound) <= NATIVE_INTEGER_LIMIT
+    return 'value' in valueSet
+        ? fits(valueSet.value)
+            ? 'native'
+            : 'big'
+        : fits(valueSet.min) && fits(valueSet.max)
+          ? 'native'
+          : 'big'
+}
+
+function isImplicitBig(valueSet: cir.ValueSet): boolean {
+    return (
+        valueSet.universe === 'integer' &&
+        !valueSet.boxed &&
+        integerRepresentation(valueSet) === 'big'
+    )
+}
+
+/** Lowers `expr` and converts it to the representation of `target`. */
+function lowerConverted(expr: cir.Expression, target: cir.ValueSet): string {
+    const lowered = lowerExpr(expr)
+    if (target.universe !== 'integer' || expr.type.universe !== 'integer')
+        return lowered
+    const from = integerRepresentation(expr.type)
+    const to = integerRepresentation(target)
+    if (from === to) {
+        // Implicit big values are reference counted by the backend; sharing needs a retain.
+        const shares =
+            to === 'big' &&
+            isImplicitBig(target) &&
+            isImplicitBig(expr.type) &&
+            (expr.kind === 'VARIABLE_REF' || expr.kind === 'PROPERTY_REF')
+        return shares ? `retainRC(${lowered})` : lowered
+    }
+    return from === 'native'
+        ? `Integer¸fromInt64(${lowered})`
+        : `Integer·toInt64(${lowered})`
+}
+
 export function lowerStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
         case 'CALL':
             return `${lowerFunctionCall(stmt)};`
         case 'VARIABLE_DECL':
-            return `${lowerType(stmt.type)} ${stmt.name} = ${lowerExpr(stmt.initialValue)};`
+            variableTypes.set(stmt.name, stmt.type)
+            return `${lowerType(stmt.type)} ${stmt.name} = ${lowerConverted(stmt.initialValue, stmt.type)};`
         case 'ASSIGN':
             if (
                 stmt.target.kind === 'VARIABLE_REF' &&
                 stmt.value.kind === 'ALLOCATION'
             )
                 return `memcpy(&${lowerStorage(stmt.target)}->properties, &(${mangleTypeName(stmt.value.type)}ˇproperties){
-                        ${stmt.value.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
+                        ${stmt.value.properties?.map((property) => `.${property.name} = ${lowerPropertyValue(stmt.value.type, property)}`).join(', ') ?? ''}
                     },
                     sizeof(${mangleTypeName(stmt.value.type)}ˇproperties));`
-            else
+            else if (stmt.target.kind === 'PROPERTY_REF')
+                return `${lowerStorage(stmt.target)} = ${lowerPropertyValue(stmt.target.object.type, { name: stmt.target.property, value: stmt.value })};`
+            else if (targetType(stmt.target) === undefined)
                 return `${lowerStorage(stmt.target)} = ${lowerExpr(stmt.value)};`
+            else if (isImplicitBig(targetType(stmt.target)!))
+                // The backend owns implicit Integer* values and releases the old one.
+                return `{ Integer *oldˇ = ${lowerStorage(stmt.target)}; ${lowerStorage(stmt.target)} = ${lowerConverted(stmt.value, targetType(stmt.target)!)}; releaseRC(oldˇ); }`
+            else
+                return `${lowerStorage(stmt.target)} = ${lowerConverted(stmt.value, targetType(stmt.target)!)};`
         case 'SELF_INIT':
             return `memcpy(&self->properties, &(${mangleTypeName(stmt.type)}ˇproperties){
-                    ${stmt.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
+                    ${stmt.properties?.map((property) => `.${property.name} = ${lowerPropertyValue(stmt.type, property)}`).join(', ') ?? ''}
                 },
                 sizeof(${mangleTypeName(stmt.type)}ˇproperties));`
         case 'ENSURE_UNIQUE':
@@ -297,7 +399,7 @@ export function lowerStmt(stmt: cir.Statement): string {
 export function lowerInitStmt(stmt: cir.Statement): string {
     switch (stmt.kind) {
         case 'VARIABLE_DECL':
-            return `${stmt.name} = ${lowerExpr(stmt.initialValue)};`
+            return `${stmt.name} = ${lowerConverted(stmt.initialValue, stmt.type)};`
         default:
             return lowerStmt(stmt)
     }
@@ -310,7 +412,9 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'STRING_LITERAL':
             return `"${expr.type.value}"`
         case 'INTEGER_LITERAL':
-            return expr.type.value
+            return integerRepresentation(expr.type) === 'native'
+                ? expr.type.value
+                : `Integer¸fromCString("${expr.type.value}")`
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
         case 'CALL':
@@ -326,7 +430,10 @@ export function lowerExpr(expr: cir.Expression): string {
                 case 'truthvalue':
                     return `boxTruthvalue(${lowerExpr(expr.expression)})`
                 case 'integer':
-                    return `integerWithDigits(1, ${lowerExpr(expr.expression)})`
+                    return expr.expression.type.universe === 'integer' &&
+                        rangeRepresentation(expr.expression.type) === 'big'
+                        ? `retainRC(${lowerExpr(expr.expression)})`
+                        : `integerWithDigits(1, ${lowerExpr(expr.expression)})`
                 default:
                     throw new Error(
                         `Unknown box universe: ${expr.expression.type.universe}`,
@@ -335,7 +442,7 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'ALLOCATION':
             const mangledTypeName = mangleTypeName(expr.type)
             return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
-                ${expr.properties?.map((property) => `.${property.name} = ${lowerExpr(property.value)}`).join(', ') ?? ''}
+                ${expr.properties?.map((property) => `.${property.name} = ${lowerPropertyValue(expr.type, property)}`).join(', ') ?? ''}
             )`
         case 'OR':
             // Cast necessary because of shared mutable state. TypeScript cannot merge Truth[] and (false | true)[] into one type as they are contra-variant.

@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# `subset`
+# `subset` and `type
 
 [ADRs](../README.md)
 
@@ -18,6 +18,8 @@ The `integer` and `real` universes support subsets based on ranges. Such a range
 A `real` also needs a representation (its precision). That is a separate property from its range (see [ADR-025](../adr-025.md)), so it is not part of a `subset`. A range alone is a `subset`. A range together with a representation is a `type`. This ADR covers named ranges, and the named bundles that standard numeric formats need.
 
 **Terminology.** A `universe` is a top set (`integer`, `real`, `truthvalue`, `rc-type`). A `subset` is a universe plus a range. A `type` is a subset plus, for `real`, a representation.
+
+![taxonomy](../images/type-taxonomy.svg)
 
 ## Decision
 
@@ -53,7 +55,7 @@ A balanced ternary range is symmetric and includes both ends, so it uses `...` r
 A named floating-point format is a range plus a representation, so it is a `type`, not a `subset`:
 
 ```clawr
-type float64 = real(-(2^53-1)*2^971...(2^53-1)*2^971) sig 53 scale 1074 bin
+type float64 = real(-(2^53-1)*2^971...(2^53-1)*2^971) sig 53 bin
 ```
 
 The range gives the largest finite magnitude. `sig 53 bin` gives 53 significant bits. IEEE has that many only down to the smallest normal number. Below it, the spacing is fixed (the subnormals), and `scale 1074 bin` expresses that floor: no finer than multiples of 2⁻¹⁰⁷⁴.
@@ -80,7 +82,7 @@ The base word `ter` is reserved. No ternary hardware exists yet, and the only la
 Values derived from the draft, to be verified before this is adopted:
 
 ```clawr
-type btfloat27 = real(-(3^20-1)/2*3^102...(3^20-1)/2*3^102) sig 20 scale 145 ter
+type btfloat27 = real(-(3^20-1)/2*3^102...(3^20-1)/2*3^102) sig 20 ter
 ```
 
 - `sig 20` counts the sign trit, which is the leading digit of normal numbers. The floor `scale 145` comes from the exponent minimum of −121 plus 24 extended-significand trits for subnormals.
@@ -106,6 +108,4 @@ type btfloat27 = real(-(3^20-1)/2*3^102...(3^20-1)/2*3^102) sig 20 scale 145 ter
 ## Related ADRs
 
 - [ADR-005](../adr-005.md) Types are Sets
-- [ADR-025](../adr-025.md) The `real` Datatype
-
-> The one thing I'd want to nail down in an ADR before committing: **what does "subset" mean when the underlying lattice is not a flat union?** `truthvalue` is a flat three-element lattice, so `(false|true)` is easy. Is every union a flat lattice, or can unions nest? If `LinkedList`'s `node` case contains another union, does `LinkedList(node)` mean the case is present, or that the case is present _and all its sub-cases are present_? That distinction will matter, and it's the kind of thing that's cheap to decide now and expensive to change later. — DeepSeek Recommendation
+- [ADR-025](../adr-025.md) The `real` Datatype: Precision axes and bases

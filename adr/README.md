@@ -56,12 +56,13 @@ Records so far:
 - [ADR-022](./adr-022.md): `integer` Exponentiation
 - [ADR-023](./adr-023.md): `integer` Division
 - [ADR-024](./adr-024.md): The `integer` Combinatorial Explosion
-- [ADR-025](./adr-025.md): The `real` Datatype
-- [ADR-026](./adr-026.md): Private Properties Are Per Type
+- [ADR-025](./adr-025.md): The `real` Datatype: Precision axes and bases
+- [ADR-026](./adr-026.md): Backend Execution Mechanics and Lowering for Reals
+- [ADR-027](./adr-027.md): Private Properties Are Per Type
 
 Draft ideas with no ADR number:
 
-- [`subset`](./drafts/subset.md)
+- [`subset` and `type`](./drafts/subset.md)
 - [Multi-Module Programs and Libraries](./drafts/multi-module.md)
 - [Nested Functions and Lambdas](./drafts/lambdas.md)
 - [Discard Label `_`](./drafts/discard-label.md)

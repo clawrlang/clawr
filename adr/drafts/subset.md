@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 MD033 -->
 <img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
 
-# `subset` and `type
+# `subset` and `type`
 
 [ADRs](../README.md)
 
@@ -20,6 +20,8 @@ A `real` also needs a representation (its precision). That is a separate propert
 **Terminology.** A `universe` is a top set (`integer`, `real`, `truthvalue`, `rc-type`). A `subset` is a universe plus a range. A `type` is a subset plus, for `real`, a representation.
 
 ![taxonomy](../images/type-taxonomy.svg)
+
+**Precision base and storage base.** In `sig n base`, `base` defines the precision and representation requirements. For `bin` and `ter`, the storage base is flexible as long as precision holds above $x_{\text{guarantee}}$ (see [ADR-025](../adr-025.md)). For `dec`, the type strictly mandates a base-10 decimal representation. This ensures that `dec` behaves predictably according to decimal arithmetic expectations (e.g. `0.1 + 0.2 == 0.3`), while binary/ternary types focus on conceptual precision across architectures.
 
 ## Decision
 
@@ -50,32 +52,32 @@ A balanced ternary range is symmetric and includes both ends, so it uses `...` r
 - `subset btint81 = integer(-(3^81-1)/2...(3^81-1)/2)`
 - ...
 
-### IEEE 754 binary floating point
+### IEEE-shaped binary types
 
-A named floating-point format is a range plus a representation, so it is a `type`, not a `subset`:
+A named floating-point format is a range plus a precision, so it is a `type`, not a `subset`:
 
 ```clawr
 type float64 = real(-(2^53-1)*2^971...(2^53-1)*2^971) sig 53 bin
 ```
 
-The range gives the largest finite magnitude. `sig 53 bin` gives 53 significant bits. IEEE has that many only down to the smallest normal number. Below it, the spacing is fixed (the subnormals), and `scale 1074 bin` expresses that floor: no finer than multiples of 2⁻¹⁰⁷⁴.
+The range gives the largest finite magnitude. `sig 53 bin` gives 53 significant binary digits of precision. `x_guarantee = min(M·2^(-106), 4/M) ≈ 2^(-1022)`, which is exactly binary64's smallest normal. This is not a coincidence: the second term of the $x_{\text{guarantee}}$ formula is calibrated to the IEEE exponent balance, so an IEEE-shaped range yields an IEEE-shaped guarantee.
 
-| Type       | `sig` (bits) | `scale` floor (bin) | Largest magnitude  |
-| ---------- | ------------ | ------------------- | ------------------ |
-| `float16`  | 11           | 24                  | (2^11−1)·2^5       |
-| `float32`  | 24           | 149                 | (2^24−1)·2^104     |
-| `float64`  | 53           | 1074                | (2^53−1)·2^971     |
-| `float128` | 113          | 16494               | (2^113−1)·2^16271  |
-| `float256` | 237          | 262378              | (2^237−1)·2^261907 |
+| Type       | `sig` (bits) | $x_{\text{guarantee}}$ | Largest magnitude                  |
+| ---------- | ------------ | ---------------------- | ---------------------------------- |
+| `float16`  | 11           | $≈ 2^{-14}$            | $(2^{11}−1) \cdot 2^5 $            |
+| `float32`  | 24           | $≈ 2^{-126}$           | $(2^{24}−1) \cdot 2^{104 }$        |
+| `float64`  | 53           | $≈ 2^{-1{,}022}$       | $(2^{53}−1)·2^{971}$               |
+| `float128` | 113          | $≈ 2^{-16{,}382}$      | $(2^{113}−1)·2^{16{,}271 }$        |
+| `float256` | 237          | $≈ 2^{-262{,}142}$     | $(2^{237}−1) \cdot 2^{261{,}907 }$ |
 
-These types are the deliberate exception to the exact-then-round-once rule of ADR-025:
+These types are **precision-portable, not result-portable**. They say "at least this many significant digits down to this magnitude"; they say nothing about bit layout, rounding per operation, or storage base.
 
-- They mean _exactly_ the IEEE binary values, with rounding after each operation, so `(a * b) + c` matches existing numerical code. The language reference should state this openly.
-- On binary hardware they map to native `float`/`double`. On ternary hardware they are emulated, slowly but correctly, with no source change. The principle is semantic portability, not performance portability.
-- They cover the **finite** values only. NaN and ±∞ are not reals, and ±0 collapse to one real value. Interop with C `double` bit patterns is an explicit conversion at the boundary (for example from a `bitfield`).
-- The alternative, "at least p bits, the hardware's choice", would make results differ between targets and break canonical equality, so it is rejected.
+- **On binary hardware** they coincide with the corresponding IEEE binary format. `float64` and binary64 store the same values with the same rounding, so results match existing numerical code. That coincidence is a backend property, not a type property.
+- **On ternary or other hardware** they are stored natively with at least the required precision. Results may differ from binary IEEE at the last digit; `(a * b) + c` is not bit-identical across platforms. This is the documented cost of implementation-agnosticism (see [ADR-025](https://www.google.com/search?q=../adr-025.md)).
+- **They cover finite values only.** NaN and ±∞ are not reals, and ±0 collapse to one real value. Interop with C `double` bit patterns is an explicit conversion at the boundary (for example from a `bitfield`).
+- **Exact IEEE semantics — rounding per operation, specific bit layout, subnormals with their exact spacing — is not expressible in the current type system, and that is deliberate.** Clawr models the concept (a real with $n$ digits of precision over a range), not the implementation. A programmer who needs bit-exact IEEE behavior should reach for a library that exposes the format explicitly, or for interop with a language that does. The `float64` name is therefore slightly a misnomer: it is _not_ "binary64"; it is "a binary-precision-53 real over the binary64 range". On binary hardware those coincide, which is convenient but not the definition.
 
-### Balanced ternary floating point
+### Balanced ternary types
 
 The base word `ter` is reserved. No ternary hardware exists yet, and the only layout reference is an independent draft (Ternary27: 27 trits made of a 2-trit type code, a sign trit, a 5-trit exponent and a 19-trit significand). It is not known whether that draft has been submitted to a standards body.
 
@@ -83,29 +85,30 @@ Values derived from the draft, to be verified before this is adopted:
 
 ```clawr
 type btfloat27 = real(-(3^20-1)/2*3^102...(3^20-1)/2*3^102) sig 20 ter
+
 ```
 
-- `sig 20` counts the sign trit, which is the leading digit of normal numbers. The floor `scale 145` comes from the exponent minimum of −121 plus 24 extended-significand trits for subnormals.
+- `sig 20` counts the sign trit, which is the leading digit of normal numbers. `x_guarantee = min(M·3^(-40), 9/M) ≈ 3^(-119)`.
 - Speculative: larger ternary representation might be formed as 1, 2, 3: `2*27 = 54` and `3*27 = 81`. The complete series would be: $3^k, 2 \cdot 3^k, k \in \mathbb{N}$
 - In balanced ternary, round-to-nearest is truncation, so there are no ties.
-- 1/3 is exact in `ter` and 1/2 is not, so `bin` and `ter` grids never nest. There is no implicit conversion between them, only an explicit `round`.
+- The ideal precision grids for `bin`, `ter`, and `dec` never nest as exact value sets: 1/3 is exact in `ter`, 1/2 is not; 1/2 is exact in `bin`, 1/3 is not; 1/10 is exact in `dec`, neither 1/3 nor 1/2 is. So there is no implicit conversion between precision bases, only an explicit `round`.
 - The `bt` prefix (balanced) is meaningful: positive and balanced ternary give different value sets at the same digit count. Avoid `ternary27`, because `ternary` already names the truth value.
-- Rounding-direction type codes, NaNs and infinities belong to a boundary type, as for the IEEE types.
-- Speculative: larger types could be imagined as growing
+- Rounding-direction type codes, NaNs and infinities belong to a boundary type, as for the IEEE-shaped types.
 
 ## Rationale
 
 - Easy reuse for type declarations.
 - Seems like an obvious feature as subsets already play an important role.
-- A named type that bundles range and representation cannot be written inconsistently. A prose convention ("use `sig 53` with this range") cannot be checked, and the pairing is what the name means.
+- A named type that bundles range and precision cannot be written inconsistently. A prose convention ("use `sig 53` with this range") cannot be checked, and the pairing is what the name means.
+- Standard types are _conceptual_: they describe precision and range, not bit layout or rounding strategy. This follows the language's broader stance — solve the problem, don't build a solution — and keeps the type system meaningful across hardware the language does not yet run on.
 
 ## Open Questions
 
 1. **Where do the standard types live?** In the standard library as ordinary declarations, or as built-in names?
-2. **Self-reference.** The ranges above are written out. Should a type's maximum be available as `float64.max`?
+2. **Self-reference.** The ranges above are written out. Should a type's `x_guarantee` be available as `float64.x_guarantee`? It is the one non-obvious quantity a programmer may need to reason about near-zero behavior.
 3. **Sizes without a standard.** `btfloat54` and up, and any ternary decimal-like formats, wait for hardware and standards. Speculation: larger sizes might follow the series $3^k$ and $2 \cdot 3^k$ (27, 54, 81, 162, 243, ...), since $2 \cdot 27 = 54$ and $3 \cdot 27 = 81$.
 
 ## Related ADRs
 
-- [ADR-005](../adr-005.md) Types are Sets
-- [ADR-025](../adr-025.md) The `real` Datatype: Precision axes and bases
+- [ADR-005](https://www.google.com/search?q=../adr-005.md) Types are Sets
+- [ADR-025](https://www.google.com/search?q=../adr-025.md) The `real` Datatype: Precision axes and bases

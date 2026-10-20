@@ -15,10 +15,7 @@
 
 ### Frontend Semantic/Static Analysis
 
-- `superType` matches initializer call
-  - Subtype initializers must call a supertype initializer; today the supertype's properties are left uninitialized
-  - No `superType` => no initializer
-  - `superType` must equal initializer `target`
+- Subtype initializers must call a supertype initializer (today it is optional)
 - Can `object` store a service in a property? Let's “no” for now.
 - Properties are private (only accessible via `self`) — but `data` properties `MUST NOT` be private!
 - `data` properties `MUST NOT` have initial values nor be `const`

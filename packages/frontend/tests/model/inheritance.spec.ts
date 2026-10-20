@@ -174,4 +174,19 @@ describe('Inheritance', () => {
         expect(context.scope.isBase(util.simpleTypeName('Super'))).toBeTrue()
         expect(context.scope.isBase(util.simpleTypeName('Sub'))).toBeFalse()
     })
+
+    it('rejects a supertype initializer call without a matching supertype', () => {
+        const context = util.newSemanticContext()
+        const call = FunctionCall.create({
+            baseName: 'new',
+            recipient: util.variableRef('Other'),
+            arguments: [],
+            span: util.someCodeSpan,
+        })
+        expect(call.emitSuperInitializer(context, undefined).isError).toBeTrue()
+        expect(
+            call.emitSuperInitializer(context, util.simpleTypeName('Super'))
+                .isError,
+        ).toBeTrue()
+    })
 })

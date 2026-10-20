@@ -67,7 +67,7 @@ export class ObjectDeclaration implements Declaration {
         )
     }
 
-    private superTypeName(): TypeName | undefined {
+    superTypeName(): TypeName | undefined {
         return this.superType
             ? TypeName.create({
                   name: this.superType,

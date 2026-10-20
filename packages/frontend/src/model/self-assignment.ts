@@ -2,6 +2,7 @@ import { Context, Statement } from '@/model'
 import { SHARED } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import { SourceCodeSpan } from '@/tools/diagnostics'
+import { RCTypeSet } from '@/model/value-set'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 
@@ -67,7 +68,17 @@ export class SelfAssignment implements Statement {
                     value: f.value,
                 })) ?? [],
         })
-        return Result.ok
+
+        const initializerCall = this.value.initializerCall
+        if (!initializerCall) return Result.ok
+        const selfType = context.scope.selfVariable()?.type
+        const superType =
+            selfType instanceof RCTypeSet
+                ? context.scope
+                      .objectDeclaration(selfType.type)
+                      ?.superTypeName()
+                : undefined
+        return initializerCall.emitSuperInitializer(context, superType)
     }
 
     private checkValidity(context: Context): SemanticResult {

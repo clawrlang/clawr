@@ -1,7 +1,9 @@
 import { Context, Expression, Statement } from '@/model'
 import { FunctionName } from '@/model/function-name'
 import { AnyIsolationLevel, UNIQUE } from '@/model/isolation-level'
+import { TypeName } from '@/model/type-name'
 import { RCTypeSet, ValueSet } from '@/model/value-set'
+import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
 import { Result, SuccessResult } from '@/tools/result'
@@ -224,6 +226,48 @@ export class FunctionCall implements Expression, Statement {
                 },
             })
         }
+        return Result.ok
+    }
+
+    /**
+     * Emits this call as the supertype initializer invocation of an
+     * initializer that is running on `self`.
+     */
+    emitSuperInitializer(
+        context: Context,
+        superType: TypeName | undefined,
+    ): SemanticResult {
+        if (!superType)
+            return SemanticErrorResult.failure(
+                'Only a type with a supertype can call a supertype initializer',
+                this.span,
+            )
+        if (
+            !(this.recipient instanceof VariableReference) ||
+            this.recipient.name !== superType.name
+        )
+            return SemanticErrorResult.failure(
+                `The initializer must belong to the supertype ${superType.name}`,
+                this.span,
+            )
+        const argsResult = SemanticResult.collect(
+            this.arguments.map((arg) => arg.toCIRExpression(context)),
+        )
+        if (argsResult.isError) return argsResult
+
+        context.scope.emitted.push({
+            kind: 'CALL',
+            name: this.name.toCIR(),
+            arguments: argsResult.value,
+            receiver: {
+                dispatch: 'direct',
+                object: {
+                    kind: 'VARIABLE_REF',
+                    name: 'self',
+                    type: { universe: 'rc-type', ...superType.toCIR() },
+                },
+            },
+        })
         return Result.ok
     }
 

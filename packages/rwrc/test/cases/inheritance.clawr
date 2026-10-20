@@ -10,7 +10,7 @@ state:
 object Sub: Super {
     func value() => self->property
 init:
-    func new() => {property: 2}
+    func new() => {Super.new(), property: 2}
 state:
     property: integer(0..<100)
 }

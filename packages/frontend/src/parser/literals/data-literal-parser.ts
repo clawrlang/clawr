@@ -30,6 +30,7 @@ export class DataLiteralParser {
                 return undefined
             }
         })
+        if (initializerCall && stream.isNext('PUNCTUATION', ',')) stream.next()
         while (!stream.isNext('PUNCTUATION', '}')) {
             const key = stream.expect('IDENTIFIER').identifier
             stream.expect('PUNCTUATION', ':')

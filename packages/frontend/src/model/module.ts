@@ -25,6 +25,7 @@ export class Module {
             ...this.main.map((stmt) => stmt.emitStatement(context)),
         ])
         if (result.isError) throw result.error
+        if (this.main.length) context.scope.releaseVariables()
         return {
             $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
             declarations: context.scope.rootScope.emitted,

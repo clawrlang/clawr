@@ -142,15 +142,16 @@ export function lower(json: string): string {
 }
 
 /**
- * Properties holding implicit `Integer*` values are owned by the entity, so
- * copy-on-write and deallocation must retain and release them.
+ * Properties holding pointers (rc-types, boxed values and implicit `Integer*`
+ * values) are owned by the entity, so copy-on-write and deallocation must
+ * retain and release them.
  */
 function lowerNestedHooks(
     decl: cir.Declaration & { kind: 'RC_TYPE_DECL' },
-    bigProperties: { name: string }[],
+    ownedProperties: { name: string }[],
 ): { code: string; fields: string } {
     const base = 'base' in decl ? decl.base : undefined
-    if (!bigProperties.length && !base) return { code: '', fields: '' }
+    if (!ownedProperties.length && !base) return { code: '', fields: '' }
     const name = mangleTypeName(decl)
     const hook = (action: 'retain' | 'release') => {
         const baseHook = base
@@ -158,7 +159,7 @@ function lowerNestedHooks(
             : ''
         return `static void ${name}ˇ${action}Nested(void *self) {
             ${baseHook}
-            ${bigProperties.map((p) => `${action}RC(((${name} *)self)->properties.${p.name});`).join('\n')}
+            ${ownedProperties.map((p) => `${action}RC(((${name} *)self)->properties.${p.name});`).join('\n')}
         }`
     }
     return {
@@ -177,10 +178,10 @@ export function lowerDecl(decl: cir.Declaration): string {
                         `${lowerType(property.type)} ${property.name};`,
                 )
                 .join('\n')
-            const bigProperties = decl.properties.filter(
-                (property) => implicitRepresentation(property.type) === 'big',
+            const ownedProperties = decl.properties.filter((property) =>
+                isPointerType(property.type),
             )
-            const nestedHooks = lowerNestedHooks(decl, bigProperties)
+            const nestedHooks = lowerNestedHooks(decl, ownedProperties)
             if (!('methods' in decl))
                 return `typedef struct {
                         ${properties}
@@ -418,6 +419,10 @@ function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
                 `Unknown value set universe: ${(valueSet as any).universe}`,
             )
     }
+}
+
+function isPointerType(valueSet: cir.ValueSet): boolean {
+    return lowerType(valueSet).endsWith('*')
 }
 
 const NATIVE_INTEGER_LIMIT = 2n ** 63n - 1n

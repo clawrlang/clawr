@@ -284,4 +284,23 @@ describe('Type declaration', () => {
         expect(result).toContain('.property = property')
         expect(result).toContain('return self;')
     })
+
+    it('retains and releases nested rc-type properties', () => {
+        const result = lowerDecl({
+            kind: 'RC_TYPE_DECL',
+            name: 'Outer',
+            properties: [
+                { name: 'inner', type: { universe: 'rc-type', name: 'Inner' } },
+                {
+                    name: 'count',
+                    type: { universe: 'integer', min: '0', max: '9' },
+                },
+            ],
+        })
+        expect(result).toContain('retainRC(((Outer *)self)->properties.inner);')
+        expect(result).toContain(
+            'releaseRC(((Outer *)self)->properties.inner);',
+        )
+        expect(result).not.toContain('properties.count);')
+    })
 })

@@ -56,13 +56,18 @@ Records so far:
 - [ADR-022](./adr-022.md): `integer` Exponentiation
 - [ADR-023](./adr-023.md): `integer` Division
 - [ADR-024](./adr-024.md): The `integer` Combinatorial Explosion
-- [ADR-025](./adr-025.md): The `real` Datatype: Precision axes and bases
-- [ADR-026](./adr-026.md): Backend Execution Mechanics and Lowering for Reals
-- [ADR-027](./adr-027.md): Private Properties Are Per Type
+- [ADR-025](./adr-025.md): The `real` Datatype: Precision Kinds and Bases
+- [ADR-026](./adr-026.md): The `real` Datatype: Compatibility and Precision
+- [ADR-027](./adr-027.md): The `real` Datatype: Exact Values and Single Rounding at Storage
+- [ADR-028](./adr-028.md): The `real` Datatype: Assignment, Equality, and Literals
+- [ADR-029](./adr-029.md): The `real` Datatype: Inference
+- [ADR-030](./adr-030.md): The `real` Datatype: `real big`
+- [ADR-031](./adr-031.md): Backend Execution Mechanics and Lowering for Reals
+- [ADR-032](./adr-032.md): `subset` and `type`
+- [ADR-033](./adr-033.md): Private Properties Are Per Type
 
 Draft ideas with no ADR number:
 
-- [`subset` and `type`](./drafts/subset.md)
 - [Multi-Module Programs and Libraries](./drafts/multi-module.md)
 - [Nested Functions and Lambdas](./drafts/lambdas.md)
 - [Discard Label `_`](./drafts/discard-label.md)

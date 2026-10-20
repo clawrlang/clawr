@@ -77,7 +77,6 @@ Draft ideas with no ADR number:
 - [Purity](./drafts/purity.md)
 - [Unions and Enumerated Types](./drafts/union-enum.md)
 - [Ternary Fields on Binary Hardware](./drafts/fields.md)
-- [Unconstrained `real`](./drafts/unconstrained-real.md)
 - [List Comprehensions and Generators](./drafts/list-comprehension.md)
 - [ADA Inspirations](./drafts/clawr-ada.md)
 - [Visibility](./drafts/visibility.md)

@@ -27,11 +27,12 @@ export class ObjectDeclarationParser {
         const startToken = stream.expect('KEYWORD', 'object', 'service')
         const nameToken = stream.expect('IDENTIFIER')
 
-        let superType: string | undefined
+        const inherits: string[] = []
 
         if (stream.isNext('PUNCTUATION', ':')) {
             stream.expect('PUNCTUATION', ':')
-            superType = stream.expect('IDENTIFIER').identifier
+            do inherits.push(stream.expect('IDENTIFIER').identifier)
+            while (stream.isNext('PUNCTUATION', ',') && stream.next())
         }
 
         stream.expect('PUNCTUATION', '{')
@@ -78,7 +79,7 @@ export class ObjectDeclarationParser {
         return ObjectDeclaration.create({
             kind: startToken.keyword as 'object' | 'service',
             name: TypeName.create({ name: nameToken.identifier }),
-            superType,
+            inherits,
             readonly,
             mutating: mutating ?? [],
             initializers: initializers ?? [],

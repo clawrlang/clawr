@@ -27,7 +27,7 @@ describe('ObjectDeclaration Parser', () => {
         expect(parseObject(code)).toMatchObject({
             kind: 'object',
             name: { name: 'Sub' },
-            superType: 'Super',
+            inherits: ['Super'],
             readonly: [],
             mutating: [],
             initializers: [],

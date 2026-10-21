@@ -1,6 +1,7 @@
 import { DataDeclaration } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { FunctionName } from '@/model/function-name'
+import { InterfaceDeclaration } from '@/model/interface-declaration'
 import { IsolationLevel, SHARED, UNKNOWN } from '@/model/isolation-level'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
@@ -15,6 +16,15 @@ class RootScope {
         new Map()
     public readonly emitted: cir.Declaration[] = []
     private readonly baseTypes: Set<string> = new Set()
+    private readonly interfaces: Map<string, InterfaceDeclaration> = new Map()
+
+    interfaceDeclaration(name: TypeName): InterfaceDeclaration | undefined {
+        return this.interfaces.get(name.canonical())
+    }
+
+    addInterfaceDeclaration(decl: InterfaceDeclaration) {
+        this.interfaces.set(decl.name.canonical(), decl)
+    }
 
     markAsBase(name: TypeName) {
         this.baseTypes.add(name.canonical())
@@ -95,6 +105,10 @@ export class Scope {
 
     addObjectDeclaration(decl: ObjectDeclaration) {
         this.types.set(decl.name.canonical(), decl)
+    }
+
+    interfaceDeclaration(name: TypeName): InterfaceDeclaration | undefined {
+        return this.rootScope.interfaceDeclaration(name)
     }
 
     markAsBase(name: TypeName) {

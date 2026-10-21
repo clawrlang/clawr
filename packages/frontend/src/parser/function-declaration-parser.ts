@@ -1,6 +1,7 @@
 import { Token, TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { FunctionDeclaration } from '@/model/function-declaration'
+import { MethodSignature } from '@/model/interface-declaration'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { Parameter } from '@/model/parameter'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
@@ -60,6 +61,23 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             parameters,
             result,
             implementation: { kind: 'body', statements },
+        })
+    }
+
+    parseSignature(stream: TokenStream): MethodSignature {
+        const funcToken = stream.expect('KEYWORD', 'func')
+        const nameToken = stream.expect('IDENTIFIER')
+        const parameters = this.parseParameters(stream)
+        const result = this.parseReturnType(stream)
+        const last = parameters.at(-1)
+        return MethodSignature.create({
+            baseName: nameToken.identifier,
+            parameters,
+            result: result?.type,
+            span: {
+                start: funcToken.start,
+                end: result?.type.span?.end ?? last?.span.end ?? nameToken.end,
+            },
         })
     }
 

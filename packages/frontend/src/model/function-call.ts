@@ -56,6 +56,20 @@ export class FunctionCall implements Expression, Statement {
     isolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
         if (this.name.toString() === 'copy(of:)') return Result.value(UNIQUE)
 
+        if (this.recipient) {
+            const type = this.recipient.type(context)
+            if (type.isError) return type
+            if (!(type.value instanceof RCTypeSet)) return Result.value(UNIQUE)
+            const found = context.scope
+                .objectDeclaration(type.value.type)
+                ?.lookupMethod(this.name, context)
+            return found
+                ? found.declaration.resultIsolationLevel(
+                      found.owner.injectSelf(context),
+                  )
+                : Result.value(UNIQUE)
+        }
+
         const decl = context.scope.functionDeclaration(this.name)
         if (!decl)
             return SemanticErrorResult.failure(
@@ -79,6 +93,24 @@ export class FunctionCall implements Expression, Statement {
                     'Recipient must be rc-type',
                     this.recipient.span,
                 )
+
+            const interfaceDecl = context.scope.interfaceDeclaration(
+                recipientType.type,
+            )
+            if (interfaceDecl) {
+                const required = interfaceDecl.method(this.name)
+                if (!required)
+                    return SemanticErrorResult.failure(
+                        `Method declaration not found: ${this.name.toString()}`,
+                        this.span,
+                    )
+                return required.result
+                    ? Result.value(required.result)
+                    : SemanticErrorResult.failure(
+                          `Method has no result set: ${this.name.toString()}`,
+                          this.span,
+                      )
+            }
 
             const typeDecl = context.scope.objectDeclaration(recipientType.type)
             if (!typeDecl)
@@ -150,10 +182,7 @@ export class FunctionCall implements Expression, Statement {
                 kind: 'CALL',
                 name: this.name.toCIR(),
                 arguments: args,
-                receiver: {
-                    dispatch: this.dispatchKind(context),
-                    object: recipient as any,
-                },
+                receiver: this.receiver(context, recipient),
                 type: value.toCIR(),
             } satisfies cir.Expression)
         } else {
@@ -220,10 +249,7 @@ export class FunctionCall implements Expression, Statement {
                 kind: 'CALL',
                 name: _name,
                 arguments: args,
-                receiver: recipientCIR && {
-                    dispatch: this.dispatchKind(context),
-                    object: recipientCIR as any,
-                },
+                receiver: recipientCIR && this.receiver(context, recipientCIR),
             })
         }
         return Result.ok
@@ -271,6 +297,27 @@ export class FunctionCall implements Expression, Statement {
         return Result.ok
     }
 
+    private receiver(context: Context, object: cir.Expression): Receiver {
+        const type = this.recipient?.type(context)
+        const typeName =
+            type && !type.isError && type.value instanceof RCTypeSet
+                ? type.value.type
+                : undefined
+        if (typeName && context.scope.interfaceDeclaration(typeName))
+            return {
+                dispatch: 'conformance',
+                object: {
+                    ...object,
+                    type: {
+                        universe: 'interface',
+                        name: typeName.name,
+                        namespace: typeName.namespace,
+                    },
+                },
+            } as Receiver
+        return { dispatch: this.dispatchKind(context), object } as any
+    }
+
     private dispatchKind(context: Context): 'direct' | 'inherited' {
         const type = this.recipient?.type(context)
         if (!type || type.isError || !(type.value instanceof RCTypeSet))
@@ -296,3 +343,5 @@ export class FunctionCall implements Expression, Statement {
         return recipientResult?.value
     }
 }
+
+type Receiver = Extract<cir.Expression, { kind: 'CALL' }>['receiver']

@@ -5,13 +5,12 @@
 
 ## `object`/`service`
 
-- Parse `trait`/`role` types (method signatures without body)
 - Begin static analysis for `object`/`service`/`trait`/`role`
 - Make 'self' a reserved identifier
 - Make `FunctionCall` support methods
   - [x] direct
   - [x] inherited
-  - [ ] conformance
+  - [x] conformance (frontend/CIR; backend lowering of `conformance` dispatch is still missing, see ADR-034)
 
 ### Frontend Semantic/Static Analysis
 
@@ -21,6 +20,9 @@
 - `data` properties `MUST NOT` have initial values nor be `const`
 - Properties with initial value should be able to skip/infer value-set
 - The `currentValue()` is not used for anything anymore. Add some optimizations that use it.
+
+- Backend: lower `INTERFACE_DECL`, `conformances` and `conformance` dispatch (conformance table via `header->is_a`)
+- Inherit supertype conformances; `mutating` requirements; `data`/boxed types conforming to traits
 
 ## Function Parameters — Semantic Model
 

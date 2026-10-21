@@ -43,6 +43,8 @@ export interface Statement {
 }
 
 export interface Declaration {
+    /** Declarations with a lower phase are registered first (default 1). */
+    readonly registrationPhase?: number
     /** Called for all declarations of a module before any is emitted. */
     registerDeclaration?(context: Context): void
     emitDeclaration(context: Context): SemanticResult

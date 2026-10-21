@@ -65,6 +65,7 @@ Records so far:
 - [ADR-031](./adr-031.md): Backend Execution Mechanics and Lowering for Reals
 - [ADR-032](./adr-032.md): `subset` and `type`
 - [ADR-033](./adr-033.md): Private Properties Are Per Type
+- [ADR-034](./adr-034.md): Declaring and Conforming to `trait`s and `role`s
 
 Draft ideas with no ADR number:
 

@@ -20,6 +20,7 @@
 - Properties are private (only accessible via `self`) — but `data` properties `MUST NOT` be private!
 - `data` properties `MUST NOT` have initial values nor be `const`
 - Properties with initial value should be able to skip/infer value-set
+- The `currentValue()` is not used for anything anymore. Add some optimizations that use it.
 
 ## Function Parameters — Semantic Model
 

@@ -1,0 +1,25 @@
+name: Sync ADRs to Documentation Repo
+
+on:
+  push:
+    branches:
+      - main # Or your default branch
+    paths:
+      - 'adr/**' # Only trigger when files in the adr directory change
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy ADRs to Target Repository
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: git@github.com:clawrlang/clawr-doc.git
+          BRANCH: main # The branch in the target repo (often main or gh-pages)
+          FOLDER: adr # The source directory in clawrlang/clawr
+          TARGET_DIR: adr # The destination directory in clawrlang/clawr-doc
+          SSH_PRIVATE_KEY: ${{ secrets.ADR_DEPLOY_KEY }}

@@ -9,11 +9,5 @@ charset = utf-8
 indent_style = space
 indent_size = 4
 
-[*.json]
-indent_size = 2
-
-[*.cir]
-indent_size = 2
-
-[*.md]
+[*.{json,yaml,yml,cir,md}]
 indent_size = 2

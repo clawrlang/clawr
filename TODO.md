@@ -37,7 +37,6 @@
 - Ensure that variables with `undefined` `isolationLevel` are not assigned without `copy(of:)`
 
 - CALL: Ensure that each argument matches its parameter’s `isolationLevel`
-  - `RETAIN` arguments
 - Allow any argument value — `ISOLATED`, `SHARED`, `UNIQUE` and even `UNKNOWN` — for `UNKNOWN` parameters
 - Support default parameter values
   - Inject at call site? (only simple values?)

@@ -9,8 +9,8 @@
   - `SUBTRACTION`
   - `MULTIPLICATION`
   - `DIVISION`
-  - `MODULUS` (rename to `REMAINDER`? `MODULO`? …?)
-  - `EXPONENTIAL` (rename to `POWER`? something else?)
+  - `REMAINDER` (can never return negative values - does that affect the type or just the `currentValue`?)
+  - `POWER`
 
 ## `object`/`service`
 

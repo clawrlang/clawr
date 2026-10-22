@@ -23,7 +23,7 @@ startBlock:
             universe: integer
             value: '6'
         right:
-          kind: MODULUS
+          kind: REMAINDER
           left:
             kind: INTEGER_LITERAL
             type:

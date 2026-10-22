@@ -113,10 +113,10 @@ const OPERATORS = {
 }
 
 const CIR_KINDS = {
-    '^': 'EXPONENTIAL',
+    '^': 'POWER',
     '*': 'MULTIPLICATION',
     '/': 'DIVISION',
-    '%': 'MODULUS',
+    '%': 'REMAINDER',
     '+': 'ADDITION',
     '-': 'SUBTRACTION',
     '==': 'EQUAL',

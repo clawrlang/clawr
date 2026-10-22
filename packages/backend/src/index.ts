@@ -876,8 +876,8 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'SUBTRACTION':
         case 'MULTIPLICATION':
         case 'DIVISION':
-        case 'MODULUS':
-        case 'EXPONENTIAL':
+        case 'REMAINDER':
+        case 'POWER':
             return lowerIntegerArithmetic(expr)
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
@@ -895,8 +895,8 @@ const BIG_ARITHMETIC = {
     SUBTRACTION: 'subtract',
     MULTIPLICATION: 'multiply',
     DIVISION: 'floorDivide',
-    MODULUS: 'modulus',
-    EXPONENTIAL: 'power',
+    REMAINDER: 'modulus',
+    POWER: 'power',
 } as const
 
 function operandRepresentation(expr: cir.Expression): Representation {
@@ -922,9 +922,9 @@ function lowerIntegerArithmetic(
         switch (expr.kind) {
             case 'DIVISION':
                 return `floorDiv64(${l}, ${r})`
-            case 'MODULUS':
+            case 'REMAINDER':
                 return `floorMod64(${l}, ${r})`
-            case 'EXPONENTIAL':
+            case 'POWER':
                 break
             default:
                 return `(${l}) ${NATIVE_OPERATORS[expr.kind]} (${r})`

@@ -31,7 +31,12 @@ startBlock:
     type: { universe: integer, min: '-10', max: '10' }
     initialValue:
       kind: DIVISION
-      left: { kind: VARIABLE_REF, name: b, type: { universe: integer, min: '-10', max: '10' } }
+      left:
+        {
+          kind: VARIABLE_REF,
+          name: b,
+          type: { universe: integer, min: '-10', max: '10' },
+        }
       right:
         kind: INTEGER_LITERAL
         type: { universe: integer, value: '2' }
@@ -41,35 +46,58 @@ startBlock:
     type: { universe: integer, boxed: true }
     initialValue:
       kind: BOX
-      expression: { kind: VARIABLE_REF, name: c, type: { universe: integer, min: '-10', max: '10' } }
+      expression:
+        {
+          kind: VARIABLE_REF,
+          name: c,
+          type: { universe: integer, min: '-10', max: '10' },
+        }
       type: { universe: integer, boxed: true }
   - kind: CALL
     name: { baseName: print, labels: [] }
     arguments:
-      - { kind: VARIABLE_REF, name: box_c, type: { universe: integer, boxed: true } }
+      - {
+          kind: VARIABLE_REF,
+          name: box_c,
+          type: { universe: integer, boxed: true },
+        }
   - kind: RELEASE
     object: { kind: VARIABLE_REF, name: box_c }
   - kind: VARIABLE_DECL
     name: d
-    type: { universe: integer, min: '-10', max: '10' }
+    type: { universe: integer, min: '0', max: '10' }
     initialValue:
-      kind: MODULUS
-      left: { kind: VARIABLE_REF, name: b, type: { universe: integer, min: '-10', max: '10' } }
+      kind: REMAINDER
+      left:
+        {
+          kind: VARIABLE_REF,
+          name: b,
+          type: { universe: integer, min: '-10', max: '10' },
+        }
       right:
         kind: INTEGER_LITERAL
         type: { universe: integer, value: '2' }
-      type: { universe: integer, min: '-10', max: '10' }
+      type: { universe: integer, min: '0', max: '10' }
   - kind: VARIABLE_DECL
     name: box_d
     type: { universe: integer, boxed: true }
     initialValue:
       kind: BOX
-      expression: { kind: VARIABLE_REF, name: d, type: { universe: integer, min: '-10', max: '10' } }
+      expression:
+        {
+          kind: VARIABLE_REF,
+          name: d,
+          type: { universe: integer, min: '-10', max: '10' },
+        }
       type: { universe: integer, boxed: true }
   - kind: CALL
     name: { baseName: print, labels: [] }
     arguments:
-      - { kind: VARIABLE_REF, name: box_d, type: { universe: integer, boxed: true } }
+      - {
+          kind: VARIABLE_REF,
+          name: box_d,
+          type: { universe: integer, boxed: true },
+        }
   - kind: RELEASE
     object: { kind: VARIABLE_REF, name: box_d }
   # e = a * b (mixed big and native)
@@ -79,7 +107,12 @@ startBlock:
     initialValue:
       kind: MULTIPLICATION
       left: { kind: VARIABLE_REF, name: a, type: { universe: integer } }
-      right: { kind: VARIABLE_REF, name: b, type: { universe: integer, min: '-10', max: '10' } }
+      right:
+        {
+          kind: VARIABLE_REF,
+          name: b,
+          type: { universe: integer, min: '-10', max: '10' },
+        }
       type: { universe: integer }
   - kind: CALL
     name: { baseName: print, labels: [] }
@@ -101,12 +134,21 @@ startBlock:
     type: { universe: integer, boxed: true }
     initialValue:
       kind: BOX
-      expression: { kind: VARIABLE_REF, name: f, type: { universe: integer, min: '0', max: '5' } }
+      expression:
+        {
+          kind: VARIABLE_REF,
+          name: f,
+          type: { universe: integer, min: '0', max: '5' },
+        }
       type: { universe: integer, boxed: true }
   - kind: CALL
     name: { baseName: print, labels: [] }
     arguments:
-      - { kind: VARIABLE_REF, name: box_f, type: { universe: integer, boxed: true } }
+      - {
+          kind: VARIABLE_REF,
+          name: box_f,
+          type: { universe: integer, boxed: true },
+        }
   - kind: RELEASE
     object: { kind: VARIABLE_REF, name: box_f }
   # g = 2 ^ 70
@@ -114,7 +156,7 @@ startBlock:
     name: g
     type: { universe: integer }
     initialValue:
-      kind: EXPONENTIAL
+      kind: POWER
       left:
         kind: INTEGER_LITERAL
         type: { universe: integer, value: '2' }

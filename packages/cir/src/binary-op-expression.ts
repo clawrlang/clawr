@@ -14,8 +14,8 @@ type ArithmeticOperation = {
         | 'SUBTRACTION'
         | 'MULTIPLICATION'
         | 'DIVISION'
-        | 'MODULUS'
-        | 'EXPONENTIAL'
+        | 'REMAINDER'
+        | 'POWER'
 } & (
     | {
           left: Expression & { type: { universe: 'integer' } }

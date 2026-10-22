@@ -115,6 +115,9 @@ export function lower(json: string): string {
     variableTypes = new Map()
     propertyTypes.clear()
     signatures.clear()
+    interfaceNames.clear()
+    interfaceDecls.clear()
+    typeDecls.clear()
     temps = []
     blockLocals.length = 0
     const cir = CIRParser.parse(json)
@@ -126,19 +129,39 @@ export function lower(json: string): string {
                     property.type,
                 )
 
+    for (const decl of cir.declarations ?? [])
+        if (decl.kind === 'INTERFACE_DECL') {
+            interfaceNames.add(mangleTypeName(decl))
+            interfaceDecls.set(mangleTypeName(decl), decl)
+        } else if (decl.kind === 'RC_TYPE_DECL')
+            typeDecls.set(mangleTypeName(decl), decl)
     registerSignatures(cir.declarations ?? [])
 
     const variableDecls =
         cir.declarations?.filter((decl) => decl.kind === 'VARIABLE_DECL') ?? []
     return `#include <stdio.h>
         #include "runtime.h"
-        ${cir.declarations ? cir.declarations.map(lowerDecl).join('\n') : ''}
+        ${cir.declarations ? [...cir.declarations].sort(interfacesFirst).map(lowerDecl).join('\n') : ''}
         ${variableDecls?.length ? lowerInit(variableDecls) : ''}
         int main() {
             ${cir.startBlock ? lowerBlock(cir.startBlock, { universe: 'void' }, []) : ''}
             return 0;
         }
         `
+}
+
+const interfaceNames = new Set<string>()
+const interfaceDecls = new Map<
+    string,
+    cir.Declaration & { kind: 'INTERFACE_DECL' }
+>()
+const typeDecls = new Map<string, cir.Declaration & { kind: 'RC_TYPE_DECL' }>()
+
+function interfacesFirst(a: cir.Declaration, b: cir.Declaration) {
+    return (
+        Number(b.kind === 'INTERFACE_DECL') -
+        Number(a.kind === 'INTERFACE_DECL')
+    )
 }
 
 /**
@@ -210,15 +233,17 @@ export function lowerDecl(decl: cir.Declaration): string {
             const vtableMethods = decl.dispatchTable
                 ?.map(lowerVtableMethod)
                 .join('\n')
+            const conformances = lowerConformances(decl)
+            const dataFields = `${nestedHooks.fields}${conformances.field}`
             const typeInfo = decl.dispatchTable
                 ? `.polymorphic_type = {
-                        .data = { .size = sizeof(${mangledTypeName}) ${nestedHooks.fields} },
+                        .data = { .size = sizeof(${mangledTypeName}) ${dataFields} },
                         ${decl.base ? `.super = &${mangleTypeName(decl.base)}ˇtype.polymorphic_type,` : ''}
                         .vtable = &(${mangledTypeName}ˇvtable){
                             ${vtableMethods}
                         }
                     }`
-                : `.data_type = { .size = sizeof(${mangledTypeName}) ${nestedHooks.fields} }`
+                : `.data_type = { .size = sizeof(${mangledTypeName}) ${dataFields} }`
             return `typedef struct {
                 ${properties}
             } ${mangledTypeName}ˇproperties;
@@ -232,6 +257,7 @@ export function lowerDecl(decl: cir.Declaration): string {
             ${vtableStruct}
             ${nestedHooks.code}
             ${decl.methods?.map((m) => lowerMethod(m, decl)).join('\n') ?? ''}
+            ${conformances.code}
             static const __type_info ${mangledTypeName}ˇtype = {
                 ${typeInfo}
             };
@@ -249,12 +275,107 @@ export function lowerDecl(decl: cir.Declaration): string {
             return `typedef struct ${mangleTypeName(decl)}ˇwitness {
                     ${decl.methods.map(lowerAbstractSlot).join('\n')}
                 } ${mangleTypeName(decl)}ˇwitness;
-                __interface_info ${mangleTypeName(decl)}ˇinfo = {
+                __interface_info ${mangleTypeName(decl)}ˇtype = {
                     .name = "${mangleTypeName(decl)}"
                 };`
 
         default:
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
+    }
+}
+
+/**
+ * Each conformance gets a witness table of the type's own (or inherited)
+ * implementations, found at runtime through the type info.
+ */
+function lowerConformances(decl: cir.Declaration & { kind: 'RC_TYPE_DECL' }): {
+    code: string
+    field: string
+} {
+    const conformances = decl.conformances ?? []
+    if (!conformances.length) return { code: '', field: '' }
+    const typeName = mangleTypeName(decl)
+    const dispatchTable = 'dispatchTable' in decl ? decl.dispatchTable : []
+    const owner = (name: { baseName: string; labels: string[] }) =>
+        dispatchTable?.find(
+            ({ slot }) =>
+                slot.baseName === name.baseName &&
+                slot.labels.join() === name.labels.join(),
+        )?.implementation ?? decl
+
+    const code = conformances.map(({ interface: iface, fulfillments }) => {
+        const interfaceName = mangleTypeName(iface)
+        const witness = `${typeName}ˇ${interfaceName}ˇwitness`
+        const thunks: string[] = []
+        const slots = fulfillments.map(({ requirement, implementation }) => {
+            const slotName = mangleNameWithLabels(requirement)
+            const ownerDecl = owner(implementation)
+            const implName = mangleNameWithLabels(implementation, ownerDecl)
+            const type = typeDecls.get(mangleTypeName(ownerDecl))
+            const thunk = lowerWitnessThunk(
+                `${typeName}ˇ${interfaceName}ˇ${slotName}`,
+                implName,
+                interfaceDecls
+                    .get(interfaceName)
+                    ?.methods.find((m) => m.baseName === requirement.baseName),
+                type && 'methods' in type
+                    ? type.methods.find(
+                          (m) => m.baseName === implementation.baseName,
+                      )
+                    : undefined,
+                mangleTypeName(ownerDecl),
+            )
+            if (thunk) thunks.push(thunk.code)
+            const target = thunk?.name ?? implName
+            return `.${slotName} = (__typeof__(((${interfaceName}ˇwitness *)0)->${slotName}))${target},`
+        })
+        return `${thunks.join('\n')}
+            static const ${interfaceName}ˇwitness ${witness} = { ${slots.join('\n')} };
+            static const __interface_conformance_entry ${typeName}ˇ${interfaceName}ˇconformance = {
+                .interface = &${interfaceName}ˇtype,
+                .witness_table = &${witness}
+            };`
+    })
+    const entries = conformances.map(
+        ({ interface: iface }) =>
+            `&${typeName}ˇ${mangleTypeName(iface)}ˇconformance`,
+    )
+    return {
+        code: code.join('\n'),
+        field: `, .conformances = (const __interface_conformance_entry *[]){ ${entries.join(', ')}, NULL }`,
+    }
+}
+
+/**
+ * An implementation may promise a narrower result than the interface
+ * requires, which can mean a different representation (`int64_t` versus
+ * `Integer*`). A thunk converts the result so the witness matches the slot.
+ */
+function lowerWitnessThunk(
+    name: string,
+    implementation: string,
+    required: FunctionSignature | undefined,
+    implemented: FunctionSignature | undefined,
+    ownerType: string,
+): { name: string; code: string } | undefined {
+    if (!required || !implemented) return undefined
+    const requiredType = lowerType(required.returnType)
+    const implementedType = lowerType(implemented.returnType)
+    if (requiredType === implementedType) return undefined
+    const params = required.parameters.map(
+        (p) => `${lowerType(p.type)} ${p.name}`,
+    )
+    const args = required.parameters.map((p) => p.name)
+    const call = `${implementation}((${ownerType}*)self${args.map((a) => `, ${a}`).join('')})`
+    const converted =
+        implementedType === 'int64_t' && requiredType === 'Integer*'
+            ? `Integer¸fromInt64(${call})`
+            : call
+    return {
+        name,
+        code: `static ${requiredType} ${name}(${['void* self', ...params].join(', ')}) {
+            return ${converted};
+        }`,
     }
 }
 
@@ -411,7 +532,12 @@ function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
         case 'truthvalue':
             return valueSet.boxed ? 'TruthvalueBox*' : 'truthvalue_t'
         case 'rc-type':
-            return `${valueSet.name}*`
+            // Interfaces are named like types where the frontend resolved them early
+            return interfaceNames.has(mangleTypeName(valueSet))
+                ? 'void*'
+                : `${valueSet.name}*`
+        case 'interface':
+            return 'void*'
         case 'void':
             return 'void'
         default:
@@ -842,7 +968,7 @@ function signatureOf(call: cir.Statement & { kind: 'CALL' }) {
     return signatures.get(
         mangleNameWithLabels(
             call.name,
-            receiver && receiver.dispatch !== 'conformance'
+            receiver
                 ? (receiver.object.type as { name: string; namespace?: string })
                 : undefined,
         ),
@@ -873,11 +999,15 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
             })
             return `VTABLE(${targetName}, ${declarationType})->${slotName}(${[lowerExpr(receiver.object), ...args]})`
         }
-        case 'conformance':
-        default:
-            throw new Error(
-                `Dispatch mode of ${receiver?.dispatch} not yet supported`,
-            )
+        case 'conformance': {
+            const target = lowerExpr(receiver.object)
+            const interfaceName = mangleTypeName(receiver.object.type)
+            const slotName = mangleNameWithLabels({
+                ...call.name,
+                namespace: undefined,
+            })
+            return `((${interfaceName}ˇwitness *)CONFORMANCE_ENTRY(${target}, ${interfaceName}))->${slotName}(${[target, ...args].join(', ')})`
+        }
     }
 }
 

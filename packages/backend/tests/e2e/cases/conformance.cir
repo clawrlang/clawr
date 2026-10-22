@@ -1,0 +1,296 @@
+# yaml-language-server: $schema=../../../../cir/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: RC_TYPE_DECL
+    name: Square
+    properties: []
+    methods:
+      - kind: FUNCTION_DECL
+        baseName: area
+        labels: []
+        parameters: []
+        returnType:
+          universe: integer
+          min: '0'
+          max: '100'
+        body:
+          - kind: RETURN
+            value:
+              kind: INTEGER_LITERAL
+              type:
+                universe: integer
+                value: '4'
+    initializers:
+      - kind: FUNCTION_DECL
+        baseName: new
+        labels: []
+        parameters: []
+        body:
+          - kind: SELF_INIT
+            type:
+              universe: rc-type
+              name: Square
+            properties: []
+        returnType:
+          universe: void
+    conformances:
+      - interface:
+          name: Shape
+        fulfillments:
+          - requirement:
+              baseName: area
+              labels: []
+            implementation:
+              baseName: area
+              labels: []
+  - kind: INTERFACE_DECL
+    name: Shape
+    methods:
+      - baseName: area
+        labels: []
+        parameters: []
+        returnType:
+          universe: integer
+          min: '0'
+          max: '100'
+  - kind: RC_TYPE_DECL
+    name: Base
+    properties: []
+    methods:
+      - kind: FUNCTION_DECL
+        baseName: area
+        labels: []
+        parameters: []
+        returnType:
+          universe: integer
+          min: '0'
+          max: '100'
+        body:
+          - kind: RETURN
+            value:
+              kind: INTEGER_LITERAL
+              type:
+                universe: integer
+                value: '7'
+    initializers:
+      - kind: FUNCTION_DECL
+        baseName: new
+        labels: []
+        parameters: []
+        body:
+          - kind: SELF_INIT
+            type:
+              universe: rc-type
+              name: Base
+            properties: []
+        returnType:
+          universe: void
+    dispatchTable:
+      - slot:
+          baseName: area
+          labels: []
+          parameters: []
+          returnType:
+            universe: integer
+            min: '0'
+            max: '100'
+        declaredIn:
+          name: Base
+        implementation:
+          name: Base
+  - kind: RC_TYPE_DECL
+    name: Tri
+    base:
+      name: Base
+    properties: []
+    methods: []
+    initializers:
+      - kind: FUNCTION_DECL
+        baseName: new
+        labels: []
+        parameters: []
+        body:
+          - kind: SELF_INIT
+            type:
+              universe: rc-type
+              name: Tri
+            properties: []
+          - kind: CALL
+            receiver:
+              object:
+                kind: VARIABLE_REF
+                name: self
+                type:
+                  universe: rc-type
+                  name: Base
+              dispatch: direct
+            name:
+              baseName: new
+              labels: []
+            arguments: []
+        returnType:
+          universe: void
+    conformances:
+      - interface:
+          name: Shape
+        fulfillments:
+          - requirement:
+              baseName: area
+              labels: []
+            implementation:
+              baseName: area
+              labels: []
+    dispatchTable:
+      - slot:
+          baseName: area
+          labels: []
+          parameters: []
+          returnType:
+            universe: integer
+            min: '0'
+            max: '100'
+        declaredIn:
+          name: Base
+        implementation:
+          name: Base
+startBlock:
+  - kind: VARIABLE_DECL
+    name: sq
+    type:
+      universe: rc-type
+      name: Square
+    initialValue:
+      kind: ALLOCATION
+      isolationLevel: ISOLATED
+      type:
+        universe: rc-type
+        name: Square
+  - kind: CALL
+    name:
+      baseName: new
+      labels: []
+    arguments: []
+    receiver:
+      dispatch: direct
+      object:
+        kind: VARIABLE_REF
+        name: sq
+        type:
+          universe: rc-type
+          name: Square
+  - kind: VARIABLE_DECL
+    name: __tempˇ0
+    initialValue:
+      kind: BOX
+      expression:
+        kind: CALL
+        receiver:
+          object:
+            kind: VARIABLE_REF
+            name: sq
+            type:
+              universe: interface
+              name: Shape
+          dispatch: conformance
+        name:
+          baseName: area
+          labels: []
+        arguments: []
+        type:
+          universe: integer
+          min: '0'
+          max: '100'
+      type:
+        universe: integer
+        boxed: true
+    type:
+      universe: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ0
+        type:
+          universe: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ0
+  - kind: VARIABLE_DECL
+    name: tri
+    type:
+      universe: rc-type
+      name: Tri
+    initialValue:
+      kind: ALLOCATION
+      isolationLevel: ISOLATED
+      type:
+        universe: rc-type
+        name: Tri
+  - kind: CALL
+    name:
+      baseName: new
+      labels: []
+    arguments: []
+    receiver:
+      dispatch: direct
+      object:
+        kind: VARIABLE_REF
+        name: tri
+        type:
+          universe: rc-type
+          name: Tri
+  - kind: VARIABLE_DECL
+    name: __tempˇ1
+    initialValue:
+      kind: BOX
+      expression:
+        kind: CALL
+        receiver:
+          object:
+            kind: VARIABLE_REF
+            name: tri
+            type:
+              universe: interface
+              name: Shape
+          dispatch: conformance
+        name:
+          baseName: area
+          labels: []
+        arguments: []
+        type:
+          universe: integer
+          min: '0'
+          max: '100'
+      type:
+        universe: integer
+        boxed: true
+    type:
+      universe: integer
+      boxed: true
+  - kind: CALL
+    name:
+      baseName: print
+      labels: []
+    arguments:
+      - kind: VARIABLE_REF
+        name: __tempˇ1
+        type:
+          universe: integer
+          boxed: true
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: __tempˇ1
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: sq
+  - kind: RELEASE
+    object:
+      kind: VARIABLE_REF
+      name: tri

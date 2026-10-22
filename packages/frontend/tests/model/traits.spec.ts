@@ -85,6 +85,20 @@ describe('trait and role', () => {
         expect(sub.conformances[0].fulfillments).toHaveLength(1)
     })
 
+    it('inherits the conformances of the supertype', () => {
+        const cir = compile(`${shape}
+            object Base: Shape { func area() => 1 }
+            object Sub: Base { func area() => 1 }
+            object Other: Base {}
+        `)
+        const find = (n: string) =>
+            cir.declarations.find((d: any) => d.name === n) as any
+        expect(find('Sub').conformances[0].interface).toEqual({ name: 'Shape' })
+        expect(find('Other').conformances[0].interface).toEqual({
+            name: 'Shape',
+        })
+    })
+
     it('rejects a missing requirement', () => {
         expect(() =>
             compile(`${shape}

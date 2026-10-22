@@ -297,10 +297,20 @@ export class ObjectDeclaration implements Declaration {
         )
     }
 
+    /** Own conformances followed by those inherited from supertypes. */
+    private allConformances(context: Context): string[] {
+        const inherited =
+            this.superDeclaration(context)?.allConformances(context) ?? []
+        return [
+            ...this.conformances,
+            ...inherited.filter((name) => !this.conformances.includes(name)),
+        ]
+    }
+
     private checkConformances(context: Context): SemanticResult<Conformance[]> {
         const result: Conformance[] = []
         const seen = new Set<string>()
-        for (const name of this.conformances) {
+        for (const name of this.allConformances(context)) {
             const typeName = TypeName.create({
                 name,
                 namespace: this.name.namespace,

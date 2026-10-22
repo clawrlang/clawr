@@ -1,0 +1,33 @@
+trait Shape {
+    func area() -> integer
+}
+
+object Square: Shape {
+    func area() => 4
+init:
+    func new() => {}
+}
+
+object Base: Shape {
+    func area() => 7
+init:
+    func new() => {}
+}
+
+object Tri: Base {
+init:
+    func new() => {Base.new()}
+}
+
+func measure(_ shape: Shape) -> integer {
+    return shape.area()
+}
+
+@main {
+    const sq: Square = {Square.new()}
+    const tri: Tri = {Tri.new()}
+    print(sq.area())
+    print(tri.area())
+    print(measure(sq))
+    print(measure(tri))
+}

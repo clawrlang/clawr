@@ -29,7 +29,7 @@ describe('Interface Declaration', () => {
         expect(result).toContain(
             'int64_t (*slot˛l)(void* self, truthvalue_t p);',
         )
-        expect(result).toContain('__interface_info MyInterfaceˇinfo ')
+        expect(result).toContain('__interface_info MyInterfaceˇtype ')
         expect(result).toContain('.name = "MyInterface"')
     })
 })

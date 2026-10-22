@@ -14,12 +14,7 @@
 
 ## `object`/`service`
 
-- Begin static analysis for `object`/`service`/`trait`/`role`
 - Make 'self' a reserved identifier
-- Make `FunctionCall` support methods
-  - [x] direct
-  - [x] inherited
-  - [x] conformance (frontend/CIR; backend lowering of `conformance` dispatch is still missing, see ADR-034)
 
 ### Frontend Semantic/Static Analysis
 

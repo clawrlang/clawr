@@ -1,7 +1,16 @@
 # TODO
 
 - Backend: temporaries are hoisted per statement, so `Integer*` temporaries in loop conditions are evaluated only once — hoist them into the loop
-- `real` operands — deferred until [ADR-025](adr/adr-025.md) settles precision and whether `Real*` is used
+- Add `RealLiteral` to the model. (`ter` mode is deferred until real life ternary processors exist — which might be never)
+- Lower `real` values on the backend using IEEE `binary*` and `decimal*` representations.
+- Lower `real` types with massive precision and/or range as `Real*`.
+- Implement static analysis and lowering of dyadic operations supporting combinations of small vs large numbers (`real` and `integer` types).
+  - `ADDITION`
+  - `SUBTRACTION`
+  - `MULTIPLICATION`
+  - `DIVISION`
+  - `MODULUS` (rename to `REMAINDER`? `MODULO`? …?)
+  - `EXPONENTIAL` (rename to `POWER`? something else?)
 
 ## `object`/`service`
 
@@ -15,9 +24,6 @@
 ### Frontend Semantic/Static Analysis
 
 - Subtype initializers must call a supertype initializer (today it is optional)
-- Can `object` store a service in a property? Let's “no” for now.
-- Properties are private (only accessible via `self`) — but `data` properties `MUST NOT` be private!
-- `data` properties `MUST NOT` have initial values nor be `const`
 - Properties with initial value should be able to skip/infer value-set
 - The `currentValue()` is not used for anything anymore. Add some optimizations that use it.
 

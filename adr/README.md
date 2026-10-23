@@ -66,6 +66,7 @@ Records so far:
 - [ADR-032](./adr-032.md): `subset` and `type`
 - [ADR-033](./adr-033.md): Private Properties Are Per Type
 - [ADR-034](./adr-034.md): Declaring and Conforming to `trait`s and `role`s
+- [ADR-035](./adr-035.md): Separating Mutability from Isolation in Declaration Syntax
 
 Draft ideas with no ADR number:
 

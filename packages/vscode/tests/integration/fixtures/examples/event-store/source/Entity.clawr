@@ -1,11 +1,8 @@
-subset EntityId = string @matches(/^[a-zA-Z0-9_-]+$/)
-subset TypeId = string @matches(/^[a-zA-Z0-9._-]+$/)
+subset EntityId = string (/^[a-zA-Z0-9_-]+$/)
+subset TypeId = string (/^[a-zA-Z0-9._-]+$/)
 subset PersistedEntityVersion = integer (0..<2^31)
 
-union EntityVersion {
-    case notPersisted
-    case version(PersistedEntityVersion)
-}
+union EntityVersion = notPersisted | version(PersistedEntityVersion)
 
 // Event stored in database
 data PublishedEvent {
@@ -30,17 +27,22 @@ trait Entity {
     version() -> EntityVersion
     unpublishedEvents() -> Sequence<UnpublishedEvent>
 
-companion:
+init:
     func reconstituted(
         id: EntityId,
         at version: PersistedEntityVersion,
         events: Sequence<PublishedEvent>
-    ) -> Self
+    )
 
+// TODO: problem: The ADRs say that traits and roles do not include static requirements.
+// How, then, to specify the entity type id?
+companion:
     func entityType() -> TypeId
-    // TODO: Is it possible to add constants to a vtable?
+    // TODO: Is it possible to add constants to a witness table?
     // const entityType: TypeId
 }
+
+// `self` keyword used here. But should not mean that helpers and hidden state should be available.
 
 extension Entity {
     // Default implementation. Can be overridden for performance if needed.

@@ -2,8 +2,12 @@
 data CommandContext {
     entityId: EntityId
     actor: string
-    frameworkContext: ref any
-    entityStore: ref EntityStore
+    mutref frameworkContext: any
+    mutref entityStore: EntityStore
+
+    // alt syntax:
+    // frameworkContext: ref any
+    // entityStore: ref EntityStore
 }
 
 // In adapter library?:

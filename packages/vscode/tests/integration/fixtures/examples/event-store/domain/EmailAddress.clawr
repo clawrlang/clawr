@@ -1,19 +1,17 @@
 object EmailAddress {
-    func value() -> string => self.value
+    func value() -> string => self->value
 
 init:
     func of(input: string) -> EmailAddress { // | InvalidEmail {
 //        guard input.matches(/^[^@]+@[^@]+\.[^@]+$/)
 //            or return invalidEmail("Invalid email format")
 
-        const normalized = input.lowercase()
-        return { value: normalized }
+        const normalized = lowercase(input)
+        self = { value: normalized }
     }
 
     // For reconstruction from events (already validated)
-    func prevalidated(input: string) -> EmailAddress {
-        return { value: input }
-    }
+    func prevalidated(input: string) -> EmailAddress => { value: input }
 
 state:
     // This is a value object (immutable) so its data must not change

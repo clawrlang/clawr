@@ -5,7 +5,7 @@ service EntityStore {
 
         const events = await loadHistory(id.entityId, id.entityType)
             or return entityNotFound(id.entityId)
-        return TEntity.reconstitute(id.entityId, at: history.version, from: history.events)
+        return { reconstituted(id.entityId, at: history.version, from: history.events) }
     }
 
     async func loadHistory(entityId: EntityId, entityType: string) throws

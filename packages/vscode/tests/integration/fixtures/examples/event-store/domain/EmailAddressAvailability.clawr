@@ -60,6 +60,23 @@ mutating:
         }
     }
 
+init:
+    func reconstituted(_ id: EntityId, at version: PersistedEntityVersion, from events: [PublishedEvent]) {
+        self = {
+            id: id
+            pendingEvents: []
+            version: version
+        }
+
+        for event in events { apply(event) }
+    }
+
+    func empty() => {
+        version: notPersisted,
+        pendingEvents: []
+        usedAddresses: Set.empty()
+    }
+
 state:
     version: EntityVersion
     usedAddresses: Set<EmailAddress>
@@ -70,26 +87,6 @@ companion EmailAddressAvailability {
     const singletonId = EntityId.of("email-availability")
     func entityType() => "EmailAddressAvailability"
 
-    func empty() -> EmailAddressAvailability {
-        return {
-            version: notPersisted,
-            pendingEvents: []
-            usedAddresses: Set.empty()
-        }
-    }
-
-    func reconstitute(_ id: EntityId, at version: PersistedEntityVersion, from events: [PublishedEvent])
-        -> EmailAddressAvailability {
-        self = {
-            id: id
-            pendingEvents: []
-            version: version
-        }
-
-        for event in events {
-            apply(event)
-        }
-    }
 
     // Get or create singleton
     async func get(ref entityStore: EntityStore) throws

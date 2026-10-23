@@ -22,9 +22,6 @@
 - Properties with initial value should be able to skip/infer value-set
 - The `currentValue()` is not used for anything anymore. Add some optimizations that use it.
 
-- Backend: lower `INTERFACE_DECL`, `conformances` and `conformance` dispatch (conformance table via `header->is_a`)
-- Inherit supertype conformances; `mutating` requirements; `data`/boxed types conforming to traits
-
 ## Function Parameters — Semantic Model
 
 - Refactoring: improve encapsulation; `Parameter` does nothing

@@ -79,8 +79,8 @@ export class FunctionCall implements Expression, Statement {
         return decl.resultIsolationLevel(context)
     }
 
-    type(context: Context): SemanticResult<ValueSet> {
-        return this.currentValue(context)
+    type(_: Context): SemanticResult<ValueSet> {
+        throw 'not implemented'
     }
 
     currentValue(context: Context): SemanticResult<ValueSet> {

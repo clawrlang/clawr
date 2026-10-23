@@ -41,7 +41,6 @@
 ## Advanced / Ice Box
 
 - `object` may not reach outside itself (its properties) except for calling `service` through a parameter
-- `FunctionCall.type()` should probably not return `currentValue()`
 - `VariableDeclaration.initialValue` — handle type mismatch
 - `DataLiteral` – handle property type mismatch
 - Get the property values from the declared type when converting `SHARED` to `ISOLATED`

@@ -27,8 +27,6 @@
 
 ## Function Parameters — Semantic Model
 
-- Do not `ENSURE_UNIQUE` a `SHARED` return-value
-
 - Refactoring: improve encapsulation; `Parameter` does nothing
   - Ensure that `type` and `defaultValue` are compatible
   - `FunctionCall`: Check `isolationLevel` and value/type of arguments

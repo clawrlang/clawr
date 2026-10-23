@@ -3,6 +3,7 @@ import { Retain } from '@/model/retain'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
+import { ISOLATED } from './isolation-level'
 
 export class ReturnStatement implements Statement {
     private constructor(
@@ -34,17 +35,17 @@ export class ReturnStatement implements Statement {
 
         const collected = SemanticResult.collect([
             this.value.currentValue(context),
+            this.value.isolationLevel(context),
             Retain.ifStorage(this.value, context),
         ])
         if (collected.isError) return collected
-        const [type, retainedValue] = collected.value
+        const [type, isolationLevel, retainedValue] = collected.value
 
         const cirResult = retainedValue.toCIRExpression(context)
         if (cirResult.isError) return cirResult
         const retainedValueCIR = cirResult.value
 
-        if (retainedValue instanceof Retain) {
-            // && isolationLevel === ISOLATED
+        if (retainedValue instanceof Retain && isolationLevel === ISOLATED) {
             const objectResult = retainedValue.value.toCIRExpression(context)
             if (objectResult.isError) return objectResult
             context.scope.emitted.push({

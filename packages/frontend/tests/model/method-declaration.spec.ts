@@ -138,9 +138,7 @@ describe('FunctionDeclaration (method)', () => {
             },
         })
 
-        expect(() => funcDecl.emitMethod(context)).not.toThrow(
-            /Cannot return a SHARED variable as UNIQUE/,
-        )
+        expect(() => funcDecl.emitMethod(context)).not.toThrow()
     })
 
     it('throws if returning ISOLATED as SHARED', () => {
@@ -176,9 +174,7 @@ describe('FunctionDeclaration (method)', () => {
             },
         })
 
-        expect(() => funcDecl.emitMethod(context)).not.toThrow(
-            /Cannot return an ISOLATED variable as ref/,
-        )
+        expect(() => funcDecl.emitMethod(context)).not.toThrow()
     })
 
     it('throws if returning ISOLATED as SHARED', () => {
@@ -214,9 +210,7 @@ describe('FunctionDeclaration (method)', () => {
             },
         })
 
-        expect(() => funcDecl.emitMethod(context)).not.toThrow(
-            /Cannot return an ISOLATED variable as ref/,
-        )
+        expect(() => funcDecl.emitMethod(context)).not.toThrow()
     })
 
     describe('infers return value-set from implicit-return expression', () => {

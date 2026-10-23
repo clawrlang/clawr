@@ -153,9 +153,7 @@ describe('FunctionDeclaration (initializer)', () => {
                 expression: util.variableRef('myVar'),
             },
         })
-        expect(() => funcDecl.emitInitializer(context)).not.toThrow(
-            /Cannot return a SHARED variable as UNIQUE/,
-        )
+        expect(() => funcDecl.emitInitializer(context)).not.toThrow()
     })
 
     it('throws if returning ISOLATED as SHARED', () => {
@@ -191,9 +189,7 @@ describe('FunctionDeclaration (initializer)', () => {
             },
         })
 
-        expect(() => funcDecl.emitInitializer(context)).not.toThrow(
-            /Cannot return an ISOLATED variable as ref/,
-        )
+        expect(() => funcDecl.emitInitializer(context)).not.toThrow()
     })
 
     it('throws if returning ISOLATED as SHARED', () => {
@@ -229,9 +225,7 @@ describe('FunctionDeclaration (initializer)', () => {
             },
         })
 
-        expect(() => funcDecl.emitInitializer(context)).not.toThrow(
-            /Cannot return an ISOLATED variable as ref/,
-        )
+        expect(() => funcDecl.emitInitializer(context)).not.toThrow()
     })
 
     it('infers self-assignment from implicit-return expression', () => {

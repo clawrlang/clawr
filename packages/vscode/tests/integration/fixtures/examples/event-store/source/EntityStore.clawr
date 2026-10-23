@@ -1,0 +1,22 @@
+service EntityStore {
+
+    async func reconstitute<TEntity: Entity>(id: TypedEntityId) throws
+            -> TEntity | EntityNotFound {
+
+        const events = await loadHistory(id.entityId, id.entityType)
+            or return entityNotFound(id.entityId)
+        return TEntity.reconstitute(id.entityId, at: history.version, from: history.events)
+    }
+
+    async func loadHistory(entityId: EntityId, entityType: string) throws
+        -> (PersistedEntityVersion, [PublishedEvent])
+    {
+        // TODO: This probably needs some technical shenanigans
+        // It is meant to run two SELECT statements in one roundtrip
+        return await query(
+            "SELECT version FROM Entities WHERE id = ?;
+            SELECT * FROM Events WHERE entity_id = ? ORDER BY ordinal",
+            entityId, entityId
+        )
+    }
+}

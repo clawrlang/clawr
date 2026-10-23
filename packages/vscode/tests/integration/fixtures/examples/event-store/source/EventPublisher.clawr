@@ -1,0 +1,89 @@
+service EventPublisher {
+
+    // Publish changes from multiple entities atomically
+    async func publishChanges(
+        in entities: Collection<Entity>,
+        as actor: string
+    ) throws -> Void | ConcurrencyConflict {
+
+        const transaction = await database.beginTransaction()
+        defer { transaction.rollback() }
+
+        // Get next global position
+        const position = await getNextPosition()
+
+        // Save each entity's events
+        for entity in entities {
+            guard entity.hasChanges() or continue
+
+            const events = entity.unpublishedEvents()
+
+            // Check version
+            // Get both version and max ordinal in one query
+            const (currentVersion, maxOrdinal) = await getVersionAndMaxOrdinal(entity.id())
+
+            guard currentVersion == entity.version()
+                or return concurrencyConflict(
+                    entity.id(),
+                    entity.version(),
+                    currentVersion
+                )
+
+            match entity.version() {
+                case notPersisted => {
+                    await insertEntity(entity.id(), entity.entityType(), version: 0)
+                }
+                case version(expectedVersion) => {
+                    guard currentVersion == expectedVersion
+                        or return concurrencyConflict(
+                            entity.id(),
+                            expectedVersion,
+                            currentVersion
+                        )
+                }
+            }
+
+            // Insert events
+            // Start ordinal from max existing ordinal
+            mut ordinal = maxOrdinal
+            for event in events {
+                ordinal += 1
+                await insertEvent(
+                    entityId: entity.id(),
+                    name: event.name,
+                    details: event.details,
+                    actor: actor,
+                    ordinal: ordinal,
+                    position: position
+                )
+            }
+
+            // Version increments by 1
+            await updateVersion(entity.id(), newVersion: currentVersion + 1)
+        }
+
+        await transaction.commit()
+    }
+
+    async helper func getVersionAndMaxOrdinal(entityId: EntityId)
+        throws -> (integer, integer)?
+    {
+        // Single roundtrip query
+        const result = await queryOne(
+            """
+            SELECT
+                e.version, -- NULL if not exists
+                COALESCE(MAX(ev.ordinal), -1) as max_ordinal
+            FROM Entities e
+            LEFT JOIN Events ev ON ev.entity_id = e.id
+            WHERE e.id = ?
+            GROUP BY e.version
+            """,
+            entityId
+        )
+
+        guard result or return null
+
+        return (result.version, result.max_ordinal ?? -1)
+    }
+}

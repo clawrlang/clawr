@@ -1,0 +1,115 @@
+
+// Event details for EmailAddressAvailability
+data EmailAddressDetails
+{
+   emailAddress: string
+}
+
+// The singleton entity
+object EmailAddressAvailability: Entity {
+
+    func id() => EmailAddressAvailability.singletonId
+    func version() => self.version
+	func unpublishedEvents() => self.pendingEvents
+
+    // Query methods
+    func isAvailable(email: EmailAddress) -> boolean {
+        return !self.usedAddresses.contains(email)
+    }
+
+mutating:
+
+    // Domain operation: Claim email address
+    func claim(email: EmailAddress) -> Void | EmailAlreadyClaimed {
+        guard self.isAvailable(email)
+            or return emailAlreadyClaimed(email)
+
+        const details: EmailAddressDetails = {
+            emailAddress: email.value()
+        }
+        pendingEvents.append({
+            name: "EmailAddressClaimed"
+            details: details
+        })
+    }
+
+    // Domain operation: Release email address
+    func release(email: EmailAddress) {
+        const details: EmailAddressDetails = {
+            emailAddress: email.value()
+        }
+        pendingEvents.append({
+            name: "EmailAddressReleased"
+            details: details
+        })
+    }
+
+    // Apply events - mutates self
+    func apply(event: PublishedEvent) {
+        match event.name {
+            case "EmailAddressClaimed" => {
+                const details = JSON.deserialize<EmailAddressDetails>(event.details)
+                self.usedAddresses.add(
+                    EmailAddress.prevalidated(details.emailAddress))
+            }
+            case "EmailAddressReleased" => {
+                const details = JSON.deserialize<EmailAddressDetails>(event.details)
+                self.usedAddresses.remove(
+                    EmailAddress.prevalidated(details.emailAddress))
+            }
+        }
+    }
+
+state:
+    version: EntityVersion
+    usedAddresses: Set<EmailAddress>
+    pendingEvents: [UnpublishedEvent]
+}
+
+companion EmailAddressAvailability {
+    const singletonId = EntityId.of("email-availability")
+    func entityType() => "EmailAddressAvailability"
+
+    func empty() -> EmailAddressAvailability {
+        return {
+            version: notPersisted,
+            pendingEvents: []
+            usedAddresses: Set.empty()
+        }
+    }
+
+    func reconstitute(_ id: EntityId, at version: PersistedEntityVersion, from events: [PublishedEvent])
+        -> EmailAddressAvailability {
+        self = {
+            id: id
+            pendingEvents: []
+            version: version
+        }
+
+        for event in events {
+            apply(event)
+        }
+    }
+
+    // Get or create singleton
+    async func get(ref entityStore: EntityStore) throws
+            -> EmailAddressAvailability {
+        const typedId = TypedEntityId {
+            entityId: EmailAddressAvailability.singletonId,
+            entityType: "EmailAddressAvailability"
+        }
+
+        match entityStore.reconstitute<EmailAddressAvailability>(typedId) {
+            case success(entity) => return entity
+            case entityNotFound(_) => {
+                return EmailAddressAvailability.empty()
+            }
+        }
+    }
+}
+
+union AvailabilityError {
+    case emailAlreadyClaimed(EmailAddress)
+}
+
+typealias EmailAlreadyClaimed = AvailabilityError @case(emailAlreadyClaimed)

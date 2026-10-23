@@ -1,0 +1,75 @@
+// ============================================================================
+// BASE UNION
+// ============================================================================
+
+union RateProviderError {
+    case unsupportedCurrency(Currency, Currency)
+    case rateNotAvailable(Currency, Currency, Date)
+    case rateLimitExceeded(integer)  // seconds until reset
+    case invalidResponse(string)
+}
+
+// ============================================================================
+// CONSTRAINED TYPES
+// ============================================================================
+
+typealias UnsupportedCurrency = RateProviderError @case(unsupportedCurrency)
+typealias RateNotAvailable = RateProviderError @case(rateNotAvailable)
+typealias RateLimitExceeded = RateProviderError @case(rateLimitExceeded)
+
+typealias UserFacingError = RateProviderError
+    @cases(unsupportedCurrency, rateLimitExceeded)
+
+// ============================================================================
+// USAGE IN FUNCTIONS
+// ============================================================================
+
+service ExchangeRateProvider {
+    // Single case - can elide name in match
+    async func getCurrentRate(from: Currency, to: Currency)
+        throws NetworkError
+        -> ExchangeRate | UnsupportedCurrency // ad hoc union type
+    {
+        guard supported(from, to)
+            or return unsupportedCurrency(from, to)
+        // ...
+    }
+
+    // Multiple cases - must use names
+    async func getHistoricalRate(from: Currency, to: Currency, date: Date)
+        throws NetworkError
+        -> ExchangeRate | UserFacingError
+    {
+        guard supported(from, to)
+            or return unsupportedCurrency(from, to)
+
+        guard withinRateLimit()
+            or return rateLimitExceeded(60)
+        // ...
+    }
+}
+
+// ============================================================================
+// PATTERN MATCHING
+// ============================================================================
+
+// Single case - name optional
+match getCurrentRate(.USD, .EUR) {
+    case success(rate) => print("Rate: \(rate)")
+    case (from, to) => print("Cannot convert \(from) to \(to)")  // ✅ Allowed
+}
+
+// Multiple cases - names required
+match getHistoricalRate(.USD, .EUR, yesterday) {
+    case success(rate) => print("Rate: \(rate)")
+    case unsupportedCurrency(from, to) =>
+        print("Currency pair not supported")
+    case rateLimitExceeded(seconds) =>
+        print("Try again in \(seconds) seconds")
+}
+
+// Generic error handling
+match getCurrentRate(.USD, .EUR) {
+    case success(rate) => use(rate)
+    case error => logAndRetry(error)  // Matches any error
+}

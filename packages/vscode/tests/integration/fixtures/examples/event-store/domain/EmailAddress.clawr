@@ -1,0 +1,29 @@
+object EmailAddress {
+    func value() -> string => self.value
+
+init:
+    func of(input: string) -> EmailAddress { // | InvalidEmail {
+//        guard input.matches(/^[^@]+@[^@]+\.[^@]+$/)
+//            or return invalidEmail("Invalid email format")
+
+        const normalized = input.lowercase()
+        return { value: normalized }
+    }
+
+    // For reconstruction from events (already validated)
+    func prevalidated(input: string) -> EmailAddress {
+        return { value: input }
+    }
+
+state:
+    // This is a value object (immutable) so its data must not change
+    const value: string
+    // Though `const` might be redundant here. If there are no `mutating`
+    // methods, the value cannot change anyway.
+}
+
+// union EmailError {
+//     case invalidEmail(string)
+// }
+
+// typealias InvalidEmail = EmailError @case(invalidEmail)

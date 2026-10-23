@@ -1,0 +1,132 @@
+subset sqlInteger = int32
+subset sqlBigint = int64
+
+service EventSource {
+
+    // Start continuous projection
+    func beginProjecting() {
+        self.pollEventsTable()
+    }
+
+    helper func pollEventsTable() {
+        // Cancel any pending delay
+        self.currentDelay?.cancel()
+
+        // Poll once
+        const numNotified = self.pollEventsTableOnce()
+
+        // Schedule next poll based on whether events were found
+        const nextDelay = self.pollingStrategy.nextDelay(after: numNotified)
+        self.currentDelay = Timer.after(nextDelay) {
+            self.pollEventsTable()
+        }
+    }
+
+    func pollEventsTableOnce() -> sqlInteger {
+        const lastPosition = self.tracker.lastFinishedPosition() ?? -1
+        const unsortedEvents = await self.repository.getEvents(
+            since: lastPosition,
+            maxCount: pollingStrategy.batchSize()
+        )
+
+        return self.emit(unsortedEvents)
+    }
+
+    // Emit events, handling incomplete batches
+    func emit(unsortedEvents: [ProjectionEvent]) -> sqlInteger] {
+        mut eventGroups = self.groupByPosition(unsortedEvents)
+
+        // CRITICAL: If batch is full, last position might be incomplete
+        const totalCount = eventGroups.flatCount(g => g.events)
+        if (totalCount >= pollingStrategy.batchSize())
+            eventGroups.removeLast()
+
+        for (position, events) in eventGroups {
+            // Notify the start of a position
+            // This could for example start a database transaction
+            self.tracker.onProjectionStarting(position)
+
+            try {
+                // Emit this position
+                for (event in events) self.emitEvent(event)
+                // Notify that the emitted batch was successful
+                // This should commit the transaction.
+                self.tracker.onProjectionFinished(at: position)
+            } catch error {
+                // Notify that something went wrong in this batch
+                // This should rollback the transaction.
+                // And maybe trigger an alert.
+                self.tracker.onProjectionError(position)
+            }
+        }
+
+        return eventGroups.flatCount(g => g.events)
+    }
+
+    // Group events by position, sorted
+    helper func groupByPosition(
+        events: [ProjectionEvent]
+    ) -> [(position: sqlBigint, events: [ProjectionEvent])] {
+
+        // Group and sort by position
+        const groups = events
+           .group(by: event => event.position)
+           .sorted(by: group => group.key)
+
+        // Sort events within each group by ordinal
+        return sortedGroups.map((position, events) =>
+            const sortedEvents = events.sorted(by: event => event.ordinal)
+            return (position: position, events: sortedEvents)
+        )
+    }
+
+    helper func emitEvent(event: ProjectionEvent) {
+        const receptacles = self.receptacles.getReceptacles(event.name)
+        for (ref receptacle in receptacles) {
+            receptacle.update(event)
+        }
+    }
+
+state:
+    repository: ref EventSourceRepository
+    receptacles: ReceptacleCollection
+    tracker: ref ProjectionTracker?
+    pollingStrategy: ref PollingStrategy
+    currentDelay: Timer?
+}
+
+companion EventSource {
+    func prepare(
+        repository: EventSourceRepository,
+        receptacles: ReceptacleCollection,
+
+        // SYNTAX: Optional parameters (default to `null`)
+        [tracker]: ref ProjectionTracker?,
+        // SYNTAX: This parameter creates a strategy if not specified
+        [pollingStrategy]: ref PollingStrategy or DefaultPollingStrategy.new()
+    ) => {
+		repository: repository
+		receptacles: receptacles
+		tracker: tracker ?? NothingTracker()
+		pollingStrategy: pollingStrategy
+	}
+
+    func startPolling(
+        repository: EventSourceRepository,
+        receptacles: ReceptacleCollection,
+        [tracker]: ref ProjectionTracker?,
+        [pollingStrategy]: ref PollingStrategy?
+    ) -> EventSource {
+        const x: EventSource = {
+	        prepare(
+                repository: repository
+                receptacles: receptacles
+                tracker: tracker
+                pollingStrategy: pollingStrategy
+            )
+        }
+
+        x.pollEventsTable()
+        return x
+    }
+}

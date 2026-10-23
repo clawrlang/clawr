@@ -1,0 +1,33 @@
+object ReceptacleCollection {
+
+    func getReceptacles(eventName: string) -> [ref Receptacle] {
+        return self.receptacles[eventName] ?? []
+    }
+
+mutating:
+
+    func add(_ receptacle: ref Receptacle) {
+        for (eventName in receptacle.acceptedEvents()) {
+			if (eventName in receptacles)
+				receptacles[eventName].append(receptacle)
+			else
+				receptacles[eventName] = [receptacle]
+        }
+    }
+
+    func remove(_ receptacle: ref Receptacle) {
+        for (eventName in receptacle.acceptedEvents())
+			receptacles[eventName].remove(receptacle)
+    }
+
+state:
+    receptacles: Dictionary<string, [ref Receptacle]>
+}
+
+companion ReceptacleCollection {
+    func from(receptacles: [ref Receptacle]) -> ReceptacleCollection {
+        var r: ReceptacleCollection = { receptacles: Dictionary.empty() }
+        for (receptacle in receptacles) r.add(receptacle)
+        return r
+    }
+}

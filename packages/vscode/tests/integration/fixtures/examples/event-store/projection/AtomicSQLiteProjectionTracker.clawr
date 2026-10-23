@@ -1,0 +1,40 @@
+service AtomicSQLiteProjectionTracker: ProjectionTracker {
+    func lastFinishedPosition() -> sqlBigint? {
+        const result = await self.database.queryOne(
+            "SELECT position FROM Projections WHERE source = ?",
+            self.sourceName
+        )
+        return result?.position
+    }
+
+    func onProjectionStarting(at position: sqlBigint) {
+        // Start a transaction shared with receptacles
+        transaction = database.beginTransaction()
+    }
+
+    async func onProjectionFinished(at position: sqlBigint) throws {
+        await self.database.execute(
+            """
+            INSERT INTO Projections (source, position)
+            VALUES (?, ?)
+            ON CONFLICT(source) DO UPDATE SET position = excluded.position
+            """,
+            self.sourceName, position
+        )
+        // Commit the transaction persisting all changes performed by
+        // the receptacles
+        database.commitTransaction()
+    }
+
+    func onProjectionError(position: sqlBigint) {
+        // Rollback the transaction aborting all changes performed by
+        // receptacles for this position
+        database.rollbackTransaction()
+        log.error("Failed to project position \(position)")
+        // Maybe notify an alert system so that an engineer can fix the problem
+    }
+
+state:
+    database: ref TargetDatabase
+    sourceName: string
+}

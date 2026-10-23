@@ -1,0 +1,11 @@
+data Event {
+    entityId: string
+    entityType: string
+    name: string
+    details: string  // JSON
+    ordinal: sqlInteger
+    position: sqlBigint
+}
+
+subset sqlInteger = int32
+subset sqlBigint = int64

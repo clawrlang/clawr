@@ -1,0 +1,49 @@
+// Command DTO
+data SetEmailAddress {
+    emailAddress: string
+}
+
+// Command handler
+service SetEmailAddressHandler: CommandHandler<SetEmailAddress, Void>
+{
+    async func handle(
+        command: SetEmailAddress,
+        context: CommandContext
+    ) throws {
+
+        // Validate command
+        const emailAddress = EmailAddress.of(command.emailAddress)
+            or match {
+                case (message) => return CommandResult.badRequest(message)
+            }
+
+        // Load entities
+        mut availability = EmailAddressAvailability.get(context.entityStore)?
+        mut user = context.entityStore.load<User>(
+            context.entityId,
+            "User"
+        ) or match {
+            case entityNotFound(_) =>
+                return CommandResult.notFound("User not found")
+        }
+
+        // Execute domain operations - events tracked automatically!
+        availability.claim(emailAddress)
+            or match {
+                case emailAlreadyClaimed(email) =>
+                    return CommandResult.forbidden("Email \(email.value()) already claimed")
+            }
+
+        user.setEmailAddress(emailAddress)
+            or match {
+                case invalidOperation(msg) =>
+                    return CommandResult.badRequest(msg)
+            }
+
+        // Publish all changes atomically
+        await context.entityStore.publishChanges(
+            [availability, user],
+            context.actor
+        )?
+    }
+}

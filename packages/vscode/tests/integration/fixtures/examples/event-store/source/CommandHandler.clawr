@@ -1,0 +1,33 @@
+// Command context provided to handlers
+data CommandContext {
+    entityId: EntityId
+    actor: string
+    frameworkContext: ref any
+    entityStore: ref EntityStore
+}
+
+// In adapter library?:
+extension CommandContext {
+  func aspNetHttpContext() => self.frameworkContext as HttpContext
+	  or fatalError("Not properly configured for ASP .Net Web API.")
+}
+
+// Command result types
+// TODO: These are named for HTTP statuses. Should
+// they be renamed to something HTTP agnostic?
+union CommandError {
+    case badRequest(reason: string)
+    case unauthorized(reason: string) // authenticationFailed?
+    case forbidden(reason: string) // accessDenied?
+    case notFound(reason: string) // unknownEntity?
+    case conflict(reason: string)
+}
+
+// Use CommandHandler<Command, Void> to return 204 No Nontent when successful
+// NOTE: Void type should be syntactically equivalent to `void` in C,
+// and be stored as `0` in memory (null pointer) at runtime.
+
+role CommandHandler<TCommand, TResult> {
+    async func handle(command: TCommand, context: CommandContext) throws
+        -> TResult | CommandError
+}

@@ -1,0 +1,38 @@
+// Implement to update your read model
+role Receptacle {
+    // Which events does this receptacle handle?
+    func acceptedEvents() -> [string]
+
+    // Update read model database based on event
+    func update(event: ProjectionEvent) throws
+}
+
+// Implement to configure polling frequency
+role PollingStrategy {
+    // The maximum number of events to fetch in each batch
+    func batchSize() -> integer (1..<2^16)
+
+    // Delay to next poll
+    /// @param numNotified: the number of notified events in the last poll
+    func nextDelay(after: sqlInteger) -> Duration
+}
+
+service DefaultPollingStrategy: PollingStrategy {
+    func batchSize() => 100
+
+    func nextDelay(after eventCount: sqlInteger) -> Duration {
+        // If no events found, wait longer
+        return eventCount == 0
+            ? Duration.seconds(60)
+            : Duration.seconds(1)
+    }
+}
+
+// Implement to persist the current position so that projection
+// can resume after a server restart
+role ProjectionTracker {
+    func lastProjectedPosition() -> sqlBigint?
+    func onProjectionStarting(at position: sqlBigint)
+    func onProjectionFinished(at position: sqlBigint)
+    func onProjectionError(at position: sqlBigint)
+}

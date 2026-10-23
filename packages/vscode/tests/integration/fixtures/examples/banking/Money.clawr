@@ -1,0 +1,287 @@
+// ============================================================================
+// CURRENCY - Simple enum
+// ============================================================================
+
+enum Currency {
+    USD
+    EUR
+    GBP
+    JPY
+    BTC
+
+    func symbol() -> string {
+        match self {
+            case USD => "$"
+            case EUR => "€"
+            case GBP => "£"
+            case JPY => "¥"
+            case BTC => "₿"
+        }
+    }
+
+    func decimalPlaces() -> integer {
+        match self {
+            case JPY => 0
+            case BTC => 8
+            else => 2
+        }
+    }
+}
+
+// ============================================================================
+// MONEY - Domain object, uses union for errors
+// ============================================================================
+
+object Money {
+
+    func amount() -> decimal => self.amountInMinorUnits / self.divisor()
+    func currency() -> Currency => self.currency
+    func minorUnits() -> integer => self.amountInMinorUnits
+
+    func isZero() -> boolean => self.amountInMinorUnits == 0
+    func isPositive() -> boolean => self.amountInMinorUnits > 0
+    func isNegative() -> boolean => self.amountInMinorUnits < 0
+
+    // Domain operations return unions
+    func add(_ other: Money) -> Money | CurrencyMismatch {
+        guard self.currency == other.currency
+            or return currencyMismatch(self.currency, other.currency)
+
+        return Money.minorUnits(
+            self.amountInMinorUnits + other.amountInMinorUnits,
+            currency: self.currency
+        )
+    }
+
+    func subtract(_ other: Money) -> Money | CurrencyMismatch {
+        guard self.currency == other.currency
+            or return currencyMismatch(self.currency, other.currency)
+
+        return Money.minorUnits(
+            self.amountInMinorUnits - other.amountInMinorUnits,
+            currency: self.currency
+        )
+    }
+
+    func multiply(by factor: decimal) -> Money {
+        const newAmount = decimal(self.amountInMinorUnits) * factor
+        return Money.minorUnits(
+            integer(Math.round(newAmount)),
+            currency: self.currency
+        )
+    }
+
+    func divide(by divisor: decimal) -> Money | DivisionByZero {
+        guard divisor != 0 or return divisionByZero
+
+        const newAmount = decimal(self.amountInMinorUnits) / divisor
+        return Money.minorUnits(
+            integer(Math.round(newAmount)),
+            currency: self.currency
+        )
+    }
+
+    func allocate(proportions: [decimal]) -> [Money] | InvalidProportions {
+        guard proportions.sum() == 1.0
+            or return invalidProportions("Proportions must sum to 1.0")
+
+        // Split money according to proportions, handling rounding
+        mut allocated: [Money] = []
+        mut remaining = self.amountInMinorUnits
+
+        for proportion in proportions {
+            const amount = integer(Math.round(decimal(self.amountInMinorUnits) * proportion))
+            allocated.append(Money.minorUnits(amount, currency: self.currency))
+            remaining -= amount
+        }
+
+        // Distribute remainder to avoid rounding errors
+        // (simplified - real implementation would be more sophisticated)
+        if remaining != 0 {
+            allocated[0] = Money.minorUnits(
+                allocated[0].amountInMinorUnits + remaining,
+                currency: self.currency
+            )
+        }
+
+        return allocated
+    }
+
+data:
+    amountInMinorUnits: integer
+    currency: Currency
+
+    func divisor() -> integer => 10 ^ self.currency.decimalPlaces()
+}
+
+companion Money {
+
+    func zero(currency: Currency) -> Money {
+        return { amountInMinorUnits: 0, currency: currency }
+    }
+
+    func minorUnits(_ amount: integer, currency: Currency) -> Money {
+        return { amountInMinorUnits: amount, currency: currency }
+    }
+
+    func amount(_ amount: decimal, currency: Currency) -> Money {
+        const divisor = 10 ^ currency.decimalPlaces()
+        return {
+            amountInMinorUnits: integer(Math.round(amount * divisor)),
+            currency: currency
+        }
+    }
+}
+
+// ============================================================================
+// ERROR TYPES - Domain errors as unions
+// ============================================================================
+
+union MoneyError {
+    case currencyMismatch(Currency, Currency)
+    case divisionByZero
+    case invalidProportions(string)
+}
+
+// Specific error types for clarity
+typealias CurrencyMismatch = MoneyError
+typealias DivisionByZero = MoneyError
+typealias InvalidProportions = MoneyError
+
+// ============================================================================
+// OPERATORS - Clean syntax for common operations
+// ============================================================================
+
+companion Money {
+    operator a: Money + b: Money -> Money | CurrencyMismatch {
+        return a.add(b)
+    }
+
+    operator a: Money - b: Money -> Money | CurrencyMismatch {
+        return a.subtract(b)
+    }
+
+    operator a: Money * b: decimal -> Money {
+        return a.multiply(by: b)
+    }
+
+    operator a: Money / b: decimal -> Money | DivisionByZero {
+        return a.divide(by: b)
+    }
+
+    operator a: Money == b: Money -> boolean | CurrencyMismatch {
+        guard a.currency == b.currency
+            or return currencyMismatch(a.currency, b.currency)
+        return a.amountInMinorUnits == b.amountInMinorUnits
+    }
+
+    operator a: Money < b: Money -> boolean | CurrencyMismatch {
+        guard a.currency == b.currency
+            or return currencyMismatch(a.currency, b.currency)
+        return a.amountInMinorUnits < b.amountInMinorUnits
+    }
+
+    operator a: Money > b: Money -> boolean | CurrencyMismatch {
+        guard a.currency == b.currency
+            or return currencyMismatch(a.currency, b.currency)
+        return a.amountInMinorUnits > b.amountInMinorUnits
+    }
+}
+
+// ============================================================================
+// EXCHANGE RATE - Another domain object
+// ============================================================================
+
+object ExchangeRate {
+    func from() -> Currency => self.fromCurrency
+    func to() -> Currency => self.toCurrency
+    func rate() -> decimal => self.rate
+
+    func convert(amount: Money) -> Money | InvalidConversion {
+        guard amount.currency == self.fromCurrency
+            or return invalidConversion("Amount is in \(amount.currency), expected \(self.fromCurrency)")
+
+        const convertedMinorUnits = decimal(amount.minorUnits()) * self.rate
+        return Money.minorUnits(
+            integer(Math.round(convertedMinorUnits)),
+            currency: self.toCurrency
+        )
+    }
+
+    func invert() -> ExchangeRate {
+        return ExchangeRate.rate(
+            1.0 / self.rate,
+            from: self.toCurrency,
+            to: self.fromCurrency
+        )
+    }
+
+data:
+    fromCurrency: Currency
+    toCurrency: Currency
+    rate: decimal @min(0.0)
+}
+
+companion ExchangeRate {
+    func rate(_ rate: decimal, from: Currency, to: Currency) -> ExchangeRate | InvalidRate {
+        guard rate > 0 or return invalidRate("Rate must be positive")
+        return {
+            fromCurrency: from,
+            toCurrency: to,
+            rate: rate
+        }
+    }
+}
+
+union ConversionError {
+    case invalidConversion(string)
+    case invalidRate(string)
+}
+
+typealias InvalidConversion = ConversionError
+typealias InvalidRate = ConversionError
+
+// ============================================================================
+// EXCHANGE RATE PROVIDER - System service, can throw
+// ============================================================================
+
+service ExchangeRateProvider {
+    async func getRate(from: Currency, to: Currency)
+        throws NetworkError, TimeoutError
+        -> ExchangeRate | UnsupportedCurrency
+    {
+        // System error (throws): Network/infrastructure failures
+        const response = await httpClient.get("/rates/\(from)/\(to)")
+
+        // Domain error (union): Business rule violation
+        guard response.supported
+            or return unsupportedCurrency(from, to)
+
+        return ExchangeRate.rate(
+            response.rate,
+            from: from,
+            to: to
+        )?  // Propagate InvalidRate if rate is invalid
+    }
+
+    async func getHistoricalRate(
+        from: Currency,
+        to: Currency,
+        date: Date
+    ) throws NetworkError, TimeoutError -> ExchangeRate | RateNotAvailable {
+        const response = await httpClient.get("/rates/\(from)/\(to)/\(date)")
+
+        guard response.exists
+            or return rateNotAvailable(from, to, date)
+
+        return ExchangeRate.rate(response.rate, from: from, to: to)?
+    }
+}
+
+union RateProviderError {
+    case unsupportedCurrency(Currency, Currency)
+    case rateNotAvailable(Currency, Currency, Date)
+}
+
+typealias UnsupportedCurrency = RateProviderError
+typealias RateNotAvailable = RateProviderError

@@ -1,0 +1,48 @@
+subset EntityId = string @matches(/^[a-zA-Z0-9_-]+$/)
+subset TypeId = string @matches(/^[a-zA-Z0-9._-]+$/)
+subset PersistedEntityVersion = integer (0..<2^31)
+
+union EntityVersion {
+    case notPersisted
+    case version(PersistedEntityVersion)
+}
+
+// Event stored in database
+data PublishedEvent {
+    entityId: EntityId
+    name: string
+    details: string // JSON
+    actor: string
+    timestamp: DateTime
+    ordinal: integer
+    position: integer
+}
+
+// Event pending publication
+data UnpublishedEvent {
+    name: string
+    details: string // JSON
+    // No metadata until the event is published
+}
+
+trait Entity {
+    id() -> EntityId
+    version() -> EntityVersion
+    unpublishedEvents() -> Sequence<UnpublishedEvent>
+
+companion:
+    func reconstituted(
+        id: EntityId,
+        at version: PersistedEntityVersion,
+        events: Sequence<PublishedEvent>
+    ) -> Self
+
+    func entityType() -> TypeId
+    // TODO: Is it possible to add constants to a vtable?
+    // const entityType: TypeId
+}
+
+extension Entity {
+    // Default implementation. Can be overridden for performance if needed.
+    func hasChanges() => !self.unpublishedEvents().isEmpty()
+}

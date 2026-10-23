@@ -1,0 +1,94 @@
+// User event details
+data Registered {
+    username: string
+    name: string
+}
+
+data EmailAddressChanged {
+    address: string
+}
+
+object User: Entity {
+    func id() => self.id
+    func version() => self.version
+    func unpublishedEvents() => self.pendingEvents
+
+    // State accessors only if needed
+    func username() => self.username
+    func emailAddress() => self.emailAddress
+
+mutating:
+    func setEmailAddress(newEmail: EmailAddress) {
+        guard newEmail != self.emailAddress or return // no error and no change
+
+        const details: EmailAddressChanged = {
+            address: newEmail.value()
+        }
+        pendingEvents.append({
+            name: "EmailAddressChanged"
+            details: JSON.serialize(details)
+        })
+    }
+
+    // Apply mutates self directly - only called during reconstitution
+    func apply(event: UserEvent) {
+        match event {
+            case "Registered" => {
+                const details = JSON.deserialize<Registered>(event.details)
+                self.username = details.username
+                self.name = details.name
+            }
+            case "EmailAddressChanged" => {
+                const details = JSON.deserialize<EmailAddressDetails>(event.details)
+                self.emailAddress = EmailAddress.prevalidated(details.emailAddress)
+            }
+        }
+    }
+
+state:
+    id: EntityId
+    version: EntityVersion
+    pendingEvents: [UnpublishedEvent]
+
+    username: string
+    name: string
+    emailAddress: EmailAddress
+}
+
+companion User {
+    func entityType() => "User"
+
+    // Register a new User
+    func register(id: EntityId, name: string, emailAddress: EmailAddress) {
+        self = {
+            id: id
+            version: notPersisted
+            name: name
+            emailAddress: EmailAddress.prevalidated("")
+            pendingEvents: [{
+                name: "Registered",
+                details: JSON.serialize(Register {
+	                username: id.value()
+	                name: name
+	            })
+            }]
+        }
+
+        self.setEmailAddress(emailAddress)
+    }
+
+    // Efficient reconstitution - single allocation, in-place mutations
+    func reconstitute(id: EntityId, at version: PersistedEntityVersion, from events: [PublishedEvent]) -> User {
+        self = {
+            id: id,
+            version: 0,
+            username: "",
+            name: "",
+            emailAddress: EmailAddress.prevalidated("")
+        }
+
+        for event in events {
+            apply(event)
+        }
+    }
+}

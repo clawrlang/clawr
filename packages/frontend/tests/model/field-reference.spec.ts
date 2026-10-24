@@ -73,29 +73,25 @@ describe('Property Reference', () => {
     describe('infers its type and isolation level from the context', () => {
         const cases = [
             {
-                keyword: 'const',
                 isImmutable: true,
                 expected: ISOLATED,
             },
             {
-                keyword: 'mut',
                 isImmutable: false,
                 expected: ISOLATED,
             },
             {
-                keyword: 'ref',
                 isImmutable: true,
                 expected: SHARED,
             },
             {
-                keyword: 'mutref',
                 isImmutable: false,
                 expected: SHARED,
             },
         ] as const
 
-        for (const { keyword, isImmutable, expected } of cases)
-            test(`${keyword} object`, () => {
+        for (const { isImmutable, expected } of cases)
+            test(`${isImmutable ? 'immutable' : 'mutable'} ${expected} object`, () => {
                 const context = util.newSemanticContext()
                 context.scope.addVariableDeclaration('myVar', {
                     isImmutable,

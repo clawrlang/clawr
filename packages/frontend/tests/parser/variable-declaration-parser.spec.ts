@@ -25,7 +25,7 @@ describe('VariableDeclarationParser', () => {
     })
 
     it('parses mutable reference variable declaration', () => {
-        const source = `mutref foo: Type = { x: 1, y: 2 }`
+        const source = `mut foo: ref Type = { x: 1, y: 2 }`
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: false,
             name: 'foo',
@@ -41,7 +41,7 @@ describe('VariableDeclarationParser', () => {
     })
 
     it('parses non-reassignable reference variable declaration', () => {
-        const source = `ref foo: Type = { x: 1, y: 2 }`
+        const source = `const foo: ref Type = { x: 1, y: 2 }`
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
             name: 'foo',
@@ -61,13 +61,12 @@ describe('VariableDeclarationParser', () => {
         expect(parseVariableDeclaration(source)).toMatchObject({
             isImmutable: true,
             name: 'foo',
-            isolationLevel: ISOLATED,
             initialValue: { value: { min: 1n, max: 1n } },
         })
     })
 
-    it('sets the isolation-level of data literal', () => {
-        const source = 'ref r: MyData = {}'
+    it('parses shared data literal', () => {
+        const source = 'const r: ref MyData = {}'
         const decl = parseVariableDeclaration(source)
 
         expect(decl).toMatchObject({
@@ -76,6 +75,39 @@ describe('VariableDeclarationParser', () => {
             isolationLevel: SHARED,
             type: { type: { name: 'MyData' } },
             initialValue: { properties: [] },
+        })
+    })
+
+    it('parses isolated data literal', () => {
+        const source = 'const v: cow MyData = {}'
+        const decl = parseVariableDeclaration(source)
+
+        expect(decl).toMatchObject({
+            isImmutable: true,
+            name: 'v',
+            isolationLevel: ISOLATED,
+            type: { type: { name: 'MyData' } },
+            initialValue: { properties: [] },
+        })
+    })
+
+    it('parses shared copy', () => {
+        const source = 'const r = copy(of: x) as ref'
+        const decl = parseVariableDeclaration(source)
+
+        expect(decl).toMatchObject({
+            name: 'r',
+            isolationLevel: SHARED,
+        })
+    })
+
+    it('parses isolated data literal', () => {
+        const source = 'const v = copy(of: x) as cow'
+        const decl = parseVariableDeclaration(source)
+
+        expect(decl).toMatchObject({
+            name: 'v',
+            isolationLevel: ISOLATED,
         })
     })
 })

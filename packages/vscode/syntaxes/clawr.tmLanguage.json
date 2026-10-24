@@ -37,7 +37,11 @@
       "patterns": [
         {
           "name": "storage.modifier.clawr",
-          "match": "\\b(const|mut|ref|mutref)\\b"
+          "match": "\\b(const|mut)\\b"
+        },
+        {
+          "name": "storage.modifier.clawr",
+          "match": "\\b(ref|cow)\\b"
         },
         {
           "name": "keyword.other.declaration.clawr",

@@ -1,12 +1,10 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { Property } from '@/model/data-declaration'
+import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { ISOLATION_KEYWORDS, MUTABILITY_KEYWORDS } from '@/model/keywords'
 import { Context } from '@/parser'
 import { ExpressionParser } from '@/parser/expression-parser'
-import {
-    SemanticsKeyword,
-    SemanticsKeywordParser,
-} from '@/parser/semantics-keyword-parser'
 import { TypeConstraintParser } from '@/parser/type-constraint-parser'
 
 export class PropertyParser {
@@ -17,12 +15,16 @@ export class PropertyParser {
     }
 
     parse(stream: TokenStream): Property {
-        let keyword =
-            SemanticsKeywordParser.parse(stream) ?? SemanticsKeyword.mut
+        const mutabilityToken = stream.isNext('KEYWORD', ...MUTABILITY_KEYWORDS)
+            ? stream.expect('KEYWORD', ...MUTABILITY_KEYWORDS)
+            : undefined
         const propertyNameToken = stream.expect('IDENTIFIER')
         const propertyName = propertyNameToken.identifier
 
         stream.expect('PUNCTUATION', ':')
+        const isolationToken = stream.isNext('KEYWORD', ...ISOLATION_KEYWORDS)
+            ? stream.expect('KEYWORD', ...ISOLATION_KEYWORDS)
+            : undefined
         const type = TypeConstraintParser.create(this.context).parse(stream)
 
         let defaultValue: Expression | undefined
@@ -33,8 +35,9 @@ export class PropertyParser {
 
         return {
             name: propertyName,
-            isImmutable: keyword.isImmutable,
-            isolationLevel: keyword.isolationLevel,
+            isImmutable: mutabilityToken?.keyword === 'const',
+            isolationLevel:
+                isolationToken?.keyword === 'ref' ? SHARED : ISOLATED,
             type,
             defaultValue,
         }

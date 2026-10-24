@@ -1,6 +1,6 @@
 import { TokenStream } from '@/lexer'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { IntegerSet, TruthvalueSet } from '@/model/value-set'
+import { IntegerSet, RCTypeSet, TruthvalueSet } from '@/model/value-set'
 import { DataDeclarationParser } from '@/parser/data-declaration-parser'
 import { describe, expect, it } from 'bun:test'
 
@@ -34,7 +34,7 @@ describe('DataDeclarationParser', () => {
     it('parses a data declaration with mixed semantics', () => {
         const code = `
             data MyData {
-                ref property1: integer
+                const property1: ref T
                 const property2: truthvalue
             }`
         const result = parseDataDeclaration(code)
@@ -53,7 +53,7 @@ describe('DataDeclarationParser', () => {
                 },
             ],
         })
-        expect(result.properties[0].type).toBeInstanceOf(IntegerSet)
+        expect(result.properties[0].type).toBeInstanceOf(RCTypeSet)
         expect(result.properties[1].type).toBeInstanceOf(TruthvalueSet)
     })
 })

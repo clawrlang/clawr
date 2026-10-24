@@ -160,6 +160,63 @@ describe('VariableDeclaration', () => {
         })
     })
 
+    describe('inferred isolation level', () => {
+        describe('infers isolation level from variable reference', () => {
+            const context = util.newSemanticContext()
+            context.scope.rootScope.addDataDeclaration(
+                DataDeclaration.create({
+                    name: TypeName.create({ name: 'MyType' }),
+                    properties: [],
+                }),
+            )
+            context.scope.addVariableDeclaration('isolatedVar', {
+                isImmutable: true,
+                isolationLevel: ISOLATED,
+                type: RCTypeSet.create({
+                    type: util.simpleTypeName('MyType'),
+                }),
+            })
+
+            context.scope.addVariableDeclaration('sharedVar', {
+                isImmutable: true,
+                isolationLevel: SHARED,
+                type: RCTypeSet.create({
+                    type: util.simpleTypeName('MyType'),
+                }),
+            })
+
+            test('ISOLATED', () => {
+                const decl = VariableDeclaration.create({
+                    isImmutable: false,
+                    name: 'foo',
+                    initialValue: util.variableRef('isolatedVar'),
+                    nameSpan: util.someCodeSpan,
+                    span: util.someCodeSpan,
+                })
+                const result = decl.emitStatement(context)
+                expect(result.isSuccess || result.error).toBeTrue()
+                expect(
+                    context.scope.variableDeclaration('foo')?.isolationLevel,
+                ).toEqual(ISOLATED)
+            })
+
+            test('SHARED', () => {
+                const decl = VariableDeclaration.create({
+                    isImmutable: false,
+                    name: 'bar',
+                    initialValue: util.variableRef('sharedVar'),
+                    nameSpan: util.someCodeSpan,
+                    span: util.someCodeSpan,
+                })
+                const result = decl.emitStatement(context)
+                expect(result.isSuccess || result.error).toBeTrue()
+                expect(
+                    context.scope.variableDeclaration('bar')?.isolationLevel,
+                ).toEqual(SHARED)
+            })
+        })
+    })
+
     describe('injects RETAIN statement', () => {
         test('for a propertyReference', () => {
             const context = util.newSemanticContext()

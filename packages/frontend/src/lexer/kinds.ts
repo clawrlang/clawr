@@ -67,7 +67,8 @@ const ALL_KW = [
     'const',
     'mut',
     'ref',
-    'mutref',
+    'cow',
+    'as',
 
     // Functions / methods / operators
     `func`,

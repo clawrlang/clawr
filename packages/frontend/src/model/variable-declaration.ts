@@ -19,7 +19,7 @@ export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private readonly isImmutable: boolean,
         private readonly name: string,
-        private readonly isolationLevel: IsolationLevel,
+        private readonly isolationLevel: IsolationLevel | undefined,
         private readonly type: TypeConstraintDeclaration | undefined,
         private readonly initialValue: Expression,
         private readonly span: SourceCodeSpan,
@@ -37,7 +37,7 @@ export class VariableDeclaration implements Statement, Declaration {
     }: {
         isImmutable: boolean
         name: string
-        isolationLevel: IsolationLevel
+        isolationLevel?: IsolationLevel
         type?: TypeConstraintDeclaration
         initialValue: Expression
         span: SourceCodeSpan
@@ -66,9 +66,17 @@ export class VariableDeclaration implements Statement, Declaration {
         scope: Scope | Scope['rootScope'],
         context: Context,
     ): SemanticResult {
-        const initialValueResult = this.currentValueFromInitial(context)
+        const initialValueResult = SemanticResult.collect([
+            this.initialValue.isolationLevel(context),
+            this.currentValueFromInitial(context),
+        ])
         if (initialValueResult.isError) return initialValueResult
-        const initialValue = initialValueResult.value
+        const [valueIsolationLevel, initialValue] = initialValueResult.value
+        if (valueIsolationLevel === 'UNKNOWN')
+            return SemanticErrorResult.failure(
+                'Cannot assign UNKNOWN isolation values',
+                this.span,
+            )
         const validityResult = this.checkValidity(initialValue, context)
         if (validityResult.isError) return validityResult
 
@@ -79,7 +87,11 @@ export class VariableDeclaration implements Statement, Declaration {
 
         scope.addVariableDeclaration(this.name, {
             isImmutable: this.isImmutable,
-            isolationLevel: this.isolationLevel!!,
+            isolationLevel:
+                this.isolationLevel ??
+                (valueIsolationLevel === 'UNIQUE'
+                    ? ISOLATED
+                    : valueIsolationLevel),
             type: type,
         })
         context.highlightRecorder?.record('variable', this.nameSpan, [
@@ -156,6 +168,7 @@ export class VariableDeclaration implements Statement, Declaration {
         if (valueIsolationLevelResult.isError) return valueIsolationLevelResult
         const valueIsolationLevel = valueIsolationLevelResult.value
         if (valueIsolationLevel === UNIQUE) return Result.ok
+        if (!this.isolationLevel) return Result.ok
         if (this.isolationLevel !== valueIsolationLevel)
             return SemanticErrorResult.failure(
                 `Cannot assign ${valueIsolationLevel} value to ${this.isolationLevel} target`,

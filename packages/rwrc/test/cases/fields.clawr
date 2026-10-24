@@ -5,15 +5,15 @@ data Inner {
 
 data Outer {
     property1: integer(0..<100)
-    ref inner: Inner
+    inner: ref Inner
 }
 
 @main {
-    ref a: Outer = { property1: 42, inner: { property: 47 } }
-    ref b = a
+    const a: ref Outer = { property1: 42, inner: { property: 47 } }
+    const b = a // infer ref (SHARED)
 
-    const c = copy(of: a)
-    mut d = c
+    const c = copy(of: a) as cow
+    mut d = c // infer cow (ISOLATED)
 
     b->property1 = 0 // changes a
     d.property1 = 1 // only chsnges d
@@ -21,7 +21,7 @@ data Outer {
     print(a->property1)
     print(c.property1)
 
-    ref e = c.inner
+    const e = c.inner
     b->inner->property = 3
 
     print(e->property)

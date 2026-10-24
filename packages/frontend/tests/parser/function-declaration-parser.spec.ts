@@ -80,7 +80,7 @@ describe('Function Declaration Parser', () => {
 
     it('parses parameters with semantics', () => {
         const code =
-            'func myFunction(ref _ x: MyData, const label y: truthvalue) {}'
+            'func myFunction(const _ x: ref MyData, const label y: truthvalue) {}'
 
         const result = parseFunction(code)
         expect(result).toMatchObject({
@@ -92,7 +92,7 @@ describe('Function Declaration Parser', () => {
                     isolationLevel: SHARED,
                     span: {
                         start: { line: 1, column: 17 },
-                        end: { line: 1, column: 32 },
+                        end: { line: 1, column: 38 },
                     },
                 },
                 {
@@ -101,8 +101,8 @@ describe('Function Declaration Parser', () => {
                     type: { values: ['false', 'ambiguous', 'true'] },
                     isImmutable: true,
                     span: {
-                        start: { line: 1, column: 34 },
-                        end: { line: 1, column: 59 },
+                        start: { line: 1, column: 40 },
+                        end: { line: 1, column: 65 },
                     },
                 },
             ],

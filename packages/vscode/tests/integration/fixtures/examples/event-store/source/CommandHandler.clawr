@@ -2,8 +2,8 @@
 data CommandContext {
     entityId: EntityId
     actor: string
-    mutref frameworkContext: any
-    mutref entityStore: EntityStore
+    mut frameworkContext: ref any
+    mut entityStore: ref EntityStore
 
     // alt syntax:
     // frameworkContext: ref any

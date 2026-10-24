@@ -3,13 +3,13 @@ data MyData {
 }
 
 const c: MyData = { property: 1 }
-ref r: MyData = copy(of: c)
+const r: ref MyData = copy(of: c)
 
 @main {
     mut m: MyData = c
     m.property = 2 // isolated mutation
 
-    mutref mr: MyData = r
+    mut mr: ref MyData = r
     r->property = 3 // shared mutation
 
     print(c.property)

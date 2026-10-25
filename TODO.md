@@ -1,6 +1,5 @@
 # TODO
 
-- Backend: temporaries are hoisted per statement, so `Integer*` temporaries in loop conditions are evaluated only once — hoist them into the loop
 - Lower `real` values on the backend using IEEE `binary*` and `decimal*` representations.
 - Lower `real` types with massive precision and/or range as `Real*`.
 - Implement static analysis and lowering of dyadic operations supporting combinations of small vs large numbers (`real` and `integer` types).
@@ -48,3 +47,4 @@
 - binary/ternary data (`tritfield`/`bitfield`)
 - should `truthvalue` be `Ordered` – `false < ambiguous < true`?
 - Evaluate a (pure) function call.
+- Backend: temporaries are hoisted per statement, so `Integer*` temporaries in loop conditions are evaluated only once — hoist them into the loop

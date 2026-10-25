@@ -118,7 +118,7 @@ export class VariableDeclaration implements Statement, Declaration {
         const initialValueResult = value.toCIRExpression({
             ...context,
             explicitType: this.type,
-            isolationLevel: this.isolationLevel,
+            isolationLevel: this.isolationLevel ?? ISOLATED,
         })
         if (initialValueResult.isError) return initialValueResult
         const initialValue: cir.Expression = initialValueResult.value

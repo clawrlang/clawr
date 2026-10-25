@@ -1,22 +1,20 @@
 import { TokenStream } from '@/lexer'
 import { ISOLATED, SHARED } from '@/model/isolation-level'
-import {
-    ISOLATION_KEYWORDS,
-    IsolationKeyword,
-    MUTABILITY_KEYWORDS,
-} from '@/model/keywords'
-import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
+import { ISOLATION_KEYWORDS, MUTABILITY_KEYWORDS } from '@/model/keywords'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import { Context } from '@/parser'
+import { BindingParser } from '@/parser/binding-parser'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { StatementParser } from '@/parser/statement-parser'
-import { TypeConstraintParser } from '@/parser/type-constraint-parser'
+import { SourceError } from '@/tools'
 
 export class VariableDeclarationParser implements StatementParser<VariableDeclaration> {
-    private expressionParser: ExpressionParser
+    private readonly expressionParser: ExpressionParser
+    private readonly bindingParser: BindingParser
 
-    private constructor(private context: Context) {
+    private constructor(context: Context) {
         this.expressionParser = ExpressionParser.create(context)
+        this.bindingParser = BindingParser.create(context)
     }
 
     static create(context: Context): VariableDeclarationParser {
@@ -28,47 +26,36 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
     }
 
     parse(stream: TokenStream): VariableDeclaration {
-        const mutabilityToken = stream.expect('KEYWORD', ...MUTABILITY_KEYWORDS)
-        const nameToken = stream.expect('IDENTIFIER')
-        const name = nameToken.identifier
-        const typeConstraint = this.parseTypeConstraint(stream)
-        const type = typeConstraint?.[0]
-        let isolation = typeConstraint?.[1]
+        const binding = this.bindingParser.parse(stream)
+        if (binding.label)
+            throw SourceError.create({
+                message: 'Variables cannot have labels',
+                span: binding.span,
+            })
+        if (binding.isImmutable === undefined)
+            throw SourceError.create({
+                message: 'Variables must have explicit mutability',
+                span: binding.span,
+            })
+
         stream.expect('PUNCTUATION', '=')
         const initialValue = this.expressionParser.parse(stream)
         if (stream.isNext('KEYWORD', 'as')) {
             stream.next()
-            isolation = stream.expect('KEYWORD', ...ISOLATION_KEYWORDS).keyword
+            binding.isolationLevel =
+                stream.expect('KEYWORD', ...ISOLATION_KEYWORDS).keyword ===
+                'cow'
+                    ? ISOLATED
+                    : SHARED
         }
         return VariableDeclaration.create({
-            isImmutable: mutabilityToken.keyword === 'const',
-            name,
-            isolationLevel:
-                isolation === 'ref'
-                    ? SHARED
-                    : isolation === 'cow' || typeConstraint
-                      ? ISOLATED
-                      : undefined,
-            type,
+            isImmutable: binding.isImmutable,
+            name: binding.name,
+            isolationLevel: binding.isolationLevel,
+            type: binding.type,
             initialValue,
-            nameSpan: { start: nameToken.start, end: nameToken.end },
-            span: { start: mutabilityToken.start, end: initialValue.span.end },
+            span: { start: binding.span.start, end: initialValue.span.end },
+            nameSpan: binding.nameSpan,
         })
-    }
-
-    private parseTypeConstraint(
-        stream: TokenStream,
-    ): [TypeConstraintDeclaration, IsolationKeyword | undefined] | undefined {
-        if (!stream.isNext('PUNCTUATION', ':')) return undefined
-        stream.expect('PUNCTUATION', ':')
-
-        const isolationToken = stream.isNext('KEYWORD', ...ISOLATION_KEYWORDS)
-            ? stream.expect('KEYWORD', ...ISOLATION_KEYWORDS)
-            : undefined
-
-        return [
-            TypeConstraintParser.create(this.context).parse(stream),
-            isolationToken?.keyword,
-        ]
     }
 }

@@ -1,26 +1,25 @@
-import { Token, TokenStream } from '@/lexer'
+import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { MethodSignature } from '@/model/interface-declaration'
 import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
-import {
-    ISOLATION_KEYWORDS,
-    IsolationKeyword,
-    MUTABILITY_KEYWORDS,
-} from '@/model/keywords'
+import { ISOLATION_KEYWORDS, IsolationKeyword } from '@/model/keywords'
 import { Parameter } from '@/model/parameter'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { RCTypeSet } from '@/model/value-set'
 import { Context, DeclarationParser } from '@/parser'
+import { BindingParser } from '@/parser/binding-parser'
 import { BlockParser } from '@/parser/block-parser'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { TypeConstraintParser } from '@/parser/type-constraint-parser'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
+    private readonly bindingParser: BindingParser
     private readonly typeConstraintParser: TypeConstraintParser
 
     private constructor(private context: Context) {
         this.typeConstraintParser = TypeConstraintParser.create(context)
+        this.bindingParser = BindingParser.create(context)
     }
 
     static create(context: Context): FunctionDeclarationParser {
@@ -113,20 +112,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         stream.expect('PUNCTUATION', '(')
         const parameters: Parameter[] = []
         while (!stream.isNext('PUNCTUATION', ')')) {
-            const mutabilityToken = stream.isNext(
-                'KEYWORD',
-                ...MUTABILITY_KEYWORDS,
-            )
-                ? stream.expect('KEYWORD', ...MUTABILITY_KEYWORDS)
-                : undefined
-            const labelToken = stream.expect('IDENTIFIER')
-            let varNameToken: (Token & { kind: 'IDENTIFIER' }) | undefined
-
-            if (stream.isNext('IDENTIFIER'))
-                varNameToken = stream.expect('IDENTIFIER')
-            else varNameToken = labelToken
-
-            const [type, isolation] = this.parseTypeConstraint(stream)
+            const binding = this.bindingParser.parse(stream)
 
             let defaultValue: Expression | undefined
             if (stream.isNext('PUNCTUATION', '=')) {
@@ -138,30 +124,22 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
 
             parameters.push(
                 Parameter.create({
-                    isImmutable:
-                        !mutabilityToken ||
-                        mutabilityToken?.keyword === 'const',
+                    isImmutable: binding.isImmutable !== false,
                     label:
-                        labelToken.identifier === '_'
+                        binding.label === '_'
                             ? undefined
-                            : labelToken.identifier,
-                    varName: varNameToken.identifier,
+                            : (binding.label ?? binding.name),
+                    varName: binding.name,
                     isolationLevel:
-                        isolation === 'cow'
-                            ? ISOLATED
-                            : isolation === 'ref'
-                              ? SHARED
-                              : type instanceof RCTypeSet
-                                ? UNKNOWN
-                                : ISOLATED,
-                    type: type,
+                        binding.isolationLevel ??
+                        (binding.type instanceof RCTypeSet
+                            ? UNKNOWN
+                            : ISOLATED),
+                    type: binding.type,
                     defaultValue,
                     span: {
-                        start: mutabilityToken?.start ?? labelToken.start,
-                        end:
-                            defaultValue?.span.end ??
-                            type?.span?.end ??
-                            varNameToken.end,
+                        start: binding.span.start,
+                        end: defaultValue?.span.end ?? binding.span.end,
                     },
                 }),
             )
@@ -175,8 +153,8 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
 
     private parseTypeConstraint(
         stream: TokenStream,
-    ): [TypeConstraintDeclaration | undefined, IsolationKeyword | undefined] {
-        if (!stream.isNext('PUNCTUATION', ':')) return [undefined, undefined]
+    ): [TypeConstraintDeclaration, IsolationKeyword | undefined] | undefined {
+        if (!stream.isNext('PUNCTUATION', ':')) return undefined
         stream.expect('PUNCTUATION', ':')
         const isolationToken = stream.isNext('KEYWORD', ...ISOLATION_KEYWORDS)
             ? stream.expect('KEYWORD', ...ISOLATION_KEYWORDS)

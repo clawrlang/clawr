@@ -1,31 +1,38 @@
 import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { Property } from '@/model/data-declaration'
-import { ISOLATED, SHARED } from '@/model/isolation-level'
-import { ISOLATION_KEYWORDS, MUTABILITY_KEYWORDS } from '@/model/keywords'
+import { ISOLATED, IsolationLevel } from '@/model/isolation-level'
+import { ISOLATION_KEYWORDS, IsolationKeyword } from '@/model/keywords'
+import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { Context } from '@/parser'
+import { BindingParser } from '@/parser/binding-parser'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { TypeConstraintParser } from '@/parser/type-constraint-parser'
+import { SourceCodeSpan, SourceError } from '@/tools'
 
 export class PropertyParser {
-    private constructor(private context: Context) {}
+    private bindingParser: BindingParser
+
+    private constructor(private context: Context) {
+        this.bindingParser = BindingParser.create(context)
+    }
 
     static create(context: Context): PropertyParser {
         return new PropertyParser(context)
     }
 
     parse(stream: TokenStream): Property {
-        const mutabilityToken = stream.isNext('KEYWORD', ...MUTABILITY_KEYWORDS)
-            ? stream.expect('KEYWORD', ...MUTABILITY_KEYWORDS)
-            : undefined
-        const propertyNameToken = stream.expect('IDENTIFIER')
-        const propertyName = propertyNameToken.identifier
-
-        stream.expect('PUNCTUATION', ':')
-        const isolationToken = stream.isNext('KEYWORD', ...ISOLATION_KEYWORDS)
-            ? stream.expect('KEYWORD', ...ISOLATION_KEYWORDS)
-            : undefined
-        const type = TypeConstraintParser.create(this.context).parse(stream)
+        const binding = this.bindingParser.parse(stream)
+        if (binding.label)
+            throw SourceError.create({
+                message: 'Properties cannot have labels',
+                span: binding.span,
+            })
+        if (!binding.type)
+            throw SourceError.create({
+                message: 'Properties must have explicit type',
+                span: binding.span,
+            })
 
         let defaultValue: Expression | undefined
         if (stream.isNext('PUNCTUATION', '=')) {
@@ -34,12 +41,36 @@ export class PropertyParser {
         }
 
         return {
-            name: propertyName,
-            isImmutable: mutabilityToken?.keyword === 'const',
-            isolationLevel:
-                isolationToken?.keyword === 'ref' ? SHARED : ISOLATED,
-            type,
+            name: binding.name,
+            isImmutable: binding.isImmutable ?? false,
+            isolationLevel: binding.isolationLevel ?? ISOLATED,
+            type: binding.type,
             defaultValue,
         }
     }
+
+    private parseTypeConstraint(
+        stream: TokenStream,
+    ): [TypeConstraintDeclaration, IsolationKeyword | undefined] | undefined {
+        if (!stream.isNext('PUNCTUATION', ':')) return undefined
+        stream.expect('PUNCTUATION', ':')
+
+        const isolationToken = stream.isNext('KEYWORD', ...ISOLATION_KEYWORDS)
+            ? stream.expect('KEYWORD', ...ISOLATION_KEYWORDS)
+            : undefined
+
+        return [
+            TypeConstraintParser.create(this.context).parse(stream),
+            isolationToken?.keyword,
+        ]
+    }
+}
+
+type Binding = {
+    name: string
+    isImmutable?: boolean
+    type?: TypeConstraintDeclaration
+    isolationLevel?: IsolationLevel
+    span: SourceCodeSpan
+    nameSpan: SourceCodeSpan
 }

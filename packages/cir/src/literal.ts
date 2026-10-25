@@ -1,4 +1,3 @@
-import { decimal } from 'decimalish'
 import {
     IntegerSingleton,
     RealSingleton,
@@ -19,7 +18,7 @@ type IntegerLiteral<Value extends bigint = bigint> = {
     kind: 'INTEGER_LITERAL'
     type: IntegerSingleton<Value>
 }
-type RealLiteral<Value extends decimal = decimal> = {
+type RealLiteral<Value extends string = string> = {
     kind: 'REAL_LITERAL'
     type: RealSingleton<Value>
 }

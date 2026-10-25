@@ -1,7 +1,6 @@
 # TODO
 
 - Backend: temporaries are hoisted per statement, so `Integer*` temporaries in loop conditions are evaluated only once — hoist them into the loop
-- Add `RealLiteral` to the model. (`ter` mode is deferred until real life ternary processors exist — which might be never)
 - Lower `real` values on the backend using IEEE `binary*` and `decimal*` representations.
 - Lower `real` types with massive precision and/or range as `Real*`.
 - Implement static analysis and lowering of dyadic operations supporting combinations of small vs large numbers (`real` and `integer` types).

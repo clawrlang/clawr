@@ -1,5 +1,6 @@
 import { TypeName } from '@/model/type-name'
 import * as cir from '@clawr/cir'
+import { decimal } from 'decimalish'
 
 export interface ValueSet {
     unconstrained(): ValueSet
@@ -54,6 +55,62 @@ export class IntegerSet<
             }
         return {
             universe: 'integer' as const,
+            min: this.min?.toString() as any,
+            max: this.max?.toString() as any,
+        }
+    }
+
+    toString(): string {
+        return 'integer'
+    }
+}
+
+export class RealSet<
+    Min extends decimal | undefined = decimal | undefined,
+    Max extends decimal | undefined = decimal | undefined,
+> implements ValueSet {
+    private constructor(
+        public readonly min: Min,
+        public readonly max: Max,
+    ) {}
+
+    static unconstrained() {
+        return new RealSet(undefined, undefined)
+    }
+
+    static singleton<Value extends decimal>(v: Value) {
+        return new RealSet(v, v)
+    }
+
+    static range<
+        Min extends decimal | undefined,
+        Max extends decimal | undefined,
+    >({ min, max }: { min?: Min; max?: Max }) {
+        return new RealSet<Min, Max>(min as Min, max as Max)
+    }
+
+    unconstrained(): ValueSet {
+        return RealSet.range({ min: undefined, max: undefined })
+    }
+
+    isSupersetTo(other: ValueSet): boolean {
+        return (
+            other instanceof RealSet &&
+            (this.min === undefined ||
+                (other.min !== undefined && other.min >= this.min)) &&
+            (this.max === undefined ||
+                (other.max !== undefined && other.max <= this.max))
+        )
+    }
+
+    toCIR(): cir.ValueSet & { universe: 'real' } {
+        if (this.min !== undefined && (this.min as decimal) === this.max)
+            return {
+                universe: 'real' as const,
+                value: this.min.toString() as any,
+            }
+        return {
+            universe: 'real' as const,
             min: this.min?.toString() as any,
             max: this.max?.toString() as any,
         }

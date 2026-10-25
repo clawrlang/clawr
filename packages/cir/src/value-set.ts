@@ -1,5 +1,3 @@
-import { decimal } from 'decimalish'
-
 export type ValueSet =
     IntegerSet | RealSet | TruthvalueSet | StringSet | RCTypeSet | InterfaceSet
 
@@ -23,15 +21,15 @@ export type IntegerSingleton<Value extends bigint = bigint> = {
 type RealSet = RealRange | RealSingleton
 
 export type RealRange<
-    Min extends decimal | undefined = decimal | undefined,
-    Max extends decimal | undefined = decimal | undefined,
+    Min extends string | undefined = string | undefined,
+    Max extends string | undefined = string | undefined,
 > = {
     universe: 'real'
     boxed?: true
-} & (Min extends undefined ? { min?: undefined } : { min: `${Min}` }) &
-    (Max extends undefined ? { max?: undefined } : { max: `${Max}` })
+} & (Min extends undefined ? { min?: undefined } : { min: Min }) &
+    (Max extends undefined ? { max?: undefined } : { max: Max })
 
-export type RealSingleton<Value extends decimal = decimal> = {
+export type RealSingleton<Value extends string = string> = {
     universe: 'real'
     boxed?: true
     value: `${Value}`

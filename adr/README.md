@@ -1,6 +1,3 @@
-<!-- markdownlint-disable MD041 MD033 -->
-<img src="./images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
-
 # Architecture Decision Records
 
 **ADRs** are design documents used to capture important architectural decisions and the reasoning behind them. They typically document:

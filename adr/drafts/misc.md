@@ -1,7 +1,6 @@
-<!-- markdownlint-disable MD041 MD033 -->
-<img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
-
 # Miscellaneous Ideas
+
+[ADRs](../README.md)
 
 ## Pipeline
 

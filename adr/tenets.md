@@ -1,6 +1,3 @@
-<!-- markdownlint-disable MD041 MD033 -->
-<img src="./images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
-
 # the Core Tenets of Clawr
 
 These are not the core values of Clawr. First: Clawr is an artefact, it does not have its own values. Second: as Clawr’s founder, I do not know my own values well enough to just list them. What I can do is list a few things that I find valuable/meaningful, while also thinking as good representation for how Clawr has been designed:
@@ -15,7 +12,7 @@ Companies like to tout a set of “values” that define them and their philosop
 
 True values are not simple. They are generally not fixed. And they are in all-honesty almost never particularly well known.
 
-All we do know is what we feel. We can know what we need with a burning passion and what we merely accept as necessary. We know what we would rather not have and what we cannot possibly abide. These are *signals* of our values, but not our *actual* values. While it is theoretically possible to go deep and figure some of this out, I can almost guarantee that no company has done any work to that effect before announcing its “core values.“
+All we do know is what we feel. We can know what we need with a burning passion and what we merely accept as necessary. We know what we would rather not have and what we cannot possibly abide. These are _signals_ of our values, but not our _actual_ values. While it is theoretically possible to go deep and figure some of this out, I can almost guarantee that no company has done any work to that effect before announcing its “core values.“
 
 ## 1. Clawr Works
 

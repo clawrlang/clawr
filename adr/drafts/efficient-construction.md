@@ -1,5 +1,7 @@
 # Efficient Construction
 
+[ADRs](../README.md)
+
 Is it possible to merge all initializers in the inheritance stack into a single `memcpy`?
 
 Maybe the frontend can emit something like…

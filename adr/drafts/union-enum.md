@@ -1,6 +1,3 @@
-<!-- markdownlint-disable MD041 MD033 -->
-<img src="../images/rawry.png" alt="Rawry" style="float: right; margin: 10px;">
-
 # Unions and Enumerated Types
 
 [ADRs](../README.md)
@@ -36,7 +33,7 @@ func enroll(course: course1|course2|course3) {
 }
 ```
 
-Maybe it couldn't work because the courses do not “exist” yet at compile-time, or perhaps it is still possible? TypeScript, after all, allows `typeof x` to define a type, and if `x` is declared `as const`, the resulting  type can be defined specifically in detail.
+Maybe it couldn't work because the courses do not “exist” yet at compile-time, or perhaps it is still possible? TypeScript, after all, allows `typeof x` to define a type, and if `x` is declared `as const`, the resulting type can be defined specifically in detail.
 
 ## Rationale
 

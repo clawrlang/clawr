@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../cir/cir.schema.json
+# yaml-language-server: $schema=../../../../../cir-schema/cir.schema.json
 $schema: http://clawr.lang/schema/cir/DRAFT-0
 startBlock:
   # a = 2^100 + 1 (does not fit in 64 bits)

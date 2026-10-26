@@ -1,14 +1,9 @@
-/*
- * This file is replaced with generated code.
- * Changes might not apply correctly unless the /generated/cir-parser folder is first deleted.
- */
-
+import cirSchema from '@cir-schema/cir.schema.json' with { type: 'json' }
+import declarations from '@cir-schema/declarations.json' with { type: 'json' }
+import expressions from '@cir-schema/expressions.json' with { type: 'json' }
+import statements from '@cir-schema/statements.json' with { type: 'json' }
+import valueSets from '@cir-schema/valuesets.json' with { type: 'json' }
 import { Module } from '@clawr/cir'
-import cirSchema from '@clawr/cir/cir.schema.json' with { type: 'json' }
-import declarations from '@clawr/cir/declarations.json' with { type: 'json' }
-import expressions from '@clawr/cir/expressions.json' with { type: 'json' }
-import statements from '@clawr/cir/statements.json' with { type: 'json' }
-import valueSets from '@clawr/cir/valuesets.json' with { type: 'json' }
 import { Ajv2020 } from 'ajv/dist/2020.js'
 import YAML from 'yaml'
 

@@ -52,7 +52,7 @@ npm run test:e2e      # Run end-to-end tests
 npx bun test packages/frontend/tests/unit/parser/module-parser.spec.ts # Run a single test fixture
 ```
 
-The CIR schema in `packages/cir/cir.schema.json` is the source for both editor validation of `.cir`
+The CIR schema in `./cir-schema/` is the source for both editor validation of `.cir`
 fixtures and runtime validation by the backend parser. Update that schema directly when the CIR
 format changes.
 

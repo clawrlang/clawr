@@ -4,7 +4,10 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "rootDir": ".",
-    "outDir": "dist"
+    "outDir": "dist",
+    "paths": {
+      "@cir-schema/*": ["../../cir-schema/*"]
+    }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "../../cir-schema/*"]
 }

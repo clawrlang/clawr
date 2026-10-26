@@ -8,17 +8,10 @@
     ".": {
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
-    },
-    "./cir.schema.json": "./cir.schema.json",
-    "./declarations.json": "./declarations.json",
-    "./statements.json": "./statements.json",
-    "./expressions.json": "./expressions.json",
-    "./valuesets.json": "./valuesets.json"
+    }
   },
   "files": [
-    "dist",
-    "cir.schema.json",
-    "valuesets.json"
+    "dist"
   ],
   "scripts": {
     "build": "tsc -b",

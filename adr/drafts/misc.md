@@ -1,6 +1,6 @@
 # Miscellaneous Ideas
 
-[ADRs](../README.md)
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 ## Pipeline
 

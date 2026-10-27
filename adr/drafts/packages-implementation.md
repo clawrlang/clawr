@@ -1,5 +1,7 @@
 # Resolving Library Dependencies
 
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
+
 Clawr should not require a particular implementation for how packages are built, named and linked. It should be possible to choose an implementation depending on what works best on the target platform.
 
 That said, there should probably be some consistent structure, but I do not yet know what it should look like. It should preferably allow multiple installed versions of each library and resolving the “diamond problem” where the same library is referenced by multiple libraries that require different versions, all loaded in the same process.

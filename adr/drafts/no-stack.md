@@ -1,5 +1,7 @@
 # No Stack Allocation (for now)
 
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
+
 The per-variable semantics of Clawr means that a `LinkedList` type can be equivalent to `x:xs` in Haskell! A linked list can be declared as a monolithic structure.
 
 As long as data is laid out with indirection (every substructure is a pointer), it is possible to define an entire structure (like a linked list) using a single literal expression.
@@ -22,7 +24,7 @@ Indirection would however preclude stack allocation. The backend would be more c
 
 Maybe it is possible to detect this and adorn the type with an indirection flag? In that case, the backend can still choose stack-allocation when that flag is not set. But that is pretty advanced analysis and not relevant for this version of the language. At this point, the backend is assumed to heap allocate.
 
-> A backend on a stack-only target sees this attribute and knows: I can still stack-allocate the _outer_ node (it has a finite size), I just can't stack-allocate the whole spine. Which is exactly what you'd want anyway — the head node lives on the stack, its `next` boxes live wherever the backend wants.
+> A backend on a stack-only target sees this attribute and knows: I can still stack-allocate the *outer* node (it has a finite size), I just can't stack-allocate the whole spine. Which is exactly what you'd want anyway — the head node lives on the stack, its `next` boxes live wherever the backend wants.
 
 Is it? I’m not sure. A `const` variable can be assigned to a property. If the variable is stack allocated, the value must be copied immediately, but if the property uses indirection, it can be assigned to other properties with copy-on-write. This sounds complicated, but maybe it is reasonable?
 

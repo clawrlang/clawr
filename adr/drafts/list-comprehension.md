@@ -1,12 +1,16 @@
 # List Comprehensions and Generators
 
-[ADRs](../README.md)
+<!-- markdownlint-disable MD033 -->
+
+s[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 ## Status
 
 ✍🏼 **Draft**
 
 > A rough sketch of an idea
+
+## Context
 
 Several languages use a syntax called a list comprehension. It allows safe filtering and conversion of lists. Clawr has its own flavour; you can choose between constructing the _cartesian product_ of existing collections, or _zipping_ ordered sequences together.
 
@@ -123,7 +127,7 @@ The value $f_{n-2}$ (syntactically `f''`) is not defined and cannot be reference
 
 ```clawr
 func geometric(ratio: real, start: real) -> Generator<real> {
-  return {> n |> n := start ~> n' * ratio }
+  return [> n |> n := start ~> n' * ratio ]
 }
 ```
 
@@ -137,7 +141,7 @@ Here is a solution to the Bowling Game kata in Clawr:
 pure func score() -> integer {
 
   // Generator (identified by the angle-bracket meant to signal temporality--play button)
-  const frameIndices = {>
+  const frameIndices = [>
     2 * frame - strikes // This defines the yielded elements
 
     // The frame is taken from an infinite list of incrementing integers
@@ -145,20 +149,20 @@ pure func score() -> integer {
 
     // Internal state machine (identified by multiple hints).
     |> strikes := 0 ~> isStrikeAt(2 * frame - strikes') ? strikes' + 1 : strikes'
-  }
+  ]
 
   // Comprehension (no angle bracket - no state-machine allowed)
-  return sum { frameScoreAt(i) | i <- frameIndices.take(10) }
+  return sum [ frameScoreAt(i) | i <- frameIndices.take(10) ]
 }
 ```
 
----
-
-| Syntax               | Meaning                |
-| -------------------- | ---------------------- |
-| `{}`                 | timeless comprehension |
-| `{>`                 | temporal generator     |
-| <code>&#124;></code> | state introduction     |
+> [!note] Syntax Summary
+>
+> | Syntax               | Meaning                  |
+> | -------------------- | ------------------------ |
+> | `[ ... ]`            | cartesian product        |
+> | `[> ... ]`           | temporal (zip) generator |
+> | <code>&#124;></code> | remembered state         |
 
 ---
 
@@ -183,19 +187,19 @@ Conceptually:
 - advance the input by two elements per step
 - stop when a full pair can’t be formed
 
-That fits your `{>}` model _very_ naturally.
+That fits your `[>]` model _very_ naturally.
 
 ### One clean way to express it
 
 You already have state and time, so you can say:
 
 ```clawr
-const pairs = {>
+const pairs = [>
   (a, b)
 | x <- xs
 |> a := take(x) ~> take(x)
 |> b := take(x) ~> take(x)
-}
+]
 ```
 
 But that’s a bit verbose.
@@ -203,10 +207,10 @@ But that’s a bit verbose.
 So it’s reasonable to introduce a **windowed binding** (purely sugar):
 
 ```clawr
-const pairs = {>
+const pairs = [>
   (a, b)
 | (a, b) <- xs.by(2)
-}
+]
 ```
 
 Semantics:
@@ -215,7 +219,7 @@ Semantics:
 - yield 1 value per tick
 - drop trailing elements if incomplete
 
-This is _not_ cartesian, not declarative — it’s temporal consumption — so `{>}` is exactly right.
+This is _not_ cartesian, not declarative — it’s temporal consumption — so `[>]` is exactly right.
 
 ---
 
@@ -223,18 +227,18 @@ This is _not_ cartesian, not declarative — it’s temporal consumption — so 
 
 This is a **sliding window of size 2 with stride 1**.
 
-Again: temporal, ordered, stateful → `{>}` territory.
+Again: temporal, ordered, stateful → `[>]` territory.
 
 ### Expressed explicitly
 
 Using state:
 
 ```clawr
-const slidingPairs = {>
+const slidingPairs = [>
   (prev, x)
 | x <- xs
 |> prev := undefined ~> x
-}
+]
 ```
 
 Rules:
@@ -253,10 +257,10 @@ Very consistent.
 If you allow window notation:
 
 ```clawr
-const slidingPairs = {>
+const slidingPairs = [>
   (a, b)
 | (a, b) <- xs.window(2)
-}
+]
 ```
 
 Semantics:
@@ -268,14 +272,14 @@ Semantics:
 
 ---
 
-## 3. Why `{}` should _not_ be allowed here
+## 3. Why `[]` should _not_ be allowed here
 
 This is important.
 
-Neither of these should be legal with `{}`:
+Neither of these should be legal with `[]`:
 
 ```clawr
-{ (x, y) | x <- xs, y <- xs }   // ❌ cartesian, wrong meaning
+[ (x, y) | x <- xs, y <- xs ]   // ❌ cartesian, wrong meaning
 ```
 
 Because:
@@ -284,9 +288,9 @@ Because:
 - pairing depends on **adjacency**
 - pairing consumes elements
 
-That’s time. `{}` must stay timeless.
+That’s time. `[]` must stay timeless.
 
-Your split between `{}` and `{>}` really pays off here.
+Your split between `[]` and `[>]` really pays off here.
 
 ---
 
@@ -294,13 +298,13 @@ Your split between `{}` and `{>}` really pays off here.
 
 | Task               | Concept            | Syntax |
 | ------------------ | ------------------ | ------ |
-| All combinations   | Cartesian product  | `{}`   |
-| Lockstep pairing   | Zip                | `{>}`  |
-| Chunking           | Window, stride > 1 | `{>}`  |
-| Overlapping pairs  | Sliding window     | `{>}`  |
-| Stateful iteration | Scan               | `{>}`  |
+| All combinations   | Cartesian product  | `[]`   |
+| Lockstep pairing   | Zip                | `[>]`  |
+| Chunking           | Window, stride > 1 | `[>]`  |
+| Overlapping pairs  | Sliding window     | `[>]`  |
+| Stateful iteration | Scan               | `[>]`  |
 
-If it consumes, remembers, advances, or depends on order → `{>}`.
+If it consumes, remembers, advances, or depends on order → `[>]`.
 
 ---
 
@@ -311,7 +315,7 @@ Don’t _start_ with `by()` / `window()` if you don’t want to.
 You can:
 
 - define them later as library helpers
-- or desugar them into `{>}` internally
+- or desugar them into `[>]` internally
 
 What matters is that **your core model already supports them** without contradiction.
 
@@ -332,4 +336,4 @@ Both are:
 - ordered
 - non-cartesian
 
-And `{>}` is exactly the right home for them.
+And `[>]` is exactly the right home for them.

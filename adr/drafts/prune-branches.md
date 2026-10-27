@@ -1,6 +1,6 @@
 # Prune CIR Banches
 
-[ADRs](../README.md)
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 `FunctionCall.currentValue()` should use parameters, `self` and the function body to figure out the returned value-set
 

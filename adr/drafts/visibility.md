@@ -1,6 +1,6 @@
 # Visibility Modifiers in Clawr
 
-[ADRs](../README.md)
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 There are no visibility modifiers. Well, okay there is one: `helper`.
 

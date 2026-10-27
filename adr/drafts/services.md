@@ -1,6 +1,6 @@
 # External Access Only Through `service`
 
-[ADRs](../README.md)
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 Is it possible to require all external access to be in the shape of a `service`?
 

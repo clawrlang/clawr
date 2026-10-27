@@ -1,6 +1,6 @@
 # Multi-Module Programs and Libraries
 
-[ADRs](../README.md)
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 ## Status
 

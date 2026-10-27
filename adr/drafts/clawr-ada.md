@@ -1,6 +1,6 @@
 # Inspirations from Ada
 
-[ADRs](../README.md)
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 Ada is named for Ada Lovelace, the assistant to Charles Babbage in the design of the [Analytical Engine](https://en.wikipedia.org/wiki/Analytical_engine).
 
@@ -257,7 +257,7 @@ Under the hood, arbitrary-precision integers typically use:
 
 Example conceptual structure:
 
-```
+```unknown
 BigInt {
     sign: bool,
     limbs: Vec<u64>,  // [least significant ... most significant]

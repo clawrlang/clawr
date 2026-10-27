@@ -1,6 +1,6 @@
 # Efficient Construction
 
-[ADRs](../README.md)
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 Is it possible to merge all initializers in the inheritance stack into a single `memcpy`?
 

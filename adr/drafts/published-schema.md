@@ -1,6 +1,6 @@
 # Published Schema
 
-[ADRs](../README.md)
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 The schema ID is `http://clawr.lang/schema/cir/DRAFT-0`. That is a URL. It is customary to store a JSON file at the URL of the schema ID.
 

@@ -8,25 +8,26 @@
 - **The consequences or implications** of that choice
 - **The status** (proposed, accepted, deprecated, etc.)
 
-In the case of Clawr, the language itself is considered architecture. [ADR-001](adr-001.md) defines the Clawr architecture as being made up of a frontend and a backend, with a data structure (the CIR) for communicating between them. The syntax and semantics of the language is important for this architecture. There is other documentation for [learning](../tutorials/README.md) and a [language reference](../lang-reference/README.md), but they do not explain _why_ the language works as it does.
+[ADR-001](adr-001.md) defines the Clawr architecture as being made up of a frontend and a backend, with a data structure (the CIR) for communicating between them. But I
+in the case of Clawr, the language itself is considered “architecture.” That is, the design of the language is a fundamental part of the system's architecture. The syntax and semantics are important enough to be documented as ADRs. There is other documentation for [learning](../tutorials/README.md) and a [language reference](../lang-reference/README.md), but they do not explain _why_ the language works as it does.
 
 Many design decisions are made implicitly by the TDD principle “make it work.” [^make-it-work] Those decisions are not documented here. When something interesting is learned requiring the design to change, that’s when the decision should be documented. The old solution should be listed under _Alternatives Considered_ and/or in the earlier sections.
 
-[^make-it-work]: “Make it work. Make it right. Make it fast.” The principle indicates a priority: if “it” does not work, efficiency is moot, so the first priority must be to “make it work.” [But this principle is not an excuse to be neglectful.](https://www.javacodegeeks.com/2026/05/why-make-it-work-then-make-it-right-then-make-it-fast-produces-bad-systems-at-scale.html)
+Also not documented here are several [sketches of future ADRs](./drafts/README.md). They are ideas that have not yet been fully developed or assigned a number. They are perhaps mostly an icebox to keep the TODO list manageable.
 
-[Tenets](./tenets.md)
+[^make-it-work]: “Make it work. Make it right. Make it fast.” The principle indicates a priority: if “it” does not work, efficiency is moot, so the first priority must be to “make it work.” (But this principle is not an excuse to be neglectful.)
 
-[Terminology](./terminology.md)
+The guiding principles for Clawr can be found in the [Tenets](./tenets.md) document.
+
+Terminology used in this documentation can be found in the [Terminology](./terminology.md) document.
 
 Statuses used in this documentation:
 
 - ✍🏼 **Draft**: A rough sketch of an idea
 - 💡 **Proposed**: An idea to be considered for adoption
 - ✅ **Adopted**: Principle is in use in the ecosystem, or the feature has been implemented in the example implementation
-- ❌ **Rejected**: Not considered a good fit for Clawr
-- 🔄 **Superseded**: Another decision has made it obsolete
 
-Records so far:
+The following ADRs have been documented so far:
 
 - [ADR-000](./adr-000.md): Platform Agnostic Language
 - [ADR-001](./adr-001.md): Syntax, Semantics and CIR
@@ -64,28 +65,3 @@ Records so far:
 - [ADR-033](./adr-033.md): Private Properties Are Per Type
 - [ADR-034](./adr-034.md): Declaring and Conforming to `trait`s and `role`s
 - [ADR-035](./adr-035.md): Separating Mutability from Isolation in Declaration Syntax
-
-Draft ideas with no ADR number:
-
-- [Multi-Module Programs and Libraries](./drafts/multi-module.md)
-- [Nested Functions and Lambdas](./drafts/lambdas.md)
-- [Discard Label `_`](./drafts/discard-label.md)
-- [Spread Operator](./drafts/spread-operator.md)
-- [Varargs Functions](./drafts/varargs.md)
-- [Threads and Processes](./drafts/threads.md)
-- [Purity](./drafts/purity.md)
-- [Unions and Enumerated Types](./drafts/union-enum.md)
-- [Ternary Fields on Binary Hardware](./drafts/fields.md)
-- [List Comprehensions and Generators](./drafts/list-comprehension.md)
-- [ADA Inspirations](./drafts/clawr-ada.md)
-- [Visibility](./drafts/visibility.md)
-- [Debug Information in the CIR](./drafts/debug.md)
-- [Disposing `service`](./drafts/deinit.md)
-- [External Access Only Through `service`](./drafts/services.md)
-- [Weak References](./drafts/weak-ref.md)
-- [Prune Branches](./drafts/prune-branches.md)
-- [Efficient Construction](./drafts/efficient-construction.md)
-- [Published Schema](./drafts/published-schema.md)
-- [Miscellaneous](./drafts/misc.md)
-- [`helper` Keyword](./drafts/helper.md)
-- [Syntax and `trait`s](./drafts/syntax-traits.md)

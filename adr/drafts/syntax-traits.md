@@ -1,6 +1,6 @@
 # Syntax and `trait`s
 
-[ADRs](../README.md)
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 The `Ordered` `trait` should allow the `<` and `>` operators. `Equatable` allows `==` and `!=`. Both `trait`s together, allow `<=` and `>=`.
 

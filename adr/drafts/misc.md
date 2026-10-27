@@ -27,7 +27,7 @@ const x: real[,]  // 2D matrix
 const y: real[,,] // 3D matrix
 ```
 
-Is a 3D matrix meaningful?
+Would a 3D matrix be meaningful?
 
 We could define matrices by their size. If the second size parameter is 1 it is a column vector, if the first is one it is a row vector. (Are row vectors meaningful?)
 

@@ -8,12 +8,12 @@
 - **The consequences or implications** of that choice
 - **The status** (proposed, accepted, deprecated, etc.)
 
-[ADR-001](adr-001.md) defines the Clawr architecture as being made up of a frontend and a backend, with a data structure (the CIR) for communicating between them. But I
-in the case of Clawr, the language itself is considered “architecture.” That is, the design of the language is a fundamental part of the system's architecture. The syntax and semantics are important enough to be documented as ADRs. There is other documentation for [learning](../tutorials/README.md) and a [language reference](../lang-reference/README.md), but they do not explain _why_ the language works as it does.
+[ADR-001](adr-001.md) defines the Clawr architecture as being made up of a frontend and a backend, with a data structure (the CIR) for communicating between them. But
+in the case of Clawr, the language itself is considered “architecture.” That is, the syntax and semantics are important enough to be documented as ADRs. There is other documentation for [learning](../tutorials/README.md) and a [language reference](../lang-reference/README.md), but they do not explain _why_ the language works as it does.
 
-Many design decisions are made implicitly by the TDD principle “make it work.” [^make-it-work] Those decisions are not documented here. When something interesting is learned requiring the design to change, that’s when the decision should be documented. The old solution should be listed under _Alternatives Considered_ and/or in the earlier sections.
+Many design decisions are made implicitly by the TDD principle “first make it work.” [^make-it-work] Those decisions are not documented here. When something interesting is learned requiring the design to change, that’s when the decision should be documented. The old solution should be listed under _Alternatives Considered_ and/or in the earlier sections.
 
-Also not documented here are several [sketches of future ADRs](./drafts/README.md). They are ideas that have not yet been fully developed or assigned a number. They are perhaps mostly an icebox to keep the TODO list manageable.
+Also not listed here are several [sketches of future ADRs](./drafts/README.md). They are ideas that have not yet been fully conceptualised or assigned a number. They are perhaps mostly an icebox to keep the TODO list manageable.
 
 [^make-it-work]: “Make it work. Make it right. Make it fast.” The principle indicates a priority: if “it” does not work, efficiency is moot, so the first priority must be to “make it work.” (But this principle is not an excuse to be neglectful.)
 

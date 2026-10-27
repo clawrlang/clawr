@@ -2,7 +2,7 @@
 
 <!-- markdownlint-disable MD033 -->
 
-s[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
+[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 ## Status
 

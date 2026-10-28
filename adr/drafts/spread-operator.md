@@ -1,6 +1,6 @@
-# Spread Operator
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
 
-[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
+# Spread Operator
 
 > Status: ✍🏼 Draft
 

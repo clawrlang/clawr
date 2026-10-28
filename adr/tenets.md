@@ -1,3 +1,5 @@
+&nbsp; / &nbsp; [Architecture Decision Records](./README.md)
+
 # the Core Tenets of Clawr
 
 These are not the core values of Clawr. First: Clawr is an artefact, it does not have its own values. Second: as Clawr’s founder, I do not know my own values well enough to just list them. What I can do is list a few things that I find valuable/meaningful, while also thinking as good representation for how Clawr has been designed:

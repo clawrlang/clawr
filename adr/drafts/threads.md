@@ -1,6 +1,6 @@
-# Threads and Processes
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
 
-[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
+# Threads and Processes
 
 > Status: ✍🏼 Draft
 

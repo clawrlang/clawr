@@ -1,8 +1,6 @@
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
+
 # List Comprehensions and Generators
-
-<!-- markdownlint-disable MD033 -->
-
-[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
 > Status: ✍🏼 Draft
 

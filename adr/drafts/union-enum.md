@@ -1,6 +1,6 @@
-# Unions and Enumerated Types
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
 
-[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
+# Unions and Enumerated Types
 
 > Status: ✍🏼 Draft
 

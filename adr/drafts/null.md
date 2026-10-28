@@ -1,6 +1,6 @@
-# What is `null`?
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
 
-[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
+# What is `null`?
 
 Probably something like a `union Optional<T> { case null, case value: T }`. But to support that we need to define `union` and generics both.
 

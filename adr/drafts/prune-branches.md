@@ -1,6 +1,6 @@
-# Prune CIR Banches
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
 
-[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
+# Prune CIR Banches
 
 `FunctionCall.currentValue()` should use parameters, `self` and the function body to figure out the returned value-set
 

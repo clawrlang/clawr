@@ -1,6 +1,6 @@
-# Resolving Library Dependencies
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
 
-[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
+# Resolving Library Dependencies
 
 Clawr should not require a particular implementation for how packages are built, named and linked. It should be possible to choose an implementation depending on what works best on the target platform.
 

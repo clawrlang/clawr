@@ -1,6 +1,6 @@
-# Miscellaneous Ideas
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
 
-[ADRs](../README.md) &#124; [Draft ADRs](./README.md)
+# Miscellaneous Ideas
 
 ## Pipeline
 

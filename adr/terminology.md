@@ -1,3 +1,5 @@
+&nbsp; / &nbsp; [Architecture Decision Records](./README.md)
+
 # Terminology in this Documentation
 
 ## Entity

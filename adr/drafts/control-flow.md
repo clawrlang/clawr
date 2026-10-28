@@ -1,10 +1,6 @@
 # Control-Flow
 
-## Status
-
-✍🏼 **Draft**
-
-> A rough sketch of an idea
+> Draft
 
 ## Context
 

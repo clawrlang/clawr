@@ -4,11 +4,7 @@
 
 [ADRs](../README.md) &#124; [Draft ADRs](./README.md)
 
-## Status
-
-✍🏼 **Draft**
-
-> A rough sketch of an idea
+> Draft
 
 ## Context
 

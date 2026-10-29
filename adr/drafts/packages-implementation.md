@@ -94,7 +94,7 @@ otool -D dist/libClawr.A.dylib
 
 When a client links against your dylib, the linker copies the dylib's **install name** (not the path you passed on the command line) into the client's `LC_LOAD_DYLIB`. So even though you did:
 
-```plain
+```shell
 clang client.o /Users/johan/Arbete/Clawr/Clawr/dist/libClawr.A.dylib -o client
 ```
 

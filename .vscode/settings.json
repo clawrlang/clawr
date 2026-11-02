@@ -8,5 +8,12 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "editor.suggest.insertMode": "replace",
-  "files.associations": { "*.cir": "yaml" }
+  "files.associations": {
+    "*.cir": "yaml"
+  },
+  "chat.tools.terminal.autoApprove": {
+    "npm run build": true,
+    "npm test": true,
+    "bun": true
+  }
 }

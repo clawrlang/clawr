@@ -1,17 +1,14 @@
 import { BinaryOperator } from '@/model/binary-operation'
 import { IntegerSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
+import { realOperationResult } from './real-operation'
 
 export class Subtraction implements BinaryOperator {
     static instance = new Subtraction()
 
     compute(minuend: ValueSet, subtrahend: ValueSet): Result<ValueSet> {
-        if (!(
-            minuend instanceof IntegerSet && subtrahend instanceof IntegerSet
-        ))
-            return ErrorResult.failure(
-                `subtraction between ${minuend.toString()} and ${subtrahend.toString()} is not supported`,
-            )
+        if (!(minuend instanceof IntegerSet && subtrahend instanceof IntegerSet))
+            return realOperationResult(minuend, subtrahend)
         const min: bigint | undefined =
             minuend.min === undefined || subtrahend.max === undefined
                 ? undefined

@@ -11,22 +11,35 @@ export class RealLiteral<Value extends decimal> implements Expression {
         return RealLiteral.create({
             value: neg(this.value.min),
             span: this.span,
+            source: this.source,
         })
     }
 
     private constructor(
         public readonly value: RealSet<Value, Value>,
         public readonly span: SourceCodeSpan,
+        private readonly source: string,
     ) {}
 
     static create<Value extends decimal>({
         value,
         span,
+        source = value.toString(),
     }: {
         value: Value
         span: SourceCodeSpan
+        source?: string
     }) {
-        return new RealLiteral(RealSet.range({ min: value, max: value }), span)
+        const precision: cir.RealPrecision = {
+            kind: 'sig',
+            digits: significantDigits(source),
+            base: 'dec',
+        }
+        return new RealLiteral(
+            RealSet.range({ min: value, max: value, precision }),
+            span,
+            source,
+        )
     }
 
     isolationLevel(): SuccessResult<ISOLATED> {
@@ -56,4 +69,10 @@ export class RealLiteral<Value extends decimal> implements Expression {
     isEffectivelyConst(): SuccessResult<true> {
         return Result.true
     }
+}
+
+function significantDigits(source: string): number {
+    const coefficient = source.split(/[eE]/, 1)[0].replace(/[+-]/, '')
+    const digits = coefficient.replace('.', '').replace(/^0+/, '')
+    return Math.max(1, digits.length)
 }

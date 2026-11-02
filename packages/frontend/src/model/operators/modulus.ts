@@ -2,15 +2,14 @@ import { unionRange } from '@/model/operators/division'
 import { IntegerSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 import { BinaryOperator } from '../binary-operation'
+import { realOperationResult } from './real-operation'
 
 export class Modulus implements BinaryOperator {
     static instance = new Modulus()
 
     compute(dividend: ValueSet, divisor: ValueSet): Result<ValueSet> {
         if (!(dividend instanceof IntegerSet && divisor instanceof IntegerSet))
-            return ErrorResult.failure(
-                `division between ${dividend.toString()} and ${divisor.toString()} is not supported`,
-            )
+            return realOperationResult(dividend, divisor)
 
         if (divisor.min === 0n || divisor.max === 0n)
             return ErrorResult.failure('division by zero')

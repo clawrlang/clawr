@@ -39,9 +39,19 @@
     "Literal": {
       "oneOf": [
         { "$ref": "#/$defs/IntegerLiteral" },
+        { "$ref": "#/$defs/RealLiteral" },
         { "$ref": "#/$defs/TruthvalueLiteral" },
         { "$ref": "#/$defs/StringLiteral" }
       ]
+    },
+    "RealLiteral": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "REAL_LITERAL" },
+        "type": { "$ref": "./valuesets.json#/$defs/RealSingleton" }
+      },
+      "required": ["kind", "type"],
+      "unevaluatedProperties": false
     },
     "MemoryExpression": {
       "oneOf": [

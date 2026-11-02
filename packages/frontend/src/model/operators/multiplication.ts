@@ -1,15 +1,14 @@
 import { BinaryOperator } from '@/model/binary-operation'
 import { IntegerSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
+import { realOperationResult } from './real-operation'
 
 export class Multiplication implements BinaryOperator {
     static instance = new Multiplication()
 
     compute(left: ValueSet, right: ValueSet): Result<ValueSet> {
         if (!(left instanceof IntegerSet && right instanceof IntegerSet))
-            return ErrorResult.failure(
-                `multiplication between ${left.toString()} and ${right.toString()} is not supported`,
-            )
+            return realOperationResult(left, right)
 
         const { min, max } = integerMultiplicationRange(left, right)
         return Result.value(IntegerSet.range({ min, max }))

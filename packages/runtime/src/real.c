@@ -1,6 +1,9 @@
 #include "real.h"
 #include "panic.h"
 
+#include <math.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -12,12 +15,15 @@
 // ---------------------------------------------------------------------------
 
 static void retainNestedProperties(void *self) {
-  retainRC(((Real *)self)->significand);
+  Real *real = (Real *)self;
+  retainRC(real->significand);
+  retainRC(real->exponent10);
 }
 
 static void releaseNestedProperties(void *self) {
   Real *real = (Real *)self;
   releaseRC(real->significand);
+  releaseRC(real->exponent10);
   if (real->string_cache)
     releaseRC(real->string_cache);
 }
@@ -45,16 +51,86 @@ static Integer *integerFromDigit(digit_t v) {
 }
 
 // Create an Integer representing 10^n (n >= 0).
-static Integer *integerPowerOf10(uint32_t n) {
+static Integer *integerPowerOf10(size_t n) {
   Integer *result = integerFromDigit(1);
   Integer *ten = integerFromDigit(10);
-  for (uint32_t i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++) {
     Integer *next = Integer¸multiply(result, ten);
     releaseRC(result);
     result = next;
   }
   releaseRC(ten);
   return result;
+}
+
+static Integer *integerFromSize(size_t value) {
+  char text[3 * sizeof(size_t) + 1];
+  snprintf(text, sizeof(text), "%zu", value);
+  return Integer¸fromCString(text);
+}
+
+static bool integerToSize(Integer *value, size_t *result) {
+  String *text = Integer·toStringRC(value);
+  const char *raw = String·toCString(text);
+  if (raw[0] == '-') {
+    releaseRC(text);
+    return false;
+  }
+  errno = 0;
+  unsigned long long parsed = strtoull(raw, NULL, 10);
+  bool fits = errno == 0 && parsed <= SIZE_MAX;
+  if (fits)
+    *result = (size_t)parsed;
+  releaseRC(text);
+  return fits;
+}
+
+static bool integerToInt64(Integer *value, int64_t *result) {
+  String *text = Integer·toStringRC(value);
+  const char *raw = String·toCString(text);
+  errno = 0;
+  long long parsed = strtoll(raw, NULL, 10);
+  bool fits = errno == 0;
+  if (fits)
+    *result = (int64_t)parsed;
+  releaseRC(text);
+  return fits;
+}
+
+static Integer *integerIncrement(Integer *value) {
+  Integer *one = integerFromDigit(1);
+  Integer *result = Integer¸add(value, one);
+  releaseRC(one);
+  return result;
+}
+
+static int compareIntegers(Integer *left, Integer *right) {
+  String *left_string = Integer·toStringRC(left);
+  String *right_string = Integer·toStringRC(right);
+  const char *left_raw = String·toCString(left_string);
+  const char *right_raw = String·toCString(right_string);
+  bool left_negative = left_raw[0] == '-';
+  bool right_negative = right_raw[0] == '-';
+  if (left_negative != right_negative) {
+    releaseRC(left_string);
+    releaseRC(right_string);
+    return left_negative ? -1 : 1;
+  }
+
+  const char *left_digits = left_negative ? left_raw + 1 : left_raw;
+  const char *right_digits = right_negative ? right_raw + 1 : right_raw;
+  size_t left_length = strlen(left_digits);
+  size_t right_length = strlen(right_digits);
+  int result = 0;
+  if (left_length != right_length)
+    result = left_length > right_length ? 1 : -1;
+  else {
+    int lexical = memcmp(left_digits, right_digits, left_length);
+    result = lexical > 0 ? 1 : lexical < 0 ? -1 : 0;
+  }
+  releaseRC(left_string);
+  releaseRC(right_string);
+  return left_negative ? -result : result;
 }
 
 // ---------------------------------------------------------------------------
@@ -99,9 +175,8 @@ static Integer *parseSignificand(const char *digits, size_t len) {
 // Normalization: remove trailing zeros from significand, adjust exponent.
 // ---------------------------------------------------------------------------
 
-static void normalize(Integer **sig, int32_t *exp) {
+static void normalize(Integer **sig, Integer **exp) {
   Integer *ten = integerFromDigit(10);
-  Integer *zero_int = retainRC(&Integer¸zero);
 
   while (true) {
     // Check if significand is zero — stop immediately.
@@ -127,11 +202,94 @@ static void normalize(Integer **sig, int32_t *exp) {
     Integer *next = Integer¸divide(*sig, ten);
     releaseRC(*sig);
     *sig = next;
-    (*exp)++;
+    Integer *next_exp = integerIncrement(*exp);
+    releaseRC(*exp);
+    *exp = next_exp;
   }
 
   releaseRC(ten);
-  releaseRC(zero_int);
+}
+
+static void roundToPrecision(Integer **sig, Integer **exp, size_t precision,
+                             bool scale_precision) {
+  String *raw_obj = Integer·toStringRC(*sig);
+  const char *raw = String·toCString(raw_obj);
+  bool negative = raw[0] == '-';
+  const char *digits = negative ? raw + 1 : raw;
+  size_t digit_count = strlen(digits);
+  if (digit_count == 1 && digits[0] == '0') {
+    releaseRC(raw_obj);
+    return;
+  }
+
+  size_t drop;
+  Integer *drop_integer = NULL;
+  if (scale_precision) {
+    Integer *cutoff_magnitude = integerFromSize(precision);
+    Integer *cutoff =
+        Integer¸subtract(&Integer¸zero, cutoff_magnitude);
+    releaseRC(cutoff_magnitude);
+    if (compareIntegers(*exp, cutoff) >= 0) {
+      releaseRC(cutoff);
+      releaseRC(raw_obj);
+      return;
+    }
+    drop_integer = Integer¸subtract(cutoff, *exp);
+    releaseRC(cutoff);
+    if (!integerToSize(drop_integer, &drop))
+      drop = SIZE_MAX;
+  } else {
+    drop = digit_count > precision ? digit_count - precision : 0;
+    drop_integer = integerFromSize(drop);
+  }
+  if (drop == 0) {
+    releaseRC(drop_integer);
+    releaseRC(raw_obj);
+    return;
+  }
+
+  size_t kept_count = digit_count > drop ? digit_count - drop : 0;
+  char *kept = malloc(kept_count + 2);
+  if (!kept)
+    panic("Out of memory rounding Real");
+  if (kept_count)
+    memcpy(kept, digits, kept_count);
+  else {
+    kept[0] = '0';
+    kept_count = 1;
+  }
+  kept[kept_count] = '\0';
+
+  bool round_up = false;
+  if (drop <= digit_count) {
+    size_t first_discarded = kept_count;
+    char first = digits[first_discarded];
+    bool remaining_nonzero = false;
+    for (size_t i = first_discarded + 1; i < digit_count; i++)
+      remaining_nonzero |= digits[i] != '0';
+    unsigned last_digit = (unsigned)(kept[kept_count - 1] - '0');
+    round_up = first > '5' ||
+               (first == '5' && (remaining_nonzero || (last_digit & 1)));
+  }
+
+  Integer *rounded = Integer¸fromCString(kept);
+  if (round_up) {
+    Integer *one = integerFromDigit(1);
+    Integer *next = Integer¸add(rounded, one);
+    releaseRC(one);
+    releaseRC(rounded);
+    rounded = next;
+  }
+  if (negative)
+    Integer·toggleSign(rounded);
+  releaseRC(*sig);
+  *sig = rounded;
+  Integer *next_exp = Integer¸add(*exp, drop_integer);
+  releaseRC(*exp);
+  *exp = next_exp;
+  releaseRC(drop_integer);
+  free(kept);
+  releaseRC(raw_obj);
 }
 
 // ---------------------------------------------------------------------------
@@ -149,7 +307,7 @@ static char *cloneString(const char *s) {
 
 // Build decimal string from significand + exponent10.
 // Returns an owned String object.
-static String *formatReal(Integer *sig, int32_t exp) {
+static String *formatReal(Integer *sig, Integer *exp) {
   // Get the absolute decimal digit string from Integer·toString.
   // Integer·toString includes a leading '-' for negatives.
   String *rawString = Integer·toStringRC(sig);
@@ -175,7 +333,48 @@ static String *formatReal(Integer *sig, int32_t exp) {
   //   digits="1",   exp=2   → dot_pos=3  → "100.0"
   //   digits="333", exp=-5  → dot_pos=-2 → "0.00333"
 
-  int64_t dot_pos = (int64_t)ndigits + exp; // digits before decimal point
+  int64_t exp_value;
+  bool use_decimal_notation =
+      integerToInt64(exp, &exp_value) &&
+      exp_value >= -100000 && exp_value <= 100000;
+  int64_t dot_pos =
+      use_decimal_notation ? (int64_t)ndigits + exp_value : 0;
+  use_decimal_notation =
+      use_decimal_notation && dot_pos >= -100000 && dot_pos <= 100000;
+
+  if (!use_decimal_notation) {
+    Integer *digit_offset = integerFromSize(ndigits - 1);
+    Integer *scientific_exp = Integer¸add(exp, digit_offset);
+    releaseRC(digit_offset);
+    String *exp_string = Integer·toStringRC(scientific_exp);
+    const char *exp_text = String·toCString(exp_string);
+    size_t exp_len = strlen(exp_text);
+    size_t out_len = (negative ? 1 : 0) + ndigits + exp_len + 4;
+    char *out = malloc(out_len);
+    if (!out)
+      panic("Out of memory in Real formatter");
+    char *p = out;
+    if (negative)
+      *p++ = '-';
+    *p++ = digits[0];
+    *p++ = '.';
+    if (ndigits > 1) {
+      memcpy(p, digits + 1, ndigits - 1);
+      p += ndigits - 1;
+    } else {
+      *p++ = '0';
+    }
+    *p++ = 'e';
+    memcpy(p, exp_text, exp_len);
+    p += exp_len;
+    *p = '\0';
+    String *result = String¸fromCString(out);
+    free(out);
+    releaseRC(exp_string);
+    releaseRC(scientific_exp);
+    releaseRC(rawString);
+    return result;
+  }
 
   // Determine output buffer size (generous upper bound).
   size_t extra = 16; // sign, '.', leading/trailing zeros, ".0", NUL
@@ -228,7 +427,10 @@ static String *formatReal(Integer *sig, int32_t exp) {
 // ---------------------------------------------------------------------------
 
 __attribute__((visibility("default")))
-Real *Real¸fromString(const char *value) {
+Real *Real¸fromString(const char *value, size_t precision,
+                      bool scale_precision) {
+  if (!scale_precision && precision == 0)
+    panic("Invalid real precision");
   // Strip readability underscores.
   size_t vlen = strlen(value);
   char *stripped = malloc(vlen + 1);
@@ -245,48 +447,76 @@ Real *Real¸fromString(const char *value) {
 
   // Split off scientific exponent if present.
   const char *eptr = strpbrk(s, "eE");
-  int32_t sci_exp = 0;
+  Integer *sci_exp = integerFromDigit(0);
   if (eptr) {
-    char *end;
-    long parsed_sci = strtol(eptr + 1, &end, 10);
-    if (*end != '\0') {
+    const char *exp_text = eptr + 1;
+    const char *exp_digits = (*exp_text == '+' || *exp_text == '-')
+                                 ? exp_text + 1
+                                 : exp_text;
+    if (!*exp_digits) {
+      releaseRC(sci_exp);
       free(stripped);
       panic("Invalid real literal (bad exponent)");
     }
-    sci_exp = (int32_t)parsed_sci;
+    for (const char *p = exp_digits; *p; p++) {
+      if (*p < '0' || *p > '9') {
+        releaseRC(sci_exp);
+        free(stripped);
+        panic("Invalid real literal (bad exponent)");
+      }
+    }
+    releaseRC(sci_exp);
+    sci_exp = Integer¸fromCString(exp_text);
   }
 
   // Find decimal point in the coefficient portion.
   size_t coeff_len = eptr ? (size_t)(eptr - s) : strlen(s);
+  if (coeff_len == 0) {
+    releaseRC(sci_exp);
+    free(stripped);
+    panic("Invalid real literal");
+  }
   const char *dot = memchr(s, '.', coeff_len);
-  int32_t exp = 0;
+  size_t frac_len = 0;
+  Integer *exp;
   char *digits_buf;
 
   if (dot) {
     size_t int_len = (size_t)(dot - s);
-    size_t frac_len = coeff_len - int_len - 1;
+    frac_len = coeff_len - int_len - 1;
     digits_buf = malloc(int_len + frac_len + 1);
     if (!digits_buf)
       panic("Out of memory in Real¸fromString");
     memcpy(digits_buf, s, int_len);
     memcpy(digits_buf + int_len, dot + 1, frac_len);
     digits_buf[int_len + frac_len] = '\0';
-    exp = -(int32_t)frac_len;
   } else {
     digits_buf = malloc(coeff_len + 1);
     if (!digits_buf)
       panic("Out of memory in Real¸fromString");
     memcpy(digits_buf, s, coeff_len);
     digits_buf[coeff_len] = '\0';
-    exp = 0;
   }
-  exp += sci_exp;
+  Integer *fractional_digits = integerFromSize(frac_len);
+  Integer *negative_fractional_digits =
+      Integer¸subtract(&Integer¸zero, fractional_digits);
+  releaseRC(fractional_digits);
+  exp = Integer¸add(sci_exp, negative_fractional_digits);
+  releaseRC(sci_exp);
+  releaseRC(negative_fractional_digits);
+  if (digits_buf[0] == '\0') {
+    free(digits_buf);
+    free(stripped);
+    releaseRC(exp);
+    panic("Invalid real literal");
+  }
 
   // Validate all characters are decimal digits.
   for (size_t i = 0; digits_buf[i]; i++) {
     if (digits_buf[i] < '0' || digits_buf[i] > '9') {
       free(digits_buf);
       free(stripped);
+      releaseRC(exp);
       panic("Invalid real literal");
     }
   }
@@ -304,13 +534,51 @@ Real *Real¸fromString(const char *value) {
 
   Real *real = allocInitRC(
       Real, 0, __rc_ISOLATED, .significand = sig, .exponent10 = exp,
-      .context_precision = CLAWR_REAL_DEFAULT_PRECISION,
+      .precision = precision, .scale_precision = scale_precision,
       .string_cache = String¸fromCString(stripped), // pre-populate from source
       .cache_valid = true);
 
   free(digits_buf);
   free(stripped);
   return real;
+}
+
+__attribute__((visibility("default")))
+Real *Real¸fromInteger(Integer *value, size_t precision,
+                       bool scale_precision) {
+  String *text = Integer·toStringRC(value);
+  Real *result =
+      Real¸fromString(String·toCString(text), precision, scale_precision);
+  releaseRC(text);
+  return result;
+}
+
+__attribute__((visibility("default")))
+Real *Real¸fromInt64(int64_t value, size_t precision,
+                     bool scale_precision) {
+  Integer *integer = Integer¸fromInt64(value);
+  Real *result = Real¸fromInteger(integer, precision, scale_precision);
+  releaseRC(integer);
+  return result;
+}
+
+__attribute__((visibility("default")))
+Real *Real¸ensureInRange(Real *value, const char *min, const char *max) {
+  if (min) {
+    Real *lower = Real¸fromString(min, 0, true);
+    int comparison = Real¸compare(value, lower);
+    releaseRC(lower);
+    if (comparison < 0)
+      panic("Real value is below its declared minimum");
+  }
+  if (max) {
+    Real *upper = Real¸fromString(max, 0, true);
+    int comparison = Real¸compare(value, upper);
+    releaseRC(upper);
+    if (comparison > 0)
+      panic("Real value is above its declared maximum");
+  }
+  return value;
 }
 
 // ---------------------------------------------------------------------------
@@ -341,74 +609,107 @@ __attribute__((visibility("default"))) const char *Real·toString(Real *self) {
 // Align two reals to a common exponent; returns new significands (owned).
 // After alignment: left_out * 10^common_exp == left->value, same for right.
 static void alignExponents(Real *left, Real *right, Integer **left_out,
-                           Integer **right_out, int32_t *common_exp) {
-  if (left->exponent10 == right->exponent10) {
+                           Integer **right_out, Integer **common_exp) {
+  int exponent_order = compareIntegers(left->exponent10, right->exponent10);
+  if (exponent_order == 0) {
     *left_out = retainRC(left->significand);
     *right_out = retainRC(right->significand);
-    *common_exp = left->exponent10;
+    *common_exp = retainRC(left->exponent10);
     return;
   }
-  if (left->exponent10 > right->exponent10) {
+  if (exponent_order > 0) {
     // Scale left up: left_sig * 10^(left.exp - right.exp)
-    int32_t diff = left->exponent10 - right->exponent10;
-    Integer *scale = integerPowerOf10((uint32_t)diff);
+    Integer *diff =
+        Integer¸subtract(left->exponent10, right->exponent10);
+    size_t diff_size;
+    if (!integerToSize(diff, &diff_size))
+      panic("Real addition requires more memory than the exponent range permits");
+    releaseRC(diff);
+    Integer *scale = integerPowerOf10(diff_size);
     *left_out = Integer¸multiply(left->significand, scale);
     releaseRC(scale);
     *right_out = retainRC(right->significand);
-    *common_exp = right->exponent10;
+    *common_exp = retainRC(right->exponent10);
   } else {
-    int32_t diff = right->exponent10 - left->exponent10;
-    Integer *scale = integerPowerOf10((uint32_t)diff);
+    Integer *diff =
+        Integer¸subtract(right->exponent10, left->exponent10);
+    size_t diff_size;
+    if (!integerToSize(diff, &diff_size))
+      panic("Real addition requires more memory than the exponent range permits");
+    releaseRC(diff);
+    Integer *scale = integerPowerOf10(diff_size);
     *left_out = retainRC(left->significand);
     *right_out = Integer¸multiply(right->significand, scale);
     releaseRC(scale);
-    *common_exp = left->exponent10;
+    *common_exp = retainRC(left->exponent10);
   }
 }
 
-static Real *realWithSigExp(Integer *sig, int32_t exp, uint32_t precision) {
+static Real *realWithSigExp(Integer *sig, Integer *exp, size_t precision,
+                            bool scale_precision) {
+  if (!scale_precision && precision == 0)
+    panic("Invalid real precision");
+  roundToPrecision(&sig, &exp, precision, scale_precision);
   normalize(&sig, &exp);
   return allocInitRC(Real, 0, __rc_ISOLATED, .significand = sig,
-                     .exponent10 = exp, .context_precision = precision,
+                     .exponent10 = exp, .precision = precision,
+                     .scale_precision = scale_precision,
                      .string_cache = NULL, .cache_valid = false);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸round(Real *value, size_t result_precision) {
+  return realWithSigExp(retainRC(value->significand),
+                        retainRC(value->exponent10), result_precision,
+                        value->scale_precision);
+}
+
+static void requireCompatiblePrecision(Real *left, Real *right) {
+  if (left->scale_precision != right->scale_precision)
+    panic("Real operands must have matching precision kinds in the runtime");
 }
 
 // ---------------------------------------------------------------------------
 // Public arithmetic
 // ---------------------------------------------------------------------------
 
-__attribute__((visibility("default"))) Real *Real¸add(Real *left, Real *right) {
+__attribute__((visibility("default"))) Real *
+Real¸add(Real *left, Real *right, size_t result_precision) {
+  requireCompatiblePrecision(left, right);
   Integer *ls;
   Integer *rs;
-  int32_t exp;
+  Integer *exp;
   alignExponents(left, right, &ls, &rs, &exp);
   Integer *sum = Integer¸add(ls, rs);
   releaseRC(ls);
   releaseRC(rs);
-  return realWithSigExp(sum, exp, left->context_precision);
+  return realWithSigExp(sum, exp, result_precision, left->scale_precision);
 }
 
 __attribute__((visibility("default")))
-Real *Real¸subtract(Real *left, Real *right) {
+Real *Real¸subtract(Real *left, Real *right, size_t result_precision) {
+  requireCompatiblePrecision(left, right);
   Integer *ls;
   Integer *rs;
-  int32_t exp;
+  Integer *exp;
   alignExponents(left, right, &ls, &rs, &exp);
   Integer *diff = Integer¸subtract(ls, rs);
   releaseRC(ls);
   releaseRC(rs);
-  return realWithSigExp(diff, exp, left->context_precision);
+  return realWithSigExp(diff, exp, result_precision, left->scale_precision);
 }
 
 __attribute__((visibility("default")))
-Real *Real¸multiply(Real *left, Real *right) {
+Real *Real¸multiply(Real *left, Real *right, size_t result_precision) {
+  requireCompatiblePrecision(left, right);
   Integer *prod = Integer¸multiply(left->significand, right->significand);
-  int32_t exp = left->exponent10 + right->exponent10;
-  return realWithSigExp(prod, exp, left->context_precision);
+  Integer *exp = Integer¸add(left->exponent10, right->exponent10);
+  return realWithSigExp(prod, exp, result_precision, left->scale_precision);
 }
 
 __attribute__((visibility("default")))
-Real *Real¸divide(Real *dividend, Real *divisor) {
+Real *Real¸divide(Real *dividend, Real *divisor, size_t result_precision) {
+  requireCompatiblePrecision(dividend, divisor);
   // Check for zero divisor.
   bool divisor_zero = true;
   for (size_t i = 0; i < divisor->significand->digits->count; i++) {
@@ -420,7 +721,7 @@ Real *Real¸divide(Real *dividend, Real *divisor) {
   if (divisor_zero)
     panic("Division by zero!");
 
-  uint32_t prec = dividend->context_precision;
+  size_t prec = result_precision;
 
   // Scale dividend significand by 10^prec to preserve precision through
   // division.
@@ -432,85 +733,178 @@ Real *Real¸divide(Real *dividend, Real *divisor) {
   releaseRC(scaled);
 
   // exponent: dividend.exp - divisor.exp - prec
-  int32_t exp = dividend->exponent10 - divisor->exponent10 - (int32_t)prec;
+  Integer *exp = Integer¸subtract(dividend->exponent10, divisor->exponent10);
+  Integer *precision_exp = integerFromSize(prec);
+  Integer *negative_precision_exp =
+      Integer¸subtract(&Integer¸zero, precision_exp);
+  Integer *adjusted_exp = Integer¸add(exp, negative_precision_exp);
+  releaseRC(exp);
+  releaseRC(precision_exp);
+  releaseRC(negative_precision_exp);
 
-  return realWithSigExp(quotient, exp, prec);
+  return realWithSigExp(quotient, adjusted_exp, prec,
+                        dividend->scale_precision);
 }
 
 __attribute__((visibility("default")))
-Real *Real¸power(Real *base, Real *exponent) {
+Real *Real¸power(Real *base, Real *exponent, size_t result_precision) {
   // Exponent must be a whole number: no negative exponent10 (fractional
   // digits).
-  if (exponent->exponent10 < 0)
+  if (compareIntegers(exponent->exponent10, &Integer¸zero) < 0)
     panic("Real exponentiation requires an integer exponent");
 
   // Build the full integer value: int_exp = significand * 10^exponent10
   Integer *int_exp;
-  if (exponent->exponent10 == 0) {
+  if (compareIntegers(exponent->exponent10, &Integer¸zero) == 0) {
     int_exp = retainRC(exponent->significand);
   } else {
-    Integer *scale = integerPowerOf10((uint32_t)exponent->exponent10);
+    size_t exponent_size;
+    if (!integerToSize(exponent->exponent10, &exponent_size))
+      panic("Real exponentiation requires more memory than available");
+    Integer *scale = integerPowerOf10(exponent_size);
     int_exp = Integer¸multiply(exponent->significand, scale);
     releaseRC(scale);
   }
 
-  // Reject negative exponents.
-  bool is_negative = false;
-  for (size_t i = 0; i < int_exp->digits->count; i++) {
-    if (ARRAY_ELEMENT_AT(i, int_exp->digits, digit_t) < 0) {
-      is_negative = true;
-      break;
-    }
-  }
-  if (is_negative) {
-    releaseRC(int_exp);
-    panic("Real exponentiation requires a non-negative exponent");
-  }
-
-  // Convert exponent to unsigned long long via toString (safe for practical
-  // sizes).
   String *exp_str_obj = Integer·toStringRC(int_exp);
   const char *exp_str = String·toCString(exp_str_obj);
-  releaseRC(int_exp);
+  bool negative_exponent = exp_str[0] == '-';
+  if (negative_exponent) {
+    Integer *absolute_exp = Integer¸subtract(&Integer¸zero, int_exp);
+    releaseRC(int_exp);
+    int_exp = absolute_exp;
+  }
+
+  // Convert exponent to unsigned long long; larger exponents cannot produce
+  // an allocatable result.
   char *end;
-  unsigned long long e = strtoull(exp_str, &end, 10);
+  errno = 0;
+  const char *exp_digits = negative_exponent ? exp_str + 1 : exp_str;
+  unsigned long long e = strtoull(exp_digits, &end, 10);
+  bool exponent_fits = errno == 0 && *end == '\0';
+  releaseRC(int_exp);
   releaseRC(exp_str_obj);
-  if (*end != '\0')
+  if (!exponent_fits)
     panic("Real exponent too large");
 
   // Binary exponentiation.
   Integer *one = integerFromDigit(1);
-  Real *result = realWithSigExp(one, 0, base->context_precision);
+  Integer *zero = integerFromDigit(0);
+  Real *result =
+      realWithSigExp(one, zero, result_precision, base->scale_precision);
   Real *b = retainRC(base);
 
   for (unsigned long long exp_rem = e; exp_rem > 0; exp_rem >>= 1) {
     if (exp_rem & 1) {
-      Real *nr = Real¸multiply(result, b);
+      Real *nr = Real¸multiply(result, b, result_precision);
       releaseRC(result);
       result = nr;
     }
     if (exp_rem >> 1 > 0) {
-      Real *nb = Real¸multiply(b, b);
+      Real *nb = Real¸multiply(b, b, result_precision);
       releaseRC(b);
       b = nb;
     }
   }
 
   releaseRC(b);
+  if (negative_exponent) {
+    Integer *one = integerFromDigit(1);
+    Integer *zero = integerFromDigit(0);
+    Real *numerator =
+        realWithSigExp(one, zero, result_precision, base->scale_precision);
+    Real *reciprocal = Real¸divide(numerator, result, result_precision);
+    releaseRC(numerator);
+    releaseRC(result);
+    result = reciprocal;
+  }
   return result;
 }
 
 __attribute__((visibility("default"))) int Real¸compare(Real *left,
                                                         Real *right) {
-  Real *diff = Real¸subtract(left, right);
-  const char *decimal = Real·toString(diff);
-
-  int result = 0;
-  if (strcmp(decimal, "0.0") != 0) {
-    result = decimal[0] == '-' ? -1 : 1;
+  String *left_string = Integer·toStringRC(left->significand);
+  String *right_string = Integer·toStringRC(right->significand);
+  const char *left_raw = String·toCString(left_string);
+  const char *right_raw = String·toCString(right_string);
+  int left_sign = left_raw[0] == '-' ? -1 : strcmp(left_raw, "0") == 0 ? 0 : 1;
+  int right_sign =
+      right_raw[0] == '-' ? -1 : strcmp(right_raw, "0") == 0 ? 0 : 1;
+  if (left_sign != right_sign) {
+    releaseRC(left_string);
+    releaseRC(right_string);
+    return left_sign < right_sign ? -1 : 1;
+  }
+  if (left_sign == 0) {
+    releaseRC(left_string);
+    releaseRC(right_string);
+    return 0;
   }
 
-  free((void *)decimal);
-  releaseRC(diff);
+  const char *left_digits = left_sign < 0 ? left_raw + 1 : left_raw;
+  const char *right_digits = right_sign < 0 ? right_raw + 1 : right_raw;
+  Integer *left_length = integerFromSize(strlen(left_digits));
+  Integer *right_length = integerFromSize(strlen(right_digits));
+  Integer *left_order = Integer¸add(left->exponent10, left_length);
+  Integer *right_order = Integer¸add(right->exponent10, right_length);
+  int order = compareIntegers(left_order, right_order);
+  releaseRC(left_length);
+  releaseRC(right_length);
+  releaseRC(left_order);
+  releaseRC(right_order);
+  releaseRC(left_string);
+  releaseRC(right_string);
+  if (order != 0)
+    return left_sign < 0 ? -order : order;
+
+  Integer *ls;
+  Integer *rs;
+  Integer *exp;
+  alignExponents(left, right, &ls, &rs, &exp);
+  int result = compareIntegers(ls, rs);
+  releaseRC(ls);
+  releaseRC(rs);
   return result;
 }
+
+#define DEFINE_IEEE_ARITHMETIC(type, pow_fn, add_name, subtract_name,         \
+                                multiply_name, divide_name, power_name)       \
+  __attribute__((visibility("default"))) type add_name(type left, type right) {\
+    volatile type result = left + right;                                      \
+    if (!isfinite(result))                                                    \
+      panic("IEEE real result is outside its finite range");                \
+    return result;                                                            \
+  }                                                                           \
+  __attribute__((visibility("default"))) type subtract_name(type left,        \
+                                                              type right) {   \
+    volatile type result = left - right;                                      \
+    if (!isfinite(result))                                                    \
+      panic("IEEE real result is outside its finite range");                \
+    return result;                                                            \
+  }                                                                           \
+  __attribute__((visibility("default"))) type multiply_name(type left,        \
+                                                              type right) {   \
+    volatile type result = left * right;                                      \
+    if (!isfinite(result))                                                    \
+      panic("IEEE real result is outside its finite range");                \
+    return result;                                                            \
+  }                                                                           \
+  __attribute__((visibility("default"))) type divide_name(type left,          \
+                                                            type right) {     \
+    volatile type result = left / right;                                      \
+    if (!isfinite(result))                                                    \
+      panic("IEEE real result is outside its finite range");                \
+    return result;                                                            \
+  }                                                                           \
+  __attribute__((visibility("default"))) type power_name(type base,           \
+                                                           type exponent) {   \
+    volatile type result = pow_fn(base, exponent);                            \
+    if (!isfinite(result))                                                    \
+      panic("IEEE real result is outside its finite range");                \
+    return result;                                                            \
+  }
+
+DEFINE_IEEE_ARITHMETIC(float, powf, Real32¸add, Real32¸subtract,
+                       Real32¸multiply, Real32¸divide, Real32¸power)
+DEFINE_IEEE_ARITHMETIC(double, pow, Real64¸add, Real64¸subtract,
+                       Real64¸multiply, Real64¸divide, Real64¸power)

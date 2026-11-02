@@ -1,6 +1,6 @@
 import { Token, TokenStream } from '@/lexer'
 import { IdentifierToken } from '@/lexer/token'
-import { IntegerLiteral } from '@/model/literals'
+import { IntegerLiteral, RealLiteral } from '@/model/literals'
 import {
     decorateTypeConstraint,
     TypeConstraintDeclaration,
@@ -9,12 +9,14 @@ import { TypeName } from '@/model/type-name'
 import {
     IntegerSet,
     RCTypeSet,
+    RealSet,
     StringSet,
     TruthvalueSet,
 } from '@/model/value-set'
 import { Context } from '@/parser'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { SourceError } from '@/tools'
+import { decimal } from 'decimalish'
 
 export class TypeConstraintParser {
     private constructor(private context: Context) {}
@@ -30,6 +32,8 @@ export class TypeConstraintParser {
         switch (type) {
             case 'integer':
                 return this.parseIntegerConstraint(stream, typeToken)
+            case 'real':
+                return this.parseRealConstraint(stream, typeToken)
             case 'truthvalue':
                 return this.parseTruthvalueConstraint(stream, typeToken)
             case 'string':
@@ -46,6 +50,76 @@ export class TypeConstraintParser {
                     },
                 )
         }
+    }
+
+    private parseRealConstraint(
+        stream: TokenStream,
+        typeToken: IdentifierToken,
+    ): TypeConstraintDeclaration {
+        let min: decimal | undefined = undefined
+        let max: decimal | undefined = undefined
+        let end = typeToken.end
+        const expressionParser = ExpressionParser.create(this.context)
+
+        if (stream.isNext('PUNCTUATION', '(')) {
+            stream.expect('PUNCTUATION', '(')
+            if (!stream.isNext('OPERATOR', '...')) {
+                const lower = expressionParser.parse(stream)
+                if (!(lower instanceof RealLiteral))
+                    throw SourceError.create({
+                        message: 'Expected a real literal',
+                        span: lower.span,
+                    })
+                min = lower.value.min
+            }
+            stream.expect('OPERATOR', '...')
+            if (!stream.isNext('PUNCTUATION', ')')) {
+                const upper = expressionParser.parse(stream)
+                if (!(upper instanceof RealLiteral))
+                    throw SourceError.create({
+                        message: 'Expected a real literal',
+                        span: upper.span,
+                    })
+                max = upper.value.max
+            }
+            end = stream.expect('PUNCTUATION', ')').end
+        }
+
+        const next = stream.peek()
+        if (
+            next?.kind !== 'IDENTIFIER' ||
+            (next.identifier !== 'scale' && next.identifier !== 'sig')
+        )
+            throw SourceError.create({
+                message: 'A real type requires an explicit precision',
+                span: { start: typeToken.start, end },
+            })
+        const kindToken = stream.expect('IDENTIFIER')
+        const digitsToken = stream.expect('INTEGER_LITERAL')
+        if (digitsToken.value < 0n || digitsToken.value > BigInt(Number.MAX_SAFE_INTEGER))
+            throw SourceError.create({
+                message: 'Real precision must be a non-negative safe integer',
+                span: { start: digitsToken.start, end: digitsToken.end },
+            })
+        let base: 'dec' | 'bin' | 'ter' = 'dec'
+        end = digitsToken.end
+        if (stream.peek()?.kind === 'IDENTIFIER') {
+            const candidate = stream.peek() as IdentifierToken
+            if (candidate.identifier === 'dec' || candidate.identifier === 'bin' || candidate.identifier === 'ter') {
+                stream.expect('IDENTIFIER')
+                base = candidate.identifier
+                end = candidate.end
+            }
+        }
+        const precision = {
+            kind: kindToken.identifier as 'scale' | 'sig',
+            digits: Number(digitsToken.value),
+            base,
+        }
+        return decorateTypeConstraint(
+            RealSet.range({ min, max, precision }),
+            { span: { start: typeToken.start, end } },
+        )
     }
 
     private parseIntegerConstraint(

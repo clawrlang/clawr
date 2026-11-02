@@ -23,6 +23,32 @@ describe('Lowering Literals', () => {
         expect(result).toBe('42')
     })
 
+    it('lowers decimal real literals with explicit precision', () => {
+        const expr: Expression = {
+            kind: 'REAL_LITERAL',
+            type: {
+                universe: 'real',
+                value: '1.25',
+                precision: { kind: 'sig', digits: 3, base: 'dec' },
+            },
+        }
+        expect(lowerExpr(expr)).toBe(
+            'Real¸fromString("1.25", 3, false)',
+        )
+    })
+
+    it('lowers IEEE binary32 real literals to native float parsing', () => {
+        const expr: Expression = {
+            kind: 'REAL_LITERAL',
+            type: {
+                universe: 'real',
+                value: '1.25',
+                precision: { kind: 'sig', digits: 24, base: 'bin' },
+            },
+        }
+        expect(lowerExpr(expr)).toBe('strtof("1.25", NULL)')
+    })
+
     describe('lowers truth value literals to C constants', () => {
         const mapping: Record<string, string> = {
             true: 'c_true',

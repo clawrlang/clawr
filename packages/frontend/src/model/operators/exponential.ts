@@ -1,15 +1,14 @@
 import { IntegerSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 import { BinaryOperator } from '../binary-operation'
+import { realOperationResult } from './real-operation'
 
 export class Exponential implements BinaryOperator {
     static instance = new Exponential()
 
     compute(base: ValueSet, exponent: ValueSet): Result<ValueSet> {
         if (!(base instanceof IntegerSet && exponent instanceof IntegerSet))
-            return ErrorResult.failure(
-                `exponentiation between ${base} and ${exponent} is not supported`,
-            )
+            return realOperationResult(base, exponent)
 
         if (exponent.min === undefined || exponent.min < 0)
             return ErrorResult.failure(

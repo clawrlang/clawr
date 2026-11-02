@@ -1,6 +1,8 @@
 # TODO
 
-- Lower `real` values on the backend using IEEE `binary*` and `decimal*` representations.
+- Complete `real` lowering with finite precision, per-operation rounding, and a magnitude range limited only by available memory; fixed-exponent IEEE formats alone are insufficient.
+  - Implemented initial slice: decimal `Real*` values with explicit precision and arbitrary decimal exponents, plus bounded IEEE binary32/binary64 lowering.
+  - Remaining: other binary widths/bases, real remainder, and fractional real exponents.
 - Lower `real` types with massive precision and/or range as `Real*`.
 - Implement static analysis and lowering of dyadic operations supporting combinations of small vs large numbers (`real` and `integer` types).
   - `ADDITION`

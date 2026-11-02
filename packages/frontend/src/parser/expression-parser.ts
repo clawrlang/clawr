@@ -2,7 +2,7 @@ import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { BinaryOperation } from '@/model/binary-operation'
 import { FunctionCall } from '@/model/function-call'
-import { IntegerLiteral, TruthValueLiteral } from '@/model/literals'
+import { IntegerLiteral, RealLiteral, TruthValueLiteral } from '@/model/literals'
 import { Comparison } from '@/model/operators'
 import { PropertyReference } from '@/model/property-reference'
 import { VariableReference } from '@/model/variable-reference'
@@ -205,6 +205,8 @@ export class ExpressionParser {
                 return this.parseTruthValueLiteral(stream)
             case 'INTEGER_LITERAL':
                 return this.parseIntegerLiteral(stream)
+            case 'REAL_LITERAL':
+                return this.parseRealLiteral(stream)
             case 'IDENTIFIER':
                 return this.parseVariableReference(stream)
             case 'PUNCTUATION':
@@ -241,6 +243,15 @@ export class ExpressionParser {
         return IntegerLiteral.create({
             value: nextToken.value,
             span: { start: nextToken.start, end: nextToken.end },
+        })
+    }
+
+    private parseRealLiteral(stream: TokenStream) {
+        const token = stream.expect('REAL_LITERAL')
+        return RealLiteral.create({
+            value: token.value,
+            source: token.source,
+            span: { start: token.start, end: token.end },
         })
     }
 

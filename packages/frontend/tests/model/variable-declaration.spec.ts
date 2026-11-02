@@ -5,6 +5,7 @@ import { ISOLATED, SHARED } from '@/model/isolation-level'
 import {
     DataLiteral,
     IntegerLiteral,
+    RealLiteral,
     TruthValueLiteral,
 } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
@@ -16,6 +17,7 @@ import { VariableDeclaration } from '@/model/variable-declaration'
 import { VariableReference } from '@/model/variable-reference'
 import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
+import { decimal } from 'decimalish'
 
 describe('VariableDeclaration', () => {
     it('converts to CIR VARIABLE_DECL', () => {
@@ -79,6 +81,7 @@ describe('VariableDeclaration', () => {
                 nameSpan: util.someCodeSpan,
                 span: util.someCodeSpan,
             })
+
             const context = util.newSemanticContext()
             context.scope.rootScope.addDataDeclaration(
                 DataDeclaration.create({
@@ -102,6 +105,36 @@ describe('VariableDeclaration', () => {
             expect((context.scope.emitted[0] as any).type).toEqual({
                 universe: 'integer',
             })
+        })
+
+        it('infers mutable real precision from the literal spelling', () => {
+            const decl = VariableDeclaration.create({
+                isImmutable: false,
+                name: 'ratio',
+                isolationLevel: ISOLATED,
+                initialValue: RealLiteral.create({
+                    value: decimal('1.250'),
+                    source: '1.250',
+                    span: util.someCodeSpan,
+                }),
+                nameSpan: util.someCodeSpan,
+                span: util.someCodeSpan,
+            })
+            const context = util.newSemanticContext()
+            decl.emitStatement(context)
+
+            expect((context.scope.emitted[0] as any).type).toMatchObject({
+                universe: 'real',
+                precision: { kind: 'sig', digits: 4, base: 'dec' },
+            })
+            expect((context.scope.emitted[0] as any).initialValue).toMatchObject(
+                {
+                    kind: 'REAL_LITERAL',
+                    type: {
+                        precision: { kind: 'sig', digits: 4, base: 'dec' },
+                    },
+                },
+            )
         })
 
         it('infers narrowest value set for constant truthvalue', () => {

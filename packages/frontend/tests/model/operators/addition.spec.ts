@@ -1,6 +1,6 @@
 import { Addition } from '@/model/operators'
-import { IntegerSet } from '@/model/value-set'
-import { describe, expect } from 'bun:test'
+import { IntegerSet, RealSet } from '@/model/value-set'
+import { describe, expect, it } from 'bun:test'
 
 describe('Addition', () => {
     describe('integer operands', () => {
@@ -13,6 +13,60 @@ describe('Addition', () => {
             expect(result.isSuccess && result.value).toMatchObject({
                 min: 5n,
                 max: 5n,
+            })
+
+            describe('real operands', () => {
+                it('uses the higher operand precision when kinds and bases match', () => {
+                    const result = Addition.instance.compute(
+                        RealSet.unconstrained({
+                            kind: 'sig',
+                            digits: 2,
+                            base: 'dec',
+                        }),
+                        RealSet.unconstrained({
+                            kind: 'sig',
+                            digits: 4,
+                            base: 'dec',
+                        }),
+                    )
+
+                    expect(result.isSuccess).toBeTrue()
+                    expect(result.isSuccess && result.value).toMatchObject({
+                        precision: { kind: 'sig', digits: 4, base: 'dec' },
+                    })
+                })
+
+                it('rejects mixed precision bases', () => {
+                    const result = Addition.instance.compute(
+                        RealSet.unconstrained({
+                            kind: 'sig',
+                            digits: 2,
+                            base: 'dec',
+                        }),
+                        RealSet.unconstrained({
+                            kind: 'sig',
+                            digits: 4,
+                            base: 'bin',
+                        }),
+                    )
+
+                    expect(result.isError).toBeTrue()
+                })
+
+                it('treats an integer operand as scale 0', () => {
+                    const result = Addition.instance.compute(
+                        IntegerSet.singleton(2n),
+                        RealSet.unconstrained({
+                            kind: 'scale',
+                            digits: 2,
+                            base: 'dec',
+                        }),
+                    )
+
+                    expect(result.isSuccess && result.value).toMatchObject({
+                        precision: { kind: 'scale', digits: 2, base: 'dec' },
+                    })
+                })
             })
         })
 

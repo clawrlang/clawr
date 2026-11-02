@@ -1,0 +1,132 @@
+# yaml-language-server: $schema=../../../../../cir-schema/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: FUNCTION_DECL
+    baseName: decimal_identity
+    labels: []
+    parameters:
+      - name: value
+        type:
+          universe: real
+          min: '0.0'
+          max: '10.0'
+          precision: { kind: scale, digits: 2, base: dec }
+    returnType:
+      universe: real
+      min: '0.0'
+      max: '10.0'
+      precision: { kind: scale, digits: 2, base: dec }
+    body:
+      - kind: RETURN
+        value:
+          kind: VARIABLE_REF
+          name: value
+          type:
+            universe: real
+            min: '0.0'
+            max: '10.0'
+            precision: { kind: scale, digits: 2, base: dec }
+startBlock:
+  - kind: VARIABLE_DECL
+    name: decimal_result
+    type:
+      universe: real
+      min: '-10.0'
+      max: '10.0'
+      precision: { kind: scale, digits: 2, base: dec }
+    initialValue:
+      kind: ADDITION
+      left:
+        kind: REAL_LITERAL
+        type:
+          universe: real
+          value: '1.23'
+          precision: { kind: scale, digits: 2, base: dec }
+      right:
+        kind: REAL_LITERAL
+        type:
+          universe: real
+          value: '2.34'
+          precision: { kind: scale, digits: 2, base: dec }
+      type:
+        universe: real
+        precision: { kind: scale, digits: 2, base: dec }
+  - kind: VARIABLE_DECL
+    name: binary_result
+    type:
+      universe: real
+      min: '-340282346638528859811704183484516925440.0'
+      max: '340282346638528859811704183484516925440.0'
+      precision: { kind: sig, digits: 24, base: bin }
+    initialValue:
+      kind: MULTIPLICATION
+      left:
+        kind: REAL_LITERAL
+        type:
+          universe: real
+          value: '1.25'
+          precision: { kind: sig, digits: 24, base: bin }
+      right:
+        kind: REAL_LITERAL
+        type:
+          universe: real
+          value: '2.5'
+          precision: { kind: sig, digits: 24, base: bin }
+      type:
+        universe: real
+        precision: { kind: sig, digits: 24, base: bin }
+  - kind: VARIABLE_DECL
+    name: integer_scale_result
+    type:
+      universe: real
+      min: '0.0'
+      max: '10.0'
+      precision: { kind: scale, digits: 2, base: dec }
+    initialValue:
+      kind: ADDITION
+      left:
+        kind: INTEGER_LITERAL
+        type: { universe: integer, value: '2' }
+      right:
+        kind: REAL_LITERAL
+        type:
+          universe: real
+          value: '1.25'
+          precision: { kind: scale, digits: 2, base: dec }
+      type:
+        universe: real
+        precision: { kind: scale, digits: 2, base: dec }
+  - kind: VARIABLE_DECL
+    name: rounded_result
+    type:
+      universe: real
+      min: '0.0'
+      max: '2.0'
+      precision: { kind: sig, digits: 2, base: dec }
+    initialValue:
+      kind: REAL_LITERAL
+      type:
+        universe: real
+        value: '1.245'
+        precision: { kind: sig, digits: 4, base: dec }
+  - kind: VARIABLE_DECL
+    name: function_result
+    type:
+      universe: real
+      min: '0.0'
+      max: '10.0'
+      precision: { kind: scale, digits: 2, base: dec }
+    initialValue:
+      kind: CALL
+      name: { baseName: decimal_identity, labels: [] }
+      arguments:
+        - kind: REAL_LITERAL
+          type:
+            universe: real
+            value: '4.5'
+            precision: { kind: scale, digits: 2, base: dec }
+      type:
+        universe: real
+        min: '0.0'
+        max: '10.0'
+        precision: { kind: scale, digits: 2, base: dec }

@@ -18,7 +18,13 @@ export type IntegerSingleton<Value extends bigint = bigint> = {
     value: `${Value}`
 }
 
-type RealSet = RealRange | RealSingleton
+export type RealSet = RealRange | RealSingleton
+
+export type RealPrecision = {
+    kind: 'scale' | 'sig'
+    digits: number
+    base: 'dec' | 'bin' | 'ter'
+}
 
 export type RealRange<
     Min extends string | undefined = string | undefined,
@@ -26,12 +32,14 @@ export type RealRange<
 > = {
     universe: 'real'
     boxed?: true
+    precision?: RealPrecision
 } & (Min extends undefined ? { min?: undefined } : { min: Min }) &
     (Max extends undefined ? { max?: undefined } : { max: Max })
 
 export type RealSingleton<Value extends string = string> = {
     universe: 'real'
     boxed?: true
+    precision?: RealPrecision
     value: `${Value}`
 }
 

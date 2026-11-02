@@ -24,6 +24,33 @@ describe('VariableDeclarationParser', () => {
         })
     })
 
+    it('infers mutable real precision from the literal spelling', () => {
+        const decl = parseVariableDeclaration('mut ratio = 1.250;')
+        expect(decl).toMatchObject({
+            isImmutable: false,
+            name: 'ratio',
+            initialValue: {
+                value: {
+                    precision: { kind: 'sig', digits: 4, base: 'dec' },
+                },
+            },
+        })
+    })
+
+    it('parses explicit real range and decimal precision', () => {
+        expect(
+            parseVariableDeclaration(
+                'mut ratio: real(0.0...10.0) scale 2 dec = 1.25;',
+            ),
+        ).toMatchObject({
+            type: {
+                min: '0',
+                max: '10',
+                precision: { kind: 'scale', digits: 2, base: 'dec' },
+            },
+        })
+    })
+
     it('parses mutable reference variable declaration', () => {
         const source = `mut foo: ref Type = { x: 1, y: 2 }`
         expect(parseVariableDeclaration(source)).toMatchObject({

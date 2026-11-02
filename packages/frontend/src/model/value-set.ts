@@ -72,25 +72,41 @@ export class RealSet<
     private constructor(
         public readonly min: Min,
         public readonly max: Max,
+        public readonly precision?: cir.RealPrecision,
     ) {}
 
-    static unconstrained() {
-        return new RealSet(undefined, undefined)
+    static unconstrained(precision?: cir.RealPrecision) {
+        return new RealSet(undefined, undefined, precision)
     }
 
-    static singleton<Value extends decimal>(v: Value) {
-        return new RealSet(v, v)
+    static singleton<Value extends decimal>(
+        v: Value,
+        precision?: cir.RealPrecision,
+    ) {
+        return new RealSet(v, v, precision)
     }
 
     static range<
         Min extends decimal | undefined,
         Max extends decimal | undefined,
-    >({ min, max }: { min?: Min; max?: Max }) {
-        return new RealSet<Min, Max>(min as Min, max as Max)
+    >({
+        min,
+        max,
+        precision,
+    }: {
+        min?: Min
+        max?: Max
+        precision?: cir.RealPrecision
+    }) {
+        return new RealSet<Min, Max>(min as Min, max as Max, precision)
     }
 
     unconstrained(): ValueSet {
-        return RealSet.range({ min: undefined, max: undefined })
+        return RealSet.range({
+            min: undefined,
+            max: undefined,
+            precision: this.precision,
+        })
     }
 
     isSupersetTo(other: ValueSet): boolean {
@@ -107,17 +123,19 @@ export class RealSet<
         if (this.min !== undefined && (this.min as decimal) === this.max)
             return {
                 universe: 'real' as const,
+                precision: this.precision,
                 value: this.min.toString() as any,
             }
         return {
             universe: 'real' as const,
+            precision: this.precision,
             min: this.min?.toString() as any,
             max: this.max?.toString() as any,
         }
     }
 
     toString(): string {
-        return 'integer'
+        return 'real'
     }
 }
 

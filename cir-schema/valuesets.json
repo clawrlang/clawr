@@ -82,6 +82,7 @@
           "$comment": "Present if the value is boxed.",
           "const": true
         },
+        "precision": { "$ref": "#/$defs/RealPrecision" },
         "value": {
           "$comment": "The single value of the set.",
           "type": "string",
@@ -103,6 +104,7 @@
           "$comment": "Present if the value is boxed.",
           "const": true
         },
+        "precision": { "$ref": "#/$defs/RealPrecision" },
         "min": {
           "$comment": "The lower bound of the range (inclusive).",
           "type": "string",
@@ -115,6 +117,17 @@
         }
       },
       "required": ["universe"],
+      "unevaluatedProperties": false
+    },
+
+    "RealPrecision": {
+      "type": "object",
+      "properties": {
+        "kind": { "enum": ["scale", "sig"] },
+        "digits": { "type": "integer", "minimum": 0 },
+        "base": { "enum": ["dec", "bin", "ter"] }
+      },
+      "required": ["kind", "digits", "base"],
       "unevaluatedProperties": false
     },
 

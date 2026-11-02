@@ -1,0 +1,15 @@
+@main {
+    const a: real sig 113 bin = 0.1
+    const b: real sig 113 bin = 0.2
+    print(a + b)
+    print(a * b)
+    print(b / a)
+    const c: real sig 237 bin = 1.5
+    const d: real sig 237 bin = 0.1
+    print(c - d)
+    print(c ^ 3)
+    print(a < b)
+    const e: real(0.0...1.0) sig 24 bin = 0.5
+    const f: real(0.0...1.0) sig 24 bin = 0.25
+    print(e - f)
+}

@@ -205,30 +205,54 @@ static char *integerToCString(Integer *self) {
     return result;
   }
 
-  int8_t sign = trillStack->digit < 0 ? -1 : 1;
-  size_t length = 18 * limbs + (sign == 1 ? 1 : 2);
+  // The trills are balanced: their signs can differ. Normalize them into
+  // non-negative trills of a number with a single overall sign.
+  digit_t *trills = malloc(sizeof(digit_t) * limbs);
+  size_t count = 0;
+  for (TrillList *limb = trillStack; limb;) {
+    trills[limbs - 1 - count++] = limb->digit; // least significant first
+    TrillList *next = limb->next;
+    free(limb);
+    limb = next;
+  }
+
+  const digit_t TRILL = 1000000000000000000LL;
+  int8_t sign = 1;
+  for (size_t i = limbs; i > 0; i--) {
+    if (trills[i - 1] != 0) {
+      sign = trills[i - 1] < 0 ? -1 : 1;
+      break;
+    }
+  }
+  if (sign == -1)
+    for (size_t i = 0; i < limbs; i++)
+      trills[i] = -trills[i];
+  for (size_t i = 0; i + 1 < limbs; i++) {
+    if (trills[i] < 0) {
+      trills[i] += TRILL;
+      trills[i + 1] -= 1;
+    } else if (trills[i] >= TRILL) {
+      trills[i] -= TRILL;
+      trills[i + 1] += 1;
+    }
+  }
+  size_t top = limbs;
+  while (top > 1 && trills[top - 1] == 0)
+    top--;
+
+  size_t length = 18 * top + (sign == 1 ? 1 : 2);
   char *result = malloc(sizeof(char) * length);
   result[length - 1] = 0;
 
   char *offset = result;
-  if (sign == -1) {
-    result[0] = '-';
-    offset++;
-  }
+  if (sign == -1)
+    *offset++ = '-';
 
   // Most significant trill might be less than 18 digits. Do not pad with zeros.
-  offset += sprintf(offset, "%lld", trillStack->digit * sign);
-  TrillList *nextLimb = trillStack->next;
-  free(trillStack);
-  trillStack = nextLimb;
-
-  while (trillStack) {
-    // Pad with zeroes to ensure 18 digits are rendered for each trill.
-    offset += sprintf(offset, "%018lld", trillStack->digit * sign);
-    TrillList *nextLimb = trillStack->next;
-    free(trillStack);
-    trillStack = nextLimb;
-  }
+  offset += sprintf(offset, "%lld", (long long)trills[top - 1]);
+  for (size_t i = top - 1; i > 0; i--)
+    offset += sprintf(offset, "%018lld", (long long)trills[i - 1]);
+  free(trills);
 
   return result;
 }

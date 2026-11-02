@@ -198,7 +198,8 @@ static Integer *parseSignificand(const char *digits, size_t len) {
         1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000,
         1000000000, 10000000000LL, 100000000000LL, 1000000000000LL,
         10000000000000LL, 100000000000000LL, 1000000000000000LL,
-        10000000000000000LL, 100000000000000000LL}[chunk]);
+        10000000000000000LL, 100000000000000000LL,
+        1000000000000000000LL}[chunk]);
     Integer *shifted = Integer¸multiply(result, scale);
     releaseRC(scale);
     releaseRC(result);
@@ -647,11 +648,15 @@ Real *Real¸ensureInRange(Real *value, const char *min, const char *max) {
 // toString
 // ---------------------------------------------------------------------------
 
+static String *formatBinaryReal(Real *self);
+
 __attribute__((visibility("default"))) String *Real·toStringRC(Real *self) {
   if (!self->cache_valid) {
     if (self->string_cache)
       releaseRC(self->string_cache);
-    self->string_cache = formatReal(self->significand, self->exponent10);
+    self->string_cache = self->binary_bits ? formatBinaryReal(self)
+                                           : formatReal(self->significand,
+                                                        self->exponent10);
     self->cache_valid = true;
   }
   return retainRC(self->string_cache);
@@ -851,8 +856,17 @@ Real *Real¸divide(Real *dividend, Real *divisor, size_t result_precision) {
   return realWithSigExp(quotient, adjusted_exp, prec, scale_mode);
 }
 
+static Real *realBinaryFromSigExp(Integer *sig, Integer *exp, size_t bits);
+static Real *powerImpl(Real *base, Real *exponent, size_t result_precision,
+                       size_t binary_bits);
+
 __attribute__((visibility("default")))
 Real *Real¸power(Real *base, Real *exponent, size_t result_precision) {
+  return powerImpl(base, exponent, result_precision, 0);
+}
+
+static Real *powerImpl(Real *base, Real *exponent, size_t result_precision,
+                       size_t binary_bits) {
   // Exponent must be a whole number: no negative exponent10 (fractional
   // digits).
   if (compareIntegers(exponent->exponent10, &Integer¸zero) < 0)
@@ -895,18 +909,21 @@ Real *Real¸power(Real *base, Real *exponent, size_t result_precision) {
   // Binary exponentiation.
   Integer *one = integerFromDigit(1);
   Integer *zero = integerFromDigit(0);
-  Real *result =
-      realWithSigExp(one, zero, result_precision, base->scale_precision);
+  Real *result = binary_bits ? realBinaryFromSigExp(one, zero, binary_bits)
+                             : realWithSigExp(one, zero, result_precision,
+                                              base->scale_precision);
   Real *b = retainRC(base);
 
   for (unsigned long long exp_rem = e; exp_rem > 0; exp_rem >>= 1) {
     if (exp_rem & 1) {
-      Real *nr = Real¸multiply(result, b, result_precision);
+      Real *nr = binary_bits ? Real¸multiplyBinary(result, b, binary_bits)
+                             : Real¸multiply(result, b, result_precision);
       releaseRC(result);
       result = nr;
     }
     if (exp_rem >> 1 > 0) {
-      Real *nb = Real¸multiply(b, b, result_precision);
+      Real *nb = binary_bits ? Real¸multiplyBinary(b, b, binary_bits)
+                             : Real¸multiply(b, b, result_precision);
       releaseRC(b);
       b = nb;
     }
@@ -917,8 +934,12 @@ Real *Real¸power(Real *base, Real *exponent, size_t result_precision) {
     Integer *one = integerFromDigit(1);
     Integer *zero = integerFromDigit(0);
     Real *numerator =
-        realWithSigExp(one, zero, result_precision, base->scale_precision);
-    Real *reciprocal = Real¸divide(numerator, result, result_precision);
+        binary_bits ? realBinaryFromSigExp(one, zero, binary_bits)
+                    : realWithSigExp(one, zero, result_precision,
+                                     base->scale_precision);
+    Real *reciprocal =
+        binary_bits ? Real¸divideBinary(numerator, result, binary_bits)
+                    : Real¸divide(numerator, result, result_precision);
     releaseRC(numerator);
     releaseRC(result);
     result = reciprocal;
@@ -970,6 +991,251 @@ __attribute__((visibility("default"))) int Real¸compare(Real *left,
   releaseRC(ls);
   releaseRC(rs);
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// Arbitrary-precision binary reals
+// ---------------------------------------------------------------------------
+
+static Integer *integerPow(digit_t base, size_t n) {
+  Integer *b = integerFromDigit(base);
+  Integer *e = integerFromSize(n);
+  Integer *result = Integer¸power(b, e);
+  releaseRC(b);
+  releaseRC(e);
+  return result;
+}
+
+// Number of bits of a positive Integer.
+static size_t bitLength(Integer *magnitude) {
+  size_t digits = integerDigitCount(magnitude);
+  size_t bits = (size_t)((double)(digits - 1) * 3.32192809488736);
+  if (bits == 0)
+    bits = 1;
+  for (;; bits++) {
+    Integer *limit = integerPow(2, bits);
+    int order = compareIntegers(magnitude, limit);
+    releaseRC(limit);
+    if (order < 0)
+      return bits;
+  }
+}
+
+static Real *realBinaryFromSigExp(Integer *sig, Integer *exp, size_t bits) {
+  normalize(&sig, &exp);
+  return allocInitRC(Real, 0, __rc_ISOLATED, .significand = sig,
+                     .exponent10 = exp, .precision = bits,
+                     .scale_precision = false, .string_cache = NULL,
+                     .cache_valid = false, .binary_bits = bits);
+}
+
+// Rounds (numerator / denominator) × 10^exponent10 to `bits` significant
+// binary digits (ties-to-even) and returns the exact decimal value of the
+// result. The denominator must be positive.
+static Real *realFromRational(Integer *numerator, Integer *denominator,
+                              Integer *exponent10, size_t bits) {
+  if (bits == 0)
+    panic("Invalid real precision");
+  if (integerIsZero(numerator))
+    return realBinaryFromSigExp(retainRC(&Integer¸zero),
+                                retainRC(&Integer¸zero), bits);
+
+  bool negative = integerIsNegative(numerator);
+  Integer *top = integerAbs(numerator);
+  Integer *bottom = retainRC(denominator);
+
+  size_t scale10;
+  if (integerIsNegative(exponent10)) {
+    Integer *magnitude = integerAbs(exponent10);
+    if (!integerToSize(magnitude, &scale10))
+      panic("Real operation requires more memory than available");
+    releaseRC(magnitude);
+    Integer *factor = integerPow(10, scale10);
+    Integer *next = Integer¸multiply(bottom, factor);
+    releaseRC(factor);
+    releaseRC(bottom);
+    bottom = next;
+  } else {
+    if (!integerToSize(exponent10, &scale10))
+      panic("Real operation requires more memory than available");
+    Integer *factor = integerPow(10, scale10);
+    Integer *next = Integer¸multiply(top, factor);
+    releaseRC(factor);
+    releaseRC(top);
+    top = next;
+  }
+
+  // Scale by 2^k so the integer quotient has at least bits + 2 bits.
+  long top_digits = (long)integerDigitCount(top);
+  long bottom_digits = (long)integerDigitCount(bottom);
+  long k = (long)bits + 4 - (long)((double)(top_digits - 1) * 3.32192809488736) +
+           (long)((double)bottom_digits * 3.32192809488736) + 2;
+  if (k >= 0) {
+    Integer *factor = integerPow(2, (size_t)k);
+    Integer *next = Integer¸multiply(top, factor);
+    releaseRC(factor);
+    releaseRC(top);
+    top = next;
+  } else {
+    Integer *factor = integerPow(2, (size_t)-k);
+    Integer *next = Integer¸multiply(bottom, factor);
+    releaseRC(factor);
+    releaseRC(bottom);
+    bottom = next;
+  }
+
+  Integer *quotient = Integer¸floorDivide(top, bottom);
+  Integer *remainder = Integer¸modulus(top, bottom);
+  size_t quotient_bits = bitLength(quotient);
+  size_t drop = quotient_bits - bits;
+  Integer *drop_divisor = integerPow(2, drop);
+  Integer *kept = Integer¸floorDivide(quotient, drop_divisor);
+  Integer *discarded = Integer¸modulus(quotient, drop_divisor);
+  Integer *half = integerPow(2, drop - 1);
+  int order = compareIntegers(discarded, half);
+  Integer *two = integerFromDigit(2);
+  Integer *parity = Integer¸modulus(kept, two);
+  bool round_up = order > 0 || (order == 0 && (!integerIsZero(remainder) ||
+                                               !integerIsZero(parity)));
+  if (round_up) {
+    Integer *next = integerIncrement(kept);
+    releaseRC(kept);
+    kept = next;
+  }
+
+  // value = kept × 2^(drop - k); convert to an exact decimal.
+  long e2 = (long)drop - k;
+  Integer *sig;
+  Integer *exp;
+  if (e2 >= 0) {
+    Integer *factor = integerPow(2, (size_t)e2);
+    sig = Integer¸multiply(kept, factor);
+    releaseRC(factor);
+    exp = retainRC(&Integer¸zero);
+  } else {
+    Integer *factor = integerPow(5, (size_t)-e2);
+    sig = Integer¸multiply(kept, factor);
+    releaseRC(factor);
+    exp = Integer¸fromInt64(e2);
+  }
+  if (negative)
+    Integer·toggleSign(sig);
+
+  releaseRC(top);
+  releaseRC(bottom);
+  releaseRC(quotient);
+  releaseRC(remainder);
+  releaseRC(drop_divisor);
+  releaseRC(kept);
+  releaseRC(discarded);
+  releaseRC(half);
+  releaseRC(two);
+  releaseRC(parity);
+  return realBinaryFromSigExp(sig, exp, bits);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸roundBinary(Real *value, size_t bits) {
+  Integer *one = integerFromDigit(1);
+  Real *result =
+      realFromRational(value->significand, one, value->exponent10, bits);
+  releaseRC(one);
+  return result;
+}
+
+static Real *roundExact(Real *exact, size_t bits) {
+  Real *result = Real¸roundBinary(exact, bits);
+  releaseRC(exact);
+  return result;
+}
+
+static String *formatBinaryReal(Real *self) {
+  size_t digits = integerDigitCount(self->significand);
+  // Shortest decimal that reads back as the same binary value.
+  for (size_t count = 1; count < digits; count++) {
+    Integer *sig = retainRC(self->significand);
+    Integer *exp = retainRC(self->exponent10);
+    roundToPrecision(&sig, &exp, count, false);
+    Integer *one = integerFromDigit(1);
+    Real *candidate = realFromRational(sig, one, exp, self->binary_bits);
+    releaseRC(one);
+    bool same = Real¸compare(candidate, self) == 0;
+    releaseRC(candidate);
+    if (same) {
+      normalize(&sig, &exp);
+      String *text = formatReal(sig, exp);
+      releaseRC(sig);
+      releaseRC(exp);
+      return text;
+    }
+    releaseRC(sig);
+    releaseRC(exp);
+  }
+  return formatReal(self->significand, self->exponent10);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸fromStringBinary(const char *value, size_t bits) {
+  return roundExact(realFromStringExact(value), bits);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸fromIntegerBinary(Integer *value, size_t bits) {
+  Integer *one = integerFromDigit(1);
+  Real *result = realFromRational(value, one, &Integer¸zero, bits);
+  releaseRC(one);
+  return result;
+}
+
+__attribute__((visibility("default")))
+Real *Real¸fromInt64Binary(int64_t value, size_t bits) {
+  Integer *integer = Integer¸fromInt64(value);
+  Real *result = Real¸fromIntegerBinary(integer, bits);
+  releaseRC(integer);
+  return result;
+}
+
+__attribute__((visibility("default")))
+Real *Real¸addBinary(Real *left, Real *right, size_t bits) {
+  return roundExact(Real¸add(left, right, SIZE_MAX), bits);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸subtractBinary(Real *left, Real *right, size_t bits) {
+  return roundExact(Real¸subtract(left, right, SIZE_MAX), bits);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸multiplyBinary(Real *left, Real *right, size_t bits) {
+  return roundExact(Real¸multiply(left, right, SIZE_MAX), bits);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸divideBinary(Real *dividend, Real *divisor, size_t bits) {
+  if (integerIsZero(divisor->significand))
+    panic("Division by zero!");
+  Integer *numerator = retainRC(dividend->significand);
+  Integer *denominator = retainRC(divisor->significand);
+  if (integerIsNegative(denominator)) {
+    Integer *negated = Integer¸subtract(&Integer¸zero, numerator);
+    releaseRC(numerator);
+    numerator = negated;
+    Integer *magnitude = integerAbs(denominator);
+    releaseRC(denominator);
+    denominator = magnitude;
+  }
+  Integer *exponent =
+      Integer¸subtract(dividend->exponent10, divisor->exponent10);
+  Real *result = realFromRational(numerator, denominator, exponent, bits);
+  releaseRC(numerator);
+  releaseRC(denominator);
+  releaseRC(exponent);
+  return result;
+}
+
+__attribute__((visibility("default")))
+Real *Real¸powerBinary(Real *base, Real *exponent, size_t bits) {
+  return powerImpl(base, exponent, bits, bits);
 }
 
 #define DEFINE_IEEE_ARITHMETIC(type, pow_fn, add_name, subtract_name,         \

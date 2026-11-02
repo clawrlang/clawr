@@ -120,7 +120,7 @@ describe('Lowering real operations', () => {
         )
     })
 
-    it('rejects binary formats without a native C type', () => {
+    it('uses arbitrary-precision runtime values for binary formats without a native C type', () => {
         const type = binaryType(113, '1.0e4932')
         const expr: Expression = {
             kind: 'ADDITION',
@@ -129,7 +129,9 @@ describe('Lowering real operations', () => {
             type: { universe: 'real', precision: type.precision },
         }
 
-        expect(() => lowerExpr(expr)).toThrow()
+        expect(lowerExpr(expr)).toMatch(
+            /Real¸addBinary\(tmpˇ\d+, tmpˇ\d+, 113\)/,
+        )
     })
 
     it('converts an integer operand to the precision of a sig real', () => {

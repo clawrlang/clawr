@@ -19,6 +19,7 @@ typedef struct Real {
   bool scale_precision;
   String *string_cache; // nullable; lazy-built by toStringRC
   bool cache_valid;
+  size_t binary_bits; // 0 for decimal reals; else the binary significand width
 } Real;
 typedef struct Realˇproperties {
   Integer *significand;
@@ -27,6 +28,7 @@ typedef struct Realˇproperties {
   bool scale_precision;
   String *string_cache; // nullable; lazy-built by toStringRC
   bool cache_valid;
+  size_t binary_bits;
 } Realˇproperties;
 extern const __type_info Realˇtype;
 
@@ -39,6 +41,18 @@ Real *Real¸fromInteger(Integer *value, size_t precision,
 Real *Real¸fromInt64(int64_t value, size_t precision, bool scale_precision);
 /// Exact-shortest decimal value of a binary float, for boxing and printing.
 Real *Real¸fromBinary(double value, unsigned significand_bits);
+/// Arbitrary-precision binary reals: significand × 2^exponent rounded to the
+/// given number of significant bits after every operation (ties-to-even).
+/// The value is stored exactly as a decimal, so any binary width is supported.
+Real *Real¸roundBinary(Real *value, size_t bits);
+Real *Real¸fromStringBinary(const char *value, size_t bits);
+Real *Real¸fromIntegerBinary(Integer *value, size_t bits);
+Real *Real¸fromInt64Binary(int64_t value, size_t bits);
+Real *Real¸addBinary(Real *left, Real *right, size_t bits);
+Real *Real¸subtractBinary(Real *left, Real *right, size_t bits);
+Real *Real¸multiplyBinary(Real *left, Real *right, size_t bits);
+Real *Real¸divideBinary(Real *dividend, Real *divisor, size_t bits);
+Real *Real¸powerBinary(Real *base, Real *exponent, size_t bits);
 String *Real·toStringRC(Real *self);
 const char *Real·toString(Real *self);
 Real *Real¸add(Real *left, Real *right, size_t result_precision);

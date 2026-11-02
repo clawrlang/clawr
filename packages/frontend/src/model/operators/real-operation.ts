@@ -43,11 +43,13 @@ export function realOperationResult(
     // An integer converts to the real's precision (like `scale 0`), whatever its kind.
     if (
         other instanceof IntegerSet &&
-        (real.precision.base === 'dec' || real.precision.base === 'bin')
+        (real.precision.base === 'dec' ||
+            real.precision.base === 'bin' ||
+            real.precision.base === 'ter')
     )
         return Result.value(RealSet.unconstrained(real.precision))
 
     return ErrorResult.failure(
-        'integers can only be combined with decimal or binary reals',
+        'integers can only be combined with decimal, binary or ternary reals',
     )
 }

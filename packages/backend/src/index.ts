@@ -590,16 +590,29 @@ function binaryLiteral(representation: BinaryRepresentation, value: string) {
     }
 }
 
+// Binary hardware cannot hold ternary grids exactly; `sig n ter` is stored in
+// the narrowest binary grid at least as precise (ADR-025): p >= 1 + ceil(n*log2(3)).
+function storagePrecision(precision: cir.RealPrecision): cir.RealPrecision {
+    if (precision.base !== 'ter' || precision.kind !== 'sig') return precision
+    return {
+        ...precision,
+        base: 'bin',
+        digits: 1 + Math.ceil(precision.digits * Math.log2(3) - 1e-12),
+    }
+}
+
 function realRepresentation(valueSet: cir.RealSet): RealRepresentation {
     // Boxed reals are always runtime `Real*` values, whatever their precision base.
     if (valueSet.boxed) return 'managed'
-    const precision = valueSet.precision
+    const declared = valueSet.precision
     if (
-        !precision ||
-        !Number.isSafeInteger(precision.digits) ||
-        precision.digits < 0
+        !declared ||
+        !Number.isSafeInteger(declared.digits) ||
+        declared.digits < 0
     )
         throw new Error('Real lowering requires an explicit valid precision')
+    const precision = storagePrecision(declared)
+    if (declared.base === 'ter' && declared.kind === 'sig') return 'managed'
     if (precision.base === 'dec') return 'managed'
     if (precision.base !== 'bin' || precision.kind !== 'sig')
         throw new Error(
@@ -778,7 +791,8 @@ function lowerLiteralAtPrecision(
     expr: cir.Expression,
     target: cir.RealSet,
 ): string | undefined {
-    const precision = target.precision
+    const declared = target.precision
+    const precision = declared && storagePrecision(declared)
     if (
         expr.kind !== 'REAL_LITERAL' ||
         !precision ||
@@ -791,13 +805,15 @@ function lowerLiteralAtPrecision(
     return realFromText(value, precision)
 }
 
-function realFromText(value: string, precision: cir.RealPrecision): string {
+function realFromText(value: string, declared: cir.RealPrecision): string {
+    const precision = storagePrecision(declared)
     return precision.base === 'bin'
         ? `Real¸fromStringBinary("${value}", ${precision.digits})`
         : `Real¸fromString("${value}", ${precision.digits}, ${precision.kind === 'scale'})`
 }
 
-function realRound(value: string, precision: cir.RealPrecision): string {
+function realRound(value: string, declared: cir.RealPrecision): string {
+    const precision = storagePrecision(declared)
     return precision.base === 'bin'
         ? `Real¸roundBinary(${value}, ${precision.digits})`
         : `Real¸round(${value}, ${precision.digits})`
@@ -806,8 +822,9 @@ function realRound(value: string, precision: cir.RealPrecision): string {
 // Lowers an integer to a managed real of the given precision.
 function lowerIntegerToReal(
     expr: cir.Expression,
-    precision: cir.RealPrecision,
+    declared: cir.RealPrecision,
 ): string {
+    const precision = storagePrecision(declared)
     const native = integerRepresentation(expr.type as any) === 'native'
     const value = native ? lowerExpr(expr) : lowerBorrowed(expr, 'big')
     if (precision.base === 'bin')
@@ -1239,7 +1256,7 @@ function lowerRealArithmetic(
     if (realExpressionRepresentation(expr) === 'managed') {
         if (expr.kind === 'REMAINDER')
             throw new Error('Remainder on managed real values is not supported')
-        const precision = expr.type.precision!
+        const precision = storagePrecision(expr.type.precision!)
         const functionName = {
             ADDITION: 'add',
             SUBTRACTION: 'subtract',

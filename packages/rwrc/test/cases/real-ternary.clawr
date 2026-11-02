@@ -1,0 +1,7 @@
+@main {
+    const a: real sig 10 ter = 0.1
+    const b: real sig 10 ter = 0.2
+    print(a + b)
+    print(a * b)
+    print(b / a)
+}

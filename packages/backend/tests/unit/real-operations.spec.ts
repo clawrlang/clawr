@@ -158,4 +158,20 @@ describe('Lowering real operations', () => {
         const lowered = lowerExpr(expr)
         expect(lowered).toMatch(/Real¸add\(tmpˇ\d+, tmpˇ\d+, 3\)/)
     })
+
+    it('stores sig ter reals in a binary grid of at least the requested precision', () => {
+        const type = {
+            universe: 'real' as const,
+            precision: { kind: 'sig' as const, digits: 10, base: 'ter' as const },
+        }
+        const expr: Expression = {
+            kind: 'ADDITION',
+            left: { kind: 'REAL_LITERAL', type: { ...type, value: '1.5' } },
+            right: { kind: 'REAL_LITERAL', type: { ...type, value: '2.5' } },
+            type,
+        }
+
+        // 1 + ceil(10 * log2(3)) = 17 bits
+        expect(lowerExpr(expr)).toMatch(/Real¸addBinary\(tmpˇ\d+, tmpˇ\d+, 17\)/)
+    })
 })

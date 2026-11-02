@@ -56,10 +56,9 @@ The following ADRs have been documented so far:
 - [ADR-024](./adr-024.md): The `integer` Combinatorial Explosion
 - [ADR-025](./adr-025.md): The `real` Datatype: Precision Kinds and Bases
 - [ADR-026](./adr-026.md): The `real` Datatype: Compatibility and Precision
-- [ADR-027](./adr-027.md): The `real` Datatype: Exact Values and Single Rounding at Storage
+- [ADR-027](./adr-027.md): The `real` Datatype: Per-Operation Rounding
 - [ADR-028](./adr-028.md): The `real` Datatype: Assignment, Equality, and Literals
 - [ADR-029](./adr-029.md): The `real` Datatype: Inference
-- [ADR-030](./adr-030.md): The `real` Datatype: `real big`
 - [ADR-031](./adr-031.md): Backend Execution Mechanics and Lowering for Reals
 - [ADR-032](./adr-032.md): `subset` and `type`
 - [ADR-033](./adr-033.md): Private Properties Are Per Type

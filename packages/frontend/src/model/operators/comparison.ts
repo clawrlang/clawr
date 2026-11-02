@@ -1,5 +1,6 @@
 import {
     IntegerSet,
+    RealSet,
     truthvalue,
     TruthvalueSet,
     ValueSet,
@@ -31,6 +32,13 @@ export class Comparison implements BinaryOperator {
     private constructor(private readonly operator: Operator) {}
 
     compute(left: ValueSet, right: ValueSet): Result<ValueSet> {
+        if (
+            Comparison.isNumeric(left, right) &&
+            Comparison.involvesReal(left, right)
+        )
+            return this.operator === '===' || this.operator === '!=='
+                ? ErrorResult.failure('not supported')
+                : Result.value(TruthvalueSet.create(['false', 'true']))
         switch (this.operator) {
             case '==':
                 return this.equals(left, right)
@@ -47,6 +55,17 @@ export class Comparison implements BinaryOperator {
             default:
                 return ErrorResult.failure('not supported')
         }
+    }
+
+    private static isNumeric(left: ValueSet, right: ValueSet) {
+        const numeric = (v: ValueSet) =>
+            v instanceof IntegerSet || v instanceof RealSet
+        return numeric(left) && numeric(right)
+    }
+
+    // Real values are compared exactly at runtime; no range reasoning yet.
+    private static involvesReal(left: ValueSet, right: ValueSet) {
+        return left instanceof RealSet || right instanceof RealSet
     }
 
     private equals(left: ValueSet, right: ValueSet): Result<ValueSet> {

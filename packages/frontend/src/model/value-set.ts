@@ -1,6 +1,6 @@
 import { TypeName } from '@/model/type-name'
 import * as cir from '@clawr/cir'
-import { decimal } from 'decimalish'
+import { decimal, gte, lte } from 'decimalish'
 
 export interface ValueSet {
     unconstrained(): ValueSet
@@ -113,9 +113,9 @@ export class RealSet<
         return (
             other instanceof RealSet &&
             (this.min === undefined ||
-                (other.min !== undefined && other.min >= this.min)) &&
+                (other.min !== undefined && gte(other.min, this.min))) &&
             (this.max === undefined ||
-                (other.max !== undefined && other.max <= this.max))
+                (other.max !== undefined && lte(other.max, this.max)))
         )
     }
 
@@ -124,13 +124,13 @@ export class RealSet<
             return {
                 universe: 'real' as const,
                 precision: this.precision,
-                value: this.min.toString() as any,
+                value: decimalText(this.min),
             }
         return {
             universe: 'real' as const,
             precision: this.precision,
-            min: this.min?.toString() as any,
-            max: this.max?.toString() as any,
+            min: this.min === undefined ? undefined : decimalText(this.min),
+            max: this.max === undefined ? undefined : decimalText(this.max),
         }
     }
 
@@ -254,4 +254,10 @@ export class RCTypeSet implements ValueSet {
     toString(): string {
         return this.type.canonical()
     }
+}
+
+// The CIR schema requires a decimal point in real values.
+function decimalText(value: decimal): any {
+    const text = value.toString()
+    return /^-?\d+$/.test(text) ? `${text}.0` : text
 }

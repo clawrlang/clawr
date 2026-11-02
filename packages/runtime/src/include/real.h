@@ -37,6 +37,8 @@ Real *Real¸ensureInRange(Real *value, const char *min, const char *max);
 Real *Real¸fromInteger(Integer *value, size_t precision,
                        bool scale_precision);
 Real *Real¸fromInt64(int64_t value, size_t precision, bool scale_precision);
+/// Exact-shortest decimal value of a binary float, for boxing and printing.
+Real *Real¸fromBinary(double value, bool single_precision);
 String *Real·toStringRC(Real *self);
 const char *Real·toString(Real *self);
 Real *Real¸add(Real *left, Real *right, size_t result_precision);

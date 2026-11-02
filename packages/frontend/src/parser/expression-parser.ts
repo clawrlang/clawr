@@ -2,7 +2,11 @@ import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { BinaryOperation } from '@/model/binary-operation'
 import { FunctionCall } from '@/model/function-call'
-import { IntegerLiteral, RealLiteral, TruthValueLiteral } from '@/model/literals'
+import {
+    IntegerLiteral,
+    RealLiteral,
+    TruthValueLiteral,
+} from '@/model/literals'
 import { Comparison } from '@/model/operators'
 import { PropertyReference } from '@/model/property-reference'
 import { VariableReference } from '@/model/variable-reference'
@@ -130,9 +134,13 @@ export class ExpressionParser {
         if (stream.isNext('OPERATOR', '-')) {
             stream.next() // Consume the '-'
             const expression = this.parsePostfixOperation(stream)
-            if (expression instanceof IntegerLiteral) return expression.negated
+            if (
+                expression instanceof IntegerLiteral ||
+                expression instanceof RealLiteral
+            )
+                return expression.negated
             throw new Error(
-                'Unary negation is so far only supported for integer literals',
+                'Unary negation is so far only supported for numeric literals',
             )
         }
         return this.parsePostfixOperation(stream)

@@ -62,8 +62,8 @@ describe('ValueSet', () => {
 
             expect(valueSet.toCIR()).toEqual({
                 universe: 'real',
-                min: '1',
-                max: '10',
+                min: '1.0',
+                max: '10.0',
             })
         })
 
@@ -82,7 +82,7 @@ describe('ValueSet', () => {
 
             expect(valueSet.toCIR()).toMatchObject({
                 universe: 'real',
-                min: '1',
+                min: '1.0',
                 max: undefined,
             })
         })
@@ -93,7 +93,7 @@ describe('ValueSet', () => {
             expect(valueSet.toCIR()).toMatchObject({
                 universe: 'real',
                 min: undefined,
-                max: '10',
+                max: '10.0',
             })
         })
 

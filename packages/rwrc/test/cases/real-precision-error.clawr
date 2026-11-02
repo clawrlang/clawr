@@ -1,0 +1,5 @@
+@main {
+    const a: real scale 2 dec = 1.25
+    const b: real sig 3 dec = 1.25
+    print(a + b)
+}

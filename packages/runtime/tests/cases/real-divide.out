@@ -11,3 +11,7 @@ large real exponent comparison = 1
 binary32 addition = 3.0
 real assignment rounding = 1.2
 negative integer real power = 0.25
+3.0 / 1.25 = 2.4
+2.00 / 3.00 = 0.667
+-2.00 / 3.00 = -0.667
+1 / 8 = 0.12

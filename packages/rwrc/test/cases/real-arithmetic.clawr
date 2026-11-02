@@ -1,0 +1,14 @@
+@main {
+    const a: real scale 2 dec = 1.25
+    const b: real scale 2 dec = 3.00
+    print(a + b)
+    print(a - b)
+    print(a * b)
+    print(b / a)
+    print(a / b)
+    const c: real sig 3 dec = 2.00
+    const d: real sig 3 dec = 3.00
+    print(c / d)
+    print(d / c)
+    print(a + 2)
+}

@@ -15,12 +15,11 @@ describe('End-to-end Tests', () => {
 
     for (const fileName of cases) {
         test(fileName, async () => {
-            const filePath = `${CASES_DIR}/${fileName}`
             const outFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.out')}`
             const errFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.err')}`
             const exePath = `${OUTPUT_DIR}/${fileName.replace(/.clawr$/, '')}`
 
-            const compilerResult = await runCli(filePath)
+            const compilerResult = await runCli(fileName)
             expect(compilerResult.stdout).toBe('')
             if (fs.existsSync(errFilePath)) {
                 const data = fs.readFileSync(errFilePath, 'utf-8')
@@ -28,6 +27,7 @@ describe('End-to-end Tests', () => {
                     code: 1,
                     stderr: data,
                 })
+                return
             } else {
                 expect(compilerResult).toMatchObject({
                     code: 0,
@@ -35,7 +35,20 @@ describe('End-to-end Tests', () => {
                 })
             }
 
+            const panicFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.panic')}`
             const exeResult = await exec(exePath, [])
+            if (fs.existsSync(panicFilePath)) {
+                // The program must abort with the expected message after printing its output
+                expect(exeResult.code).not.toBe(0)
+                expect(exeResult.stderr).toBe(
+                    fs.readFileSync(panicFilePath, 'utf-8'),
+                )
+                if (fs.existsSync(outFilePath))
+                    expect(exeResult.stdout).toBe(
+                        fs.readFileSync(outFilePath, 'utf-8'),
+                    )
+                return
+            }
             expect(exeResult).toMatchObject({
                 code: 0,
                 stderr: '',
@@ -48,13 +61,18 @@ describe('End-to-end Tests', () => {
     }
 })
 
-async function runCli(filePath: string) {
-    return await exec(RWRC_PATH, ['build', filePath, '-o', OUTPUT_DIR])
+async function runCli(fileName: string) {
+    // Relative paths keep diagnostics (and `.err` files) machine independent
+    return await exec(
+        RWRC_PATH,
+        ['build', fileName, '-o', OUTPUT_DIR],
+        CASES_DIR,
+    )
 }
 
-async function exec(command: string, args: string[]) {
+async function exec(command: string, args: string[], cwd?: string) {
     return await new Promise<ExecResult>((resolve) => {
-        const proc = child_process.spawn(command, args)
+        const proc = child_process.spawn(command, args, { cwd })
 
         let stdout = ''
         let stderr = ''

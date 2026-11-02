@@ -1,4 +1,5 @@
 #include "real.h"
+#include "interfaces.h"
 #include "panic.h"
 
 #include <math.h>
@@ -28,12 +29,27 @@ static void releaseNestedProperties(void *self) {
     releaseRC(real->string_cache);
 }
 
+__attribute__((visibility("default")))
+const clawr¸HasStringRepresentationˇwitness
+    Realˇclawr¸HasStringRepresentationˇwitness = {
+        .stringRepresentation = (String * (*)(void *)) Real·toStringRC,
+};
+__interface_conformance_entry Realˇclawr¸HasStringRepresentationˇconformance = {
+    .interface = &clawr¸HasStringRepresentationˇtype,
+    .witness_table = &Realˇclawr¸HasStringRepresentationˇwitness,
+};
+
 __attribute__((visibility("default"))) const __type_info Realˇtype = {
     .data_type =
         {
             .size = sizeof(Real),
             .retain_nested_properties = retainNestedProperties,
             .release_nested_properties = releaseNestedProperties,
+            .conformances =
+                (const __interface_conformance_entry *[]){
+                    &Realˇclawr¸HasStringRepresentationˇconformance,
+                    NULL,
+                },
         },
 };
 
@@ -95,6 +111,34 @@ static bool integerToInt64(Integer *value, int64_t *result) {
     *result = (int64_t)parsed;
   releaseRC(text);
   return fits;
+}
+
+static bool integerIsNegative(Integer *value) {
+  String *text = Integer·toStringRC(value);
+  bool negative = String·toCString(text)[0] == '-';
+  releaseRC(text);
+  return negative;
+}
+
+static bool integerIsZero(Integer *value) {
+  String *text = Integer·toStringRC(value);
+  bool zero = strcmp(String·toCString(text), "0") == 0;
+  releaseRC(text);
+  return zero;
+}
+
+static size_t integerDigitCount(Integer *value) {
+  String *text = Integer·toStringRC(value);
+  const char *raw = String·toCString(text);
+  size_t count = strlen(raw) - (raw[0] == '-' ? 1 : 0);
+  releaseRC(text);
+  return count;
+}
+
+static Integer *integerAbs(Integer *value) {
+  if (!integerIsNegative(value))
+    return retainRC(value);
+  return Integer¸subtract(&Integer¸zero, value);
 }
 
 static Integer *integerIncrement(Integer *value) {
@@ -426,6 +470,9 @@ static String *formatReal(Integer *sig, Integer *exp) {
 // fromString
 // ---------------------------------------------------------------------------
 
+static Real *realWithSigExp(Integer *sig, Integer *exp, size_t precision,
+                            bool scale_precision);
+
 __attribute__((visibility("default")))
 Real *Real¸fromString(const char *value, size_t precision,
                       bool scale_precision) {
@@ -532,11 +579,7 @@ Real *Real¸fromString(const char *value, size_t precision,
   if (negative)
     Integer·toggleSign(sig);
 
-  Real *real = allocInitRC(
-      Real, 0, __rc_ISOLATED, .significand = sig, .exponent10 = exp,
-      .precision = precision, .scale_precision = scale_precision,
-      .string_cache = String¸fromCString(stripped), // pre-populate from source
-      .cache_valid = true);
+  Real *real = realWithSigExp(sig, exp, precision, scale_precision);
 
   free(digits_buf);
   free(stripped);
@@ -722,28 +765,71 @@ Real *Real¸divide(Real *dividend, Real *divisor, size_t result_precision) {
     panic("Division by zero!");
 
   size_t prec = result_precision;
+  bool scale_mode = dividend->scale_precision;
 
-  // Scale dividend significand by 10^prec to preserve precision through
-  // division.
-  Integer *scale = integerPowerOf10(prec);
+  // Scale the dividend so the quotient has at least one digit more than the
+  // result keeps, then add a sticky digit so rounding sees inexact quotients.
+  Integer *exp_difference =
+      Integer¸subtract(dividend->exponent10, divisor->exponent10);
+  int64_t difference;
+  if (!integerToInt64(exp_difference, &difference))
+    panic("Real division requires more memory than available");
+  releaseRC(exp_difference);
+
+  int64_t shift;
+  if (scale_mode)
+    shift = difference + (int64_t)prec + 1;
+  else
+    shift = (int64_t)prec + 2 + (int64_t)integerDigitCount(divisor->significand) -
+            (int64_t)integerDigitCount(dividend->significand);
+  if (shift < 0)
+    shift = 0;
+
+  Integer *scale = integerPowerOf10((size_t)shift);
   Integer *scaled = Integer¸multiply(dividend->significand, scale);
   releaseRC(scale);
 
-  Integer *quotient = Integer¸divide(scaled, divisor->significand);
+  // Integer¸divide truncates towards zero; work with magnitudes.
+  bool negative = integerIsNegative(scaled) != integerIsNegative(divisor->significand);
+  Integer *scaled_magnitude = integerAbs(scaled);
+  Integer *divisor_magnitude = integerAbs(divisor->significand);
   releaseRC(scaled);
+  Integer *quotient = Integer¸divide(scaled_magnitude, divisor_magnitude);
+  Integer *product = Integer¸multiply(quotient, divisor_magnitude);
+  Integer *remainder = Integer¸subtract(scaled_magnitude, product);
+  bool inexact = !integerIsZero(remainder);
+  releaseRC(product);
+  releaseRC(remainder);
+  releaseRC(scaled_magnitude);
+  releaseRC(divisor_magnitude);
 
-  // exponent: dividend.exp - divisor.exp - prec
-  Integer *exp = Integer¸subtract(dividend->exponent10, divisor->exponent10);
-  Integer *precision_exp = integerFromSize(prec);
-  Integer *negative_precision_exp =
-      Integer¸subtract(&Integer¸zero, precision_exp);
-  Integer *adjusted_exp = Integer¸add(exp, negative_precision_exp);
-  releaseRC(exp);
-  releaseRC(precision_exp);
-  releaseRC(negative_precision_exp);
+  Integer *ten = integerFromDigit(10);
+  Integer *tenfold = Integer¸multiply(quotient, ten);
+  releaseRC(ten);
+  releaseRC(quotient);
+  quotient = tenfold;
+  if (inexact) {
+    Integer *one = integerFromDigit(1);
+    Integer *sticky = Integer¸add(quotient, one);
+    releaseRC(one);
+    releaseRC(quotient);
+    quotient = sticky;
+  }
+  if (negative) {
+    Integer *negated = Integer¸subtract(&Integer¸zero, quotient);
+    releaseRC(quotient);
+    quotient = negated;
+  }
 
-  return realWithSigExp(quotient, adjusted_exp, prec,
-                        dividend->scale_precision);
+  // value = quotient × 10^(exponent difference - shift - 1)
+  Integer *shift_total = integerFromSize((size_t)shift + 1);
+  Integer *quotient_exp = Integer¸subtract(
+      dividend->exponent10, divisor->exponent10);
+  Integer *adjusted_exp = Integer¸subtract(quotient_exp, shift_total);
+  releaseRC(quotient_exp);
+  releaseRC(shift_total);
+
+  return realWithSigExp(quotient, adjusted_exp, prec, scale_mode);
 }
 
 __attribute__((visibility("default")))
@@ -908,3 +994,28 @@ DEFINE_IEEE_ARITHMETIC(float, powf, Real32¸add, Real32¸subtract,
                        Real32¸multiply, Real32¸divide, Real32¸power)
 DEFINE_IEEE_ARITHMETIC(double, pow, Real64¸add, Real64¸subtract,
                        Real64¸multiply, Real64¸divide, Real64¸power)
+
+__attribute__((visibility("default")))
+Real *Real¸fromBinary(double value, bool single_precision) {
+  if (!isfinite(value))
+    panic("Cannot box a non-finite real");
+  // Shortest decimal that reads back as the same binary value.
+  char text[64];
+  int max_digits = single_precision ? 9 : 17;
+  for (int digits = 1; digits <= max_digits; digits++) {
+    snprintf(text, sizeof text, "%.*e", digits - 1, value);
+    bool same = single_precision ? strtof(text, NULL) == (float)value
+                                 : strtod(text, NULL) == value;
+    if (same || digits == max_digits) {
+      char mantissa[48];
+      int exponent;
+      if (sscanf(text, "%47[^e]e%d", mantissa, &exponent) != 2)
+        panic("Failed to format binary real");
+      char normalized[96];
+      snprintf(normalized, sizeof normalized, "%se%d", mantissa, exponent);
+      return Real¸fromString(normalized, (size_t)digits, false);
+    }
+  }
+  panic("Failed to format binary real");
+  return NULL;
+}

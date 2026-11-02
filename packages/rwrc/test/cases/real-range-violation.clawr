@@ -1,0 +1,8 @@
+func bounded(_ value: real(0.0...10.0) scale 2 dec) => 1
+
+@main {
+    const small: real(0.0...10.0) scale 2 dec = 9.5
+    print(small)
+    const big: real scale 2 dec = 11.5
+    print(bounded(big))
+}

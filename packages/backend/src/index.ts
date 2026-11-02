@@ -530,6 +530,7 @@ function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
                 ? 'int64_t'
                 : 'Integer*'
         case 'real':
+            if (valueSet.boxed) return 'Real*'
             switch (realRepresentation(valueSet)) {
                 case 'decimal':
                     return 'Real*'
@@ -573,9 +574,15 @@ function realRepresentation(valueSet: cir.RealSet): RealRepresentation {
         )
     const format =
         precision.digits === 24
-            ? { representation: 'binary32' as const, max: 3.4028234663852886e38 }
+            ? {
+                  representation: 'binary32' as const,
+                  max: 3.4028234663852886e38,
+              }
             : precision.digits === 53
-              ? { representation: 'binary64' as const, max: 1.7976931348623157e308 }
+              ? {
+                    representation: 'binary64' as const,
+                    max: 1.7976931348623157e308,
+                }
               : undefined
     if (!format)
         throw new Error(
@@ -596,12 +603,12 @@ function realRepresentation(valueSet: cir.RealSet): RealRepresentation {
             return format.representation
         throw new Error('IEEE real literal is outside its finite format range')
     }
-    throw new Error(
-        'IEEE real lowering requires a bounded native-format range',
-    )
+    throw new Error('IEEE real lowering requires a bounded native-format range')
 }
 
-function realExpressionRepresentation(expr: cir.Expression): RealRepresentation {
+function realExpressionRepresentation(
+    expr: cir.Expression,
+): RealRepresentation {
     if (
         (expr.kind === 'ADDITION' ||
             expr.kind === 'SUBTRACTION' ||
@@ -612,11 +619,18 @@ function realExpressionRepresentation(expr: cir.Expression): RealRepresentation 
         expr.type.universe === 'real' &&
         expr.type.precision?.base === 'bin'
     ) {
-        if (expr.left.type.universe !== 'real' || expr.right.type.universe !== 'real')
-            throw new Error('Mixed integer and IEEE real arithmetic is not supported')
+        if (
+            expr.left.type.universe !== 'real' ||
+            expr.right.type.universe !== 'real'
+        )
+            throw new Error(
+                'Mixed integer and IEEE real arithmetic is not supported',
+            )
         const left = realRepresentation(expr.left.type)
         if (realRepresentation(expr.right.type) !== left)
-            throw new Error('IEEE real operands must use the same native format')
+            throw new Error(
+                'IEEE real operands must use the same native format',
+            )
         return left
     }
     return expr.type.universe === 'real'
@@ -629,7 +643,10 @@ function isPointerType(valueSet: cir.ValueSet): boolean {
 }
 
 function isDecimalReal(valueSet: cir.ValueSet): boolean {
-    return valueSet.universe === 'real' && realRepresentation(valueSet) === 'decimal'
+    return (
+        valueSet.universe === 'real' &&
+        realRepresentation(valueSet) === 'decimal'
+    )
 }
 
 function isManagedOwnedType(valueSet: cir.ValueSet): boolean {
@@ -733,10 +750,29 @@ function lowerOwned(expr: cir.Expression, to: Representation): string {
     return lowerExpr(expr)
 }
 
+// A literal's value is exact, so it can adopt the precision of its target.
+function lowerLiteralAtPrecision(
+    expr: cir.Expression,
+    target: cir.RealSet,
+): string | undefined {
+    const precision = target.precision
+    if (
+        expr.kind !== 'REAL_LITERAL' ||
+        !precision ||
+        precision.base !== 'dec' ||
+        !isDecimalReal(expr.type)
+    )
+        return undefined
+    const value = expr.type.value.replaceAll('_', '')
+    return `Real¸fromString("${value}", ${precision.digits}, ${precision.kind === 'scale'})`
+}
+
 function lowerRealBorrowed(
     expr: cir.Expression,
     resultType: cir.RealSet,
 ): string {
+    const literal = lowerLiteralAtPrecision(expr, resultType)
+    if (literal) return hoist(literal, 'Real*')
     if (expr.type.universe === 'integer') {
         const precision = resultType.precision
         if (!precision) throw new Error('Real conversion requires precision')
@@ -776,6 +812,8 @@ function lowerRealBorrowed(
 }
 
 function lowerRealOwned(expr: cir.Expression, target: cir.RealSet): string {
+    const literal = lowerLiteralAtPrecision(expr, target)
+    if (literal) return literal
     if (expr.type.universe === 'integer') {
         const precision = target.precision
         if (!precision) throw new Error('Real conversion requires precision')
@@ -820,27 +858,48 @@ function lowerRealExactBorrowed(expr: cir.Expression): string {
         return hoist(converted, 'Real*')
     }
     if (expr.type.universe !== 'real' || !isDecimalReal(expr.type))
-        throw new Error('Incompatible representation for decimal real comparison')
+        throw new Error(
+            'Incompatible representation for decimal real comparison',
+        )
     const lowered = lowerExpr(expr)
     return expr.kind === 'VARIABLE_REF' || expr.kind === 'PROPERTY_REF'
         ? lowered
         : hoist(lowered, 'Real*')
 }
 
-function lowerRealRangeChecked(
-    value: string,
-    target: cir.RealSet,
-): string {
+function lowerRealRangeChecked(value: string, target: cir.RealSet): string {
     if (!isDecimalReal(target)) return value
-    const min = 'min' in target && target.min !== undefined
-        ? `"${target.min}"`
-        : 'NULL'
-    const max = 'max' in target && target.max !== undefined
-        ? `"${target.max}"`
-        : 'NULL'
+    const min =
+        'min' in target && target.min !== undefined ? `"${target.min}"` : 'NULL'
+    const max =
+        'max' in target && target.max !== undefined ? `"${target.max}"` : 'NULL'
     return min === 'NULL' && max === 'NULL'
         ? value
         : `Real¸ensureInRange(${value}, ${min}, ${max})`
+}
+
+// Decimal literals are exact, so they convert to a binary target by one
+// round-to-nearest. Other decimal-to-binary conversions remain unsupported.
+function lowerLiteralToBinary(
+    expr: cir.Expression,
+    target: cir.RealSet,
+): string | undefined {
+    if (expr.kind !== 'REAL_LITERAL' || !isDecimalReal(expr.type))
+        return undefined
+    const representation = realRepresentation(target)
+    if (representation === 'decimal') return undefined
+    const value = expr.type.value.replaceAll('_', '')
+    const max =
+        representation === 'binary32'
+            ? 3.4028234663852886e38
+            : 1.7976931348623157e308
+    if (!Number.isFinite(Number(value)) || Math.abs(Number(value)) > max)
+        throw new Error(
+            'Real literal is outside the finite range of its target',
+        )
+    return representation === 'binary32'
+        ? `strtof("${value}", NULL)`
+        : `strtod("${value}", NULL)`
 }
 
 /** Lowers `expr` for storing in a location of type `target`. */
@@ -848,6 +907,8 @@ function lowerConverted(expr: cir.Expression, target: cir.ValueSet): string {
     if (target.universe === 'real') {
         if (isDecimalReal(target))
             return lowerRealRangeChecked(lowerRealOwned(expr, target), target)
+        const literal = lowerLiteralToBinary(expr, target)
+        if (literal) return literal
         if (
             expr.type.universe !== 'real' ||
             realExpressionRepresentation(expr) !== realRepresentation(target)
@@ -868,10 +929,11 @@ function lowerArgument(expr: cir.Expression, parameter?: cir.ValueSet) {
             parameter,
         )
     if (parameter?.universe === 'real') {
+        const literal = lowerLiteralToBinary(expr, parameter)
+        if (literal) return literal
         if (
             expr.type.universe !== 'real' ||
-            realExpressionRepresentation(expr) !==
-                realRepresentation(parameter)
+            realExpressionRepresentation(expr) !== realRepresentation(parameter)
         )
             throw new Error(
                 'Implicit conversions to IEEE real representations are not supported',
@@ -1041,6 +1103,15 @@ export function lowerExpr(expr: cir.Expression): string {
                     return operandRepresentation(expr.expression) === 'big'
                         ? lowerOwned(expr.expression, 'big')
                         : `integerWithDigits(1, ${lowerExpr(expr.expression)})`
+                case 'real': {
+                    const source = expr.expression.type
+                    if (source.universe !== 'real')
+                        throw new Error('Only real values can be boxed as real')
+                    const representation = realRepresentation(source)
+                    return representation === 'decimal'
+                        ? lowerRealOwned(expr.expression, source)
+                        : `Real¸fromBinary(${lowerExpr(expr.expression)}, ${representation === 'binary32'})`
+                }
                 default:
                     throw new Error(
                         `Unknown box universe: ${expr.expression.type.universe}`,
@@ -1154,8 +1225,13 @@ function lowerRealArithmetic(
         return `Real¸${functionName}(${lowerRealBorrowed(expr.left, expr.type)}, ${lowerRealBorrowed(expr.right, expr.type)}, ${precision.digits})`
     }
 
-    if (expr.left.type.universe !== 'real' || expr.right.type.universe !== 'real')
-        throw new Error('Mixed integer and IEEE real arithmetic is not supported')
+    if (
+        expr.left.type.universe !== 'real' ||
+        expr.right.type.universe !== 'real'
+    )
+        throw new Error(
+            'Mixed integer and IEEE real arithmetic is not supported',
+        )
     const representation = realRepresentation(expr.left.type)
     if (realRepresentation(expr.right.type) !== representation)
         throw new Error('IEEE real operands must use the same native format')
@@ -1177,26 +1253,31 @@ function lowerRealComparison(
     expr: cir.Expression & { left: cir.Expression; right: cir.Expression },
     operator: '==' | '!=' | '<' | '>' | '<=' | '>=',
 ): string | undefined {
-    if (expr.left.type.universe !== 'real' && expr.right.type.universe !== 'real')
+    if (
+        expr.left.type.universe !== 'real' &&
+        expr.right.type.universe !== 'real'
+    )
         return undefined
     let realType: cir.RealSet
     if (expr.left.type.universe === 'real') realType = expr.left.type
-    else if (expr.right.type.universe === 'real')
-        realType = expr.right.type
+    else if (expr.right.type.universe === 'real') realType = expr.right.type
     else return undefined
     const representation = realRepresentation(realType)
     if (representation !== 'decimal') {
-        if (expr.left.type.universe !== 'real' || expr.right.type.universe !== 'real')
-            throw new Error('Mixed integer and IEEE real comparison is not supported')
+        if (
+            expr.left.type.universe !== 'real' ||
+            expr.right.type.universe !== 'real'
+        )
+            throw new Error(
+                'Mixed integer and IEEE real comparison is not supported',
+            )
         return `((${lowerExpr(expr.left)}) ${operator} (${lowerExpr(expr.right)}))`
     }
 
     const left = lowerRealExactBorrowed(expr.left)
     const right = lowerRealExactBorrowed(expr.right)
     const compareOperator =
-        operator === '==' ? '==' :
-        operator === '!=' ? '!=' :
-        operator
+        operator === '==' ? '==' : operator === '!=' ? '!=' : operator
     return `(Real¸compare(${left}, ${right}) ${compareOperator} 0 ? c_true : c_false)`
 }
 

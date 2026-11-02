@@ -2,7 +2,8 @@
 
 - Complete `real` lowering with finite precision, per-operation rounding, and a magnitude range limited only by available memory; fixed-exponent IEEE formats alone are insufficient.
   - Implemented initial slice: decimal `Real*` values with explicit precision and arbitrary decimal exponents, plus bounded IEEE binary32/binary64 lowering.
-  - Remaining: other binary widths/bases, real remainder, and fractional real exponents.
+  - Covered end to end by `packages/rwrc/test/cases/real-*.clawr` (`.panic` files assert expected runtime aborts).
+  - Remaining: other binary widths/bases, real remainder, fractional real exponents, named `float32`/`float64` types, and real values returned from functions (blocked by the same ISOLATED/UNIQUE return rule as integers).
 - Lower `real` types with massive precision and/or range as `Real*`.
 - Implement static analysis and lowering of dyadic operations supporting combinations of small vs large numbers (`real` and `integer` types).
   - `ADDITION`

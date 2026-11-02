@@ -1,0 +1,7 @@
+@main {
+    const a: real scale 4 dec = 1.5
+    print(a ^ 2)
+    print(a ^ 3)
+    print(a ^ -1)
+    print(a ^ 0)
+}

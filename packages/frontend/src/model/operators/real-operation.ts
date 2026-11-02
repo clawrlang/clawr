@@ -8,7 +8,9 @@ export function realOperationResult(
     const real = left instanceof RealSet ? left : right
     const other = left instanceof RealSet ? right : left
     if (!(real instanceof RealSet) || !real.precision)
-        return ErrorResult.failure('real arithmetic requires an explicit precision')
+        return ErrorResult.failure(
+            'real arithmetic requires an explicit precision',
+        )
 
     if (other instanceof RealSet) {
         if (!other.precision)
@@ -22,18 +24,23 @@ export function realOperationResult(
             return ErrorResult.failure(
                 'arithmetic with different real precision kinds or bases is not supported',
             )
-        return Result.value(
-            RealSet.unconstrained({
-                ...real.precision,
-                digits: Math.max(real.precision.digits, other.precision.digits),
-            }),
+        const wider =
+            other.precision.digits > real.precision.digits ? other : real
+        const precision = { ...real.precision, digits: wider.precision!.digits }
+        // Binary results stay in the (bounded) format of the wider operand;
+        // overflow is checked at runtime.
+        if (
+            precision.base === 'bin' &&
+            wider.min !== undefined &&
+            wider.max !== undefined
         )
+            return Result.value(
+                RealSet.range({ min: wider.min, max: wider.max, precision }),
+            )
+        return Result.value(RealSet.unconstrained(precision))
     }
 
-    if (
-        other instanceof IntegerSet &&
-        real.precision.kind === 'scale'
-    )
+    if (other instanceof IntegerSet && real.precision.kind === 'scale')
         return Result.value(
             RealSet.unconstrained({
                 ...real.precision,

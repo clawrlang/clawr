@@ -1,0 +1,9 @@
+@main {
+    const a = 1.25
+    const b = 0.5
+    print(a)
+    print(b)
+    print(a + b)
+    print(a * b)
+    print(a - b)
+}

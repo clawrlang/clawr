@@ -560,6 +560,8 @@ function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
 type RealRepresentation = 'decimal' | 'binary32' | 'binary64'
 
 function realRepresentation(valueSet: cir.RealSet): RealRepresentation {
+    // Boxed reals are always runtime `Real*` values, whatever their precision base.
+    if (valueSet.boxed) return 'decimal'
     const precision = valueSet.precision
     if (
         !precision ||

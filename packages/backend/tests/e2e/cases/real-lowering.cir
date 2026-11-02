@@ -130,3 +130,158 @@ startBlock:
         min: '0.0'
         max: '10.0'
         precision: { kind: scale, digits: 2, base: dec }
+  - kind: VARIABLE_DECL
+    name: box_decimal_result
+    type:
+      universe: real
+      precision: { kind: scale, digits: 2, base: dec }
+      boxed: true
+    initialValue:
+      kind: BOX
+      expression:
+        kind: VARIABLE_REF
+        name: decimal_result
+        type:
+          universe: real
+          min: '-10.0'
+          max: '10.0'
+          precision: { kind: scale, digits: 2, base: dec }
+      type:
+        universe: real
+        precision: { kind: scale, digits: 2, base: dec }
+        boxed: true
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - kind: VARIABLE_REF
+        name: box_decimal_result
+        type:
+          universe: real
+          precision: { kind: scale, digits: 2, base: dec }
+          boxed: true
+  - kind: RELEASE
+    object: { kind: VARIABLE_REF, name: box_decimal_result }
+  - kind: VARIABLE_DECL
+    name: box_binary_result
+    type:
+      universe: real
+      precision: { kind: sig, digits: 24, base: bin }
+      boxed: true
+    initialValue:
+      kind: BOX
+      expression:
+        kind: VARIABLE_REF
+        name: binary_result
+        type:
+          universe: real
+          min: '-340282346638528859811704183484516925440.0'
+          max: '340282346638528859811704183484516925440.0'
+          precision: { kind: sig, digits: 24, base: bin }
+      type:
+        universe: real
+        precision: { kind: sig, digits: 24, base: bin }
+        boxed: true
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - kind: VARIABLE_REF
+        name: box_binary_result
+        type:
+          universe: real
+          precision: { kind: sig, digits: 24, base: bin }
+          boxed: true
+  - kind: RELEASE
+    object: { kind: VARIABLE_REF, name: box_binary_result }
+  - kind: VARIABLE_DECL
+    name: box_integer_scale_result
+    type:
+      universe: real
+      precision: { kind: scale, digits: 2, base: dec }
+      boxed: true
+    initialValue:
+      kind: BOX
+      expression:
+        kind: VARIABLE_REF
+        name: integer_scale_result
+        type:
+          universe: real
+          min: '0.0'
+          max: '10.0'
+          precision: { kind: scale, digits: 2, base: dec }
+      type:
+        universe: real
+        precision: { kind: scale, digits: 2, base: dec }
+        boxed: true
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - kind: VARIABLE_REF
+        name: box_integer_scale_result
+        type:
+          universe: real
+          precision: { kind: scale, digits: 2, base: dec }
+          boxed: true
+  - kind: RELEASE
+    object: { kind: VARIABLE_REF, name: box_integer_scale_result }
+  - kind: VARIABLE_DECL
+    name: box_rounded_result
+    type:
+      universe: real
+      precision: { kind: sig, digits: 2, base: dec }
+      boxed: true
+    initialValue:
+      kind: BOX
+      expression:
+        kind: VARIABLE_REF
+        name: rounded_result
+        type:
+          universe: real
+          min: '0.0'
+          max: '2.0'
+          precision: { kind: sig, digits: 2, base: dec }
+      type:
+        universe: real
+        precision: { kind: sig, digits: 2, base: dec }
+        boxed: true
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - kind: VARIABLE_REF
+        name: box_rounded_result
+        type:
+          universe: real
+          precision: { kind: sig, digits: 2, base: dec }
+          boxed: true
+  - kind: RELEASE
+    object: { kind: VARIABLE_REF, name: box_rounded_result }
+  - kind: VARIABLE_DECL
+    name: box_function_result
+    type:
+      universe: real
+      precision: { kind: scale, digits: 2, base: dec }
+      boxed: true
+    initialValue:
+      kind: BOX
+      expression:
+        kind: VARIABLE_REF
+        name: function_result
+        type:
+          universe: real
+          min: '0.0'
+          max: '10.0'
+          precision: { kind: scale, digits: 2, base: dec }
+      type:
+        universe: real
+        precision: { kind: scale, digits: 2, base: dec }
+        boxed: true
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - kind: VARIABLE_REF
+        name: box_function_result
+        type:
+          universe: real
+          precision: { kind: scale, digits: 2, base: dec }
+          boxed: true
+  - kind: RELEASE
+    object: { kind: VARIABLE_REF, name: box_function_result }

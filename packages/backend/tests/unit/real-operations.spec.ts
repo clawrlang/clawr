@@ -30,9 +30,7 @@ describe('Lowering real operations', () => {
             },
         }
 
-        expect(lowerExpr(expr)).toMatch(
-            /Real¸add\(tmpˇ\d+, tmpˇ\d+, 3\)/,
-        )
+        expect(lowerExpr(expr)).toMatch(/Real¸add\(tmpˇ\d+, tmpˇ\d+, 3\)/)
     })
 
     it('uses explicit float32 arithmetic helpers for binary32 operands', () => {
@@ -40,7 +38,11 @@ describe('Lowering real operations', () => {
             universe: 'real' as const,
             min: '-340282346638528859811704183484516925440',
             max: '340282346638528859811704183484516925440',
-            precision: { kind: 'sig' as const, digits: 24, base: 'bin' as const },
+            precision: {
+                kind: 'sig' as const,
+                digits: 24,
+                base: 'bin' as const,
+            },
         }
         const expr: Expression = {
             kind: 'ADDITION',
@@ -52,7 +54,9 @@ describe('Lowering real operations', () => {
             },
         }
 
-        expect(lowerExpr(expr)).toBe('Real32¸add(strtof("1.25", NULL), strtof("2.5", NULL))')
+        expect(lowerExpr(expr)).toBe(
+            'Real32¸add(strtof("1.25", NULL), strtof("2.5", NULL))',
+        )
     })
 
     it('compares decimal values without reducing them to a common precision', () => {
@@ -77,8 +81,79 @@ describe('Lowering real operations', () => {
             type: { universe: 'truthvalue', values: ['false', 'true'] },
         }
 
-        expect(lowerExpr(expr)).toMatch(
-            /Real¸compare\(tmpˇ\d+, tmpˇ\d+\) < 0/,
+        expect(lowerExpr(expr)).toMatch(/Real¸compare\(tmpˇ\d+, tmpˇ\d+\) < 0/)
+    })
+
+    const binaryType = (digits: number, max: string) => ({
+        universe: 'real' as const,
+        min: `-${max}`,
+        max,
+        precision: { kind: 'sig' as const, digits, base: 'bin' as const },
+    })
+
+    it('uses float16 helpers and an _Float16 literal for binary16 operands', () => {
+        const type = binaryType(11, '65504.0')
+        const expr: Expression = {
+            kind: 'MULTIPLICATION',
+            left: { kind: 'REAL_LITERAL', type: { ...type, value: '1.5' } },
+            right: { kind: 'REAL_LITERAL', type: { ...type, value: '2.25' } },
+            type: {
+                universe: 'real',
+                precision: type.precision,
+            },
+        }
+
+        expect(lowerExpr(expr)).toBe('Real16¸multiply(1.5f16, 2.25f16)')
+    })
+
+    it('uses float64 helpers for binary64 operands', () => {
+        const type = binaryType(53, '1.7976931348623157e308')
+        const expr: Expression = {
+            kind: 'DIVISION',
+            left: { kind: 'REAL_LITERAL', type: { ...type, value: '1.0' } },
+            right: { kind: 'REAL_LITERAL', type: { ...type, value: '4.0' } },
+            type: { universe: 'real', precision: type.precision },
+        }
+
+        expect(lowerExpr(expr)).toBe(
+            'Real64¸divide(strtod("1.0", NULL), strtod("4.0", NULL))',
         )
+    })
+
+    it('rejects binary formats without a native C type', () => {
+        const type = binaryType(113, '1.0e4932')
+        const expr: Expression = {
+            kind: 'ADDITION',
+            left: { kind: 'REAL_LITERAL', type: { ...type, value: '1.0' } },
+            right: { kind: 'REAL_LITERAL', type: { ...type, value: '2.0' } },
+            type: { universe: 'real', precision: type.precision },
+        }
+
+        expect(() => lowerExpr(expr)).toThrow()
+    })
+
+    it('converts an integer operand to the precision of a sig real', () => {
+        const expr: Expression = {
+            kind: 'ADDITION',
+            left: {
+                kind: 'REAL_LITERAL',
+                type: {
+                    universe: 'real',
+                    value: '1.25',
+                    precision: { kind: 'sig', digits: 3, base: 'dec' },
+                },
+            },
+            right: {
+                kind: 'INTEGER_LITERAL',
+                type: { universe: 'integer', value: '2' },
+            },
+            type: {
+                universe: 'real',
+                precision: { kind: 'sig', digits: 3, base: 'dec' },
+            },
+        }
+
+        const lowered = lowerExpr(expr)
+        expect(lowered).toMatch(/Real¸add\(tmpˇ\d+, tmpˇ\d+, 3\)/)
     })
 })

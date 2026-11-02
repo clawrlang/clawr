@@ -1,7 +1,6 @@
 # TODO
 
 - Complete `real` lowering with finite precision, per-operation rounding, and a magnitude range limited only by available memory; fixed-exponent IEEE formats alone are insufficient.
-  - Missing unit tests for `lowerType()` - cover various range and precision scenarios
   - Implemented initial slice: decimal `Real*` values with explicit precision and arbitrary decimal exponents, plus bounded IEEE binary16/binary32/binary64 lowering, and integer arithmetic with decimal `sig`/`scale` reals.
   - Covered end to end by `packages/rwrc/test/cases/real-*.clawr` (`.panic` files assert expected runtime aborts).
   - Remaining: binary128 (needs `_Float128`/`__float128` or a runtime fallback; unavailable on Apple clang), other bases, real remainder, fractional real exponents, named `float32`/`float64` types, and real values returned from functions (blocked by the same ISOLATED/UNIQUE return rule as integers).

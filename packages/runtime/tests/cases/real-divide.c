@@ -115,5 +115,11 @@ int main() {
     releaseRC(result);
   }
 
+  // Range bounds are compared exactly, not rounded to whole numbers
+  dividend = Real¸fromString("9.4", 2, true);
+  result = Real¸ensureInRange(dividend, "9.35", "9.45");
+  printf("fractional bounds accept %s\n", Real·toString(result));
+  releaseRC(dividend);
+
   return 0;
 }

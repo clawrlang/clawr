@@ -15,3 +15,4 @@ negative integer real power = 0.25
 2.00 / 3.00 = 0.667
 -2.00 / 3.00 = -0.667
 1 / 8 = 0.12
+fractional bounds accept 9.4

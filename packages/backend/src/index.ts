@@ -531,14 +531,10 @@ function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
                 : 'Integer*'
         case 'real':
             if (valueSet.boxed) return 'Real*'
-            switch (realRepresentation(valueSet)) {
-                case 'decimal':
-                    return 'Real*'
-                case 'binary32':
-                    return 'float'
-                case 'binary64':
-                    return 'double'
-            }
+            const representation = realRepresentation(valueSet)
+            return representation === 'decimal'
+                ? 'Real*'
+                : BINARY_FORMATS[representation].ctype
         case 'truthvalue':
             return valueSet.boxed ? 'TruthvalueBox*' : 'truthvalue_t'
         case 'rc-type':
@@ -557,7 +553,41 @@ function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
     }
 }
 
-type RealRepresentation = 'decimal' | 'binary32' | 'binary64'
+type RealRepresentation = 'decimal' | 'binary16' | 'binary32' | 'binary64'
+type BinaryRepresentation = Exclude<RealRepresentation, 'decimal'>
+
+// Native IEEE formats: significand bits, largest finite value, C type, runtime prefix.
+const BINARY_FORMATS: Record<
+    BinaryRepresentation,
+    { bits: number; max: number; ctype: string; prefix: string }
+> = {
+    binary16: { bits: 11, max: 65504, ctype: '_Float16', prefix: 'Real16' },
+    binary32: {
+        bits: 24,
+        max: 3.4028234663852886e38,
+        ctype: 'float',
+        prefix: 'Real32',
+    },
+    binary64: {
+        bits: 53,
+        max: 1.7976931348623157e308,
+        ctype: 'double',
+        prefix: 'Real64',
+    },
+}
+
+function binaryLiteral(representation: BinaryRepresentation, value: string) {
+    if (!Number.isFinite(Number(value)))
+        throw new Error('Real literal is not a finite number')
+    switch (representation) {
+        case 'binary16':
+            return `${value}f16`
+        case 'binary32':
+            return `strtof("${value}", NULL)`
+        case 'binary64':
+            return `strtod("${value}", NULL)`
+    }
+}
 
 function realRepresentation(valueSet: cir.RealSet): RealRepresentation {
     // Boxed reals are always runtime `Real*` values, whatever their precision base.
@@ -574,18 +604,10 @@ function realRepresentation(valueSet: cir.RealSet): RealRepresentation {
         throw new Error(
             `Real precision ${precision.kind} ${precision.digits} ${precision.base} is not supported by this backend`,
         )
-    const format =
-        precision.digits === 24
-            ? {
-                  representation: 'binary32' as const,
-                  max: 3.4028234663852886e38,
-              }
-            : precision.digits === 53
-              ? {
-                    representation: 'binary64' as const,
-                    max: 1.7976931348623157e308,
-                }
-              : undefined
+    const entry = Object.entries(BINARY_FORMATS).find(
+        ([, f]) => f.bits === precision.digits,
+    ) as [BinaryRepresentation, (typeof BINARY_FORMATS)[BinaryRepresentation]] | undefined
+    const format = entry && { representation: entry[0], max: entry[1].max }
     if (!format)
         throw new Error(
             `IEEE real precision ${precision.digits} has no supported native representation`,
@@ -778,10 +800,6 @@ function lowerRealBorrowed(
     if (expr.type.universe === 'integer') {
         const precision = resultType.precision
         if (!precision) throw new Error('Real conversion requires precision')
-        if (precision.kind !== 'scale')
-            throw new Error(
-                'Integer values can only be combined with scale-precision reals',
-            )
         const converted =
             integerRepresentation(expr.type) === 'native'
                 ? `Real¸fromInt64(${lowerExpr(expr)}, ${precision.digits}, ${precision.kind === 'scale'})`
@@ -819,10 +837,6 @@ function lowerRealOwned(expr: cir.Expression, target: cir.RealSet): string {
     if (expr.type.universe === 'integer') {
         const precision = target.precision
         if (!precision) throw new Error('Real conversion requires precision')
-        if (precision.kind !== 'scale')
-            throw new Error(
-                'Integer values can only be converted to scale-precision reals',
-            )
         return integerRepresentation(expr.type) === 'native'
             ? `Real¸fromInt64(${lowerExpr(expr)}, ${precision.digits}, ${precision.kind === 'scale'})`
             : `Real¸fromInteger(${lowerBorrowed(expr, 'big')}, ${precision.digits}, ${precision.kind === 'scale'})`
@@ -891,17 +905,11 @@ function lowerLiteralToBinary(
     const representation = realRepresentation(target)
     if (representation === 'decimal') return undefined
     const value = expr.type.value.replaceAll('_', '')
-    const max =
-        representation === 'binary32'
-            ? 3.4028234663852886e38
-            : 1.7976931348623157e308
-    if (!Number.isFinite(Number(value)) || Math.abs(Number(value)) > max)
+    if (Math.abs(Number(value)) > BINARY_FORMATS[representation].max)
         throw new Error(
             'Real literal is outside the finite range of its target',
         )
-    return representation === 'binary32'
-        ? `strtof("${value}", NULL)`
-        : `strtod("${value}", NULL)`
+    return binaryLiteral(representation, value)
 }
 
 /** Lowers `expr` for storing in a location of type `target`. */
@@ -1112,7 +1120,7 @@ export function lowerExpr(expr: cir.Expression): string {
                     const representation = realRepresentation(source)
                     return representation === 'decimal'
                         ? lowerRealOwned(expr.expression, source)
-                        : `Real¸fromBinary(${lowerExpr(expr.expression)}, ${representation === 'binary32'})`
+                        : `Real¸fromBinary(${lowerExpr(expr.expression)}, ${BINARY_FORMATS[representation].bits})`
                 }
                 default:
                     throw new Error(
@@ -1198,14 +1206,10 @@ function lowerRealLiteral(
     const precision = expr.type.precision
     if (!precision) throw new Error('Real literal has no explicit precision')
     const value = expr.type.value.replaceAll('_', '')
-    switch (realRepresentation(expr.type)) {
-        case 'decimal':
-            return `Real¸fromString("${value}", ${precision.digits}, ${precision.kind === 'scale'})`
-        case 'binary32':
-            return `strtof("${value}", NULL)`
-        case 'binary64':
-            return `strtod("${value}", NULL)`
-    }
+    const representation = realRepresentation(expr.type)
+    return representation === 'decimal'
+        ? `Real¸fromString("${value}", ${precision.digits}, ${precision.kind === 'scale'})`
+        : binaryLiteral(representation, value)
 }
 
 function lowerRealArithmetic(
@@ -1237,7 +1241,9 @@ function lowerRealArithmetic(
     const representation = realRepresentation(expr.left.type)
     if (realRepresentation(expr.right.type) !== representation)
         throw new Error('IEEE real operands must use the same native format')
-    const prefix = representation === 'binary32' ? 'Real32' : 'Real64'
+    if (representation === 'decimal')
+        throw new Error('Decimal real operands are lowered separately')
+    const prefix = BINARY_FORMATS[representation].prefix
     const operation = {
         ADDITION: 'add',
         SUBTRACTION: 'subtract',

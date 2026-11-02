@@ -1,0 +1,6 @@
+@main {
+    const x: real sig 3 dec = 1.25
+    print(x + 2)
+    print(3 * x)
+    print(x / 3)
+}

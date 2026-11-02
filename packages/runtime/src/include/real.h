@@ -38,7 +38,7 @@ Real *Real¸fromInteger(Integer *value, size_t precision,
                        bool scale_precision);
 Real *Real¸fromInt64(int64_t value, size_t precision, bool scale_precision);
 /// Exact-shortest decimal value of a binary float, for boxing and printing.
-Real *Real¸fromBinary(double value, bool single_precision);
+Real *Real¸fromBinary(double value, unsigned significand_bits);
 String *Real·toStringRC(Real *self);
 const char *Real·toString(Real *self);
 Real *Real¸add(Real *left, Real *right, size_t result_precision);
@@ -49,6 +49,13 @@ Real *Real¸power(Real *base, Real *exponent, size_t result_precision);
 Real *Real¸round(Real *value, size_t result_precision);
 int Real¸compare(Real *left, Real *right);
 
+#ifdef __FLT16_MANT_DIG__
+_Float16 Real16¸add(_Float16 left, _Float16 right);
+_Float16 Real16¸subtract(_Float16 left, _Float16 right);
+_Float16 Real16¸multiply(_Float16 left, _Float16 right);
+_Float16 Real16¸divide(_Float16 left, _Float16 right);
+_Float16 Real16¸power(_Float16 base, _Float16 exponent);
+#endif
 float Real32¸add(float left, float right);
 float Real32¸subtract(float left, float right);
 float Real32¸multiply(float left, float right);

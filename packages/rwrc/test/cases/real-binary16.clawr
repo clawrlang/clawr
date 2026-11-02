@@ -1,0 +1,7 @@
+@main {
+    const a: real(-65504.0...65504.0) sig 11 bin = 1.5
+    const b: real(-65504.0...65504.0) sig 11 bin = 2.25
+    print(a + b)
+    print(a * b)
+    print(b / a)
+}

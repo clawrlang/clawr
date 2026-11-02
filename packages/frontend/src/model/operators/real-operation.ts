@@ -40,15 +40,11 @@ export function realOperationResult(
         return Result.value(RealSet.unconstrained(precision))
     }
 
-    if (other instanceof IntegerSet && real.precision.kind === 'scale')
-        return Result.value(
-            RealSet.unconstrained({
-                ...real.precision,
-                digits: Math.max(real.precision.digits, 0),
-            }),
-        )
+    // An integer converts to the real's precision (like `scale 0`), whatever its kind.
+    if (other instanceof IntegerSet && real.precision.base === 'dec')
+        return Result.value(RealSet.unconstrained(real.precision))
 
     return ErrorResult.failure(
-        'integer and significant-precision real arithmetic is not supported',
+        'integers can only be combined with decimal reals',
     )
 }

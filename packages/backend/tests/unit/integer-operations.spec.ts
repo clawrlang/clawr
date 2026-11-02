@@ -1,8 +1,11 @@
 import { lowerExpr } from '@clawr/backend'
 import { Expression } from '@clawr/cir'
 import { describe, expect, it } from 'bun:test'
+import { BooleanSet } from '../../../cir/dist/src/value-set.js'
 
-const literal = (value: string): Expression => ({
+const literal = (
+    value: `${bigint}`,
+): Expression & { kind: 'INTEGER_LITERAL' } => ({
     kind: 'INTEGER_LITERAL',
     type: { universe: 'integer', value },
 })
@@ -30,21 +33,27 @@ describe('Lowering integer operations', () => {
     })
 
     it('compares native operands as truthvalues', () => {
-        const expr: Expression = {
-            kind: 'LESS_THAN',
+        const expr = {
+            kind: 'LESS_THAN' as const,
             left: literal('1'),
             right: literal('2'),
-            type: { universe: 'truthvalue', value: 'true' },
+            type: {
+                universe: 'truthvalue',
+                values: ['false', 'true'],
+            } satisfies BooleanSet,
         }
         expect(lowerExpr(expr)).toBe('((1) < (2) ? c_true : c_false)')
     })
 
     it('uses Integer functions when an operand exceeds 64 bits', () => {
-        const expr: Expression = {
-            kind: 'GREATER_THAN',
+        const expr = {
+            kind: 'GREATER_THAN' as const,
             left: literal('100000000000000000000'),
             right: literal('2'),
-            type: { universe: 'truthvalue' },
+            type: {
+                universe: 'truthvalue',
+                values: ['false', 'true'],
+            } satisfies BooleanSet,
         }
         expect(lowerExpr(expr)).toMatch(/^Integer¸gt\(tmpˇ\d+, tmpˇ\d+\)$/)
     })

@@ -472,10 +472,22 @@ static String *formatReal(Integer *sig, Integer *exp) {
 
 static Real *realWithSigExp(Integer *sig, Integer *exp, size_t precision,
                             bool scale_precision);
+static Real *realFromStringImpl(const char *value, size_t precision,
+                                bool scale_precision, bool round);
 
 __attribute__((visibility("default")))
 Real *Real¸fromString(const char *value, size_t precision,
                       bool scale_precision) {
+  return realFromStringImpl(value, precision, scale_precision, true);
+}
+
+/// Parses a value without rounding it (used for exact range bounds).
+static Real *realFromStringExact(const char *value) {
+  return realFromStringImpl(value, 0, true, false);
+}
+
+static Real *realFromStringImpl(const char *value, size_t precision,
+                                bool scale_precision, bool round) {
   if (!scale_precision && precision == 0)
     panic("Invalid real precision");
   // Strip readability underscores.
@@ -579,7 +591,14 @@ Real *Real¸fromString(const char *value, size_t precision,
   if (negative)
     Integer·toggleSign(sig);
 
-  Real *real = realWithSigExp(sig, exp, precision, scale_precision);
+  Real *real;
+  if (round)
+    real = realWithSigExp(sig, exp, precision, scale_precision);
+  else
+    real = allocInitRC(Real, 0, __rc_ISOLATED, .significand = sig,
+                       .exponent10 = exp, .precision = precision,
+                       .scale_precision = scale_precision,
+                       .string_cache = NULL, .cache_valid = false);
 
   free(digits_buf);
   free(stripped);
@@ -608,14 +627,14 @@ Real *Real¸fromInt64(int64_t value, size_t precision,
 __attribute__((visibility("default")))
 Real *Real¸ensureInRange(Real *value, const char *min, const char *max) {
   if (min) {
-    Real *lower = Real¸fromString(min, 0, true);
+    Real *lower = realFromStringExact(min);
     int comparison = Real¸compare(value, lower);
     releaseRC(lower);
     if (comparison < 0)
       panic("Real value is below its declared minimum");
   }
   if (max) {
-    Real *upper = Real¸fromString(max, 0, true);
+    Real *upper = realFromStringExact(max);
     int comparison = Real¸compare(value, upper);
     releaseRC(upper);
     if (comparison > 0)
@@ -995,17 +1014,39 @@ DEFINE_IEEE_ARITHMETIC(float, powf, Real32¸add, Real32¸subtract,
 DEFINE_IEEE_ARITHMETIC(double, pow, Real64¸add, Real64¸subtract,
                        Real64¸multiply, Real64¸divide, Real64¸power)
 
+#ifdef __FLT16_MANT_DIG__
+static _Float16 powHalf(_Float16 base, _Float16 exponent) {
+  return (_Float16)powf((float)base, (float)exponent);
+}
+DEFINE_IEEE_ARITHMETIC(_Float16, powHalf, Real16¸add, Real16¸subtract,
+                       Real16¸multiply, Real16¸divide, Real16¸power)
+#endif
+
+static bool roundsToHalf(double parsed, double value) {
+#ifdef __FLT16_MANT_DIG__
+  return (_Float16)parsed == (_Float16)value;
+#else
+  (void)parsed;
+  (void)value;
+  panic("binary16 is not supported on this platform");
+  return false;
+#endif
+}
+
 __attribute__((visibility("default")))
-Real *Real¸fromBinary(double value, bool single_precision) {
+Real *Real¸fromBinary(double value, unsigned significand_bits) {
   if (!isfinite(value))
     panic("Cannot box a non-finite real");
   // Shortest decimal that reads back as the same binary value.
   char text[64];
-  int max_digits = single_precision ? 9 : 17;
+  // Digits needed to round-trip: ceil(1 + bits * log10(2))
+  int max_digits = significand_bits <= 11 ? 5 : significand_bits <= 24 ? 9 : 17;
   for (int digits = 1; digits <= max_digits; digits++) {
     snprintf(text, sizeof text, "%.*e", digits - 1, value);
-    bool same = single_precision ? strtof(text, NULL) == (float)value
-                                 : strtod(text, NULL) == value;
+    double parsed = strtod(text, NULL);
+    bool same = significand_bits <= 11   ? roundsToHalf(parsed, value)
+                : significand_bits <= 24 ? strtof(text, NULL) == (float)value
+                                         : parsed == value;
     if (same || digits == max_digits) {
       char mantissa[48];
       int exponent;

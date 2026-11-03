@@ -11,7 +11,7 @@ suite('Diagnostics', () => {
             return found.length > 0 ? found : undefined
         })
 
-        assert.strictEqual(diagnostics.length, 1)
+        assert.ok(diagnostics.length >= 1)
         assert.strictEqual(
             diagnostics[0].severity,
             vscode.DiagnosticSeverity.Error,

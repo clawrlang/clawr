@@ -5,12 +5,12 @@ mutating:
     func do() { self->z = true }
 state:
     x: integer
-    y: real
+    y: real scale 3
     z: truthvalue
 }
 
 data D {
     x: integer
-    y: real
+    y: real scale 5
     z: truthvalue
 }

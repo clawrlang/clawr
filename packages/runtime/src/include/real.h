@@ -67,6 +67,8 @@ Real *Real¸subtractScale(Real *left, Real *right, size_t n, unsigned base);
 Real *Real¸multiplyScale(Real *left, Real *right, size_t n, unsigned base);
 Real *Real¸divideScale(Real *dividend, Real *divisor, size_t n, unsigned base);
 Real *Real¸powerScale(Real *base, Real *exponent, size_t n, unsigned base_);
+/// Exact value as a reduced fraction, e.g. "1/27" (not exposed in the language yet).
+String *Real¸toFraction(Real *value);
 String *Real·toStringRC(Real *self);
 const char *Real·toString(Real *self);
 Real *Real¸add(Real *left, Real *right, size_t result_precision);

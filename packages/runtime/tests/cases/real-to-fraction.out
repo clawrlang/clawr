@@ -1,0 +1,9 @@
+ter scale 3: 0.04 = 1/27
+ter scale 3: 0.1 = 1/9
+ter scale 3: -0.3 = -8/27
+bin scale 5: 0.15625 = 5/32
+bin scale 3: 0.5 = 1/2
+ter scale 3: 0 = 0/1
+bin sig 24: 0.75 = 3/4
+dec: 2.5 = 5/2
+dec: 40 = 40/1

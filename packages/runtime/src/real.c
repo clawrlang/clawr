@@ -1646,3 +1646,41 @@ Real *Real¸powerScale(Real *value, Real *exponent, size_t n, unsigned base) {
   }
   return result;
 }
+
+// Exact value as a reduced fraction "numerator/denominator".
+__attribute__((visibility("default"))) String *Real¸toFraction(Real *value) {
+  Integer *p;
+  Integer *q;
+  rationalOf(value, &p, &q);
+  Integer *a = integerAbs(p);
+  Integer *b = retainRC(q);
+  while (!integerIsZero(b)) {
+    Integer *next = Integer¸modulus(a, b);
+    releaseRC(a);
+    a = b;
+    b = next;
+  }
+  // a is now the gcd (or q when p is zero, giving 0/1).
+  Integer *magnitude = integerAbs(p);
+  Integer *numerator = Integer¸floorDivide(magnitude, a);
+  releaseRC(magnitude);
+  Integer *denominator = Integer¸floorDivide(q, a);
+  if (integerIsNegative(p))
+    Integer·toggleSign(numerator);
+  String *left = Integer·toStringRC(numerator);
+  String *right = Integer·toStringRC(denominator);
+  String *slash = String¸fromCString("/");
+  String *head = String¸concat(left, slash);
+  String *result = String¸concat(head, right);
+  releaseRC(left);
+  releaseRC(right);
+  releaseRC(slash);
+  releaseRC(head);
+  releaseRC(numerator);
+  releaseRC(denominator);
+  releaseRC(p);
+  releaseRC(q);
+  releaseRC(a);
+  releaseRC(b);
+  return result;
+}

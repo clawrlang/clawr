@@ -613,8 +613,9 @@ function realRepresentation(valueSet: cir.RealSet): RealRepresentation {
         throw new Error('Real lowering requires an explicit valid precision')
     const precision = storagePrecision(declared)
     if (declared.base === 'ter' && declared.kind === 'sig') return 'managed'
-    if (precision.base === 'dec') return 'managed'
-    if (precision.base !== 'bin' || precision.kind !== 'sig')
+    if (precision.base === 'dec' || precision.kind === 'scale')
+        return 'managed'
+    if (precision.base !== 'bin')
         throw new Error(
             `Real precision ${precision.kind} ${precision.digits} ${precision.base} is not supported by this backend`,
         )
@@ -796,8 +797,6 @@ function lowerLiteralAtPrecision(
     if (
         expr.kind !== 'REAL_LITERAL' ||
         !precision ||
-        (precision.base !== 'dec' &&
-            !(precision.base === 'bin' && precision.kind === 'sig')) ||
         !isManagedReal(expr.type)
     )
         return undefined
@@ -805,18 +804,38 @@ function lowerLiteralAtPrecision(
     return realFromText(value, precision)
 }
 
-function realFromText(value: string, declared: cir.RealPrecision): string {
+// Runtime function suffix and trailing arguments for a precision's grid:
+// `sig n bin` rounds to n bits, `scale n` in base 2 or 3 rounds to a multiple
+// of base^-n, and decimal reals take the precision and whether it is a scale.
+function gridCall(declared: cir.RealPrecision) {
     const precision = storagePrecision(declared)
-    return precision.base === 'bin'
-        ? `Real¸fromStringBinary("${value}", ${precision.digits})`
-        : `Real¸fromString("${value}", ${precision.digits}, ${precision.kind === 'scale'})`
+    if (precision.kind === 'scale' && precision.base !== 'dec')
+        return {
+            suffix: 'Scale',
+            args: `${precision.digits}, ${precision.base === 'bin' ? 2 : 3}`,
+            roundArgs: `${precision.digits}, ${precision.base === 'bin' ? 2 : 3}`,
+        }
+    if (precision.base === 'bin')
+        return {
+            suffix: 'Binary',
+            args: `${precision.digits}`,
+            roundArgs: `${precision.digits}`,
+        }
+    return {
+        suffix: '',
+        args: `${precision.digits}, ${precision.kind === 'scale'}`,
+        roundArgs: `${precision.digits}`,
+    }
+}
+
+function realFromText(value: string, declared: cir.RealPrecision): string {
+    const grid = gridCall(declared)
+    return `Real¸fromString${grid.suffix}("${value}", ${grid.args})`
 }
 
 function realRound(value: string, declared: cir.RealPrecision): string {
-    const precision = storagePrecision(declared)
-    return precision.base === 'bin'
-        ? `Real¸roundBinary(${value}, ${precision.digits})`
-        : `Real¸round(${value}, ${precision.digits})`
+    const grid = gridCall(declared)
+    return `Real¸${grid.suffix ? `round${grid.suffix}` : 'round'}(${value}, ${grid.roundArgs})`
 }
 
 // Lowers an integer to a managed real of the given precision.
@@ -824,16 +843,10 @@ function lowerIntegerToReal(
     expr: cir.Expression,
     declared: cir.RealPrecision,
 ): string {
-    const precision = storagePrecision(declared)
+    const grid = gridCall(declared)
     const native = integerRepresentation(expr.type as any) === 'native'
     const value = native ? lowerExpr(expr) : lowerBorrowed(expr, 'big')
-    if (precision.base === 'bin')
-        return native
-            ? `Real¸fromInt64Binary(${value}, ${precision.digits})`
-            : `Real¸fromIntegerBinary(${value}, ${precision.digits})`
-    return native
-        ? `Real¸fromInt64(${value}, ${precision.digits}, ${precision.kind === 'scale'})`
-        : `Real¸fromInteger(${value}, ${precision.digits}, ${precision.kind === 'scale'})`
+    return `Real¸from${native ? 'Int64' : 'Integer'}${grid.suffix}(${value}, ${grid.args})`
 }
 
 function lowerRealBorrowed(
@@ -1256,7 +1269,7 @@ function lowerRealArithmetic(
     if (realExpressionRepresentation(expr) === 'managed') {
         if (expr.kind === 'REMAINDER')
             throw new Error('Remainder on managed real values is not supported')
-        const precision = storagePrecision(expr.type.precision!)
+        const grid = gridCall(expr.type.precision!)
         const functionName = {
             ADDITION: 'add',
             SUBTRACTION: 'subtract',
@@ -1264,8 +1277,8 @@ function lowerRealArithmetic(
             DIVISION: 'divide',
             POWER: 'power',
         }[expr.kind]
-        const suffix = precision.base === 'bin' ? 'Binary' : ''
-        return `Real¸${functionName}${suffix}(${lowerRealBorrowed(expr.left, expr.type)}, ${lowerRealBorrowed(expr.right, expr.type)}, ${precision.digits})`
+        const opArgs = grid.suffix === 'Scale' ? grid.args : grid.roundArgs
+        return `Real¸${functionName}${grid.suffix}(${lowerRealBorrowed(expr.left, expr.type)}, ${lowerRealBorrowed(expr.right, expr.type)}, ${opArgs})`
     }
 
     const representation = realExpressionRepresentation(expr)

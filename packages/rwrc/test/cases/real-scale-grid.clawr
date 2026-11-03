@@ -1,0 +1,15 @@
+@main {
+    const a: real scale 3 bin = 0.1
+    const b: real scale 3 bin = 0.3
+    print(a)
+    print(a + b)
+    print(a * b)
+    print(b / a)
+    const c: real scale 3 ter = 0.1
+    const d: real scale 3 ter = 0.3
+    print(c + d)
+    print(c * d)
+    print(d / c)
+    print(c < d)
+    print(d ^ 2)
+}

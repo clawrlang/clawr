@@ -1,9 +1,9 @@
 # TODO
 
 - Complete `real` lowering with finite precision, per-operation rounding, and a magnitude range limited only by available memory; fixed-exponent IEEE formats alone are insufficient.
-  - Implemented initial slice: decimal `Real*` values with explicit precision and arbitrary decimal exponents, plus bounded IEEE binary16/binary32/binary64 lowering, arbitrary-precision binary reals (`Real*` rounded to N bits) for any other `sig N bin` or non-full range, `sig N ter` stored as binary with 1 + ⌈N·log₂3⌉ bits (ADR-025), and integer arithmetic with decimal `sig`/`scale` reals.
+  - Implemented initial slice: decimal `Real*` values with explicit precision and arbitrary decimal exponents, plus bounded IEEE binary16/binary32/binary64 lowering, arbitrary-precision binary reals (`Real*` rounded to N bits) for any other `sig N bin` or non-full range, `sig N ter` stored as binary with 1 + ⌈N·log₂3⌉ bits (ADR-025), and `scale N` reals in base 2 and 3 (integer multiples of 2⁻ᴺ / 3⁻ᴺ; base 3 stores the numerator over 3ᴺ and prints the shortest decimal that rounds to the same grid point), and integer arithmetic with decimal `sig`/`scale` reals.
   - Covered end to end by `packages/rwrc/test/cases/real-*.clawr` (`.panic` files assert expected runtime aborts).
-  - Remaining: `scale` precision in base 2 and 3, conversions between native IEEE and arbitrary-precision binary reals, real remainder, fractional real exponents, named `float32`/`float64` types, and real values returned from functions (blocked by the same ISOLATED/UNIQUE return rule as integers).
+  - Remaining: conversions between native IEEE and arbitrary-precision binary reals, real remainder, fractional real exponents, named `float32`/`float64` types, and real values returned from functions (blocked by the same ISOLATED/UNIQUE return rule as integers).
 - Lower `real` types with massive precision and/or range as `Real*`.
 - Implement static analysis and lowering of dyadic operations supporting combinations of small vs large numbers (`real` and `integer` types).
   - `ADDITION`

@@ -649,14 +649,16 @@ Real *Real¸ensureInRange(Real *value, const char *min, const char *max) {
 // ---------------------------------------------------------------------------
 
 static String *formatBinaryReal(Real *self);
+static String *formatTernaryScale(Real *self);
 
 __attribute__((visibility("default"))) String *Real·toStringRC(Real *self) {
   if (!self->cache_valid) {
     if (self->string_cache)
       releaseRC(self->string_cache);
-    self->string_cache = self->binary_bits ? formatBinaryReal(self)
-                                           : formatReal(self->significand,
-                                                        self->exponent10);
+    self->string_cache = self->grid_base == 3 ? formatTernaryScale(self)
+                         : self->binary_bits  ? formatBinaryReal(self)
+                                              : formatReal(self->significand,
+                                                           self->exponent10);
     self->cache_valid = true;
   }
   return retainRC(self->string_cache);
@@ -947,8 +949,12 @@ static Real *powerImpl(Real *base, Real *exponent, size_t result_precision,
   return result;
 }
 
+static int compareTernaryScale(Real *left, Real *right);
+
 __attribute__((visibility("default"))) int Real¸compare(Real *left,
                                                         Real *right) {
+  if (left->grid_base == 3 || right->grid_base == 3)
+    return compareTernaryScale(left, right);
   String *left_string = Integer·toStringRC(left->significand);
   String *right_string = Integer·toStringRC(right->significand);
   const char *left_raw = String·toCString(left_string);
@@ -1325,4 +1331,318 @@ Real *Real¸fromBinary(double value, unsigned significand_bits) {
   }
   panic("Failed to format binary real");
   return NULL;
+}
+
+// ---------------------------------------------------------------------------
+// `scale n` reals on a binary or ternary grid
+// ---------------------------------------------------------------------------
+
+static Integer *negateInteger(Integer *value) {
+  return Integer¸subtract(&Integer¸zero, value);
+}
+
+static Integer *integerPowerSize(Integer *exponent) {
+  size_t n;
+  if (!integerToSize(exponent, &n))
+    panic("Real operation requires more memory than available");
+  return integerPow(10, n);
+}
+
+// value = p / q with q > 0.
+static void rationalOf(Real *x, Integer **p, Integer **q) {
+  if (x->grid_base == 3) {
+    *p = retainRC(x->significand);
+    *q = integerPow(3, x->precision);
+  } else if (integerIsNegative(x->exponent10)) {
+    Integer *magnitude = integerAbs(x->exponent10);
+    *p = retainRC(x->significand);
+    *q = integerPowerSize(magnitude);
+    releaseRC(magnitude);
+  } else {
+    Integer *factor = integerPowerSize(x->exponent10);
+    *p = Integer¸multiply(x->significand, factor);
+    *q = integerFromDigit(1);
+    releaseRC(factor);
+  }
+}
+
+// Rounds p / q (q > 0) to the nearest multiple of base^-n, ties to even.
+static Real *roundToGrid(Integer *p, Integer *q, size_t n, unsigned base) {
+  if (base != 2 && base != 3)
+    panic("Unsupported real scale base");
+  bool negative = integerIsNegative(p);
+  Integer *magnitude = integerAbs(p);
+  Integer *factor = integerPow(base, n);
+  Integer *top = Integer¸multiply(magnitude, factor);
+  Integer *kept = Integer¸floorDivide(top, q);
+  Integer *remainder = Integer¸modulus(top, q);
+  Integer *twice = Integer¸add(remainder, remainder);
+  int order = compareIntegers(twice, q);
+  Integer *two = integerFromDigit(2);
+  Integer *parity = Integer¸modulus(kept, two);
+  if (order > 0 || (order == 0 && !integerIsZero(parity))) {
+    Integer *next = integerIncrement(kept);
+    releaseRC(kept);
+    kept = next;
+  }
+  if (negative && !integerIsZero(kept))
+    Integer·toggleSign(kept);
+  releaseRC(magnitude);
+  releaseRC(factor);
+  releaseRC(top);
+  releaseRC(remainder);
+  releaseRC(twice);
+  releaseRC(two);
+  releaseRC(parity);
+
+  Integer *sig = kept;
+  Integer *exp = retainRC(&Integer¸zero);
+  if (base == 2 && n > 0) {
+    Integer *fives = integerPow(5, n);
+    sig = Integer¸multiply(kept, fives);
+    releaseRC(fives);
+    releaseRC(kept);
+    releaseRC(exp);
+    exp = Integer¸fromInt64(-(int64_t)n);
+    normalize(&sig, &exp);
+  }
+  return allocInitRC(Real, 0, __rc_ISOLATED, .significand = sig,
+                     .exponent10 = exp, .precision = n,
+                     .scale_precision = true, .string_cache = NULL,
+                     .cache_valid = false, .binary_bits = 0,
+                     .grid_base = base);
+}
+
+static Real *gridFromReal(Real *value, size_t n, unsigned base) {
+  Integer *p;
+  Integer *q;
+  rationalOf(value, &p, &q);
+  Real *result = roundToGrid(p, q, n, base);
+  releaseRC(p);
+  releaseRC(q);
+  return result;
+}
+
+static Real *gridFromDecimal(Integer *sig, Integer *exp, size_t n,
+                             unsigned base) {
+  Real decimal = {.significand = sig, .exponent10 = exp, .grid_base = 0};
+  return gridFromReal(&decimal, n, base);
+}
+
+static int compareTernaryScale(Real *left, Real *right) {
+  Integer *lp;
+  Integer *lq;
+  Integer *rp;
+  Integer *rq;
+  rationalOf(left, &lp, &lq);
+  rationalOf(right, &rp, &rq);
+  Integer *a = Integer¸multiply(lp, rq);
+  Integer *b = Integer¸multiply(rp, lq);
+  int result = compareIntegers(a, b);
+  releaseRC(a);
+  releaseRC(b);
+  releaseRC(lp);
+  releaseRC(lq);
+  releaseRC(rp);
+  releaseRC(rq);
+  return result;
+}
+
+static String *formatTernaryScale(Real *self) {
+  if (integerIsZero(self->significand))
+    return formatReal(self->significand, self->exponent10);
+  // Shortest decimal that rounds back to the same grid point.
+  size_t places = (size_t)ceil((double)self->precision * 0.4771212547196624) + 4;
+  Integer *q = integerPow(3, self->precision);
+  bool negative = integerIsNegative(self->significand);
+  Integer *magnitude = integerAbs(self->significand);
+  Integer *factor = integerPow(10, places);
+  Integer *top = Integer¸multiply(magnitude, factor);
+  Integer *sig = Integer¸floorDivide(top, q);
+  Integer *remainder = Integer¸modulus(top, q);
+  Integer *twice = Integer¸add(remainder, remainder);
+  if (compareIntegers(twice, q) >= 0) {
+    Integer *next = integerIncrement(sig);
+    releaseRC(sig);
+    sig = next;
+  }
+  if (negative)
+    Integer·toggleSign(sig);
+  Integer *exp = Integer¸fromInt64(-(int64_t)places);
+  releaseRC(q);
+  releaseRC(magnitude);
+  releaseRC(factor);
+  releaseRC(top);
+  releaseRC(remainder);
+  releaseRC(twice);
+
+  size_t digits = integerDigitCount(sig);
+  for (size_t count = 1; count < digits; count++) {
+    Integer *candidate_sig = retainRC(sig);
+    Integer *candidate_exp = retainRC(exp);
+    roundToPrecision(&candidate_sig, &candidate_exp, count, false);
+    Real *candidate =
+        gridFromDecimal(candidate_sig, candidate_exp, self->precision, 3);
+    bool same = compareTernaryScale(candidate, self) == 0;
+    releaseRC(candidate);
+    if (same) {
+      normalize(&candidate_sig, &candidate_exp);
+      String *text = formatReal(candidate_sig, candidate_exp);
+      releaseRC(candidate_sig);
+      releaseRC(candidate_exp);
+      releaseRC(sig);
+      releaseRC(exp);
+      return text;
+    }
+    releaseRC(candidate_sig);
+    releaseRC(candidate_exp);
+  }
+  normalize(&sig, &exp);
+  String *text = formatReal(sig, exp);
+  releaseRC(sig);
+  releaseRC(exp);
+  return text;
+}
+
+__attribute__((visibility("default")))
+Real *Real¸roundScale(Real *value, size_t n, unsigned base) {
+  return gridFromReal(value, n, base);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸fromStringScale(const char *value, size_t n, unsigned base) {
+  Real *exact = realFromStringExact(value);
+  Real *result = gridFromReal(exact, n, base);
+  releaseRC(exact);
+  return result;
+}
+
+__attribute__((visibility("default")))
+Real *Real¸fromIntegerScale(Integer *value, size_t n, unsigned base) {
+  return gridFromDecimal(value, &Integer¸zero, n, base);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸fromInt64Scale(int64_t value, size_t n, unsigned base) {
+  Integer *integer = Integer¸fromInt64(value);
+  Real *result = Real¸fromIntegerScale(integer, n, base);
+  releaseRC(integer);
+  return result;
+}
+
+typedef enum { SCALE_ADD, SCALE_SUB, SCALE_MUL, SCALE_DIV } ScaleOp;
+
+static Real *scaleOperation(ScaleOp op, Real *left, Real *right, size_t n,
+                            unsigned base) {
+  Integer *lp;
+  Integer *lq;
+  Integer *rp;
+  Integer *rq;
+  rationalOf(left, &lp, &lq);
+  rationalOf(right, &rp, &rq);
+  Integer *p;
+  Integer *q;
+  switch (op) {
+  case SCALE_ADD:
+  case SCALE_SUB: {
+    Integer *a = Integer¸multiply(lp, rq);
+    Integer *b = Integer¸multiply(rp, lq);
+    p = op == SCALE_ADD ? Integer¸add(a, b) : Integer¸subtract(a, b);
+    q = Integer¸multiply(lq, rq);
+    releaseRC(a);
+    releaseRC(b);
+    break;
+  }
+  case SCALE_MUL:
+    p = Integer¸multiply(lp, rp);
+    q = Integer¸multiply(lq, rq);
+    break;
+  case SCALE_DIV:
+    if (integerIsZero(rp))
+      panic("Division by zero!");
+    p = Integer¸multiply(lp, rq);
+    q = Integer¸multiply(lq, rp);
+    if (integerIsNegative(q)) {
+      Integer *np = negateInteger(p);
+      Integer *nq = negateInteger(q);
+      releaseRC(p);
+      releaseRC(q);
+      p = np;
+      q = nq;
+    }
+    break;
+  }
+  Real *result = roundToGrid(p, q, n, base);
+  releaseRC(p);
+  releaseRC(q);
+  releaseRC(lp);
+  releaseRC(lq);
+  releaseRC(rp);
+  releaseRC(rq);
+  return result;
+}
+
+__attribute__((visibility("default")))
+Real *Real¸addScale(Real *left, Real *right, size_t n, unsigned base) {
+  return scaleOperation(SCALE_ADD, left, right, n, base);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸subtractScale(Real *left, Real *right, size_t n, unsigned base) {
+  return scaleOperation(SCALE_SUB, left, right, n, base);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸multiplyScale(Real *left, Real *right, size_t n, unsigned base) {
+  return scaleOperation(SCALE_MUL, left, right, n, base);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸divideScale(Real *dividend, Real *divisor, size_t n, unsigned base) {
+  return scaleOperation(SCALE_DIV, dividend, divisor, n, base);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸powerScale(Real *value, Real *exponent, size_t n, unsigned base) {
+  Integer *ep;
+  Integer *eq;
+  rationalOf(exponent, &ep, &eq);
+  bool negative = integerIsNegative(ep);
+  Integer *magnitude = integerAbs(ep);
+  Integer *remainder = Integer¸modulus(magnitude, eq);
+  if (!integerIsZero(remainder))
+    panic("Real exponentiation requires an integer exponent");
+  Integer *whole = Integer¸floorDivide(magnitude, eq);
+  size_t e;
+  if (!integerToSize(whole, &e))
+    panic("Real exponent too large");
+  releaseRC(ep);
+  releaseRC(eq);
+  releaseRC(magnitude);
+  releaseRC(remainder);
+  releaseRC(whole);
+
+  Real *result = Real¸fromInt64Scale(1, n, base);
+  Real *b = retainRC(value);
+  for (size_t rest = e; rest > 0; rest >>= 1) {
+    if (rest & 1) {
+      Real *next = scaleOperation(SCALE_MUL, result, b, n, base);
+      releaseRC(result);
+      result = next;
+    }
+    if (rest >> 1 > 0) {
+      Real *next = scaleOperation(SCALE_MUL, b, b, n, base);
+      releaseRC(b);
+      b = next;
+    }
+  }
+  releaseRC(b);
+  if (negative) {
+    Real *one = Real¸fromInt64Scale(1, n, base);
+    Real *reciprocal = scaleOperation(SCALE_DIV, one, result, n, base);
+    releaseRC(one);
+    releaseRC(result);
+    result = reciprocal;
+  }
+  return result;
 }

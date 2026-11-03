@@ -20,6 +20,7 @@ typedef struct Real {
   String *string_cache; // nullable; lazy-built by toStringRC
   bool cache_valid;
   size_t binary_bits; // 0 for decimal reals; else the binary significand width
+  unsigned grid_base; // 0, or 2/3 for `scale n` reals on a binary/ternary grid
 } Real;
 typedef struct Realˇproperties {
   Integer *significand;
@@ -29,6 +30,7 @@ typedef struct Realˇproperties {
   String *string_cache; // nullable; lazy-built by toStringRC
   bool cache_valid;
   size_t binary_bits;
+  unsigned grid_base;
 } Realˇproperties;
 extern const __type_info Realˇtype;
 
@@ -53,6 +55,18 @@ Real *Real¸subtractBinary(Real *left, Real *right, size_t bits);
 Real *Real¸multiplyBinary(Real *left, Real *right, size_t bits);
 Real *Real¸divideBinary(Real *dividend, Real *divisor, size_t bits);
 Real *Real¸powerBinary(Real *base, Real *exponent, size_t bits);
+/// `scale n` reals in base 2 or 3: the value is an integer multiple of
+/// base^-n, rounded (ties-to-even) after every operation. Base 2 values are
+/// stored as exact decimals; base 3 values store the numerator over 3^n.
+Real *Real¸roundScale(Real *value, size_t n, unsigned base);
+Real *Real¸fromStringScale(const char *value, size_t n, unsigned base);
+Real *Real¸fromIntegerScale(Integer *value, size_t n, unsigned base);
+Real *Real¸fromInt64Scale(int64_t value, size_t n, unsigned base);
+Real *Real¸addScale(Real *left, Real *right, size_t n, unsigned base);
+Real *Real¸subtractScale(Real *left, Real *right, size_t n, unsigned base);
+Real *Real¸multiplyScale(Real *left, Real *right, size_t n, unsigned base);
+Real *Real¸divideScale(Real *dividend, Real *divisor, size_t n, unsigned base);
+Real *Real¸powerScale(Real *base, Real *exponent, size_t n, unsigned base_);
 String *Real·toStringRC(Real *self);
 const char *Real·toString(Real *self);
 Real *Real¸add(Real *left, Real *right, size_t result_precision);

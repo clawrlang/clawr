@@ -1,0 +1,15 @@
+bin scale 3: 0.1 = 0.125
+bin scale 3: 0.1 + 0.3 = 0.375
+bin scale 3: 0.1 * 0.3 = 0.0
+bin scale 3: 0.3 / 0.1 = 2.0
+bin scale 3: 0.3 ^ 2 = 0.0
+ter scale 3: 0.1 = 0.1
+ter scale 3: 0.1 + 0.3 = 0.4
+ter scale 3: 0.1 * 0.3 = 0.04
+ter scale 3: 0.3 / 0.1 = 2.67
+ter scale 3: 0.1 - 0.3 = -0.2
+ter scale 3: 0.3 ^ -2 = 13.5
+compare -1 1
+ter scale 20: 1 / 3 = 0.3333333333
+ter scale 5: -7 = -7.0
+ter scale 5: -0.7 = -0.7

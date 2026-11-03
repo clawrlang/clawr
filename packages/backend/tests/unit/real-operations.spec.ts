@@ -174,4 +174,25 @@ describe('Lowering real operations', () => {
         // 1 + ceil(10 * log2(3)) = 17 bits
         expect(lowerExpr(expr)).toMatch(/Real¸addBinary\(tmpˇ\d+, tmpˇ\d+, 17\)/)
     })
+
+    it('rounds scale reals in base 2 and 3 to their grid', () => {
+        for (const [base, code] of [
+            ['bin', 2],
+            ['ter', 3],
+        ] as const) {
+            const type = {
+                universe: 'real' as const,
+                precision: { kind: 'scale' as const, digits: 4, base },
+            }
+            const expr: Expression = {
+                kind: 'MULTIPLICATION',
+                left: { kind: 'REAL_LITERAL', type: { ...type, value: '1.5' } },
+                right: { kind: 'REAL_LITERAL', type: { ...type, value: '2.5' } },
+                type,
+            }
+            const lowered = lowerExpr(expr)
+            expect(lowered).toContain(`Real¸multiplyScale(tmpˇ`)
+            expect(lowered).toContain(`, 4, ${code})`)
+        }
+    })
 })

@@ -17,45 +17,47 @@ describe('End-to-end Tests', () => {
         test(fileName, async () => {
             const outFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.out')}`
             const errFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.err')}`
+            const panicFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.panic')}`
             const exePath = `${OUTPUT_DIR}/${fileName.replace(/.clawr$/, '')}`
 
+            const errFileExists = fs.existsSync(errFilePath)
+
             const compilerResult = await runCli(fileName)
-            expect(compilerResult.stdout).toBe('')
-            if (fs.existsSync(errFilePath)) {
-                const data = fs.readFileSync(errFilePath, 'utf-8')
-                expect(compilerResult).toMatchObject({
-                    code: 1,
-                    stderr: data,
-                })
-                return
-            } else {
-                expect(compilerResult).toMatchObject({
-                    code: 0,
-                    stderr: '',
+            checkCompilerOutput(compilerResult)
+            if (errFileExists) return
+
+            const exeResult = await exec(exePath, [])
+            checkForPanicCondition(exeResult)
+            checkStdOut(exeResult)
+
+            function checkCompilerOutput(result: ExecResult) {
+                const expectedExitCode = errFileExists ? 1 : 0
+                const expectedError = errFileExists
+                    ? fs.readFileSync(errFilePath, 'utf-8')
+                    : ''
+                expect(result).toMatchObject({
+                    code: expectedExitCode,
+                    stderr: expectedError,
+                    stdout: '',
                 })
             }
 
-            const panicFilePath = `${CASES_DIR}/${fileName.replace(/.clawr$/, '.panic')}`
-            const exeResult = await exec(exePath, [])
-            if (fs.existsSync(panicFilePath)) {
-                // The program must abort with the expected message after printing its output
-                expect(exeResult.code).not.toBe(0)
-                expect(exeResult.stderr).toBe(
-                    fs.readFileSync(panicFilePath, 'utf-8'),
-                )
-                if (fs.existsSync(outFilePath))
-                    expect(exeResult.stdout).toBe(
-                        fs.readFileSync(outFilePath, 'utf-8'),
-                    )
-                return
+            function checkForPanicCondition(result: ExecResult) {
+                const panicFileExists = fs.existsSync(panicFilePath)
+                const expectedOutput = panicFileExists
+                    ? fs.readFileSync(panicFilePath, 'utf-8')
+                    : ''
+                const expectedExitCode = panicFileExists ? 1 : 0
+                expect(result).toMatchObject({
+                    code: expectedExitCode,
+                    stderr: expectedOutput,
+                })
             }
-            expect(exeResult).toMatchObject({
-                code: 0,
-                stderr: '',
-            })
-            if (fs.existsSync(outFilePath)) {
-                const data = fs.readFileSync(outFilePath, 'utf-8')
-                expect(exeResult.stdout).toBe(data)
+
+            function checkStdOut(result: ExecResult) {
+                if (!fs.existsSync(outFilePath)) return
+                const expectedOutput = fs.readFileSync(outFilePath, 'utf-8')
+                expect(result.stdout).toBe(expectedOutput)
             }
         })
     }

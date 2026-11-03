@@ -23,6 +23,10 @@
       "types": "./dist/src/parser/index.d.ts",
       "default": "./dist/src/parser/index.js"
     },
+    "./stdlib": {
+      "types": "./dist/src/stdlib.d.ts",
+      "default": "./dist/src/stdlib.js"
+    },
     "./parser/*": {
       "types": "./dist/src/parser/*.d.ts",
       "default": "./dist/src/parser/*.js"
@@ -55,6 +59,7 @@
   },
   "dependencies": {
     "@clawr/cir": "^0.1.0",
+    "@clawr/stdlib": "^0.1.0",
     "decimalish": "^0.1.2"
   },
   "devDependencies": {

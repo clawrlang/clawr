@@ -80,6 +80,8 @@ const ALL_KW = [
     `enum`,
     'union',
     'data',
+    'subset',
+    'type',
     'object',
     'service',
     'companion',

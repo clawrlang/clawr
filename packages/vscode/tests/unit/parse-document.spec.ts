@@ -7,6 +7,13 @@ describe('parseDocument', () => {
         expect(diagnostics).toEqual([])
     })
 
+    it('resolves standard numeric aliases', () => {
+        const { diagnostics } = parseDocument(
+            '@main {\n    const count: natural = 5\n    const value: float32 = 1.5\n}',
+        )
+        expect(diagnostics).toEqual([])
+    })
+
     it('records a diagnostic for an unknown variable', () => {
         const { diagnostics } = parseDocument(
             '@main {\n    const y: integer = unknownVar\n}',

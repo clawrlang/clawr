@@ -1,11 +1,13 @@
 import { TokenStream } from '@/lexer'
 import { Declaration } from '@/model'
 import { HighlightRecorder } from '@/tools/highlights'
+import type { Scope } from '@/model/scope'
 import * as cir from '@clawr/cir'
 
 export type Context = {
     highlightRecorder?: HighlightRecorder
     type?: string
+    scope?: Scope
     isolationLevel?: (cir.Expression & { kind: 'ALLOCATION' })['isolationLevel']
 }
 

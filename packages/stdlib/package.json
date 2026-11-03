@@ -1,0 +1,12 @@
+{
+  "name": "@clawr/stdlib",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Clawr standard library declarations",
+  "files": [
+    "*.clawr"
+  ],
+  "exports": {
+    "./stdlib.clawr": "./stdlib.clawr"
+  }
+}

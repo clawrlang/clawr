@@ -1,0 +1,11 @@
+@main {
+    const n: natural = 5
+    const h: binary16 = 1.5
+    const f: binary32 = 2.25
+    const d: binary64 = 3.125
+    print(n)
+    print(h)
+    print(f)
+    print(d)
+    print(f + 0.25)
+}

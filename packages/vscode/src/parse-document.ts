@@ -1,6 +1,7 @@
 import { TokenStream } from '@clawr/frontend/lexer'
 import { Scope } from '@clawr/frontend/model/scope'
 import { ModuleParser } from '@clawr/frontend/parser'
+import { createStandardLibraryScope } from '@clawr/frontend/stdlib'
 import type {
     HighlightRecorder,
     SemanticTokenKind,
@@ -36,7 +37,7 @@ export function parseDocument(source: string): ParsedDocument {
     }
     const context = {
         highlightRecorder,
-        scope: Scope.createRoot(),
+        scope: Scope.createRoot(createStandardLibraryScope()),
     }
 
     try {

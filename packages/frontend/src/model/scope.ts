@@ -5,6 +5,7 @@ import { InterfaceDeclaration } from '@/model/interface-declaration'
 import { IsolationLevel, SHARED, UNKNOWN } from '@/model/isolation-level'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeName } from '@/model/type-name'
+import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { RCTypeSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 import * as cir from '@clawr/cir'
@@ -17,6 +18,7 @@ class RootScope {
     public readonly emitted: cir.Declaration[] = []
     private readonly baseTypes: Set<string> = new Set()
     private readonly interfaces: Map<string, InterfaceDeclaration> = new Map()
+    private readonly typeAliases = new Map<string, TypeConstraintDeclaration>()
 
     interfaceDeclaration(name: TypeName): InterfaceDeclaration | undefined {
         return this.interfaces.get(name.canonical())
@@ -62,6 +64,16 @@ class RootScope {
         this.functions.set(decl.name().toString(), decl)
     }
 
+    typeAlias(name: string): TypeConstraintDeclaration | undefined {
+        return this.typeAliases.get(name)
+    }
+
+    addTypeAlias(name: string, value: TypeConstraintDeclaration): boolean {
+        if (this.typeAliases.has(name)) return false
+        this.typeAliases.set(name, value)
+        return true
+    }
+
     variableDeclaration(name: string): Variable | undefined {
         return this.variables.get(name)
     }
@@ -82,10 +94,11 @@ export class Scope {
     private constructor(
         public rootScope: RootScope,
         public parentScope?: Scope,
+        public readonly namespace?: string,
     ) {}
 
-    static createRoot() {
-        return new Scope(new RootScope())
+    static createRoot(parentScope?: Scope, namespace?: string) {
+        return new Scope(new RootScope(), parentScope, namespace)
     }
 
     createChildScope() {
@@ -99,8 +112,10 @@ export class Scope {
     dataDeclaration(name: TypeName): DataDeclaration | undefined {
         const decl = this.types.get(name.canonical())
         if (decl instanceof DataDeclaration) return decl
+        const globalDecl = this.rootScope.dataDeclaration(name)
+        if (globalDecl) return globalDecl
         if (this.parentScope) return this.parentScope.dataDeclaration(name)
-        return this.rootScope.dataDeclaration(name)
+        return undefined
     }
 
     addObjectDeclaration(decl: ObjectDeclaration) {
@@ -108,7 +123,10 @@ export class Scope {
     }
 
     interfaceDeclaration(name: TypeName): InterfaceDeclaration | undefined {
-        return this.rootScope.interfaceDeclaration(name)
+        return (
+            this.rootScope.interfaceDeclaration(name) ??
+            this.parentScope?.interfaceDeclaration(name)
+        )
     }
 
     markAsBase(name: TypeName) {
@@ -122,19 +140,36 @@ export class Scope {
     objectDeclaration(name: TypeName): ObjectDeclaration | undefined {
         const decl = this.types.get(name.canonical())
         if (decl instanceof ObjectDeclaration) return decl
+        const globalDecl = this.rootScope.objectDeclaration(name)
+        if (globalDecl) return globalDecl
         if (this.parentScope) return this.parentScope.objectDeclaration(name)
-        return this.rootScope.objectDeclaration(name)
+        return undefined
     }
 
     functionDeclaration(name: FunctionName): FunctionDeclaration | undefined {
-        return this.rootScope.functionDeclaration(name.toString())
+        return (
+            this.rootScope.functionDeclaration(name.toString()) ??
+            this.parentScope?.functionDeclaration(name)
+        )
+    }
+
+    typeAlias(name: string): TypeConstraintDeclaration | undefined {
+        return (
+            this.rootScope.typeAlias(name) ?? this.parentScope?.typeAlias(name)
+        )
+    }
+
+    addTypeAlias(name: string, value: TypeConstraintDeclaration): boolean {
+        return this.rootScope.addTypeAlias(name, value)
     }
 
     variableDeclaration(name: string): Variable | undefined {
         const variable = this.variables.get(name)
         if (variable) return variable
+        const globalVariable = this.rootScope.variableDeclaration(name)
+        if (globalVariable) return globalVariable
         if (this.parentScope) return this.parentScope.variableDeclaration(name)
-        return this.rootScope.variableDeclaration(name)
+        return undefined
     }
 
     addVariableDeclaration(name: string, value: Variable) {
@@ -174,8 +209,10 @@ export class Scope {
         if (value) return value
         const variable = this.variables.get(name)
         if (variable) return variable.type
+        const globalValue = this.rootScope.variableDeclaration(name)?.type
+        if (globalValue) return globalValue
         if (this.parentScope) return this.parentScope.currentValue(name)
-        return this.rootScope.variableDeclaration(name)?.type
+        return undefined
     }
 
     setCurrentValue(name: string, valueSet: ValueSet): Result {

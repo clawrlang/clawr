@@ -10,6 +10,7 @@ import * as backend from '@clawr/backend'
 import { TokenStream } from '@clawr/frontend/lexer'
 import { Scope } from '@clawr/frontend/model/scope'
 import { ModuleParser } from '@clawr/frontend/parser'
+import { createStandardLibraryScope } from '@clawr/frontend/stdlib'
 import {
     SourceCodeSpan,
     SourceError,
@@ -17,7 +18,10 @@ import {
 } from '@clawr/frontend/tools'
 
 const exeDir = path.dirname(process.execPath)
-const runtimeLibName = readFileSync(path.join(exeDir, 'libClawr.name'), 'utf-8').trim()
+const runtimeLibName = readFileSync(
+    path.join(exeDir, 'libClawr.name'),
+    'utf-8',
+).trim()
 const program = new Command()
 
 program.name('rwrc').description('Clawr language compiler').version('0.1.0')
@@ -57,13 +61,14 @@ async function parseToCIR({
     file: string
     outputFilePath: string
 }) {
+    const standardLibraryScope = createStandardLibraryScope()
     const context = {
-        scope: Scope.createRoot(),
+        scope: Scope.createRoot(standardLibraryScope),
     }
 
     const sourceCode = await fs.readFile(file, 'utf-8')
     const stream = TokenStream.read(sourceCode)
-    const cir = ModuleParser.create({}).parse(stream).toCIR(context)
+    const cir = ModuleParser.create(context).parse(stream).toCIR(context)
 
     await ensureDirectoryExists(path.dirname(outputFilePath))
     await fs.writeFile(outputFilePath, JSON.stringify(cir))

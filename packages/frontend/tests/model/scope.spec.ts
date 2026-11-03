@@ -37,6 +37,29 @@ describe('Scope', () => {
             })
         })
 
+        it('updates program root variables before checking the parent scope', () => {
+            const standardLibrary = Scope.createRoot()
+            standardLibrary.addVariableDeclaration('v', {
+                isImmutable: false,
+                isolationLevel: ISOLATED,
+                type: IntegerSet.singleton(5n),
+            })
+            const scope = Scope.createRoot(standardLibrary)
+            scope.rootScope.addVariableDeclaration('v', {
+                isImmutable: false,
+                isolationLevel: ISOLATED,
+                type: IntegerSet.unconstrained(),
+            })
+
+            expect(
+                scope.setCurrentValue('v', IntegerSet.singleton(12n)).isSuccess,
+            ).toBeTrue()
+            expect(scope.currentValue('v')).toMatchObject({
+                min: 12n,
+                max: 12n,
+            })
+        })
+
         it('finds the value in the parent scope', () => {
             const parent = Scope.createRoot()
             parent.addVariableDeclaration('v', {

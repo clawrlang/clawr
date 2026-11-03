@@ -32,3 +32,6 @@ They are essentally an ice-box for architectural decisions and future TODOs.
 - [Resolving Library Dependencies](./packages-implementation.md)
 - [What is `null`?](./null.md)
 - [Control Flow](./control-flow.md)
+- [Standard Library](./stdlib.md)
+- [Generics](./generics.md)
+- [Test Framework](./test-framework.md)

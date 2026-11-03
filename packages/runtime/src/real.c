@@ -996,6 +996,7 @@ __attribute__((visibility("default"))) int Real¸compare(Real *left,
   int result = compareIntegers(ls, rs);
   releaseRC(ls);
   releaseRC(rs);
+  releaseRC(exp);
   return result;
 }
 

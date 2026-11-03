@@ -1,0 +1,15 @@
+func pass(_ x: real sig 5 dec) -> real sig 5 dec {
+    return x
+}
+func twice(_ x: real sig 5 dec) -> real sig 5 dec {
+    const y: real sig 5 dec = x + x
+    return y
+}
+func big(_ x: integer) -> integer {
+    return x * 2
+}
+@main {
+    print(pass(1.5))
+    print(twice(2.25))
+    print(big(21))
+}

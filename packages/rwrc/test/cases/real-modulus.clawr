@@ -1,0 +1,20 @@
+@main {
+    const a: real sig 5 dec = 7.5
+    const n: real sig 5 dec = -7.5
+    const b: real sig 5 dec = 2.0
+    const m: real sig 5 dec = -2.0
+    print(a % b)
+    print(n % b)
+    print(a % m)
+    const c: real sig 53 bin = 7.5
+    const o: real sig 53 bin = -7.5
+    const d: real sig 53 bin = 2.0
+    print(c % d)
+    print(o % d)
+    const e: real sig 113 bin = -7.5
+    const f: real sig 113 bin = 2.0
+    print(e % f)
+    const g: real scale 3 ter = 1.0
+    const h: real scale 3 ter = 0.3
+    print(g % h)
+}

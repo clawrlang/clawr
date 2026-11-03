@@ -1684,3 +1684,100 @@ __attribute__((visibility("default"))) String *Real¸toFraction(Real *value) {
   releaseRC(b);
   return result;
 }
+
+// ---------------------------------------------------------------------------
+// Remainder: n - floor(n / d) * d, as for integers (ADR-023)
+// ---------------------------------------------------------------------------
+
+// Floored modulus of whole numbers; the result takes the sign of the divisor.
+static Integer *floorModulus(Integer *n, Integer *d) {
+  if (integerIsZero(d))
+    panic("Division by zero!");
+  Integer *dividend = integerAbs(n);
+  Integer *divisor = integerAbs(d);
+  Integer *m = Integer¸modulus(dividend, divisor);
+  releaseRC(dividend);
+  if (integerIsNegative(n) != integerIsNegative(d) && !integerIsZero(m)) {
+    Integer *flipped = Integer¸subtract(divisor, m);
+    releaseRC(m);
+    m = flipped;
+  }
+  releaseRC(divisor);
+  if (integerIsNegative(d) && !integerIsZero(m))
+    Integer·toggleSign(m);
+  return m;
+}
+
+// The remainder as m / q, where q > 0 is the common denominator.
+static void remainderParts(Real *left, Real *right, Integer **m,
+                           Integer **q) {
+  Integer *lp;
+  Integer *lq;
+  Integer *rp;
+  Integer *rq;
+  rationalOf(left, &lp, &lq);
+  rationalOf(right, &rp, &rq);
+  Integer *a = Integer¸multiply(lp, rq);
+  Integer *b = Integer¸multiply(rp, lq);
+  *m = floorModulus(a, b);
+  *q = Integer¸multiply(lq, rq);
+  releaseRC(a);
+  releaseRC(b);
+  releaseRC(lp);
+  releaseRC(lq);
+  releaseRC(rp);
+  releaseRC(rq);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸modulus(Real *left, Real *right, size_t result_precision) {
+  Integer *ls;
+  Integer *rs;
+  Integer *exp;
+  alignExponents(left, right, &ls, &rs, &exp);
+  Integer *m = floorModulus(ls, rs);
+  releaseRC(ls);
+  releaseRC(rs);
+  return realWithSigExp(m, exp, result_precision, left->scale_precision);
+}
+
+__attribute__((visibility("default")))
+Real *Real¸modulusBinary(Real *left, Real *right, size_t bits) {
+  Integer *m;
+  Integer *q;
+  remainderParts(left, right, &m, &q);
+  Real *result = realFromRational(m, q, &Integer¸zero, bits);
+  releaseRC(m);
+  releaseRC(q);
+  return result;
+}
+
+__attribute__((visibility("default")))
+Real *Real¸modulusScale(Real *left, Real *right, size_t n, unsigned base) {
+  Integer *m;
+  Integer *q;
+  remainderParts(left, right, &m, &q);
+  Real *result = roundToGrid(m, q, n, base);
+  releaseRC(m);
+  releaseRC(q);
+  return result;
+}
+
+#define DEFINE_IEEE_MODULUS(type, fmod_fn, name)                              \
+  __attribute__((visibility("default"))) type name(type left, type right) {   \
+    if (right == 0)                                                           \
+      panic("Division by zero!");                                             \
+    volatile type result = fmod_fn(left, right);                              \
+    if (result != 0 && (result < 0) != (right < 0))                           \
+      result = result + right;                                                \
+    return result;                                                            \
+  }
+
+DEFINE_IEEE_MODULUS(float, fmodf, Real32¸modulus)
+DEFINE_IEEE_MODULUS(double, fmod, Real64¸modulus)
+#ifdef __FLT16_MANT_DIG__
+static _Float16 fmodHalf(_Float16 left, _Float16 right) {
+  return (_Float16)fmodf((float)left, (float)right);
+}
+DEFINE_IEEE_MODULUS(_Float16, fmodHalf, Real16¸modulus)
+#endif

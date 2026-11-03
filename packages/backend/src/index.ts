@@ -1267,14 +1267,13 @@ function lowerRealArithmetic(
     if (expr.type.universe !== 'real')
         throw new Error('Real arithmetic result must have a real type')
     if (realExpressionRepresentation(expr) === 'managed') {
-        if (expr.kind === 'REMAINDER')
-            throw new Error('Remainder on managed real values is not supported')
         const grid = gridCall(expr.type.precision!)
         const functionName = {
             ADDITION: 'add',
             SUBTRACTION: 'subtract',
             MULTIPLICATION: 'multiply',
             DIVISION: 'divide',
+            REMAINDER: 'modulus',
             POWER: 'power',
         }[expr.kind]
         const opArgs = grid.suffix === 'Scale' ? grid.args : grid.roundArgs
@@ -1292,11 +1291,9 @@ function lowerRealArithmetic(
         SUBTRACTION: 'subtract',
         MULTIPLICATION: 'multiply',
         DIVISION: 'divide',
-        REMAINDER: undefined,
+        REMAINDER: 'modulus',
         POWER: 'power',
     }[expr.kind]
-    if (!operation)
-        throw new Error('Remainder on IEEE real values is not supported')
     const ctype = BINARY_FORMATS[representation].ctype
     const operand = (e: cir.Expression) =>
         e.type.universe === 'integer'

@@ -195,4 +195,22 @@ describe('Lowering real operations', () => {
             expect(lowered).toContain(`, 4, ${code})`)
         }
     })
+
+    it('lowers real remainder for every representation', () => {
+        const cases = [
+            [{ kind: 'sig', digits: 3, base: 'dec' }, /Real¸modulus\(tmpˇ\d+, tmpˇ\d+, 3\)/],
+            [{ kind: 'sig', digits: 113, base: 'bin' }, /Real¸modulusBinary\(tmpˇ\d+, tmpˇ\d+, 113\)/],
+            [{ kind: 'scale', digits: 4, base: 'ter' }, /Real¸modulusScale\(tmpˇ\d+, tmpˇ\d+, 4, 3\)/],
+        ] as const
+        for (const [precision, pattern] of cases) {
+            const type = { universe: 'real' as const, precision }
+            const expr: Expression = {
+                kind: 'REMAINDER',
+                left: { kind: 'REAL_LITERAL', type: { ...type, value: '7.5' } },
+                right: { kind: 'REAL_LITERAL', type: { ...type, value: '2' } },
+                type,
+            }
+            expect(lowerExpr(expr)).toMatch(pattern)
+        }
+    })
 })

@@ -77,6 +77,10 @@ Real *Real¸multiply(Real *left, Real *right, size_t result_precision);
 Real *Real¸divide(Real *dividend, Real *divisor, size_t result_precision);
 Real *Real¸power(Real *base, Real *exponent, size_t result_precision);
 Real *Real¸round(Real *value, size_t result_precision);
+/// Floored remainder, n - floor(n / d) * d, rounded to the result precision.
+Real *Real¸modulus(Real *left, Real *right, size_t result_precision);
+Real *Real¸modulusBinary(Real *left, Real *right, size_t bits);
+Real *Real¸modulusScale(Real *left, Real *right, size_t n, unsigned base);
 int Real¸compare(Real *left, Real *right);
 
 #ifdef __FLT16_MANT_DIG__
@@ -85,16 +89,19 @@ _Float16 Real16¸subtract(_Float16 left, _Float16 right);
 _Float16 Real16¸multiply(_Float16 left, _Float16 right);
 _Float16 Real16¸divide(_Float16 left, _Float16 right);
 _Float16 Real16¸power(_Float16 base, _Float16 exponent);
+_Float16 Real16¸modulus(_Float16 left, _Float16 right);
 #endif
 float Real32¸add(float left, float right);
 float Real32¸subtract(float left, float right);
 float Real32¸multiply(float left, float right);
 float Real32¸divide(float left, float right);
 float Real32¸power(float base, float exponent);
+float Real32¸modulus(float left, float right);
 double Real64¸add(double left, double right);
 double Real64¸subtract(double left, double right);
 double Real64¸multiply(double left, double right);
 double Real64¸divide(double left, double right);
 double Real64¸power(double base, double exponent);
+double Real64¸modulus(double left, double right);
 
 #endif // CLAWR_REAL_H

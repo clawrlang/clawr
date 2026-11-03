@@ -1,5 +1,5 @@
 import { Exponential } from '@/model/operators'
-import { IntegerSet } from '@/model/value-set'
+import { IntegerSet, RealSet } from '@/model/value-set'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('Exponential', () => {
@@ -13,6 +13,29 @@ describe('Exponential', () => {
             min: 8n,
             max: 8n,
         })
+    })
+
+    it('accepts a real base with an integer exponent', () => {
+        const precision = { kind: 'sig', digits: 5, base: 'dec' } as const
+        const result = Exponential.instance.compute(
+            RealSet.unconstrained(precision),
+            IntegerSet.singleton(2n),
+        )
+        expect(result.isSuccess).toBeTrue()
+    })
+
+    it('rejects real exponents', () => {
+        const precision = { kind: 'sig', digits: 5, base: 'dec' } as const
+        for (const base of [
+            RealSet.unconstrained(precision),
+            IntegerSet.singleton(2n),
+        ]) {
+            const result = Exponential.instance.compute(
+                base,
+                RealSet.unconstrained(precision),
+            )
+            expect(result.isSuccess).toBeFalse()
+        }
     })
 
     describe('integer ranges', () => {

@@ -7,7 +7,10 @@ export class Exponential implements BinaryOperator {
     static instance = new Exponential()
 
     compute(base: ValueSet, exponent: ValueSet): Result<ValueSet> {
-        if (!(base instanceof IntegerSet && exponent instanceof IntegerSet))
+        if (!(exponent instanceof IntegerSet))
+            return ErrorResult.failure('exponents must be integers')
+
+        if (!(base instanceof IntegerSet))
             return realOperationResult(base, exponent)
 
         if (exponent.min === undefined || exponent.min < 0)

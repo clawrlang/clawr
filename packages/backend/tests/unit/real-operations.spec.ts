@@ -48,10 +48,7 @@ describe('Lowering real operations', () => {
             kind: 'ADDITION',
             left: { kind: 'REAL_LITERAL', type: { ...type, value: '1.25' } },
             right: { kind: 'REAL_LITERAL', type: { ...type, value: '2.5' } },
-            type: {
-                universe: 'real',
-                precision: { kind: 'sig', digits: 24, base: 'bin' },
-            },
+            type,
         }
 
         expect(lowerExpr(expr)).toBe(
@@ -97,10 +94,7 @@ describe('Lowering real operations', () => {
             kind: 'MULTIPLICATION',
             left: { kind: 'REAL_LITERAL', type: { ...type, value: '1.5' } },
             right: { kind: 'REAL_LITERAL', type: { ...type, value: '2.25' } },
-            type: {
-                universe: 'real',
-                precision: type.precision,
-            },
+            type,
         }
 
         expect(lowerExpr(expr)).toBe('Real16¸multiply(1.5f16, 2.25f16)')
@@ -112,7 +106,7 @@ describe('Lowering real operations', () => {
             kind: 'DIVISION',
             left: { kind: 'REAL_LITERAL', type: { ...type, value: '1.0' } },
             right: { kind: 'REAL_LITERAL', type: { ...type, value: '4.0' } },
-            type: { universe: 'real', precision: type.precision },
+            type,
         }
 
         expect(lowerExpr(expr)).toBe(
@@ -126,7 +120,7 @@ describe('Lowering real operations', () => {
             kind: 'ADDITION',
             left: { kind: 'REAL_LITERAL', type: { ...type, value: '1.0' } },
             right: { kind: 'REAL_LITERAL', type: { ...type, value: '2.0' } },
-            type: { universe: 'real', precision: type.precision },
+            type,
         }
 
         expect(lowerExpr(expr)).toMatch(

@@ -17,6 +17,8 @@ export function realOperationResult(
             return ErrorResult.failure(
                 'real arithmetic requires an explicit precision',
             )
+        const adopting = adoptedLiteralPrecision(real, other)
+        if (adopting) return Result.value(adopting)
         if (
             real.precision.kind !== other.precision.kind ||
             real.precision.base !== other.precision.base
@@ -29,13 +31,16 @@ export function realOperationResult(
         const precision = { ...real.precision, digits: wider.precision!.digits }
         // Binary results stay in the (bounded) format of the wider operand;
         // overflow is checked at runtime.
-        if (
-            precision.base === 'bin' &&
-            wider.min !== undefined &&
-            wider.max !== undefined
+        const bounded = [wider, real, other].find(
+            (operand) => operand.min !== undefined && operand.max !== undefined,
         )
+        if (precision.base === 'bin' && bounded)
             return Result.value(
-                RealSet.range({ min: wider.min, max: wider.max, precision }),
+                RealSet.range({
+                    min: bounded.min,
+                    max: bounded.max,
+                    precision,
+                }),
             )
         return Result.value(RealSet.unconstrained(precision))
     }
@@ -52,4 +57,34 @@ export function realOperationResult(
     return ErrorResult.failure(
         'integers can only be combined with decimal, binary or ternary reals',
     )
+}
+
+// A decimal literal is exact, so it adopts the precision of the other operand
+// (it is rounded to that precision when lowered).
+function adoptedLiteralPrecision(
+    left: RealSet,
+    right: RealSet,
+): ValueSet | undefined {
+    const isLiteral = (v: RealSet) =>
+        v.min !== undefined &&
+        v.min === v.max &&
+        v.precision?.kind === 'sig' &&
+        v.precision.base === 'dec'
+    const literal = isLiteral(left)
+        ? left
+        : isLiteral(right)
+          ? right
+          : undefined
+    if (!literal) return undefined
+    const other = literal === left ? right : left
+    if (other === literal) return undefined
+    const precision = other.precision!
+    if (precision.kind === 'sig' && precision.base === 'dec') return undefined
+    if (
+        precision.base === 'bin' &&
+        other.min !== undefined &&
+        other.max !== undefined
+    )
+        return RealSet.range({ min: other.min, max: other.max, precision })
+    return RealSet.unconstrained(precision)
 }

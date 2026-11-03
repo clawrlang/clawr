@@ -43,6 +43,8 @@ Real *Real¸fromInteger(Integer *value, size_t precision,
 Real *Real¸fromInt64(int64_t value, size_t precision, bool scale_precision);
 /// Exact-shortest decimal value of a binary float, for boxing and printing.
 Real *Real¸fromBinary(double value, unsigned significand_bits);
+/// Nearest double to a managed real (exact when the value has at most 53 bits).
+double Real¸toBinary(Real *value);
 /// Arbitrary-precision binary reals: significand × 2^exponent rounded to the
 /// given number of significant bits after every operation (ties-to-even).
 /// The value is stored exactly as a decimal, so any binary width is supported.

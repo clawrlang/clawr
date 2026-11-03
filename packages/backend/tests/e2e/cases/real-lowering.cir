@@ -74,6 +74,8 @@ startBlock:
           precision: { kind: sig, digits: 24, base: bin }
       type:
         universe: real
+        min: '-340282346638528859811704183484516925440.0'
+        max: '340282346638528859811704183484516925440.0'
         precision: { kind: sig, digits: 24, base: bin }
   - kind: VARIABLE_DECL
     name: integer_scale_result

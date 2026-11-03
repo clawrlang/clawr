@@ -1307,6 +1307,11 @@ static bool roundsToHalf(double parsed, double value) {
 }
 
 __attribute__((visibility("default")))
+double Real¸toBinary(Real *value) {
+  return strtod(Real·toString(value), NULL);
+}
+
+__attribute__((visibility("default")))
 Real *Real¸fromBinary(double value, unsigned significand_bits) {
   if (!isfinite(value))
     panic("Cannot box a non-finite real");

@@ -1,0 +1,16 @@
+@main {
+    const a: real sig 113 bin = 0.5
+    const b: real sig 53 bin = 0.25
+    const c: real scale 3 bin = 1.0
+    print(a + 0.25)
+    print(b * 2.0)
+    print(a + b)
+    print(b + a)
+    print(a < b)
+    print(b < 0.5)
+    print(c + 0.25)
+    print(b + 1)
+    const d: real sig 20 bin = 0.125
+    print(b + d)
+    print(d < b)
+}

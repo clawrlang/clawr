@@ -613,8 +613,7 @@ function realRepresentation(valueSet: cir.RealSet): RealRepresentation {
         throw new Error('Real lowering requires an explicit valid precision')
     const precision = storagePrecision(declared)
     if (declared.base === 'ter' && declared.kind === 'sig') return 'managed'
-    if (precision.base === 'dec' || precision.kind === 'scale')
-        return 'managed'
+    if (precision.base === 'dec' || precision.kind === 'scale') return 'managed'
     if (precision.base !== 'bin')
         throw new Error(
             `Real precision ${precision.kind} ${precision.digits} ${precision.base} is not supported by this backend`,
@@ -645,31 +644,6 @@ function realRepresentation(valueSet: cir.RealSet): RealRepresentation {
 function realExpressionRepresentation(
     expr: cir.Expression,
 ): RealRepresentation {
-    if (
-        (expr.kind === 'ADDITION' ||
-            expr.kind === 'SUBTRACTION' ||
-            expr.kind === 'MULTIPLICATION' ||
-            expr.kind === 'DIVISION' ||
-            expr.kind === 'REMAINDER' ||
-            expr.kind === 'POWER') &&
-        expr.type.universe === 'real' &&
-        expr.type.precision?.base === 'bin'
-    ) {
-        const operands = [expr.left, expr.right].filter(
-            (operand) => operand.type.universe === 'real',
-        )
-        const left = realRepresentation(operands[0].type as cir.RealSet)
-        if (
-            operands.some(
-                (operand) =>
-                    realRepresentation(operand.type as cir.RealSet) !== left,
-            )
-        )
-            throw new Error(
-                'IEEE real operands must use the same native format',
-            )
-        return left
-    }
     return expr.type.universe === 'real'
         ? realRepresentation(expr.type)
         : 'managed'
@@ -794,11 +768,7 @@ function lowerLiteralAtPrecision(
 ): string | undefined {
     const declared = target.precision
     const precision = declared && storagePrecision(declared)
-    if (
-        expr.kind !== 'REAL_LITERAL' ||
-        !precision ||
-        !isManagedReal(expr.type)
-    )
+    if (expr.kind !== 'REAL_LITERAL' || !precision || !isManagedReal(expr.type))
         return undefined
     const value = expr.type.value.replaceAll('_', '')
     return realFromText(value, precision)
@@ -861,6 +831,8 @@ function lowerRealBorrowed(
         return hoist(lowerIntegerToReal(expr, precision), 'Real*')
     }
 
+    const nativeOperand = nativeToManaged(expr)
+    if (nativeOperand) return nativeOperand
     if (expr.type.universe !== 'real' || !isManagedReal(expr.type))
         throw new Error('Incompatible representation for decimal real operand')
     const sourcePrecision = expr.type.precision
@@ -880,6 +852,18 @@ function lowerRealBorrowed(
     if (sourcePrecision.digits !== resultPrecision.digits)
         lowered = hoist(realRound(lowered, resultPrecision), 'Real*')
     return lowered
+}
+
+// An IEEE value converts exactly to an arbitrary-precision real.
+function nativeToManaged(expr: cir.Expression): string | undefined {
+    if (expr.type.universe !== 'real') return undefined
+    const representation = realRepresentation(expr.type)
+    if (representation === 'managed') return undefined
+    const { bits } = BINARY_FORMATS[representation]
+    return hoist(
+        `Real¸fromBinary((double)(${lowerExpr(expr)}), ${bits})`,
+        'Real*',
+    )
 }
 
 function lowerRealOwned(expr: cir.Expression, target: cir.RealSet): string {
@@ -922,6 +906,8 @@ function lowerRealExactBorrowed(expr: cir.Expression): string {
                 : `Real¸fromInteger(${lowerBorrowed(expr, 'big')}, 0, true)`
         return hoist(converted, 'Real*')
     }
+    const nativeOperand = nativeToManaged(expr)
+    if (nativeOperand) return nativeOperand
     if (expr.type.universe !== 'real' || !isManagedReal(expr.type))
         throw new Error(
             'Incompatible representation for decimal real comparison',
@@ -1280,11 +1266,9 @@ function lowerRealArithmetic(
         return `Real¸${functionName}${grid.suffix}(${lowerRealBorrowed(expr.left, expr.type)}, ${lowerRealBorrowed(expr.right, expr.type)}, ${opArgs})`
     }
 
-    const representation = realExpressionRepresentation(expr)
-    if (representation === 'managed')
-        throw new Error(
-            'Mixed native and arbitrary-precision real operands are not supported',
-        )
+    const representation = realExpressionRepresentation(
+        expr,
+    ) as BinaryRepresentation
     const prefix = BINARY_FORMATS[representation].prefix
     const operation = {
         ADDITION: 'add',
@@ -1295,10 +1279,16 @@ function lowerRealArithmetic(
         POWER: 'power',
     }[expr.kind]
     const ctype = BINARY_FORMATS[representation].ctype
-    const operand = (e: cir.Expression) =>
-        e.type.universe === 'integer'
-            ? `(${ctype})(${lowerExpr(e)})`
-            : lowerExpr(e)
+    const operand = (e: cir.Expression) => {
+        if (e.kind === 'REAL_LITERAL')
+            return binaryLiteral(
+                representation,
+                (e.type as { value: string }).value.replaceAll('_', ''),
+            )
+        if (e.type.universe === 'real' && isManagedReal(e.type))
+            return `(${ctype})Real¸toBinary(${lowerRealExactBorrowed(e)})`
+        return `(${ctype})(${lowerExpr(e)})`
+    }
     return `${prefix}¸${operation}(${operand(expr.left)}, ${operand(expr.right)})`
 }
 
@@ -1316,16 +1306,20 @@ function lowerRealComparison(
     else if (expr.right.type.universe === 'real') realType = expr.right.type
     else return undefined
     const representation = realRepresentation(realType)
-    if (representation !== 'managed') {
-        if (
-            expr.left.type.universe !== 'real' ||
-            expr.right.type.universe !== 'real'
-        )
-            throw new Error(
-                'Mixed integer and IEEE real comparison is not supported',
-            )
+    const bothNative = [expr.left, expr.right].every(
+        (e) =>
+            e.type.universe === 'real' &&
+            realRepresentation(e.type) !== 'managed',
+    )
+    if (representation !== 'managed' && bothNative)
         return `((${lowerExpr(expr.left)}) ${operator} (${lowerExpr(expr.right)}))`
-    }
+    if (
+        representation !== 'managed' &&
+        expr.left.type.universe !== expr.right.type.universe
+    )
+        throw new Error(
+            'Mixed integer and IEEE real comparison is not supported',
+        )
 
     const left = lowerRealExactBorrowed(expr.left)
     const right = lowerRealExactBorrowed(expr.right)

@@ -16,6 +16,17 @@ describe('Function Declaration Parser', () => {
         })
     })
 
+    it('parses an extern function without a body', () => {
+        const result = parseFunction(
+            'extern func twice(_ x: integer) -> integer',
+        )
+        expect(result).toMatchObject({
+            baseName: 'twice',
+            implementation: { kind: 'extern' },
+            result: { type: { min: undefined, max: undefined } },
+        })
+    })
+
     it('parses a function with default-labeled parameters', () => {
         const code = 'func myFunction(x: integer, y: truthvalue) {}'
 

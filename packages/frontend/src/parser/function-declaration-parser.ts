@@ -12,6 +12,7 @@ import { BindingParser } from '@/parser/binding-parser'
 import { BlockParser } from '@/parser/block-parser'
 import { ExpressionParser } from '@/parser/expression-parser'
 import { TypeConstraintParser } from '@/parser/type-constraint-parser'
+import { SourceError } from '@/tools'
 
 export class FunctionDeclarationParser implements DeclarationParser<FunctionDeclaration> {
     private readonly bindingParser: BindingParser
@@ -27,16 +28,44 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
     }
 
     isNext(stream: TokenStream): boolean {
-        return stream.isNext('KEYWORD', 'func')
+        return stream.isNext('KEYWORD', 'func', 'extern')
     }
 
-    parse(stream: TokenStream): FunctionDeclaration {
-        stream.expect('KEYWORD', 'func')
+    parse(
+        stream: TokenStream,
+        { allowExtern = true }: { allowExtern?: boolean } = {},
+    ): FunctionDeclaration {
+        const isExtern = stream.isNext('KEYWORD', 'extern')
+        const firstToken = isExtern
+            ? stream.expect('KEYWORD', 'extern')
+            : undefined
+        if (isExtern && !allowExtern)
+            throw SourceError.create({
+                message: '`extern` is only allowed on top-level functions',
+                span: { ...firstToken! },
+            })
+        const funcToken = stream.expect('KEYWORD', 'func')
+        const start = (firstToken ?? funcToken).start
         const nameToken = stream.expect('IDENTIFIER')
         const baseName = nameToken.identifier
 
         const parameters = this.parseParameters(stream)
         const result = this.parseReturnType(stream)
+
+        if (isExtern)
+            return FunctionDeclaration.create({
+                baseName,
+                parameters,
+                result,
+                implementation: { kind: 'extern' },
+                span: {
+                    start,
+                    end:
+                        result?.type.span?.end ??
+                        parameters.at(-1)?.span.end ??
+                        nameToken.end,
+                },
+            })
 
         if (stream.isNext('PUNCTUATION', '=>')) {
             stream.expect('PUNCTUATION', '=>')

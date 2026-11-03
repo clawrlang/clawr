@@ -13,6 +13,7 @@ import { Scope } from '@/model/scope'
 import { SelfAssignment } from '@/model/self-assignment'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { RCTypeSet, ValueSet } from '@/model/value-set'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
@@ -28,9 +29,8 @@ export class FunctionDeclaration implements Declaration {
                   isolationLevel: IsolationLevel | UNIQUE
               }
             | undefined,
-        public readonly implementation:
-            | { kind: 'implicit-return'; expression: Expression }
-            | { kind: 'body'; statements: Statement[] },
+        public readonly implementation: FunctionImplementation,
+        public readonly span?: SourceCodeSpan,
     ) {}
 
     static create({
@@ -38,6 +38,7 @@ export class FunctionDeclaration implements Declaration {
         parameters,
         result,
         implementation,
+        span,
     }: {
         baseName: string
         parameters: Parameter[]
@@ -47,15 +48,15 @@ export class FunctionDeclaration implements Declaration {
                   isolationLevel: IsolationLevel | UNIQUE
               }
             | undefined
-        implementation:
-            | { kind: 'implicit-return'; expression: Expression }
-            | { kind: 'body'; statements: Statement[] }
+        implementation: FunctionImplementation
+        span?: SourceCodeSpan
     }): FunctionDeclaration {
         return new FunctionDeclaration(
             baseName,
             parameters,
             result,
             implementation,
+            span,
         )
     }
 
@@ -88,6 +89,7 @@ export class FunctionDeclaration implements Declaration {
 
     emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addFunctionDeclaration(this)
+        if (this.implementation.kind === 'extern') return Result.ok
 
         const bodyContextResult = this.makeBodyContext(context)
         if (bodyContextResult.isError) return bodyContextResult
@@ -136,6 +138,9 @@ export class FunctionDeclaration implements Declaration {
     emitMethod(
         context: Context,
     ): SemanticResult<cir.Declaration & { kind: 'FUNCTION_DECL' }> {
+        if (this.implementation.kind === 'extern')
+            return this.externNotAllowed('Methods cannot be extern')
+
         const bodyContextResult = this.makeBodyContext(context)
         if (bodyContextResult.isError) return bodyContextResult
         const bodyContext = bodyContextResult.value
@@ -186,6 +191,8 @@ export class FunctionDeclaration implements Declaration {
             returnType: { universe: 'void' }
         }
     > {
+        if (this.implementation.kind === 'extern')
+            return this.externNotAllowed('Initializers cannot be extern')
         const bodyContextResult = this.makeBodyContext(context)
         if (bodyContextResult.isError) return bodyContextResult
         const bodyContext = bodyContextResult.value
@@ -229,7 +236,20 @@ export class FunctionDeclaration implements Declaration {
         return Result.value(cirFuncDecl)
     }
 
+    private externNotAllowed(message: string) {
+        return SemanticErrorResult.failure(
+            message,
+            this.span ?? {
+                start: { line: 1, column: 1 },
+                end: { line: 1, column: 1 },
+            },
+        )
+    }
+
     private makeInitializerBody(): SemanticResult<Statement[]> {
+        if (this.implementation.kind === 'extern')
+            return this.externNotAllowed('Initializers cannot be extern')
+
         if (this.implementation.kind === 'body')
             return Result.value(this.implementation.statements)
 
@@ -247,6 +267,9 @@ export class FunctionDeclaration implements Declaration {
     }
 
     private makeBodyContext(context: Context): SemanticResult<Context> {
+        if (this.implementation.kind === 'extern')
+            throw new Error('Function is extern')
+
         const parameterScopeResult = this.scopeAddingParameters(context)
         if (parameterScopeResult.isError) return parameterScopeResult
         const contextWithParameters = {
@@ -327,6 +350,8 @@ export class FunctionDeclaration implements Declaration {
         if (this.result) return Result.value(this.result.type.toCIR())
         if (this.implementation.kind === 'body')
             return Result.value({ universe: 'void' })
+        if (this.implementation.kind === 'extern')
+            throw new Error('Function is extern')
         const typeResult = this.implementation.expression.currentValue(context)
         if (typeResult.isError) return typeResult
         return Result.value(typeResult.value.toCIR())
@@ -339,3 +364,15 @@ export class FunctionDeclaration implements Declaration {
         }
     }
 }
+
+type FunctionImplementation =
+    /** Extern = Implemented by the runtime; has no body and emits no declaration. */
+    | { kind: 'extern' }
+    | {
+          kind: 'implicit-return'
+          expression: Expression
+      }
+    | {
+          kind: 'body'
+          statements: Statement[]
+      }

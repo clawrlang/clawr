@@ -95,7 +95,9 @@ export class ObjectDeclarationParser {
         const methods: FunctionDeclaration[] = []
 
         while (!this.isSectionEnd(stream))
-            methods.push(this.functionParser.parse(stream))
+            methods.push(
+                this.functionParser.parse(stream, { allowExtern: false }),
+            )
 
         return methods
     }

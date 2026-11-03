@@ -21,6 +21,11 @@ describe('ObjectDeclaration Parser', () => {
         })
     })
 
+    it('rejects extern methods', () => {
+        const code = 'object A {\n    extern func f()\n}'
+        expect(() => parseObject(code)).toThrow('extern')
+    })
+
     it('parses object with supertype', () => {
         const code = 'object Sub: Super {}'
 

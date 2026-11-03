@@ -72,6 +72,7 @@ const ALL_KW = [
 
     // Functions / methods / operators
     `func`,
+    'extern',
     'pure',
     `operator`,
 

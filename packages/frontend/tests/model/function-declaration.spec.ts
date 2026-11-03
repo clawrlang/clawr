@@ -11,6 +11,33 @@ import * as cir from '@clawr/cir'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('FunctionDeclaration', () => {
+    it('registers an extern function without emitting a declaration', () => {
+        const funcDecl = FunctionDeclaration.create({
+            baseName: 'myFunction',
+            parameters: [],
+            result: undefined,
+            implementation: { kind: 'extern' },
+        })
+        const context = util.newSemanticContext()
+        expect(funcDecl.emitDeclaration(context).isError).toBe(false)
+        expect(context.scope.functionDeclaration(funcDecl.name())).toBe(
+            funcDecl,
+        )
+        expect(context.scope.rootScope.emitted).toEqual([])
+    })
+
+    it('reports an error for extern methods and initializers', () => {
+        const funcDecl = FunctionDeclaration.create({
+            baseName: 'f',
+            parameters: [],
+            result: undefined,
+            implementation: { kind: 'extern' },
+        })
+        const context = util.newSemanticContext()
+        expect(funcDecl.emitMethod(context).isError).toBe(true)
+        expect(funcDecl.emitInitializer(context).isError).toBe(true)
+    })
+
     it('converts to CIR with function body', () => {
         const funcDecl = FunctionDeclaration.create({
             baseName: 'myFunction',

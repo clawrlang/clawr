@@ -1,22 +1,12 @@
 # TODO
 
-- Complete `real` lowering with finite precision, per-operation rounding, and a magnitude range limited only by available memory; fixed-exponent IEEE formats alone are insufficient.
-  - Implemented initial slice: decimal `Real*` values with explicit precision and arbitrary decimal exponents, plus bounded IEEE binary16/binary32/binary64 lowering, arbitrary-precision binary reals (`Real*` rounded to N bits) for any other `sig N bin` or non-full range, `sig N ter` stored as binary with 1 + ⌈N·log₂3⌉ bits (ADR-025), and `scale N` reals in base 2 and 3 (integer multiples of 2⁻ᴺ / 3⁻ᴺ; base 3 stores the numerator over 3ᴺ and prints the shortest decimal that rounds to the same grid point), floored real remainder (`n - floor(n/d)·d`, ADR-023) on every representation, and integer arithmetic with decimal `sig`/`scale` reals.
-  - Covered end to end by `packages/rwrc/test/cases/real-*.clawr` (`.panic` files assert expected runtime aborts).
-  - Implicit promotion (ADR-027): integers and decimal literals adopt the real operand's precision; native IEEE and arbitrary-precision binary operands combine at the higher precision. Real values can be returned from functions.
-  - Remaining: a language surface for `toFraction`.
-- Lower `real` types with massive precision and/or range as `Real*`.
-- Implement static analysis and lowering of dyadic operations supporting combinations of small vs large numbers (`real` and `integer` types).
-  - `ADDITION`
-  - `SUBTRACTION`
-  - `MULTIPLICATION`
-  - `DIVISION`
-  - `REMAINDER` (can never return negative values - does that affect the type or just the `currentValue`?)
-  - `POWER`
+## Standard Library
+
+- Make the standard library an official, documented language feature: finalize its public surface, complete the remaining work in [ADR-036](./adr/adr-036.md), and adopt the ADR when ready.
 
 ## `object`/`service`
 
-- Make 'self' a reserved identifier
+- Make `self` a reserved identifier (and `super` too?)
 
 ### Frontend Semantic/Static Analysis
 
@@ -42,6 +32,7 @@
 
 ## Advanced / Ice Box
 
+- Add a language-level `toFraction` operation for the existing runtime functionality.
 - `object` may not reach outside itself (its properties) except for calling `service` through a parameter
 - `VariableDeclaration.initialValue` — handle type mismatch
 - `DataLiteral` – handle property type mismatch

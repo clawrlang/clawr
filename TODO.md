@@ -13,6 +13,7 @@
 - Subtype initializers must call a supertype initializer (today it is optional)
 - Properties with initial value should be able to skip/infer value-set
 - The `currentValue()` is not used for anything anymore. Add some optimizations that use it.
+  - The `currentValue()` could be used to allow an operation like `a^b` even if the `type` of `b` includes negative values.
 
 ## Function Parameters — Semantic Model
 

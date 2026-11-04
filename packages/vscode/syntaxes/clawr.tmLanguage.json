@@ -41,15 +41,15 @@
         },
         {
           "name": "storage.modifier.clawr",
-          "match": "\\b(ref|cow)\\b"
+          "match": "\\b(ref|cow|as)\\b"
         },
         {
           "name": "keyword.other.declaration.clawr",
-          "match": "\\b(func|pure|operator|enum|union|data|object|service|companion|role|trait)\\b"
+          "match": "\\b(func|pure|operator|enum|union|data|object|service|companion|subset|type|role|trait)\\b"
         },
         {
           "name": "variable.language.clawr",
-          "match": "\\bsuper\\b"
+          "match": "\\b(super|self]\\b"
         },
         {
           "name": "keyword.other.section.clawr",

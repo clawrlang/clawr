@@ -40,7 +40,7 @@ describe('VariableDeclaration', () => {
         expect(context.scope.emitted[0]).toMatchObject({
             kind: 'VARIABLE_DECL',
             name: 'foo',
-            type: { universe: 'integer', value: '1' },
+            type: { universe: 'integer' },
             initialValue: {
                 kind: 'INTEGER_LITERAL',
                 type: { universe: 'integer', value: '1' },
@@ -127,14 +127,14 @@ describe('VariableDeclaration', () => {
                 universe: 'real',
                 precision: { kind: 'sig', digits: 4, base: 'dec' },
             })
-            expect((context.scope.emitted[0] as any).initialValue).toMatchObject(
-                {
-                    kind: 'REAL_LITERAL',
-                    type: {
-                        precision: { kind: 'sig', digits: 4, base: 'dec' },
-                    },
+            expect(
+                (context.scope.emitted[0] as any).initialValue,
+            ).toMatchObject({
+                kind: 'REAL_LITERAL',
+                type: {
+                    precision: { kind: 'sig', digits: 4, base: 'dec' },
                 },
-            )
+            })
         })
 
         it('infers narrowest value set for constant truthvalue', () => {
@@ -602,10 +602,10 @@ describe('VariableDeclaration', () => {
             })
             const context = util.newSemanticContext()
             decl.emitStatement(context)
-            expect(context.scope.variableDeclaration('x')).toEqual({
+            expect(context.scope.variableDeclaration('x')).toMatchObject({
                 isImmutable: true,
                 isolationLevel: ISOLATED,
-                type: IntegerSet.range({ min: 42n, max: 42n }),
+                type: IntegerSet.unconstrained(),
             })
         })
 

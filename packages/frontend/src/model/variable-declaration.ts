@@ -80,18 +80,19 @@ export class VariableDeclaration implements Statement, Declaration {
         const validityResult = this.checkValidity(initialValue, context)
         if (validityResult.isError) return validityResult
 
+        const isolationLevel =
+            this.isolationLevel ??
+            (valueIsolationLevel === 'UNIQUE' ? ISOLATED : valueIsolationLevel)
+
         const type =
-            this.isImmutable && this.isolationLevel === ISOLATED
+            this.type ??
+            (this.isImmutable && isolationLevel === ISOLATED
                 ? initialValue
-                : (this.type ?? initialValue.unconstrained())
+                : initialValue.unconstrained())
 
         scope.addVariableDeclaration(this.name, {
             isImmutable: this.isImmutable,
-            isolationLevel:
-                this.isolationLevel ??
-                (valueIsolationLevel === 'UNIQUE'
-                    ? ISOLATED
-                    : valueIsolationLevel),
+            isolationLevel,
             type: type,
         })
         context.highlightRecorder?.record('variable', this.nameSpan, [

@@ -45,7 +45,7 @@
         },
         {
           "name": "keyword.other.declaration.clawr",
-          "match": "\\b(func|pure|operator|enum|union|data|object|service|companion|subset|type|role|trait)\\b"
+          "match": "\\b(func|pure|operator|enum|union|data|object|service|companion|subset|type|role|trait|extern)\\b"
         },
         {
           "name": "variable.language.clawr",

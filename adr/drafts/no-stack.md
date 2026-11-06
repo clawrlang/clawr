@@ -1,6 +1,8 @@
-&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [ADR Sketches](./README.md)
 
 # No Stack Allocation (for now)
+
+> Status: 🗳️ Idea
 
 The per-variable semantics of Clawr means that a `LinkedList` type can be equivalent to `x:xs` in Haskell! A linked list can be declared as a monolithic structure.
 

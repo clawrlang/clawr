@@ -1,6 +1,8 @@
-&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [ADR Sketches](./README.md)
 
 # External Access Only Through `service`
+
+> Status: 🗳️ Idea
 
 Is it possible to require all external access to be in the shape of a `service`?
 

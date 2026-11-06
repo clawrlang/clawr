@@ -1,6 +1,8 @@
-&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [ADR Sketches](./README.md)
 
 # Syntax and `trait`s
+
+> Status: 🗳️ Idea
 
 The `Ordered` `trait` should allow the `<` and `>` operators. `Equatable` allows `==` and `!=`. Both `trait`s together, allow `<=` and `>=`.
 

@@ -1,6 +1,8 @@
-&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [ADR Sketches](./README.md)
 
 # Published Schema
+
+> Status: 🗳️ Idea
 
 The schema ID is `"$schema": "http://clawr.lang/schema/cir/DRAFT-0"`. That is a URL. It is customary to store a JSON file at the URL of the schema ID.
 

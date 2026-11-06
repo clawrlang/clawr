@@ -1,5 +1,7 @@
 # Generics in Clawr
 
+> Status: 🗳️ Idea
+
 Today this is necesary:
 
 ```clawr

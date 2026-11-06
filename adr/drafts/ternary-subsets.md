@@ -2,7 +2,7 @@
 
 # Ternary `subset` and `type`
 
-> Status: ✍🏼 Draft
+> Status: 🗳️ Idea
 
 ## Context
 

@@ -1,6 +1,8 @@
-&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [ADR Sketches](./README.md)
 
 # What is `null`?
+
+> Status: 🗳️ Idea
 
 Probably something like a `union Optional<T> { case null, case value: T }`. But to support that we need to define `union` and generics both.
 

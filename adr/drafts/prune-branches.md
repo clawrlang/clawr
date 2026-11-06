@@ -1,6 +1,8 @@
-&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [ADR Sketches](./README.md)
 
 # Prune CIR Banches
+
+> Status: 🗳️ Idea
 
 `FunctionCall.currentValue()` should use parameters, `self` and the function body to figure out the returned value-set
 

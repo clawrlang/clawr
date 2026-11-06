@@ -1,5 +1,7 @@
 # Test Framework for Clawr
 
+> Status: 🗳️ Idea
+
 There should be a standardized test framework for Clawr that allows developers to write, organize, and execute tests for their code.
 
 The test framework should provide:

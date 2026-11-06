@@ -23,8 +23,9 @@ Terminology used in this documentation can be found in the [Terminology](./termi
 
 Statuses used in this documentation:
 
-- <div class="status Draft"><span class="title">✍🏼 Draft</span> A rough sketch of an idea</div>
-- <div class="status Proposed"><span class="title">💡 Proposed</span> An idea to be considered for adoption</div>
+- <div class="status Idea"><span class="title">🗳️ Idea</span> A reminder of an idea or a problem that will need to be handled</div>
+- <div class="status Draft"><span class="title">✍🏼 Draft</span> A more developed idea that is being worked on</div>
+- <div class="status Proposed"><span class="title">📝 Proposed</span> An idea to be considered for adoption</div>
 - <div class="status Adopted"><span class="title">✅ Adopted</span> Principle is in use in the ecosystem, or the feature has been implemented in the example implementation</div>
 
 The following ADRs have been documented so far:

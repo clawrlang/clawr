@@ -1,6 +1,8 @@
-&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [ADR Sketches](./README.md)
 
 # Efficient Construction
+
+> Status: 🗳️ Idea
 
 Is it possible to merge all initializers in the inheritance stack into a single `memcpy`?
 

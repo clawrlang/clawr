@@ -36,3 +36,4 @@ They are essentally an ice-box for architectural decisions and future TODOs.
 - [Test Framework](./test-framework.md)
 - [Ternary `subset` and `type`](./ternary-subsets.md)
 - [Events](./events.md)
+- [Extensions](./extensions.md)

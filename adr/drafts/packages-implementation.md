@@ -1,6 +1,8 @@
-&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [ADR Sketches](./README.md)
 
 # Resolving Library Dependencies
+
+> Status: 🗳️ Idea
 
 Clawr should not require a particular implementation for how packages are built, named and linked. It should be possible to choose an implementation depending on what works best on the target platform.
 

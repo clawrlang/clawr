@@ -1,8 +1,8 @@
-&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [Drafts](./README.md)
+&nbsp; / &nbsp; [Architecture Decision Records](../README.md) &nbsp; / &nbsp; [ADR Sketches](./README.md)
 
 # Debug Information in the CIR
 
-> Status: ✍🏼 Draft
+> Status: 🗳️ Idea
 
 ## Context
 

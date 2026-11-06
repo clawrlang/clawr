@@ -49,7 +49,7 @@
         },
         {
           "name": "variable.language.clawr",
-          "match": "\\b(super|self]\\b"
+          "match": "\\b(super|self)\\b"
         },
         {
           "name": "keyword.other.section.clawr",

@@ -6,7 +6,7 @@ data MyData {
 }
 
 const a: ref MyData = { property1: 42, property2: {} }
-const b = copy(of: a)
+const b = copy(of: a) as isolated
 
 func getShared() -> ref MyData => a
 func getIsolated() -> const MyData => b

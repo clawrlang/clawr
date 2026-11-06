@@ -12,8 +12,8 @@ data Outer {
     const a: ref Outer = { property1: 42, inner: { property: 47 } }
     const b = a // infer ref (SHARED)
 
-    const c = copy(of: a) as cow
-    mut d = c // infer cow (ISOLATED)
+    const c = copy(of: a) as isolated
+    mut d = c // infer isolated
 
     b->property1 = 0 // changes a
     d.property1 = 1 // only chsnges d

@@ -47,7 +47,7 @@ export class BindingParser {
             isolationLevel:
                 isolation === 'ref'
                     ? SHARED
-                    : isolation === 'cow'
+                    : isolation === 'isolated'
                       ? ISOLATED
                       : undefined,
             span: {

@@ -44,7 +44,7 @@ export class VariableDeclarationParser implements StatementParser<VariableDeclar
             stream.next()
             binding.isolationLevel =
                 stream.expect('KEYWORD', ...ISOLATION_KEYWORDS).keyword ===
-                'cow'
+                'isolated'
                     ? ISOLATED
                     : SHARED
         }

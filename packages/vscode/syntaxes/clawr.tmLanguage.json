@@ -41,7 +41,7 @@
         },
         {
           "name": "storage.modifier.clawr",
-          "match": "\\b(ref|cow|as)\\b"
+          "match": "\\b(ref|isolated|as)\\b"
         },
         {
           "name": "keyword.other.declaration.clawr",

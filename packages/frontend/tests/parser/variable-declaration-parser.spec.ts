@@ -106,7 +106,7 @@ describe('VariableDeclarationParser', () => {
     })
 
     it('parses isolated data literal', () => {
-        const source = 'const v: cow MyData = {}'
+        const source = 'const v: isolated MyData = {}'
         const decl = parseVariableDeclaration(source)
 
         expect(decl).toMatchObject({
@@ -129,7 +129,7 @@ describe('VariableDeclarationParser', () => {
     })
 
     it('parses isolated data literal', () => {
-        const source = 'const v = copy(of: x) as cow'
+        const source = 'const v = copy(of: x) as isolated'
         const decl = parseVariableDeclaration(source)
 
         expect(decl).toMatchObject({

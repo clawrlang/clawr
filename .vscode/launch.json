@@ -8,7 +8,7 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
-        "${workspaceFolder}/packages/vscode/tests/integration/fixtures"
+        "${workspaceFolder}/.vscode/extension-launcher.code-workspace"
       ],
       "outFiles": ["${workspaceFolder}/packages/vscode/dist/**/*.js"],
       "preLaunchTask": "npm: build:vscode"

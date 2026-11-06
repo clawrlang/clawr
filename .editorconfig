@@ -9,5 +9,5 @@ charset = utf-8
 indent_style = space
 indent_size = 4
 
-[*.{json,yaml,yml,cir,md}]
+[*.{json,yaml,yml,cir,md,code-workspace}]
 indent_size = 2

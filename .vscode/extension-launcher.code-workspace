@@ -1,0 +1,7 @@
+{
+  "folders": [
+    { "path": "../packages/vscode/tests/integration/fixtures" },
+    { "path": "../packages/rwrc/test/cases" },
+  ],
+  "settings": {},
+}

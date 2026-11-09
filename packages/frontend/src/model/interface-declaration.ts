@@ -3,6 +3,7 @@ import { FunctionName } from '@/model/function-name'
 import { Parameter } from '@/model/parameter'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { TypeName } from '@/model/type-name'
+import { RCTypeSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
 import { Result } from '@/tools/result'
@@ -45,22 +46,34 @@ export class MethodSignature {
         })
     }
 
-    toCIR(context: Context): SemanticResult<SignatureCIR> {
+    usesSelf(): boolean {
+        return [...this.parameters.map((p) => p.type), this.result].some(
+            (type) => type instanceof RCTypeSet && type.type.name === 'Self',
+        )
+    }
+
+    toCIR(context: Context, selfType?: TypeName): SemanticResult<SignatureCIR> {
         const untyped = this.parameters.find((p) => !p.type)
         if (untyped)
             return SemanticErrorResult.failure(
                 `Parameter ${untyped.varName} of ${this.baseName} must have an explicit value set`,
                 untyped.span,
             )
+        const typeToCIR = (type: TypeConstraintDeclaration) =>
+            type instanceof RCTypeSet && type.type.name === 'Self'
+                ? RCTypeSet.create({
+                      type: selfType ?? TypeName.create({ name: 'void' }),
+                  }).toCIR()
+                : context.scope.toCIRType(type)
         return Result.value({
             baseName: this.baseName,
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((p) => ({
                 name: p.varName,
-                type: context.scope.toCIRType(p.type!),
+                type: typeToCIR(p.type!),
             })),
             returnType: this.result
-                ? context.scope.toCIRType(this.result)
+                ? typeToCIR(this.result)
                 : { universe: 'void' },
         })
     }

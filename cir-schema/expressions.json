@@ -16,7 +16,32 @@
         { "$ref": "#/$defs/Equality" },
         { "$ref": "#/$defs/LogicalOperation" },
         { "$ref": "#/$defs/OrderComparison" },
-        { "$ref": "#/$defs/RefComparison" }
+        { "$ref": "#/$defs/RefComparison" },
+        { "$ref": "#/$defs/TraitComparison" }
+      ]
+    },
+    "TraitComparison": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "TRAIT_COMPARISON" },
+        "operator": { "enum": ["==", "!=", "<", ">", "<=", ">="] },
+        "left": { "$ref": "#/$defs/TraitOperand" },
+        "right": { "$ref": "#/$defs/TraitOperand" },
+        "type": { "$ref": "./valuesets.json#/$defs/TruthvalueSet" }
+      },
+      "required": ["kind", "operator", "left", "right", "type"],
+      "unevaluatedProperties": false
+    },
+    "TraitOperand": {
+      "allOf": [
+        { "$ref": "#" },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "$ref": "./valuesets.json#/$defs/RCTypeSet" }
+          },
+          "required": ["type"]
+        }
       ]
     },
     "FunctionCallExpression": {

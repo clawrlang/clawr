@@ -1123,6 +1123,8 @@ export function lowerInitStmt(stmt: cir.Statement): string {
 
 export function lowerExpr(expr: cir.Expression): string {
     switch (expr.kind) {
+        case 'TRAIT_COMPARISON':
+            return lowerTraitComparison(expr)
         case 'RETAIN':
             return `retainRC(${lowerStorage(expr.object)})`
         case 'STRING_LITERAL':
@@ -1188,13 +1190,13 @@ export function lowerExpr(expr: cir.Expression): string {
             return (
                 lowerRealComparison(expr, '==') ??
                 lowerIntegerComparison(expr, 'eq', '==') ??
-                `(${lowerExpr(expr.left)}) == (${lowerExpr(expr.right)})`
+                `((${lowerExpr(expr.left)}) == (${lowerExpr(expr.right)}) ? c_true : c_false)`
             )
         case 'NOT_EQUAL':
             return (
                 lowerRealComparison(expr, '!=') ??
                 lowerIntegerComparison(expr, 'ne', '!=') ??
-                `(${lowerExpr(expr.left)}) != (${lowerExpr(expr.right)})`
+                `((${lowerExpr(expr.left)}) != (${lowerExpr(expr.right)}) ? c_true : c_false)`
             )
         case 'LESS_THAN':
             return (
@@ -1236,6 +1238,53 @@ export function lowerExpr(expr: cir.Expression): string {
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
     }
+}
+
+function lowerTraitComparison(
+    expr: Extract<cir.Expression, { kind: 'TRAIT_COMPARISON' }>,
+): string {
+    const operand = (value: cir.Expression, name: string) => {
+        const saved = temps
+        temps = []
+        try {
+            const lowered = lowerExpr(value)
+            const { pre, post } = drainTemps()
+            const owned =
+                value.kind === 'CALL' ||
+                value.kind === 'ALLOCATION' ||
+                value.kind === 'RETAIN' ||
+                value.kind === 'AS_SHARED'
+            return `${pre}
+                void *${name} = ${owned ? lowered : `retainRC(${lowered})`};
+                ${post}`
+        } finally {
+            temps = saved
+        }
+    }
+    const left = `cmpˇleft${tempCounter++}`
+    const right = `cmpˇright${tempCounter++}`
+    const result = `cmpˇresult${tempCounter++}`
+    const equal = `((clawr¸Equatableˇwitness *)CONFORMANCE_ENTRY(${left}, clawr¸Equatable))->equals(${left}, ${right})`
+    const reversed = expr.operator === '>' || expr.operator === '>='
+    const first = reversed ? right : left
+    const second = reversed ? left : right
+    const ordered = `((clawr¸Orderedˇwitness *)CONFORMANCE_ENTRY(${first}, clawr¸Ordered))->isOrderedBefore(${first}, ${second})`
+    const comparison =
+        expr.operator === '=='
+            ? equal
+            : expr.operator === '!='
+              ? `(${equal} == c_true ? c_false : c_true)`
+              : expr.operator === '<=' || expr.operator === '>='
+                ? `(${equal} == c_true ? c_true : ${ordered})`
+                : ordered
+    return `({
+        ${operand(expr.left, left)}
+        ${operand(expr.right, right)}
+        truthvalue_t ${result} = ${comparison};
+        releaseRC(${right});
+        releaseRC(${left});
+        ${result};
+    })`
 }
 
 function lowerRealLiteral(
@@ -1315,7 +1364,7 @@ function lowerRealComparison(
             realRepresentation(e.type) !== 'managed',
     )
     if (representation !== 'managed' && bothNative)
-        return `((${lowerExpr(expr.left)}) ${operator} (${lowerExpr(expr.right)}))`
+        return `((${lowerExpr(expr.left)}) ${operator} (${lowerExpr(expr.right)}) ? c_true : c_false)`
     if (
         representation !== 'managed' &&
         expr.left.type.universe !== expr.right.type.universe

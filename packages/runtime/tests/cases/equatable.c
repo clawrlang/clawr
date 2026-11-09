@@ -22,7 +22,7 @@ static truthvalue_t DataStructure·equals(void *left, void *right) {
 }
 
 static const clawr¸Equatableˇwitness DataStructureˇclawr¸Equatableˇwitness = {
-    .equal = DataStructure·equals,
+    .equals = DataStructure·equals,
 };
 __interface_conformance_entry DataStructureˇclawr¸Equatableˇconformance = {
     .interface = &clawr¸Equatableˇtype,
@@ -50,8 +50,8 @@ int main() {
 
   const clawr¸Equatableˇwitness *witness =
       CONFORMANCE_ENTRY(a, clawr¸Equatable);
-  truthvalue_t aIsB = witness->equal(a, b);
-  truthvalue_t aIsC = witness->equal(a, c);
+  truthvalue_t aIsB = witness->equals(a, b);
+  truthvalue_t aIsC = witness->equals(a, c);
   TruthvalueBox *box1 = boxTruthvalue(aIsB);
   print(box1);
   releaseRC(box1);

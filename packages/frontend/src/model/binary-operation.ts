@@ -9,7 +9,8 @@ import {
     Multiplication,
     Subtraction,
 } from '@/model/operators'
-import { ValueSet } from '@/model/value-set'
+import { RCTypeSet, TruthvalueSet, ValueSet } from '@/model/value-set'
+import { TypeName } from '@/model/type-name'
 import { SourceCodeSpan } from '@/tools'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
@@ -54,7 +55,7 @@ export class BinaryOperation implements Expression {
         ])
         if (collected.isError) return collected
         const [left, right] = collected.value
-        return this.compute(left, right)
+        return this.compute(left, right, context)
     }
 
     currentValue(context: ContextWithType): SemanticResult<ValueSet> {
@@ -64,7 +65,7 @@ export class BinaryOperation implements Expression {
         ])
         if (collected.isError) return collected
         const [left, right] = collected.value
-        return this.compute(left, right)
+        return this.compute(left, right, context)
     }
 
     toCIRExpression(context: ContextWithType): SemanticResult<cir.Expression> {
@@ -75,6 +76,20 @@ export class BinaryOperation implements Expression {
         ])
         if (collected.isError) return collected
         const [left, right, type] = collected.value
+        if (
+            isRCExpression(left) &&
+            isRCExpression(right) &&
+            isTraitOperator(this.operator) &&
+            type instanceof TruthvalueSet
+        ) {
+            return Result.value({
+                kind: 'TRAIT_COMPARISON',
+                operator: this.operator,
+                left,
+                right,
+                type: type.toCIR(),
+            })
+        }
         // The operator strategies already verified the operand types.
         return Result.value({
             kind: CIR_KINDS[this.operator],
@@ -84,13 +99,73 @@ export class BinaryOperation implements Expression {
         } as cir.Expression)
     }
 
-    private compute(left: ValueSet, right: ValueSet): SemanticResult<ValueSet> {
+    private compute(
+        left: ValueSet,
+        right: ValueSet,
+        context: Context,
+    ): SemanticResult<ValueSet> {
+        if (
+            isTraitOperator(this.operator) &&
+            (left instanceof RCTypeSet || right instanceof RCTypeSet)
+        ) {
+            if (
+                !(left instanceof RCTypeSet && right instanceof RCTypeSet) ||
+                left.type.canonical() !== right.type.canonical()
+            )
+                return SemanticErrorResult.failure(
+                    'Comparison requires operands of the same concrete type',
+                    this.span,
+                )
+            const object = context.scope.objectDeclaration(left.type)
+            if (!object || object.isPolymorphic(context))
+                return SemanticErrorResult.failure(
+                    'Comparison requires a non-polymorphic concrete object type',
+                    this.span,
+                )
+            const traits =
+                this.operator === '==' || this.operator === '!='
+                    ? ['Equatable']
+                    : this.operator === '<' || this.operator === '>'
+                      ? ['Ordered']
+                      : ['Ordered', 'Equatable']
+            for (const name of traits) {
+                if (
+                    !object.conformsTo(
+                        TypeName.create({ name, namespace: 'clawr' }),
+                        context,
+                    )
+                )
+                    return SemanticErrorResult.failure(
+                        `${left.toString()} must conform to clawr.${name}`,
+                        this.span,
+                    )
+            }
+            return Result.value(
+                this.operator === '==' || this.operator === '!='
+                    ? TruthvalueSet.create(['false', 'true'])
+                    : TruthvalueSet.unconstrained(),
+            )
+        }
         const strategy = OPERATORS[this.operator]
         const result = strategy.compute(left, right)
         return result.isError
             ? SemanticErrorResult.failure(result.error.message, this.span)
             : result
     }
+}
+
+function isTraitOperator(
+    operator: keyof typeof OPERATORS,
+): operator is '==' | '!=' | '<' | '>' | '<=' | '>=' {
+    return ['==', '!=', '<', '>', '<=', '>='].includes(operator)
+}
+
+function isRCExpression(
+    expression: cir.Expression,
+): expression is cir.Expression & {
+    type: Extract<cir.ValueSet, { universe: 'rc-type' }>
+} {
+    return expression.type.universe === 'rc-type'
 }
 
 const OPERATORS = {

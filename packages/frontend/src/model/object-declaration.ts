@@ -4,6 +4,7 @@ import { FunctionDeclaration } from '@/model/function-declaration'
 import { FunctionName } from '@/model/function-name'
 import { MethodSignature } from '@/model/interface-declaration'
 import { TypeName } from '@/model/type-name'
+import { RCTypeSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
@@ -287,6 +288,7 @@ export class ObjectDeclaration implements Declaration {
         requirement: { parameters: { type: unknown }[] },
         implementation: MethodCIR,
         context: Context,
+        selfType: TypeName,
     ): SemanticResult<boolean> {
         const sameParameters =
             JSON.stringify(implementation.parameters.map((p) => p.type)) ===
@@ -299,9 +301,12 @@ export class ObjectDeclaration implements Declaration {
         if (!found) return Result.value(false)
         const type = found.declaration.type(found.owner.injectSelf(context))
         if (type.isError) return type
-        return Result.value(
-            !!type.value && required.result.isSupersetTo(type.value),
-        )
+        const expected =
+            required.result instanceof RCTypeSet &&
+            required.result.type.name === 'Self'
+                ? RCTypeSet.create({ type: selfType })
+                : required.result
+        return Result.value(!!type.value && expected.isSupersetTo(type.value))
     }
 
     /** Own conformances followed by those inherited from supertypes. */
@@ -312,6 +317,13 @@ export class ObjectDeclaration implements Declaration {
             ...this.conformances,
             ...inherited.filter((name) => !this.conformances.includes(name)),
         ]
+    }
+
+    private conformanceSelf(name: string, context: Context): TypeName {
+        return this.conformances.includes(name)
+            ? this.name
+            : (this.superDeclaration(context)?.conformanceSelf(name, context) ??
+                  this.name)
     }
 
     conformsTo(name: TypeName, context: Context): boolean {
@@ -357,8 +369,9 @@ export class ObjectDeclaration implements Declaration {
                 )
 
             const fulfillments: Conformance['fulfillments'] = []
+            const selfType = this.conformanceSelf(name, context)
             for (const method of interfaceDecl.methods) {
-                const requirementResult = method.toCIR(context)
+                const requirementResult = method.toCIR(context, selfType)
                 if (requirementResult.isError) return requirementResult
                 const requirement = requirementResult.value
                 const implementation = this.findEmittedMethod(
@@ -375,6 +388,7 @@ export class ObjectDeclaration implements Declaration {
                     requirement,
                     implementation,
                     context,
+                    selfType,
                 )
                 if (compatible.isError) return compatible
                 if (!compatible.value)

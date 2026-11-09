@@ -86,8 +86,8 @@ export class FunctionCall implements Expression, Statement {
         return decl.resultIsolationLevel(context)
     }
 
-    type(_: Context): SemanticResult<ValueSet> {
-        throw 'not implemented'
+    type(context: Context): SemanticResult<ValueSet> {
+        return this.currentValue(context)
     }
 
     currentValue(context: Context): SemanticResult<ValueSet> {
@@ -109,6 +109,11 @@ export class FunctionCall implements Expression, Statement {
                 if (!required)
                     return SemanticErrorResult.failure(
                         `Method declaration not found: ${this.name.toString()}`,
+                        this.span,
+                    )
+                if (required.usesSelf())
+                    return SemanticErrorResult.failure(
+                        'Methods involving Self cannot be called on a trait-typed value',
                         this.span,
                     )
                 return required.result
@@ -332,8 +337,14 @@ export class FunctionCall implements Expression, Statement {
             )
         const iface = context.scope.interfaceDeclaration(type.value.type)
         const object = context.scope.objectDeclaration(type.value.type)
+        const requirement = iface?.method(this.name)
+        if (requirement?.usesSelf())
+            return SemanticErrorResult.failure(
+                'Methods involving Self cannot be called on a trait-typed value',
+                this.span,
+            )
         const declaration =
-            iface?.method(this.name) ??
+            requirement ??
             object?.lookupMethod(this.name, context)?.declaration ??
             object?.initializer(this.name)
         if (!declaration)

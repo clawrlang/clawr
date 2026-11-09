@@ -7,18 +7,27 @@
 
 // ```clawr
 // trait Equatable {
-//     companion func equal(left: Self, right: Self) -> boolean
-//     func equals(other: Self) -> boolean
+//     func equals(_ other: Self) -> boolean
 // }
 // ```
 typedef struct {
-  truthvalue_t (*equal)(void *left, void *right);
+  truthvalue_t (*equals)(void *left, void *right);
 } clawr¸Equatableˇwitness;
 extern const __interface_info clawr¸Equatableˇtype;
 
 // ```clawr
+// trait Ordered {
+//     func isOrderedBefore(_ other: Self) -> boolean
+// }
+// ```
+typedef struct {
+  truthvalue_t (*isOrderedBefore)(void *left, void *right);
+} clawr¸Orderedˇwitness;
+extern const __interface_info clawr¸Orderedˇtype;
+
+// ```clawr
 // trait HasStringRepresentation {
-//     func stringRepresentation(other: Self) -> String
+//     func stringRepresentation() -> string
 // }
 // ```
 typedef struct {

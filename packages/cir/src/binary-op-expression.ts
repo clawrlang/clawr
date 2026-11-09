@@ -1,5 +1,5 @@
 import { Expression } from './expression.js'
-import { BooleanSet, IntegerSet, RealRange } from './value-set.js'
+import { BooleanSet, IntegerSet, RealRange, ValueSet } from './value-set.js'
 
 export type BinaryOpExpression =
     | ArithmeticOperation
@@ -7,6 +7,15 @@ export type BinaryOpExpression =
     | OrderComparison
     | RefComparison
     | LogicalOperation
+    | TraitComparison
+
+type TraitComparison = {
+    kind: 'TRAIT_COMPARISON'
+    operator: '==' | '!=' | '<' | '>' | '<=' | '>='
+    left: Expression & { type: { universe: 'rc-type' } }
+    right: Expression & { type: { universe: 'rc-type' } }
+    type: Extract<ValueSet, { universe: 'truthvalue' }>
+}
 
 type ArithmeticOperation = {
     kind:

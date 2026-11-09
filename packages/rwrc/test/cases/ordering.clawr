@@ -1,0 +1,38 @@
+object Money: Ordered, Equatable {
+    func equals(_ other: Money) -> boolean {
+        return self->cents == other.cents
+    }
+
+    func isOrderedBefore(_ other: Money) -> boolean {
+        return self->cents < other.cents
+    }
+
+init:
+    func dollars(_ d: integer (0..<1_000_000), cents: integer (0..<100)) => { cents: d * 100 + cents }
+    func cents(_ cents: integer (0..<100)) => { cents: cents }
+
+state:
+    cents: integer (0..<100_000_000)
+}
+
+@main {
+    const oneDollar: Money = { Money.dollars(1, cents: 0) }
+    const oneFifty: Money = { Money.dollars(1, cents: 50) }
+
+    print(oneDollar > oneFifty)
+    print(oneDollar < oneFifty)
+    print(oneDollar >= oneFifty)
+    print(oneDollar <= oneFifty)
+    print(oneDollar == oneFifty)
+    print(oneDollar != oneFifty)
+    print(oneFifty > oneDollar)
+    print(oneFifty < oneDollar)
+    print(oneFifty >= oneDollar)
+    print(oneFifty <= oneDollar)
+    print(oneDollar < oneDollar)
+    print(oneDollar > oneDollar)
+    print(oneDollar <= oneDollar)
+    print(oneDollar >= oneDollar)
+    print(oneDollar == oneDollar)
+    print(oneDollar != oneDollar)
+}

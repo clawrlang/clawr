@@ -1,0 +1,13 @@
+trait Identity {
+    func identity(_ other: Self) -> Self
+}
+
+object Item: Identity {
+    func identity(_ other: ref Item) -> ref Item {
+        return other
+    }
+}
+
+@main {
+    print(true)
+}

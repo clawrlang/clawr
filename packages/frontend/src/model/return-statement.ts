@@ -4,7 +4,7 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import { ISOLATED } from './isolation-level'
-import { IntegerSet, RealSet } from './value-set'
+import { IntegerSet, RealSet, TruthvalueSet } from './value-set'
 
 export class ReturnStatement implements Statement {
     private constructor(
@@ -108,9 +108,13 @@ export class ReturnStatement implements Statement {
                 this.value!.span,
             )
 
-        // Integers and reals are ISOLATED value types: returning one always
+        // Primitive value types are ISOLATED: returning one always
         // yields an independent copy, whatever the declared result level.
-        if (currentValue instanceof IntegerSet || currentValue instanceof RealSet)
+        if (
+            currentValue instanceof IntegerSet ||
+            currentValue instanceof RealSet ||
+            currentValue instanceof TruthvalueSet
+        )
             return Result.ok
 
         return calleeResult.isolationLevel !== isolationLevel

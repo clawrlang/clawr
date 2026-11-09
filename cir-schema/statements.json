@@ -38,7 +38,7 @@
           "const": "ENSURE_UNIQUE"
         },
         "object": {
-          "$comment": "The variable or field to isolate for mutation.",
+          "$comment": "The variable or property to isolate for mutation.",
           "$ref": "./expressions.json#/$defs/Storage"
         }
       },
@@ -58,7 +58,7 @@
           "const": "RELEASE"
         },
         "object": {
-          "$comment": "The variable or field that exits scope.",
+          "$comment": "The variable or property that exits scope.",
           "$ref": "./expressions.json#/$defs/Storage"
         }
       },

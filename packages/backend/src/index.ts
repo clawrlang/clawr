@@ -172,9 +172,9 @@ function interfacesFirst(a: cir.Declaration, b: cir.Declaration) {
 function lowerNestedHooks(
     decl: cir.Declaration & { kind: 'RC_TYPE_DECL' },
     ownedProperties: { name: string }[],
-): { code: string; fields: string } {
+): { code: string; properties: string } {
     const base = 'base' in decl ? decl.base : undefined
-    if (!ownedProperties.length && !base) return { code: '', fields: '' }
+    if (!ownedProperties.length && !base) return { code: '', properties: '' }
     const name = mangleTypeName(decl)
     const hook = (action: 'retain' | 'release') => {
         const baseHook = base
@@ -187,7 +187,7 @@ function lowerNestedHooks(
     }
     return {
         code: `${hook('retain')}\n${hook('release')}`,
-        fields: `, .retain_nested_properties = ${name}ˇretainNested, .release_nested_properties = ${name}ˇreleaseNested`,
+        properties: `, .retain_nested_properties = ${name}ˇretainNested, .release_nested_properties = ${name}ˇreleaseNested`,
     }
 }
 
@@ -216,7 +216,7 @@ export function lowerDecl(decl: cir.Declaration): string {
                     } ${mangledTypeName};
                     ${nestedHooks.code}
                     static const __type_info ${mangledTypeName}ˇtype = {
-                        .data_type = { .size = sizeof(${mangledTypeName}) ${nestedHooks.fields} }
+                        .data_type = { .size = sizeof(${mangledTypeName}) ${nestedHooks.properties} }
                     };`
             const vtableTypedefs = (decl.dispatchTable ?? [])
                 ?.filter(
@@ -234,16 +234,16 @@ export function lowerDecl(decl: cir.Declaration): string {
                 ?.map(lowerVtableMethod)
                 .join('\n')
             const conformances = lowerConformances(decl)
-            const dataFields = `${nestedHooks.fields}${conformances.field}`
+            const dataProperties = `${nestedHooks.properties}${conformances.property}`
             const typeInfo = decl.dispatchTable
                 ? `.polymorphic_type = {
-                        .data = { .size = sizeof(${mangledTypeName}) ${dataFields} },
+                        .data = { .size = sizeof(${mangledTypeName}) ${dataProperties} },
                         ${decl.base ? `.super = &${mangleTypeName(decl.base)}ˇtype.polymorphic_type,` : ''}
                         .vtable = &(${mangledTypeName}ˇvtable){
                             ${vtableMethods}
                         }
                     }`
-                : `.data_type = { .size = sizeof(${mangledTypeName}) ${dataFields} }`
+                : `.data_type = { .size = sizeof(${mangledTypeName}) ${dataProperties} }`
             return `typedef struct {
                 ${properties}
             } ${mangledTypeName}ˇproperties;
@@ -290,10 +290,10 @@ export function lowerDecl(decl: cir.Declaration): string {
  */
 function lowerConformances(decl: cir.Declaration & { kind: 'RC_TYPE_DECL' }): {
     code: string
-    field: string
+    property: string
 } {
     const conformances = decl.conformances ?? []
-    if (!conformances.length) return { code: '', field: '' }
+    if (!conformances.length) return { code: '', property: '' }
     const typeName = mangleTypeName(decl)
     const dispatchTable = 'dispatchTable' in decl ? decl.dispatchTable : []
     const owner = (name: { baseName: string; labels: string[] }) =>
@@ -342,7 +342,7 @@ function lowerConformances(decl: cir.Declaration & { kind: 'RC_TYPE_DECL' }): {
     )
     return {
         code: code.join('\n'),
-        field: `, .conformances = (const __interface_conformance_entry *[]){ ${entries.join(', ')}, NULL }`,
+        property: `, .conformances = (const __interface_conformance_entry *[]){ ${entries.join(', ')}, NULL }`,
     }
 }
 

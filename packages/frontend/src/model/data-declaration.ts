@@ -37,7 +37,7 @@ export class DataDeclaration implements Declaration {
             namespace: this.name.namespace,
             properties: this.properties.map((property) => ({
                 name: property.name,
-                type: property.type!.toCIR(),
+                type: context.scope.toCIRType(property.type!),
             })),
         })
         return Result.ok

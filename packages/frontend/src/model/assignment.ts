@@ -112,7 +112,7 @@ export class Assignment implements Statement {
             context.scope.emitted.push({
                 kind: 'VARIABLE_DECL' as const,
                 name: tempVar,
-                type: targetType.toCIR(),
+                type: context.scope.toCIRType(targetType),
                 initialValue: target,
             })
 
@@ -141,7 +141,7 @@ export class Assignment implements Statement {
                 value: {
                     kind: 'AS_SHARED',
                     object: retainedValueCIR,
-                    type: targetType.toCIR(),
+                    type: context.scope.toCIRType(targetType),
                 },
             })
         } else {

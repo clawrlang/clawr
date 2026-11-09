@@ -7,7 +7,7 @@ import { FunctionDeclarationParser } from '@/parser/function-declaration-parser'
 export class InterfaceDeclarationParser implements DeclarationParser<InterfaceDeclaration> {
     private readonly functionParser: FunctionDeclarationParser
 
-    private constructor(context: Context) {
+    private constructor(private context: Context) {
         this.functionParser = FunctionDeclarationParser.create(context)
     }
 
@@ -29,7 +29,10 @@ export class InterfaceDeclarationParser implements DeclarationParser<InterfaceDe
         const endToken = stream.expect('PUNCTUATION', '}')
         return InterfaceDeclaration.create({
             kind: startToken.keyword as 'trait' | 'role',
-            name: TypeName.create({ name: nameToken.identifier }),
+            name: TypeName.create({
+                name: nameToken.identifier,
+                namespace: this.context.scope?.namespace,
+            }),
             methods,
             span: { start: startToken.start, end: endToken.end },
         })

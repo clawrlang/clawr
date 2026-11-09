@@ -353,7 +353,10 @@
         },
         "type": {
           "$comment": "The type of the entity.",
-          "$ref": "./valuesets.json#/$defs/RCTypeSet"
+          "oneOf": [
+            { "$ref": "./valuesets.json#/$defs/RCTypeSet" },
+            { "$ref": "./valuesets.json#/$defs/InterfaceSet" }
+          ]
         }
       },
       "required": ["kind", "object", "type"],
@@ -415,7 +418,10 @@
         },
         "type": {
           "$comment": "The type of the retained entity.",
-          "$ref": "./valuesets.json#/$defs/RCTypeSet"
+          "oneOf": [
+            { "$ref": "./valuesets.json#/$defs/RCTypeSet" },
+            { "$ref": "./valuesets.json#/$defs/InterfaceSet" }
+          ]
         }
       },
       "required": ["kind", "object", "type"],

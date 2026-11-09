@@ -4,7 +4,9 @@ import { ISOLATED, SHARED } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { Parameter } from '@/model/parameter'
+import { Scope } from '@/model/scope'
 import { RCTypeSet } from '@/model/value-set'
+import { createStandardLibraryScope } from '@/stdlib'
 import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 
@@ -158,7 +160,9 @@ describe('FunctionCall', () => {
             arguments: [{ value: util.integerLiteral(1) }],
             span: util.someCodeSpan,
         })
-        const context = util.newSemanticContext()
+        const context = {
+            scope: Scope.createRoot(createStandardLibraryScope()),
+        }
         statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
@@ -201,7 +205,9 @@ describe('FunctionCall', () => {
             arguments: [{ value: util.truthvalueLiteral('true') }],
             span: util.someCodeSpan,
         })
-        const context = util.newSemanticContext()
+        const context = {
+            scope: Scope.createRoot(createStandardLibraryScope()),
+        }
         statement.emitStatement(context)
         expect(context.scope.emitted).toMatchObject([
             {
@@ -241,7 +247,9 @@ describe('FunctionCall', () => {
     })
 
     it('boxes integer variable for printing', () => {
-        const context = util.newSemanticContext()
+        const context = {
+            scope: Scope.createRoot(createStandardLibraryScope()),
+        }
         context.scope.addVariableDeclaration('x', {
             ...util.someIntegerVariable,
             isImmutable: true,

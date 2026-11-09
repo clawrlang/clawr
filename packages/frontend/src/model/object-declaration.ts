@@ -2,8 +2,8 @@ import { Context, Declaration } from '@/model'
 import { Property } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { FunctionName } from '@/model/function-name'
-import { TypeName } from '@/model/type-name'
 import { MethodSignature } from '@/model/interface-declaration'
+import { TypeName } from '@/model/type-name'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
@@ -106,6 +106,12 @@ export class ObjectDeclaration implements Declaration {
         )
     }
 
+    initializer(name: FunctionName): FunctionDeclaration | undefined {
+        return this.initializers.find(
+            (initializer) => initializer.name().toString() === name.toString(),
+        )
+    }
+
     superTypeName(): TypeName | undefined {
         return this.superType
             ? TypeName.create({
@@ -157,6 +163,7 @@ export class ObjectDeclaration implements Declaration {
         }
         const superName = this.superTypeName()
         if (superName) context.scope.markAsBase(superName)
+        context.scope.rootScope.addObjectDeclaration(this)
     }
 
     injectSelf(context: Context): Context {
@@ -210,7 +217,7 @@ export class ObjectDeclaration implements Declaration {
             initializers,
             properties: this.properties.map((property) => ({
                 name: property.name,
-                type: property.type.toCIR(),
+                type: context.scope.toCIRType(property.type),
             })),
         })
         return Result.ok
@@ -307,6 +314,22 @@ export class ObjectDeclaration implements Declaration {
         ]
     }
 
+    conformsTo(name: TypeName, context: Context): boolean {
+        const target = context.scope.interfaceDeclaration(name)
+        return (
+            !!target &&
+            this.allConformances(context).some(
+                (conformance) =>
+                    context.scope.interfaceDeclaration(
+                        TypeName.create({
+                            name: conformance,
+                            namespace: this.name.namespace,
+                        }),
+                    ) === target,
+            )
+        )
+    }
+
     private checkConformances(context: Context): SemanticResult<Conformance[]> {
         const result: Conformance[] = []
         const seen = new Set<string>()
@@ -335,7 +358,7 @@ export class ObjectDeclaration implements Declaration {
 
             const fulfillments: Conformance['fulfillments'] = []
             for (const method of interfaceDecl.methods) {
-                const requirementResult = method.toCIR()
+                const requirementResult = method.toCIR(context)
                 if (requirementResult.isError) return requirementResult
                 const requirement = requirementResult.value
                 const implementation = this.findEmittedMethod(
@@ -370,7 +393,7 @@ export class ObjectDeclaration implements Declaration {
                     },
                 })
             }
-            result.push({ interface: typeName.toCIR(), fulfillments })
+            result.push({ interface: interfaceDecl.name.toCIR(), fulfillments })
         }
         return Result.value(result)
     }

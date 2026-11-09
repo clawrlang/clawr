@@ -1,0 +1,34 @@
+func show(_ value: HasStringRepresentation) {
+    print(value)
+}
+
+func showAndReturn(_ value: HasStringRepresentation) -> integer {
+    print(value)
+    return 7
+}
+
+func stringify(_ value: HasStringRepresentation) -> string {
+    return value.stringRepresentation()
+}
+
+func identity(_ value: ref HasStringRepresentation) -> ref HasStringRepresentation {
+    return value
+}
+
+object Printer {
+    func show(_ value: HasStringRepresentation) {
+        print(value)
+    }
+init:
+    func new() => {}
+}
+
+@main {
+    show(42)
+    show(true)
+    stringify(42)
+    show(identity(8))
+    print(showAndReturn(2.5))
+    const printer: Printer = {Printer.new()}
+    printer.show(23)
+}

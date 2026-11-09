@@ -537,6 +537,8 @@ function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
                 : BINARY_FORMATS[representation].ctype
         case 'truthvalue':
             return valueSet.boxed ? 'TruthvalueBox*' : 'truthvalue_t'
+        case 'string':
+            return 'String*'
         case 'rc-type':
             // Interfaces are named like types where the frontend resolved them early
             return interfaceNames.has(mangleTypeName(valueSet))
@@ -968,6 +970,7 @@ function lowerConverted(expr: cir.Expression, target: cir.ValueSet): string {
 
 /** Lowers a call argument for a parameter of type `parameter`. */
 function lowerArgument(expr: cir.Expression, parameter?: cir.ValueSet) {
+    if (expr.kind === 'BOX') return hoist(lowerExpr(expr), lowerType(expr.type))
     if (parameter?.universe === 'real' && isManagedReal(parameter))
         return lowerRealRangeChecked(
             lowerRealBorrowed(expr, parameter),

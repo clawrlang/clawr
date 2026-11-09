@@ -9,9 +9,17 @@ describe('parseDocument', () => {
 
     it('resolves standard numeric aliases', () => {
         const { diagnostics } = parseDocument(
-            '@main {\n    const count: natural = 5\n    const value: float32 = 1.5\n}',
+            '@main {\n    const count: natural = 5\n    const value: binary32 = 1.5\n}',
         )
         expect(diagnostics).toEqual([])
+    })
+
+    it('uses the standard print declaration for diagnostics', () => {
+        expect(parseDocument('@main { print(42) }').diagnostics).toEqual([])
+        const { diagnostics } = parseDocument('@main { print() }')
+        expect(diagnostics[0]?.message).toContain(
+            'Function declaration not found: print()',
+        )
     })
 
     it('records a diagnostic for an unknown variable', () => {

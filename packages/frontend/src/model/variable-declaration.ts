@@ -127,7 +127,7 @@ export class VariableDeclaration implements Statement, Declaration {
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,
             name: this.name,
-            type: type.toCIR(),
+            type: context.scope.toCIRType(type),
             initialValue: initialValue,
         })
 

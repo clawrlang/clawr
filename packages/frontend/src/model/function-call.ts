@@ -1,8 +1,15 @@
 import { Context, Expression, Statement } from '@/model'
+import { FunctionDeclaration } from '@/model/function-declaration'
 import { FunctionName } from '@/model/function-name'
 import { AnyIsolationLevel, UNIQUE } from '@/model/isolation-level'
 import { TypeName } from '@/model/type-name'
-import { RCTypeSet, ValueSet } from '@/model/value-set'
+import {
+    IntegerSet,
+    RCTypeSet,
+    RealSet,
+    TruthvalueSet,
+    ValueSet,
+} from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
@@ -169,90 +176,172 @@ export class FunctionCall implements Expression, Statement {
 
     toCIRExpression(context: Context): SemanticResult<cir.Expression> {
         if (this.recipient) {
+            const declaration = this.recipientDeclaration(context)
+            if (declaration.isError) return declaration
+            const args = this.argumentsToCIR(context, declaration.value)
+            if (args.isError) return args
             const argsResult = SemanticResult.collect([
                 this.currentValue(context),
                 this.recipient.toCIRExpression(context),
-                ...this.arguments.map((arg) => arg.toCIRExpression(context)),
             ])
 
             if (argsResult.isError) return argsResult
-            const [value, recipient, ...args] = argsResult.value
+            const [value, recipient] = argsResult.value
 
             return Result.value({
                 kind: 'CALL',
                 name: this.name.toCIR(),
-                arguments: args,
+                arguments: args.value,
                 receiver: this.receiver(context, recipient),
-                type: value.toCIR(),
+                type: context.scope.toCIRType(value),
             } satisfies cir.Expression)
         } else {
-            const argsResult = SemanticResult.collect([
-                this.currentValue(context),
-                ...this.arguments.map((arg) => arg.toCIRExpression(context)),
-            ])
-
+            const valueResult = this.currentValue(context)
+            if (valueResult.isError) return valueResult
+            const argsResult = this.argumentsToCIR(
+                context,
+                context.scope.functionDeclaration(this.name),
+            )
             if (argsResult.isError) return argsResult
-            const [value, ...args] = argsResult.value
 
             return Result.value({
                 kind: 'CALL',
                 name: this.name.toCIR(),
-                arguments: args,
-                type: value.toCIR(),
+                arguments: argsResult.value,
+                type: context.scope.toCIRType(valueResult.value),
             } satisfies cir.Expression)
         }
     }
 
     emitStatement(context: Context): SemanticResult {
-        const argsResult = SemanticResult.collect(
-            this.arguments.map((arg) => arg.toCIRExpression(context)),
+        const receiver = this.recipientDeclaration(context)
+        if (receiver.isError) return receiver
+        const declaration = this.recipient
+            ? receiver.value
+            : this.name.toString() !== 'copy(of:)'
+              ? context.scope.functionDeclaration(this.name)
+              : undefined
+        if (
+            !this.recipient &&
+            this.name.toString() !== 'copy(of:)' &&
+            !declaration
         )
-        if (argsResult.isError) return argsResult
-        const args = argsResult.value
-        const _name = this.name.toCIR()
-        if (_name.baseName === 'print') {
-            const tempName = context.scope.nextTempVar()
-            const boxType = { ...args[0].type, boxed: true as const }
-            context.scope.emitted.push(
-                {
-                    kind: 'VARIABLE_DECL',
-                    name: tempName,
-                    type: boxType,
-                    initialValue: {
-                        kind: 'BOX',
-                        expression: args[0],
-                        type: boxType,
-                    },
-                },
-                {
-                    kind: 'CALL',
-                    name: _name,
-                    arguments: [
-                        {
-                            kind: 'VARIABLE_REF',
-                            name: tempName,
-                            type: boxType,
-                        },
-                    ],
-                },
-                {
-                    kind: 'RELEASE',
-                    object: {
-                        kind: 'VARIABLE_REF',
-                        name: tempName,
-                    },
-                },
+            return SemanticErrorResult.failure(
+                `Function declaration not found: ${this.name.toString()}`,
+                this.span,
             )
-        } else {
-            const recipientCIR = this.maybeRecipientCIR(context)
+        const argsResult = this.argumentsToCIR(context, declaration)
+        if (argsResult.isError) return argsResult
+        const releases: cir.Statement[] = []
+        const args = argsResult.value.map((arg) => {
+            if (arg.kind !== 'BOX') return arg
+            const name = context.scope.nextTempVar()
             context.scope.emitted.push({
-                kind: 'CALL',
-                name: _name,
-                arguments: args,
-                receiver: recipientCIR && this.receiver(context, recipientCIR),
+                kind: 'VARIABLE_DECL',
+                name,
+                type: arg.type,
+                initialValue: arg,
+            })
+            releases.push({
+                kind: 'RELEASE',
+                object: { kind: 'VARIABLE_REF', name },
+            })
+            return { kind: 'VARIABLE_REF' as const, name, type: arg.type }
+        })
+        const _name = this.name.toCIR()
+        const recipientCIR = this.maybeRecipientCIR(context)
+        context.scope.emitted.push({
+            kind: 'CALL',
+            name: _name,
+            arguments: args,
+            receiver: recipientCIR && this.receiver(context, recipientCIR),
+        })
+        context.scope.emitted.push(...releases)
+        return Result.ok
+    }
+
+    private argumentsToCIR(
+        context: Context,
+        declaration?: Pick<FunctionDeclaration, 'parameters'>,
+    ): SemanticResult<cir.Expression[]> {
+        const result: cir.Expression[] = []
+        for (const [index, argument] of this.arguments.entries()) {
+            const converted = argument.toCIRExpression(context)
+            if (converted.isError) return converted
+            const parameter = declaration?.parameters[index]?.type
+            const iface =
+                parameter instanceof RCTypeSet
+                    ? context.scope.interfaceDeclaration(parameter.type)
+                    : undefined
+            if (!iface) {
+                result.push(converted.value)
+                continue
+            }
+            const value = argument.currentValue(context)
+            if (value.isError) return value
+            if (value.value instanceof RCTypeSet) {
+                const actual = value.value.type
+                if (
+                    context.scope.interfaceDeclaration(actual) !== iface &&
+                    !context.scope
+                        .objectDeclaration(actual)
+                        ?.conformsTo(iface.name, context)
+                )
+                    return SemanticErrorResult.failure(
+                        `Argument does not conform to ${iface.name.name}`,
+                        argument.span,
+                    )
+                result.push(converted.value)
+                continue
+            }
+            let library = context.scope.parentScope
+            while (library && library.namespace !== 'clawr')
+                library = library.parentScope
+            if (
+                library?.interfaceDeclaration(iface.name) !== iface ||
+                iface.name.name !== 'HasStringRepresentation' ||
+                !(
+                    value.value instanceof IntegerSet ||
+                    value.value instanceof RealSet ||
+                    value.value instanceof TruthvalueSet
+                )
+            )
+                return SemanticErrorResult.failure(
+                    `Argument does not conform to ${iface.name.name}`,
+                    argument.span,
+                )
+            result.push({
+                kind: 'BOX',
+                expression: converted.value,
+                type: { ...converted.value.type, boxed: true },
             })
         }
-        return Result.ok
+        return Result.value(result)
+    }
+
+    private recipientDeclaration(
+        context: Context,
+    ): SemanticResult<Pick<FunctionDeclaration, 'parameters'> | undefined> {
+        if (!this.recipient) return Result.value(undefined)
+        const type = this.recipient.type(context)
+        if (type.isError) return type
+        if (!(type.value instanceof RCTypeSet))
+            return SemanticErrorResult.failure(
+                'Recipient must be rc-type',
+                this.recipient.span,
+            )
+        const iface = context.scope.interfaceDeclaration(type.value.type)
+        const object = context.scope.objectDeclaration(type.value.type)
+        const declaration =
+            iface?.method(this.name) ??
+            object?.lookupMethod(this.name, context)?.declaration ??
+            object?.initializer(this.name)
+        if (!declaration)
+            return SemanticErrorResult.failure(
+                `Method declaration not found: ${this.name.toString()}`,
+                this.span,
+            )
+        return Result.value(declaration)
     }
 
     /**
@@ -276,8 +365,9 @@ export class FunctionCall implements Expression, Statement {
                 `The initializer must belong to the supertype ${superType.name}`,
                 this.span,
             )
-        const argsResult = SemanticResult.collect(
-            this.arguments.map((arg) => arg.toCIRExpression(context)),
+        const argsResult = this.argumentsToCIR(
+            context,
+            context.scope.objectDeclaration(superType)?.initializer(this.name),
         )
         if (argsResult.isError) return argsResult
 
@@ -303,15 +393,16 @@ export class FunctionCall implements Expression, Statement {
             type && !type.isError && type.value instanceof RCTypeSet
                 ? type.value.type
                 : undefined
-        if (typeName && context.scope.interfaceDeclaration(typeName))
+        const declaration =
+            typeName && context.scope.interfaceDeclaration(typeName)
+        if (declaration)
             return {
                 dispatch: 'conformance',
                 object: {
                     ...object,
                     type: {
                         universe: 'interface',
-                        name: typeName.name,
-                        namespace: typeName.namespace,
+                        ...declaration.name.toCIR(),
                     },
                 },
             } as Receiver

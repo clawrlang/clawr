@@ -18,12 +18,16 @@ export class Module {
         return new Module(main ?? [], declarations ?? [])
     }
 
-    toCIR(context: Context): cir.Module {
+    registerDeclarations(context: Context): void {
         const declarationsInPhaseOrder = [...this.declarations].sort(
             (a, b) => (a.registrationPhase ?? 1) - (b.registrationPhase ?? 1),
         )
         for (const decl of declarationsInPhaseOrder)
             decl.registerDeclaration?.(context)
+    }
+
+    toCIR(context: Context): cir.Module {
+        this.registerDeclarations(context)
         const result = SemanticResult.collect([
             ...this.declarations.map((decl) => decl.emitDeclaration(context)),
             ...this.main.map((stmt) => stmt.emitStatement(context)),

@@ -61,7 +61,10 @@ export class TypeConstraintParser {
             default:
                 return decorateTypeConstraint(
                     RCTypeSet.create({
-                        type: TypeName.create({ name: type }),
+                        type: TypeName.create({
+                            name: type,
+                            namespace: this.context.scope?.namespace,
+                        }),
                     }),
                     {
                         span: { start: typeToken.start, end: typeToken.end },

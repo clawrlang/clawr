@@ -1,0 +1,233 @@
+import { TokenStream } from '@/lexer'
+import { FunctionName } from '@/model/function-name'
+import { Scope } from '@/model/scope'
+import { TypeName } from '@/model/type-name'
+import { ModuleParser } from '@/parser/module-parser'
+import { createStandardLibraryScope } from '@/stdlib'
+import { describe, expect, it } from 'bun:test'
+
+function compile(source: string) {
+    const scope = Scope.createRoot(createStandardLibraryScope())
+    return ModuleParser.create({ scope })
+        .parse(TokenStream.read(source))
+        .toCIR({ scope })
+}
+
+describe('standard library declarations', () => {
+    it('registers the trait and extern function in the parent scope', () => {
+        const scope = Scope.createRoot(createStandardLibraryScope())
+        const trait = scope.interfaceDeclaration(
+            TypeName.create({ name: 'HasStringRepresentation' }),
+        )
+        const print = scope.functionDeclaration(
+            FunctionName.create({ baseName: 'print', arity: 1, labels: [] }),
+        )
+        expect(trait?.kind).toBe('trait')
+        expect(trait?.methods.map((method) => method.baseName)).toEqual([
+            'stringRepresentation',
+        ])
+        expect(print?.implementation.kind).toBe('extern')
+        expect(print?.parameters[0].type?.toString()).toBe(
+            'clawr¸HasStringRepresentation',
+        )
+        expect(trait?.name.toCIR()).toEqual({
+            name: 'HasStringRepresentation',
+            namespace: 'clawr',
+        })
+    })
+
+    it('uses the declared print signature for calls', () => {
+        const cir = compile('@main { print(42) print(true) print(1.5) }')
+        expect(
+            cir.startBlock?.filter((statement) => statement.kind === 'CALL'),
+        ).toHaveLength(3)
+        expect(() => compile('@main { print() }')).toThrow(
+            'Function declaration not found: print()',
+        )
+        expect(() => compile('@main { print(value: 42) }')).toThrow(
+            'Function declaration not found: print(value:)',
+        )
+        expect(() => compile('@main { print(1, 2) }')).toThrow(
+            'Function declaration not found: print(_:,_:)',
+        )
+    })
+
+    it('does not apply stdlib print boxing to a shadowing declaration', () => {
+        const cir = compile(`
+            extern func print(_ value: integer)
+            @main { print(1) }
+        `)
+        expect(cir.startBlock).toMatchObject([
+            { kind: 'CALL', arguments: [{ kind: 'INTEGER_LITERAL' }] },
+        ])
+    })
+
+    it('checks conformance against the standard trait requirements', () => {
+        const cir = compile(`
+            extern func text() -> string
+            object Printable: HasStringRepresentation {
+                func stringRepresentation() -> string { return text() }
+            }
+        `)
+        expect(
+            cir.declarations?.find((decl) => decl.kind === 'RC_TYPE_DECL'),
+        ).toMatchObject({
+            kind: 'RC_TYPE_DECL',
+            name: 'Printable',
+            conformances: [
+                {
+                    interface: {
+                        name: 'HasStringRepresentation',
+                        namespace: 'clawr',
+                    },
+                    fulfillments: [
+                        {
+                            requirement: {
+                                baseName: 'stringRepresentation',
+                            },
+                        },
+                    ],
+                },
+            ],
+        })
+        expect(() =>
+            compile('object Unprintable: HasStringRepresentation {}'),
+        ).toThrow(
+            'Unprintable does not implement HasStringRepresentation.stringRepresentation',
+        )
+        expect(() =>
+            compile(`
+                object Wrong: HasStringRepresentation {
+                    func stringRepresentation() -> integer { return 1 }
+                }
+            `),
+        ).toThrow('must have the same signature')
+    })
+
+    it('resolves methods on the standard trait in static analysis', () => {
+        const cir = compile(`
+            func stringify(_ value: HasStringRepresentation) -> string {
+                return value.stringRepresentation()
+            }
+        `)
+        const trait = {
+            universe: 'interface',
+            name: 'HasStringRepresentation',
+            namespace: 'clawr',
+        }
+        expect(cir.declarations).toHaveLength(1)
+        expect(cir.declarations?.[0]).toMatchObject({
+            kind: 'FUNCTION_DECL',
+            parameters: [{ name: 'value', type: trait }],
+            body: [
+                {
+                    kind: 'RETURN',
+                    value: {
+                        kind: 'CALL',
+                        receiver: {
+                            dispatch: 'conformance',
+                            object: {
+                                kind: 'VARIABLE_REF',
+                                name: 'value',
+                                type: trait,
+                            },
+                        },
+                    },
+                },
+            ],
+        })
+    })
+
+    it('honors a forward-declared local trait without changing the stdlib signature', () => {
+        const source = `
+            func use(_ value: HasStringRepresentation) -> integer {
+                return value.local()
+            }
+            object Local: HasStringRepresentation {
+                func local() -> integer { return 1 }
+            init:
+                func new() => {}
+            }
+            trait HasStringRepresentation {
+                func local() -> integer
+            }
+        `
+        const cir = compile(`${source} @main { print(42) }`)
+        expect(
+            cir.declarations?.find((decl) => decl.kind === 'FUNCTION_DECL'),
+        ).toMatchObject({
+            parameters: [
+                {
+                    type: {
+                        universe: 'interface',
+                        name: 'HasStringRepresentation',
+                        namespace: undefined,
+                    },
+                },
+            ],
+        })
+        expect(
+            cir.declarations?.find((decl) => decl.kind === 'RC_TYPE_DECL'),
+        ).toMatchObject({
+            conformances: [
+                {
+                    interface: {
+                        name: 'HasStringRepresentation',
+                        namespace: undefined,
+                    },
+                },
+            ],
+        })
+        expect(() =>
+            compile(`
+                ${source}
+                @main {
+                    const value: Local = {Local.new()}
+                    print(value)
+                }
+            `),
+        ).toThrow('Argument does not conform to HasStringRepresentation')
+    })
+
+    it('accepts conforming objects and checks trait-typed function arguments', () => {
+        expect(() =>
+            compile(`
+                extern func text() -> string
+                object Printable: HasStringRepresentation {
+                    func stringRepresentation() -> string { return text() }
+                init:
+                    func new() => {}
+                }
+                func show(_ value: HasStringRepresentation) { print(value) }
+                @main {
+                    const value: Printable = {Printable.new()}
+                    print(value)
+                    show(value)
+                    show(42)
+                }
+            `),
+        ).not.toThrow()
+        expect(() =>
+            compile(`
+                data Record {}
+                func show(_ value: HasStringRepresentation) {}
+                @main {
+                    const value: Record = {}
+                    show(value)
+                }
+            `),
+        ).toThrow('Argument does not conform to HasStringRepresentation')
+    })
+
+    it('rejects unsupported arguments before runtime boxing', () => {
+        expect(() =>
+            compile(`
+                data Record {}
+                @main {
+                    const value: Record = {}
+                    print(value)
+                }
+            `),
+        ).toThrow('Argument does not conform to HasStringRepresentation')
+    })
+})

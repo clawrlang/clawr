@@ -1,5 +1,5 @@
 import { Expression } from './expression.js'
-import { RCTypeSet, ValueSet } from './value-set.js'
+import { InterfaceSet, RCTypeSet, ValueSet } from './value-set.js'
 
 export type MemoryExpression = Allocation | Retain | AsShared | Box
 
@@ -16,13 +16,13 @@ type Allocation = {
 type Retain = {
     kind: 'RETAIN'
     object: Storage
-    type: RCTypeSet
+    type: RCTypeSet | InterfaceSet
 }
 
 type AsShared = {
     kind: 'AS_SHARED'
     object: Extract<Expression, { kind: 'CALL' }>
-    type: RCTypeSet
+    type: RCTypeSet | InterfaceSet
 }
 
 type Box = {

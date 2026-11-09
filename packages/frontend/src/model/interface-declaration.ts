@@ -45,7 +45,7 @@ export class MethodSignature {
         })
     }
 
-    toCIR(): SemanticResult<SignatureCIR> {
+    toCIR(context: Context): SemanticResult<SignatureCIR> {
         const untyped = this.parameters.find((p) => !p.type)
         if (untyped)
             return SemanticErrorResult.failure(
@@ -57,9 +57,11 @@ export class MethodSignature {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((p) => ({
                 name: p.varName,
-                type: p.type!.toCIR(),
+                type: context.scope.toCIRType(p.type!),
             })),
-            returnType: this.result?.toCIR() ?? { universe: 'void' },
+            returnType: this.result
+                ? context.scope.toCIRType(this.result)
+                : { universe: 'void' },
         })
     }
 }
@@ -99,7 +101,7 @@ export class InterfaceDeclaration implements Declaration {
 
     emitDeclaration(context: Context): SemanticResult {
         const methodsResult = SemanticResult.collect(
-            this.methods.map((m) => m.toCIR()),
+            this.methods.map((m) => m.toCIR(context)),
         )
         if (methodsResult.isError) return methodsResult
         context.scope.rootScope.emitted.push({

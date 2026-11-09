@@ -87,8 +87,12 @@ export class FunctionDeclaration implements Declaration {
         return Result.ok
     }
 
-    emitDeclaration(context: Context): SemanticResult {
+    registerDeclaration(context: Context): void {
         context.scope.rootScope.addFunctionDeclaration(this)
+    }
+
+    emitDeclaration(context: Context): SemanticResult {
+        this.registerDeclaration(context)
         if (this.implementation.kind === 'extern') return Result.ok
 
         const bodyContextResult = this.makeBodyContext(context)
@@ -126,7 +130,7 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                type: param.type!.toCIR(),
+                type: context.scope.toCIRType(param.type!),
             })),
             returnType,
             body: bodyContext.scope.emitted,
@@ -176,7 +180,7 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                type: param.type!.toCIR(),
+                type: context.scope.toCIRType(param.type!),
             })),
             returnType,
             body: bodyContext.scope.emitted,
@@ -227,7 +231,7 @@ export class FunctionDeclaration implements Declaration {
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
                 name: param.varName,
-                type: param.type!.toCIR(),
+                type: context.scope.toCIRType(param.type!),
             })),
             returnType: { universe: 'void' } as const,
             body: bodyContext.scope.emitted,
@@ -347,14 +351,15 @@ export class FunctionDeclaration implements Declaration {
     private returnType(
         context: Context,
     ): SemanticResult<cir.ValueSet | { universe: 'void' }> {
-        if (this.result) return Result.value(this.result.type.toCIR())
+        if (this.result)
+            return Result.value(context.scope.toCIRType(this.result.type))
         if (this.implementation.kind === 'body')
             return Result.value({ universe: 'void' })
         if (this.implementation.kind === 'extern')
             throw new Error('Function is extern')
         const typeResult = this.implementation.expression.currentValue(context)
         if (typeResult.isError) return typeResult
-        return Result.value(typeResult.value.toCIR())
+        return Result.value(context.scope.toCIRType(typeResult.value))
     }
 
     private bodyContext(context: Context): Context {

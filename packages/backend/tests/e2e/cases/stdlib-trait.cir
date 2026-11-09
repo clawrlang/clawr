@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=../../../../../cir-schema/cir.schema.json
+$schema: http://clawr.lang/schema/cir/DRAFT-0
+declarations:
+  - kind: RC_TYPE_DECL
+    name: Printable
+    properties: []
+    methods:
+      - kind: FUNCTION_DECL
+        baseName: stringRepresentation
+        labels: []
+        parameters: []
+        returnType: { universe: string }
+        body:
+          - kind: RETURN
+            value:
+              kind: CALL
+              name: { namespace: String, baseName: fromCString, labels: [] }
+              arguments:
+                - kind: STRING_LITERAL
+                  type: { universe: string, value: 'hello' }
+              type: { universe: string }
+    initializers: []
+    conformances:
+      - interface: { name: HasStringRepresentation, namespace: clawr }
+        fulfillments:
+          - requirement: { baseName: stringRepresentation, labels: [] }
+            implementation: { baseName: stringRepresentation, labels: [] }
+startBlock:
+  - kind: VARIABLE_DECL
+    name: item
+    type: { universe: rc-type, name: Printable }
+    initialValue:
+      kind: ALLOCATION
+      isolationLevel: ISOLATED
+      type: { universe: rc-type, name: Printable }
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - kind: VARIABLE_REF
+        name: item
+        type: { universe: rc-type, name: Printable }
+  - kind: RELEASE
+    object: { kind: VARIABLE_REF, name: item }

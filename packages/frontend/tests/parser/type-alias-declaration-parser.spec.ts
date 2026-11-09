@@ -37,7 +37,7 @@ describe('Named subset and type declarations', () => {
         expect(cir.startBlock).toHaveLength(1)
     })
 
-    it('loads built-in aliases from the implicit Clawr stdlib scope', () => {
+    it('loads built-in aliases from the implicit clawr stdlib scope', () => {
         const standardLibrary = createStandardLibraryScope()
         const scope = Scope.createRoot(standardLibrary)
         const module = ModuleParser.create({ scope }).parse(
@@ -59,7 +59,7 @@ describe('Named subset and type declarations', () => {
             throw new Error('Expected binary32 to be a RealSet')
         if (!(binary64 instanceof RealSet))
             throw new Error('Expected binary64 to be a RealSet')
-        expect(standardLibrary.namespace).toBe('Clawr')
+        expect(standardLibrary.namespace).toBe('clawr')
         expect(binary32.precision).toEqual({
             kind: 'sig',
             digits: 24,

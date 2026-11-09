@@ -57,7 +57,7 @@ export class ReturnStatement implements Statement {
             context.scope.emitted.push({
                 kind: 'VARIABLE_DECL',
                 name: temp,
-                type: type.toCIR(),
+                type: context.scope.toCIRType(type),
                 initialValue: retainedValueCIR,
             })
             context.scope.releaseVariables()

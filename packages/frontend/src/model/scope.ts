@@ -4,8 +4,8 @@ import { FunctionName } from '@/model/function-name'
 import { InterfaceDeclaration } from '@/model/interface-declaration'
 import { IsolationLevel, SHARED, UNKNOWN } from '@/model/isolation-level'
 import { ObjectDeclaration } from '@/model/object-declaration'
-import { TypeName } from '@/model/type-name'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
+import { TypeName } from '@/model/type-name'
 import { RCTypeSet, ValueSet } from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 import * as cir from '@clawr/cir'
@@ -125,8 +125,29 @@ export class Scope {
     interfaceDeclaration(name: TypeName): InterfaceDeclaration | undefined {
         return (
             this.rootScope.interfaceDeclaration(name) ??
+            (!name.namespace && this.namespace
+                ? this.rootScope.interfaceDeclaration(
+                      TypeName.create({
+                          name: name.name,
+                          namespace: this.namespace,
+                      }),
+                  )
+                : undefined) ??
             this.parentScope?.interfaceDeclaration(name)
         )
+    }
+
+    toCIRType(
+        value: RCTypeSet,
+    ): Extract<cir.ValueSet, { universe: 'rc-type' | 'interface' }>
+    toCIRType(value: ValueSet): cir.ValueSet
+    toCIRType(value: ValueSet): cir.ValueSet {
+        if (value instanceof RCTypeSet) {
+            const declaration = this.interfaceDeclaration(value.type)
+            if (declaration)
+                return { universe: 'interface', ...declaration.name.toCIR() }
+        }
+        return value.toCIR()
     }
 
     markAsBase(name: TypeName) {

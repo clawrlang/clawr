@@ -1,6 +1,8 @@
 import { DataDeclaration } from '@/model/data-declaration'
 import { FunctionCall } from '@/model/function-call'
+import { FunctionDeclaration } from '@/model/function-declaration'
 import { Module } from '@/model/module'
+import { Parameter } from '@/model/parameter'
 import { IntegerSet, TruthvalueSet } from '@/model/value-set'
 import { VariableDeclaration } from '@/model/variable-declaration'
 import * as util from '@@/util'
@@ -20,7 +22,24 @@ describe('Module', () => {
                 }),
             ],
         })
-        const result = module.toCIR(util.newSemanticContext())
+        const context = util.newSemanticContext()
+        context.scope.rootScope.addFunctionDeclaration(
+            FunctionDeclaration.create({
+                ...util.someFunctionDeclConfig,
+                baseName: 'add',
+                parameters: [
+                    Parameter.create({
+                        ...util.someParameterDeclConfig,
+                        varName: 'a',
+                    }),
+                    Parameter.create({
+                        ...util.someParameterDeclConfig,
+                        varName: 'b',
+                    }),
+                ],
+            }),
+        )
+        const result = module.toCIR(context)
         expect(result).toMatchObject({
             startBlock: [
                 {

@@ -52,7 +52,7 @@ export class Retain implements Expression {
         return Result.value({
             kind: 'RETAIN' as const,
             object: objectResult.value,
-            type: this.valueSet.toCIR(),
+            type: context.scope.toCIRType(this.valueSet),
         })
     }
 }

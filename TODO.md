@@ -4,6 +4,10 @@
 
 - Make the standard library an official, documented language feature: finalize its public surface, complete the remaining work in [ADR-036](./adr/adr-036.md), and adopt the ADR when ready.
 
+## Comparison Operators
+
+- Replace the `kind: 'SCOPE'` expression with ordinary cleanup statements.
+
 ## `object`/`service`
 
 - Make `self` a reserved identifier (and `super` too?)

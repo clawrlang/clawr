@@ -7,41 +7,37 @@
     { "$ref": "#/$defs/Literal" },
     { "$ref": "#/$defs/MemoryExpression" },
     { "$ref": "#/$defs/PropertyReference" },
-    { "$ref": "#/$defs/VariableReference" }
+    { "$ref": "#/$defs/VariableReference" },
+    { "$ref": "#/$defs/ScopedExpression" }
   ],
   "$defs": {
+    "ScopedExpression": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "SCOPE" },
+        "statements": {
+          "$comment": "Bindings evaluated in order before the value.",
+          "type": "array",
+          "items": { "$ref": "./statements.json#/$defs/VariableDeclaration" }
+        },
+        "value": { "$ref": "#" },
+        "cleanup": {
+          "type": "array",
+          "$comment": "Releases evaluated after the value and before the scope exits.",
+          "items": { "$ref": "./statements.json#/$defs/Release" }
+        },
+        "type": { "$ref": "./valuesets.json#" }
+      },
+      "required": ["kind", "statements", "value", "cleanup", "type"],
+      "unevaluatedProperties": false
+    },
     "BinaryOperation": {
       "oneOf": [
         { "$ref": "#/$defs/Arithmetic" },
         { "$ref": "#/$defs/Equality" },
         { "$ref": "#/$defs/LogicalOperation" },
         { "$ref": "#/$defs/OrderComparison" },
-        { "$ref": "#/$defs/RefComparison" },
-        { "$ref": "#/$defs/TraitComparison" }
-      ]
-    },
-    "TraitComparison": {
-      "type": "object",
-      "properties": {
-        "kind": { "const": "TRAIT_COMPARISON" },
-        "operator": { "enum": ["==", "!=", "<", ">", "<=", ">="] },
-        "left": { "$ref": "#/$defs/TraitOperand" },
-        "right": { "$ref": "#/$defs/TraitOperand" },
-        "type": { "$ref": "./valuesets.json#/$defs/TruthvalueSet" }
-      },
-      "required": ["kind", "operator", "left", "right", "type"],
-      "unevaluatedProperties": false
-    },
-    "TraitOperand": {
-      "allOf": [
-        { "$ref": "#" },
-        {
-          "type": "object",
-          "properties": {
-            "type": { "$ref": "./valuesets.json#/$defs/RCTypeSet" }
-          },
-          "required": ["type"]
-        }
+        { "$ref": "#/$defs/RefComparison" }
       ]
     },
     "FunctionCallExpression": {

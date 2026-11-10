@@ -26,18 +26,16 @@ describe('CIR parser schema validation', () => {
         ).toThrow('Invalid CIR:')
     })
 
-    it('validates trait comparison operand and result types', () => {
-        const operand = {
-            kind: 'VARIABLE_REF',
-            name: 'value',
-            type: { universe: 'rc-type', name: 'Item' },
-        }
-        const expression = {
-            kind: 'TRAIT_COMPARISON',
-            operator: '<=',
-            left: operand,
-            right: operand,
-            type: { universe: 'truthvalue' },
+    it('validates scoped expressions and their statements', () => {
+        const scope = {
+            kind: 'SCOPE',
+            statements: [],
+            value: {
+                kind: 'TRUTHVALUE_LITERAL',
+                type: { universe: 'truthvalue', value: 'true' },
+            },
+            cleanup: [],
+            type: { universe: 'truthvalue', value: 'true' },
         }
         const module = (value: object) =>
             JSON.stringify({
@@ -50,19 +48,9 @@ describe('CIR parser schema validation', () => {
                     },
                 ],
             })
-        expect(() => CIRParser.parse(module(expression))).not.toThrow()
+        expect(() => CIRParser.parse(module(scope))).not.toThrow()
         expect(() =>
-            CIRParser.parse(
-                module({
-                    ...expression,
-                    left: { ...operand, type: { universe: 'integer' } },
-                }),
-            ),
-        ).toThrow('Invalid CIR:')
-        expect(() =>
-            CIRParser.parse(
-                module({ ...expression, type: { universe: 'integer' } }),
-            ),
+            CIRParser.parse(module({ ...scope, cleanup: [{}] })),
         ).toThrow('Invalid CIR:')
     })
 })

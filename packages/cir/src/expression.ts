@@ -3,6 +3,7 @@ import { FunctionName } from './identfier.js'
 import { Literal } from './literal.js'
 import { MemoryExpression } from './memory-expression.js'
 import { InterfaceSet, RCTypeSet, ValueSet } from './value-set.js'
+import { Statement } from './statement.js'
 
 export type Expression =
     | Literal
@@ -11,6 +12,15 @@ export type Expression =
     | PropertyReference
     | FunctionCall
     | BinaryOpExpression
+    | ScopedExpression
+
+type ScopedExpression = {
+    kind: 'SCOPE'
+    statements: Extract<Statement, { kind: 'VARIABLE_DECL' }>[]
+    value: Expression
+    cleanup: Extract<Statement, { kind: 'RELEASE' }>[]
+    type: ValueSet
+}
 
 type VariableReference = {
     kind: 'VARIABLE_REF'

@@ -1,5 +1,5 @@
 import { Context, ContextWithType, Expression } from '@/model'
-import { AnyIsolationLevel, ISOLATED } from '@/model/isolation-level'
+import { AnyIsolationLevel, ISOLATED, UNKNOWN } from '@/model/isolation-level'
 import {
     Addition,
     Comparison,
@@ -9,12 +9,20 @@ import {
     Multiplication,
     Subtraction,
 } from '@/model/operators'
-import { RCTypeSet, TruthvalueSet, ValueSet } from '@/model/value-set'
 import { TypeName } from '@/model/type-name'
+import {
+    RCTypeSet,
+    TruthvalueSet,
+    ValueSet,
+    truthvalue,
+} from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
+import { FunctionCall } from './function-call'
+import { Retain } from './retain'
+import { VariableReference } from './variable-reference'
 import { LogicalAND } from './operators/logical-and'
 import { LogicalOR } from './operators/logical-or'
 
@@ -70,33 +78,135 @@ export class BinaryOperation implements Expression {
 
     toCIRExpression(context: ContextWithType): SemanticResult<cir.Expression> {
         const collected = SemanticResult.collect([
-            this.left.toCIRExpression(context),
-            this.right.toCIRExpression(context),
+            this.left.type(context),
+            this.right.type(context),
             this.type(context),
         ])
         if (collected.isError) return collected
         const [left, right, type] = collected.value
         if (
-            isRCExpression(left) &&
-            isRCExpression(right) &&
+            left instanceof RCTypeSet &&
+            right instanceof RCTypeSet &&
             isTraitOperator(this.operator) &&
             type instanceof TruthvalueSet
-        ) {
-            return Result.value({
-                kind: 'TRAIT_COMPARISON',
-                operator: this.operator,
-                left,
-                right,
-                type: type.toCIR(),
-            })
-        }
+        )
+            return this.traitComparison(context, left, right, type)
+        const operands = SemanticResult.collect([
+            this.left.toCIRExpression(context),
+            this.right.toCIRExpression(context),
+        ])
+        if (operands.isError) return operands
+        const [leftCIR, rightCIR] = operands.value
         // The operator strategies already verified the operand types.
         return Result.value({
             kind: CIR_KINDS[this.operator],
-            left,
-            right,
+            left: leftCIR,
+            right: rightCIR,
             type: type.toCIR(),
         } as cir.Expression)
+    }
+
+    private traitComparison(
+        context: Context,
+        leftType: RCTypeSet,
+        rightType: RCTypeSet,
+        type: TruthvalueSet<truthvalue[]>,
+    ): SemanticResult<cir.Expression> {
+        const scope = context.scope.createChildScope()
+        const localContext = { ...context, scope }
+        const statements: Extract<cir.Statement, { kind: 'VARIABLE_DECL' }>[] =
+            []
+        const refs: VariableReference[] = []
+        for (const [operand, operandType] of [
+            [this.left, leftType],
+            [this.right, rightType],
+        ] as const) {
+            const retained = Retain.ifStorage(operand, context)
+            if (retained.isError) return retained
+            const value = retained.value.toCIRExpression(context)
+            if (value.isError) return value
+            const name = context.scope.nextTempVar()
+            scope.addVariableDeclaration(name, {
+                isImmutable: true,
+                isolationLevel: UNKNOWN,
+                type: operandType,
+            })
+            statements.push({
+                kind: 'VARIABLE_DECL',
+                name,
+                type: operandType.toCIR(),
+                initialValue: value.value,
+            })
+            refs.push(VariableReference.create({ name, span: operand.span }))
+        }
+        const [left, right] = refs
+        const call = (
+            name: string,
+            receiver: Expression,
+            argument: Expression,
+        ) =>
+            FunctionCall.create({
+                recipient: receiver,
+                baseName: name,
+                arguments: [{ value: argument }],
+                span: this.span,
+            }).toCIRExpression(localContext)
+        const reverse = this.operator === '>' || this.operator === '>='
+        const equality =
+            this.operator === '==' ||
+            this.operator === '!=' ||
+            this.operator === '<=' ||
+            this.operator === '>='
+                ? call('equals', left, right)
+                : undefined
+        if (equality?.isError) return equality
+        const ordering =
+            this.operator !== '==' && this.operator !== '!='
+                ? call(
+                      'isOrderedBefore',
+                      reverse ? right : left,
+                      reverse ? left : right,
+                  )
+                : undefined
+        if (ordering?.isError) return ordering
+        const equals = equality?.value
+        const before = ordering?.value
+        const eq = equals && isTruthvalueExpression(equals) ? equals : undefined
+        const ord =
+            before && isTruthvalueExpression(before) ? before : undefined
+        let value: cir.Expression
+        if (this.operator === '==' && eq) value = eq
+        else if (this.operator === '!=' && eq)
+            value = {
+                kind: 'NOT_EQUAL',
+                left: eq,
+                right: {
+                    kind: 'TRUTHVALUE_LITERAL',
+                    type: { universe: 'truthvalue', value: 'true' },
+                },
+                type: { universe: 'truthvalue', values: ['false', 'true'] },
+            }
+        else if ((this.operator === '<' || this.operator === '>') && ord)
+            value = ord
+        else if (eq && ord)
+            value = { kind: 'OR', left: eq, right: ord, type: type.toCIR() }
+        else
+            return SemanticErrorResult.failure(
+                'Comparison methods must return truthvalues',
+                this.span,
+            )
+        return Result.value({
+            kind: 'SCOPE',
+            statements,
+            value,
+            cleanup: refs
+                .map((ref) => ({
+                    kind: 'RELEASE' as const,
+                    object: { kind: 'VARIABLE_REF' as const, name: ref.name },
+                }))
+                .reverse(),
+            type: type.toCIR(),
+        })
     }
 
     private compute(
@@ -140,10 +250,25 @@ export class BinaryOperation implements Expression {
                         this.span,
                     )
             }
+            if (this.operator === '==' || this.operator === '!=')
+                return Result.value(TruthvalueSet.create(['false', 'true']))
+            const ordered = context.scope
+                .interfaceDeclaration(
+                    TypeName.create({ name: 'Ordered', namespace: 'clawr' }),
+                )
+                ?.methods.find(
+                    (method) => method.baseName === 'isOrderedBefore',
+                )
+            if (!(ordered?.result instanceof TruthvalueSet))
+                return SemanticErrorResult.failure(
+                    'clawr.Ordered.isOrderedBefore must return a truthvalue',
+                    this.span,
+                )
+            const mayBeAmbiguous = ordered.result.values.includes('ambiguous')
             return Result.value(
-                this.operator === '==' || this.operator === '!='
-                    ? TruthvalueSet.create(['false', 'true'])
-                    : TruthvalueSet.unconstrained(),
+                mayBeAmbiguous
+                    ? TruthvalueSet.unconstrained()
+                    : TruthvalueSet.create(['false', 'true']),
             )
         }
         const strategy = OPERATORS[this.operator]
@@ -154,18 +279,18 @@ export class BinaryOperation implements Expression {
     }
 }
 
+function isTruthvalueExpression(
+    expression: cir.Expression,
+): expression is cir.Expression & {
+    type: Extract<cir.ValueSet, { universe: 'truthvalue' }>
+} {
+    return expression.type.universe === 'truthvalue'
+}
+
 function isTraitOperator(
     operator: keyof typeof OPERATORS,
 ): operator is '==' | '!=' | '<' | '>' | '<=' | '>=' {
     return ['==', '!=', '<', '>', '<=', '>='].includes(operator)
-}
-
-function isRCExpression(
-    expression: cir.Expression,
-): expression is cir.Expression & {
-    type: Extract<cir.ValueSet, { universe: 'rc-type' }>
-} {
-    return expression.type.universe === 'rc-type'
 }
 
 const OPERATORS = {

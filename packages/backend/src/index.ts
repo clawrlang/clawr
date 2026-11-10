@@ -35,6 +35,20 @@ function drainTemps(): { pre: string; post: string } {
     }
 }
 
+function lowerContainedExpression(expr: cir.Expression): string {
+    const saved = temps
+    temps = []
+    try {
+        const value = lowerExpr(expr)
+        const { pre, post } = drainTemps()
+        if (!pre && !post) return value
+        const result = `exprˇresult${tempCounter++}`
+        return `({ ${pre} ${lowerType(expr.type)} ${result} = ${value}; ${post} ${result}; })`
+    } finally {
+        temps = saved
+    }
+}
+
 function registerSignature(
     key: string,
     signature: {
@@ -1123,8 +1137,28 @@ export function lowerInitStmt(stmt: cir.Statement): string {
 
 export function lowerExpr(expr: cir.Expression): string {
     switch (expr.kind) {
-        case 'TRAIT_COMPARISON':
-            return lowerTraitComparison(expr)
+        case 'SCOPE': {
+            const savedVariables = variableTypes
+            variableTypes = new Map(variableTypes)
+            blockLocals.push([])
+            try {
+                const statements = expr.statements.map(lowerStmt).join('\n')
+                const value = lowerContainedExpression(expr.value)
+                const result = `scopeˇresult${tempCounter++}`
+                const cleanup = expr.cleanup.map(lowerStmt).join('\n')
+                const locals = blockLocals[blockLocals.length - 1]
+                return `({
+                    ${statements}
+                    ${lowerType(expr.type)} ${result} = ${value};
+                    ${cleanup}
+                    ${locals.map((name) => `releaseRC(${name});`).join('\n')}
+                    ${result};
+                })`
+            } finally {
+                blockLocals.pop()
+                variableTypes = savedVariables
+            }
+        }
         case 'RETAIN':
             return `retainRC(${lowerStorage(expr.object)})`
         case 'STRING_LITERAL':
@@ -1173,17 +1207,9 @@ export function lowerExpr(expr: cir.Expression): string {
                 ${expr.properties?.map((property) => `.${property.name} = ${lowerPropertyValue(expr.type, property)}`).join(', ') ?? ''}
             )`
         case 'OR':
-            // Cast necessary because of shared mutable state. TypeScript cannot merge Truth[] and (false | true)[] into one type as they are contra-variant.
-            // Of course, `includes()` is a read-only operation, which is always safe, but TypeScript is incapable of drawing that conclusion.
-            const values: cir.truthvalue[] =
-                'value' in expr.left.type
-                    ? [expr.left.type.value]
-                    : 'values' in expr.left.type
-                      ? expr.left.type.values
-                      : ['false', 'ambiguous', 'true']
-            if (values.includes('ambiguous'))
-                throw new Error('ambiguity not yet supported')
-            return `(${lowerExpr(expr.left)}) || (${lowerExpr(expr.right)})`
+            const left = `orˇleft${tempCounter++}`
+            return `({ truthvalue_t ${left} = ${lowerContainedExpression(expr.left)};
+                ${left} == c_true ? c_true : truthvalue¸or(${left}, ${lowerContainedExpression(expr.right)}); })`
         case 'AND':
             return `(${lowerExpr(expr.left)}) && (${lowerExpr(expr.right)})`
         case 'EQUAL':
@@ -1238,53 +1264,6 @@ export function lowerExpr(expr: cir.Expression): string {
         default:
             throw new Error(`Unknown expression kind: ${(expr as any).kind}`)
     }
-}
-
-function lowerTraitComparison(
-    expr: Extract<cir.Expression, { kind: 'TRAIT_COMPARISON' }>,
-): string {
-    const operand = (value: cir.Expression, name: string) => {
-        const saved = temps
-        temps = []
-        try {
-            const lowered = lowerExpr(value)
-            const { pre, post } = drainTemps()
-            const owned =
-                value.kind === 'CALL' ||
-                value.kind === 'ALLOCATION' ||
-                value.kind === 'RETAIN' ||
-                value.kind === 'AS_SHARED'
-            return `${pre}
-                void *${name} = ${owned ? lowered : `retainRC(${lowered})`};
-                ${post}`
-        } finally {
-            temps = saved
-        }
-    }
-    const left = `cmpˇleft${tempCounter++}`
-    const right = `cmpˇright${tempCounter++}`
-    const result = `cmpˇresult${tempCounter++}`
-    const equal = `((clawr¸Equatableˇwitness *)CONFORMANCE_ENTRY(${left}, clawr¸Equatable))->equals(${left}, ${right})`
-    const reversed = expr.operator === '>' || expr.operator === '>='
-    const first = reversed ? right : left
-    const second = reversed ? left : right
-    const ordered = `((clawr¸Orderedˇwitness *)CONFORMANCE_ENTRY(${first}, clawr¸Ordered))->isOrderedBefore(${first}, ${second})`
-    const comparison =
-        expr.operator === '=='
-            ? equal
-            : expr.operator === '!='
-              ? `(${equal} == c_true ? c_false : c_true)`
-              : expr.operator === '<=' || expr.operator === '>='
-                ? `(${equal} == c_true ? c_true : ${ordered})`
-                : ordered
-    return `({
-        ${operand(expr.left, left)}
-        ${operand(expr.right, right)}
-        truthvalue_t ${result} = ${comparison};
-        releaseRC(${right});
-        releaseRC(${left});
-        ${result};
-    })`
 }
 
 function lowerRealLiteral(

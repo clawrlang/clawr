@@ -15,6 +15,11 @@ state:
     cents: integer (0..<100_000_000)
 }
 
+func observe(_ code: integer, _ value: ref Money) -> ref Money {
+    print(code)
+    return value
+}
+
 @main {
     const oneDollar: Money = { Money.dollars(1, cents: 0) }
     const oneFifty: Money = { Money.dollars(1, cents: 50) }
@@ -35,4 +40,7 @@ state:
     print(oneDollar >= oneDollar)
     print(oneDollar == oneDollar)
     print(oneDollar != oneDollar)
+    print(observe(10, oneDollar) <= observe(20, oneFifty))
+    print(observe(30, oneFifty) > observe(40, oneDollar))
+    print(true || observe(50, oneDollar) == oneFifty)
 }

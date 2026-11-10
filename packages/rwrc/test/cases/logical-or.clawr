@@ -1,0 +1,13 @@
+func observe(_ code: integer, _ value: truthvalue) -> truthvalue {
+    print(code)
+    return value
+}
+
+@main {
+    print(false || false)
+    print(false || true)
+    print(ambiguous || false)
+    print(ambiguous || true)
+    print(true || observe(1, false))
+    print(false || observe(2, true))
+}

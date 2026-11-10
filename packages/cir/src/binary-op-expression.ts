@@ -7,15 +7,6 @@ export type BinaryOpExpression =
     | OrderComparison
     | RefComparison
     | LogicalOperation
-    | TraitComparison
-
-type TraitComparison = {
-    kind: 'TRAIT_COMPARISON'
-    operator: '==' | '!=' | '<' | '>' | '<=' | '>='
-    left: Expression & { type: { universe: 'rc-type' } }
-    right: Expression & { type: { universe: 'rc-type' } }
-    type: Extract<ValueSet, { universe: 'truthvalue' }>
-}
 
 type ArithmeticOperation = {
     kind:
@@ -78,5 +69,5 @@ type LogicalOperation = {
     kind: 'AND' | 'OR'
     left: Expression & { type: { universe: 'truthvalue' } }
     right: Expression & { type: { universe: 'truthvalue' } }
-    type: BooleanSet
+    type: Extract<ValueSet, { universe: 'truthvalue' }>
 }

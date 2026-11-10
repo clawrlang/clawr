@@ -47,11 +47,58 @@ describe('trait comparisons', () => {
                 print(a >= b)
             }
         `)
-        const comparisons = JSON.stringify(cir.startBlock)
-        for (const operator of ['==', '!=', '<', '>', '<=', '>='])
-            expect(comparisons).toContain(`"operator":"${operator}"`)
-        expect(comparisons).toContain('"values":["false","true"]')
-        expect(comparisons).toContain('"universe":"truthvalue"')
+        const scopes = (cir.startBlock ?? []).flatMap((statement) =>
+            statement.kind === 'VARIABLE_DECL' &&
+            statement.initialValue.kind === 'BOX' &&
+            statement.initialValue.expression.kind === 'SCOPE'
+                ? [statement.initialValue.expression]
+                : [],
+        )
+        expect(scopes).toHaveLength(6)
+        const method = (baseName: string) => ({
+            kind: 'CALL',
+            name: { baseName },
+            receiver: { dispatch: 'direct' },
+        })
+        expect(scopes.map((scope) => scope.value)).toMatchObject([
+            method('equals'),
+            { kind: 'NOT_EQUAL', left: method('equals') },
+            method('isOrderedBefore'),
+            method('isOrderedBefore'),
+            {
+                kind: 'OR',
+                left: method('equals'),
+                right: method('isOrderedBefore'),
+            },
+            {
+                kind: 'OR',
+                left: method('equals'),
+                right: method('isOrderedBefore'),
+            },
+        ])
+        for (const scope of scopes) {
+            expect(scope.type).toEqual({
+                universe: 'truthvalue',
+                values: ['false', 'true'],
+            })
+            expect(scope.statements).toHaveLength(2)
+            expect(scope.cleanup).toHaveLength(2)
+        }
+        const [left, right] = scopes[3].statements
+        expect(scopes[3].value).toMatchObject({
+            receiver: { object: { name: right.name } },
+            arguments: [{ name: left.name }],
+        })
+        expect(scopes[5].value).toMatchObject({
+            left: {
+                receiver: { object: { name: scopes[5].statements[0].name } },
+                arguments: [{ name: scopes[5].statements[1].name }],
+            },
+            right: {
+                receiver: { object: { name: scopes[5].statements[1].name } },
+                arguments: [{ name: scopes[5].statements[0].name }],
+            },
+        })
     })
 
     it('requires the relevant canonical traits', () => {
@@ -80,6 +127,21 @@ describe('trait comparisons', () => {
                 ${compare('==')}
             `),
         ).toThrow('must conform to clawr.Equatable')
+    })
+
+    it('keeps primitive comparisons as binary CIR operations', () => {
+        const cir = compile(`
+            func less(_ a: real sig 24 bin, _ b: real sig 24 bin) -> boolean {
+                return a < b
+            }
+            func equal(_ a: integer, _ b: integer) -> boolean {
+                return a == b
+            }
+        `)
+        expect(cir.declarations).toMatchObject([
+            { body: [{ kind: 'RETURN', value: { kind: 'LESS_THAN' } }] },
+            { body: [{ kind: 'RETURN', value: { kind: 'EQUAL' } }] },
+        ])
     })
 
     it('rejects incorrect Self signatures and overly broad equality results', () => {

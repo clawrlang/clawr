@@ -25,8 +25,8 @@ trait Equatable {
 }
 
 /**
- * Enable `<` and `>` comparisons. The predicate returns ambiguous when the
- * ordering is unknown or incomparable; it does not mean the values are equal.
+ * Enable `<` and `>` comparisons. The predicate returns true when the
+ * receiver precedes the other value and false otherwise.
  * Combine with Equatable to enable `<=` and `>=`.
  */
 trait Ordered {

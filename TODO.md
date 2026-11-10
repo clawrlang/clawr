@@ -7,6 +7,7 @@
 ## Comparison Operators
 
 - Replace the `kind: 'SCOPE'` expression with ordinary cleanup statements.
+  - Deferred until control flow is implemented. - A `true || <comparison>` or a `false && <comparison>` expression needs to short-circuit.
 
 ## `object`/`service`
 

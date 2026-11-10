@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "const": "http://clawr.lang/schema/cir/DRAFT-0"
+    },
+    "startBlock": {
+      "type": "array",
+      "items": { "$ref": "./statements.json#" }
+    },
+    "declarations": {
+      "type": "array",
+      "items": { "$ref": "./declarations.json#" }
+    }
+  },
+  "required": ["$schema"],
+  "unevaluatedProperties": false
+}

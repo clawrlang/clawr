@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/$defs/RCTypeDeclaration" },
+    { "$ref": "#/$defs/InterfaceDeclaration" },
+    { "$ref": "#/$defs/VariableDeclaration" },
+    { "$ref": "#/$defs/FunctionDeclaration" }
+  ],
+  "$defs": {
+    "RCTypeDeclaration": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "RC_TYPE_DECL"
+        },
+        "name": {
+          "$comment": "The name of the declared type.",
+          "type": "string"
+        },
+        "namespace": {
+          "$comment": "Optional namespace.",
+          "type": "string"
+        },
+        "properties": {
+          "$comment": "The stored properties of the declared type.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/PropertyDeclaration" }
+        },
+        "conformances": {
+          "$comment": "Interfaces the declared type conforms to.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Conformance" }
+        },
+        "base": {
+          "$comment": "The supertype of the declared type.",
+          "$ref": "#/$defs/CanonicalName"
+        },
+        "methods": {
+          "$comment": "The methods of the declared type.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/FunctionDeclaration" }
+        },
+        "initializers": {
+          "$comment": "Initializer methods of the declared type.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/FunctionDeclarationVoid" }
+        },
+        "dispatchTable": {
+          "$comment": "Table for looking up interface conformance implementations.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/DispatchTableEntry" }
+        }
+      },
+      "required": ["kind", "name", "properties"],
+      "unevaluatedProperties": false
+    },
+    "InterfaceDeclaration": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "INTERFACE_DECL"
+        },
+        "name": { "type": "string", "$comment": "Type name." },
+        "namespace": { "type": "string", "$comment": "Optional namespace." },
+        "methods": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/FunctionSignature" },
+          "$comment": "Methods that must exist on conforming types."
+        }
+      },
+      "required": ["kind", "name", "methods"],
+      "unevaluatedProperties": false
+    },
+    "VariableDeclaration": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "VARIABLE_DECL"
+        },
+        "name": {
+          "$comment": "The name of the declared variable.",
+          "type": "string"
+        },
+        "namespace": {
+          "$comment": "Optional namespace.",
+          "type": "string"
+        },
+        "type": {
+          "$comment": "The type of the variable.",
+          "$ref": "./valuesets.json#"
+        },
+        "initialValue": {
+          "$comment": "The initial value of the variable.",
+          "$ref": "./expressions.json#"
+        }
+      },
+      "required": ["kind", "name", "type", "initialValue"],
+      "unevaluatedProperties": false
+    },
+    "FunctionDeclaration": {
+      "type": "object",
+      "allOf": [
+        { "$ref": "#/$defs/FunctionSignature_base" },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "$comment": "Declaration discriminator.",
+              "const": "FUNCTION_DECL"
+            },
+            "body": {
+              "type": "array",
+              "items": { "$ref": "./statements.json#" },
+              "$comment": "Function body."
+            },
+            "namespace": {
+              "type": "string",
+              "$comment": "Optional namespace (not for methods)."
+            }
+          },
+          "required": ["kind", "body"]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+
+    "PropertyDeclaration": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$comment": "The name of the property.",
+          "type": "string"
+        },
+        "type": {
+          "$comment": "The type of the property.",
+          "$ref": "./valuesets.json#"
+        }
+      },
+      "required": ["name", "type"],
+      "unevaluatedProperties": false
+    },
+    "Conformance": {
+      "type": "object",
+      "properties": {
+        "interface": {
+          "$comment": "The interface the type conforms to.",
+          "$ref": "#/$defs/CanonicalName"
+        },
+        "fulfillments": {
+          "$comment": "Lookup table for implementations.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Fulfillment" }
+        }
+      },
+      "required": ["interface", "fulfillments"],
+      "unevaluatedProperties": false
+    },
+    "Fulfillment": {
+      "type": "object",
+      "properties": {
+        "requirement": {
+          "$comment": "The required method name.",
+          "$ref": "./expressions.json#/$defs/FunctionName"
+        },
+        "implementation": {
+          "$comment": "The name of the method that fulfils the requirement.",
+          "$ref": "./expressions.json#/$defs/FunctionName"
+        }
+      },
+      "required": ["requirement", "implementation"],
+      "unevaluatedProperties": false
+    },
+    "DispatchTableEntry": {
+      "type": "object",
+      "properties": {
+        "slot": {
+          "$comment": "The requirement.",
+          "$ref": "#/$defs/FunctionSignature"
+        },
+        "declaredIn": {
+          "$comment": "The type that introduces the requirement.",
+          "$ref": "#/$defs/CanonicalName"
+        },
+        "implementation": {
+          "$comment": "The type (itself or supertype) that implements the requirement.",
+          "$ref": "#/$defs/CanonicalName"
+        }
+      },
+      "required": ["slot", "declaredIn"],
+      "unevaluatedProperties": false
+    },
+    "CanonicalName": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$comment": "The name of a type.",
+          "type": "string"
+        },
+        "namespace": {
+          "$comment": "Optional namespace.",
+          "type": "string"
+        }
+      },
+      "required": ["name"],
+      "unevaluatedProperties": false
+    },
+
+    "FunctionSignature": {
+      "type": "object",
+      "$ref": "#/$defs/FunctionSignature_base",
+      "unevaluatedProperties": false
+    },
+    "FunctionDeclarationVoid": {
+      "allOf": [
+        { "$ref": "#/$defs/FunctionDeclaration" },
+        {
+          "type": "object",
+          "properties": { "returnType": { "$ref": "#/$defs/Void" } }
+        }
+      ]
+    },
+    "FunctionSignature_base": {
+      "type": "object",
+      "properties": {
+        "baseName": { "type": "string", "$comment": "Function base name." },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "$comment": "Labels; part of the unique function name."
+        },
+        "parameters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Parameter" },
+          "$comment": "Each parameter has `name` and `type`."
+        },
+        "returnType": {
+          "oneOf": [
+            { "$ref": "./valuesets.json#" },
+            { "$ref": "#/$defs/Void" }
+          ],
+          "$comment": "`{\"universe\":\"void\"}` means no result."
+        }
+      },
+      "required": ["baseName", "labels", "parameters", "returnType"]
+    },
+    "Parameter": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$comment": "The name of the parameter.",
+          "type": "string"
+        },
+        "type": {
+          "$comment": "The type of the parameter.",
+          "$ref": "./valuesets.json#"
+        }
+      },
+      "required": ["name", "type"],
+      "unevaluatedProperties": false
+    },
+    "Void": {
+      "type": "object",
+      "properties": {
+        "universe": {
+          "$comment": "Declaration discriminator.",
+          "const": "void"
+        }
+      },
+      "required": ["universe"],
+      "unevaluatedProperties": false
+    }
+  }
+}

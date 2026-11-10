@@ -37,3 +37,5 @@ They are essentally an ice-box for architectural decisions and future TODOs.
 - [Ternary `subset` and `type`](./ternary-subsets.md)
 - [Events](./events.md)
 - [Extensions](./extensions.md)
+- [Serializable Data](./serializable-data.md)
+- [Auto Equality](./auto-equality.md)

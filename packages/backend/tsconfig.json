@@ -6,8 +6,8 @@
     "rootDir": ".",
     "outDir": "dist",
     "paths": {
-      "@cir-schema/*": ["../../cir-schema/*"]
+      "@schema/*": ["../../schema/*"]
     }
   },
-  "include": ["src/**/*.ts", "../../cir-schema/*"]
+  "include": ["src/**/*.ts", "../../schema/*"]
 }

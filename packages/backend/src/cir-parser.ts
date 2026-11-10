@@ -1,9 +1,9 @@
-import cirSchema from '@cir-schema/cir.schema.json' with { type: 'json' }
-import declarations from '@cir-schema/declarations.json' with { type: 'json' }
-import expressions from '@cir-schema/expressions.json' with { type: 'json' }
-import statements from '@cir-schema/statements.json' with { type: 'json' }
-import valueSets from '@cir-schema/valuesets.json' with { type: 'json' }
 import { Module } from '@clawr/cir'
+import cirSchema from '@schema/cir.schema.json' with { type: 'json' }
+import declarations from '@schema/declarations.json' with { type: 'json' }
+import expressions from '@schema/expressions.json' with { type: 'json' }
+import statements from '@schema/statements.json' with { type: 'json' }
+import valueSets from '@schema/valuesets.json' with { type: 'json' }
 import { Ajv2020 } from 'ajv/dist/2020.js'
 import YAML from 'yaml'
 

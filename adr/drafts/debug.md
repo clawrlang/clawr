@@ -13,24 +13,24 @@ runtime state back to source.
 
 ## Decision
 
-CIR instructions MAY carry optional debug metadata:
+CIR instructions `MAY` carry optional debug metadata:
 
 - source span (file, line, column range)
 - provenance chain (what expression/instruction this was derived from)
 - static value-set of the value at this point
 
-The metadata is optional. Backends MUST NOT depend on it. Backends MUST
-NOT emit it. It is consumed by debuggers and reference interpreters only.
+The metadata is optional. Backends `MUST NOT` depend on it. Backends `MUST`
+`NOT` emit it. It is consumed by debuggers and reference interpreters only.
 
-Optimization level is a frontend concern. The CIR format does not
-distinguish "debug" from "release" code. A frontend MAY emit more or
+Optimization level is a frontend concern. The CIR format `MUST NOT`
+distinguish "debug" from "release" code. A frontend `MAY` emit more or
 less optimized CIR depending on flags, but the format is the same.
 
-The frontend MUST NOT erase provenance when folding. It MAY omit
+The frontend `MUST NOT` erase provenance when folding. It `MAY` omit
 provenance entirely (no debug info), but if it emits any, the chain
 must be consistent.
 
-Implicit backend boxing ([ADR-016](../adr-016.md)) is backend-private and MUST NOT
+Implicit backend boxing ([ADR-016](../adr-016.md)) is backend-private and `MUST NOT`
 appear in debug metadata as a source-level operation.
 
 ## Rationale

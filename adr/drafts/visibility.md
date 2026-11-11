@@ -246,3 +246,7 @@ data:
 | `helper object` / `service` / `data` | Package only       | Only code in the same package         |
 
 **Key insight:** The `helper` keyword means "implementation detail" - the scope depends on what kind of thing it marks, but the intent is always the same: this is not part of the public API.
+
+## Related ADRs
+
+- [`helper` Keyword](./helper.md) (Note: duplicate entry)

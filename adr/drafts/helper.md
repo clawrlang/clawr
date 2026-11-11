@@ -26,3 +26,4 @@ Clawr will only have one modifier: `helper`. Sensible defaults apply where some 
 ## Related ADRs
 
 - [ADR-008](../adr-008.md) (Encapsulation vs Data)
+- [Visibility Modifiers in Clawr](./visibility.md) (note: duplicate entry)

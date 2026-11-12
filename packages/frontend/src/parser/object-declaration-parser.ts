@@ -31,8 +31,17 @@ export class ObjectDeclarationParser {
 
         if (stream.isNext('PUNCTUATION', ':')) {
             stream.expect('PUNCTUATION', ':')
-            do inherits.push(stream.expect('IDENTIFIER').identifier)
-            while (stream.isNext('PUNCTUATION', ',') && stream.next())
+            do {
+                const token = stream.expect('IDENTIFIER')
+                inherits.push(token.identifier)
+                this.context.definitionRecorder?.typeReference(
+                    token.identifier,
+                    {
+                        start: token.start,
+                        end: token.end,
+                    },
+                )
+            } while (stream.isNext('PUNCTUATION', ',') && stream.next())
         }
 
         stream.expect('PUNCTUATION', '{')
@@ -79,6 +88,7 @@ export class ObjectDeclarationParser {
         return ObjectDeclaration.create({
             kind: startToken.keyword as 'object' | 'service',
             name: TypeName.create({ name: nameToken.identifier }),
+            nameSpan: { start: nameToken.start, end: nameToken.end },
             inherits,
             readonly,
             mutating: mutating ?? [],

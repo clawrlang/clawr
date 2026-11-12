@@ -4,6 +4,7 @@ import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { TypeName } from '@/model/type-name'
 import { Result } from '@/tools/result'
 import { SemanticResult } from '@/tools/source-result'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 
 export type Property = {
     isImmutable: boolean
@@ -17,16 +18,23 @@ export class DataDeclaration implements Declaration {
     private constructor(
         public name: TypeName,
         public properties: Property[],
+        public readonly span?: SourceCodeSpan,
     ) {}
 
     static create({
         name,
         properties,
+        span,
     }: {
         name: TypeName
         properties: Property[]
+        span?: SourceCodeSpan
     }): DataDeclaration {
-        return new DataDeclaration(name, properties)
+        return new DataDeclaration(name, properties, span)
+    }
+
+    registerDeclaration(context: Context): void {
+        context.scope.rootScope.addDataDeclaration(this)
     }
 
     emitDeclaration(context: Context): SemanticResult {

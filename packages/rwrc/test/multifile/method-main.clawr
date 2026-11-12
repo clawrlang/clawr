@@ -1,0 +1,11 @@
+object Alpha {
+    func use(_ other: Beta) -> integer { return other.value() }
+init:
+    func new() => {}
+}
+
+@main {
+    const a: Alpha = {Alpha.new()}
+    const b: Beta = {Beta.new()}
+    print(a.use(b))
+}

@@ -18,11 +18,11 @@ export type VariableSemantics = (typeof VARIABLE_SEMANTICS)[number]
 export class VariableDeclaration implements Statement, Declaration {
     private constructor(
         private readonly isImmutable: boolean,
-        private readonly name: string,
+        public readonly name: string,
         private readonly isolationLevel: IsolationLevel | undefined,
         private readonly type: TypeConstraintDeclaration | undefined,
         private readonly initialValue: Expression,
-        private readonly span: SourceCodeSpan,
+        public readonly span: SourceCodeSpan,
         private readonly nameSpan: SourceCodeSpan,
     ) {}
 

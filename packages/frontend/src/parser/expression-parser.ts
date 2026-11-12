@@ -157,6 +157,7 @@ export class ExpressionParser {
                     expression = FunctionCall.create({
                         baseName: expression.name,
                         arguments: args,
+                        nameSpan: expression.span,
                         span: {
                             start: expression.span.start,
                             end,

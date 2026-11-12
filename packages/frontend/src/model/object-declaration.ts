@@ -56,7 +56,8 @@ export class ObjectDeclaration implements Declaration {
         private readonly mutating: FunctionDeclaration[],
         private readonly initializers: FunctionDeclaration[],
         public readonly properties: Property[],
-        private readonly span: SourceCodeSpan,
+        public readonly span: SourceCodeSpan,
+        public readonly nameSpan?: SourceCodeSpan,
     ) {
         this.superType = superType
         this.conformances = conformances
@@ -74,6 +75,7 @@ export class ObjectDeclaration implements Declaration {
         initializers,
         properties,
         span,
+        nameSpan,
     }: {
         kind: 'object' | 'service'
         name: TypeName
@@ -86,6 +88,7 @@ export class ObjectDeclaration implements Declaration {
         initializers: FunctionDeclaration[]
         properties: Property[]
         span: SourceCodeSpan
+        nameSpan?: SourceCodeSpan
     }) {
         return new ObjectDeclaration(
             kind,
@@ -98,6 +101,7 @@ export class ObjectDeclaration implements Declaration {
             initializers,
             properties,
             span,
+            nameSpan,
         )
     }
 

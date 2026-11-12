@@ -43,6 +43,7 @@ The Clawr language is designed to be agnostic to hardware bases and layout. Nume
 This project is written in TypeScript for [Node.js](https://nodejs.org/en/download).
 
 ```sh
+git submodule update --init --recursive
 npm install
 npm test
 npm run test:unit     # Quick unit tests only
@@ -51,6 +52,30 @@ npm run test:e2e      # Run end-to-end tests
 
 npx bun test packages/frontend/tests/unit/parser/module-parser.spec.ts # Run a single test fixture
 ```
+
+The standard-library declarations and their ordered manifest live in the
+documentation repository, pinned as a Git submodule. The compiler's build
+embeds them; the standalone executable does not need the checkout at runtime.
+The pinned documentation commit must be available from the submodule remote
+for a fresh clone.
+
+### Multi-file programs
+
+Pass source files in order. Multiple files require an output name:
+
+```sh
+packages/rwrc/dist/rwrc build types.clawr main.clawr --name example -o dist
+```
+
+The files share one program scope and must contain exactly one `@main`, even
+when building a single file. Named aliases must precede their uses. This is
+not yet a system of separately importable modules or packages.
+
+The VS Code extension discovers `.clawr` files per workspace folder in lexical
+path order, excluding dependencies and generated output. Set
+`clawr.sourceFiles` to an ordered array of paths relative to the workspace
+folder to match a particular CLI build. Cross-file go-to-definition supports
+top-level types and functions; rename remains single-file.
 
 The CIR schema in `./schema/` is the source for both editor validation of `.cir` fixtures and runtime validation by the backend parser. The schema is updated automatically from the Clawr documentation.
 

@@ -155,7 +155,56 @@ export function lower(json: string): string {
         cir.declarations?.filter((decl) => decl.kind === 'VARIABLE_DECL') ?? []
     return `#include <stdio.h>
         #include "runtime.h"
-        ${cir.declarations ? [...cir.declarations].sort(interfacesFirst).map(lowerDecl).join('\n') : ''}
+        ${(cir.declarations ?? [])
+            .filter((decl) => decl.kind === 'RC_TYPE_DECL')
+            .map(
+                (decl) =>
+                    `typedef struct ${mangleTypeName(decl)} ${mangleTypeName(decl)};`,
+            )
+            .join('\n')}
+        ${(cir.declarations ?? [])
+            .filter((decl) => decl.kind === 'RC_TYPE_DECL')
+            .map((decl) => lowerRCStructure(decl))
+            .join('\n')}
+        ${(cir.declarations ?? [])
+            .filter((decl) => decl.kind === 'RC_TYPE_DECL')
+            .map(
+                (decl) =>
+                    `static const __type_info ${mangleTypeName(decl)}ˇtype;`,
+            )
+            .join('\n')}
+        ${(cir.declarations ?? [])
+            .filter((decl) => decl.kind === 'FUNCTION_DECL')
+            .map(
+                (decl) =>
+                    `${functionSignature(decl, mangleNameWithParameters(decl))};`,
+            )
+            .join('\n')}
+        ${(cir.declarations ?? [])
+            .filter((decl) => decl.kind === 'RC_TYPE_DECL' && 'methods' in decl)
+            .flatMap((decl) =>
+                'methods' in decl
+                    ? [
+                          ...decl.methods.map(
+                              (method) =>
+                                  `${memberSignature(method, decl, false)};`,
+                          ),
+                          ...decl.initializers.map(
+                              (initializer) =>
+                                  `${memberSignature(initializer, decl, true)};`,
+                          ),
+                      ]
+                    : [],
+            )
+            .join('\n')}
+        ${
+            cir.declarations
+                ? [...cir.declarations]
+                      .sort(declarationOrder)
+                      .map((decl) => lowerDecl(decl, true))
+                      .join('\n')
+                : ''
+        }
         ${variableDecls?.length ? lowerInit(variableDecls) : ''}
         int main() {
             ${cir.startBlock ? lowerBlock(cir.startBlock, { universe: 'void' }, []) : ''}
@@ -171,11 +220,16 @@ const interfaceDecls = new Map<
 >()
 const typeDecls = new Map<string, cir.Declaration & { kind: 'RC_TYPE_DECL' }>()
 
-function interfacesFirst(a: cir.Declaration, b: cir.Declaration) {
-    return (
-        Number(b.kind === 'INTERFACE_DECL') -
-        Number(a.kind === 'INTERFACE_DECL')
-    )
+function declarationOrder(a: cir.Declaration, b: cir.Declaration) {
+    const rank = (decl: cir.Declaration) =>
+        decl.kind === 'INTERFACE_DECL'
+            ? 0
+            : decl.kind === 'VARIABLE_DECL'
+              ? 1
+              : decl.kind === 'RC_TYPE_DECL'
+                ? 2
+                : 3
+    return rank(a) - rank(b)
 }
 
 /**
@@ -205,29 +259,38 @@ function lowerNestedHooks(
     }
 }
 
-export function lowerDecl(decl: cir.Declaration): string {
+function lowerRCStructure(
+    decl: cir.Declaration & { kind: 'RC_TYPE_DECL' },
+): string {
+    const name = mangleTypeName(decl)
+    const properties = decl.properties
+        .map((property) => `${lowerType(property.type)} ${property.name};`)
+        .join('\n')
+    return `typedef struct {
+        ${properties}
+    } ${name}ˇproperties;
+    typedef struct ${name} {
+        ${'base' in decl && decl.base ? `${mangleTypeName(decl.base)} super` : '__rc_header header'};
+        ${name}ˇproperties properties;
+    } ${name};`
+}
+
+export function lowerDecl(
+    decl: cir.Declaration,
+    structureAlreadyEmitted = false,
+): string {
     switch (decl.kind) {
         case 'RC_TYPE_DECL': {
             const mangledTypeName = mangleTypeName(decl)
-            const properties = decl.properties
-                .map(
-                    (property) =>
-                        `${lowerType(property.type)} ${property.name};`,
-                )
-                .join('\n')
+            const structure = structureAlreadyEmitted
+                ? ''
+                : lowerRCStructure(decl)
             const ownedProperties = decl.properties.filter((property) =>
                 isPointerType(property.type),
             )
             const nestedHooks = lowerNestedHooks(decl, ownedProperties)
             if (!('methods' in decl))
-                return `typedef struct {
-                        ${properties}
-                    } ${mangledTypeName}ˇproperties;
-
-                    typedef struct {
-                        __rc_header header;
-                        ${mangledTypeName}ˇproperties properties;
-                    } ${mangledTypeName};
+                return `${structure}
                     ${nestedHooks.code}
                     static const __type_info ${mangledTypeName}ˇtype = {
                         .data_type = { .size = sizeof(${mangledTypeName}) ${nestedHooks.properties} }
@@ -258,15 +321,7 @@ export function lowerDecl(decl: cir.Declaration): string {
                         }
                     }`
                 : `.data_type = { .size = sizeof(${mangledTypeName}) ${dataProperties} }`
-            return `typedef struct {
-                ${properties}
-            } ${mangledTypeName}ˇproperties;
-
-            typedef struct {
-                ${decl.base ? `${mangleTypeName(decl.base)} super` : '__rc_header header'};
-                ${mangledTypeName}ˇproperties properties;
-            } ${mangledTypeName};
-
+            return `${structure}
             ${vtableTypedefs.join('\n')}
             ${vtableStruct}
             ${nestedHooks.code}
@@ -472,6 +527,33 @@ function lowerMethod(
     )
 }
 
+function memberSignature(
+    decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
+    receiverType: cir.Declaration & { kind: 'RC_TYPE_DECL' },
+    initializer: boolean,
+): string {
+    return functionSignature(
+        {
+            ...decl,
+            returnType: initializer
+                ? { universe: 'rc-type', name: 'void' }
+                : decl.returnType,
+            parameters: [
+                {
+                    name: 'self',
+                    type: {
+                        universe: 'rc-type',
+                        name: receiverType.name,
+                        namespace: receiverType.namespace,
+                    },
+                },
+                ...decl.parameters,
+            ],
+        },
+        mangleNameWithParameters(decl, receiverType),
+    )
+}
+
 function lowerInitializer(
     decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
     receiverType: cir.Declaration & { kind: 'RC_TYPE_DECL' },
@@ -503,7 +585,7 @@ function lowerInitializer(
     )
 }
 
-function lowerFunction(
+function functionSignature(
     decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
     mangledName: string,
 ) {
@@ -516,7 +598,14 @@ function lowerFunction(
         .join(', ')
     const returnType = lowerType(decl.returnType)
 
-    return `${returnType} ${mangledName}(${params}) {
+    return `${returnType} ${mangledName}(${params})`
+}
+
+function lowerFunction(
+    decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
+    mangledName: string,
+) {
+    return `${functionSignature(decl, mangledName)} {
         ${[
             ...decl.parameters
                 .filter((param) => param.type.universe === 'rc-type')

@@ -27,6 +27,10 @@
       "types": "./dist/src/stdlib.d.ts",
       "default": "./dist/src/stdlib.js"
     },
+    "./program": {
+      "types": "./dist/src/program.d.ts",
+      "default": "./dist/src/program.js"
+    },
     "./parser/*": {
       "types": "./dist/src/parser/*.d.ts",
       "default": "./dist/src/parser/*.js"
@@ -54,7 +58,9 @@
   "scripts": {
     "pretest": "npm run build --workspace=@clawr/cir  && npm run build",
     "test": "tsc --noEmit && BUN_JSC_useTailCalls=0 bun test ./tests",
+    "prebuild": "npm run build --workspace=@clawr/stdlib",
     "build": "ttsc",
+    "prepack": "npm run build --workspace=@clawr/cir && npm run build",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {

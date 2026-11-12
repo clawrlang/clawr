@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "pretest:unit": "npm run build --workspace=@clawr/cir",
-    "test:unit": "npm test --workspace=@clawr/frontend && npm run test:unit --workspace=@clawr/backend",
+    "test:unit": "npm test --workspace=@clawr/stdlib && npm test --workspace=@clawr/frontend && npm run test:unit --workspace=@clawr/backend",
     "build": "npm run build --workspace=@clawr/rwrc",
     "build:backend": "npm run build --workspace=@clawr/backend",
     "build:rwrc": "npm run build:rwrc --workspace=@clawr/rwrc",
@@ -30,6 +30,6 @@
     "test:runtime": "npm test --workspace=@clawr/runtime",
     "build:vscode": "npm run build --workspace=@clawr/vscode",
     "test:vscode": "npm test --workspace=@clawr/vscode",
-    "test": "npm test --workspace=@clawr/frontend && npm run build:runtime && npm run test:backend && npm run test:e2e"
+    "test": "npm test --workspace=@clawr/stdlib && npm test --workspace=@clawr/frontend && npm run build:runtime && npm run test:backend && npm run test:e2e"
   }
 }

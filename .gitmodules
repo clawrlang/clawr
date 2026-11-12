@@ -1,0 +1,3 @@
+[submodule "vendor/clawr-doc"]
+	path = vendor/clawr-doc
+	url = https://github.com/clawrlang/clawr-doc.git

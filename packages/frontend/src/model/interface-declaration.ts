@@ -85,6 +85,7 @@ export class InterfaceDeclaration implements Declaration {
         public readonly name: TypeName,
         public readonly methods: MethodSignature[],
         public readonly span: SourceCodeSpan,
+        public readonly nameSpan?: SourceCodeSpan,
     ) {}
 
     static create(config: {
@@ -92,12 +93,14 @@ export class InterfaceDeclaration implements Declaration {
         name: TypeName
         methods: MethodSignature[]
         span: SourceCodeSpan
+        nameSpan?: SourceCodeSpan
     }) {
         return new InterfaceDeclaration(
             config.kind,
             config.name,
             config.methods,
             config.span,
+            config.nameSpan,
         )
     }
 

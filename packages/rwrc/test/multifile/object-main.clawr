@@ -1,0 +1,6 @@
+func run() {
+    const item: Item = {Item.new()}
+    print(item.value())
+}
+
+@main { run() }

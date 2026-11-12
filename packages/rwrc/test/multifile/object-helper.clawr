@@ -1,0 +1,7 @@
+object Item {
+    func value() => self->property
+init:
+    func new() => {property: 42}
+state:
+    property: integer
+}

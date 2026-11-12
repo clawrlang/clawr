@@ -25,6 +25,7 @@ export class FunctionCall implements Expression, Statement {
         private readonly recipient: Expression | undefined,
         args: Expression[],
         public readonly span: SourceCodeSpan,
+        private readonly nameSpan: SourceCodeSpan,
     ) {
         this.arguments = args
     }
@@ -34,11 +35,13 @@ export class FunctionCall implements Expression, Statement {
         recipient,
         arguments: args,
         span,
+        nameSpan,
     }: {
         baseName: string
         recipient?: Expression
         arguments: { label?: string; value: Expression }[]
         span: SourceCodeSpan
+        nameSpan?: SourceCodeSpan
     }): FunctionCall {
         return new FunctionCall(
             FunctionName.create({
@@ -49,11 +52,18 @@ export class FunctionCall implements Expression, Statement {
             recipient,
             args.map((arg) => arg.value),
             span,
+            nameSpan ?? span,
         )
     }
 
     withTarget(target: Expression) {
-        return new FunctionCall(this.name, target, this.arguments, this.span)
+        return new FunctionCall(
+            this.name,
+            target,
+            this.arguments,
+            this.span,
+            this.nameSpan,
+        )
     }
 
     isEffectivelyConst(): SuccessResult<true> {
@@ -201,6 +211,7 @@ export class FunctionCall implements Expression, Statement {
                 type: context.scope.toCIRType(value),
             } satisfies cir.Expression)
         } else {
+            this.recordDefinition(context)
             const valueResult = this.currentValue(context)
             if (valueResult.isError) return valueResult
             const argsResult = this.argumentsToCIR(
@@ -226,6 +237,7 @@ export class FunctionCall implements Expression, Statement {
             : this.name.toString() !== 'copy(of:)'
               ? context.scope.functionDeclaration(this.name)
               : undefined
+        if (!this.recipient) this.recordDefinition(context)
         if (
             !this.recipient &&
             this.name.toString() !== 'copy(of:)' &&
@@ -263,6 +275,17 @@ export class FunctionCall implements Expression, Statement {
         })
         context.scope.emitted.push(...releases)
         return Result.ok
+    }
+
+    private recordDefinition(context: Context): void {
+        const definition = context.scope.functionDeclaration(
+            this.name,
+        )?.nameSpan
+        if (definition)
+            context.definitionRecorder?.functionReference(
+                this.nameSpan,
+                definition,
+            )
     }
 
     private argumentsToCIR(

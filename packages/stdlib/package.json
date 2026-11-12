@@ -3,11 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "description": "Clawr standard library declarations",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "*.clawr"
+    "dist"
   ],
   "exports": {
-    "./subsets.clawr": "./subsets.clawr",
-    "./traits.clawr": "./traits.clawr"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "prepack": "npm run build",
+    "test": "node --test build.test.mjs"
   }
 }

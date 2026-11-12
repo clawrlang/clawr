@@ -30,6 +30,7 @@ export class DataDeclarationParser {
         return DataDeclaration.create({
             name: TypeName.create({ name }),
             properties: properties,
+            span: { start: nameToken.start, end: nameToken.end },
         })
     }
 }

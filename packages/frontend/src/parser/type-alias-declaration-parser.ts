@@ -66,6 +66,7 @@ export class TypeAliasDeclarationParser {
         return TypeAliasDeclaration.create({
             name: nameToken.identifier,
             value,
+            nameSpan: { start: nameToken.start, end: nameToken.end },
         })
     }
 }

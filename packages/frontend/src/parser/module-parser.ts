@@ -10,6 +10,7 @@ import { ObjectDeclarationParser } from '@/parser/object-declaration-parser'
 import { TypeAliasDeclarationParser } from '@/parser/type-alias-declaration-parser'
 import { VariableDeclarationParser } from '@/parser/variable-declaration-parser'
 import { SourceError } from '@/tools'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 
 export class ModuleParser {
     private blockParser: BlockParser
@@ -33,6 +34,7 @@ export class ModuleParser {
 
     parse(stream: TokenStream): Module {
         let main: Statement[] | undefined = undefined
+        let mainSpan: SourceCodeSpan | undefined
         const declarations: Declaration[] = []
 
         while (stream.peek()) {
@@ -45,7 +47,8 @@ export class ModuleParser {
                     })
                 }
 
-                stream.expect('ANNOTATION', '@main')
+                const token = stream.expect('ANNOTATION', '@main')
+                mainSpan = { start: token.start, end: token.end }
                 main = this.blockParser.parse(stream)
             } else {
                 const parser = this.declarationParsers.find((parser) =>
@@ -61,6 +64,6 @@ export class ModuleParser {
                 declarations.push(parser!.parse(stream))
             }
         }
-        return Module.create({ main, declarations })
+        return Module.create({ main, declarations, mainSpan })
     }
 }

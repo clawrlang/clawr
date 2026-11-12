@@ -9,12 +9,14 @@ import { ValueSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { HighlightRecorder } from '@/tools/highlights'
+import { DefinitionRecorder } from '@/tools/definitions'
 import { SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
 
 export type Context = {
     scope: Scope
     highlightRecorder?: HighlightRecorder
+    definitionRecorder?: DefinitionRecorder
     calleeResult?: {
         type: ValueSet
         isolationLevel: IsolationLevel | UNIQUE

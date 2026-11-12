@@ -1,0 +1,5 @@
+func first() => shared
+
+@main {
+    print(first())
+}

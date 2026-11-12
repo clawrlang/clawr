@@ -65,6 +65,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                         parameters.at(-1)?.span.end ??
                         nameToken.end,
                 },
+                nameSpan: { start: nameToken.start, end: nameToken.end },
             })
 
         if (stream.isNext('PUNCTUATION', '=>')) {
@@ -81,6 +82,8 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                     kind: 'implicit-return',
                     expression: returnExpression,
                 },
+                span: { start, end: returnExpression.span.end },
+                nameSpan: { start: nameToken.start, end: nameToken.end },
             })
         }
 
@@ -91,6 +94,8 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             parameters,
             result,
             implementation: { kind: 'body', statements },
+            span: { start, end: nameToken.end },
+            nameSpan: { start: nameToken.start, end: nameToken.end },
         })
     }
 

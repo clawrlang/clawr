@@ -34,12 +34,16 @@ export class TokenStream {
     private source: Source
     private previousToken: Token | undefined
 
-    private constructor(source: string | Source) {
+    private constructor(
+        source: string | Source,
+        private readonly sourceName?: string,
+    ) {
         this.source = typeof source === 'string' ? new Source(source) : source
+        if (sourceName) this.source.location.source = sourceName
     }
 
-    static read(source: string) {
-        return new TokenStream(source)
+    static read(source: string, sourceName?: string) {
+        return new TokenStream(source, sourceName)
     }
 
     attempt<T>(parse: (clone: TokenStream) => T): T {
@@ -51,7 +55,7 @@ export class TokenStream {
     }
 
     clone() {
-        const clone = new TokenStream(this.source.clone())
+        const clone = new TokenStream(this.source.clone(), this.sourceName)
         clone.previousToken = this.previousToken
         return clone
     }
@@ -181,9 +185,21 @@ export class TokenStream {
     }
 
     next(options?: { stopAtNewline: true } | undefined): Token | undefined {
-        const token = this.readnext(options)
-        if (token && token.kind !== 'NEWLINE') this.previousToken = token
-        return token
+        try {
+            const token = this.readnext(options)
+            if (token && this.sourceName) {
+                token.start.source = this.sourceName
+                token.end.source = this.sourceName
+            }
+            if (token && token.kind !== 'NEWLINE') this.previousToken = token
+            return token
+        } catch (error) {
+            if (error instanceof SourceError && this.sourceName) {
+                error.span.start.source = this.sourceName
+                error.span.end.source = this.sourceName
+            }
+            throw error
+        }
     }
 
     private readnext(
@@ -592,6 +608,7 @@ type SourceLocation = {
     line: number
     column: number
     index: number
+    source?: string
 }
 
 class BetterRegex {

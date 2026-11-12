@@ -1,0 +1,6 @@
+func read(_ value: Item) -> integer { return value.property }
+
+@main {
+    const item: Item = { property: 42 }
+    print(read(item))
+}

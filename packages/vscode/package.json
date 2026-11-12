@@ -13,7 +13,23 @@
     "Programming Languages"
   ],
   "main": "./dist/src/extension.js",
+  "files": [
+    "dist",
+    "syntaxes",
+    "language-configuration.json"
+  ],
   "contributes": {
+    "configuration": {
+      "title": "Clawr",
+      "properties": {
+        "clawr.sourceFiles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Ordered source paths relative to the workspace folder. Empty discovers Clawr files in lexical order."
+        }
+      }
+    },
     "languages": [
       {
         "id": "clawr",
@@ -35,6 +51,8 @@
     ]
   },
   "scripts": {
+    "prebuild": "npm run build --workspace=@clawr/cir && npm run build --workspace=@clawr/frontend",
+    "prepack": "npm run build",
     "pretest": "npm run build",
     "test": "npm run test:unit && npm run test:grammar && npm run test:integration",
     "test:unit": "tsc --noEmit -p tsconfig.json && BUN_JSC_useTailCalls=0 bun test ./tests/unit",

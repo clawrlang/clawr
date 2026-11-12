@@ -1,0 +1,11 @@
+object Alpha {
+    func use(_ other: ref Beta) -> integer { return other->property }
+init:
+    func new() => {}
+}
+
+@main {
+    const a: Alpha = {Alpha.new()}
+    const b: ref Beta = {Beta.new()}
+    print(a.use(b))
+}

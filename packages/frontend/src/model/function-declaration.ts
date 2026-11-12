@@ -31,6 +31,7 @@ export class FunctionDeclaration implements Declaration {
             | undefined,
         public readonly implementation: FunctionImplementation,
         public readonly span?: SourceCodeSpan,
+        public readonly nameSpan?: SourceCodeSpan,
     ) {}
 
     static create({
@@ -39,6 +40,7 @@ export class FunctionDeclaration implements Declaration {
         result,
         implementation,
         span,
+        nameSpan,
     }: {
         baseName: string
         parameters: Parameter[]
@@ -50,6 +52,7 @@ export class FunctionDeclaration implements Declaration {
             | undefined
         implementation: FunctionImplementation
         span?: SourceCodeSpan
+        nameSpan?: SourceCodeSpan
     }): FunctionDeclaration {
         return new FunctionDeclaration(
             baseName,
@@ -57,6 +60,7 @@ export class FunctionDeclaration implements Declaration {
             result,
             implementation,
             span,
+            nameSpan,
         )
     }
 

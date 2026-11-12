@@ -1,0 +1,6 @@
+object Beta {
+init:
+    func new() => {property: 42}
+state:
+    property: integer
+}

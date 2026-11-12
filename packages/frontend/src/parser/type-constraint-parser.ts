@@ -35,6 +35,10 @@ export class TypeConstraintParser {
     ): TypeConstraintDeclaration {
         const typeToken = stream.expect('IDENTIFIER')
         const type = typeToken.identifier
+        this.context.definitionRecorder?.typeReference(type, {
+            start: typeToken.start,
+            end: typeToken.end,
+        })
 
         const alias = this.context.scope?.typeAlias(type)
         if (alias)

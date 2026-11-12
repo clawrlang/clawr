@@ -1,0 +1,5 @@
+object Beta {
+    func value() => 42
+init:
+    func new() => {}
+}

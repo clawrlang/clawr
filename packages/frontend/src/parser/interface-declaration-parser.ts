@@ -34,6 +34,7 @@ export class InterfaceDeclarationParser implements DeclarationParser<InterfaceDe
                 namespace: this.context.scope?.namespace,
             }),
             methods,
+            nameSpan: { start: nameToken.start, end: nameToken.end },
             span: { start: startToken.start, end: endToken.end },
         })
     }

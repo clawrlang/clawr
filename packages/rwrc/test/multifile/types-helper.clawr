@@ -1,0 +1,3 @@
+data Item {
+    property: integer
+}

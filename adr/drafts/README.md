@@ -6,7 +6,6 @@ These are drafts (or maybe merely sketches) of architecture decision records (AD
 
 They are essentally an ice-box for architectural decisions and future TODOs.
 
-- [Multi-Module Programs and Libraries](./multi-module.md)
 - [Nested Functions and Lambdas](./lambdas.md)
 - [Discard Label `_`](./discard-label.md)
 - [Spread Operator](./spread-operator.md)

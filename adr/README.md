@@ -67,3 +67,4 @@ The following ADRs have been documented so far:
 - [ADR-035](./adr-035.md): Separating Mutability from Isolation in Declaration Syntax
 - [ADR-036](./adr-036.md): Standard Library for Clawr
 - [ADR-037](./adr-037.md): Hashing and `HashEquatable`
+- [ADR-038](./adr-038.md): Multi-File Programs and Future Modules

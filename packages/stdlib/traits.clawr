@@ -1,0 +1,22 @@
+trait HasStringRepresentation {
+    func stringRepresentation() -> string
+}
+
+/**
+ * Enable `==` and `!=` comparisons.
+ * Combine with Ordered to enable `<=` and `>=`.
+ */
+trait Equatable {
+    func equals(_ other: Self) -> boolean
+}
+
+/**
+ * Enable `<` and `>` comparisons. The predicate returns true when the
+ * receiver precedes the other value and false otherwise.
+ * Combine with Equatable to enable `<=` and `>=`.
+ */
+trait Ordered {
+    func isOrderedBefore(_ other: Self) -> boolean
+}
+
+extern func print(_ value: HasStringRepresentation)

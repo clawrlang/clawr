@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 const directory = path.dirname(fileURLToPath(import.meta.url))
 const sourceDirectory = path.resolve(
     directory,
-    '../../vendor/clawr-doc/std-lib',
+    '../../vendor/clawr-doc/spec/stdlib',
 )
 const manifestPath = path.join(sourceDirectory, 'manifest.json')
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))

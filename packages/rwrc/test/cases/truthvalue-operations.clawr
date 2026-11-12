@@ -1,0 +1,18 @@
+func show(_ value: truthvalue, _ other: truthvalue) {
+    print(rotate(value, by: other))
+    print(adjust(value, towards: other))
+    print(modulate(value, by: other))
+}
+
+@main {
+    show(false, false)
+    show(false, ambiguous)
+    show(false, true)
+    show(ambiguous, false)
+    show(ambiguous, ambiguous)
+    show(ambiguous, true)
+    show(true, false)
+    show(true, ambiguous)
+    show(true, true)
+    print(rotate(adjust(false, towards: true), by: modulate(false, by: false)))
+}

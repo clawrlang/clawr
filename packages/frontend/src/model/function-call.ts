@@ -297,6 +297,15 @@ export class FunctionCall implements Expression, Statement {
             const converted = argument.toCIRExpression(context)
             if (converted.isError) return converted
             const parameter = declaration?.parameters[index]?.type
+            if (parameter instanceof TruthvalueSet) {
+                const value = argument.currentValue(context)
+                if (value.isError) return value
+                if (!(value.value instanceof TruthvalueSet))
+                    return SemanticErrorResult.failure(
+                        'Argument must be a truthvalue',
+                        argument.span,
+                    )
+            }
             const iface =
                 parameter instanceof RCTypeSet
                     ? context.scope.interfaceDeclaration(parameter.type)

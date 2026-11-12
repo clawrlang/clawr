@@ -19,7 +19,7 @@ const script = fileURLToPath(new URL('./build.mjs', import.meta.url))
 function fixture(run) {
     const root = mkdtempSync(path.join(os.tmpdir(), 'clawr-stdlib-test-'))
     const packageDir = path.join(root, 'packages/stdlib')
-    const sources = path.join(root, 'vendor/clawr-doc/std-lib')
+    const sources = path.join(root, 'vendor/clawr-doc/spec/stdlib')
     mkdirSync(packageDir, { recursive: true })
     mkdirSync(sources, { recursive: true })
     copyFileSync(script, path.join(packageDir, 'build.mjs'))

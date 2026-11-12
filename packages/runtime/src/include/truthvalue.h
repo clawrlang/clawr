@@ -24,6 +24,19 @@ static inline truthvalue_t modulate__by(truthvalue_t value, truthvalue_t by) {
   return value * by;
 }
 
+static inline truthvalue_t rotate˛by(truthvalue_t value, truthvalue_t by) {
+  return rotate__by(value, by);
+}
+
+static inline truthvalue_t adjust˛towards(truthvalue_t value,
+                                         truthvalue_t towards) {
+  return adjust__towards(value, towards);
+}
+
+static inline truthvalue_t modulate˛by(truthvalue_t value, truthvalue_t by) {
+  return modulate__by(value, by);
+}
+
 static inline truthvalue_t truthvalue¸and(truthvalue_t a, truthvalue_t b) {
   return a < b ? a : b;
 }

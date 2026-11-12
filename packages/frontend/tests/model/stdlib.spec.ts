@@ -52,6 +52,29 @@ describe('standard library declarations', () => {
         )
     })
 
+    it('resolves truthvalue functions with their declared labels and types', () => {
+        compile(`@main {
+            rotate(false, by: true)
+            adjust(ambiguous, towards: false)
+            modulate(true, by: ambiguous)
+        }`)
+        expect(() => compile('@main { rotate(false, true) }')).toThrow(
+            'Function declaration not found: rotate(_:,_:)',
+        )
+        expect(() => compile('@main { adjust(false, by: true) }')).toThrow(
+            'Function declaration not found: adjust(_:,by:)',
+        )
+        expect(() => compile('@main { modulate(42, by: true) }')).toThrow(
+            'Argument must be a truthvalue',
+        )
+        expect(() => compile('@main { rotate(true, by: 42) }')).toThrow(
+            'Argument must be a truthvalue',
+        )
+        expect(() =>
+            compile('@main { print(modulate(42, by: true)) }'),
+        ).toThrow('Argument must be a truthvalue')
+    })
+
     it('does not apply stdlib print boxing to a shadowing declaration', () => {
         const cir = compile(`
             extern func print(_ value: integer)

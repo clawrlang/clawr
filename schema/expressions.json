@@ -441,12 +441,20 @@
           "$comment": "The type of the retained entity.",
           "oneOf": [
             { "$ref": "./valuesets.json#/$defs/RCTypeSet" },
-            { "$ref": "./valuesets.json#/$defs/InterfaceSet" }
+            { "$ref": "./valuesets.json#/$defs/InterfaceSet" },
+            { "$ref": "#/$defs/BoxedValueSet" }
           ]
         }
       },
       "required": ["kind", "object", "type"],
       "unevaluatedProperties": false
+    },
+    "BoxedValueSet": {
+      "$ref": "./valuesets.json#",
+      "properties": {
+        "boxed": { "const": true }
+      },
+      "required": ["boxed"]
     },
 
     "Storage": {

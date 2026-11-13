@@ -14,21 +14,36 @@ const CLAWR_LANGUAGE = { language: 'clawr' }
 export function activate(context: vscode.ExtensionContext): void {
     const analysis = new WorkspaceAnalysis()
     const watcher = vscode.workspace.createFileSystemWatcher('**/*.clawr')
+    const projectWatcher =
+        vscode.workspace.createFileSystemWatcher('**/.clawr-project')
 
     context.subscriptions.push(
         analysis,
         watcher,
+        projectWatcher,
         watcher.onDidCreate(() => analysis.invalidate()),
         watcher.onDidChange(() => analysis.invalidate()),
         watcher.onDidDelete(() => analysis.invalidate()),
+        projectWatcher.onDidCreate(() => analysis.invalidate()),
+        projectWatcher.onDidChange(() => analysis.invalidate()),
+        projectWatcher.onDidDelete(() => analysis.invalidate()),
+        vscode.workspace.onDidRenameFiles((event) => {
+            if (
+                event.files.some(({ oldUri, newUri }) =>
+                    [oldUri, newUri].some(
+                        (uri) =>
+                            uri.path.endsWith('.clawr') ||
+                            uri.path.endsWith('/.clawr-project'),
+                    ),
+                )
+            )
+                analysis.invalidate()
+        }),
         vscode.workspace.onDidChangeWorkspaceFolders(() =>
             analysis.invalidate(),
         ),
         vscode.workspace.onDidChangeConfiguration((event) => {
-            if (
-                event.affectsConfiguration('clawr.sourceFiles') ||
-                event.affectsConfiguration('files.exclude')
-            )
+            if (event.affectsConfiguration('files.exclude'))
                 analysis.invalidate()
         }),
         vscode.workspace.onDidOpenTextDocument((document) => {

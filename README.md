@@ -75,11 +75,20 @@ The files share one program scope and must contain exactly one `@main`, even
 when building a single file. Named aliases must precede their uses. This is
 not yet a system of separately importable modules or packages.
 
-The VS Code extension discovers `.clawr` files per workspace folder in lexical
-path order, excluding dependencies and generated output. Set
-`clawr.sourceFiles` to an ordered array of paths relative to the workspace
-folder to match a particular CLI build. Cross-file go-to-definition supports
-top-level types and functions; rename remains single-file.
+The VS Code extension treats each `.clawr` file as independent unless its
+directory or an ancestor contains an empty `.clawr-project` marker. Files under
+the nearest marker form a project, in lexical path order; nested markers create
+separate projects. Files named `*.script.clawr` remain independent even inside
+a project. Discovery stays within each workspace folder and excludes
+dependencies and generated output. The editor allows declaration-only files;
+the compiler still requires exactly one `@main` per executable.
+
+The former `clawr.sourceFiles` setting is no longer supported. To migrate,
+place a `.clawr-project` marker in the project directory and rename independent
+files within it to `*.script.clawr` or move them outside the project. Make sure
+lexical file order puts named aliases before their uses, and pass the project
+files explicitly in the same order to the compiler. Cross-file go-to-definition
+supports top-level types and functions; rename remains single-file.
 
 The CIR schema in `./schema/` is the source for both editor validation of `.cir` fixtures and runtime validation by the backend parser. The schema is updated automatically from the Clawr documentation.
 

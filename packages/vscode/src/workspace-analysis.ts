@@ -1,13 +1,7 @@
 import * as vscode from 'vscode'
+import { posix } from 'node:path'
 import { analyzeProgram, AnalyzedDocument } from './analyze-program'
-import { parseDocument } from './parse-document'
 import { toRange } from './spans'
-
-function isStringArray(value: unknown): value is string[] {
-    return (
-        Array.isArray(value) && value.every((item) => typeof item === 'string')
-    )
-}
 
 export class WorkspaceAnalysis implements vscode.Disposable {
     readonly collection = vscode.languages.createDiagnosticCollection('clawr')
@@ -40,7 +34,9 @@ export class WorkspaceAnalysis implements vscode.Disposable {
             const found = result.get(document.uri.toString())
             if (found) return found
         }
-        return { ...parseDocument(document.getText()), definitions: [] }
+        return analyzeProgram([
+            { name: document.uri.toString(), source: document.getText() },
+        ]).get(document.uri.toString())!
     }
 
     private async folder(
@@ -58,70 +54,41 @@ export class WorkspaceAnalysis implements vscode.Disposable {
     private async load(
         folder: vscode.WorkspaceFolder,
     ): Promise<Map<string, AnalyzedDocument>> {
-        const configured = vscode.workspace
-            .getConfiguration('clawr', folder.uri)
-            .get<unknown>('sourceFiles', [])
-        if (!isStringArray(configured))
-            throw new Error('clawr.sourceFiles must be an array of paths')
-        let uris: vscode.Uri[]
-        if (configured.length) {
-            if (
-                new Set(configured).size !== configured.length ||
-                configured.some(
-                    (name) =>
-                        !name.endsWith('.clawr') ||
-                        name.startsWith('/') ||
-                        name.includes('\\') ||
-                        name
-                            .split('/')
-                            .some(
-                                (part) =>
-                                    !part || part === '.' || part === '..',
-                            ),
-                )
-            )
-                throw new Error(
-                    'clawr.sourceFiles must contain unique relative .clawr paths',
-                )
-            uris = configured.map((name) =>
-                vscode.Uri.joinPath(folder.uri, name),
-            )
-            if (new Set(uris.map((uri) => uri.toString())).size !== uris.length)
-                throw new Error('clawr.sourceFiles contains duplicate paths')
-        } else {
-            uris = await vscode.workspace.findFiles(
+        const [sources, markers] = await Promise.all([
+            vscode.workspace.findFiles(
                 new vscode.RelativePattern(folder, '**/*.clawr'),
-            )
-            uris = uris.filter((uri) => {
-                const relative = vscode.workspace.asRelativePath(uri, false)
-                return (
-                    vscode.workspace.getWorkspaceFolder(uri)?.uri.toString() ===
-                        folder.uri.toString() &&
-                    !relative
-                        .split('/')
-                        .some((part) =>
-                            [
-                                'node_modules',
-                                'dist',
-                                'vendor',
-                                '.git',
-                                '.out',
-                            ].includes(part),
-                        )
+            ),
+            vscode.workspace.findFiles(
+                new vscode.RelativePattern(folder, '**/.clawr-project'),
+            ),
+        ])
+        const included = (uri: vscode.Uri): boolean =>
+            vscode.workspace.getWorkspaceFolder(uri)?.uri.toString() ===
+                folder.uri.toString() &&
+            !vscode.workspace
+                .asRelativePath(uri, false)
+                .split('/')
+                .some((part) =>
+                    ['node_modules', 'dist', 'vendor', '.git', '.out'].includes(
+                        part,
+                    ),
                 )
-            })
-            uris.sort((a, b) =>
-                a.path < b.path ? -1 : a.path > b.path ? 1 : 0,
-            )
-        }
+        const projectDirectories = new Set(
+            markers.filter(included).map((uri) => posix.dirname(uri.path)),
+        )
+        const folderPath = folder.uri.path.replace(/\/+$/, '') || '/'
+        const uris = sources.filter(included).sort((a, b) =>
+            a.path < b.path ? -1 : a.path > b.path ? 1 : 0,
+        )
         const open = new Map(
             vscode.workspace.textDocuments.map((document) => [
                 document.uri.toString(),
                 document,
             ]),
         )
-        const sources = await Promise.all(
+        const loaded = await Promise.all(
             uris.map(async (uri) => ({
+                uri,
                 name: uri.toString(),
                 source:
                     open.get(uri.toString())?.getText() ??
@@ -130,7 +97,34 @@ export class WorkspaceAnalysis implements vscode.Disposable {
                     ).toString('utf8'),
             })),
         )
-        return analyzeProgram(sources)
+        const groups = new Map<string, typeof loaded>()
+        for (const source of loaded) {
+            let directory = posix.dirname(source.uri.path)
+            let project: string | undefined
+            if (!source.uri.path.endsWith('.script.clawr')) {
+                while (directory.length >= folderPath.length) {
+                    if (projectDirectories.has(directory)) {
+                        project = directory
+                        break
+                    }
+                    const parent = posix.dirname(directory)
+                    if (parent === directory) break
+                    directory = parent
+                }
+            }
+            const key =
+                project === undefined
+                    ? `file:${source.name}`
+                    : `project:${project}`
+            const group = groups.get(key) ?? []
+            group.push(source)
+            groups.set(key, group)
+        }
+        const results = new Map<string, AnalyzedDocument>()
+        for (const group of groups.values())
+            for (const [name, result] of analyzeProgram(group))
+                results.set(name, result)
+        return results
     }
 
     private async publish(): Promise<void> {

@@ -1,5 +1,12 @@
 import { downloadAndUnzipVSCode, runTests } from '@vscode/test-electron'
-import { existsSync, symlinkSync } from 'node:fs'
+import {
+    existsSync,
+    mkdtempSync,
+    rmSync,
+    symlinkSync,
+    writeFileSync,
+} from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { Writable } from 'node:stream'
 import { fileURLToPath } from 'node:url'
@@ -74,6 +81,14 @@ if (!existsSync(vscodeExecutablePath))
     )
 
 const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '..')
+const userDataDir = mkdtempSync(join(tmpdir(), 'clawr-vscode-test-'))
+const workspaceFile = join(userDataDir, 'test.code-workspace')
+writeFileSync(
+    workspaceFile,
+    JSON.stringify({
+        folders: [{ path: join(packageRoot, 'tests/integration/fixtures') }],
+    }),
+)
 
 try {
     await runTests({
@@ -88,7 +103,9 @@ try {
         // Keep output limited to our own test results: other built-in
         // extensions (e.g. Copilot Chat) otherwise log a lot of noise.
         launchArgs: [
-            join(packageRoot, 'tests/integration/fixtures'),
+            workspaceFile,
+            '--user-data-dir',
+            userDataDir,
             '--disable-extensions',
             '--disable-workspace-trust',
             '--skip-welcome',
@@ -99,4 +116,6 @@ try {
 } catch (error) {
     console.error(error)
     process.exitCode = 1
+} finally {
+    rmSync(userDataDir, { recursive: true, force: true })
 }

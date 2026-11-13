@@ -19,17 +19,6 @@
     "language-configuration.json"
   ],
   "contributes": {
-    "configuration": {
-      "title": "Clawr",
-      "properties": {
-        "clawr.sourceFiles": {
-          "type": "array",
-          "items": { "type": "string" },
-          "default": [],
-          "description": "Ordered source paths relative to the workspace folder. Empty discovers Clawr files in lexical order."
-        }
-      }
-    },
     "languages": [
       {
         "id": "clawr",

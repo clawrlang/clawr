@@ -450,6 +450,7 @@
       "unevaluatedProperties": false
     },
     "BoxedValueSet": {
+      "type": "object",
       "$ref": "./valuesets.json#",
       "properties": {
         "boxed": { "const": true }

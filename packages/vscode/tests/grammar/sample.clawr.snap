@@ -62,7 +62,7 @@
 #              ^^^ source.clawr
 #                 ^^ source.clawr keyword.operator.clawr
 #                   ^ source.clawr
-#                    ^^^^ source.clawr variable.other.clawr
+#                    ^^^^ source.clawr variable.language.clawr
 #                        ^^ source.clawr keyword.operator.clawr
 #                          ^^^^^ source.clawr variable.other.clawr
 >

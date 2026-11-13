@@ -11,4 +11,10 @@ export { Declaration } from './declaration.js'
 export { Expression } from './expression.js'
 export { CanonicalName } from './identfier.js'
 export { Statement } from './statement.js'
-export { RealPrecision, RealSet, truthvalue, ValueSet } from './value-set.js'
+export {
+    BoxedValueSet,
+    RealPrecision,
+    RealSet,
+    truthvalue,
+    ValueSet,
+} from './value-set.js'

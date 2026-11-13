@@ -1,6 +1,8 @@
 export type ValueSet =
     IntegerSet | RealSet | TruthvalueSet | StringSet | RCTypeSet | InterfaceSet
 
+export type BoxedValueSet = ValueSet & { boxed: true }
+
 export type IntegerSet = IntegerRange | IntegerSingleton
 
 type IntegerRange<

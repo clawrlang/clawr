@@ -69,4 +69,30 @@ describe('CIR parser schema validation', () => {
             CIRParser.parse(module({ ...scope, cleanup: [{}] })),
         ).toThrow('Invalid CIR:')
     })
+
+    it('accepts RETAIN expressions for boxed value sets', () => {
+        expect(() =>
+            CIRParser.parse(
+                JSON.stringify({
+                    $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
+                    startBlock: [
+                        {
+                            kind: 'CALL',
+                            name: { baseName: 'consume', labels: [] },
+                            arguments: [
+                                {
+                                    kind: 'RETAIN',
+                                    object: {
+                                        kind: 'VARIABLE_REF',
+                                        name: 'value',
+                                    },
+                                    type: { universe: 'integer', boxed: true },
+                                },
+                            ],
+                        },
+                    ],
+                }),
+            ),
+        ).not.toThrow()
+    })
 })

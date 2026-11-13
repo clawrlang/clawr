@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "pretest:unit": "npm run build --workspace=@clawr/cir",
-    "test:unit": "npm test --workspace=@clawr/stdlib && npm test --workspace=@clawr/frontend && npm run test:unit --workspace=@clawr/backend",
+    "test:unit": "npm run build --workspace=@clawr/frontend && npm test --workspace=@clawr/stdlib && npm test --workspace=@clawr/frontend --ignore-scripts && npm run test:unit --workspace=@clawr/backend",
     "build": "npm run build --workspace=@clawr/rwrc",
     "build:backend": "npm run build --workspace=@clawr/backend",
     "build:rwrc": "npm run build:rwrc --workspace=@clawr/rwrc",
@@ -30,6 +30,9 @@
     "test:runtime": "npm test --workspace=@clawr/runtime",
     "build:vscode": "npm run build --workspace=@clawr/vscode",
     "test:vscode": "npm test --workspace=@clawr/vscode",
-    "test": "npm test --workspace=@clawr/stdlib && npm test --workspace=@clawr/frontend && npm run build:runtime && npm run test:backend && npm run test:e2e"
+    "build:test:compiler": "npm run build --workspace=@clawr/stdlib && npm run build --workspace=@clawr/cir && npm run build --workspace=@clawr/frontend --ignore-scripts && npm run build --workspace=@clawr/backend && npm run build:runtime && npm run build:prepared --workspace=@clawr/rwrc",
+    "test:compiler:prepared": "npm test --workspace=@clawr/stdlib && npm test --workspace=@clawr/frontend --ignore-scripts && npm test --workspace=@clawr/backend --ignore-scripts && npm test --workspace=@clawr/rwrc --ignore-scripts",
+    "test:all": "npm run build:test:compiler && npm run build --workspace=@clawr/vscode --ignore-scripts && npm run compile:integration --workspace=@clawr/vscode && npm run test:compiler:prepared && npm test --workspace=@clawr/runtime --ignore-scripts && npm test --workspace=@clawr/vscode --ignore-scripts",
+    "test": "npm run build:test:compiler && npm run test:compiler:prepared"
   }
 }

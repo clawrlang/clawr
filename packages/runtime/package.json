@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "npm run build && bun test ./tests/*.test.ts",
+    "pretest": "npm run build",
+    "test": "bun test ./tests/*.test.ts",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "devDependencies": {

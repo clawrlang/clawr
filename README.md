@@ -49,6 +49,7 @@ npm test
 npm run test:unit     # Quick unit tests only
 npm run test:backend  # Run backend tests
 npm run test:e2e      # Run end-to-end tests
+npm run test:all      # Run all tests, including runtime and VS Code extension tests
 
 npx bun test packages/frontend/tests/unit/parser/module-parser.spec.ts # Run a single test fixture
 ```
@@ -58,6 +59,9 @@ documentation repository, pinned as a Git submodule. The compiler's build
 embeds them; the standalone executable does not need the checkout at runtime.
 The pinned documentation commit must be available from the submodule remote
 for a fresh clone.
+
+GitHub Actions runs `npm run test:all` on each push. It builds shared
+dependencies once before running the compiler, runtime, and VS Code suites.
 
 ### Multi-file programs
 

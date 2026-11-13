@@ -7,11 +7,13 @@
   "main": "./dist/index.js",
   "scripts": {
     "prebuild": "npm run build --workspace=@clawr/cir && npm run build --workspace=@clawr/frontend && npm run build --workspace=@clawr/backend",
-    "build": "tsc --noEmit && npm run build:runtime && npm run build:rwrc",
-    "build:runtime": "npm run build --workspace=@clawr/runtime && mkdir -p dist && rm -rf dist/include && cp -R ../runtime/dist/include dist/include && cp ../runtime/dist/libClawr.* dist/",
+    "build": "npm run build --workspace=@clawr/runtime && npm run build:prepared",
+    "build:prepared": "tsc --noEmit && npm run copy:runtime && npm run build:rwrc",
+    "build:runtime": "npm run build --workspace=@clawr/runtime && npm run copy:runtime",
+    "copy:runtime": "mkdir -p dist && rm -rf dist/include && cp -R ../runtime/dist/include dist/include && cp ../runtime/dist/libClawr.* dist/",
     "build:rwrc": "ttsc && bun build ./dist/src/index.js --compile --outfile dist/rwrc && node scripts/sign-rwrc.mjs",
     "pretest": "npm run build",
-    "test": "npm run build && bun test"
+    "test": "bun test"
   },
   "dependencies": {
     "@clawr/backend": "^0.1.0",

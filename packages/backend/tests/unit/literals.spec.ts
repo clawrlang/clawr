@@ -11,7 +11,7 @@ describe('Lowering Literals', () => {
             type: { universe: 'string', value: 'Hello, World!' },
         }
         const result = lowerExpr(expr)
-        expect(result).toBe('"Hello, World!"')
+        expect(result).toBe('String¸fromCString("Hello, World!")')
     })
 
     it('lowers integer literals correctly', () => {

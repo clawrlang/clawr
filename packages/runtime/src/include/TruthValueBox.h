@@ -24,24 +24,7 @@ static const clawr¸HasStringRepresentationˇwitness
         .stringRepresentation =
             (String * (*)(void *)) TruthvalueBoxˇstringRepresentation,
 };
-__interface_conformance_entry
-    TruthvalueBoxˇclawr¸HasStringRepresentationˇconformance = {
-        .interface = &clawr¸HasStringRepresentationˇtype,
-        .witness_table = &TruthvalueBoxˇclawr¸HasStringRepresentationˇwitness,
-};
-
-const __type_info TruthvalueBoxˇtype = {
-    .polymorphic_type = {
-        .data =
-            {
-                .size = sizeof(TruthvalueBox),
-                .conformances =
-                    (const __interface_conformance_entry *[]){
-                        &TruthvalueBoxˇclawr¸HasStringRepresentationˇconformance,
-                        NULL,
-                    },
-            },
-    }};
+extern const __type_info TruthvalueBoxˇtype;
 
 static TruthvalueBox *boxTruthvalue(truthvalue_t value) {
   return allocInitRC(TruthvalueBox, 0, __rc_ISOLATED, value = value);

@@ -13,12 +13,8 @@ declarations:
         body:
           - kind: RETURN
             value:
-              kind: CALL
-              name: { namespace: String, baseName: fromCString, labels: [] }
-              arguments:
-                - kind: STRING_LITERAL
-                  type: { universe: string, value: 'hello' }
-              type: { universe: string }
+              kind: STRING_LITERAL
+              type: { universe: string, value: 'hello' }
     initializers: []
     conformances:
       - interface: { name: HasStringRepresentation, namespace: clawr }

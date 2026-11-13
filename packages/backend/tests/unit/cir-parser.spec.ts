@@ -1,7 +1,23 @@
 import { describe, expect, it } from 'bun:test'
 import CIRParser from '../../src/cir-parser.js'
+import { Ajv2020 } from 'ajv/dist/2020.js'
+import cirSchema from '../../../../schema/cir.schema.json'
+import declarations from '../../../../schema/declarations.json'
+import expressions from '../../../../schema/expressions.json'
+import statements from '../../../../schema/statements.json'
+import valueSets from '../../../../schema/valuesets.json'
 
 describe('CIR parser schema validation', () => {
+    it('compiles schemas without strict type warnings', () => {
+        expect(() =>
+            new Ajv2020({ strictTypes: true })
+                .addSchema(declarations, 'declarations.json')
+                .addSchema(statements, 'statements.json')
+                .addSchema(expressions, 'expressions.json')
+                .addSchema(valueSets, 'valuesets.json')
+                .compile(cirSchema),
+        ).not.toThrow()
+    })
     it('parses valid JSON using the CIR schema', () => {
         const result = CIRParser.parse(
             '{"$schema":"http://clawr.lang/schema/cir/DRAFT-0","startBlock":[]}',

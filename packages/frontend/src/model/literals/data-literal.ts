@@ -44,6 +44,11 @@ export class DataLiteral implements Expression {
             )
         const dataDecl = context.scope.dataDeclaration(explicitType.type)
         const objectDecl = context.scope.objectDeclaration(explicitType.type)
+        if (objectDecl?.opaque)
+            return SemanticErrorResult.failure(
+                'Opaque services cannot be constructed by literals',
+                this.span,
+            )
         const decl = dataDecl ?? objectDecl
         if (!decl)
             return SemanticErrorResult.failure(
@@ -124,6 +129,11 @@ export class DataLiteral implements Expression {
         if (!targetType)
             return SemanticErrorResult.failure(
                 `DataLiteral.toCIRExpression: target type ${explicitType.type.name} not found in scope`,
+                this.span,
+            )
+        if ('opaque' in targetType && targetType.opaque)
+            return SemanticErrorResult.failure(
+                'Opaque services cannot be constructed by literals',
                 this.span,
             )
         const propertyDeclarations = new Map(

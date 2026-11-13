@@ -8,6 +8,7 @@
 #include "clawr_string.h"
 #include "integer.h"
 #include "interfaces.h"
+#include "hash.h"
 #include "lanes.h"
 #include "real.h"
 #include "panic.h"

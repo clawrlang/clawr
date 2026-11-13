@@ -5,6 +5,7 @@ import {
     IsolationLevel,
     UNIQUE,
     UNKNOWN,
+    SHARED,
 } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import { Parameter } from '@/model/parameter'
@@ -73,7 +74,19 @@ export class FunctionDeclaration implements Declaration {
     }
 
     resultIsolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
-        if (this.result) return Result.value(this.result.isolationLevel)
+        if (this.result) {
+            if (
+                this.result.type instanceof RCTypeSet &&
+                context.scope.objectDeclaration(this.result.type.type)?.opaque
+            ) {
+                if (this.result.isolationLevel === 'ISOLATED')
+                    return this.externNotAllowed(
+                        'HashBuilder results must be shared',
+                    )
+                return Result.value(SHARED)
+            }
+            return Result.value(this.result.isolationLevel)
+        }
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.isolationLevel(context)
         else
@@ -83,7 +96,10 @@ export class FunctionDeclaration implements Declaration {
     }
 
     type(context: Context): SemanticResult<ValueSet | undefined> {
-        if (this.result) return Result.value(this.result.type)
+        if (this.result)
+            return Result.value(
+                context.scope.canonicalOpaqueType(this.result.type),
+            )
         if (this.implementation.kind === 'implicit-return')
             return this.implementation.expression.currentValue(
                 this.bodyContext(context),
@@ -97,6 +113,10 @@ export class FunctionDeclaration implements Declaration {
 
     emitDeclaration(context: Context): SemanticResult {
         this.registerDeclaration(context)
+        if (this.result) {
+            const isolation = this.resultIsolationLevel(context)
+            if (isolation.isError) return isolation
+        }
         if (this.implementation.kind === 'extern') return Result.ok
 
         const bodyContextResult = this.makeBodyContext(context)
@@ -294,10 +314,22 @@ export class FunctionDeclaration implements Declaration {
                 : undefined
 
         if (this.result || this.implementation.kind === 'body') {
+            const opaque =
+                this.result?.type instanceof RCTypeSet &&
+                context.scope.objectDeclaration(this.result.type.type)?.opaque
+            if (opaque && this.result?.isolationLevel === 'ISOLATED')
+                return this.externNotAllowed(
+                    'HashBuilder results must be shared',
+                )
             const bodyContext = this.bodyContext({
                 ...context,
                 scope: parameterScopeResult.value,
-                calleeResult: this.result,
+                calleeResult: this.result && {
+                    type: context.scope.canonicalOpaqueType(this.result.type),
+                    isolationLevel: opaque
+                        ? SHARED
+                        : this.result.isolationLevel,
+                },
             })
             return Result.value(bodyContext)
         } else {
@@ -339,10 +371,18 @@ export class FunctionDeclaration implements Declaration {
                         param.span,
                     )
             if (typeResult.isError) return typeResult
+            const opaque =
+                typeResult.value instanceof RCTypeSet &&
+                context.scope.objectDeclaration(typeResult.value.type)?.opaque
+            if (opaque && param.isolationLevel === 'ISOLATED')
+                return SemanticErrorResult.failure(
+                    'HashBuilder parameters must be shared',
+                    param.span,
+                )
             parameterScope.addVariableDeclaration(param.varName, {
                 isImmutable: param.isImmutable,
-                isolationLevel: param.isolationLevel,
-                type: typeResult.value,
+                isolationLevel: opaque ? SHARED : param.isolationLevel,
+                type: context.scope.canonicalOpaqueType(typeResult.value),
             })
             context.highlightRecorder?.record('parameter', param.span, [
                 'declaration',

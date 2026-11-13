@@ -15,6 +15,13 @@ typedef struct {
 } clawr¸Equatableˇwitness;
 extern const __interface_info clawr¸Equatableˇtype;
 
+struct HashBuilder;
+typedef struct {
+  truthvalue_t (*equals)(void *left, void *right);
+  void (*hash˛into)(void *self, struct HashBuilder *builder);
+} clawr¸HashEquatableˇwitness;
+extern const __interface_info clawr¸HashEquatableˇtype;
+
 // ```clawr
 // trait Ordered {
 //     func isOrderedBefore(_ other: Self) -> boolean

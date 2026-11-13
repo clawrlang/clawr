@@ -1,5 +1,7 @@
 #include "clawr_string.h"
 #include "panic.h"
+#include "hash.h"
+#include "interfaces.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,13 +14,27 @@ static void releaseNestedProperties(void *self) {
     s->data = NULL;
     s->length = 0;
   }
+
 }
+
+static String *stringRepresentation(void *self) { return retainRC(self); }
+static const clawr¸HasStringRepresentationˇwitness stringWitness = {
+    .stringRepresentation = stringRepresentation,
+};
+static const __interface_conformance_entry stringConformance = {
+    .interface = &clawr¸HasStringRepresentationˇtype,
+    .witness_table = &stringWitness,
+};
 
 __attribute__((visibility("default"))) const __type_info Stringˇtype = {
     .data_type =
         {
             .size = sizeof(String),
             .release_nested_properties = releaseNestedProperties,
+            .conformances = (const __interface_conformance_entry *[]){
+                &stringConformance, &Stringˇhash_conformance,
+                &Stringˇequal_conformance, NULL,
+            },
         },
 };
 
@@ -59,7 +75,9 @@ __attribute__((visibility("default"))) truthvalue_t String¸eq(String *left,
     return c_true;
   if (!left || !right)
     return c_false;
-  return strcmp(left->data, right->data) == 0 ? c_true : c_false;
+  return left->length == right->length &&
+                 memcmp(left->data, right->data, left->length) == 0
+             ? c_true : c_false;
 }
 
 __attribute__((visibility("default")))

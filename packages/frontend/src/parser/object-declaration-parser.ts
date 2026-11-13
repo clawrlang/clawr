@@ -20,11 +20,16 @@ export class ObjectDeclarationParser {
     }
 
     isNext(stream: TokenStream): boolean {
-        return stream.isNext('KEYWORD', 'object', 'service')
+        return stream.isNext('KEYWORD', 'object', 'service', 'opaque')
     }
 
     parse(stream: TokenStream): ObjectDeclaration {
-        const startToken = stream.expect('KEYWORD', 'object', 'service')
+        const opaqueToken = stream.isNext('KEYWORD', 'opaque')
+            ? stream.expect('KEYWORD', 'opaque')
+            : undefined
+        const startToken = opaqueToken
+            ? stream.expect('KEYWORD', 'service')
+            : stream.expect('KEYWORD', 'object', 'service')
         const nameToken = stream.expect('IDENTIFIER')
 
         const inherits: string[] = []
@@ -46,7 +51,7 @@ export class ObjectDeclarationParser {
 
         stream.expect('PUNCTUATION', '{')
 
-        const readonly = this.parseMethods(stream)
+        const readonly = this.parseMethods(stream, !!opaqueToken)
         let mutating: FunctionDeclaration[] | undefined
         let initializers: FunctionDeclaration[] | undefined
         let properties: Property[] | undefined
@@ -87,7 +92,13 @@ export class ObjectDeclarationParser {
         const endToken = stream.expect('PUNCTUATION', '}')
         return ObjectDeclaration.create({
             kind: startToken.keyword as 'object' | 'service',
-            name: TypeName.create({ name: nameToken.identifier }),
+            name: TypeName.create({
+                name: nameToken.identifier,
+                namespace: opaqueToken
+                    ? this.context.scope?.namespace
+                    : undefined,
+            }),
+            opaque: !!opaqueToken,
             nameSpan: { start: nameToken.start, end: nameToken.end },
             inherits,
             readonly,
@@ -101,13 +112,14 @@ export class ObjectDeclarationParser {
         })
     }
 
-    parseMethods(stream: TokenStream): FunctionDeclaration[] {
+    parseMethods(
+        stream: TokenStream,
+        allowExtern = false,
+    ): FunctionDeclaration[] {
         const methods: FunctionDeclaration[] = []
 
         while (!this.isSectionEnd(stream))
-            methods.push(
-                this.functionParser.parse(stream, { allowExtern: false }),
-            )
+            methods.push(this.functionParser.parse(stream, { allowExtern }))
 
         return methods
     }

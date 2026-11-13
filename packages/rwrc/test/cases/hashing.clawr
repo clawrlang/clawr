@@ -1,0 +1,52 @@
+trait DetailedHash: HashEquatable {}
+
+object Amount: DetailedHash {
+    func equals(_ other: Amount) -> boolean {
+        return self->cents == other.cents
+    }
+    func hash(into builder: HashBuilder) {
+        print(self->cents)
+        builder.add(self->cents)
+        builder.add(true)
+        builder.add(text(123))
+    }
+init:
+    func new(_ cents: integer (0..<100)) => { cents: cents }
+state:
+    cents: integer (0..<100)
+}
+
+func contribute(_ value: HashEquatable, into builder: HashBuilder) {
+    builder.add(value)
+}
+
+func text(_ value: HasStringRepresentation) -> string {
+    return value.stringRepresentation()
+}
+
+object Packet: HashEquatable {
+    func equals(_ other: Packet) -> boolean => true
+    func hash(into builder: HashBuilder) {
+        const amount: Amount = { Amount.new(4) }
+        builder.add(amount)
+    }
+}
+
+@main {
+    const builder = newHashBuilder()
+    const alias = builder
+    const one: Amount = { Amount.new(1) }
+    const same: Amount = { Amount.new(1) }
+    const two: Amount = { Amount.new(2) }
+    print(one == same)
+    print(one != two)
+    contribute(one, into: builder)
+    alias.add(two)
+    builder.add(123456789012345678901234567890)
+    builder.add(1.25)
+    builder.add(ambiguous)
+    const packet: Packet = {}
+    builder.add(packet)
+    newHashBuilder().add(3)
+    newHashBuilder()
+}

@@ -15,6 +15,59 @@ trait Shape {
 `
 
 describe('trait and role', () => {
+    it('resolves forward parents and diamond requirements and emits implied conformances', () => {
+        const result = compile(`
+            trait Diamond: Left, Right {}
+            trait Left: Root {}
+            trait Right: Root {}
+            trait Root { func ping() }
+            object Value: Diamond { func ping() {} }
+            func use(_ value: Root) { value.ping() }
+            func forward(_ value: Diamond) { use(value) }
+        `)
+        const value = result.declarations.find((d) => d.name === 'Value')
+        expect(value.conformances.map((c: any) => c.interface.name)).toEqual([
+            'Root',
+            'Left',
+            'Right',
+            'Diamond',
+        ])
+        expect(
+            result.declarations.find((d) => d.name === 'Diamond').methods,
+        ).toHaveLength(1)
+    })
+
+    it('rejects cycles, incompatible parents and conflicting inherited signatures', () => {
+        for (const code of [
+            'trait A: B {} trait B: A {}',
+            'trait A: Missing {}',
+            'role B {} trait A: B {}',
+            'trait B {} trait A: B, B {}',
+            'trait A { func x() func x() }',
+            'object V {} trait A { func x(_ v: ref V) } trait B { func x(_ v: isolated V) } trait C: A, B {}',
+            'trait A { func x() -> integer } trait B { func x() -> truthvalue } trait C: A, B {}',
+        ])
+            expect(() => compile(code)).toThrow()
+    })
+
+    it('requires inherited Self methods using the concrete implementing type', () => {
+        expect(() =>
+            compile(`
+            trait Parent { func same(_ other: Self) -> truthvalue }
+            trait Child: Parent {}
+            object Value: Child {
+                func same(_ other: Value) => true
+            }
+        `),
+        ).not.toThrow()
+        expect(() =>
+            compile(`
+            trait Parent { func same(_ other: Self) -> truthvalue }
+            trait Child: Parent {}
+            object Value: Child {}
+        `),
+        ).toThrow()
+    })
     it('parses signatures into an interface declaration', () => {
         const cir = compile(`
             role Named {

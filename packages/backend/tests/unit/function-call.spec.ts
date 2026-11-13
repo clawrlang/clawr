@@ -24,7 +24,7 @@ describe('Function Calls', () => {
                 type: { universe: 'integer' },
             }
             const result = lowerExpr(expr)
-            expect(result).toBe('myFunction˛param1˛param2(42, "Hello")')
+            expect(result).toMatch(/^myFunction˛param1˛param2\(42, tmpˇ\d+\)$/)
         })
 
         test('statement', () => {
@@ -46,7 +46,9 @@ describe('Function Calls', () => {
                 ],
             }
             const result = lowerStmt(stmt)
-            expect(result).toBe('myFunction˛param1˛param2(42, "Hello");')
+            expect(result).toMatch(
+                /^String\* (tmpˇ\d+) = String¸fromCString\("Hello"\);\nmyFunction˛param1˛param2\(42, \1\);\nreleaseRC\(\1\);$/,
+            )
         })
     })
 
@@ -71,7 +73,7 @@ describe('Function Calls', () => {
                 type: { universe: 'string' },
             }
             const result = lowerExpr(expr)
-            expect(result).toBe('myFunction˛param1(42, "Hello")')
+            expect(result).toMatch(/^myFunction˛param1\(42, tmpˇ\d+\)$/)
         })
 
         test('statement', () => {
@@ -93,7 +95,9 @@ describe('Function Calls', () => {
                 ],
             }
             const result = lowerStmt(stmt)
-            expect(result).toBe('myFunction˛param1(42, "Hello");')
+            expect(result).toMatch(
+                /^String\* (tmpˇ\d+) = String¸fromCString\("Hello"\);\nmyFunction˛param1\(42, \1\);\nreleaseRC\(\1\);$/,
+            )
         })
     })
 

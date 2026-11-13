@@ -8,6 +8,7 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
+import { SourceError } from '@/tools'
 import * as cir from '@clawr/cir'
 
 type SignatureCIR = Extract<
@@ -86,6 +87,7 @@ export class InterfaceDeclaration implements Declaration {
         public readonly methods: MethodSignature[],
         public readonly span: SourceCodeSpan,
         public readonly nameSpan?: SourceCodeSpan,
+        public readonly inherits: string[] = [],
     ) {}
 
     static create(config: {
@@ -94,6 +96,7 @@ export class InterfaceDeclaration implements Declaration {
         methods: MethodSignature[]
         span: SourceCodeSpan
         nameSpan?: SourceCodeSpan
+        inherits?: string[]
     }) {
         return new InterfaceDeclaration(
             config.kind,
@@ -101,14 +104,97 @@ export class InterfaceDeclaration implements Declaration {
             config.methods,
             config.span,
             config.nameSpan,
+            config.inherits,
         )
     }
 
     /** Interfaces must be known before any object resolves its conformances. */
     readonly registrationPhase = 0
 
-    method(name: FunctionName): MethodSignature | undefined {
-        return this.methods.find((m) => m.name().toString() === name.toString())
+    hierarchy(context: Context): InterfaceDeclaration[] {
+        const result: InterfaceDeclaration[] = []
+        const visiting = new Set<InterfaceDeclaration>()
+        const visit = (declaration: InterfaceDeclaration) => {
+            if (visiting.has(declaration))
+                throw SourceError.create({
+                    message: `Cyclic interface inheritance involving ${declaration.name.name}`,
+                    span: declaration.span,
+                })
+            if (result.includes(declaration)) return
+            visiting.add(declaration)
+            const seen = new Set<string>()
+            for (const name of declaration.inherits) {
+                const parent = context.scope.interfaceDeclaration(
+                    TypeName.create({
+                        name,
+                        namespace: declaration.name.namespace,
+                    }),
+                )
+                if (
+                    !parent ||
+                    parent.kind !== declaration.kind ||
+                    seen.has(name)
+                )
+                    throw SourceError.create({
+                        message: `Invalid ${declaration.kind} parent ${name}`,
+                        span: declaration.span,
+                    })
+                seen.add(name)
+                visit(parent)
+            }
+            visiting.delete(declaration)
+            result.push(declaration)
+        }
+        visit(this)
+        return result
+    }
+
+    resolvedMethods(context: Context): MethodSignature[] {
+        const methods = new Map<string, MethodSignature>()
+        for (const declaration of this.hierarchy(context)) {
+            const ownNames = new Set<string>()
+            for (const method of declaration.methods) {
+                const key = method.name().toString()
+                if (ownNames.has(key))
+                    throw SourceError.create({
+                        message: `Duplicate requirement ${key}`,
+                        span: method.span,
+                    })
+                ownNames.add(key)
+                const previous = methods.get(key)
+                if (previous) {
+                    const a = previous.toCIR(context)
+                    const b = method.toCIR(context)
+                    if (a.isError) throw a.error
+                    if (b.isError) throw b.error
+                    const signature = (m: SignatureCIR) =>
+                        JSON.stringify([
+                            m.parameters.map((p) => p.type),
+                            m.returnType,
+                        ])
+                    if (
+                        signature(a.value) !== signature(b.value) ||
+                        JSON.stringify(
+                            previous.parameters.map((p) => p.isolationLevel),
+                        ) !==
+                            JSON.stringify(
+                                method.parameters.map((p) => p.isolationLevel),
+                            )
+                    )
+                        throw SourceError.create({
+                            message: `Conflicting inherited requirement ${key}`,
+                            span: method.span,
+                        })
+                } else methods.set(key, method)
+            }
+        }
+        return [...methods.values()]
+    }
+
+    method(name: FunctionName, context: Context): MethodSignature | undefined {
+        return this.resolvedMethods(context).find(
+            (m) => m.name().toString() === name.toString(),
+        )
     }
 
     registerDeclaration(context: Context) {
@@ -117,7 +203,7 @@ export class InterfaceDeclaration implements Declaration {
 
     emitDeclaration(context: Context): SemanticResult {
         const methodsResult = SemanticResult.collect(
-            this.methods.map((m) => m.toCIR(context)),
+            this.resolvedMethods(context).map((m) => m.toCIR(context)),
         )
         if (methodsResult.isError) return methodsResult
         context.scope.rootScope.emitted.push({

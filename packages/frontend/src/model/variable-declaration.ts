@@ -4,7 +4,7 @@ import { DataLiteral } from '@/model/literals'
 import { Retain } from '@/model/retain'
 import { Scope } from '@/model/scope'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
-import { ValueSet } from '@/model/value-set'
+import { RCTypeSet, ValueSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
@@ -84,11 +84,12 @@ export class VariableDeclaration implements Statement, Declaration {
             this.isolationLevel ??
             (valueIsolationLevel === 'UNIQUE' ? ISOLATED : valueIsolationLevel)
 
-        const type =
+        const declaredType =
             this.type ??
             (this.isImmutable && isolationLevel === ISOLATED
                 ? initialValue
                 : initialValue.unconstrained())
+        const type = context.scope.canonicalOpaqueType(declaredType)
 
         scope.addVariableDeclaration(this.name, {
             isImmutable: this.isImmutable,
@@ -158,7 +159,7 @@ export class VariableDeclaration implements Statement, Declaration {
         currentValue: ValueSet,
         context: Context,
     ): SemanticResult {
-        if (!this.isValidValue(currentValue))
+        if (!this.isValidValue(currentValue, context))
             return SemanticErrorResult.failure(
                 'Incompatible initial value',
                 this.initialValue.span,
@@ -178,16 +179,29 @@ export class VariableDeclaration implements Statement, Declaration {
         return Result.ok
     }
 
-    private isValidValue(currentValue: ValueSet) {
+    private isValidValue(currentValue: ValueSet, context: Context) {
+        if (
+            this.type instanceof RCTypeSet &&
+            currentValue instanceof RCTypeSet
+        ) {
+            const object = context.scope.objectDeclaration(this.type.type)
+            if (object?.opaque)
+                return (
+                    context.scope.objectDeclaration(currentValue.type) ===
+                    object
+                )
+        }
         return !this.type || this.type.isSupersetTo(currentValue)
     }
 
     private currentValueFromInitial(
         context: Context,
     ): SemanticResult<ValueSet> {
-        return this.initialValue.currentValue({
+        const result = this.initialValue.currentValue({
             ...context,
             explicitType: this.type,
         })
+        if (result.isError) return result
+        return Result.value(context.scope.canonicalOpaqueType(result.value))
     }
 }

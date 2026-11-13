@@ -8,6 +8,7 @@ import {
     RCTypeSet,
     RealSet,
     TruthvalueSet,
+    StringSet,
     ValueSet,
 } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
@@ -115,7 +116,7 @@ export class FunctionCall implements Expression, Statement {
                 recipientType.type,
             )
             if (interfaceDecl) {
-                const required = interfaceDecl.method(this.name)
+                const required = interfaceDecl.method(this.name, context)
                 if (!required)
                     return SemanticErrorResult.failure(
                         `Method declaration not found: ${this.name.toString()}`,
@@ -163,6 +164,14 @@ export class FunctionCall implements Expression, Statement {
                 const valueResult = this.arguments[0].currentValue(context)
                 if (valueResult.isError) return valueResult
                 const value = valueResult.value
+                if (
+                    value instanceof RCTypeSet &&
+                    context.scope.objectDeclaration(value.type)?.opaque
+                )
+                    return SemanticErrorResult.failure(
+                        'Opaque services cannot be copied',
+                        this.span,
+                    )
                 return value instanceof RCTypeSet
                     ? Result.value(value)
                     : SemanticErrorResult.failure(
@@ -205,7 +214,7 @@ export class FunctionCall implements Expression, Statement {
 
             return Result.value({
                 kind: 'CALL',
-                name: this.name.toCIR(),
+                name: this.callName(context),
                 arguments: args.value,
                 receiver: this.receiver(context, recipient),
                 type: context.scope.toCIRType(value),
@@ -222,7 +231,7 @@ export class FunctionCall implements Expression, Statement {
 
             return Result.value({
                 kind: 'CALL',
-                name: this.name.toCIR(),
+                name: this.callName(context),
                 arguments: argsResult.value,
                 type: context.scope.toCIRType(valueResult.value),
             } satisfies cir.Expression)
@@ -250,6 +259,32 @@ export class FunctionCall implements Expression, Statement {
         const argsResult = this.argumentsToCIR(context, declaration)
         if (argsResult.isError) return argsResult
         const releases: cir.Statement[] = []
+        let recipientCIR = this.maybeRecipientCIR(context)
+        if (
+            recipientCIR &&
+            recipientCIR.type.universe === 'rc-type' &&
+            context.scope.objectDeclaration(TypeName.create(recipientCIR.type))
+                ?.opaque &&
+            recipientCIR.kind !== 'VARIABLE_REF' &&
+            recipientCIR.kind !== 'PROPERTY_REF'
+        ) {
+            const name = context.scope.nextTempVar()
+            context.scope.emitted.push({
+                kind: 'VARIABLE_DECL',
+                name,
+                type: recipientCIR.type,
+                initialValue: recipientCIR,
+            })
+            releases.push({
+                kind: 'RELEASE',
+                object: { kind: 'VARIABLE_REF', name },
+            })
+            recipientCIR = {
+                kind: 'VARIABLE_REF',
+                name,
+                type: recipientCIR.type,
+            }
+        }
         const args = argsResult.value.map((arg) => {
             if (arg.kind !== 'BOX') return arg
             const name = context.scope.nextTempVar()
@@ -265,8 +300,7 @@ export class FunctionCall implements Expression, Statement {
             })
             return { kind: 'VARIABLE_REF' as const, name, type: arg.type }
         })
-        const _name = this.name.toCIR()
-        const recipientCIR = this.maybeRecipientCIR(context)
+        const _name = this.callName(context)
         context.scope.emitted.push({
             kind: 'CALL',
             name: _name,
@@ -288,6 +322,25 @@ export class FunctionCall implements Expression, Statement {
             )
     }
 
+    private callName(context: Context) {
+        if (!this.recipient) {
+            const declaration = context.scope.functionDeclaration(this.name)
+            let library = context.scope.parentScope
+            while (library && library.namespace !== 'clawr')
+                library = library.parentScope
+            const type = declaration?.result?.type
+            if (
+                library &&
+                declaration &&
+                declaration === library.functionDeclaration(this.name) &&
+                type instanceof RCTypeSet &&
+                context.scope.objectDeclaration(type.type)?.opaque
+            )
+                return { ...this.name.toCIR(), namespace: library.namespace }
+        }
+        return this.name.toCIR()
+    }
+
     private argumentsToCIR(
         context: Context,
         declaration?: Pick<FunctionDeclaration, 'parameters'>,
@@ -297,6 +350,29 @@ export class FunctionCall implements Expression, Statement {
             const converted = argument.toCIRExpression(context)
             if (converted.isError) return converted
             const parameter = declaration?.parameters[index]?.type
+            if (
+                parameter instanceof RCTypeSet &&
+                context.scope.objectDeclaration(parameter.type)?.opaque
+            ) {
+                const actual = argument.currentValue(context)
+                if (actual.isError) return actual
+                if (
+                    !(actual.value instanceof RCTypeSet) ||
+                    context.scope.objectDeclaration(actual.value.type) !==
+                        context.scope.objectDeclaration(parameter.type)
+                )
+                    return SemanticErrorResult.failure(
+                        'Argument must be a HashBuilder',
+                        argument.span,
+                    )
+                const isolation = argument.isolationLevel(context)
+                if (isolation.isError) return isolation
+                if (isolation.value === 'ISOLATED')
+                    return SemanticErrorResult.failure(
+                        'HashBuilder must be shared',
+                        argument.span,
+                    )
+            }
             if (parameter instanceof TruthvalueSet) {
                 const value = argument.currentValue(context)
                 if (value.isError) return value
@@ -319,7 +395,10 @@ export class FunctionCall implements Expression, Statement {
             if (value.value instanceof RCTypeSet) {
                 const actual = value.value.type
                 if (
-                    context.scope.interfaceDeclaration(actual) !== iface &&
+                    !context.scope
+                        .interfaceDeclaration(actual)
+                        ?.hierarchy(context)
+                        .includes(iface) &&
                     !context.scope
                         .objectDeclaration(actual)
                         ?.conformsTo(iface.name, context)
@@ -336,17 +415,26 @@ export class FunctionCall implements Expression, Statement {
                 library = library.parentScope
             if (
                 library?.interfaceDeclaration(iface.name) !== iface ||
-                iface.name.name !== 'HasStringRepresentation' ||
+                ![
+                    'HasStringRepresentation',
+                    'HashEquatable',
+                    'Equatable',
+                ].includes(iface.name.name) ||
                 !(
                     value.value instanceof IntegerSet ||
                     value.value instanceof RealSet ||
-                    value.value instanceof TruthvalueSet
+                    value.value instanceof TruthvalueSet ||
+                    value.value instanceof StringSet
                 )
             )
                 return SemanticErrorResult.failure(
                     `Argument does not conform to ${iface.name.name}`,
                     argument.span,
                 )
+            if (value.value instanceof StringSet) {
+                result.push(converted.value)
+                continue
+            }
             result.push({
                 kind: 'BOX',
                 expression: converted.value,
@@ -369,7 +457,16 @@ export class FunctionCall implements Expression, Statement {
             )
         const iface = context.scope.interfaceDeclaration(type.value.type)
         const object = context.scope.objectDeclaration(type.value.type)
-        const requirement = iface?.method(this.name)
+        if (object?.opaque) {
+            const isolation = this.recipient.isolationLevel(context)
+            if (isolation.isError) return isolation
+            if (isolation.value === 'ISOLATED')
+                return SemanticErrorResult.failure(
+                    'HashBuilder must be shared',
+                    this.recipient.span,
+                )
+        }
+        const requirement = iface?.method(this.name, context)
         if (requirement?.usesSelf())
             return SemanticErrorResult.failure(
                 'Methods involving Self cannot be called on a trait-typed value',
@@ -449,6 +546,9 @@ export class FunctionCall implements Expression, Statement {
                     },
                 },
             } as Receiver
+        const opaque = typeName && context.scope.objectDeclaration(typeName)
+        if (opaque?.opaque && isRCExpression(object))
+            return { dispatch: 'direct', object }
         return { dispatch: this.dispatchKind(context), object } as any
     }
 
@@ -479,3 +579,11 @@ export class FunctionCall implements Expression, Statement {
 }
 
 type Receiver = Extract<cir.Expression, { kind: 'CALL' }>['receiver']
+
+function isRCExpression(
+    expression: cir.Expression,
+): expression is cir.Expression & {
+    type: Extract<cir.ValueSet, { universe: 'rc-type' }>
+} {
+    return expression.type.universe === 'rc-type'
+}

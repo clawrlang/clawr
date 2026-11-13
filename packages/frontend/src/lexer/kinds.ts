@@ -84,6 +84,7 @@ const ALL_KW = [
     'type',
     'object',
     'service',
+    'opaque',
     'companion',
     'role',
     'trait',

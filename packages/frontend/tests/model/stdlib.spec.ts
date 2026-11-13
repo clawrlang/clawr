@@ -14,6 +14,84 @@ function compile(source: string) {
 }
 
 describe('standard library declarations', () => {
+    it('resolves opaque builder calls and primitive contributions without redeclaring the runtime type', () => {
+        const result = compile(`extern func text() -> string
+        @main {
+            const builder: HashBuilder = newHashBuilder()
+            const alias = builder
+            builder.add(42)
+            alias.add(true)
+            builder.add(1.5)
+            builder.add(text())
+        }`)
+        expect(result.declarations).toEqual([])
+        expect(result.startBlock?.[0]).toMatchObject({
+            kind: 'VARIABLE_DECL',
+            type: {
+                universe: 'rc-type',
+                namespace: 'clawr',
+                name: 'HashBuilder',
+            },
+        })
+        expect(JSON.stringify(result)).toContain('clawr')
+        expect(() => compile('@main { const b: HashBuilder = {} }')).toThrow(
+            'Opaque services cannot be constructed',
+        )
+        expect(() => compile('service Fake: HashBuilder {}')).toThrow(
+            'Opaque services cannot be subclassed',
+        )
+        expect(() => compile('opaque service Fake {}')).toThrow(
+            'Unsupported opaque service',
+        )
+        expect(() =>
+            compile(
+                '@main { const b: isolated HashBuilder = newHashBuilder() }',
+            ),
+        ).toThrow('Cannot assign SHARED')
+        expect(() =>
+            compile(
+                '@main { const b = newHashBuilder() const copy = copy(of: b) }',
+            ),
+        ).toThrow('Opaque services cannot be copied')
+        expect(() =>
+            compile(`
+            func forward(_ b: HashBuilder) -> HashBuilder { return b }
+            @main { const b = forward(newHashBuilder()) b.add(1) }
+        `),
+        ).not.toThrow()
+        expect(() =>
+            compile('extern func wrong() -> const HashBuilder'),
+        ).toThrow('HashBuilder results must be shared')
+    })
+
+    it('does not grant builtin HashEquatable behavior to a shadowing trait', () => {
+        expect(() =>
+            compile(`
+            trait HashEquatable { func hash() }
+            extern func consume(_ value: HashEquatable)
+            @main { consume(1) }
+        `),
+        ).toThrow('does not conform')
+    })
+
+    it('preserves a local factory shadow without assigning its call the runtime namespace', () => {
+        const result = compile(`
+            extern func newHashBuilder() -> integer
+            @main { const value = newHashBuilder() }
+        `)
+        expect(result.startBlock?.[0]).toMatchObject({
+            kind: 'VARIABLE_DECL',
+            type: { universe: 'integer' },
+            initialValue: {
+                kind: 'CALL',
+                name: { baseName: 'newHashBuilder' },
+            },
+        })
+        const statement = result.startBlock?.[0]
+        if (statement?.kind !== 'VARIABLE_DECL' || statement.initialValue.kind !== 'CALL')
+            throw new Error('Expected a factory call')
+        expect(statement.initialValue.name.namespace).toBeUndefined()
+    })
     it('registers the trait and extern function in the parent scope', () => {
         const scope = Scope.createRoot(createStandardLibraryScope())
         const trait = scope.interfaceDeclaration(

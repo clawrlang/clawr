@@ -1,5 +1,6 @@
 #include "real.h"
 #include "interfaces.h"
+#include "hash.h"
 #include "panic.h"
 
 #include <math.h>
@@ -48,6 +49,8 @@ __attribute__((visibility("default"))) const __type_info Realˇtype = {
             .conformances =
                 (const __interface_conformance_entry *[]){
                     &Realˇclawr¸HasStringRepresentationˇconformance,
+                    &Realˇhash_conformance,
+                    &Realˇequal_conformance,
                     NULL,
                 },
         },

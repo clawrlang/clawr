@@ -146,8 +146,21 @@ export class Scope {
             const declaration = this.interfaceDeclaration(value.type)
             if (declaration)
                 return { universe: 'interface', ...declaration.name.toCIR() }
+            const object = this.objectDeclaration(value.type)
+            if (object?.opaque)
+                return { universe: 'rc-type', ...object.name.toCIR() }
         }
         return value.toCIR()
+    }
+
+    canonicalOpaqueType(value: ValueSet): ValueSet {
+        const declaration =
+            value instanceof RCTypeSet
+                ? this.objectDeclaration(value.type)
+                : undefined
+        return declaration?.opaque
+            ? RCTypeSet.create({ type: declaration.name })
+            : value
     }
 
     markAsBase(name: TypeName) {
@@ -163,6 +176,12 @@ export class Scope {
         if (decl instanceof ObjectDeclaration) return decl
         const globalDecl = this.rootScope.objectDeclaration(name)
         if (globalDecl) return globalDecl
+        if (!name.namespace && this.namespace) {
+            const namespaced = this.rootScope.objectDeclaration(
+                TypeName.create({ name: name.name, namespace: this.namespace }),
+            )
+            if (namespaced) return namespaced
+        }
         if (this.parentScope) return this.parentScope.objectDeclaration(name)
         return undefined
     }

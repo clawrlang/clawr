@@ -2,7 +2,10 @@ import { Context, Declaration } from '@/model'
 import { Property } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { FunctionName } from '@/model/function-name'
-import { MethodSignature } from '@/model/interface-declaration'
+import {
+    InterfaceDeclaration,
+    MethodSignature,
+} from '@/model/interface-declaration'
 import { TypeName } from '@/model/type-name'
 import { RCTypeSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
@@ -58,6 +61,7 @@ export class ObjectDeclaration implements Declaration {
         public readonly properties: Property[],
         public readonly span: SourceCodeSpan,
         public readonly nameSpan?: SourceCodeSpan,
+        public readonly opaque = false,
     ) {
         this.superType = superType
         this.conformances = conformances
@@ -76,6 +80,7 @@ export class ObjectDeclaration implements Declaration {
         properties,
         span,
         nameSpan,
+        opaque,
     }: {
         kind: 'object' | 'service'
         name: TypeName
@@ -89,6 +94,7 @@ export class ObjectDeclaration implements Declaration {
         properties: Property[]
         span: SourceCodeSpan
         nameSpan?: SourceCodeSpan
+        opaque?: boolean
     }) {
         return new ObjectDeclaration(
             kind,
@@ -102,6 +108,7 @@ export class ObjectDeclaration implements Declaration {
             properties,
             span,
             nameSpan,
+            opaque,
         )
     }
 
@@ -179,6 +186,37 @@ export class ObjectDeclaration implements Declaration {
 
     emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addObjectDeclaration(this)
+        if (this.opaque) {
+            if (
+                this.kind !== 'service' ||
+                this.name.canonical() !== 'clawr¸HashBuilder' ||
+                this.inherits.length ||
+                this.properties.length ||
+                this.initializers.length ||
+                this.mutating.length ||
+                this.readonly.length !== 1 ||
+                this.readonly.some(
+                    (m) =>
+                        m.implementation.kind !== 'extern' ||
+                        m.name().toString() !== 'add(_:)' ||
+                        m.result ||
+                        !(m.parameters[0]?.type instanceof RCTypeSet) ||
+                        context.scope
+                            .interfaceDeclaration(m.parameters[0].type.type)
+                            ?.name.canonical() !== 'clawr¸HashEquatable',
+                )
+            )
+                return SemanticErrorResult.failure(
+                    'Unsupported opaque service declaration',
+                    this.span,
+                )
+            return Result.ok
+        }
+        if (this.superDeclaration(context)?.opaque)
+            return SemanticErrorResult.failure(
+                'Opaque services cannot be subclassed',
+                this.span,
+            )
 
         const objectContext = {
             ...context,
@@ -334,14 +372,16 @@ export class ObjectDeclaration implements Declaration {
         const target = context.scope.interfaceDeclaration(name)
         return (
             !!target &&
-            this.allConformances(context).some(
-                (conformance) =>
-                    context.scope.interfaceDeclaration(
+            this.allConformances(context).some((conformance) =>
+                context.scope
+                    .interfaceDeclaration(
                         TypeName.create({
                             name: conformance,
                             namespace: this.name.namespace,
                         }),
-                    ) === target,
+                    )
+                    ?.hierarchy(context)
+                    .includes(target),
             )
         )
     }
@@ -349,6 +389,7 @@ export class ObjectDeclaration implements Declaration {
     private checkConformances(context: Context): SemanticResult<Conformance[]> {
         const result: Conformance[] = []
         const seen = new Set<string>()
+        const declarations = new Map<InterfaceDeclaration, TypeName>()
         for (const name of this.allConformances(context)) {
             const typeName = TypeName.create({
                 name,
@@ -372,9 +413,15 @@ export class ObjectDeclaration implements Declaration {
                     this.span,
                 )
 
-            const fulfillments: Conformance['fulfillments'] = []
             const selfType = this.conformanceSelf(name, context)
-            for (const method of interfaceDecl.methods) {
+            for (const inherited of interfaceDecl.hierarchy(context))
+                if (!declarations.has(inherited))
+                    declarations.set(inherited, selfType)
+        }
+        for (const [interfaceDecl, selfType] of declarations) {
+            const name = interfaceDecl.name.name
+            const fulfillments: Conformance['fulfillments'] = []
+            for (const method of interfaceDecl.resolvedMethods(context)) {
                 const requirementResult = method.toCIR(context, selfType)
                 if (requirementResult.isError) return requirementResult
                 const requirement = requirementResult.value

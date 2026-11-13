@@ -1,6 +1,7 @@
 #include "integer.h"
 #include "array.h"
 #include "interfaces.h"
+#include "hash.h"
 #include "panic.h"
 #include <ctype.h>
 #include <stdarg.h>
@@ -36,6 +37,8 @@ __attribute__((visibility("default"))) const __type_info Integerˇtype = {
             .conformances =
                 (const __interface_conformance_entry *[]){
                     &Integerˇclawr¸HasStringRepresentationˇconformance,
+                    &Integerˇhash_conformance,
+                    &Integerˇequal_conformance,
                     NULL,
                 },
         },

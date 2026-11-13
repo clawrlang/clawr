@@ -22,6 +22,21 @@ export class InterfaceDeclarationParser implements DeclarationParser<InterfaceDe
     parse(stream: TokenStream): InterfaceDeclaration {
         const startToken = stream.expect('KEYWORD', 'trait', 'role')
         const nameToken = stream.expect('IDENTIFIER')
+        const inherits: string[] = []
+        if (stream.isNext('PUNCTUATION', ':')) {
+            stream.next()
+            do {
+                const token = stream.expect('IDENTIFIER')
+                inherits.push(token.identifier)
+                this.context.definitionRecorder?.typeReference(
+                    token.identifier,
+                    {
+                        start: token.start,
+                        end: token.end,
+                    },
+                )
+            } while (stream.isNext('PUNCTUATION', ',') && stream.next())
+        }
         stream.expect('PUNCTUATION', '{')
         const methods = []
         while (!stream.isNext('PUNCTUATION', '}'))
@@ -34,6 +49,7 @@ export class InterfaceDeclarationParser implements DeclarationParser<InterfaceDe
                 namespace: this.context.scope?.namespace,
             }),
             methods,
+            inherits,
             nameSpan: { start: nameToken.start, end: nameToken.end },
             span: { start: startToken.start, end: endToken.end },
         })

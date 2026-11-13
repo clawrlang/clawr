@@ -150,6 +150,24 @@ export function lower(json: string): string {
         } else if (decl.kind === 'RC_TYPE_DECL')
             typeDecls.set(mangleTypeName(decl), decl)
     registerSignatures(cir.declarations ?? [])
+    registerSignature('clawr¸newHashBuilder', {
+        parameters: [],
+        returnType: {
+            universe: 'rc-type',
+            namespace: 'clawr',
+            name: 'HashBuilder',
+        },
+    })
+    registerSignature('clawr¸HashBuilder·add', {
+        parameters: [
+            {
+                universe: 'interface',
+                namespace: 'clawr',
+                name: 'HashEquatable',
+            },
+        ],
+        returnType: { universe: 'void' },
+    })
 
     const variableDecls =
         cir.declarations?.filter((decl) => decl.kind === 'VARIABLE_DECL') ?? []
@@ -766,7 +784,11 @@ function isManagedReal(valueSet: cir.ValueSet): boolean {
 }
 
 function isManagedOwnedType(valueSet: cir.ValueSet): boolean {
-    return isImplicitBig(valueSet) || isManagedReal(valueSet)
+    return (
+        isImplicitBig(valueSet) ||
+        isManagedReal(valueSet) ||
+        valueSet.universe === 'string'
+    )
 }
 
 const NATIVE_INTEGER_LIMIT = 2n ** 63n - 1n
@@ -1054,6 +1076,11 @@ function lowerLiteralToBinary(
 
 /** Lowers `expr` for storing in a location of type `target`. */
 function lowerConverted(expr: cir.Expression, target: cir.ValueSet): string {
+    if (
+        target.universe === 'string' &&
+        (expr.kind === 'VARIABLE_REF' || expr.kind === 'PROPERTY_REF')
+    )
+        return `retainRC(${lowerExpr(expr)})`
     if (target.universe === 'real') {
         if (isManagedReal(target))
             return lowerRealRangeChecked(lowerRealOwned(expr, target), target)
@@ -1074,6 +1101,18 @@ function lowerConverted(expr: cir.Expression, target: cir.ValueSet): string {
 /** Lowers a call argument for a parameter of type `parameter`. */
 function lowerArgument(expr: cir.Expression, parameter?: cir.ValueSet) {
     if (expr.kind === 'BOX') return hoist(lowerExpr(expr), lowerType(expr.type))
+    if (
+        isHashBuilder(expr.type) &&
+        expr.kind !== 'VARIABLE_REF' &&
+        expr.kind !== 'PROPERTY_REF'
+    )
+        return hoist(lowerExpr(expr), lowerType(expr.type))
+    if (
+        expr.type.universe === 'string' &&
+        expr.kind !== 'VARIABLE_REF' &&
+        expr.kind !== 'PROPERTY_REF'
+    )
+        return hoist(lowerExpr(expr), 'String*')
     if (parameter?.universe === 'real' && isManagedReal(parameter))
         return lowerRealRangeChecked(
             lowerRealBorrowed(expr, parameter),
@@ -1135,7 +1174,10 @@ function lowerStmtCore(stmt: cir.Statement): string {
             if (
                 returned &&
                 returned.universe !== 'void' &&
-                isManagedOwnedType(returned)
+                (isManagedOwnedType(returned) ||
+                    (returned.universe === 'rc-type' &&
+                        returned.namespace === 'clawr' &&
+                        returned.name === 'HashBuilder'))
             ) {
                 hoist(call, lowerType(returned))
                 return ''
@@ -1251,7 +1293,7 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'RETAIN':
             return `retainRC(${lowerStorage(expr.object)})`
         case 'STRING_LITERAL':
-            return `"${expr.type.value}"`
+            return `String¸fromCString("${expr.type.value}")`
         case 'INTEGER_LITERAL':
             return integerRepresentation(expr.type) === 'native'
                 ? expr.type.value
@@ -1541,6 +1583,10 @@ function signatureOf(call: cir.Statement & { kind: 'CALL' }) {
 
 function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
     const receiver = call.receiver
+    const builder =
+        receiver && isHashBuilder(receiver.object.type)
+            ? lowerArgument(receiver.object)
+            : undefined
     const signature = signatureOf(call)
     const args = call.arguments.map((arg, i) =>
         lowerArgument(arg, signature?.parameters[i]),
@@ -1552,7 +1598,7 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
         }
         case 'direct': {
             const name = mangleNameWithLabels(call.name, receiver.object.type)
-            return `${name}(${[lowerExpr(receiver.object), ...args].join(', ')})`
+            return `${name}(${[builder ?? lowerExpr(receiver.object), ...args].join(', ')})`
         }
         case 'inherited': {
             const targetName = lowerExpr(receiver.object)
@@ -1573,6 +1619,14 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
             return `((${interfaceName}ˇwitness *)CONFORMANCE_ENTRY(${target}, ${interfaceName}))->${slotName}(${[target, ...args].join(', ')})`
         }
     }
+}
+
+function isHashBuilder(type: cir.ValueSet): boolean {
+    return (
+        type.universe === 'rc-type' &&
+        type.namespace === 'clawr' &&
+        type.name === 'HashBuilder'
+    )
 }
 
 export function lowerTruthvalueLiteral(

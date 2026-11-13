@@ -1,16 +1,84 @@
 import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
-import { ISOLATED, SHARED } from '@/model/isolation-level'
+import { ISOLATED, SHARED, UNIQUE } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { Parameter } from '@/model/parameter'
 import { Scope } from '@/model/scope'
-import { RCTypeSet } from '@/model/value-set'
+import { RCTypeSet, StringSet } from '@/model/value-set'
 import { createStandardLibraryScope } from '@/stdlib'
 import * as util from '@@/util'
 import { describe, expect, it, test } from 'bun:test'
 
 describe('FunctionCall', () => {
+    it('reports isolated string results for declared, inferred, and trait calls', () => {
+        const context = {
+            scope: Scope.createRoot(createStandardLibraryScope()),
+        }
+        const stringType = util.spannedTypeConstraint(StringSet.create())
+        context.scope.rootScope.addFunctionDeclaration(
+            FunctionDeclaration.create({
+                ...util.someFunctionDeclConfig,
+                baseName: 'declared',
+                result: { type: stringType, isolationLevel: UNIQUE },
+                implementation: { kind: 'extern' },
+            }),
+        )
+        context.scope.rootScope.addFunctionDeclaration(
+            FunctionDeclaration.create({
+                ...util.someFunctionDeclConfig,
+                baseName: 'inferred',
+                parameters: [
+                    Parameter.create({
+                        ...util.someParameterDeclConfig,
+                        label: undefined,
+                        varName: 'input',
+                        type: stringType,
+                        isolationLevel: ISOLATED,
+                    }),
+                ],
+                result: undefined,
+                implementation: {
+                    kind: 'implicit-return',
+                    expression: util.variableRef('input'),
+                },
+            }),
+        )
+        context.scope.addVariableDeclaration('text', {
+            isImmutable: true,
+            isolationLevel: ISOLATED,
+            type: stringType,
+        })
+        context.scope.addVariableDeclaration('printable', {
+            isImmutable: true,
+            isolationLevel: ISOLATED,
+            type: RCTypeSet.create({
+                type: util.simpleTypeName('HasStringRepresentation'),
+            }),
+        })
+        for (const call of [
+            FunctionCall.create({
+                baseName: 'declared',
+                arguments: [],
+                span: util.someCodeSpan,
+            }),
+            FunctionCall.create({
+                baseName: 'inferred',
+                arguments: [{ value: util.variableRef('text') }],
+                span: util.someCodeSpan,
+            }),
+            FunctionCall.create({
+                baseName: 'stringRepresentation',
+                recipient: util.variableRef('printable'),
+                arguments: [],
+                span: util.someCodeSpan,
+            }),
+        ]) {
+            const result = call.isolationLevel(context)
+            expect(result.isSuccess && result.value).toBe(ISOLATED)
+        }
+    })
+
     it('converts to CIR', () => {
         const context = util.newSemanticContext()
         context.scope.rootScope.addFunctionDeclaration(

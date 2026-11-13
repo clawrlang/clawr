@@ -6,6 +6,7 @@ import {
     UNIQUE,
     UNKNOWN,
     SHARED,
+    ISOLATED,
 } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import { Parameter } from '@/model/parameter'
@@ -13,7 +14,7 @@ import { ReturnStatement } from '@/model/return-statement'
 import { Scope } from '@/model/scope'
 import { SelfAssignment } from '@/model/self-assignment'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
-import { RCTypeSet, ValueSet } from '@/model/value-set'
+import { RCTypeSet, StringSet, ValueSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
 import { Result } from '@/tools/result'
@@ -74,25 +75,41 @@ export class FunctionDeclaration implements Declaration {
     }
 
     resultIsolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
-        if (this.result) {
-            if (
-                this.result.type instanceof RCTypeSet &&
-                context.scope.objectDeclaration(this.result.type.type)?.opaque
-            ) {
-                if (this.result.isolationLevel === 'ISOLATED')
-                    return this.externNotAllowed(
-                        'HashBuilder results must be shared',
-                    )
-                return Result.value(SHARED)
-            }
-            return Result.value(this.result.isolationLevel)
-        }
-        if (this.implementation.kind === 'implicit-return')
-            return this.implementation.expression.isolationLevel(context)
-        else
+        if (this.result) return this.declaredResultIsolationLevel(context)
+        if (this.implementation.kind !== 'implicit-return')
             throw new Error(
                 `unable to infer isolation level for ${this.baseName}`,
             )
+        const scope = this.scopeAddingParameters(context)
+        if (scope.isError) return scope
+        return this.implementation.expression.isolationLevel({
+            ...context,
+            scope: scope.value,
+        })
+    }
+
+    private declaredResultIsolationLevel(
+        context: Context,
+    ): SemanticResult<IsolationLevel | UNIQUE> {
+        if (!this.result) throw new Error('Function has no declared result')
+        if (this.result.type instanceof StringSet) {
+            if (this.result.isolationLevel === SHARED)
+                return this.externNotAllowed(
+                    'A string value cannot be shared with ref',
+                )
+            return Result.value(ISOLATED)
+        }
+        if (
+            this.result.type instanceof RCTypeSet &&
+            context.scope.objectDeclaration(this.result.type.type)?.opaque
+        ) {
+            if (this.result.isolationLevel === ISOLATED)
+                return this.externNotAllowed(
+                    'HashBuilder results must be shared',
+                )
+            return Result.value(SHARED)
+        }
+        return Result.value(this.result.isolationLevel)
     }
 
     type(context: Context): SemanticResult<ValueSet | undefined> {
@@ -100,10 +117,13 @@ export class FunctionDeclaration implements Declaration {
             return Result.value(
                 context.scope.canonicalOpaqueType(this.result.type),
             )
-        if (this.implementation.kind === 'implicit-return')
+        if (this.implementation.kind === 'implicit-return') {
+            const scope = this.scopeAddingParameters(context)
+            if (scope.isError) return scope
             return this.implementation.expression.currentValue(
-                this.bodyContext(context),
+                this.bodyContext({ ...context, scope: scope.value }),
             )
+        }
         return Result.ok
     }
 
@@ -314,21 +334,16 @@ export class FunctionDeclaration implements Declaration {
                 : undefined
 
         if (this.result || this.implementation.kind === 'body') {
-            const opaque =
-                this.result?.type instanceof RCTypeSet &&
-                context.scope.objectDeclaration(this.result.type.type)?.opaque
-            if (opaque && this.result?.isolationLevel === 'ISOLATED')
-                return this.externNotAllowed(
-                    'HashBuilder results must be shared',
-                )
+            const isolation = this.result
+                ? this.declaredResultIsolationLevel(context)
+                : undefined
+            if (isolation?.isError) return isolation
             const bodyContext = this.bodyContext({
                 ...context,
                 scope: parameterScopeResult.value,
                 calleeResult: this.result && {
                     type: context.scope.canonicalOpaqueType(this.result.type),
-                    isolationLevel: opaque
-                        ? SHARED
-                        : this.result.isolationLevel,
+                    isolationLevel: isolation!.value,
                 },
             })
             return Result.value(bodyContext)

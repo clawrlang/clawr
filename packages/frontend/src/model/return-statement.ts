@@ -4,7 +4,7 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import { ISOLATED } from './isolation-level'
-import { IntegerSet, RealSet, TruthvalueSet } from './value-set'
+import { IntegerSet, RealSet, StringSet, TruthvalueSet } from './value-set'
 
 export class ReturnStatement implements Statement {
     private constructor(
@@ -46,7 +46,33 @@ export class ReturnStatement implements Statement {
         if (cirResult.isError) return cirResult
         const retainedValueCIR = cirResult.value
 
-        if (retainedValue instanceof Retain && isolationLevel === ISOLATED) {
+        if (type instanceof StringSet) {
+            const releaseStart = context.scope.emitted.length
+            context.scope.releaseVariables()
+            let returnValue = retainedValueCIR
+            if (context.scope.emitted.length > releaseStart) {
+                // Evaluate the value before releasing an owner it may reference.
+                const temp = context.scope.nextTempVar()
+                context.scope.emitted.splice(releaseStart, 0, {
+                    kind: 'VARIABLE_DECL',
+                    name: temp,
+                    type: context.scope.toCIRType(type),
+                    initialValue: retainedValueCIR,
+                })
+                returnValue = {
+                    kind: 'VARIABLE_REF',
+                    name: temp,
+                    type: retainedValueCIR.type,
+                }
+            }
+            context.scope.emitted.push({
+                kind: 'RETURN',
+                value: returnValue,
+            })
+        } else if (
+            retainedValue instanceof Retain &&
+            isolationLevel === ISOLATED
+        ) {
             const objectResult = retainedValue.value.toCIRExpression(context)
             if (objectResult.isError) return objectResult
             context.scope.emitted.push({
@@ -113,6 +139,7 @@ export class ReturnStatement implements Statement {
         if (
             currentValue instanceof IntegerSet ||
             currentValue instanceof RealSet ||
+            currentValue instanceof StringSet ||
             currentValue instanceof TruthvalueSet
         )
             return Result.ok

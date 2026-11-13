@@ -2,6 +2,17 @@ import { describe, expect, it } from 'bun:test'
 import { analyzeProgram } from '../../src/analyze-program'
 
 describe('workspace program analysis', () => {
+    it('accepts a string property returned with an explicit result type', () => {
+        const name = 'file:///email.clawr'
+        const results = analyzeProgram([
+            {
+                name,
+                source: 'object EmailAddress { func value() -> string => self->value state: const value: string }',
+            },
+        ])
+        expect(results.get(name)!.diagnostics).toHaveLength(0)
+    })
+
     it('resolves cross-file functions and types to their definitions', () => {
         const results = analyzeProgram([
             {

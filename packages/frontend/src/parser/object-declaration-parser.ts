@@ -126,7 +126,7 @@ export class ObjectDeclarationParser {
 
     private parseProperties(stream: TokenStream) {
         const properties: Property[] = []
-        const propertyParser = PropertyParser.create({})
+        const propertyParser = PropertyParser.create(this.context)
 
         while (!this.isSectionEnd(stream))
             properties.push(propertyParser.parse(stream))

@@ -202,7 +202,7 @@ describe('Function Declaration Parser', () => {
     })
 
     it('parses a function with an ISOLATED return type', () => {
-        const code = 'func myFunction() -> const MyData { return {} }'
+        const code = 'func myFunction() -> isolated MyData { return {} }'
 
         const result = parseFunction(code)
         expect(result.result).toMatchObject({ isolationLevel: ISOLATED })
@@ -213,6 +213,12 @@ describe('Function Declaration Parser', () => {
 
         const result = parseFunction(code)
         expect(result.result).toMatchObject({ isolationLevel: SHARED })
+    })
+
+    it('rejects the old const return modifier', () => {
+        expect(() =>
+            parseFunction('func myFunction() -> const MyData { return {} }'),
+        ).toThrow("Expected IDENTIFIER, but got KEYWORD 'const'")
     })
 })
 

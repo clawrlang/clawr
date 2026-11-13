@@ -60,7 +60,7 @@ describe('standard library declarations', () => {
         `),
         ).not.toThrow()
         expect(() =>
-            compile('extern func wrong() -> const HashBuilder'),
+            compile('extern func wrong() -> isolated HashBuilder'),
         ).toThrow('HashBuilder results must be shared')
     })
 

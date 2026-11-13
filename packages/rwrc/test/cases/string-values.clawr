@@ -1,0 +1,35 @@
+type Text = string
+
+data TextBox {
+    value: Text
+}
+
+object TextHolder {
+    func value() -> string => self->value
+init:
+    func make(_ input: string) => { value: input }
+state:
+    const value: string
+}
+
+func stringify(_ value: HasStringRepresentation) -> string =>
+    value.stringRepresentation()
+
+func getValue(_ input: Text) -> string {
+    const box: TextBox = { value: input }
+    return box.value
+}
+
+func identity(_ input: string) => input
+
+func getObjectValue(_ input: string) -> string {
+    const holder: TextHolder = {TextHolder.make(input)}
+    return holder.value()
+}
+
+@main {
+    const result = getValue(stringify(42))
+    print(result)
+    print(identity(stringify(7)))
+    print(getObjectValue(result))
+}

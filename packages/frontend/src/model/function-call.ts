@@ -1,7 +1,7 @@
 import { Context, Expression, Statement } from '@/model'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { FunctionName } from '@/model/function-name'
-import { AnyIsolationLevel, UNIQUE } from '@/model/isolation-level'
+import { AnyIsolationLevel, ISOLATED, UNIQUE } from '@/model/isolation-level'
 import { TypeName } from '@/model/type-name'
 import {
     IntegerSet,
@@ -75,6 +75,9 @@ export class FunctionCall implements Expression, Statement {
         if (this.name.toString() === 'copy(of:)') return Result.value(UNIQUE)
 
         if (this.recipient) {
+            const result = this.currentValue(context)
+            if (result.isError) return result
+            if (result.value instanceof StringSet) return Result.value(ISOLATED)
             const type = this.recipient.type(context)
             if (type.isError) return type
             if (!(type.value instanceof RCTypeSet)) return Result.value(UNIQUE)

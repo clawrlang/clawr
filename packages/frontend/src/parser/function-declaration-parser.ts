@@ -6,7 +6,7 @@ import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { ISOLATION_KEYWORDS, IsolationKeyword } from '@/model/keywords'
 import { Parameter } from '@/model/parameter'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
-import { RCTypeSet } from '@/model/value-set'
+import { RCTypeSet, StringSet } from '@/model/value-set'
 import { Context, DeclarationParser } from '@/parser'
 import { BindingParser } from '@/parser/binding-parser'
 import { BlockParser } from '@/parser/block-parser'
@@ -120,20 +120,27 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         if (stream.isNext('OPERATOR', '->')) {
             stream.expect('OPERATOR', '->')
             const isolationLevel = this.parseIsolationlevel(stream)
+            const type = this.typeConstraintParser.parse(stream)
+            if (type instanceof StringSet && isolationLevel === SHARED)
+                throw SourceError.create({
+                    message: 'A string value cannot be shared with ref',
+                    span: type.span,
+                })
             return {
-                type: this.typeConstraintParser.parse(stream),
-                isolationLevel,
+                type,
+                isolationLevel:
+                    type instanceof StringSet ? ISOLATED : isolationLevel,
             }
         }
     }
 
     private parseIsolationlevel(stream: TokenStream) {
-        const semanticsToken = stream.isNext('KEYWORD', 'ref', 'const')
-            ? stream.expect('KEYWORD', 'ref', 'const')
+        const semanticsToken = stream.isNext('KEYWORD', 'ref', 'isolated')
+            ? stream.expect('KEYWORD', 'ref', 'isolated')
             : undefined
 
         switch (semanticsToken?.keyword) {
-            case 'const':
+            case 'isolated':
                 return ISOLATED
             case 'ref':
                 return SHARED

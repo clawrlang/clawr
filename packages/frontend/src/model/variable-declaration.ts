@@ -1,10 +1,15 @@
 import { Context, Declaration, Expression, Statement } from '@/model'
-import { ISOLATED, IsolationLevel, UNIQUE } from '@/model/isolation-level'
+import {
+    ISOLATED,
+    IsolationLevel,
+    SHARED,
+    UNIQUE,
+} from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import { Retain } from '@/model/retain'
 import { Scope } from '@/model/scope'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
-import { RCTypeSet, ValueSet } from '@/model/value-set'
+import { RCTypeSet, StringSet, ValueSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
@@ -72,6 +77,15 @@ export class VariableDeclaration implements Statement, Declaration {
         ])
         if (initialValueResult.isError) return initialValueResult
         const [valueIsolationLevel, initialValue] = initialValueResult.value
+        if (
+            this.isolationLevel === SHARED &&
+            (initialValue instanceof StringSet ||
+                this.type instanceof StringSet)
+        )
+            return SemanticErrorResult.failure(
+                'A string value cannot be shared with ref',
+                this.span,
+            )
         if (valueIsolationLevel === 'UNKNOWN')
             return SemanticErrorResult.failure(
                 'Cannot assign UNKNOWN isolation values',

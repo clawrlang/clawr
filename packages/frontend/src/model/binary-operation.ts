@@ -97,6 +97,21 @@ export class BinaryOperation implements Expression {
         ])
         if (operands.isError) return operands
         const [leftCIR, rightCIR] = operands.value
+        if (
+            (this.operator === '&&' || this.operator === '||') &&
+            type instanceof TruthvalueSet &&
+            isTruthvalueExpression(leftCIR) &&
+            isTruthvalueExpression(rightCIR)
+        )
+            return Result.value(
+                this.shortCircuit(
+                    context,
+                    this.operator === '&&' ? 'AND' : 'OR',
+                    leftCIR,
+                    rightCIR,
+                    type,
+                ),
+            )
         // The operator strategies already verified the operand types.
         return Result.value({
             kind: CIR_KINDS[this.operator],
@@ -104,6 +119,65 @@ export class BinaryOperation implements Expression {
             right: rightCIR,
             type: type.toCIR(),
         } as cir.Expression)
+    }
+
+    private shortCircuit(
+        context: Context,
+        kind: 'AND' | 'OR',
+        left: cir.Expression & { type: { universe: 'truthvalue' } },
+        right: cir.Expression & { type: { universe: 'truthvalue' } },
+        type: TruthvalueSet<truthvalue[]>,
+    ): cir.Expression {
+        const name = context.scope.nextTempVar()
+        const result = {
+            kind: 'VARIABLE_REF' as const,
+            name,
+            type: { universe: 'truthvalue' as const },
+        }
+        return {
+            kind: 'SCOPE',
+            statements: [
+                {
+                    kind: 'VARIABLE_DECL',
+                    name,
+                    type: result.type,
+                    initialValue: left,
+                },
+                {
+                    kind: 'IF',
+                    condition: {
+                        kind: 'NOT_EQUAL',
+                        left: result,
+                        right: {
+                            kind: 'TRUTHVALUE_LITERAL',
+                            type: {
+                                universe: 'truthvalue',
+                                value: kind === 'AND' ? 'false' : 'true',
+                            },
+                        },
+                        type: {
+                            universe: 'truthvalue',
+                            values: ['false', 'true'],
+                        },
+                    },
+                    then: [
+                        {
+                            kind: 'ASSIGN',
+                            target: { kind: 'VARIABLE_REF', name },
+                            value: {
+                                kind,
+                                left: result,
+                                right,
+                                type: type.toCIR(),
+                            },
+                        },
+                    ],
+                },
+            ],
+            value: result,
+            cleanup: [],
+            type: type.toCIR(),
+        }
     }
 
     private traitComparison(
@@ -189,7 +263,7 @@ export class BinaryOperation implements Expression {
         else if ((this.operator === '<' || this.operator === '>') && ord)
             value = ord
         else if (eq && ord)
-            value = { kind: 'OR', left: eq, right: ord, type: type.toCIR() }
+            value = this.shortCircuit(context, 'OR', eq, ord, type)
         else
             return SemanticErrorResult.failure(
                 'Comparison methods must return truthvalues',

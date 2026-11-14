@@ -67,6 +67,38 @@ describe('CIR parser schema validation', () => {
 
         expect(() => CIRParser.parse(module(scope))).not.toThrow()
         expect(() =>
+            CIRParser.parse(
+                module({
+                    ...scope,
+                    statements: [
+                        {
+                            kind: 'VARIABLE_DECL',
+                            name: 'result',
+                            type: scope.type,
+                            initialValue: scope.value,
+                        },
+                        {
+                            kind: 'IF',
+                            condition: scope.value,
+                            then: [
+                                {
+                                    kind: 'ASSIGN',
+                                    target: {
+                                        kind: 'VARIABLE_REF',
+                                        name: 'result',
+                                    },
+                                    value: scope.value,
+                                },
+                            ],
+                        },
+                    ],
+                }),
+            ),
+        ).not.toThrow()
+        expect(() =>
+            CIRParser.parse(module({ ...scope, statements: [{}] })),
+        ).toThrow('Invalid CIR:')
+        expect(() =>
             CIRParser.parse(module({ ...scope, cleanup: [{}] })),
         ).toThrow('Invalid CIR:')
     })

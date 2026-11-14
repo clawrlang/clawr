@@ -23,7 +23,7 @@ type LogicalNot = {
 
 type ScopedExpression = {
     kind: 'SCOPE'
-    statements: Extract<Statement, { kind: 'VARIABLE_DECL' }>[]
+    statements: Statement[]
     value: Expression
     cleanup: Extract<Statement, { kind: 'RELEASE' }>[]
     type: ValueSet

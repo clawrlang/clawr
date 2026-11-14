@@ -60,21 +60,30 @@ describe('trait comparisons', () => {
             name: { baseName },
             receiver: { dispatch: 'direct' },
         })
+        const inclusiveComparison = {
+            kind: 'SCOPE',
+            statements: [
+                { initialValue: method('equals') },
+                {
+                    kind: 'IF',
+                    then: [
+                        {
+                            value: {
+                                kind: 'OR',
+                                right: method('isOrderedBefore'),
+                            },
+                        },
+                    ],
+                },
+            ],
+        }
         expect(scopes.map((scope) => scope.value)).toMatchObject([
             method('equals'),
             { kind: 'NOT_EQUAL', left: method('equals') },
             method('isOrderedBefore'),
             method('isOrderedBefore'),
-            {
-                kind: 'OR',
-                left: method('equals'),
-                right: method('isOrderedBefore'),
-            },
-            {
-                kind: 'OR',
-                left: method('equals'),
-                right: method('isOrderedBefore'),
-            },
+            inclusiveComparison,
+            inclusiveComparison,
         ])
         for (const scope of scopes) {
             expect(scope.type).toEqual({
@@ -85,19 +94,41 @@ describe('trait comparisons', () => {
             expect(scope.cleanup).toHaveLength(2)
         }
         const [left, right] = scopes[3].statements
+        if (left.kind !== 'VARIABLE_DECL' || right.kind !== 'VARIABLE_DECL')
+            throw new Error('Expected operand declarations')
         expect(scopes[3].value).toMatchObject({
             receiver: { object: { name: right.name } },
             arguments: [{ name: left.name }],
         })
+        const [inclusiveLeft, inclusiveRight] = scopes[5].statements
+        if (
+            inclusiveLeft.kind !== 'VARIABLE_DECL' ||
+            inclusiveRight.kind !== 'VARIABLE_DECL'
+        )
+            throw new Error('Expected operand declarations')
         expect(scopes[5].value).toMatchObject({
-            left: {
-                receiver: { object: { name: scopes[5].statements[0].name } },
-                arguments: [{ name: scopes[5].statements[1].name }],
-            },
-            right: {
-                receiver: { object: { name: scopes[5].statements[1].name } },
-                arguments: [{ name: scopes[5].statements[0].name }],
-            },
+            statements: [
+                {
+                    initialValue: {
+                        receiver: { object: { name: inclusiveLeft.name } },
+                        arguments: [{ name: inclusiveRight.name }],
+                    },
+                },
+                {
+                    then: [
+                        {
+                            value: {
+                                right: {
+                                    receiver: {
+                                        object: { name: inclusiveRight.name },
+                                    },
+                                    arguments: [{ name: inclusiveLeft.name }],
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
         })
     })
 

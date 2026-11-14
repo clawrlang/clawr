@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=../../../../../schema/cir.schema.json
+$schema: 'http://clawr.lang/schema/cir/DRAFT-0'
+declarations:
+  - kind: FUNCTION_DECL
+    baseName: observe
+    labels: []
+    parameters: []
+    returnType: { universe: truthvalue }
+    body:
+      - kind: CALL
+        name: { baseName: print, labels: [] }
+        arguments:
+          - kind: BOX
+            expression:
+              kind: TRUTHVALUE_LITERAL
+              type: { universe: truthvalue, value: ambiguous }
+            type: { universe: truthvalue, boxed: true }
+      - kind: RETURN
+        value:
+          kind: TRUTHVALUE_LITERAL
+          type: { universe: truthvalue, value: 'true' }
+startBlock:
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - kind: BOX
+        expression:
+          kind: AND
+          left:
+            kind: TRUTHVALUE_LITERAL
+            type: { universe: truthvalue, value: 'false' }
+          right:
+            kind: CALL
+            name: { baseName: observe, labels: [] }
+            arguments: []
+            type: { universe: truthvalue }
+          type: { universe: truthvalue }
+        type: { universe: truthvalue, boxed: true }
+  - kind: CALL
+    name: { baseName: print, labels: [] }
+    arguments:
+      - kind: BOX
+        expression:
+          kind: OR
+          left:
+            kind: TRUTHVALUE_LITERAL
+            type: { universe: truthvalue, value: 'true' }
+          right:
+            kind: CALL
+            name: { baseName: observe, labels: [] }
+            arguments: []
+            type: { universe: truthvalue }
+          type: { universe: truthvalue }
+        type: { universe: truthvalue, boxed: true }

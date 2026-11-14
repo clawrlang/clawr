@@ -1349,16 +1349,10 @@ export function lowerExpr(expr: cir.Expression): string {
             return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
                 ${expr.properties?.map((property) => `.${property.name} = ${lowerPropertyValue(expr.type, property)}`).join(', ') ?? ''}
             )`
-        case 'OR': {
-            const left = `orˇleft${tempCounter++}`
-            return `({ truthvalue_t ${left} = ${lowerContainedExpression(expr.left)};
-                ${left} == c_true ? c_true : truthvalue¸or(${left}, ${lowerContainedExpression(expr.right)}); })`
-        }
-        case 'AND': {
-            const left = `andˇleft${tempCounter++}`
-            return `({ truthvalue_t ${left} = ${lowerContainedExpression(expr.left)};
-                ${left} == c_false ? c_false : truthvalue¸and(${left}, ${lowerContainedExpression(expr.right)}); })`
-        }
+        case 'OR':
+            return `truthvalue¸or(${lowerExpr(expr.left)}, ${lowerExpr(expr.right)})`
+        case 'AND':
+            return `truthvalue¸and(${lowerExpr(expr.left)}, ${lowerExpr(expr.right)})`
         case 'EQUAL':
             return (
                 lowerRealComparison(expr, '==') ??

@@ -65,6 +65,7 @@ type RefComparison = {
     type: BooleanSet
 }
 
+/** Eager operations; the frontend expresses short-circuiting using SCOPE and IF. */
 type LogicalOperation = {
     kind: 'AND' | 'OR'
     left: Expression & { type: { universe: 'truthvalue' } }

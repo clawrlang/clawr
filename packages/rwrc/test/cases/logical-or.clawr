@@ -3,6 +3,10 @@ func observe(_ code: integer, _ value: truthvalue) -> truthvalue {
     return value
 }
 
+func choose(_ value: truthvalue) -> truthvalue {
+    return value || observe(18, true)
+}
+
 @main {
     print(false || false)
     print(false || true)
@@ -10,4 +14,19 @@ func observe(_ code: integer, _ value: truthvalue) -> truthvalue {
     print(ambiguous || true)
     print(true || observe(1, false))
     print(false || observe(2, true))
+    print(false && observe(3, true))
+    print(true && observe(4, ambiguous))
+    print(ambiguous && observe(5, false))
+    print(ambiguous || observe(6, false))
+    print(observe(7, true) || observe(8, false))
+    print(observe(9, false) && observe(10, true))
+    print(true || false && observe(11, true))
+    print(false || true && observe(12, ambiguous))
+    print(false && observe(13, true) || observe(14, true))
+    const stored = false || observe(15, true)
+    if stored && observe(16, true) {
+        print(17)
+    }
+    print(choose(true))
+    print(choose(ambiguous))
 }

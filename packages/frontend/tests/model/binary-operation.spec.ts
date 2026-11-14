@@ -3,6 +3,54 @@ import * as util from '@@/util'
 import { describe, expect, describe as it, test } from 'bun:test'
 
 describe('BinaryOperation', () => {
+    test('encodes short-circuit evaluation as scoped CIR branches', () => {
+        for (const [operator, kind, stop] of [
+            ['&&', 'AND', 'false'],
+            ['||', 'OR', 'true'],
+        ] as const) {
+            const result = BinaryOperation.create({
+                operator,
+                left: util.truthvalueLiteral('ambiguous'),
+                right: util.truthvalueLiteral('true'),
+                span: util.someCodeSpan,
+            }).toCIRExpression(util.newSemanticContext())
+            if (result.isError) throw result.error
+            expect(result.value).toMatchObject({
+                kind: 'SCOPE',
+                statements: [
+                    {
+                        kind: 'VARIABLE_DECL',
+                        name: '__tempˇ0',
+                        initialValue: {
+                            kind: 'TRUTHVALUE_LITERAL',
+                            type: { value: 'ambiguous' },
+                        },
+                    },
+                    {
+                        kind: 'IF',
+                        condition: {
+                            kind: 'NOT_EQUAL',
+                            left: { kind: 'VARIABLE_REF', name: '__tempˇ0' },
+                            right: { type: { value: stop } },
+                        },
+                        then: [
+                            {
+                                kind: 'ASSIGN',
+                                target: { name: '__tempˇ0' },
+                                value: {
+                                    kind,
+                                    left: { name: '__tempˇ0' },
+                                    right: { kind: 'TRUTHVALUE_LITERAL' },
+                                },
+                            },
+                        ],
+                    },
+                ],
+                value: { kind: 'VARIABLE_REF', name: '__tempˇ0' },
+            })
+        }
+    })
+
     describe('Logical OR', () => {
         it('evaluates truthvalue literals as singleton MAX truth', () => {
             const examples = [
@@ -433,17 +481,6 @@ describe('BinaryOperation', () => {
                 expect(result.isSuccess || result.error.errors).toBeTrue()
                 expect(result.isSuccess && result.value.kind).toBe(kind)
             }
-        })
-
-        it('lowers logical operators', () => {
-            const expr = BinaryOperation.create({
-                operator: '&&',
-                left: util.truthvalueLiteral('true'),
-                right: util.truthvalueLiteral('false'),
-                span: util.someCodeSpan,
-            })
-            const result = expr.toCIRExpression(util.newSemanticContext())
-            expect(result.isSuccess && result.value.kind).toBe('AND')
         })
     })
 })

@@ -5,12 +5,26 @@
     { "$ref": "#/$defs/Assign" },
     { "$ref": "#/$defs/EnsureUnique" },
     { "$ref": "#/$defs/FunctionCallStatement" },
+    { "$ref": "#/$defs/If" },
     { "$ref": "#/$defs/Release" },
     { "$ref": "#/$defs/Return" },
     { "$ref": "#/$defs/SelfInitialization" },
     { "$ref": "#/$defs/VariableDeclaration" }
   ],
   "$defs": {
+    "If": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "IF" },
+        "condition": {
+          "$ref": "./expressions.json#/$defs/TruthvalueExpression"
+        },
+        "then": { "type": "array", "items": { "$ref": "#" } },
+        "otherwise": { "type": "array", "items": { "$ref": "#" } }
+      },
+      "required": ["kind", "condition", "then"],
+      "unevaluatedProperties": false
+    },
     "Assign": {
       "type": "object",
       "properties": {

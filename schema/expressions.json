@@ -3,6 +3,7 @@
   "type": "object",
   "oneOf": [
     { "$ref": "#/$defs/BinaryOperation" },
+    { "$ref": "#/$defs/LogicalNot" },
     { "$ref": "#/$defs/FunctionCallExpression" },
     { "$ref": "#/$defs/Literal" },
     { "$ref": "#/$defs/MemoryExpression" },
@@ -11,14 +12,37 @@
     { "$ref": "#/$defs/ScopedExpression" }
   ],
   "$defs": {
+    "UnboxedTruthvalueSet": {
+      "type": "object",
+      "allOf": [{ "$ref": "./valuesets.json#/$defs/TruthvalueSet" }],
+      "not": { "type": "object", "required": ["boxed"] }
+    },
+    "TruthvalueExpression": {
+      "type": "object",
+      "allOf": [{ "$ref": "#" }],
+      "properties": {
+        "type": { "$ref": "#/$defs/UnboxedTruthvalueSet" }
+      },
+      "required": ["type"]
+    },
+    "LogicalNot": {
+      "type": "object",
+      "properties": {
+        "kind": { "const": "NOT" },
+        "operand": { "$ref": "#/$defs/TruthvalueExpression" },
+        "type": { "$ref": "#/$defs/UnboxedTruthvalueSet" }
+      },
+      "required": ["kind", "operand", "type"],
+      "unevaluatedProperties": false
+    },
     "ScopedExpression": {
       "type": "object",
       "properties": {
         "kind": { "const": "SCOPE" },
         "statements": {
-          "$comment": "Bindings evaluated in order before the value.",
+          "$comment": "Statements evaluated in order before the value.",
           "type": "array",
-          "items": { "$ref": "./statements.json#/$defs/VariableDeclaration" }
+          "items": { "$ref": "./statements.json#" }
         },
         "value": { "$ref": "#" },
         "cleanup": {
@@ -182,6 +206,7 @@
       "unevaluatedProperties": false
     },
     "LogicalOperation": {
+      "$comment": "Eager three-valued operations. Short-circuit evaluation is expressed using SCOPE and IF.",
       "type": "object",
       "properties": {
         "kind": {

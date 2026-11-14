@@ -17,6 +17,14 @@ Clawr will only have one modifier: `helper`. Sensible defaults apply where some 
 - Methods are visible by default, but can be marked `helper`. A method marked `helper` can only be invoked by other methods on the owning type.
 - A type of any kind is visible by default. A `helper` type can only be accessed from inside its containing package (module?).
 
+| Declaration                   | Visible To                            | `helper`                              |
+| ----------------------------- | ------------------------------------- | ------------------------------------- |
+| `object` / `service` / `data` | Everyone who imports the package      | Only code in the same package         |
+| Free function                 | Everyone who imports the package      | Only code in the same package         |
+| Method                        | All code that can see the parent type | Only the parent `object` or `service` |
+
+**Key insight:** The `helper` keyword means "implementation detail" - the scope depends on what kind of thing it marks, but the intent is always the same: this is not part of the public API.
+
 ## Rationale
 
 - Pluralistic visibility modifiers can be powerful, but also confusing. If a single keyword is enough, we should not complicate the story.
@@ -26,4 +34,3 @@ Clawr will only have one modifier: `helper`. Sensible defaults apply where some 
 ## Related ADRs
 
 - [ADR-008](../adr-008.md) (Encapsulation vs Data)
-- [Visibility Modifiers in Clawr](./visibility.md) (note: duplicate entry)

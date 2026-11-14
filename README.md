@@ -24,7 +24,7 @@ The code is organised in packages:
 
 The `@clawr/frontend` package is a compiler frontend. It parses and analyzes .clawr source code and outputs an AST called the Clawr Intermediate Representation (CIR). This is then interpreted by the backend and lowered to machine code that runs on the target platform. Many backends — for various target platforms — can reuse the same frontend as the CIR is standardized.
 
-The `@clawr/cir` package defines the Clawr Intermediate Representation data structures. These structures are standardized and portable. Any backend should be able to parse the input from any frontend and lower it to its target platform architecture. The specification is documented at <https://clawrlang.github.io/clawr-doc/cir-reference/>.
+The `@clawr/cir` package defines the Clawr Intermediate Representation data structures. These structures are standardized and portable. Any backend should be able to parse the input from any frontend and lower it to its target platform architecture. The specification is documented in the [CIR reference](https://clawrlang.github.io/clawr-doc/spec/cir/).
 
 The `@clawr/backend` package provides an example backend that produces Mac binaries via C intermediries and clang. The hope is that a rich ecosystem of compiler backends will grow in the future. The backend determines the hardware/OS architecture the final product will run on. Clawr as a language — and the compiler frontend — is agnostic to this. The backend could even be ternary!
 
@@ -54,41 +54,18 @@ npm run test:all      # Run all tests, including runtime and VS Code extension t
 npx bun test packages/frontend/tests/unit/parser/module-parser.spec.ts # Run a single test fixture
 ```
 
-The standard-library declarations and their ordered manifest live in the
-documentation repository, pinned as a Git submodule. The compiler's build
-embeds them; the standalone executable does not need the checkout at runtime.
-The pinned documentation commit must be available from the submodule remote
-for a fresh clone.
+The [implementation guide](https://clawrlang.github.io/clawr-doc/guides/implementation/programs.html)
+explains standard-library loading from the pinned documentation submodule.
 
 GitHub Actions runs `npm run test:all` on each push. It builds shared
 dependencies once before running the compiler, runtime, and VS Code suites.
 
-### Multi-file programs
+### Documentation
 
-Pass source files in order. Multiple files require an output name:
-
-```sh
-packages/rwrc/dist/rwrc build types.clawr main.clawr --name example -o dist
-```
-
-The files share one program scope and must contain exactly one `@main`, even
-when building a single file. Named aliases must precede their uses. This is
-not yet a system of separately importable modules or packages.
-
-The VS Code extension treats each `.clawr` file as independent unless its
-directory or an ancestor contains an empty `.clawr-project` marker. Files under
-the nearest marker form a project, in lexical path order; nested markers create
-separate projects. Files named `*.script.clawr` remain independent even inside
-a project. Discovery stays within each workspace folder and excludes
-dependencies and generated output. The editor allows declaration-only files;
-the compiler still requires exactly one `@main` per executable.
-
-The former `clawr.sourceFiles` setting is no longer supported. To migrate,
-place a `.clawr-project` marker in the project directory and rename independent
-files within it to `*.script.clawr` or move them outside the project. Make sure
-lexical file order puts named aliases before their uses, and pass the project
-files explicitly in the same order to the compiler. Cross-file go-to-definition
-supports top-level types and functions; rename remains single-file.
+- [Programs and source-module rules](https://clawrlang.github.io/clawr-doc/spec/language/programs.html)
+- [Building multi-file programs](https://clawrlang.github.io/clawr-doc/guides/implementation/programs.html)
+- [VS Code projects and independent scripts](https://clawrlang.github.io/clawr-doc/guides/ide-reference/projects.html)
+- [Where to document a feature](./CONTRIBUTING#documentation-changes)
 
 The CIR schema in `./schema/` is the source for both editor validation of `.cir` fixtures and runtime validation by the backend parser. The schema is updated automatically from the Clawr documentation.
 

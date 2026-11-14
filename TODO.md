@@ -1,9 +1,8 @@
 # TODO
 
-## Comparison Operators
+## Documentation
 
-- Replace the `kind: 'SCOPE'` expression with ordinary cleanup statements.
-  - Deferred until control flow is implemented. - A `true || <comparison>` or a `false && <comparison>` expression needs to short-circuit.
+- ADR-012 and ADR-013 contradict each other according to clawr-doc/spec/language/semantics/function-parameters.md. The desired behavior is that labels can be reordered in the source code. But this is probably not reflected in the CIR. There is an idea regarding currying, where labelled arguments can be partially applied. It does not seem to be documented anywhere yet.
 
 ## `object`/`service`
 

@@ -11,4 +11,15 @@ A few ground rules:
 - Stewardship can be transferred if multiple people commit to maintaining and honouring the project.
 - Please follow the code style and include unit tests for new features.
 
+## Documentation Changes
+
+The canonical documentation lives in [clawr-doc](https://github.com/clawrlang/clawr-doc). Follow its [documentation placement guide](https://github.com/clawrlang/clawr-doc/blob/main/CONTRIBUTING#where-documentation-belongs):
+
+- Current language, CIR, and standard-library rules belong in `spec/`.
+- Example compiler, runtime, CLI, and editor behavior belong in `guides/`.
+- ADRs explain decisions and link to current rules; they are not the sole feature documentation.
+- Keep this README as an entry point, with links rather than detailed feature contracts.
+
+Make documentation changes in the canonical repository, not in this checkout's `vendor/clawr-doc` submodule or synchronized ADR/schema copies. Publish documentation first, then update the submodule pin. Implementing part of a draft ADR does not make its remaining proposals current behavior.
+
 If you want to become a maintainer, please open a PR adding yourself to MAINTAINERS.

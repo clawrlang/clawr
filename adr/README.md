@@ -30,43 +30,43 @@ Statuses used in this documentation:
 
 The following ADRs have been documented so far:
 
-- [ADR-000](./adr-000.md): Platform Agnostic Language
-- [ADR-001](./adr-001.md): Syntax, Semantics and CIR
-- [ADR-002](./adr-002.md): Per-Variable Isolation
-- [ADR-003](./adr-003.md): `UNIQUE` Return Values
-- [ADR-004](./adr-004.md): `UNKNOWN` Parameters
-- [ADR-005](./adr-005.md): Types are Sets
-- [ADR-006](./adr-006.md): Three-valued Truth
-- [ADR-007](./adr-007.md): Three-valued Logic Operators
-- [ADR-008](./adr-008.md): Encapsulation vs Data
-- [ADR-009](./adr-009.md): Interface Types
-- [ADR-010](./adr-010.md): Serializable `data`
-- [ADR-011](./adr-011.md): Ad Hoc Data Structures
-- [ADR-012](./adr-012.md): Parameters Labels and Ordering
-- [ADR-013](./adr-013.md): Currying on Labels
-- [ADR-014](./adr-014.md): Traits and Static
-- [ADR-015](./adr-015.md): Basic ARC Rules
-- [ADR-016](./adr-016.md): Backend-Managed Boxing of Unboxed Primitives
-- [ADR-017](./adr-017.md): Inheritance Allocation
-- [ADR-018](./adr-018.md): `object` Initialization
-- [ADR-019](./adr-019.md): `namespace`
-- [ADR-020](./adr-020.md): Singleton `service`
-- [ADR-021](./adr-021.md): Binary Operators and Precedence
-- [ADR-022](./adr-022.md): `integer` Exponentiation
-- [ADR-023](./adr-023.md): `integer` Division
-- [ADR-024](./adr-024.md): The `integer` Combinatorial Explosion
-- [ADR-025](./adr-025.md): The `real` Datatype: Precision Kinds and Bases
-- [ADR-026](./adr-026.md): The `real` Datatype: Compatibility and Precision
-- [ADR-027](./adr-027.md): The `real` Datatype: Per-Operation Rounding
-- [ADR-028](./adr-028.md): The `real` Datatype: Assignment, Equality, and Literals
-- [ADR-029](./adr-029.md): The `real` Datatype: Inference
-- [ADR-030](./adr-030.md): The `real` Datatype: `real big`
-- [ADR-031](./adr-031.md): Backend Execution Mechanics and Lowering for Reals
-- [ADR-032](./adr-032.md): `subset` and `type`
-- [ADR-033](./adr-033.md): Private Properties Are Per Type
-- [ADR-034](./adr-034.md): Declaring and Conforming to `trait`s and `role`s
-- [ADR-035](./adr-035.md): Separating Mutability from Isolation in Declaration Syntax
-- [ADR-036](./adr-036.md): Standard Library for Clawr
-- [ADR-037](./adr-037.md): Hashing and `HashEquatable`
-- [ADR-038](./adr-038.md): Multi-File Programs and Future Modules
-- [ADR-039](./adr-039.md): Control-Flow
+- ✅ [ADR-000](./adr-000.md): Platform Agnostic Language
+- ✅ [ADR-001](./adr-001.md): Syntax, Semantics and CIR
+- ✅ [ADR-002](./adr-002.md): Per-Variable Isolation
+- ✅ [ADR-003](./adr-003.md): `UNIQUE` Return Values
+- ✅ [ADR-004](./adr-004.md): `UNKNOWN` Parameters
+- ✅ [ADR-005](./adr-005.md): Types are Sets
+- ✅ [ADR-006](./adr-006.md): Three-valued Truth
+- 📝 [ADR-007](./adr-007.md): Three-valued Logic Operators
+- ✅ [ADR-008](./adr-008.md): Encapsulation vs Data
+- 📝 [ADR-009](./adr-009.md): Interface Types
+- 📝 [ADR-010](./adr-010.md): Serializable `data`
+- 📝 [ADR-011](./adr-011.md): Ad Hoc Data Structures
+- ✅ [ADR-012](./adr-012.md): Parameters Labels and Ordering
+- ✍🏼 [ADR-013](./adr-013.md): Currying on Labels
+- 📝 [ADR-014](./adr-014.md): Traits and Static
+- ✅ [ADR-015](./adr-015.md): Basic ARC Rules
+- ✅ [ADR-016](./adr-016.md): Backend-Managed Boxing of Unboxed Primitives
+- ✅ [ADR-017](./adr-017.md): Inheritance Allocation
+- ✅ [ADR-018](./adr-018.md): `object` Initialization
+- 📝 [ADR-019](./adr-019.md): `namespace`
+- 📝 [ADR-020](./adr-020.md): Singleton `service`
+- 📝 [ADR-021](./adr-021.md): Binary Operators and Precedence
+- ✅ [ADR-022](./adr-022.md): `integer` Exponentiation
+- ✅ [ADR-023](./adr-023.md): `integer` Division
+- ✍🏼 [ADR-024](./adr-024.md): The `integer` Combinatorial Explosion
+- ✅ [ADR-025](./adr-025.md): The `real` Datatype: Precision Kinds and Bases
+- ✅ [ADR-026](./adr-026.md): The `real` Datatype: Compatibility and Precision
+- ✅ [ADR-027](./adr-027.md): The `real` Datatype: Per-Operation Rounding
+- ✅ [ADR-028](./adr-028.md): The `real` Datatype: Assignment, Equality, and Literals
+- ✅ [ADR-029](./adr-029.md): The `real` Datatype: Inference
+- ❌ [ADR-030](./adr-030.md): The `real` Datatype: `real big`
+- ✅ [ADR-031](./adr-031.md): Backend Execution Mechanics and Lowering for Reals
+- ✅ [ADR-032](./adr-032.md): `subset` and `type`
+- ✅ [ADR-033](./adr-033.md): Private Properties Are Per Type
+- ✅ [ADR-034](./adr-034.md): Declaring and Conforming to `trait`s and `role`s
+- ✅ [ADR-035](./adr-035.md): Separating Mutability from Isolation in Declaration Syntax
+- ✅ [ADR-036](./adr-036.md): Standard Library for Clawr
+- 📝 [ADR-037](./adr-037.md): Hashing and `HashEquatable`
+- ✅ [ADR-038](./adr-038.md): Multi-File Programs and Future Modules
+- ✅ [ADR-039](./adr-039.md): Control-Flow

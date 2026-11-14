@@ -37,24 +37,24 @@ The following ADRs have been documented so far:
 - ✅ [ADR-004](./adr-004.md): `UNKNOWN` Parameters
 - ✅ [ADR-005](./adr-005.md): Types are Sets
 - ✅ [ADR-006](./adr-006.md): Three-valued Truth
-- 📝 [ADR-007](./adr-007.md): Three-valued Logic Operators
+- ✅ [ADR-007](./adr-007.md): Three-valued Logic Operators
 - ✅ [ADR-008](./adr-008.md): Encapsulation vs Data
-- 📝 [ADR-009](./adr-009.md): Interface Types
+- ✅ [ADR-009](./adr-009.md): Interface Types
 - 📝 [ADR-010](./adr-010.md): Serializable `data`
 - 📝 [ADR-011](./adr-011.md): Ad Hoc Data Structures
 - ✅ [ADR-012](./adr-012.md): Parameters Labels and Ordering
 - ✍🏼 [ADR-013](./adr-013.md): Currying on Labels
-- 📝 [ADR-014](./adr-014.md): Traits and Static
+- ✅ [ADR-014](./adr-014.md): Traits and Static
 - ✅ [ADR-015](./adr-015.md): Basic ARC Rules
 - ✅ [ADR-016](./adr-016.md): Backend-Managed Boxing of Unboxed Primitives
 - ✅ [ADR-017](./adr-017.md): Inheritance Allocation
 - ✅ [ADR-018](./adr-018.md): `object` Initialization
 - 📝 [ADR-019](./adr-019.md): `namespace`
 - 📝 [ADR-020](./adr-020.md): Singleton `service`
-- 📝 [ADR-021](./adr-021.md): Binary Operators and Precedence
+- ✅ [ADR-021](./adr-021.md): Binary Operators and Precedence
 - ✅ [ADR-022](./adr-022.md): `integer` Exponentiation
 - ✅ [ADR-023](./adr-023.md): `integer` Division
-- ✍🏼 [ADR-024](./adr-024.md): The `integer` Combinatorial Explosion
+- ✅ [ADR-024](./adr-024.md): The `integer` Combinatorial Explosion
 - ✅ [ADR-025](./adr-025.md): The `real` Datatype: Precision Kinds and Bases
 - ✅ [ADR-026](./adr-026.md): The `real` Datatype: Compatibility and Precision
 - ✅ [ADR-027](./adr-027.md): The `real` Datatype: Per-Operation Rounding

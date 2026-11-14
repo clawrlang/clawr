@@ -105,6 +105,15 @@ export class VariableDeclaration implements Statement, Declaration {
                 : initialValue.unconstrained())
         const type = context.scope.canonicalOpaqueType(declaredType)
 
+        const valueResult = Retain.ifStorage(this.initialValue, context)
+        if (valueResult.isError) return valueResult
+        const initialValueCIR = valueResult.value.toCIRExpression({
+            ...context,
+            explicitType: this.type,
+            isolationLevel: this.isolationLevel ?? ISOLATED,
+        })
+        if (initialValueCIR.isError) return initialValueCIR
+
         scope.addVariableDeclaration(this.name, {
             isImmutable: this.isImmutable,
             isolationLevel,
@@ -116,7 +125,12 @@ export class VariableDeclaration implements Statement, Declaration {
         ])
         this.setCurrentValue(context, initialValue)
 
-        const emissionResult = this.emitCIRDeclaration(context, type, scope)
+        const emissionResult = this.emitCIRDeclaration(
+            context,
+            type,
+            scope,
+            initialValueCIR.value,
+        )
         if (emissionResult.isError) return emissionResult
 
         return Result.ok
@@ -126,22 +140,14 @@ export class VariableDeclaration implements Statement, Declaration {
         context: Context,
         type: ValueSet,
         scope: Scope | Scope['rootScope'],
+        initialValue: cir.Expression,
     ): SemanticResult {
-        const valueResult = Retain.ifStorage(this.initialValue, context)
-        if (valueResult.isError) return valueResult
-        const value = valueResult.value
-
-        const initialValueResult = value.toCIRExpression({
-            ...context,
-            explicitType: this.type,
-            isolationLevel: this.isolationLevel ?? ISOLATED,
-        })
-        if (initialValueResult.isError) return initialValueResult
-        const initialValue: cir.Expression = initialValueResult.value
-
         scope.emitted.push({
             kind: 'VARIABLE_DECL' as const,
-            name: this.name,
+            name:
+                scope instanceof Scope
+                    ? scope.bindingName(this.name)
+                    : this.name,
             type: context.scope.toCIRType(type),
             initialValue: initialValue,
         })

@@ -1224,6 +1224,14 @@ function lowerStmtCore(stmt: cir.Statement): string {
                 sizeof(${mangleTypeName(stmt.type)}ˇproperties));`
         case 'ENSURE_UNIQUE':
             return `mutateRC(${lowerStorage(stmt.object)});`
+        case 'IF': {
+            const condition = lowerContainedExpression(stmt.condition)
+            const then = lowerBlock(stmt.then, currentReturnType, [])
+            const otherwise = stmt.otherwise
+                ? ` else {\n${lowerBlock(stmt.otherwise, currentReturnType, [])}\n}`
+                : ''
+            return `if ((${condition}) == c_true) {\n${then}\n}${otherwise}`
+        }
         case 'RELEASE':
             return `releaseRC(${lowerStorage(stmt.object)});`
         case 'RETURN': {
@@ -1231,7 +1239,9 @@ function lowerStmtCore(stmt: cir.Statement): string {
                 ? lowerConverted(stmt.value, currentReturnType as cir.ValueSet)
                 : undefined
             const { pre, post } = drainTemps()
-            const releases = (blockLocals[blockLocals.length - 1] ?? [])
+            const releases = [...blockLocals]
+                .reverse()
+                .flat()
                 .map((name) => `releaseRC(${name});`)
                 .join('\n')
             if (!value) return [releases, 'return;'].filter(Boolean).join('\n')
@@ -1302,6 +1312,8 @@ export function lowerExpr(expr: cir.Expression): string {
             return lowerRealLiteral(expr)
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
+        case 'NOT':
+            return `(-(${lowerContainedExpression(expr.operand)}))`
         case 'CALL':
             return lowerFunctionCall(expr)
         case 'VARIABLE_REF':
@@ -1337,12 +1349,16 @@ export function lowerExpr(expr: cir.Expression): string {
             return `allocInitRC(${mangledTypeName}, 0, ${`__rc_${expr.isolationLevel}`},
                 ${expr.properties?.map((property) => `.${property.name} = ${lowerPropertyValue(expr.type, property)}`).join(', ') ?? ''}
             )`
-        case 'OR':
+        case 'OR': {
             const left = `orˇleft${tempCounter++}`
             return `({ truthvalue_t ${left} = ${lowerContainedExpression(expr.left)};
                 ${left} == c_true ? c_true : truthvalue¸or(${left}, ${lowerContainedExpression(expr.right)}); })`
-        case 'AND':
-            return `(${lowerExpr(expr.left)}) && (${lowerExpr(expr.right)})`
+        }
+        case 'AND': {
+            const left = `andˇleft${tempCounter++}`
+            return `({ truthvalue_t ${left} = ${lowerContainedExpression(expr.left)};
+                ${left} == c_false ? c_false : truthvalue¸and(${left}, ${lowerContainedExpression(expr.right)}); })`
+        }
         case 'EQUAL':
             return (
                 lowerRealComparison(expr, '==') ??
@@ -1359,30 +1375,30 @@ export function lowerExpr(expr: cir.Expression): string {
             return (
                 lowerRealComparison(expr, '<') ??
                 lowerIntegerComparison(expr, 'lt', '<') ??
-                `(${lowerExpr(expr.left)}) < (${lowerExpr(expr.right)})`
+                `((${lowerExpr(expr.left)}) < (${lowerExpr(expr.right)}) ? c_true : c_false)`
             )
         case 'GREATER_THAN':
             return (
                 lowerRealComparison(expr, '>') ??
                 lowerIntegerComparison(expr, 'gt', '>') ??
-                `(${lowerExpr(expr.left)}) > (${lowerExpr(expr.right)})`
+                `((${lowerExpr(expr.left)}) > (${lowerExpr(expr.right)}) ? c_true : c_false)`
             )
         case 'LESS_THAN_OR_EQUAL':
             return (
                 lowerRealComparison(expr, '<=') ??
                 lowerIntegerComparison(expr, 'le', '<=') ??
-                `(${lowerExpr(expr.left)}) <= (${lowerExpr(expr.right)})`
+                `((${lowerExpr(expr.left)}) <= (${lowerExpr(expr.right)}) ? c_true : c_false)`
             )
         case 'GREATER_THAN_OR_EQUAL':
             return (
                 lowerRealComparison(expr, '>=') ??
                 lowerIntegerComparison(expr, 'ge', '>=') ??
-                `(${lowerExpr(expr.left)}) >= (${lowerExpr(expr.right)})`
+                `((${lowerExpr(expr.left)}) >= (${lowerExpr(expr.right)}) ? c_true : c_false)`
             )
         case 'SAME':
-            return `(${lowerExpr(expr.left)}) == (${lowerExpr(expr.right)})`
+            return `((${lowerExpr(expr.left)}) == (${lowerExpr(expr.right)}) ? c_true : c_false)`
         case 'NOT_SAME':
-            return `(${lowerExpr(expr.left)}) != (${lowerExpr(expr.right)})`
+            return `((${lowerExpr(expr.left)}) != (${lowerExpr(expr.right)}) ? c_true : c_false)`
         case 'ADDITION':
         case 'SUBTRACTION':
         case 'MULTIPLICATION':

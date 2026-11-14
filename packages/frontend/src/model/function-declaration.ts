@@ -422,9 +422,11 @@ export class FunctionDeclaration implements Declaration {
     }
 
     private bodyContext(context: Context): Context {
+        const scope = context.scope.createChildScope()
         return {
             ...context,
-            scope: context.scope.createChildScope(),
+            scope,
+            returnScope: scope,
         }
     }
 }

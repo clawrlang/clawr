@@ -2,6 +2,7 @@ import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { BinaryOperation } from '@/model/binary-operation'
 import { FunctionCall } from '@/model/function-call'
+import { LogicalNot } from '@/model/logical-not'
 import {
     IntegerLiteral,
     RealLiteral,
@@ -131,6 +132,14 @@ export class ExpressionParser {
     }
 
     parsePrefixExpression(stream: TokenStream): Expression {
+        if (stream.isNext('OPERATOR', '!')) {
+            const token = stream.expect('OPERATOR', '!')
+            const operand = this.parsePrefixExpression(stream)
+            return LogicalNot.create({
+                operand,
+                span: { start: token.start, end: operand.span.end },
+            })
+        }
         if (stream.isNext('OPERATOR', '-')) {
             stream.next() // Consume the '-'
             const expression = this.parsePostfixOperation(stream)

@@ -41,7 +41,9 @@ export class Module {
                         Number(a instanceof VariableDeclaration),
                 )
                 .map((decl) => decl.emitDeclaration(context)),
-            ...(this.main ?? []).map((stmt) => stmt.emitStatement(context)),
+            ...(this.main ?? []).map((stmt) =>
+                stmt.emitStatement({ ...context, returnScope: context.scope }),
+            ),
         ])
         if (result.isError) throw result.error
         if (this.main?.length) context.scope.releaseVariables()

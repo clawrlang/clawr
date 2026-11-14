@@ -11,6 +11,14 @@ export type Statement =
     | VariableDeclaration
     | Assign
     | SelfInitialization
+    | If
+
+type If = {
+    kind: 'IF'
+    condition: Expression
+    then: Statement[]
+    otherwise?: Statement[]
+}
 
 type FunctionCall = Omit<Extract<Expression, { kind: 'CALL' }>, 'type'>
 

@@ -64,9 +64,75 @@ describe('CIR parser schema validation', () => {
                     },
                 ],
             })
+
         expect(() => CIRParser.parse(module(scope))).not.toThrow()
         expect(() =>
             CIRParser.parse(module({ ...scope, cleanup: [{}] })),
+        ).toThrow('Invalid CIR:')
+    })
+
+    it('validates conditional statements and logical negation recursively', () => {
+        const value = {
+            kind: 'TRUTHVALUE_LITERAL',
+            type: { universe: 'truthvalue', value: 'ambiguous' },
+        }
+        const module = (condition: object, then: object[]) =>
+            JSON.stringify({
+                $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
+                startBlock: [{ kind: 'IF', condition, then, otherwise: [] }],
+            })
+        expect(() =>
+            CIRParser.parse(
+                module(
+                    {
+                        kind: 'NOT',
+                        operand: value,
+                        type: { universe: 'truthvalue', value: 'ambiguous' },
+                    },
+                    [{ kind: 'IF', condition: value, then: [] }],
+                ),
+            ),
+        ).not.toThrow()
+        expect(() => CIRParser.parse(module(value, [{}]))).toThrow(
+            'Invalid CIR:',
+        )
+        expect(() =>
+            CIRParser.parse(
+                module(
+                    {
+                        kind: 'INTEGER_LITERAL',
+                        type: { universe: 'integer', value: '1' },
+                    },
+                    [],
+                ),
+            ),
+        ).toThrow('Invalid CIR:')
+        expect(() =>
+            CIRParser.parse(
+                module(
+                    {
+                        kind: 'VARIABLE_REF',
+                        name: 'boxed',
+                        type: { universe: 'truthvalue', boxed: true },
+                    },
+                    [],
+                ),
+            ),
+        ).toThrow('Invalid CIR:')
+        expect(() =>
+            CIRParser.parse(
+                module(
+                    {
+                        kind: 'NOT',
+                        operand: {
+                            kind: 'INTEGER_LITERAL',
+                            type: { universe: 'integer', value: '1' },
+                        },
+                        type: { universe: 'truthvalue' },
+                    },
+                    [],
+                ),
+            ),
         ).toThrow('Invalid CIR:')
     })
 

@@ -104,11 +104,18 @@ export class PropertyReference implements Expression {
         if (objectvalueResult.isError) return objectvalueResult
         const objectValue = objectvalueResult.value
         if (objectValue instanceof RCTypeSet) {
-            if (objectValue.properties)
-                objectValue.properties[this.property] = value
+            const updated = objectValue.properties
+                ? RCTypeSet.create({
+                      type: objectValue.type,
+                      properties: {
+                          ...objectValue.properties,
+                          [this.property]: value,
+                      },
+                  })
+                : objectValue
 
             const object: Expression = this.object
-            const result = object.setCurrentValue?.(context, objectValue)
+            const result = object.setCurrentValue?.(context, updated)
             if (result) return result
         }
         return Result.ok

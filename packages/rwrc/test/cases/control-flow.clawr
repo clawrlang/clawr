@@ -1,0 +1,86 @@
+data Item {
+    number: integer
+}
+
+data TextBox {
+    value: string
+}
+
+func stringify(_ value: HasStringRepresentation) -> string =>
+    value.stringRepresentation()
+
+func observe(_ code: integer, _ value: truthvalue) -> truthvalue {
+    print(code)
+    return value
+}
+
+func select(_ value: truthvalue) -> integer {
+    if value {
+        return 1
+    } else if !value {
+        return 2
+    } else {
+        return 3
+    }
+}
+
+func useOwner(_ value: truthvalue) -> integer {
+    const outer: Item = { number: 42 }
+    if value {
+        const outer: Item = { number: 7 }
+        if true {
+            const inner: Item = { number: outer.number }
+            return inner.number
+        }
+    }
+    return outer.number
+}
+
+func useText(_ value: truthvalue) -> string {
+    const outer: TextBox = { value: stringify(42) }
+    if value {
+        const inner: TextBox = { value: stringify(7) }
+        return inner.value
+    }
+    return outer.value
+}
+
+@main {
+    print(select(true))
+    print(select(false))
+    print(select(ambiguous))
+    if observe(10, true) {
+        print(11)
+    } else if observe(12, true) {
+        print(13)
+    }
+    if observe(20, ambiguous) {
+        print(21)
+    } else if observe(22, true) {
+        print(23)
+    }
+    if false && observe(30, true) {
+        print(31)
+    } else {
+        print(32)
+    }
+    if ambiguous && observe(33, true) {
+        print(35)
+    } else {
+        print(34)
+    }
+    if !observe(40, false) {
+        print(41)
+    }
+    mut value: integer = 0
+    if true {
+        value = 5
+        const value: integer = value + 1
+        print(value)
+    }
+    print(value)
+    print(useOwner(true))
+    print(useOwner(false))
+    print(useText(true))
+    print(useText(false))
+}

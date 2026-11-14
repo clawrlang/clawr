@@ -15,6 +15,7 @@ import * as cir from '@clawr/cir'
 
 export type Context = {
     scope: Scope
+    returnScope?: Scope
     highlightRecorder?: HighlightRecorder
     definitionRecorder?: DefinitionRecorder
     calleeResult?: {

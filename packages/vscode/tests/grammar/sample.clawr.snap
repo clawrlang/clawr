@@ -131,6 +131,20 @@
 #          ^^ source.clawr keyword.operator.clawr
 #            ^ source.clawr
 #             ^ source.clawr constant.numeric.clawr
+>    if true {} else if false {} else {}
+#^^^^ source.clawr
+#    ^^ source.clawr keyword.control.clawr
+#      ^ source.clawr
+#       ^^^^ source.clawr constant.language.clawr
+#           ^^^^ source.clawr
+#               ^^^^ source.clawr keyword.control.clawr
+#                   ^ source.clawr
+#                    ^^ source.clawr keyword.control.clawr
+#                      ^ source.clawr
+#                       ^^^^^ source.clawr constant.language.clawr
+#                            ^^^^ source.clawr
+#                                ^^^^ source.clawr keyword.control.clawr
+#                                    ^^^^ source.clawr
 >    print(label)
 #^^^^ source.clawr
 #    ^^^^^ source.clawr variable.other.clawr

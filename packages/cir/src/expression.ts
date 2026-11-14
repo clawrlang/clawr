@@ -13,6 +13,13 @@ export type Expression =
     | FunctionCall
     | BinaryOpExpression
     | ScopedExpression
+    | LogicalNot
+
+type LogicalNot = {
+    kind: 'NOT'
+    operand: Expression
+    type: ValueSet & { universe: 'truthvalue' }
+}
 
 type ScopedExpression = {
     kind: 'SCOPE'

@@ -27,7 +27,7 @@ export class ReturnStatement implements Statement {
         if (validationResult.isError) return validationResult
 
         if (!this.value || !context.calleeResult) {
-            context.scope.releaseVariables()
+            context.scope.releaseThrough(context.returnScope ?? context.scope)
             context.scope.emitted.push({
                 kind: 'RETURN',
             })
@@ -48,7 +48,7 @@ export class ReturnStatement implements Statement {
 
         if (type instanceof StringSet) {
             const releaseStart = context.scope.emitted.length
-            context.scope.releaseVariables()
+            context.scope.releaseThrough(context.returnScope ?? context.scope)
             let returnValue = retainedValueCIR
             if (context.scope.emitted.length > releaseStart) {
                 // Evaluate the value before releasing an owner it may reference.
@@ -86,7 +86,7 @@ export class ReturnStatement implements Statement {
                 type: context.scope.toCIRType(type),
                 initialValue: retainedValueCIR,
             })
-            context.scope.releaseVariables()
+            context.scope.releaseThrough(context.returnScope ?? context.scope)
             context.scope.emitted.push({
                 kind: 'RETURN',
                 value: {
@@ -96,10 +96,26 @@ export class ReturnStatement implements Statement {
                 },
             })
         } else {
-            context.scope.releaseVariables()
+            const releaseStart = context.scope.emitted.length
+            context.scope.releaseThrough(context.returnScope ?? context.scope)
+            let returnValue = retainedValueCIR
+            if (context.scope.emitted.length > releaseStart) {
+                const temp = context.scope.nextTempVar()
+                context.scope.emitted.splice(releaseStart, 0, {
+                    kind: 'VARIABLE_DECL',
+                    name: temp,
+                    type: retainedValueCIR.type,
+                    initialValue: retainedValueCIR,
+                })
+                returnValue = {
+                    kind: 'VARIABLE_REF',
+                    name: temp,
+                    type: retainedValueCIR.type,
+                }
+            }
             context.scope.emitted.push({
                 kind: 'RETURN',
-                value: retainedValueCIR,
+                value: returnValue,
             })
         }
         return Result.ok

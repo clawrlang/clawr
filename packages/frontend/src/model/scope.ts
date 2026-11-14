@@ -19,6 +19,11 @@ class RootScope {
     private readonly baseTypes: Set<string> = new Set()
     private readonly interfaces: Map<string, InterfaceDeclaration> = new Map()
     private readonly typeAliases = new Map<string, TypeConstraintDeclaration>()
+    private nextBindingCounter = 0
+
+    nextBindingName(name: string) {
+        return `${name}ˇlocal${this.nextBindingCounter++}`
+    }
 
     interfaceDeclaration(name: TypeName): InterfaceDeclaration | undefined {
         return this.interfaces.get(name.canonical())
@@ -85,9 +90,11 @@ class RootScope {
 
 export class Scope {
     private readonly variables: Map<string, Variable> = new Map()
+    private readonly bindingNames: Map<string, string> = new Map()
     private readonly types: Map<string, DataDeclaration | ObjectDeclaration> =
         new Map()
     private currentValues: Map<string, ValueSet> = new Map()
+    private readonly outerAssignments = new Set<string>()
     public emitted: cir.Statement[] = []
     private nextTempVarCounter = 0
 
@@ -206,14 +213,42 @@ export class Scope {
     variableDeclaration(name: string): Variable | undefined {
         const variable = this.variables.get(name)
         if (variable) return variable
+        const parentVariable =
+            this.parentScope?.rootScope === this.rootScope
+                ? this.parentScope.variableDeclaration(name)
+                : undefined
+        if (parentVariable) return parentVariable
         const globalVariable = this.rootScope.variableDeclaration(name)
         if (globalVariable) return globalVariable
-        if (this.parentScope) return this.parentScope.variableDeclaration(name)
-        return undefined
+        return this.parentScope?.variableDeclaration(name)
     }
 
     addVariableDeclaration(name: string, value: Variable) {
+        if (
+            this.parentScope?.rootScope === this.rootScope &&
+            this.parentScope.hasLocalBinding(name)
+        )
+            this.bindingNames.set(name, this.rootScope.nextBindingName(name))
         this.variables.set(name, value)
+    }
+
+    private hasLocalBinding(name: string): boolean {
+        return (
+            this.variables.has(name) ||
+            (this.parentScope?.rootScope === this.rootScope &&
+                this.parentScope.hasLocalBinding(name))
+        )
+    }
+
+    bindingName(name: string): string {
+        if (this.variables.has(name)) return this.bindingNames.get(name) ?? name
+        if (
+            this.parentScope?.rootScope === this.rootScope &&
+            this.parentScope.variableDeclaration(name)
+        )
+            return this.parentScope.bindingName(name)
+        if (this.rootScope.variableDeclaration(name)) return name
+        return this.parentScope?.bindingName(name) ?? name
     }
 
     selfVariable(): Variable | undefined {
@@ -229,18 +264,39 @@ export class Scope {
     }
 
     releaseVariables() {
-        const vars = [...this.variables.entries()]
-            .filter((v) => v[1].type instanceof RCTypeSet)
-            .map((v) => v[0])
+        this.emitted.push(...this.variableReleases())
+    }
 
-        for (const name of vars) {
-            this.emitted.push({
+    private variableReleases(): cir.Statement[] {
+        return [...this.variables.entries()]
+            .filter((v) => v[1].type instanceof RCTypeSet)
+            .map(([name]) => ({
                 kind: 'RELEASE',
                 object: {
                     kind: 'VARIABLE_REF',
-                    name,
+                    name: this.bindingName(name),
                 },
-            })
+            }))
+    }
+
+    releaseThrough(boundary: Scope) {
+        let scope: Scope | undefined = this
+        while (scope) {
+            this.emitted.push(...scope.variableReleases())
+            if (scope === boundary) return
+            scope = scope.parentScope
+        }
+        throw new Error('Return scope is not an ancestor of the current scope')
+    }
+
+    widenOuterAssignments(branches: Scope[]) {
+        for (const branch of branches) {
+            for (const name of branch.outerAssignments) {
+                const variable = this.variableDeclaration(name)
+                if (!variable) throw new Error(`Unknown variable: ${name}`)
+                const result = this.setCurrentValue(name, variable.type)
+                if (result.isError) throw result.error
+            }
         }
     }
 
@@ -249,10 +305,14 @@ export class Scope {
         if (value) return value
         const variable = this.variables.get(name)
         if (variable) return variable.type
+        const parentValue =
+            this.parentScope?.rootScope === this.rootScope
+                ? this.parentScope.currentValue(name)
+                : undefined
+        if (parentValue) return parentValue
         const globalValue = this.rootScope.variableDeclaration(name)?.type
         if (globalValue) return globalValue
-        if (this.parentScope) return this.parentScope.currentValue(name)
-        return undefined
+        return this.parentScope?.currentValue(name)
     }
 
     setCurrentValue(name: string, valueSet: ValueSet): Result {
@@ -261,6 +321,7 @@ export class Scope {
         if (!variable?.type.isSupersetTo(valueSet))
             return ErrorResult.failure(`Incompatible value for ${name}`)
         this.currentValues.set(name, valueSet)
+        if (!this.variables.has(name)) this.outerAssignments.add(name)
         return Result.ok
     }
 }

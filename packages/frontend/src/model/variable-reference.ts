@@ -82,7 +82,7 @@ export class VariableReference implements Expression {
         )
         return Result.value({
             kind: 'VARIABLE_REF' as const,
-            name: this.name,
+            name: context.scope.bindingName(this.name),
             type: context.scope.toCIRType(valueResult.value),
         })
     }

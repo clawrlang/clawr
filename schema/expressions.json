@@ -28,9 +28,15 @@
     "LogicalNot": {
       "type": "object",
       "properties": {
-        "kind": { "const": "NOT" },
-        "operand": { "$ref": "#/$defs/TruthvalueExpression" },
-        "type": { "$ref": "#/$defs/UnboxedTruthvalueSet" }
+        "kind": { "$comment": "Expression discriminator.", "const": "NOT" },
+        "operand": {
+          "$comment": "The truth value to negate.",
+          "$ref": "#/$defs/TruthvalueExpression"
+        },
+        "type": {
+          "$comment": "Possible results of the negation.",
+          "$ref": "#/$defs/UnboxedTruthvalueSet"
+        }
       },
       "required": ["kind", "operand", "type"],
       "unevaluatedProperties": false
@@ -38,19 +44,22 @@
     "ScopedExpression": {
       "type": "object",
       "properties": {
-        "kind": { "const": "SCOPE" },
+        "kind": { "$comment": "Expression discriminator.", "const": "SCOPE" },
         "statements": {
           "$comment": "Statements evaluated in order before the value.",
           "type": "array",
           "items": { "$ref": "./statements.json#" }
         },
-        "value": { "$ref": "#" },
+        "value": { "$comment": "The result evaluated before cleanup.", "$ref": "#" },
         "cleanup": {
           "type": "array",
           "$comment": "Releases evaluated after the value and before the scope exits.",
           "items": { "$ref": "./statements.json#/$defs/Release" }
         },
-        "type": { "$ref": "./valuesets.json#" }
+        "type": {
+          "$comment": "The value-set of the resulting expression.",
+          "$ref": "./valuesets.json#"
+        }
       },
       "required": ["kind", "statements", "value", "cleanup", "type"],
       "unevaluatedProperties": false

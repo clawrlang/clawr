@@ -15,12 +15,19 @@
     "If": {
       "type": "object",
       "properties": {
-        "kind": { "const": "IF" },
+        "kind": { "$comment": "Statement discriminator.", "const": "IF" },
         "condition": {
+          "$comment": "Selects the then branch only when true.",
           "$ref": "./expressions.json#/$defs/TruthvalueExpression"
         },
-        "then": { "type": "array", "items": { "$ref": "#" } },
-        "otherwise": { "type": "array", "items": { "$ref": "#" } }
+        "then": {
+          "$comment": "Statements executed when the condition is true.",
+          "type": "array", "items": { "$ref": "#" }
+        },
+        "otherwise": {
+          "$comment": "Statements executed when the condition is false or ambiguous.",
+          "type": "array", "items": { "$ref": "#" }
+        }
       },
       "required": ["kind", "condition", "then"],
       "unevaluatedProperties": false

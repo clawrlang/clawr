@@ -115,7 +115,7 @@ guard t or { return } // Exit if `t` is false or ambiguous
 guard t != false or { return } // Exit if `t` is false only
 ```
 
-Note that [string interpolation](./drafts/string-interpolation.md) is not yet implemented. The syntax is yet to be decided. The example above borrows from Swift.
+Note that [string interpolation](./string-interpolation.md) is not yet implemented. The syntax is yet to be decided. The example above borrows from Swift.
 
 ## Rationale
 

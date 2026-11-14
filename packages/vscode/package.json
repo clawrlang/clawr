@@ -36,6 +36,16 @@
         "language": "clawr",
         "scopeName": "source.clawr",
         "path": "./syntaxes/clawr.tmLanguage.json"
+      },
+      {
+        "scopeName": "markdown.clawr.codeblock",
+        "path": "./syntaxes/markdown-clawr.tmLanguage.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.clawr": "clawr"
+        }
       }
     ]
   },
@@ -61,6 +71,8 @@
     "@types/vscode": "^1.138.0",
     "@vscode/test-electron": "^3.1.0",
     "typescript": "^7.0.2",
+    "vscode-oniguruma": "^1.7.0",
+    "vscode-textmate": "^7.0.4",
     "vscode-tmgrammar-test": "^0.1.3"
   }
 }

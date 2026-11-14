@@ -4,6 +4,9 @@
   "C_Cpp.clang_format_fallbackStyle": "LLVM",
   "C_Cpp.default.includePath": ["packages/runtime/src/include"],
   "C_Cpp.formatting": "clangFormat",
+  // Workaround for microsoft/vscode-js-debug#2462: extension host aborts on
+  // F5 launch ("Cannot toggle network tracking, please report this.")
+  "debug.javascript.enableNetworkView": false,
   "editor.codeActionsOnSave": { "source.organizeImports": "always" },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,

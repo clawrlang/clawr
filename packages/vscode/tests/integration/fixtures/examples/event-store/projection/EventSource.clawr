@@ -38,8 +38,9 @@ service EventSource {
 
         // CRITICAL: If batch is full, last position might be incomplete
         const totalCount = eventGroups.flatCount(g => g.events)
-        if (totalCount >= pollingStrategy.batchSize())
+        if totalCount >= pollingStrategy.batchSize() {
             eventGroups.removeLast()
+        }
 
         for (position, events) in eventGroups {
             // Notify the start of a position

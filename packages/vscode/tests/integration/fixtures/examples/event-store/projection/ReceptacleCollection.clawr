@@ -8,10 +8,11 @@ mutating:
 
     func add(_ receptacle: ref Receptacle) {
         for (eventName in receptacle.acceptedEvents()) {
-			if (eventName in receptacles)
+			if eventName in receptacles {
 				receptacles[eventName].append(receptacle)
-			else
+			} else {
 				receptacles[eventName] = [receptacle]
+            }
         }
     }
 

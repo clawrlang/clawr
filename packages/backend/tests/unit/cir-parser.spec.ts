@@ -113,6 +113,7 @@ describe('CIR parser schema validation', () => {
                 $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
                 startBlock: [{ kind: 'IF', condition, then, otherwise: [] }],
             })
+
         expect(() =>
             CIRParser.parse(
                 module(
@@ -164,6 +165,44 @@ describe('CIR parser schema validation', () => {
                     },
                     [],
                 ),
+            ),
+        ).toThrow('Invalid CIR:')
+    })
+
+    it('validates loop conditions, bodies, and test order', () => {
+        const loop = {
+            kind: 'LOOP',
+            condition: {
+                kind: 'TRUTHVALUE_LITERAL',
+                type: { universe: 'truthvalue', value: 'true' },
+            },
+            body: [],
+            testAfter: false,
+        }
+        const module = (statement: object) =>
+            JSON.stringify({
+                $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
+                startBlock: [statement],
+            })
+        expect(() => CIRParser.parse(module(loop))).not.toThrow()
+        expect(() =>
+            CIRParser.parse(module({ ...loop, testAfter: true })),
+        ).not.toThrow()
+        expect(() =>
+            CIRParser.parse(module({ ...loop, testAfter: 'yes' })),
+        ).toThrow('Invalid CIR:')
+        expect(() => CIRParser.parse(module({ ...loop, body: [{}] }))).toThrow(
+            'Invalid CIR:',
+        )
+        expect(() =>
+            CIRParser.parse(
+                module({
+                    ...loop,
+                    condition: {
+                        kind: 'INTEGER_LITERAL',
+                        type: { universe: 'integer', value: '1' },
+                    },
+                }),
             ),
         ).toThrow('Invalid CIR:')
     })

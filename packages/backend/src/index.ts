@@ -1232,6 +1232,13 @@ function lowerStmtCore(stmt: cir.Statement): string {
                 : ''
             return `if ((${condition}) == c_true) {\n${then}\n}${otherwise}`
         }
+        case 'LOOP': {
+            const condition = lowerContainedExpression(stmt.condition)
+            const body = lowerBlock(stmt.body, currentReturnType, [])
+            return stmt.testAfter
+                ? `do {\n${body}\n} while ((${condition}) == c_true);`
+                : `while ((${condition}) == c_true) {\n${body}\n}`
+        }
         case 'RELEASE':
             return `releaseRC(${lowerStorage(stmt.object)});`
         case 'RETURN': {

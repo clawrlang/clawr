@@ -1,0 +1,59 @@
+data Item {
+    value: integer
+}
+
+func observe(_ code: integer, _ value: truthvalue) -> truthvalue {
+    print(code)
+    return value
+}
+
+func earlyReturn(_ count: integer) -> integer {
+    const outer: Item = { value: 42 }
+    mut i: integer = 0
+    while i < count {
+        const inner: Item = { value: outer.value }
+        return inner.value
+    }
+    return outer.value
+}
+
+func earlyRepeat(_ value: truthvalue) -> integer {
+    const outer: Item = { value: 17 }
+    repeat {
+        const outer: Item = { value: 8 }
+        return outer.value
+    } while observe(99, value)
+    return outer.value
+}
+
+@main {
+    while observe(1, false) { print(99) }
+    while observe(2, ambiguous) { print(99) }
+    repeat { print(3) } while observe(4, false)
+    repeat { print(5) } while observe(6, ambiguous)
+    while false && observe(99, true) { print(99) }
+    repeat { print(7) } while false && observe(99, true)
+    mut i: integer = 0
+    while observe(i, i < 3) {
+        const item: Item = { value: i }
+        print(item.value)
+        i = i + 1
+    }
+    mut j: integer = 0
+    repeat {
+        j = j + 1
+        print(j)
+    } while j < 2
+    mut k: integer = 0
+    while k < 2 {
+        mut n: integer = 0
+        repeat {
+            n = n + 1
+        } while n < 2
+        print(n)
+        k = k + 1
+    }
+    print(earlyReturn(1))
+    print(earlyReturn(0))
+    print(earlyRepeat(true))
+}

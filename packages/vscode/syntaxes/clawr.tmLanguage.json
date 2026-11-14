@@ -61,7 +61,7 @@
         },
         {
           "name": "keyword.control.clawr",
-          "match": "\\b(return|if|else)\\b"
+          "match": "\\b(return|if|else|while|repeat)\\b"
         }
       ]
     },

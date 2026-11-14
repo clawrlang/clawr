@@ -4,6 +4,7 @@ import { Context } from '@/parser'
 import { AssignmentParser } from '@/parser/assignment-parser'
 import { FunctionCallParser } from '@/parser/function-call-parser'
 import { IfStatementParser } from '@/parser/if-statement-parser'
+import { LoopStatementParser } from '@/parser/loop-statement-parser'
 import { ReturnStatementParser } from '@/parser/return-statement-parser'
 import { StatementParser } from '@/parser/statement-parser'
 import { VariableDeclarationParser } from '@/parser/variable-declaration-parser'
@@ -21,6 +22,7 @@ export class BlockParser {
             AssignmentParser.create(context),
             ReturnStatementParser.create(context),
             IfStatementParser.create(context),
+            LoopStatementParser.create(context),
         ]
     }
 

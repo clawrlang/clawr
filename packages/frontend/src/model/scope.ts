@@ -102,6 +102,7 @@ export class Scope {
         public rootScope: RootScope,
         public parentScope?: Scope,
         public readonly namespace?: string,
+        private readonly loopEntry = false,
     ) {}
 
     static createRoot(parentScope?: Scope, namespace?: string) {
@@ -110,6 +111,10 @@ export class Scope {
 
     createChildScope() {
         return new Scope(this.rootScope, this)
+    }
+
+    createLoopScope() {
+        return new Scope(this.rootScope, this, undefined, true)
     }
 
     nextTempVar() {
@@ -305,6 +310,14 @@ export class Scope {
         if (value) return value
         const variable = this.variables.get(name)
         if (variable) return variable.type
+        if (this.loopEntry) {
+            const outer = this.parentScope?.variableDeclaration(name)
+            if (
+                outer &&
+                (!outer.isImmutable || outer.type instanceof RCTypeSet)
+            )
+                return outer.type
+        }
         const parentValue =
             this.parentScope?.rootScope === this.rootScope
                 ? this.parentScope.currentValue(name)

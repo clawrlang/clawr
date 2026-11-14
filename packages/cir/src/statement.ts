@@ -12,6 +12,14 @@ export type Statement =
     | Assign
     | SelfInitialization
     | If
+    | Loop
+
+type Loop = {
+    kind: 'LOOP'
+    condition: Expression
+    body: Statement[]
+    testAfter: boolean
+}
 
 type If = {
     kind: 'IF'

@@ -6,12 +6,33 @@
     { "$ref": "#/$defs/EnsureUnique" },
     { "$ref": "#/$defs/FunctionCallStatement" },
     { "$ref": "#/$defs/If" },
+    { "$ref": "#/$defs/Loop" },
     { "$ref": "#/$defs/Release" },
     { "$ref": "#/$defs/Return" },
     { "$ref": "#/$defs/SelfInitialization" },
     { "$ref": "#/$defs/VariableDeclaration" }
   ],
   "$defs": {
+    "Loop": {
+      "type": "object",
+      "properties": {
+        "kind": { "$comment": "Statement discriminator.", "const": "LOOP" },
+        "condition": {
+          "$comment": "Continues the loop only when true.",
+          "$ref": "./expressions.json#/$defs/TruthvalueExpression"
+        },
+        "body": {
+          "$comment": "Statements executed on each iteration.",
+          "type": "array", "items": { "$ref": "#" }
+        },
+        "testAfter": {
+          "$comment": "When true, test after the body; otherwise test before it.",
+          "type": "boolean"
+        }
+      },
+      "required": ["kind", "condition", "body", "testAfter"],
+      "unevaluatedProperties": false
+    },
     "If": {
       "type": "object",
       "properties": {

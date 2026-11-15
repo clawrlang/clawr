@@ -2,6 +2,7 @@
   "folders": [
     { "path": "../packages/vscode/tests/integration/fixtures" },
     { "path": "../packages/rwrc/test/cases" },
+    { "path": "../vendor/clawr-doc/spec/stdlib" },
   ],
   "settings": {},
 }

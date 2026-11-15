@@ -40,7 +40,4 @@
 - Get the property values from the declared type when converting `SHARED` to `ISOLATED`
   - `SHARED` values cannot know their state
   - `ISOLATED` values can know their state intimately
-- binary/ternary data (`tritfield`/`bitfield`)
-- should `truthvalue` be `Ordered` – `false < ambiguous < true`?
-- Evaluate a (pure) function call.
 - Backend: temporaries are hoisted per statement, so `Integer*` temporaries in loop conditions are evaluated only once — hoist them into the loop

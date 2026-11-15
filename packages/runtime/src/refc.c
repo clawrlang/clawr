@@ -254,30 +254,35 @@ _register_conformance(const __type_info *type,
 __attribute__((visibility("default"))) const void *
 _lookup_conformance(const __type_info *type,
                     const __interface_info *interface) {
-  // Check static conformances first (fast path)
-  const __interface_conformance_entry **pointer = type->data_type.conformances;
-  if (pointer) {
-    while (*pointer && (*pointer)->interface) {
-      if ((*pointer)->interface == interface)
-        return (*pointer)->witness_table;
-      pointer++;
-    }
-  }
-
-  // Fall back to side table (retroactive conformances)
-  size_t bucket = ((uintptr_t)type >> 4) % SIDE_TABLE_BUCKETS;
-  __side_table_entry *se = __conformance_side_table[bucket];
-  while (se) {
-    if (se->type == type) {
-      __conformance_node *node = se->conformances;
-      while (node) {
-        if (node->conformance.interface == interface)
-          return node->conformance.witness_table;
-        node = node->next;
+  while (type) {
+    // Check static conformances first (fast path)
+    const __interface_conformance_entry **pointer =
+        type->data_type.conformances;
+    if (pointer) {
+      while (*pointer && (*pointer)->interface) {
+        if ((*pointer)->interface == interface)
+          return (*pointer)->witness_table;
+        pointer++;
       }
-      return NULL;
     }
-    se = se->next;
+
+    // Fall back to side table (retroactive conformances)
+    size_t bucket = ((uintptr_t)type >> 4) % SIDE_TABLE_BUCKETS;
+    __side_table_entry *se = __conformance_side_table[bucket];
+    while (se) {
+      if (se->type == type) {
+        __conformance_node *node = se->conformances;
+        while (node) {
+          if (node->conformance.interface == interface)
+            return node->conformance.witness_table;
+          node = node->next;
+        }
+        break;
+      }
+      se = se->next;
+    }
+
+    type = type->data_type.super;
   }
   return NULL;
 }

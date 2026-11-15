@@ -7,6 +7,7 @@ export type Declaration =
     | VariableDeclaration
     | FunctionDeclaration
     | RCTypeDeclaration
+    | ExtensionDeclaration
     | InterfaceDeclaration
 
 type InterfaceDeclaration = {
@@ -40,6 +41,21 @@ type FunctionSignature = {
     returnType: ValueSet | { universe: 'void' }
 }
 
+type Conformance = {
+    interface: CanonicalName
+    fulfillments: {
+        requirement: FunctionName
+        implementation: FunctionName
+    }[]
+}
+
+type ExtensionDeclaration = {
+    kind: 'EXTENSION_DECL'
+    target: CanonicalName
+    methods: FunctionDeclaration[]
+    conformances?: Conformance[]
+}
+
 type RCTypeDeclaration = {
     kind: 'RC_TYPE_DECL'
     name: string
@@ -48,13 +64,7 @@ type RCTypeDeclaration = {
         name: string
         type: ValueSet
     }[]
-    conformances?: {
-        interface: CanonicalName
-        fulfillments: {
-            requirement: FunctionName
-            implementation: FunctionName
-        }[]
-    }[]
+    conformances?: Conformance[]
 } & (
     | {
           base?: CanonicalName
@@ -69,8 +79,6 @@ type RCTypeDeclaration = {
           }[]
       }
     | {
-          // Methods added to a data type by an extension.
-          methods: FunctionDeclaration[]
+          methods?: FunctionDeclaration[]
       }
-    | {}
 )

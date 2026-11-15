@@ -22,6 +22,8 @@ typedef const struct __interface_conformance_entry {
   const void *witness_table;
 } __interface_conformance_entry;
 
+typedef union __type_info __type_info;
+
 /// @brief Information about an entity’s (`data` or `object`) type
 typedef const struct __data_type_info {
   /// @brief The size of the memory payload for allocations of this type
@@ -35,27 +37,24 @@ typedef const struct __data_type_info {
   /// Implementation should call releaseRC() on all nested structures.
   void (*release_nested_properties)(void *self);
 
+  const __type_info *const super;
   const __interface_conformance_entry
       **const conformances; // NULL-terminated array
 } __data_type_info;
 
-struct __polymorphic_type_info;
 typedef const struct __polymorphic_type_info {
 
   /// @brief Duplicate layout of __data_type_info
   __data_type_info data;
 
-  /// @brief Pointer to the super type info
-  const struct __polymorphic_type_info *const super;
   /// @brief Pointer to the vtable for this type
   void *vtable;
-
 } __polymorphic_type_info;
 
-typedef union __type_info {
+union __type_info {
   __data_type_info data_type;
   __polymorphic_type_info polymorphic_type;
-} __type_info;
+};
 
 /// @brief Platform for `weak` references to an entity
 typedef struct __rc_proxy {

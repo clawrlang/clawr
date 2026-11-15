@@ -19,8 +19,11 @@ typedef struct Prism {
   int height;
 } Prism;
 static const __type_info Prismˇtype = {.polymorphic_type = {
-                                           .data = {.size = sizeof(Prism)},
-                                           .super = NULL,
+                                           .data =
+                                               {
+                                                   .size = sizeof(Prism),
+                                                   .super = NULL,
+                                               },
                                        }};
 typedef int (*Prism·areaˇmethod)(void *self);
 
@@ -68,8 +71,11 @@ int RectBlock·area(RectBlock *self) {
 
 static __type_info RectBlockˇtype = {
     .polymorphic_type = {
-        .data = {.size = sizeof(RectBlock)},
-        .super = &Prismˇtype.polymorphic_type,
+        .data =
+            {
+                .size = sizeof(RectBlock),
+                .super = &Prismˇtype,
+            },
         .vtable =
             &(Prismˇvtable){
                 .area = (Prism·areaˇmethod)RectBlock·area,

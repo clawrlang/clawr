@@ -36,6 +36,9 @@ const sameName = (
     a.labels.length === b.labels.length &&
     a.labels.every((label, i) => label === b.labels[i])
 
+const canonicalName = ({ name, namespace }: cir.CanonicalName) =>
+    namespace ? `${namespace}¸${name}` : name
+
 const sameSignature = (
     a: { parameters: { type: unknown }[]; returnType: unknown },
     b: { parameters: { type: unknown }[]; returnType: unknown },
@@ -307,21 +310,26 @@ export class ObjectDeclaration implements Declaration {
             ),
         )
         if (declaredMethodsResult.isError) return declaredMethodsResult
-        const extensionMethodsResult = SemanticResult.collect(
-            context.scope.rootScope
-                .extensionDeclarations(this.name)
-                .flatMap((extension) => [
-                    ...extension.methods,
-                    ...extension.mutating,
-                ])
-                .map((method) => method.emitMethod(objectContext)),
+        const extensions = context.scope.rootScope.extensionDeclarations(
+            this.name,
         )
-        if (extensionMethodsResult.isError) return extensionMethodsResult
-        const methods = [
+        const extensionMethods = new Map<
+            ExtensionDeclaration,
+            (cir.Declaration & { kind: 'FUNCTION_DECL' })[]
+        >()
+        for (const extension of extensions) {
+            const methodsResult = SemanticResult.collect(
+                [...extension.methods, ...extension.mutating].map((method) =>
+                    method.emitMethod(objectContext),
+                ),
+            )
+            if (methodsResult.isError) return methodsResult
+            extensionMethods.set(extension, methodsResult.value)
+        }
+        this.emittedMethods = [
             ...declaredMethodsResult.value,
-            ...extensionMethodsResult.value,
+            ...[...extensionMethods.values()].flat(),
         ]
-        this.emittedMethods = methods
 
         const initializersResult = SemanticResult.collect(
             this.initializers.map((m) => m.emitInitializer(objectContext)),
@@ -331,6 +339,14 @@ export class ObjectDeclaration implements Declaration {
 
         const conformancesResult = this.checkConformances(context)
         if (conformancesResult.isError) return conformancesResult
+        const extensionConformanceNames =
+            this.extensionConformanceNames(context)
+        const conformances = conformancesResult.value.filter(
+            (conformance) =>
+                !extensionConformanceNames.has(
+                    canonicalName(conformance.interface),
+                ),
+        )
 
         const tableResult = this.makeDispatchTable(
             context,
@@ -344,18 +360,60 @@ export class ObjectDeclaration implements Declaration {
             name: this.name.name,
             namespace: this.name.namespace,
             ...(this.superType && { base: this.superTypeName()!.toCIR() }),
-            ...(conformancesResult.value.length && {
-                conformances: conformancesResult.value,
+            ...(conformances.length && {
+                conformances,
             }),
             ...(this.dispatchTable && { dispatchTable: this.dispatchTable }),
-            methods,
+            methods: declaredMethodsResult.value,
             initializers,
             properties: this.properties.map((property) => ({
                 name: property.name,
                 type: context.scope.toCIRType(property.type),
             })),
         })
+        for (const extension of extensions) {
+            const interfaceDeclaration = extension.conformance
+                ? context.scope.interfaceDeclaration(extension.conformance)
+                : undefined
+            const extensionInterfaces = new Set(
+                interfaceDeclaration
+                    ?.hierarchy(context)
+                    .map((iface) => iface.name.canonical()) ?? [],
+            )
+            const extensionConformances = conformancesResult.value.filter(
+                (conformance) =>
+                    extensionInterfaces.has(
+                        canonicalName(conformance.interface),
+                    ),
+            )
+            context.scope.rootScope.emitted.push({
+                kind: 'EXTENSION_DECL',
+                target: this.name.toCIR(),
+                methods: extensionMethods.get(extension) ?? [],
+                ...(extensionConformances.length > 0 && {
+                    conformances: extensionConformances,
+                }),
+            })
+        }
         return Result.ok
+    }
+
+    private extensionConformanceNames(context: Context): Set<string> {
+        const names =
+            this.superDeclaration(context)?.extensionConformanceNames(
+                context,
+            ) ?? new Set<string>()
+        for (const extension of context.scope.rootScope.extensionDeclarations(
+            this.name,
+        )) {
+            if (!extension.conformance) continue
+            const declaration = context.scope.interfaceDeclaration(
+                extension.conformance,
+            )
+            for (const inherited of declaration?.hierarchy(context) ?? [])
+                names.add(inherited.name.canonical())
+        }
+        return names
     }
 
     private makeDispatchTable(

@@ -23,12 +23,42 @@ init:
     func new() => {}
 }
 
-extension Marker {
+role HasMarker {
+    func markerValue() -> integer
+}
+
+role HasTag {
+    func tag() -> integer
+}
+
+extension Marker: HasMarker {
     func markerValue() => 9
+}
+
+object ExtensionMarker: HasTag {
+init:
+    func new() => {}
+}
+
+extension ExtensionMarker {
+    func tag() => 8
+}
+
+object ChildMarker: Marker {
+init:
+    func new() => {Marker.new()}
 }
 
 func read(_ value: HasValue) -> integer {
     return value.value()
+}
+
+func readMarker(_ value: HasMarker) -> integer {
+    return value.markerValue()
+}
+
+func readTag(_ value: HasTag) -> integer {
+    return value.tag()
 }
 
 @main {
@@ -37,9 +67,13 @@ func read(_ value: HasValue) -> integer {
     counter.increment()
 
     const marker: Marker = {Marker.new()}
+    const childMarker: ChildMarker = {ChildMarker.new()}
+    const extensionMarker: ExtensionMarker = {ExtensionMarker.new()}
     print(original.value)
     print(counter.doubled())
     print(read(counter))
     print(serializeJSON(counter))
     print(marker.markerValue())
+    print(readMarker(childMarker))
+    print(readTag(extensionMarker))
 }

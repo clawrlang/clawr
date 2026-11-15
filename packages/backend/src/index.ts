@@ -75,11 +75,22 @@ function registerSignatures(declarations: cir.Declaration[]) {
                         returnType: method.returnType,
                     })
                 break
+            case 'EXTENSION_DECL':
+                for (const method of decl.methods)
+                    registerSignature(
+                        mangleNameWithLabels(method, decl.target),
+                        {
+                            parameters: method.parameters.map((p) => p.type),
+                            returnType: method.returnType,
+                        },
+                    )
+                break
             case 'RC_TYPE_DECL':
                 if (!('methods' in decl)) break
+                const methods = decl.methods ?? []
                 const initializers =
                     'initializers' in decl ? decl.initializers : []
-                for (const method of [...decl.methods, ...initializers])
+                for (const method of [...methods, ...initializers])
                     registerSignature(mangleNameWithLabels(method, decl), {
                         parameters: method.parameters.map((p) => p.type),
                         returnType: method.returnType,
@@ -133,6 +144,7 @@ export function lower(json: string): string {
     interfaceNames.clear()
     interfaceDecls.clear()
     typeDecls.clear()
+    methodDeclarations.clear()
     temps = []
     blockLocals.length = 0
     const cir = CIRParser.parse(json)
@@ -150,6 +162,21 @@ export function lower(json: string): string {
             interfaceDecls.set(mangleTypeName(decl), decl)
         } else if (decl.kind === 'RC_TYPE_DECL')
             typeDecls.set(mangleTypeName(decl), decl)
+    for (const decl of cir.declarations ?? []) {
+        if (decl.kind === 'RC_TYPE_DECL' && 'methods' in decl) {
+            for (const method of decl.methods ?? [])
+                methodDeclarations.set(
+                    mangleNameWithLabels(method, decl),
+                    method,
+                )
+        } else if (decl.kind === 'EXTENSION_DECL') {
+            for (const method of decl.methods)
+                methodDeclarations.set(
+                    mangleNameWithLabels(method, decl.target),
+                    method,
+                )
+        }
+    }
     registerSignatures(cir.declarations ?? [])
     registerSignature('clawr¸newHashBuilder', {
         parameters: [],
@@ -207,24 +234,24 @@ export function lower(json: string): string {
             )
             .join('\n')}
         ${(cir.declarations ?? [])
-            .filter((decl) => decl.kind === 'RC_TYPE_DECL' && 'methods' in decl)
-            .flatMap((decl) =>
-                'methods' in decl
-                    ? [
-                          ...decl.methods.map(
-                              (method) =>
-                                  `${memberSignature(method, decl, false)};`,
-                          ),
-                          ...('initializers' in decl
-                              ? decl.initializers
-                              : []
-                          ).map(
-                              (initializer) =>
-                                  `${memberSignature(initializer, decl, true)};`,
-                          ),
-                      ]
-                    : [],
-            )
+            .flatMap((decl) => {
+                if (decl.kind === 'EXTENSION_DECL')
+                    return decl.methods.map(
+                        (method) =>
+                            `${memberSignature(method, decl.target, false)};`,
+                    )
+                if (decl.kind !== 'RC_TYPE_DECL' || !('methods' in decl))
+                    return []
+                return [
+                    ...(decl.methods ?? []).map(
+                        (method) => `${memberSignature(method, decl, false)};`,
+                    ),
+                    ...('initializers' in decl ? decl.initializers : []).map(
+                        (initializer) =>
+                            `${memberSignature(initializer, decl, true)};`,
+                    ),
+                ]
+            })
             .join('\n')}
         ${
             cir.declarations
@@ -234,6 +261,7 @@ export function lower(json: string): string {
                       .join('\n')
                 : ''
         }
+        ${lowerExtensionConformances(cir.declarations ?? [])}
         ${variableDecls?.length ? lowerInit(variableDecls) : ''}
         int main() {
             ${cir.startBlock ? lowerBlock(cir.startBlock, { universe: 'void' }, []) : ''}
@@ -248,6 +276,10 @@ const interfaceDecls = new Map<
     cir.Declaration & { kind: 'INTERFACE_DECL' }
 >()
 const typeDecls = new Map<string, cir.Declaration & { kind: 'RC_TYPE_DECL' }>()
+const methodDeclarations = new Map<
+    string,
+    cir.Declaration & { kind: 'FUNCTION_DECL' }
+>()
 
 function declarationOrder(a: cir.Declaration, b: cir.Declaration) {
     const rank = (decl: cir.Declaration) =>
@@ -257,7 +289,9 @@ function declarationOrder(a: cir.Declaration, b: cir.Declaration) {
               ? 1
               : decl.kind === 'RC_TYPE_DECL'
                 ? 2
-                : 3
+                : decl.kind === 'EXTENSION_DECL'
+                  ? 3
+                  : 4
     return rank(a) - rank(b)
 }
 
@@ -275,7 +309,7 @@ function lowerNestedHooks(
     const name = mangleTypeName(decl)
     const hook = (action: 'retain' | 'release') => {
         const baseHook = base
-            ? `{ void (*h)(void *) = ${mangleTypeName(base)}ˇtype.polymorphic_type.data.${action}_nested_properties; if (h) h(self); }`
+            ? `{ void (*h)(void *) = ${mangleTypeName(base)}ˇtype.data_type.${action}_nested_properties; if (h) h(self); }`
             : ''
         return `static void ${name}ˇ${action}Nested(void *self) {
             ${baseHook}
@@ -320,7 +354,7 @@ export function lowerDecl(
             const nestedHooks = lowerNestedHooks(decl, ownedProperties)
             if (!('initializers' in decl)) {
                 const conformances = lowerConformances(decl)
-                const methods = 'methods' in decl ? decl.methods : []
+                const methods = 'methods' in decl ? (decl.methods ?? []) : []
                 return `${structure}
                     ${methods.map((m) => lowerMethod(m, decl)).join('\n')}
                     ${nestedHooks.code}
@@ -347,20 +381,23 @@ export function lowerDecl(
                 .join('\n')
             const conformances = lowerConformances(decl)
             const dataProperties = `${nestedHooks.properties}${conformances.property}`
+            const superType = decl.base
+                ? `, .super = &${mangleTypeName(decl.base)}ˇtype`
+                : ''
+            const dataType = `.size = sizeof(${mangledTypeName})${superType} ${dataProperties}`
             const typeInfo = decl.dispatchTable
                 ? `.polymorphic_type = {
-                        .data = { .size = sizeof(${mangledTypeName}) ${dataProperties} },
-                        ${decl.base ? `.super = &${mangleTypeName(decl.base)}ˇtype.polymorphic_type,` : ''}
+                        .data = { ${dataType} },
                         .vtable = &(${mangledTypeName}ˇvtable){
                             ${vtableMethods}
                         }
                     }`
-                : `.data_type = { .size = sizeof(${mangledTypeName}) ${dataProperties} }`
+                : `.data_type = { ${dataType} }`
             return `${structure}
             ${vtableTypedefs.join('\n')}
             ${vtableStruct}
             ${nestedHooks.code}
-            ${decl.methods?.map((m) => lowerMethod(m, decl)).join('\n') ?? ''}
+            ${(decl.methods ?? []).map((m) => lowerMethod(m, decl)).join('\n')}
             ${conformances.code}
             static const __type_info ${mangledTypeName}ˇtype = {
                 ${typeInfo}
@@ -368,6 +405,10 @@ export function lowerDecl(
             ${decl.initializers?.map((m) => lowerInitializer(m, decl)).join('\n') ?? ''}
             `
         }
+        case 'EXTENSION_DECL':
+            return decl.methods
+                .map((method) => lowerMethod(method, decl.target))
+                .join('\n')
         case 'VARIABLE_DECL':
             variableTypes.set(decl.name, decl.type)
             return `${lowerType(decl.type)} ${decl.name};`
@@ -396,7 +437,7 @@ function isImplicitJSONData(
         !('initializers' in decl) &&
         !(
             'methods' in decl &&
-            decl.methods.some(
+            (decl.methods ?? []).some(
                 (method) =>
                     method.baseName === 'toJSON' && method.labels.length === 0,
             )
@@ -483,44 +524,21 @@ function lowerConformances(decl: cir.Declaration & { kind: 'RC_TYPE_DECL' }): {
     if (!conformances.length) return { code: '', property: '' }
     const typeName = mangleTypeName(decl)
     const dispatchTable = 'dispatchTable' in decl ? decl.dispatchTable : []
-    const owner = (name: { baseName: string; labels: string[] }) =>
-        dispatchTable?.find(
-            ({ slot }) =>
-                slot.baseName === name.baseName &&
-                slot.labels.join() === name.labels.join(),
-        )?.implementation ?? decl
-
-    const code = conformances.map(({ interface: iface, fulfillments }) => {
-        const interfaceName = mangleTypeName(iface)
-        const witness = `${typeName}ˇ${interfaceName}ˇwitness`
-        const thunks: string[] = []
-        const slots = fulfillments.map(({ requirement, implementation }) => {
-            const slotName = mangleNameWithLabels(requirement)
-            const ownerDecl = owner(implementation)
-            const implName = mangleNameWithLabels(implementation, ownerDecl)
-            const type = typeDecls.get(mangleTypeName(ownerDecl))
-            const thunk = lowerWitnessThunk(
-                `${typeName}ˇ${interfaceName}ˇ${slotName}`,
-                implName,
-                interfaceDecls
-                    .get(interfaceName)
-                    ?.methods.find((m) => m.baseName === requirement.baseName),
-                type && 'methods' in type
-                    ? type.methods.find(
-                          (m) => m.baseName === implementation.baseName,
-                      )
-                    : undefined,
-                mangleTypeName(ownerDecl),
-            )
-            if (thunk) thunks.push(thunk.code)
-            const target = thunk?.name ?? implName
-            return `.${slotName} = (__typeof__(((${interfaceName}ˇwitness *)0)->${slotName}))${target},`
-        })
-        return `${thunks.join('\n')}
-            static const ${interfaceName}ˇwitness ${witness} = { ${slots.join('\n')} };
-            static const __interface_conformance_entry ${typeName}ˇ${interfaceName}ˇconformance = {
-                .interface = &${interfaceName}ˇtype,
-                .witness_table = &${witness}
+    const code = conformances.map((conformance) => {
+        const witness = lowerConformanceWitness(
+            decl,
+            conformance,
+            (name) =>
+                dispatchTable?.find(
+                    ({ slot }) =>
+                        slot.baseName === name.baseName &&
+                        slot.labels.join() === name.labels.join(),
+                )?.implementation ?? implementationOwner(name, decl),
+        )
+        return `${witness.code}
+            static const __interface_conformance_entry ${typeName}ˇ${witness.interfaceName}ˇconformance = {
+                .interface = &${witness.interfaceName}ˇtype,
+                .witness_table = &${witness.witnessName}
             };`
     })
     const entries = conformances.map(
@@ -531,6 +549,97 @@ function lowerConformances(decl: cir.Declaration & { kind: 'RC_TYPE_DECL' }): {
         code: code.join('\n'),
         property: `, .conformances = (const __interface_conformance_entry *[]){ ${entries.join(', ')}, NULL }`,
     }
+}
+
+function lowerExtensionConformances(declarations: cir.Declaration[]): string {
+    const conformances = new Map<
+        string,
+        {
+            target: cir.CanonicalName
+            conformance: NonNullable<
+                Extract<
+                    cir.Declaration,
+                    { kind: 'EXTENSION_DECL' }
+                >['conformances']
+            >[number]
+        }
+    >()
+    for (const decl of declarations) {
+        if (decl.kind !== 'EXTENSION_DECL') continue
+        for (const conformance of decl.conformances ?? []) {
+            const key = `${mangleTypeName(decl.target)}:${mangleTypeName(conformance.interface)}`
+            if (!conformances.has(key))
+                conformances.set(key, {
+                    target: decl.target,
+                    conformance,
+                })
+        }
+    }
+    return [...conformances.values()]
+        .map(({ target, conformance }) => {
+            const typeName = mangleTypeName(target)
+            const witness = lowerConformanceWitness(
+                target,
+                conformance,
+                (name) => implementationOwner(name, target),
+            )
+            return `${witness.code}
+                __attribute__((constructor)) static void ${typeName}ˇ${witness.interfaceName}ˇregisterConformance(void) {
+                    ADD_CONFORMANCE_ENTRY(${typeName}, ${witness.interfaceName});
+                }`
+        })
+        .join('\n')
+}
+
+function lowerConformanceWitness(
+    target: cir.CanonicalName,
+    conformance: NonNullable<
+        Extract<cir.Declaration, { kind: 'RC_TYPE_DECL' }>['conformances']
+    >[number],
+    owner: (name: { baseName: string; labels: string[] }) => cir.CanonicalName,
+): { code: string; witnessName: string; interfaceName: string } {
+    const typeName = mangleTypeName(target)
+    const interfaceName = mangleTypeName(conformance.interface)
+    const witnessName = `${typeName}ˇ${interfaceName}ˇwitness`
+    const thunks: string[] = []
+    const slots = conformance.fulfillments.map(
+        ({ requirement, implementation }) => {
+            const slotName = mangleNameWithLabels(requirement)
+            const ownerType = owner(implementation)
+            const implName = mangleNameWithLabels(implementation, ownerType)
+            const implemented = methodDeclarations.get(implName)
+            const thunk = lowerWitnessThunk(
+                `${typeName}ˇ${interfaceName}ˇ${slotName}`,
+                implName,
+                interfaceDecls
+                    .get(interfaceName)
+                    ?.methods.find((m) => m.baseName === requirement.baseName),
+                implemented,
+                mangleTypeName(ownerType),
+            )
+            if (thunk) thunks.push(thunk.code)
+            const implementationName = thunk?.name ?? implName
+            return `.${slotName} = (__typeof__(((${interfaceName}ˇwitness *)0)->${slotName}))${implementationName},`
+        },
+    )
+    return {
+        code: `${thunks.join('\n')}
+            static const ${interfaceName}ˇwitness ${witnessName} = { ${slots.join('\n')} };`,
+        witnessName,
+        interfaceName,
+    }
+}
+
+function implementationOwner(
+    name: { baseName: string; labels: string[] },
+    receiver: cir.CanonicalName,
+): cir.CanonicalName {
+    if (methodDeclarations.has(mangleNameWithLabels(name, receiver)))
+        return receiver
+    const declaration = typeDecls.get(mangleTypeName(receiver))
+    const base =
+        declaration && 'base' in declaration ? declaration.base : undefined
+    return base ? implementationOwner(name, base) : receiver
 }
 
 /**
@@ -623,7 +732,7 @@ function lowerMethodTypedef({ slot, declaredIn }: DispatchSlot) {
 
 function lowerMethod(
     decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
-    receiverType: cir.Declaration & { kind: 'RC_TYPE_DECL' },
+    receiverType: { name: string; namespace?: string },
 ): string {
     const mangledFunctionName = mangleNameWithParameters(decl, receiverType)
     return lowerFunction(
@@ -647,7 +756,7 @@ function lowerMethod(
 
 function memberSignature(
     decl: cir.Declaration & { kind: 'FUNCTION_DECL' },
-    receiverType: cir.Declaration & { kind: 'RC_TYPE_DECL' },
+    receiverType: { name: string; namespace?: string },
     initializer: boolean,
 ): string {
     return functionSignature(

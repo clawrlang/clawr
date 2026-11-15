@@ -154,20 +154,24 @@ export class DataDeclaration implements Declaration {
         const extensions = context.scope.rootScope.extensionDeclarations(
             this.name,
         )
-        const extensionMethods = SemanticResult.collect(
-            extensions
-                .flatMap((extension) => [
-                    ...extension.methods,
-                    ...extension.mutating,
-                ])
-                .map((method) => method.emitMethod(this.injectSelf(context))),
-        )
-        if (extensionMethods.isError) return extensionMethods
+        const extensionMethods = new Map<
+            ExtensionDeclaration,
+            (cir.Declaration & { kind: 'FUNCTION_DECL' })[]
+        >()
+        for (const extension of extensions) {
+            const methodsResult = SemanticResult.collect(
+                [...extension.methods, ...extension.mutating].map((method) =>
+                    method.emitMethod(this.injectSelf(context)),
+                ),
+            )
+            if (methodsResult.isError) return methodsResult
+            extensionMethods.set(extension, methodsResult.value)
+        }
 
         const extensionConformances = this.checkExtensionConformances(
             context,
             extensions,
-            extensionMethods.value,
+            [...extensionMethods.values()].flat(),
         )
         if (extensionConformances.isError) return extensionConformances
 
@@ -209,36 +213,29 @@ export class DataDeclaration implements Declaration {
                   },
               ]
             : []
-        const conformances = [
-            ...jsonConformance,
-            ...extensionConformances.value.filter(
-                (extension) =>
-                    !jsonConformance.some(
-                        (json) =>
-                            json.interface.name === extension.interface.name &&
-                            json.interface.namespace ===
-                                extension.interface.namespace,
-                    ),
-            ),
-        ]
         context.scope.rootScope.emitted.push({
             kind: 'RC_TYPE_DECL',
             name: this.name.name,
             namespace: this.name.namespace,
-            ...(conformances.length > 0 && {
-                conformances,
+            ...(jsonConformance.length > 0 && {
+                conformances: jsonConformance,
             }),
-            ...((serializerMethod || extensionMethods.value.length > 0) && {
-                methods: [
-                    ...(serializerMethod ? [serializerMethod] : []),
-                    ...extensionMethods.value,
-                ],
-            }),
+            ...(serializerMethod && { methods: [serializerMethod] }),
             properties: this.properties.map((property) => ({
                 name: property.name,
                 type: context.scope.toCIRType(property.type!),
             })),
         })
+        for (const extension of extensions) {
+            const conformances =
+                extensionConformances.value.get(extension) ?? []
+            context.scope.rootScope.emitted.push({
+                kind: 'EXTENSION_DECL',
+                target: this.name.toCIR(),
+                methods: extensionMethods.get(extension) ?? [],
+                ...(conformances.length > 0 && { conformances }),
+            })
+        }
         return Result.ok
     }
 
@@ -247,17 +244,24 @@ export class DataDeclaration implements Declaration {
         extensions: ExtensionDeclaration[],
         methods: (cir.Declaration & { kind: 'FUNCTION_DECL' })[],
     ): SemanticResult<
-        NonNullable<
-            Extract<cir.Declaration, { kind: 'RC_TYPE_DECL' }>['conformances']
+        Map<
+            ExtensionDeclaration,
+            NonNullable<
+                Extract<
+                    cir.Declaration,
+                    { kind: 'EXTENSION_DECL' }
+                >['conformances']
+            >
         >
     > {
         type Conformance = NonNullable<
-            Extract<cir.Declaration, { kind: 'RC_TYPE_DECL' }>['conformances']
+            Extract<cir.Declaration, { kind: 'EXTENSION_DECL' }>['conformances']
         >[number]
-        const conformances: Conformance[] = []
-        const seen = new Set<string>()
+        const conformances = new Map<ExtensionDeclaration, Conformance[]>()
         for (const extension of extensions) {
             if (!extension.conformance) continue
+            const extensionConformances: Conformance[] = []
+            const seen = new Set<string>()
             const declaration = context.scope.interfaceDeclaration(
                 extension.conformance,
             )
@@ -369,11 +373,12 @@ export class DataDeclaration implements Declaration {
                         },
                     })
                 }
-                conformances.push({
+                extensionConformances.push({
                     interface: inherited.name.toCIR(),
                     fulfillments,
                 })
             }
+            conformances.set(extension, extensionConformances)
         }
         return Result.value(conformances)
     }

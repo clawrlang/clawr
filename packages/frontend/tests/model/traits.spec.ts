@@ -223,13 +223,32 @@ describe('trait and role', () => {
             }
         `)
         const rectangle = cir.declarations.find(
-            (declaration: any) => declaration.name === 'Rectangle',
+            (declaration: any) =>
+                declaration.kind === 'EXTENSION_DECL' &&
+                declaration.target.name === 'Rectangle',
         ) as any
         expect(rectangle.methods).toMatchObject([
             { kind: 'FUNCTION_DECL', baseName: 'area' },
         ])
         expect(rectangle.conformances).toMatchObject([
             { interface: { name: 'HasArea' } },
+        ])
+        const rectangleType = cir.declarations.find(
+            (declaration: any) => declaration.name === 'Rectangle',
+        ) as any
+        expect(rectangleType).not.toHaveProperty('methods')
+        expect(rectangleType).not.toHaveProperty('conformances')
+        const unit = cir.declarations.find(
+            (declaration: any) => declaration.name === 'Unit',
+        ) as any
+        const unitExtension = cir.declarations.find(
+            (declaration: any) =>
+                declaration.kind === 'EXTENSION_DECL' &&
+                declaration.target.name === 'Unit',
+        ) as any
+        expect(unit.methods).toEqual([])
+        expect(unitExtension.methods).toMatchObject([
+            { kind: 'FUNCTION_DECL', baseName: 'value' },
         ])
         expect(JSON.stringify(cir.declarations)).toContain(
             '"dispatch":"direct"',
@@ -310,11 +329,17 @@ describe('trait and role', () => {
             extension Worker: Starts { func start() {} }
         `)
         const worker = cir.declarations.find(
-            (declaration: any) => declaration.name === 'Worker',
+            (declaration: any) =>
+                declaration.kind === 'EXTENSION_DECL' &&
+                declaration.target.name === 'Worker',
         ) as any
         expect(worker.conformances).toMatchObject([
             { interface: { name: 'Starts' } },
         ])
+        const workerType = cir.declarations.find(
+            (declaration: any) => declaration.name === 'Worker',
+        ) as any
+        expect(workerType).not.toHaveProperty('conformances')
     })
 
     it('uses copy-on-write before calling a mutating data extension method', () => {

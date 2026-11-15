@@ -18,8 +18,11 @@ typedef struct Prism {
 static const __type_info Prismˇtype = {
     .polymorphic_type =
         {
-            .data = {.size = sizeof(Prism)},
-            .super = NULL,
+            .data =
+                {
+                    .size = sizeof(Prism),
+                    .super = NULL,
+                },
         },
 };
 
@@ -75,8 +78,11 @@ int RectBlock·area(void *self) {
 }
 
 static __type_info RectBlockˇtype = {.polymorphic_type = {
-                                         .data = {.size = sizeof(RectBlock)},
-                                         .super = &Prismˇtype.polymorphic_type,
+                                         .data =
+                                             {
+                                                 .size = sizeof(RectBlock),
+                                                 .super = &Prismˇtype,
+                                             },
                                          .vtable =
                                              &(RectBlockˇvtable){
                                                  .area = RectBlock·area,
@@ -117,15 +123,20 @@ typedef struct SquareBlockˇproperties {
 int SquareBlock·offset(void *self) { return 1; }
 
 static __type_info SquareBlockˇtype = {
-    .polymorphic_type = {
-        .data = {.size = sizeof(SquareBlock)},
-        .super = &RectBlockˇtype.polymorphic_type,
-        .vtable =
-            &(RectBlockˇvtable){
-                .area = RectBlock·area,
-                .offset = SquareBlock·offset,
-            },
-    }};
+    .polymorphic_type =
+        {
+            .data =
+                {
+                    .size = sizeof(SquareBlock),
+                    .super = &RectBlockˇtype,
+                },
+            .vtable =
+                &(RectBlockˇvtable){
+                    .area = RectBlock·area,
+                    .offset = SquareBlock·offset,
+                },
+        },
+};
 
 // Clawr: `func new(side: integer, height: integer) -> SquareBlock`
 SquareBlock *SquareBlock¸new_side_height(int side, int height) {

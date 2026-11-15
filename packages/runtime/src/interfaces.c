@@ -9,3 +9,6 @@ const __interface_info clawr¸Orderedˇtype = {.name = "clawr.Ordered"};
 __attribute__((visibility("default")))
 const __interface_info clawr¸HasStringRepresentationˇtype = {
     .name = "clawr.HasStringRepresentation"};
+__attribute__((visibility("default")))
+const __interface_info clawr¸JSONSerializableˇtype = {
+    .name = "clawr.JSONSerializable"};

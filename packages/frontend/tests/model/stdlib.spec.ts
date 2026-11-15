@@ -153,6 +153,107 @@ describe('standard library declarations', () => {
         ).toThrow('Argument must be a truthvalue')
     })
 
+    it('implicitly conforms only recursively pure data to JSONSerializable', () => {
+        const cir = compile(`
+            data Leaf { value: integer }
+            data Record {
+                leaf: Leaf
+                flag: truthvalue
+            }
+            object Entity { state: id: integer }
+            data WithObject { entity: Entity }
+            data WithRef { shared: ref Record }
+            @main {
+                const record: Record = {
+                    leaf: { value: 42 }
+                    flag: ambiguous
+                }
+                serializeJSON(record)
+            }
+        `)
+        const type = (name: string) =>
+            cir.declarations?.find(
+                (declaration) =>
+                    declaration.kind === 'RC_TYPE_DECL' &&
+                    declaration.name === name,
+            )
+        expect(type('Leaf')).toMatchObject({
+            conformances: [
+                { interface: { name: 'JSONSerializable', namespace: 'clawr' } },
+            ],
+        })
+        expect(type('Record')).toMatchObject({
+            conformances: [
+                { interface: { name: 'JSONSerializable', namespace: 'clawr' } },
+            ],
+        })
+        expect(type('WithObject')).not.toHaveProperty('conformances')
+        expect(type('WithRef')).not.toHaveProperty('conformances')
+    })
+
+    it('allows explicitly conforming impure data to define a JSON serializer', () => {
+        const cir = compile(`
+            object Entity {}
+            data Leaf { value: integer }
+            extern func json(_ entity: Entity, shared value: ref Leaf) -> string
+            data WithObject: JSONSerializable {
+                entity: Entity
+                shared: ref Leaf
+            serialize:
+                func toJSON() -> string =>
+                    json(self->entity, shared: self->shared)
+            }
+            extern func value() -> WithObject
+            @main { serializeJSON(value()) }
+        `)
+        const type = cir.declarations?.find(
+            (declaration) =>
+                declaration.kind === 'RC_TYPE_DECL' &&
+                declaration.name === 'WithObject',
+        )
+        expect(type).toMatchObject({
+            conformances: [
+                { interface: { name: 'JSONSerializable', namespace: 'clawr' } },
+            ],
+            methods: [
+                {
+                    kind: 'FUNCTION_DECL',
+                    baseName: 'toJSON',
+                    returnType: { universe: 'string' },
+                },
+            ],
+        })
+    })
+
+    it('requires a valid custom serializer for explicitly conforming impure data', () => {
+        expect(() =>
+            compile(`
+                data WithoutConformance {
+                    value: integer
+                serialize:
+                    func toJSON() -> string => text()
+                }
+                extern func text() -> string
+            `),
+        ).toThrow('requires JSONSerializable conformance')
+        expect(() =>
+            compile(`
+                object Entity {}
+                data WithoutSerializer: JSONSerializable { entity: Entity }
+            `),
+        ).toThrow('must define serialize: toJSON()')
+        expect(() =>
+            compile(`
+                object Entity {}
+                data WrongSerializer: JSONSerializable {
+                    entity: Entity
+                serialize:
+                    func toJSON() -> integer => 1
+                }
+            `),
+        ).toThrow('must be a non-extern toJSON() method returning string')
+    })
+
     it('does not apply stdlib print boxing to a shadowing declaration', () => {
         const cir = compile(`
             extern func print(_ value: integer)

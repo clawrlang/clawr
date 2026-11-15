@@ -185,6 +185,13 @@ export function lower(json: string): string {
             .map((decl) => lowerRCStructure(decl))
             .join('\n')}
         ${(cir.declarations ?? [])
+            .filter(isImplicitJSONData)
+            .map(
+                (decl) =>
+                    `static String *${mangleNameWithLabels({ baseName: 'toJSON', labels: [] }, decl)}(${mangleTypeName(decl)} *self);`,
+            )
+            .join('\n')}
+        ${(cir.declarations ?? [])
             .filter((decl) => decl.kind === 'RC_TYPE_DECL')
             .map(
                 (decl) =>
@@ -307,12 +314,16 @@ export function lowerDecl(
                 isPointerType(property.type),
             )
             const nestedHooks = lowerNestedHooks(decl, ownedProperties)
-            if (!('methods' in decl))
+            if (!('methods' in decl)) {
+                const conformances = lowerConformances(decl)
                 return `${structure}
                     ${nestedHooks.code}
+                    ${conformances.code}
+                    ${isImplicitJSONData(decl) ? lowerJSONSerializer(decl) : ''}
                     static const __type_info ${mangledTypeName}ˇtype = {
-                        .data_type = { .size = sizeof(${mangledTypeName}) ${nestedHooks.properties} }
+                        .data_type = { .size = sizeof(${mangledTypeName}) ${nestedHooks.properties}${conformances.property} }
                     };`
+            }
             const vtableTypedefs = (decl.dispatchTable ?? [])
                 ?.filter(
                     (s) =>
@@ -369,6 +380,82 @@ export function lowerDecl(
         default:
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
     }
+}
+
+function isImplicitJSONData(
+    decl: cir.Declaration,
+): decl is cir.Declaration & { kind: 'RC_TYPE_DECL' } {
+    return (
+        decl.kind === 'RC_TYPE_DECL' &&
+        !('methods' in decl) &&
+        (decl.conformances ?? []).some(
+            ({ interface: iface }) =>
+                iface.namespace === 'clawr' &&
+                iface.name === 'JSONSerializable',
+        )
+    )
+}
+
+function lowerJSONSerializer(
+    decl: cir.Declaration & { kind: 'RC_TYPE_DECL' },
+): string {
+    const typeName = mangleTypeName(decl)
+    const serializer = mangleNameWithLabels(
+        { baseName: 'toJSON', labels: [] },
+        decl,
+    )
+    const properties = decl.properties
+        .map((property, index) => {
+            const value = `self->properties.${property.name}`
+            const comma = index ? 'JSONWriter¸appendRaw(&writer, ",");' : ''
+            let encode: string
+            switch (property.type.universe) {
+                case 'integer':
+                    encode =
+                        integerRepresentation(property.type) === 'native'
+                            ? `JSONWriter¸appendInt64(&writer, ${value});`
+                            : `JSONWriter¸appendInteger(&writer, ${value});`
+                    break
+                case 'real':
+                    encode =
+                        property.type.boxed ||
+                        realRepresentation(property.type) === 'managed'
+                            ? `JSONWriter¸appendReal(&writer, ${value});`
+                            : `JSONWriter¸appendDouble(&writer, (double)${value});`
+                    break
+                case 'truthvalue':
+                    encode = `JSONWriter¸appendTruthvalue(&writer, ${property.type.boxed ? `${value}->value` : value});`
+                    break
+                case 'string':
+                    encode = `JSONWriter¸appendString(&writer, ${value});`
+                    break
+                case 'rc-type': {
+                    const nested = mangleNameWithLabels(
+                        { baseName: 'toJSON', labels: [] },
+                        property.type,
+                    )
+                    encode = `{ String *jsonValue${index} = ${nested}(${value}); JSONWriter¸appendRaw(&writer, String·toCString(jsonValue${index})); releaseRC(jsonValue${index}); }`
+                    break
+                }
+                default:
+                    throw new Error(
+                        `Cannot implicitly encode ${property.type.universe} property ${property.name} as JSON`,
+                    )
+            }
+            return `${comma}
+                JSONWriter¸appendQuotedCString(&writer, ${JSON.stringify(property.name)});
+                JSONWriter¸appendRaw(&writer, ":");
+                ${encode}`
+        })
+        .join('\n')
+    return `static String *${serializer}(${typeName} *self) {
+        JSONWriter writer;
+        JSONWriter¸init(&writer);
+        JSONWriter¸appendRaw(&writer, "{");
+        ${properties}
+        JSONWriter¸appendRaw(&writer, "}");
+        return JSONWriter¸finish(&writer);
+    }`
 }
 
 /**

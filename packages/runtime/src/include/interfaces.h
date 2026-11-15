@@ -42,4 +42,9 @@ typedef struct {
 } clawr¸HasStringRepresentationˇwitness;
 extern const __interface_info clawr¸HasStringRepresentationˇtype;
 
+typedef struct {
+  String *(*toJSON)(void *self);
+} clawr¸JSONSerializableˇwitness;
+extern const __interface_info clawr¸JSONSerializableˇtype;
+
 #endif // CLAWR_INTERFACES_H

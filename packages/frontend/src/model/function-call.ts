@@ -404,6 +404,9 @@ export class FunctionCall implements Expression, Statement {
                         .includes(iface) &&
                     !context.scope
                         .objectDeclaration(actual)
+                        ?.conformsTo(iface.name, context) &&
+                    !context.scope
+                        .dataDeclaration(actual)
                         ?.conformsTo(iface.name, context)
                 )
                     return SemanticErrorResult.failure(

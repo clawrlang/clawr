@@ -12,9 +12,9 @@ This draft is a reminder to come back to the question later.
 
 ## Extensions and Retroactive Conformance
 
-The current implementation of extensions add methods directly to the `RC_TYPE_DECL` nodes. This means that a package-imported type cannot be extended. We will need to consider an alternative approach — probably involving explicit `EXTENSION_DECL` nodes — to allow extending types from imported packages.
+Cross-package coherence must be defined. [ADR-040](../adr-040.md) rejects duplicate extension methods and duplicate explicit (type, trait/role) conformances only within the current program; it defers conflicts across imported packages. Since extension methods use direct static dispatch rather than vtable slots, the CIR and linker must preserve implementation ownership and resolve identities deterministically, without relying on package load or merge order.
 
-Cross-package coherence must be defined as well. [ADR-040](../adr-040.md) rejects duplicate extension methods and duplicate explicit (type, trait/role) conformances only within the current program; it defers conflicts across imported packages. Since extension methods use direct static dispatch rather than vtable slots, the CIR and linker must preserve implementation ownership and resolve identities deterministically, without relying on package load or merge order.
+One important caveat: `ADD_CONFORMANCE_ENTRY()` isn’t yet sufficient for cross-CIR use. It registers by the address of the target’s type-info symbol; the backend currently emits that symbol as static, so another compiled package can’t reference it. Also, the runtime side table doesn’t reject duplicates: it prepends entries, so the latest registration wins. Those details need resolving for imported extensions and deterministic conformance selection. See refc.h, refc.c, and backend lowering.
 
 ---
 

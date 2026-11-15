@@ -1,5 +1,12 @@
 # TODO
 
+## Serialization
+
+- Replace `JSONSerializable` with a generic `Serializable` trait.
+  - Make serialization format pluggable and not tied to JSON.
+  - Maybe add YAML, S-expressions and/or Protobuf support as alternative serialization formats.
+- Implement deserialization.
+
 ## Documentation
 
 - ADR-012 (parameter labels) and ADR-013 (currying and labelled arguments) contradict each other according to clawr-doc/spec/language/semantics/function-parameters.md. The desired behavior is that labels can be reordered in the source code, but automatically reverted to their proper order in the CIR.

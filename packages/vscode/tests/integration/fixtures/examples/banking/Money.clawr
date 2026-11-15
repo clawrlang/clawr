@@ -8,7 +8,9 @@ enum Currency {
     GBP
     JPY
     BTC
+}
 
+extension Currency {
     func symbol() -> string {
         match self {
             case USD => "$"

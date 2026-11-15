@@ -27,6 +27,7 @@ Statuses used in this documentation:
 - <div class="status Draft"><span class="title">✍🏼 Draft</span> A more developed idea that is being worked on</div>
 - <div class="status Proposed"><span class="title">📝 Proposed</span> An idea to be considered for adoption</div>
 - <div class="status Adopted"><span class="title">✅ Adopted</span> Principle is in use in the ecosystem, or the feature has been implemented in the example implementation</div>
+- <div class="status Rejected"><span class="title">❌ Rejected</span> Principle is not adopted or the feature will not be implemented</div>
 
 The following ADRs have been documented so far:
 
@@ -43,7 +44,7 @@ The following ADRs have been documented so far:
 - 📝 [ADR-010](./adr-010.md): Serializable `data`
 - 📝 [ADR-011](./adr-011.md): Ad Hoc Data Structures
 - ✅ [ADR-012](./adr-012.md): Parameters Labels and Ordering
-- ✍🏼 [ADR-013](./adr-013.md): Currying on Labels
+- 📝 [ADR-013](./adr-013.md): Currying on Labels
 - ✅ [ADR-014](./adr-014.md): Traits and Static
 - ✅ [ADR-015](./adr-015.md): Basic ARC Rules
 - ✅ [ADR-016](./adr-016.md): Backend-Managed Boxing of Unboxed Primitives

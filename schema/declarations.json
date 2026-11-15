@@ -3,6 +3,7 @@
   "type": "object",
   "oneOf": [
     { "$ref": "#/$defs/RCTypeDeclaration" },
+    { "$ref": "#/$defs/ExtensionDeclaration" },
     { "$ref": "#/$defs/InterfaceDeclaration" },
     { "$ref": "#/$defs/VariableDeclaration" },
     { "$ref": "#/$defs/FunctionDeclaration" }
@@ -54,6 +55,31 @@
         }
       },
       "required": ["kind", "name", "properties"],
+      "unevaluatedProperties": false
+    },
+    "ExtensionDeclaration": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Declaration discriminator.",
+          "const": "EXTENSION_DECL"
+        },
+        "target": {
+          "$comment": "The type extended by this declaration.",
+          "$ref": "#/$defs/CanonicalName"
+        },
+        "methods": {
+          "$comment": "Methods implemented by this extension.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/FunctionDeclaration" }
+        },
+        "conformances": {
+          "$comment": "Trait or role conformances and their method fulfillments.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Conformance" }
+        }
+      },
+      "required": ["kind", "target", "methods"],
       "unevaluatedProperties": false
     },
     "InterfaceDeclaration": {

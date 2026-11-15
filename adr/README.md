@@ -70,3 +70,4 @@ The following ADRs have been documented so far:
 - 📝 [ADR-037](./adr-037.md): Hashing and `HashEquatable`
 - ✅ [ADR-038](./adr-038.md): Multi-File Programs and Future Modules
 - ✅ [ADR-039](./adr-039.md): Control-Flow
+- ✅ [ADR-040](./adr-040.md): Extensions

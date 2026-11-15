@@ -4,6 +4,7 @@ import { Module } from '@/model/module'
 import { Context, DeclarationParser } from '@/parser'
 import { BlockParser } from '@/parser/block-parser'
 import { DataDeclarationParser } from '@/parser/data-declaration-parser'
+import { ExtensionDeclarationParser } from '@/parser/extension-declaration-parser'
 import { FunctionDeclarationParser } from '@/parser/function-declaration-parser'
 import { InterfaceDeclarationParser } from '@/parser/interface-declaration-parser'
 import { ObjectDeclarationParser } from '@/parser/object-declaration-parser'
@@ -20,6 +21,7 @@ export class ModuleParser {
         this.blockParser = BlockParser.create(context)
         this.declarationParsers = [
             DataDeclarationParser.create(context),
+            ExtensionDeclarationParser.create(context),
             TypeAliasDeclarationParser.create(context),
             VariableDeclarationParser.create(context),
             FunctionDeclarationParser.create(context),

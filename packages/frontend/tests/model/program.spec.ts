@@ -82,6 +82,36 @@ describe('multi-file programs', () => {
         expect(() => compile([definition, use])).not.toThrow()
         expect(() => compile([use, definition])).toThrow()
     })
+
+    it('resolves extensions and rejects duplicate methods across source files', () => {
+        expect(() =>
+            compile([
+                { name: 'type', source: 'data Point { x: integer }' },
+                {
+                    name: 'extension',
+                    source: 'extension Point { func xValue() => self->x }',
+                },
+                {
+                    name: 'main',
+                    source: '@main { const point: Point = { x: 1 } point.xValue() }',
+                },
+            ]),
+        ).not.toThrow()
+        expect(() =>
+            compile([
+                { name: 'type', source: 'data Point {}' },
+                {
+                    name: 'first',
+                    source: 'extension Point { func value() => 1 }',
+                },
+                {
+                    name: 'second',
+                    source: 'extension Point { func value() => 2 }',
+                },
+                { name: 'main', source: '@main {}' },
+            ]),
+        ).toThrow('Duplicate extension method')
+    })
 })
 
 describe('string value semantics', () => {

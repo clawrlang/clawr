@@ -1,5 +1,7 @@
 import { Context, Declaration, Expression } from '@/model'
 import { FunctionDeclaration } from '@/model/function-declaration'
+import { FunctionName } from '@/model/function-name'
+import type { ExtensionDeclaration } from '@/model/extension-declaration'
 import { IsolationLevel } from '@/model/isolation-level'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { TypeName } from '@/model/type-name'
@@ -13,6 +15,7 @@ import {
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import { SourceCodeSpan } from '@/tools/diagnostics'
+import * as cir from '@clawr/cir'
 
 export type Property = {
     isImmutable: boolean
@@ -57,6 +60,37 @@ export class DataDeclaration implements Declaration {
         context.scope.rootScope.addDataDeclaration(this)
     }
 
+    lookupMethod(
+        name: FunctionName,
+        context: Context,
+    ): FunctionDeclaration | undefined {
+        if (this.serializer?.name().toString() === name.toString())
+            return this.serializer
+        return context.scope.rootScope
+            .extensionDeclarations(this.name)
+            .flatMap((extension: ExtensionDeclaration) => [
+                ...extension.methods,
+                ...extension.mutating,
+            ])
+            .find((method) => method.name().toString() === name.toString())
+    }
+
+    extensionMethodIsMutating(name: FunctionName, context: Context): boolean {
+        return context.scope.rootScope
+            .extensionDeclarations(this.name)
+            .some((extension) =>
+                extension.mutating.some(
+                    (method) => method.name().toString() === name.toString(),
+                ),
+            )
+    }
+
+    injectSelf(context: Context): Context {
+        const scope = context.scope.createChildScope()
+        scope.addSelfVariable(this.name)
+        return { ...context, scope }
+    }
+
     conformsTo(name: TypeName, context: Context): boolean {
         const serializable = context.scope.interfaceDeclaration(
             TypeName.create({
@@ -64,12 +98,25 @@ export class DataDeclaration implements Declaration {
                 namespace: 'clawr',
             }),
         )
-        return (
+        if (
             !!serializable &&
             name.canonical() === serializable.name.canonical() &&
             (this.implicitlyJSONSerializable(context, new Set()) ||
                 (this.explicitlySerializable && !!this.serializer))
         )
+            return true
+        const target = context.scope.interfaceDeclaration(name)
+        if (!target) return false
+        return context.scope.rootScope
+            .extensionDeclarations(this.name)
+            .some(
+                (extension) =>
+                    !!extension.conformance &&
+                    context.scope
+                        .interfaceDeclaration(extension.conformance)
+                        ?.hierarchy(context)
+                        .includes(target),
+            )
     }
 
     emitDeclaration(context: Context): SemanticResult {
@@ -104,47 +151,35 @@ export class DataDeclaration implements Declaration {
                         end: { line: 1, column: 1 },
                     },
             )
+        const extensions = context.scope.rootScope.extensionDeclarations(
+            this.name,
+        )
+        const extensionMethods = SemanticResult.collect(
+            extensions
+                .flatMap((extension) => [
+                    ...extension.methods,
+                    ...extension.mutating,
+                ])
+                .map((method) => method.emitMethod(this.injectSelf(context))),
+        )
+        if (extensionMethods.isError) return extensionMethods
+
+        const extensionConformances = this.checkExtensionConformances(
+            context,
+            extensions,
+            extensionMethods.value,
+        )
+        if (extensionConformances.isError) return extensionConformances
+
+        let serializerMethod:
+            (cir.Declaration & { kind: 'FUNCTION_DECL' }) | undefined
         if (this.serializer) {
-            const serializerContext = context.scope.createChildScope()
-            serializerContext.addSelfVariable(this.name)
-            const method = this.serializer.emitMethod({
-                ...context,
-                scope: serializerContext,
-            })
+            const serializerContext = this.injectSelf(context)
+            const method = this.serializer.emitMethod(serializerContext)
             if (method.isError) return method
-            context.scope.rootScope.emitted.push({
-                kind: 'RC_TYPE_DECL',
-                name: this.name.name,
-                namespace: this.name.namespace,
-                methods: [method.value],
-                initializers: [],
-                conformances: [
-                    {
-                        interface: {
-                            name: 'JSONSerializable',
-                            namespace: 'clawr',
-                        },
-                        fulfillments: [
-                            {
-                                requirement: {
-                                    baseName: 'toJSON',
-                                    labels: [],
-                                },
-                                implementation: {
-                                    baseName: 'toJSON',
-                                    labels: [],
-                                },
-                            },
-                        ],
-                    },
-                ],
-                properties: this.properties.map((property) => ({
-                    name: property.name,
-                    type: context.scope.toCIRType(property.type),
-                })),
-            })
-            return Result.ok
+            serializerMethod = method.value
         }
+
         const serializable = this.conformsTo(
             TypeName.create({
                 name: 'JSONSerializable',
@@ -152,30 +187,51 @@ export class DataDeclaration implements Declaration {
             }),
             context,
         )
+        const jsonConformance = serializable
+            ? [
+                  {
+                      interface: {
+                          name: 'JSONSerializable',
+                          namespace: 'clawr',
+                      },
+                      fulfillments: [
+                          {
+                              requirement: {
+                                  baseName: 'toJSON',
+                                  labels: [],
+                              },
+                              implementation: {
+                                  baseName: 'toJSON',
+                                  labels: [],
+                              },
+                          },
+                      ],
+                  },
+              ]
+            : []
+        const conformances = [
+            ...jsonConformance,
+            ...extensionConformances.value.filter(
+                (extension) =>
+                    !jsonConformance.some(
+                        (json) =>
+                            json.interface.name === extension.interface.name &&
+                            json.interface.namespace ===
+                                extension.interface.namespace,
+                    ),
+            ),
+        ]
         context.scope.rootScope.emitted.push({
             kind: 'RC_TYPE_DECL',
             name: this.name.name,
             namespace: this.name.namespace,
-            ...(serializable && {
-                conformances: [
-                    {
-                        interface: {
-                            name: 'JSONSerializable',
-                            namespace: 'clawr',
-                        },
-                        fulfillments: [
-                            {
-                                requirement: {
-                                    baseName: 'toJSON',
-                                    labels: [],
-                                },
-                                implementation: {
-                                    baseName: 'toJSON',
-                                    labels: [],
-                                },
-                            },
-                        ],
-                    },
+            ...(conformances.length > 0 && {
+                conformances,
+            }),
+            ...((serializerMethod || extensionMethods.value.length > 0) && {
+                methods: [
+                    ...(serializerMethod ? [serializerMethod] : []),
+                    ...extensionMethods.value,
                 ],
             }),
             properties: this.properties.map((property) => ({
@@ -186,8 +242,147 @@ export class DataDeclaration implements Declaration {
         return Result.ok
     }
 
+    private checkExtensionConformances(
+        context: Context,
+        extensions: ExtensionDeclaration[],
+        methods: (cir.Declaration & { kind: 'FUNCTION_DECL' })[],
+    ): SemanticResult<
+        NonNullable<
+            Extract<cir.Declaration, { kind: 'RC_TYPE_DECL' }>['conformances']
+        >
+    > {
+        type Conformance = NonNullable<
+            Extract<cir.Declaration, { kind: 'RC_TYPE_DECL' }>['conformances']
+        >[number]
+        const conformances: Conformance[] = []
+        const seen = new Set<string>()
+        for (const extension of extensions) {
+            if (!extension.conformance) continue
+            const declaration = context.scope.interfaceDeclaration(
+                extension.conformance,
+            )
+            if (!declaration)
+                return SemanticErrorResult.failure(
+                    `${extension.conformance.name} is not a trait or role`,
+                    extension.span,
+                )
+            for (const inherited of declaration.hierarchy(context)) {
+                if (seen.has(inherited.name.canonical())) continue
+                seen.add(inherited.name.canonical())
+                const fulfillments: Conformance['fulfillments'] = []
+                for (const requirement of inherited.resolvedMethods(context)) {
+                    const requirementCIR = requirement.toCIR(context, this.name)
+                    if (requirementCIR.isError) return requirementCIR
+                    const implementation = methods.find(
+                        (method) =>
+                            method.baseName === requirement.baseName &&
+                            method.labels.length ===
+                                requirementCIR.value.labels.length &&
+                            method.labels.every(
+                                (label, index) =>
+                                    label ===
+                                    requirementCIR.value.labels[index],
+                            ),
+                    )
+                    const implementationDeclaration = extensions
+                        .flatMap((candidate) => [
+                            ...candidate.methods,
+                            ...candidate.mutating,
+                        ])
+                        .find(
+                            (method) =>
+                                method.name().toString() ===
+                                requirement.name().toString(),
+                        )
+                    if (!implementation)
+                        return SemanticErrorResult.failure(
+                            `${this.name.name} does not implement ${inherited.name.name}.${requirement.baseName}`,
+                            extension.span,
+                        )
+                    if (
+                        extensions.some((candidate) =>
+                            candidate.mutating.some(
+                                (method) =>
+                                    method.name().toString() ===
+                                    requirement.name().toString(),
+                            ),
+                        )
+                    )
+                        return SemanticErrorResult.failure(
+                            `Mutating method ${requirement.baseName} cannot implement a trait or role requirement`,
+                            extension.span,
+                        )
+                    if (
+                        JSON.stringify(
+                            implementation.parameters.map(
+                                (parameter) => parameter.type,
+                            ),
+                        ) !==
+                        JSON.stringify(
+                            requirementCIR.value.parameters.map(
+                                (parameter) => parameter.type,
+                            ),
+                        )
+                    )
+                        return SemanticErrorResult.failure(
+                            `${this.name.name}.${requirement.baseName} must have the same signature as the requirement in ${inherited.name.name}`,
+                            extension.span,
+                        )
+                    if (!requirement.result) {
+                        if (implementation.returnType.universe !== 'void')
+                            return SemanticErrorResult.failure(
+                                `${this.name.name}.${requirement.baseName} must not return a value`,
+                                extension.span,
+                            )
+                    } else {
+                        if (!implementationDeclaration)
+                            return SemanticErrorResult.failure(
+                                `${this.name.name} does not implement ${inherited.name.name}.${requirement.baseName}`,
+                                extension.span,
+                            )
+                        const resultType = implementationDeclaration.type(
+                            this.injectSelf(context),
+                        )
+                        if (resultType.isError) return resultType
+                        const expected =
+                            requirement.result instanceof RCTypeSet &&
+                            requirement.result.type.name === 'Self'
+                                ? RCTypeSet.create({ type: this.name })
+                                : requirement.result
+                        if (
+                            !resultType.value ||
+                            !expected.isSupersetTo(resultType.value)
+                        )
+                            return SemanticErrorResult.failure(
+                                `${this.name.name}.${requirement.baseName} must have a result compatible with the requirement in ${inherited.name.name}`,
+                                extension.span,
+                            )
+                    }
+                    fulfillments.push({
+                        requirement: {
+                            baseName: requirementCIR.value.baseName,
+                            labels: requirementCIR.value.labels,
+                        },
+                        implementation: {
+                            baseName: implementation.baseName,
+                            labels: implementation.labels,
+                        },
+                    })
+                }
+                conformances.push({
+                    interface: inherited.name.toCIR(),
+                    fulfillments,
+                })
+            }
+        }
+        return Result.value(conformances)
+    }
+
     private isValidSerializer(context: Context): boolean {
-        if (!this.serializer || this.serializer.name().toString() !== 'toJSON()')
+        if (
+            !this.serializer ||
+            this.serializer.name().toString() !== 'toJSON()'
+        )
             return false
         if (this.serializer.parameters.length !== 0 || !this.serializer.result)
             return false

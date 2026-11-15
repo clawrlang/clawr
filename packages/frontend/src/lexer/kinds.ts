@@ -88,6 +88,7 @@ const ALL_KW = [
     'companion',
     'role',
     'trait',
+    'extension',
 
     // Object-scoped variables
     `super`,

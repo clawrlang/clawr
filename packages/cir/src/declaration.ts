@@ -41,7 +41,6 @@ type FunctionSignature = {
 }
 
 type RCTypeDeclaration = {
-    // `data` only supports these
     kind: 'RC_TYPE_DECL'
     name: string
     namespace?: string
@@ -68,6 +67,10 @@ type RCTypeDeclaration = {
               declaredIn: CanonicalName
               implementation?: CanonicalName
           }[]
+      }
+    | {
+          // Methods added to a data type by an extension.
+          methods: FunctionDeclaration[]
       }
     | {}
 )

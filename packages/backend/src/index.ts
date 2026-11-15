@@ -77,15 +77,16 @@ function registerSignatures(declarations: cir.Declaration[]) {
                 break
             case 'RC_TYPE_DECL':
                 if (!('methods' in decl)) break
-                for (const method of [
-                    ...decl.methods,
-                    ...(decl.initializers ?? []),
-                ])
+                const initializers =
+                    'initializers' in decl ? decl.initializers : []
+                for (const method of [...decl.methods, ...initializers])
                     registerSignature(mangleNameWithLabels(method, decl), {
                         parameters: method.parameters.map((p) => p.type),
                         returnType: method.returnType,
                     })
-                for (const { slot } of decl.dispatchTable ?? [])
+                for (const { slot } of 'dispatchTable' in decl
+                    ? (decl.dispatchTable ?? [])
+                    : [])
                     registerSignature(mangleNameWithLabels(slot, decl), {
                         parameters: slot.parameters.map((p) => p.type),
                         returnType: slot.returnType,
@@ -214,7 +215,10 @@ export function lower(json: string): string {
                               (method) =>
                                   `${memberSignature(method, decl, false)};`,
                           ),
-                          ...decl.initializers.map(
+                          ...('initializers' in decl
+                              ? decl.initializers
+                              : []
+                          ).map(
                               (initializer) =>
                                   `${memberSignature(initializer, decl, true)};`,
                           ),
@@ -314,9 +318,11 @@ export function lowerDecl(
                 isPointerType(property.type),
             )
             const nestedHooks = lowerNestedHooks(decl, ownedProperties)
-            if (!('methods' in decl)) {
+            if (!('initializers' in decl)) {
                 const conformances = lowerConformances(decl)
+                const methods = 'methods' in decl ? decl.methods : []
                 return `${structure}
+                    ${methods.map((m) => lowerMethod(m, decl)).join('\n')}
                     ${nestedHooks.code}
                     ${conformances.code}
                     ${isImplicitJSONData(decl) ? lowerJSONSerializer(decl) : ''}
@@ -387,7 +393,14 @@ function isImplicitJSONData(
 ): decl is cir.Declaration & { kind: 'RC_TYPE_DECL' } {
     return (
         decl.kind === 'RC_TYPE_DECL' &&
-        !('methods' in decl) &&
+        !('initializers' in decl) &&
+        !(
+            'methods' in decl &&
+            decl.methods.some(
+                (method) =>
+                    method.baseName === 'toJSON' && method.labels.length === 0,
+            )
+        ) &&
         (decl.conformances ?? []).some(
             ({ interface: iface }) =>
                 iface.namespace === 'clawr' &&

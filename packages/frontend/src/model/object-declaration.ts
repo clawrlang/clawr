@@ -1,6 +1,7 @@
 import { Context, Declaration } from '@/model'
 import { Property } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
+import type { ExtensionDeclaration } from '@/model/extension-declaration'
 import { FunctionName } from '@/model/function-name'
 import {
     InterfaceDeclaration,
@@ -118,6 +119,10 @@ export class ObjectDeclaration implements Declaration {
         )
     }
 
+    isService(): boolean {
+        return this.kind === 'service'
+    }
+
     initializer(name: FunctionName): FunctionDeclaration | undefined {
         return this.initializers.find(
             (initializer) => initializer.name().toString() === name.toString(),
@@ -138,6 +143,23 @@ export class ObjectDeclaration implements Declaration {
         return name && context.scope.objectDeclaration(name)
     }
 
+    isSubtypeOf(
+        name: TypeName,
+        context: Context,
+        visiting = new Set<string>(),
+    ): boolean {
+        if (visiting.has(this.name.canonical())) return false
+        visiting.add(this.name.canonical())
+        return (
+            this.name.canonical() === name.canonical() ||
+            !!this.superDeclaration(context)?.isSubtypeOf(
+                name,
+                context,
+                visiting,
+            )
+        )
+    }
+
     /** Subtypes and types with subtypes dispatch their methods dynamically. */
     isPolymorphic(context: Context): boolean {
         return !!this.superType || context.scope.isBase(this.name)
@@ -148,11 +170,65 @@ export class ObjectDeclaration implements Declaration {
         name: FunctionName,
         context: Context,
     ):
-        | { declaration: FunctionDeclaration; owner: ObjectDeclaration }
+        | {
+              declaration: FunctionDeclaration
+              owner: ObjectDeclaration
+              isExtension: boolean
+          }
         | undefined {
         const own = this.method(name)
-        if (own) return { declaration: own, owner: this }
+        if (own) return { declaration: own, owner: this, isExtension: false }
+        const extension = this.extensionMethod(name, context)
+        if (extension)
+            return { declaration: extension, owner: this, isExtension: true }
         return this.superDeclaration(context)?.lookupMethod(name, context)
+    }
+
+    extensionMethod(
+        name: FunctionName,
+        context: Context,
+    ): FunctionDeclaration | undefined {
+        return context.scope.rootScope
+            .extensionDeclarations(this.name)
+            .flatMap((extension: ExtensionDeclaration) => [
+                ...extension.methods,
+                ...extension.mutating,
+            ])
+            .find((method) => method.name().toString() === name.toString())
+    }
+
+    isMutatingMethod(name: FunctionName, context: Context): boolean {
+        return (
+            this.mutating.some(
+                (method) => method.name().toString() === name.toString(),
+            ) ||
+            context.scope.rootScope
+                .extensionDeclarations(this.name)
+                .some((extension) =>
+                    extension.mutating.some(
+                        (method) =>
+                            method.name().toString() === name.toString(),
+                    ),
+                ) ||
+            !!this.superDeclaration(context)?.isMutatingMethod(name, context)
+        )
+    }
+
+    isExtensionMutatingMethod(name: FunctionName, context: Context): boolean {
+        return (
+            context.scope.rootScope
+                .extensionDeclarations(this.name)
+                .some((extension) =>
+                    extension.mutating.some(
+                        (method) =>
+                            method.name().toString() === name.toString(),
+                    ),
+                ) ||
+            !!this.superDeclaration(context)?.isExtensionMutatingMethod(
+                name,
+                context,
+            )
+        )
     }
 
     registerDeclaration(context: Context) {
@@ -225,13 +301,26 @@ export class ObjectDeclaration implements Declaration {
         objectContext.scope.addObjectDeclaration(this)
         objectContext.scope.addSelfVariable(this.name)
 
-        const methodsResult = SemanticResult.collect(
+        const declaredMethodsResult = SemanticResult.collect(
             [...this.readonly, ...this.mutating].map((m) =>
                 m.emitMethod(objectContext),
             ),
         )
-        if (methodsResult.isError) return methodsResult
-        const methods = methodsResult.value
+        if (declaredMethodsResult.isError) return declaredMethodsResult
+        const extensionMethodsResult = SemanticResult.collect(
+            context.scope.rootScope
+                .extensionDeclarations(this.name)
+                .flatMap((extension) => [
+                    ...extension.methods,
+                    ...extension.mutating,
+                ])
+                .map((method) => method.emitMethod(objectContext)),
+        )
+        if (extensionMethodsResult.isError) return extensionMethodsResult
+        const methods = [
+            ...declaredMethodsResult.value,
+            ...extensionMethodsResult.value,
+        ]
         this.emittedMethods = methods
 
         const initializersResult = SemanticResult.collect(
@@ -243,7 +332,10 @@ export class ObjectDeclaration implements Declaration {
         const conformancesResult = this.checkConformances(context)
         if (conformancesResult.isError) return conformancesResult
 
-        const tableResult = this.makeDispatchTable(context, methods)
+        const tableResult = this.makeDispatchTable(
+            context,
+            declaredMethodsResult.value,
+        )
         if (tableResult.isError) return tableResult
         this.dispatchTable = tableResult.value
 
@@ -355,14 +447,23 @@ export class ObjectDeclaration implements Declaration {
     private allConformances(context: Context): string[] {
         const inherited =
             this.superDeclaration(context)?.allConformances(context) ?? []
+        const extensions = context.scope.rootScope
+            .extensionDeclarations(this.name)
+            .flatMap((extension) =>
+                extension.conformance ? [extension.conformance.name] : [],
+            )
         return [
             ...this.conformances,
+            ...extensions,
             ...inherited.filter((name) => !this.conformances.includes(name)),
         ]
     }
 
     private conformanceSelf(name: string, context: Context): TypeName {
-        return this.conformances.includes(name)
+        return this.conformances.includes(name) ||
+            context.scope.rootScope
+                .extensionDeclarations(this.name)
+                .some((extension) => extension.conformance?.name === name)
             ? this.name
             : (this.superDeclaration(context)?.conformanceSelf(name, context) ??
                   this.name)
@@ -432,6 +533,11 @@ export class ObjectDeclaration implements Declaration {
                 if (!implementation)
                     return SemanticErrorResult.failure(
                         `${this.name.name} does not implement ${name}.${requirement.baseName}`,
+                        this.span,
+                    )
+                if (this.isExtensionMutatingMethod(method.name(), context))
+                    return SemanticErrorResult.failure(
+                        `Mutating method ${requirement.baseName} cannot implement a trait or role requirement`,
                         this.span,
                     )
                 const compatible = this.fulfills(

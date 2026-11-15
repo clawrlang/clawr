@@ -1,0 +1,45 @@
+trait HasValue {
+    func value() -> integer
+}
+
+data Counter {
+    value: integer
+}
+
+extension Counter: HasValue {
+    func value() => self->value
+}
+
+extension Counter {
+    func doubled() => self->value * 2
+mutating:
+    func increment() {
+        self->value = self->value + 1
+    }
+}
+
+object Marker {
+init:
+    func new() => {}
+}
+
+extension Marker {
+    func markerValue() => 9
+}
+
+func read(_ value: HasValue) -> integer {
+    return value.value()
+}
+
+@main {
+    const original: Counter = {value: 1}
+    mut counter: Counter = original
+    counter.increment()
+
+    const marker: Marker = {Marker.new()}
+    print(original.value)
+    print(counter.doubled())
+    print(read(counter))
+    print(serializeJSON(counter))
+    print(marker.markerValue())
+}

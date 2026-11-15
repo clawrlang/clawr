@@ -5,7 +5,10 @@ import { describe, expect, it } from 'bun:test'
 
 function compile(code: string) {
     const module = ModuleParser.create({}).parse(TokenStream.read(code))
-    return module.toCIR(util.newSemanticContext()) as { declarations: any[] }
+    return module.toCIR(util.newSemanticContext()) as {
+        declarations: any[]
+        startBlock?: any[]
+    }
 }
 
 const shape = `
@@ -199,5 +202,139 @@ describe('trait and role', () => {
         const call = JSON.stringify(cir.declarations)
         expect(call).toContain('"dispatch":"conformance"')
         expect(call).toContain('"universe":"interface"')
+    })
+
+    it('adds methods and trait conformances to data and object types through extensions', () => {
+        const cir = compile(`
+            trait HasArea { func area() -> integer }
+            data Rectangle { width: integer }
+            extension Rectangle: HasArea {
+                func area() => self->width
+            }
+            object Unit {}
+            extension Unit {
+                func value() => 1
+            }
+            func measure(_ shape: HasArea) -> integer {
+                return shape.area()
+            }
+            func unitValue(_ unit: Unit) -> integer {
+                return unit.value()
+            }
+        `)
+        const rectangle = cir.declarations.find(
+            (declaration: any) => declaration.name === 'Rectangle',
+        ) as any
+        expect(rectangle.methods).toMatchObject([
+            { kind: 'FUNCTION_DECL', baseName: 'area' },
+        ])
+        expect(rectangle.conformances).toMatchObject([
+            { interface: { name: 'HasArea' } },
+        ])
+        expect(JSON.stringify(cir.declarations)).toContain(
+            '"dispatch":"direct"',
+        )
+    })
+
+    it('rejects duplicate extension methods and conformances', () => {
+        expect(() =>
+            compile(`
+                data Value {}
+                extension Value { func read() => 1 }
+                extension Value { func read() => 2 }
+            `),
+        ).toThrow('Duplicate extension method')
+        expect(() =>
+            compile(`
+                trait Named { func name() -> integer }
+                data Value {}
+                extension Value: Named { func name() => 1 }
+                extension Value: Named { func name() => 1 }
+            `),
+        ).toThrow('conforms to Named more than once')
+        expect(() =>
+            compile(`
+                object Base {}
+                object Child: Base { func read() => 1 }
+                extension Base { func read() => 2 }
+            `),
+        ).toThrow('Duplicate extension method')
+        expect(() =>
+            compile('extension integer { func value() => self }'),
+        ).toThrow('Unknown extension target integer')
+        expect(() =>
+            compile(`
+                trait Named { func name() -> integer }
+                object Value: Named { func name() => 1 }
+                extension Value: Named {}
+            `),
+        ).toThrow('conforms to Named more than once')
+    })
+
+    it('uses static dispatch for extension methods on polymorphic types', () => {
+        const cir = compile(`
+            object Base {}
+            object Child: Base {}
+            extension Base { func describe() => 1 }
+            func describe(_ value: Child) -> integer {
+                return value.describe()
+            }
+        `)
+        const base = cir.declarations.find(
+            (declaration: any) => declaration.name === 'Base',
+        ) as any
+        const call = cir.declarations.find(
+            (declaration: any) => declaration.baseName === 'describe',
+        ) as any
+        expect(base.dispatchTable).toEqual([])
+        expect(call.body).toMatchObject([
+            {
+                kind: 'RETURN',
+                value: {
+                    kind: 'CALL',
+                    receiver: { dispatch: 'direct' },
+                    arguments: [],
+                },
+            },
+        ])
+        expect(call.body[0].value.receiver.object.type).toEqual({
+            universe: 'rc-type',
+            name: 'Base',
+        })
+    })
+
+    it('allows role conformances on services through extensions', () => {
+        const cir = compile(`
+            role Starts { func start() }
+            service Worker {}
+            extension Worker: Starts { func start() {} }
+        `)
+        const worker = cir.declarations.find(
+            (declaration: any) => declaration.name === 'Worker',
+        ) as any
+        expect(worker.conformances).toMatchObject([
+            { interface: { name: 'Starts' } },
+        ])
+    })
+
+    it('uses copy-on-write before calling a mutating data extension method', () => {
+        const cir = compile(`
+            data Counter { value: integer }
+            extension Counter {
+                mutating:
+                    func increment() { self->value = self->value + 1 }
+            }
+            @main {
+                mut counter: Counter = { value: 0 }
+                counter.increment()
+            }
+        `)
+        expect(cir.startBlock?.[1]).toMatchObject({
+            kind: 'ENSURE_UNIQUE',
+        })
+        expect(cir.startBlock?.[2]).toMatchObject({
+            kind: 'CALL',
+            name: { baseName: 'increment' },
+        })
     })
 })

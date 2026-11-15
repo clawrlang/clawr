@@ -126,6 +126,7 @@ describe('Type declaration', () => {
                     returnType: { universe: 'integer', min: '0', max: '100' },
                 },
             ],
+            initializers: [],
             dispatchTable: [
                 {
                     slot: {
@@ -160,6 +161,7 @@ describe('Type declaration', () => {
             name: 'MyType',
             properties: [],
             methods: [],
+            initializers: [],
             dispatchTable: [
                 {
                     slot: {
@@ -212,6 +214,7 @@ describe('Type declaration', () => {
                     returnType: { universe: 'integer' },
                 },
             ],
+            initializers: [],
             dispatchTable: [
                 {
                     slot: {

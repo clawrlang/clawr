@@ -1,5 +1,6 @@
-import { Context, Expression, Statement } from '@/model'
+import { Context, Expression, Statement, isStorage } from '@/model'
 import { FunctionDeclaration } from '@/model/function-declaration'
+import { DataDeclaration } from '@/model/data-declaration'
 import { FunctionName } from '@/model/function-name'
 import { AnyIsolationLevel, ISOLATED, UNIQUE } from '@/model/isolation-level'
 import { TypeName } from '@/model/type-name'
@@ -84,11 +85,15 @@ export class FunctionCall implements Expression, Statement {
             const found = context.scope
                 .objectDeclaration(type.value.type)
                 ?.lookupMethod(this.name, context)
+            const data = context.scope.dataDeclaration(type.value.type)
+            const dataMethod = data?.lookupMethod(this.name, context)
             return found
                 ? found.declaration.resultIsolationLevel(
                       found.owner.injectSelf(context),
                   )
-                : Result.value(UNIQUE)
+                : dataMethod
+                  ? dataMethod.resultIsolationLevel(data!.injectSelf(context))
+                  : Result.value(UNIQUE)
         }
 
         const decl = context.scope.functionDeclaration(this.name)
@@ -139,22 +144,27 @@ export class FunctionCall implements Expression, Statement {
             }
 
             const typeDecl = context.scope.objectDeclaration(recipientType.type)
-            if (!typeDecl)
+            const dataDecl = context.scope.dataDeclaration(recipientType.type)
+            if (!typeDecl && !dataDecl)
                 return SemanticErrorResult.failure(
                     'Unknown type',
                     this.recipient.span,
                 )
 
-            const found = typeDecl.lookupMethod(this.name, context)
+            const found = typeDecl?.lookupMethod(this.name, context)
+            const dataMethod = dataDecl?.lookupMethod(this.name, context)
             if (!found)
-                return SemanticErrorResult.failure(
-                    `Method declaration not found: ${this.name.toString()}`,
-                    this.span,
-                )
+                if (!dataMethod)
+                    return SemanticErrorResult.failure(
+                        `Method declaration not found: ${this.name.toString()}`,
+                        this.span,
+                    )
 
-            const typeResult = found.declaration.type(
-                found.owner.injectSelf(context),
-            )
+            const method = found?.declaration ?? dataMethod!
+            const methodContext = found
+                ? found.owner.injectSelf(context)
+                : dataDecl!.injectSelf(context)
+            const typeResult = method.type(methodContext)
             if (typeResult.isError) return typeResult
             if (!typeResult.value)
                 return SemanticErrorResult.failure(
@@ -203,6 +213,9 @@ export class FunctionCall implements Expression, Statement {
 
     toCIRExpression(context: Context): SemanticResult<cir.Expression> {
         if (this.recipient) {
+            const mutatingPrelude = this.mutatingReceiverPrelude(context)
+            if (mutatingPrelude.isError) return mutatingPrelude
+            context.scope.emitted.push(...mutatingPrelude.value)
             const declaration = this.recipientDeclaration(context)
             if (declaration.isError) return declaration
             const args = this.argumentsToCIR(context, declaration.value)
@@ -259,6 +272,9 @@ export class FunctionCall implements Expression, Statement {
                 `Function declaration not found: ${this.name.toString()}`,
                 this.span,
             )
+        const mutatingPrelude = this.mutatingReceiverPrelude(context)
+        if (mutatingPrelude.isError) return mutatingPrelude
+        context.scope.emitted.push(...mutatingPrelude.value)
         const argsResult = this.argumentsToCIR(context, declaration)
         if (argsResult.isError) return argsResult
         const releases: cir.Statement[] = []
@@ -341,7 +357,41 @@ export class FunctionCall implements Expression, Statement {
             )
                 return { ...this.name.toCIR(), namespace: library.namespace }
         }
+
         return this.name.toCIR()
+    }
+
+    private mutatingReceiverPrelude(
+        context: Context,
+    ): SemanticResult<cir.Statement[]> {
+        if (!this.recipient) return Result.value([])
+        const type = this.recipient.type(context)
+        if (type.isError) return type
+        if (!(type.value instanceof RCTypeSet)) return Result.value([])
+
+        const object = context.scope.objectDeclaration(type.value.type)
+        const data = context.scope.dataDeclaration(type.value.type)
+        const mutating =
+            object?.isMutatingMethod(this.name, context) ||
+            data?.extensionMethodIsMutating(this.name, context)
+        if (!mutating) return Result.value([])
+
+        const isConst = this.recipient.isEffectivelyConst(context)
+        if (isConst.isError) return isConst
+        if (isConst.value)
+            return SemanticErrorResult.failure(
+                'Cannot call a mutating method on an immutable value',
+                this.recipient.span,
+            )
+        if (!isStorage(this.recipient)) return Result.value([])
+
+        const isolation = this.recipient.isolationLevel(context)
+        if (isolation.isError) return isolation
+        if (isolation.value !== ISOLATED) return Result.value([])
+
+        const receiver = this.recipient.toCIRExpression(context)
+        if (receiver.isError) return receiver
+        return Result.value([{ kind: 'ENSURE_UNIQUE', object: receiver.value }])
     }
 
     private argumentsToCIR(
@@ -463,6 +513,7 @@ export class FunctionCall implements Expression, Statement {
             )
         const iface = context.scope.interfaceDeclaration(type.value.type)
         const object = context.scope.objectDeclaration(type.value.type)
+        const data = context.scope.dataDeclaration(type.value.type)
         if (object?.opaque) {
             const isolation = this.recipient.isolationLevel(context)
             if (isolation.isError) return isolation
@@ -481,6 +532,7 @@ export class FunctionCall implements Expression, Statement {
         const declaration =
             requirement ??
             object?.lookupMethod(this.name, context)?.declaration ??
+            data?.lookupMethod(this.name, context) ??
             object?.initializer(this.name)
         if (!declaration)
             return SemanticErrorResult.failure(
@@ -552,6 +604,20 @@ export class FunctionCall implements Expression, Statement {
                     },
                 },
             } as Receiver
+        const typeDeclaration =
+            typeName && context.scope.objectDeclaration(typeName)
+        const method = typeDeclaration?.lookupMethod(this.name, context)
+        if (method?.isExtension && isRCExpression(object))
+            return {
+                dispatch: 'direct',
+                object: {
+                    ...object,
+                    type: {
+                        ...method.owner.name.toCIR(),
+                        universe: 'rc-type',
+                    },
+                } as NonNullable<Receiver>['object'],
+            }
         const opaque = typeName && context.scope.objectDeclaration(typeName)
         if (opaque?.opaque && isRCExpression(object))
             return { dispatch: 'direct', object }
@@ -563,11 +629,9 @@ export class FunctionCall implements Expression, Statement {
         if (!type || type.isError || !(type.value instanceof RCTypeSet))
             return 'direct'
         const decl = context.scope.objectDeclaration(type.value.type)
-        // Initializers are not methods and are never dispatched dynamically
-        return decl?.lookupMethod(this.name, context) &&
-            decl.isPolymorphic(context)
-            ? 'inherited'
-            : 'direct'
+        const found = decl?.lookupMethod(this.name, context)
+        if (found?.isExtension) return 'direct'
+        return found && decl?.isPolymorphic(context) ? 'inherited' : 'direct'
     }
 
     private maybeRecipientCIR(context: Context): cir.Expression | undefined {

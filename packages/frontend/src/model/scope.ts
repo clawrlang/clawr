@@ -1,5 +1,6 @@
 import { DataDeclaration } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
+import type { ExtensionDeclaration } from '@/model/extension-declaration'
 import { FunctionName } from '@/model/function-name'
 import { InterfaceDeclaration } from '@/model/interface-declaration'
 import { IsolationLevel, SHARED, UNKNOWN } from '@/model/isolation-level'
@@ -18,6 +19,7 @@ class RootScope {
     public readonly emitted: cir.Declaration[] = []
     private readonly baseTypes: Set<string> = new Set()
     private readonly interfaces: Map<string, InterfaceDeclaration> = new Map()
+    private readonly extensions = new Map<string, ExtensionDeclaration[]>()
     private readonly typeAliases = new Map<string, TypeConstraintDeclaration>()
     private nextBindingCounter = 0
 
@@ -51,12 +53,32 @@ class RootScope {
         return decl instanceof ObjectDeclaration ? decl : undefined
     }
 
+    objectDeclarations(): ObjectDeclaration[] {
+        return [...this.types.values()].filter(
+            (decl): decl is ObjectDeclaration =>
+                decl instanceof ObjectDeclaration,
+        )
+    }
+
     addDataDeclaration(decl: DataDeclaration) {
         this.types.set(decl.name.canonical(), decl)
     }
 
     addObjectDeclaration(decl: ObjectDeclaration) {
         this.types.set(decl.name.canonical(), decl)
+    }
+
+    extensionDeclarations(name: TypeName): ExtensionDeclaration[] {
+        return this.extensions.get(name.canonical()) ?? []
+    }
+
+    allExtensionDeclarations(): ExtensionDeclaration[] {
+        return [...this.extensions.values()].flat()
+    }
+
+    addExtensionDeclaration(decl: ExtensionDeclaration) {
+        const key = decl.target.canonical()
+        this.extensions.set(key, [...(this.extensions.get(key) ?? []), decl])
     }
 
     functionDeclaration(name: string): FunctionDeclaration | undefined {

@@ -178,6 +178,42 @@ export function lower(json: string): string {
         }
     }
     registerSignatures(cir.declarations ?? [])
+    const jsonBuffer: cir.ValueSet = {
+        universe: 'rc-type',
+        namespace: 'clawr',
+        name: 'JSONBuffer',
+    }
+    registerSignature('clawr¸newJSONBuffer', {
+        parameters: [],
+        returnType: jsonBuffer,
+    })
+    for (const [name, type] of [
+        ['String', { universe: 'string' }],
+        ['Integer', { universe: 'integer' }],
+        ['Real', { universe: 'real' }],
+        ['Truthvalue', { universe: 'truthvalue' }],
+    ] satisfies [string, cir.ValueSet][])
+        registerSignature(`clawr¸jsonWrite${name}˛value`, {
+            parameters: [jsonBuffer, type],
+            returnType: { universe: 'void' },
+        })
+    registerSignature('clawr¸jsonBeginStructure˛fieldCount', {
+        parameters: [jsonBuffer, { universe: 'integer' }],
+        returnType: { universe: 'void' },
+    })
+    registerSignature('clawr¸jsonBeginField˛name', {
+        parameters: [jsonBuffer, { universe: 'string' }],
+        returnType: { universe: 'void' },
+    })
+    for (const name of ['jsonEndField', 'jsonEndStructure'])
+        registerSignature(`clawr¸${name}`, {
+            parameters: [jsonBuffer],
+            returnType: { universe: 'void' },
+        })
+    registerSignature('clawr¸jsonResult', {
+        parameters: [jsonBuffer],
+        returnType: { universe: 'string' },
+    })
     registerSignature('clawr¸newHashBuilder', {
         parameters: [],
         returnType: {
@@ -211,13 +247,6 @@ export function lower(json: string): string {
         ${(cir.declarations ?? [])
             .filter((decl) => decl.kind === 'RC_TYPE_DECL')
             .map((decl) => lowerRCStructure(decl))
-            .join('\n')}
-        ${(cir.declarations ?? [])
-            .filter(isImplicitJSONData)
-            .map(
-                (decl) =>
-                    `static String *${mangleNameWithLabels({ baseName: 'toJSON', labels: [] }, decl)}(${mangleTypeName(decl)} *self);`,
-            )
             .join('\n')}
         ${(cir.declarations ?? [])
             .filter((decl) => decl.kind === 'RC_TYPE_DECL')
@@ -359,7 +388,6 @@ export function lowerDecl(
                     ${methods.map((m) => lowerMethod(m, decl)).join('\n')}
                     ${nestedHooks.code}
                     ${conformances.code}
-                    ${isImplicitJSONData(decl) ? lowerJSONSerializer(decl) : ''}
                     static const __type_info ${mangledTypeName}ˇtype = {
                         .data_type = { .size = sizeof(${mangledTypeName}) ${nestedHooks.properties}${conformances.property} }
                     };`
@@ -417,6 +445,18 @@ export function lowerDecl(
             return lowerFunction(decl, mangleNameWithParameters(decl))
 
         case 'INTERFACE_DECL':
+            if (
+                decl.namespace === 'clawr' &&
+                [
+                    'HasStringRepresentation',
+                    'Equatable',
+                    'HashEquatable',
+                    'Ordered',
+                    'Serializable',
+                    'Serializer',
+                ].includes(decl.name)
+            )
+                return ''
             return `typedef struct ${mangleTypeName(decl)}ˇwitness {
                     ${decl.methods.map(lowerAbstractSlot).join('\n')}
                 } ${mangleTypeName(decl)}ˇwitness;
@@ -427,89 +467,6 @@ export function lowerDecl(
         default:
             throw new Error(`Unknown declaration kind: ${(decl as any).kind}`)
     }
-}
-
-function isImplicitJSONData(
-    decl: cir.Declaration,
-): decl is cir.Declaration & { kind: 'RC_TYPE_DECL' } {
-    return (
-        decl.kind === 'RC_TYPE_DECL' &&
-        !('initializers' in decl) &&
-        !(
-            'methods' in decl &&
-            (decl.methods ?? []).some(
-                (method) =>
-                    method.baseName === 'toJSON' && method.labels.length === 0,
-            )
-        ) &&
-        (decl.conformances ?? []).some(
-            ({ interface: iface }) =>
-                iface.namespace === 'clawr' &&
-                iface.name === 'JSONSerializable',
-        )
-    )
-}
-
-function lowerJSONSerializer(
-    decl: cir.Declaration & { kind: 'RC_TYPE_DECL' },
-): string {
-    const typeName = mangleTypeName(decl)
-    const serializer = mangleNameWithLabels(
-        { baseName: 'toJSON', labels: [] },
-        decl,
-    )
-    const properties = decl.properties
-        .map((property, index) => {
-            const value = `self->properties.${property.name}`
-            const comma = index ? 'JSONWriter¸appendRaw(&writer, ",");' : ''
-            let encode: string
-            switch (property.type.universe) {
-                case 'integer':
-                    encode =
-                        integerRepresentation(property.type) === 'native'
-                            ? `JSONWriter¸appendInt64(&writer, ${value});`
-                            : `JSONWriter¸appendInteger(&writer, ${value});`
-                    break
-                case 'real':
-                    encode =
-                        property.type.boxed ||
-                        realRepresentation(property.type) === 'managed'
-                            ? `JSONWriter¸appendReal(&writer, ${value});`
-                            : `JSONWriter¸appendDouble(&writer, (double)${value});`
-                    break
-                case 'truthvalue':
-                    encode = `JSONWriter¸appendTruthvalue(&writer, ${property.type.boxed ? `${value}->value` : value});`
-                    break
-                case 'string':
-                    encode = `JSONWriter¸appendString(&writer, ${value});`
-                    break
-                case 'rc-type': {
-                    const nested = mangleNameWithLabels(
-                        { baseName: 'toJSON', labels: [] },
-                        property.type,
-                    )
-                    encode = `{ String *jsonValue${index} = ${nested}(${value}); JSONWriter¸appendRaw(&writer, String·toCString(jsonValue${index})); releaseRC(jsonValue${index}); }`
-                    break
-                }
-                default:
-                    throw new Error(
-                        `Cannot implicitly encode ${property.type.universe} property ${property.name} as JSON`,
-                    )
-            }
-            return `${comma}
-                JSONWriter¸appendQuotedCString(&writer, ${JSON.stringify(property.name)});
-                JSONWriter¸appendRaw(&writer, ":");
-                ${encode}`
-        })
-        .join('\n')
-    return `static String *${serializer}(${typeName} *self) {
-        JSONWriter writer;
-        JSONWriter¸init(&writer);
-        JSONWriter¸appendRaw(&writer, "{");
-        ${properties}
-        JSONWriter¸appendRaw(&writer, "}");
-        return JSONWriter¸finish(&writer);
-    }`
 }
 
 /**
@@ -870,10 +827,15 @@ function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
         case 'string':
             return 'String*'
         case 'rc-type':
+            if (
+                valueSet.namespace === 'clawr' &&
+                valueSet.name === 'HashBuilder'
+            )
+                return 'HashBuilder*'
             // Interfaces are named like types where the frontend resolved them early
             return interfaceNames.has(mangleTypeName(valueSet))
                 ? 'void*'
-                : `${valueSet.name}*`
+                : `${mangleTypeName(valueSet)}*`
         case 'interface':
             return 'void*'
         case 'void':
@@ -937,11 +899,8 @@ function realRepresentation(valueSet: cir.RealSet): RealRepresentation {
     // Boxed reals are always runtime `Real*` values, whatever their precision base.
     if (valueSet.boxed) return 'managed'
     const declared = valueSet.precision
-    if (
-        !declared ||
-        !Number.isSafeInteger(declared.digits) ||
-        declared.digits < 0
-    )
+    if (!declared) return 'managed'
+    if (!Number.isSafeInteger(declared.digits) || declared.digits < 0)
         throw new Error('Real lowering requires an explicit valid precision')
     const precision = storagePrecision(declared)
     if (declared.base === 'ter' && declared.kind === 'sig') return 'managed'
@@ -1159,6 +1118,7 @@ function lowerRealBorrowed(
     expr: cir.Expression,
     resultType: cir.RealSet,
 ): string {
+    if (!resultType.precision) return lowerRealExactBorrowed(expr)
     const literal = lowerLiteralAtPrecision(expr, resultType)
     if (literal) return hoist(literal, 'Real*')
     if (expr.type.universe === 'integer') {
@@ -1203,6 +1163,7 @@ function nativeToManaged(expr: cir.Expression): string | undefined {
 }
 
 function lowerRealOwned(expr: cir.Expression, target: cir.RealSet): string {
+    if (!target.precision) return `retainRC(${lowerRealExactBorrowed(expr)})`
     const literal = lowerLiteralAtPrecision(expr, target)
     if (literal) return literal
     if (expr.type.universe === 'integer') {
@@ -1311,7 +1272,7 @@ function lowerConverted(expr: cir.Expression, target: cir.ValueSet): string {
 function lowerArgument(expr: cir.Expression, parameter?: cir.ValueSet) {
     if (expr.kind === 'BOX') return hoist(lowerExpr(expr), lowerType(expr.type))
     if (
-        isHashBuilder(expr.type) &&
+        isRuntimeOpaqueType(expr.type) &&
         expr.kind !== 'VARIABLE_REF' &&
         expr.kind !== 'PROPERTY_REF'
     )
@@ -1383,10 +1344,7 @@ function lowerStmtCore(stmt: cir.Statement): string {
             if (
                 returned &&
                 returned.universe !== 'void' &&
-                (isManagedOwnedType(returned) ||
-                    (returned.universe === 'rc-type' &&
-                        returned.namespace === 'clawr' &&
-                        returned.name === 'HashBuilder'))
+                (isManagedOwnedType(returned) || isRuntimeOpaqueType(returned))
             ) {
                 hoist(call, lowerType(returned))
                 return ''
@@ -1518,8 +1476,14 @@ export function lowerExpr(expr: cir.Expression): string {
         }
         case 'RETAIN':
             return `retainRC(${lowerStorage(expr.object)})`
-        case 'STRING_LITERAL':
-            return `String¸fromCString("${expr.type.value}")`
+        case 'STRING_LITERAL': {
+            const literal = `"${expr.type.value.replace(
+                /[\x00-\x1f"\\?]/g,
+                (character) =>
+                    `\\${character.charCodeAt(0).toString(8).padStart(3, '0')}`,
+            )}"`
+            return `String¸fromBytes(${literal}, sizeof(${literal}) - 1)`
+        }
         case 'INTEGER_LITERAL':
             return integerRepresentation(expr.type) === 'native'
                 ? expr.type.value
@@ -1810,7 +1774,7 @@ function signatureOf(call: cir.Statement & { kind: 'CALL' }) {
 function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
     const receiver = call.receiver
     const builder =
-        receiver && isHashBuilder(receiver.object.type)
+        receiver && isRuntimeOpaqueType(receiver.object.type)
             ? lowerArgument(receiver.object)
             : undefined
     const signature = signatureOf(call)
@@ -1847,11 +1811,11 @@ function lowerFunctionCall(call: cir.Statement & { kind: 'CALL' }) {
     }
 }
 
-function isHashBuilder(type: cir.ValueSet): boolean {
+function isRuntimeOpaqueType(type: cir.ValueSet): boolean {
     return (
         type.universe === 'rc-type' &&
         type.namespace === 'clawr' &&
-        type.name === 'HashBuilder'
+        ['HashBuilder', 'JSONBuffer'].includes(type.name)
     )
 }
 

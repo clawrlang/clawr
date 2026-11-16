@@ -6,11 +6,20 @@ import { ModuleParser } from '@/parser/module-parser'
 import { createStandardLibraryScope } from '@/stdlib'
 import { describe, expect, it } from 'bun:test'
 
-function compile(source: string) {
+function compile(source: string, includeStdlib = false) {
     const scope = Scope.createRoot(createStandardLibraryScope())
-    return ModuleParser.create({ scope })
+    const result = ModuleParser.create({ scope })
         .parse(TokenStream.read(source))
         .toCIR({ scope })
+    return {
+        ...result,
+        declarations: includeStdlib
+            ? result.declarations
+            : result.declarations?.filter(
+                  (decl) =>
+                      !('namespace' in decl && decl.namespace === 'clawr'),
+              ),
+    }
 }
 
 describe('standard library declarations', () => {
@@ -88,7 +97,10 @@ describe('standard library declarations', () => {
             },
         })
         const statement = result.startBlock?.[0]
-        if (statement?.kind !== 'VARIABLE_DECL' || statement.initialValue.kind !== 'CALL')
+        if (
+            statement?.kind !== 'VARIABLE_DECL' ||
+            statement.initialValue.kind !== 'CALL'
+        )
             throw new Error('Expected a factory call')
         expect(statement.initialValue.name.namespace).toBeUndefined()
     })
@@ -153,7 +165,7 @@ describe('standard library declarations', () => {
         ).toThrow('Argument must be a truthvalue')
     })
 
-    it('implicitly conforms only recursively pure data to JSONSerializable', () => {
+    it('synthesizes ordinary Serializable extensions only for recursively pure data', () => {
         const cir = compile(`
             data Leaf { value: integer }
             data Record {
@@ -177,55 +189,66 @@ describe('standard library declarations', () => {
                     declaration.kind === 'RC_TYPE_DECL' &&
                     declaration.name === name,
             )
-        expect(type('Leaf')).toMatchObject({
+        const extensions = cir.declarations?.filter(
+            (decl) => decl.kind === 'EXTENSION_DECL',
+        )
+        expect(extensions?.map((decl) => decl.target.name)).toEqual([
+            'Leaf',
+            'Record',
+        ])
+        expect(extensions?.[0]).toMatchObject({
             conformances: [
-                { interface: { name: 'JSONSerializable', namespace: 'clawr' } },
+                { interface: { name: 'Serializable', namespace: 'clawr' } },
             ],
+            methods: [{ baseName: 'serialize', labels: ['into'] }],
         })
-        expect(type('Record')).toMatchObject({
-            conformances: [
-                { interface: { name: 'JSONSerializable', namespace: 'clawr' } },
-            ],
-        })
+        expect(
+            extensions?.[0]?.methods[0].body
+                ?.filter((stmt) => stmt.kind === 'CALL')
+                .map((stmt) => stmt.name.baseName),
+        ).toEqual(['beginStructure', 'writeField', 'endStructure'])
+        expect(type('Leaf')).not.toHaveProperty('methods')
+        expect(type('Record')).not.toHaveProperty('conformances')
         expect(type('WithObject')).not.toHaveProperty('conformances')
         expect(type('WithRef')).not.toHaveProperty('conformances')
     })
 
-    it('allows explicitly conforming impure data to define a JSON serializer', () => {
+    it('allows explicitly conforming impure data to define a serializer in an extension', () => {
         const cir = compile(`
             object Entity {}
             data Leaf { value: integer }
-            extern func json(_ entity: Entity, shared value: ref Leaf) -> string
-            data WithObject: JSONSerializable {
+            data WithObject {
                 entity: Entity
                 shared: ref Leaf
-            serialize:
-                func toJSON() -> string =>
-                    json(self->entity, shared: self->shared)
+            }
+            extension WithObject: Serializable {
+                func serialize(into serializer: ref Serializer) {
+                    serializer.writeInteger(42)
+                }
             }
             extern func value() -> WithObject
             @main { serializeJSON(value()) }
         `)
         const type = cir.declarations?.find(
             (declaration) =>
-                declaration.kind === 'RC_TYPE_DECL' &&
-                declaration.name === 'WithObject',
+                declaration.kind === 'EXTENSION_DECL' &&
+                declaration.target.name === 'WithObject',
         )
         expect(type).toMatchObject({
             conformances: [
-                { interface: { name: 'JSONSerializable', namespace: 'clawr' } },
+                { interface: { name: 'Serializable', namespace: 'clawr' } },
             ],
             methods: [
                 {
                     kind: 'FUNCTION_DECL',
-                    baseName: 'toJSON',
-                    returnType: { universe: 'string' },
+                    baseName: 'serialize',
+                    returnType: { universe: 'void' },
                 },
             ],
         })
     })
 
-    it('requires a valid custom serializer for explicitly conforming impure data', () => {
+    it('requires a valid extension implementation and rejects the removed custom syntax', () => {
         expect(() =>
             compile(`
                 data WithoutConformance {
@@ -235,23 +258,108 @@ describe('standard library declarations', () => {
                 }
                 extern func text() -> string
             `),
-        ).toThrow('requires JSONSerializable conformance')
+        ).toThrow()
         expect(() =>
             compile(`
                 object Entity {}
-                data WithoutSerializer: JSONSerializable { entity: Entity }
+                data WithoutSerializer { entity: Entity }
+                extension WithoutSerializer: Serializable {}
             `),
-        ).toThrow('must define serialize: toJSON()')
+        ).toThrow('does not implement Serializable.serialize')
         expect(() =>
             compile(`
                 object Entity {}
-                data WrongSerializer: JSONSerializable {
+                data WrongSerializer {
                     entity: Entity
-                serialize:
-                    func toJSON() -> integer => 1
+                }
+                extension WrongSerializer: Serializable {
+                    func serialize(into serializer: ref Serializer) -> integer => 1
                 }
             `),
-        ).toThrow('must be a non-extern toJSON() method returning string')
+        ).toThrow('must not return a value')
+    })
+
+    it('includes executable Clawr stdlib code once without redeclaring opaque types', () => {
+        const result = compile('@main { serializeJSON(42) }', true)
+        expect(
+            result.declarations?.filter(
+                (decl) =>
+                    decl.kind === 'RC_TYPE_DECL' &&
+                    decl.name === 'JSONSerializer',
+            ),
+        ).toHaveLength(1)
+        expect(
+            result.declarations?.filter(
+                (decl) =>
+                    decl.kind === 'FUNCTION_DECL' &&
+                    decl.baseName === 'serializeJSON',
+            ),
+        ).toHaveLength(1)
+        expect(
+            result.declarations?.some(
+                (decl) =>
+                    decl.kind === 'RC_TYPE_DECL' && decl.name === 'JSONBuffer',
+            ),
+        ).toBe(false)
+    })
+
+    it('uses explicit conformance instead of synthesizing a second serializer', () => {
+        const result = compile(`
+            data Pure { number: integer }
+            extension Pure: Serializable {
+                func serialize(into serializer: ref Serializer) { serializer.writeString("custom") }
+            }
+        `)
+        expect(
+            result.declarations?.filter(
+                (decl) => decl.kind === 'EXTENSION_DECL',
+            ),
+        ).toHaveLength(1)
+        expect(() =>
+            compile(
+                'trait Serializable {} extern func consume(_ value: Serializable) @main { consume(1) }',
+            ),
+        ).toThrow('does not conform')
+        expect(() =>
+            compile(
+                'object O {} data D { value: O } extern func value() -> D @main { serializeJSON(value()) }',
+            ),
+        ).toThrow('does not conform')
+    })
+
+    it('transports real parameters without permitting precision-free arithmetic or storage', () => {
+        const result = compile(
+            'func forward(_ value: real, into serializer: ref Serializer) { serializer.writeReal(value) }',
+        )
+        expect(result.declarations?.[0]).toMatchObject({
+            parameters: [{ type: { universe: 'real' } }, {}],
+        })
+        expect(() =>
+            compile(
+                'func wrong(_ value: real) { const result = value + value }',
+            ),
+        ).toThrow('explicit precision')
+        expect(() => compile('data Wrong { value: real }')).toThrow(
+            'explicit precision',
+        )
+        expect(() =>
+            compile('func wrong(_ value: real) -> real { return value }'),
+        ).toThrow('explicit precision')
+        expect(() =>
+            compile(
+                'func wrong(into serializer: ref Serializer) { serializer.writeReal("wrong") }',
+            ),
+        ).toThrow('Argument must be a real')
+        expect(() =>
+            compile(
+                'func wrong(into serializer: ref Serializer) { serializer.writeString(1) }',
+            ),
+        ).toThrow('Argument must be a string')
+        expect(() =>
+            compile(
+                'func wrong(into serializer: ref Serializer) { serializer.writeInteger(false) }',
+            ),
+        ).toThrow('Argument must be an integer')
     })
 
     it('does not apply stdlib print boxing to a shadowing declaration', () => {

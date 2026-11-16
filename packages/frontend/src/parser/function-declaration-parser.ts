@@ -153,7 +153,9 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         stream.expect('PUNCTUATION', '(')
         const parameters: Parameter[] = []
         while (!stream.isNext('PUNCTUATION', ')')) {
-            const binding = this.bindingParser.parse(stream)
+            const binding = this.bindingParser.parse(stream, {
+                parameter: true,
+            })
 
             let defaultValue: Expression | undefined
             if (stream.isNext('PUNCTUATION', '=')) {

@@ -16,8 +16,12 @@ describe('multi-file programs', () => {
             source: 'func first() => second() @main { print(first()) }',
         }
         const second = { name: 'second.clawr', source: 'func second() => 42' }
-        expect(compile([first, second]).declarations).toHaveLength(2)
-        expect(compile([second, first]).declarations).toHaveLength(2)
+        const userFunctions = (sources: (typeof first)[]) =>
+            compile(sources).declarations?.filter(
+                (decl) => decl.kind === 'FUNCTION_DECL' && !decl.namespace,
+            )
+        expect(userFunctions([first, second])).toHaveLength(2)
+        expect(userFunctions([second, first])).toHaveLength(2)
     })
 
     it('requires exactly one main, including empty blocks', () => {

@@ -1,0 +1,6 @@
+@main {
+    const json: ref JSONSerializer = {JSONSerializer.new()}
+    json.writeInteger(1)
+    json.result()
+    json.result()
+}

@@ -47,7 +47,7 @@ describe('Function Calls', () => {
             }
             const result = lowerStmt(stmt)
             expect(result).toMatch(
-                /^String\* (tmpˇ\d+) = String¸fromCString\("Hello"\);\nmyFunction˛param1˛param2\(42, \1\);\nreleaseRC\(\1\);$/,
+                /^String\* (tmpˇ\d+) = String¸fromBytes\("Hello", sizeof\("Hello"\) - 1\);\nmyFunction˛param1˛param2\(42, \1\);\nreleaseRC\(\1\);$/,
             )
         })
     })
@@ -96,7 +96,7 @@ describe('Function Calls', () => {
             }
             const result = lowerStmt(stmt)
             expect(result).toMatch(
-                /^String\* (tmpˇ\d+) = String¸fromCString\("Hello"\);\nmyFunction˛param1\(42, \1\);\nreleaseRC\(\1\);$/,
+                /^String\* (tmpˇ\d+) = String¸fromBytes\("Hello", sizeof\("Hello"\) - 1\);\nmyFunction˛param1\(42, \1\);\nreleaseRC\(\1\);$/,
             )
         })
     })

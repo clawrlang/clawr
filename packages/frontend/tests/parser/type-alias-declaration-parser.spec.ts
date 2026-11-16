@@ -70,7 +70,7 @@ describe('Named subset and type declarations', () => {
             digits: 53,
             base: 'bin',
         })
-        expect(cir.declarations).toEqual([])
+        expect(cir.declarations).toEqual(standardLibrary.rootScope.emitted)
         expect(cir.startBlock).toHaveLength(3)
     })
 

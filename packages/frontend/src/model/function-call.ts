@@ -344,16 +344,22 @@ export class FunctionCall implements Expression, Statement {
     private callName(context: Context) {
         if (!this.recipient) {
             const declaration = context.scope.functionDeclaration(this.name)
-            let library = context.scope.parentScope
+            let library: typeof context.scope | undefined = context.scope
             while (library && library.namespace !== 'clawr')
                 library = library.parentScope
-            const type = declaration?.result?.type
             if (
                 library &&
                 declaration &&
                 declaration === library.functionDeclaration(this.name) &&
-                type instanceof RCTypeSet &&
-                context.scope.objectDeclaration(type.type)?.opaque
+                (declaration.implementation.kind !== 'extern' ||
+                    [
+                        declaration.result?.type,
+                        ...declaration.parameters.map((p) => p.type),
+                    ].some(
+                        (type) =>
+                            type instanceof RCTypeSet &&
+                            context.scope.objectDeclaration(type.type)?.opaque,
+                    ))
             )
                 return { ...this.name.toCIR(), namespace: library.namespace }
         }
@@ -404,6 +410,27 @@ export class FunctionCall implements Expression, Statement {
             if (converted.isError) return converted
             const parameter = declaration?.parameters[index]?.type
             if (
+                parameter instanceof IntegerSet ||
+                parameter instanceof RealSet ||
+                parameter instanceof StringSet
+            ) {
+                const actual = argument.currentValue(context)
+                if (actual.isError) return actual
+                const compatible =
+                    parameter instanceof IntegerSet
+                        ? actual.value instanceof IntegerSet
+                        : parameter instanceof StringSet
+                          ? actual.value instanceof StringSet
+                          : actual.value instanceof RealSet ||
+                            (!!parameter.precision &&
+                                actual.value instanceof IntegerSet)
+                if (!compatible)
+                    return SemanticErrorResult.failure(
+                        `Argument must be ${parameter instanceof IntegerSet ? 'an' : 'a'} ${parameter.toString()}`,
+                        argument.span,
+                    )
+            }
+            if (
                 parameter instanceof RCTypeSet &&
                 context.scope.objectDeclaration(parameter.type)?.opaque
             ) {
@@ -415,14 +442,14 @@ export class FunctionCall implements Expression, Statement {
                         context.scope.objectDeclaration(parameter.type)
                 )
                     return SemanticErrorResult.failure(
-                        'Argument must be a HashBuilder',
+                        `Argument must be a ${parameter.type.name}`,
                         argument.span,
                     )
                 const isolation = argument.isolationLevel(context)
                 if (isolation.isError) return isolation
                 if (isolation.value === 'ISOLATED')
                     return SemanticErrorResult.failure(
-                        'HashBuilder must be shared',
+                        `${parameter.type.name} must be shared`,
                         argument.span,
                     )
             }
@@ -466,7 +493,7 @@ export class FunctionCall implements Expression, Statement {
                 result.push(converted.value)
                 continue
             }
-            let library = context.scope.parentScope
+            let library: typeof context.scope | undefined = context.scope
             while (library && library.namespace !== 'clawr')
                 library = library.parentScope
             if (
@@ -475,6 +502,7 @@ export class FunctionCall implements Expression, Statement {
                     'HasStringRepresentation',
                     'HashEquatable',
                     'Equatable',
+                    'Serializable',
                 ].includes(iface.name.name) ||
                 !(
                     value.value instanceof IntegerSet ||
@@ -519,7 +547,7 @@ export class FunctionCall implements Expression, Statement {
             if (isolation.isError) return isolation
             if (isolation.value === 'ISOLATED')
                 return SemanticErrorResult.failure(
-                    'HashBuilder must be shared',
+                    `${object.name.name} must be shared`,
                     this.recipient.span,
                 )
         }

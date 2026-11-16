@@ -3,6 +3,25 @@ import type * as cir from '@clawr/cir'
 import { describe, expect, it } from 'bun:test'
 
 describe('Interface Declaration', () => {
+    it('reuses runtime-owned identities without suppressing Clawr-defined stdlib interfaces', () => {
+        expect(
+            lowerDecl({
+                kind: 'INTERFACE_DECL',
+                namespace: 'clawr',
+                name: 'Serializable',
+                methods: [],
+            }),
+        ).toBe('')
+        expect(
+            lowerDecl({
+                kind: 'INTERFACE_DECL',
+                namespace: 'clawr',
+                name: 'CustomWriter',
+                methods: [],
+            }),
+        ).toContain('__interface_info clawr¸CustomWriterˇtype')
+    })
+
     it('is output correctly', () => {
         const decl: cir.Declaration = {
             kind: 'INTERFACE_DECL',

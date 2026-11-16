@@ -37,6 +37,7 @@ __attribute__((visibility("default"))) const __type_info Integerˇtype = {
             .conformances =
                 (const __interface_conformance_entry *[]){
                     &Integerˇclawr¸HasStringRepresentationˇconformance,
+                    &Integerˇserializable_conformance,
                     &Integerˇhash_conformance,
                     &Integerˇequal_conformance,
                     NULL,

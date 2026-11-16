@@ -4,6 +4,13 @@ import { FunctionName } from '@/model/function-name'
 import type { ExtensionDeclaration } from '@/model/extension-declaration'
 import { IsolationLevel } from '@/model/isolation-level'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
+import { decorateTypeConstraint } from '@/model/type-constraint-declaration'
+import { FunctionCall } from '@/model/function-call'
+import { Parameter } from '@/model/parameter'
+import { PropertyReference } from '@/model/property-reference'
+import { VariableReference } from '@/model/variable-reference'
+import { IntegerLiteral } from '@/model/literals'
+import { StringLiteral } from '@/model/literals/string-literal'
 import { TypeName } from '@/model/type-name'
 import {
     IntegerSet,
@@ -29,31 +36,19 @@ export class DataDeclaration implements Declaration {
     private constructor(
         public name: TypeName,
         public properties: Property[],
-        public readonly explicitlySerializable: boolean,
-        public readonly serializer: FunctionDeclaration | undefined,
         public readonly span?: SourceCodeSpan,
     ) {}
 
     static create({
         name,
         properties,
-        explicitlySerializable,
-        serializer,
         span,
     }: {
         name: TypeName
         properties: Property[]
-        explicitlySerializable?: boolean
-        serializer?: FunctionDeclaration
         span?: SourceCodeSpan
     }): DataDeclaration {
-        return new DataDeclaration(
-            name,
-            properties,
-            explicitlySerializable ?? false,
-            serializer,
-            span,
-        )
+        return new DataDeclaration(name, properties, span)
     }
 
     registerDeclaration(context: Context): void {
@@ -63,16 +58,23 @@ export class DataDeclaration implements Declaration {
     lookupMethod(
         name: FunctionName,
         context: Context,
+        includeSynthesized = true,
     ): FunctionDeclaration | undefined {
-        if (this.serializer?.name().toString() === name.toString())
-            return this.serializer
-        return context.scope.rootScope
+        const method = context.scope.rootScope
             .extensionDeclarations(this.name)
             .flatMap((extension: ExtensionDeclaration) => [
                 ...extension.methods,
                 ...extension.mutating,
             ])
             .find((method) => method.name().toString() === name.toString())
+        if (method) return method
+        if (
+            includeSynthesized &&
+            name.toString() === 'serialize(into:)' &&
+            this.shouldSynthesizeSerializer(context)
+        )
+            return this.synthesizedSerializer()
+        return undefined
     }
 
     extensionMethodIsMutating(name: FunctionName, context: Context): boolean {
@@ -94,15 +96,14 @@ export class DataDeclaration implements Declaration {
     conformsTo(name: TypeName, context: Context): boolean {
         const serializable = context.scope.interfaceDeclaration(
             TypeName.create({
-                name: 'JSONSerializable',
+                name: 'Serializable',
                 namespace: 'clawr',
             }),
         )
         if (
             !!serializable &&
             name.canonical() === serializable.name.canonical() &&
-            (this.implicitlyJSONSerializable(context, new Set()) ||
-                (this.explicitlySerializable && !!this.serializer))
+            this.implicitlySerializable(context, new Set())
         )
             return true
         const target = context.scope.interfaceDeclaration(name)
@@ -121,39 +122,24 @@ export class DataDeclaration implements Declaration {
 
     emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addDataDeclaration(this)
+        const extensions = context.scope.rootScope.extensionDeclarations(
+            this.name,
+        )
         if (
-            this.explicitlySerializable &&
-            !this.serializer &&
-            !this.implicitlyJSONSerializable(context, new Set())
+            this.shouldSynthesizeSerializer(context) &&
+            extensions.some((extension) =>
+                [...extension.methods, ...extension.mutating].some(
+                    (method) => method.name().toString() === 'serialize(into:)',
+                ),
+            )
         )
             return SemanticErrorResult.failure(
-                'A data type with non-serializable properties must define serialize: toJSON()',
+                'A custom serialize(into:) implementation requires explicit Serializable conformance',
                 this.span ?? {
                     start: { line: 1, column: 1 },
                     end: { line: 1, column: 1 },
                 },
             )
-        if (this.serializer && !this.explicitlySerializable)
-            return SemanticErrorResult.failure(
-                'A custom data serializer requires JSONSerializable conformance',
-                this.serializer.span ??
-                    this.span ?? {
-                        start: { line: 1, column: 1 },
-                        end: { line: 1, column: 1 },
-                    },
-            )
-        if (this.serializer && !this.isValidSerializer(context))
-            return SemanticErrorResult.failure(
-                'A data serializer must be a non-extern toJSON() method returning string',
-                this.serializer.span ??
-                    this.span ?? {
-                        start: { line: 1, column: 1 },
-                        end: { line: 1, column: 1 },
-                    },
-            )
-        const extensions = context.scope.rootScope.extensionDeclarations(
-            this.name,
-        )
         const extensionMethods = new Map<
             ExtensionDeclaration,
             (cir.Declaration & { kind: 'FUNCTION_DECL' })[]
@@ -175,57 +161,43 @@ export class DataDeclaration implements Declaration {
         )
         if (extensionConformances.isError) return extensionConformances
 
-        let serializerMethod:
-            (cir.Declaration & { kind: 'FUNCTION_DECL' }) | undefined
-        if (this.serializer) {
-            const serializerContext = this.injectSelf(context)
-            const method = this.serializer.emitMethod(serializerContext)
-            if (method.isError) return method
-            serializerMethod = method.value
-        }
-
-        const serializable = this.conformsTo(
-            TypeName.create({
-                name: 'JSONSerializable',
-                namespace: 'clawr',
-            }),
-            context,
-        )
-        const jsonConformance = serializable
-            ? [
-                  {
-                      interface: {
-                          name: 'JSONSerializable',
-                          namespace: 'clawr',
-                      },
-                      fulfillments: [
-                          {
-                              requirement: {
-                                  baseName: 'toJSON',
-                                  labels: [],
-                              },
-                              implementation: {
-                                  baseName: 'toJSON',
-                                  labels: [],
-                              },
-                          },
-                      ],
-                  },
-              ]
-            : []
         context.scope.rootScope.emitted.push({
             kind: 'RC_TYPE_DECL',
             name: this.name.name,
             namespace: this.name.namespace,
-            ...(jsonConformance.length > 0 && {
-                conformances: jsonConformance,
-            }),
-            ...(serializerMethod && { methods: [serializerMethod] }),
             properties: this.properties.map((property) => ({
                 name: property.name,
                 type: context.scope.toCIRType(property.type!),
             })),
         })
+        if (this.shouldSynthesizeSerializer(context)) {
+            const method = this.synthesizedSerializer().emitMethod(
+                this.injectSelf(context),
+            )
+            if (method.isError) return method
+            context.scope.rootScope.emitted.push({
+                kind: 'EXTENSION_DECL',
+                target: this.name.toCIR(),
+                methods: [method.value],
+                conformances: [
+                    {
+                        interface: { name: 'Serializable', namespace: 'clawr' },
+                        fulfillments: [
+                            {
+                                requirement: {
+                                    baseName: 'serialize',
+                                    labels: ['into'],
+                                },
+                                implementation: {
+                                    baseName: 'serialize',
+                                    labels: ['into'],
+                                },
+                            },
+                        ],
+                    },
+                ],
+            })
+        }
         for (const extension of extensions) {
             const conformances =
                 extensionConformances.value.get(extension) ?? []
@@ -383,27 +355,7 @@ export class DataDeclaration implements Declaration {
         return Result.value(conformances)
     }
 
-    private isValidSerializer(context: Context): boolean {
-        if (
-            !this.serializer ||
-            this.serializer.name().toString() !== 'toJSON()'
-        )
-            return false
-        if (this.serializer.parameters.length !== 0 || !this.serializer.result)
-            return false
-        return (
-            this.serializer.result.type instanceof StringSet &&
-            this.serializer.result.isolationLevel !== 'SHARED' &&
-            context.scope.interfaceDeclaration(
-                TypeName.create({
-                    name: 'JSONSerializable',
-                    namespace: 'clawr',
-                }),
-            ) !== undefined
-        )
-    }
-
-    private implicitlyJSONSerializable(
+    private implicitlySerializable(
         context: Context,
         visiting: Set<DataDeclaration>,
     ): boolean {
@@ -422,13 +374,123 @@ export class DataDeclaration implements Declaration {
             if (type instanceof RCTypeSet) {
                 const nested = context.scope.dataDeclaration(type.type)
                 return (
-                    !!nested &&
-                    nested.implicitlyJSONSerializable(context, visiting)
+                    !!nested && nested.implicitlySerializable(context, visiting)
                 )
             }
             return false
         })
         visiting.delete(this)
         return result
+    }
+
+    private shouldSynthesizeSerializer(context: Context): boolean {
+        const serializable = context.scope.interfaceDeclaration(
+            TypeName.create({
+                name: 'Serializable',
+                namespace: 'clawr',
+            }),
+        )
+        return (
+            !!serializable &&
+            !context.scope.rootScope
+                .extensionDeclarations(this.name)
+                .some(
+                    (extension) =>
+                        !!extension.conformance &&
+                        context.scope
+                            .interfaceDeclaration(extension.conformance)
+                            ?.hierarchy(context)
+                            .includes(serializable),
+                ) &&
+            this.implicitlySerializable(context, new Set())
+        )
+    }
+
+    private synthesizedSerializer(): FunctionDeclaration {
+        const span = this.span ?? {
+            start: { line: 1, column: 1 },
+            end: { line: 1, column: 1 },
+        }
+        const serializer = VariableReference.create({
+            name: 'serializer',
+            span,
+        })
+        const call = (
+            baseName: string,
+            args: { label?: string; value: Expression }[],
+        ) =>
+            FunctionCall.create({
+                baseName,
+                recipient: serializer,
+                arguments: args,
+                span,
+            })
+        return FunctionDeclaration.create({
+            baseName: 'serialize',
+            parameters: [
+                Parameter.create({
+                    isImmutable: true,
+                    label: 'into',
+                    varName: 'serializer',
+                    isolationLevel: 'SHARED',
+                    span,
+                    type: decorateTypeConstraint(
+                        RCTypeSet.create({
+                            type: TypeName.create({
+                                name: 'Serializer',
+                                namespace: 'clawr',
+                            }),
+                        }),
+                        { span },
+                    ),
+                }),
+            ],
+            result: undefined,
+            span,
+            implementation: {
+                kind: 'body',
+                statements: [
+                    call('beginStructure', [
+                        {
+                            value: StringLiteral.create(
+                                this.name.canonical(),
+                                span,
+                            ),
+                        },
+                        {
+                            label: 'fieldCount',
+                            value: IntegerLiteral.create({
+                                value: BigInt(this.properties.length),
+                                span,
+                            }),
+                        },
+                    ]),
+                    ...this.properties.map((property) =>
+                        call('writeField', [
+                            {
+                                value: StringLiteral.create(
+                                    property.name,
+                                    span,
+                                ),
+                            },
+                            {
+                                label: 'value',
+                                value: PropertyReference.create({
+                                    object: VariableReference.create({
+                                        name: 'self',
+                                        span,
+                                    }),
+                                    operator: '->',
+                                    property: property.name,
+                                    span,
+                                    propertySpan: span,
+                                }),
+                            },
+                        ]),
+                    ),
+                    call('endStructure', []),
+                ],
+            },
+        })
     }
 }

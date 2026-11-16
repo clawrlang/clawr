@@ -105,7 +105,7 @@ export class FunctionDeclaration implements Declaration {
         ) {
             if (this.result.isolationLevel === ISOLATED)
                 return this.externNotAllowed(
-                    'HashBuilder results must be shared',
+                    `${this.result.type.type.name} results must be shared`,
                 )
             return Result.value(SHARED)
         }
@@ -114,9 +114,7 @@ export class FunctionDeclaration implements Declaration {
 
     type(context: Context): SemanticResult<ValueSet | undefined> {
         if (this.result)
-            return Result.value(
-                context.scope.canonicalOpaqueType(this.result.type),
-            )
+            return Result.value(context.scope.canonicalType(this.result.type))
         if (this.implementation.kind === 'implicit-return') {
             const scope = this.scopeAddingParameters(context)
             if (scope.isError) return scope
@@ -170,6 +168,9 @@ export class FunctionDeclaration implements Declaration {
 
         const cirFuncDecl: cir.Declaration = {
             kind: 'FUNCTION_DECL',
+            ...(context.scope.namespace && {
+                namespace: context.scope.namespace,
+            }),
             baseName: this.baseName,
             labels: mapFilter(this.parameters, (p) => p.label),
             parameters: this.parameters.map((param) => ({
@@ -342,7 +343,7 @@ export class FunctionDeclaration implements Declaration {
                 ...context,
                 scope: parameterScopeResult.value,
                 calleeResult: this.result && {
-                    type: context.scope.canonicalOpaqueType(this.result.type),
+                    type: context.scope.canonicalType(this.result.type),
                     isolationLevel: isolation!.value,
                 },
             })
@@ -391,13 +392,13 @@ export class FunctionDeclaration implements Declaration {
                 context.scope.objectDeclaration(typeResult.value.type)?.opaque
             if (opaque && param.isolationLevel === 'ISOLATED')
                 return SemanticErrorResult.failure(
-                    'HashBuilder parameters must be shared',
+                    `${typeResult.value instanceof RCTypeSet ? typeResult.value.type.name : 'Opaque service'} parameters must be shared`,
                     param.span,
                 )
             parameterScope.addVariableDeclaration(param.varName, {
                 isImmutable: param.isImmutable,
                 isolationLevel: opaque ? SHARED : param.isolationLevel,
-                type: context.scope.canonicalOpaqueType(typeResult.value),
+                type: context.scope.canonicalType(typeResult.value),
             })
             context.highlightRecorder?.record('parameter', param.span, [
                 'declaration',

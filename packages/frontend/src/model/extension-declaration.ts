@@ -81,12 +81,6 @@ export class ExtensionDeclaration implements Declaration {
         const names = new Set<string>()
         for (const method of methods) {
             const name = method.name().toString()
-            if (data && name === 'toJSON()')
-                throw SourceError.create({
-                    message:
-                        'A data type must define its JSON serializer in the serialize: section',
-                    span: method.span ?? this.span,
-                })
             const inheritedMemberConflict =
                 !!object &&
                 context.scope.rootScope
@@ -125,7 +119,7 @@ export class ExtensionDeclaration implements Declaration {
                     ),
                 ) ||
                 object?.lookupMethod(method.name(), context) ||
-                data?.lookupMethod(method.name(), context) ||
+                data?.lookupMethod(method.name(), context, false) ||
                 inheritedMemberConflict ||
                 inheritedExtensionConflict
             )

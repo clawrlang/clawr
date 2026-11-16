@@ -103,7 +103,7 @@ export class VariableDeclaration implements Statement, Declaration {
             (this.isImmutable && isolationLevel === ISOLATED
                 ? initialValue
                 : initialValue.unconstrained())
-        const type = context.scope.canonicalOpaqueType(declaredType)
+        const type = context.scope.canonicalType(declaredType)
 
         const valueResult = Retain.ifStorage(this.initialValue, context)
         if (valueResult.isError) return valueResult
@@ -211,7 +211,10 @@ export class VariableDeclaration implements Statement, Declaration {
                     object
                 )
         }
-        return !this.type || this.type.isSupersetTo(currentValue)
+        return (
+            !this.type ||
+            context.scope.canonicalType(this.type).isSupersetTo(currentValue)
+        )
     }
 
     private currentValueFromInitial(
@@ -222,6 +225,6 @@ export class VariableDeclaration implements Statement, Declaration {
             explicitType: this.type,
         })
         if (result.isError) return result
-        return Result.value(context.scope.canonicalOpaqueType(result.value))
+        return Result.value(context.scope.canonicalType(result.value))
     }
 }

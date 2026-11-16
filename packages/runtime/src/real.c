@@ -49,6 +49,7 @@ __attribute__((visibility("default"))) const __type_info Realˇtype = {
             .conformances =
                 (const __interface_conformance_entry *[]){
                     &Realˇclawr¸HasStringRepresentationˇconformance,
+                    &Realˇserializable_conformance,
                     &Realˇhash_conformance,
                     &Realˇequal_conformance,
                     NULL,

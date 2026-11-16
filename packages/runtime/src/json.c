@@ -6,6 +6,7 @@
 
 #include <inttypes.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -168,8 +169,156 @@ __attribute__((visibility("default"))) String *JSONWriter¸finish(
     JSONWriter *writer) {
   if (!writer)
     panic("JSONWriter¸finish does not accept NULL");
-  String *result = String¸fromCString(writer->data ? writer->data : "");
-  free(writer->data);
+  reserve(writer, 0);
+  writer->data[writer->length] = '\0';
+  String *result = allocInitRC(String, 0, __rc_ISOLATED,
+                              .data = writer->data, .length = writer->length);
   *writer = (JSONWriter){0};
   return result;
+}
+
+typedef struct JSONFrame {
+  struct JSONFrame *parent;
+  Integer *remaining;
+  bool pending;
+  bool valueWritten;
+  bool hasFields;
+} JSONFrame;
+
+struct clawr¸JSONBuffer {
+  __rc_header header;
+  JSONWriter writer;
+  JSONFrame *frame;
+  bool rootWritten;
+  bool finalized;
+};
+typedef struct {
+  JSONWriter writer;
+  JSONFrame *frame;
+  bool rootWritten;
+  bool finalized;
+} clawr¸JSONBufferˇproperties;
+
+static void releaseJSONBuffer(void *self) {
+  clawr¸JSONBuffer *buffer = self;
+  free(buffer->writer.data);
+  while (buffer->frame) {
+    JSONFrame *frame = buffer->frame;
+    buffer->frame = frame->parent;
+    releaseRC(frame->remaining);
+    free(frame);
+  }
+}
+
+__attribute__((visibility("default")))
+const __type_info clawr¸JSONBufferˇtype = {
+    .data_type = {
+        .size = sizeof(clawr¸JSONBuffer),
+        .release_nested_properties = releaseJSONBuffer,
+    },
+};
+
+__attribute__((visibility("default")))
+clawr¸JSONBuffer *clawr¸newJSONBuffer(void) {
+  return allocInitRC(clawr¸JSONBuffer, 0, __rc_SHARED, 0);
+}
+
+static void requireWritable(clawr¸JSONBuffer *buffer) {
+  if (!buffer)
+    panic("JSON writer does not accept NULL");
+  if (buffer->finalized)
+    panic("JSON writer is already finalized");
+}
+
+static void consumeValue(clawr¸JSONBuffer *buffer) {
+  requireWritable(buffer);
+  if (buffer->frame) {
+    if (!buffer->frame->pending || buffer->frame->valueWritten)
+      panic("JSON field requires exactly one value");
+    buffer->frame->valueWritten = true;
+  } else {
+    if (buffer->rootWritten)
+      panic("JSON document requires exactly one root");
+    buffer->rootWritten = true;
+  }
+}
+
+#define JSON_SCALAR(Name, Type, append)                                       \
+  __attribute__((visibility("default")))                                     \
+  void clawr¸jsonWrite##Name##˛value(clawr¸JSONBuffer *buffer, Type value) {  \
+    consumeValue(buffer);                                                    \
+    JSONWriter¸append##append(&buffer->writer, value);                       \
+  }
+
+JSON_SCALAR(String, String *, String)
+JSON_SCALAR(Integer, Integer *, Integer)
+JSON_SCALAR(Real, Real *, Real)
+JSON_SCALAR(Truthvalue, truthvalue_t, Truthvalue)
+
+__attribute__((visibility("default")))
+void clawr¸jsonBeginStructure˛fieldCount(clawr¸JSONBuffer *buffer,
+                                        Integer *fieldCount) {
+  requireWritable(buffer);
+  if (!fieldCount || Integer¸compare(fieldCount, &Integer¸zero) < 0)
+    panic("JSON structure field count must be nonnegative");
+  consumeValue(buffer);
+  JSONFrame *frame = calloc(1, sizeof(*frame));
+  if (!frame)
+    panic("Out of memory while encoding JSON");
+  frame->parent = buffer->frame;
+  frame->remaining = retainRC(fieldCount);
+  buffer->frame = frame;
+  JSONWriter¸appendRaw(&buffer->writer, "{");
+}
+
+__attribute__((visibility("default")))
+void clawr¸jsonBeginField˛name(clawr¸JSONBuffer *buffer, String *name) {
+  requireWritable(buffer);
+  JSONFrame *frame = buffer->frame;
+  if (!frame || frame->pending ||
+      Integer¸compare(frame->remaining, &Integer¸zero) == 0)
+    panic("Unexpected JSON field");
+  if (frame->hasFields)
+    JSONWriter¸appendRaw(&buffer->writer, ",");
+  JSONWriter¸appendString(&buffer->writer, name);
+  JSONWriter¸appendRaw(&buffer->writer, ":");
+  frame->pending = true;
+  frame->valueWritten = false;
+}
+
+__attribute__((visibility("default")))
+void clawr¸jsonEndField(clawr¸JSONBuffer *buffer) {
+  requireWritable(buffer);
+  JSONFrame *frame = buffer->frame;
+  if (!frame || !frame->pending || !frame->valueWritten)
+    panic("JSON field requires exactly one complete value");
+  Integer *one = Integer¸fromInt64(1);
+  Integer *remaining = Integer¸subtract(frame->remaining, one);
+  releaseRC(one);
+  releaseRC(frame->remaining);
+  frame->remaining = remaining;
+  frame->pending = false;
+  frame->hasFields = true;
+}
+
+__attribute__((visibility("default")))
+void clawr¸jsonEndStructure(clawr¸JSONBuffer *buffer) {
+  requireWritable(buffer);
+  JSONFrame *frame = buffer->frame;
+  if (!frame || frame->pending ||
+      Integer¸compare(frame->remaining, &Integer¸zero) != 0)
+    panic("JSON structure fields do not match declared count");
+  JSONWriter¸appendRaw(&buffer->writer, "}");
+  buffer->frame = frame->parent;
+  releaseRC(frame->remaining);
+  free(frame);
+}
+
+__attribute__((visibility("default")))
+String *clawr¸jsonResult(clawr¸JSONBuffer *buffer) {
+  requireWritable(buffer);
+  if (!buffer->rootWritten || buffer->frame)
+    panic("JSON document requires one complete root");
+  buffer->finalized = true;
+  return JSONWriter¸finish(&buffer->writer);
 }

@@ -1,0 +1,123 @@
+data Empty {}
+
+data Leaf {
+    large: integer
+    text: string
+}
+
+data Record {
+    leaf: Leaf
+    empty: Empty
+    small: integer(0...10)
+    binary: binary32
+    decimal: real sig 30
+    ternary: real scale 1 ter
+    flag: truthvalue
+}
+
+object Entity {
+init:
+    func new() => {}
+}
+
+data Custom {
+    entity: Entity
+    shared: ref Leaf
+}
+
+extension Custom: Serializable {
+    func serialize(into serializer: ref Serializer) {
+        serializer.writeString("custom")
+    }
+}
+
+extension Entity: Serializable {
+    func serialize(into serializer: ref Serializer) {
+        serializer.writeInteger(9)
+    }
+}
+
+data Override { value: integer }
+
+extension Override: Serializable {
+    func serialize(into serializer: ref Serializer) {
+        serializer.writeTruthvalue(ambiguous)
+    }
+}
+
+data Pair {
+    left: integer
+    right: integer
+}
+
+service SumSerializer: Serializer {
+    func writeString(_ value: string) {}
+    func writeInteger(_ value: integer) {
+        self->total = self->total + value
+    }
+    func writeReal(_ value: real) {}
+    func writeTruthvalue(_ value: truthvalue) {}
+    func beginStructure(_ typeName: string, fieldCount: integer) {}
+    func writeField(_ name: string, value: Serializable) {
+        value.serialize(into: self)
+    }
+    func endStructure() {}
+    func result() -> integer => self->total
+state:
+    total: integer
+init:
+    func new() => {total: 0}
+}
+
+func forwardReal(_ value: real, into serializer: ref Serializer) {
+    serializer.writeReal(value)
+}
+
+func transport(_ value: real) => value
+
+@main {
+    const leaf: Leaf = {
+        large: 9007199254740993123456789
+        text: "quote: \" slash: \\ line:\n nul:\u0000 å"
+    }
+    const record: Record = {
+        leaf: leaf
+        empty: {}
+        small: 7
+        binary: 1.25
+        decimal: 12345678901234567890.123456789
+        ternary: 0.333
+        flag: ambiguous
+    }
+    print(serializeJSON(record))
+    print(serializeJSON(true))
+    print(serializeJSON(false))
+    print(serializeJSON(ambiguous))
+    print(serializeJSON("hello"))
+    print(serializeJSON("??/"))
+    print(serializeJSON(42))
+    print(serializeJSON(1.25))
+    const entity: Entity = {Entity.new()}
+    const custom: Custom = {entity: entity, shared: leaf}
+    print(serializeJSON(custom))
+    print(serializeJSON(entity))
+    const overridden: Override = {value: 1}
+    print(serializeJSON(overridden))
+    const pair: Pair = {left: 2, right: 3}
+    const json: ref JSONSerializer = {JSONSerializer.new()}
+    pair.serialize(into: json)
+    print(json.result())
+    const sum: ref SumSerializer = {SumSerializer.new()}
+    pair.serialize(into: sum)
+    print(sum.result())
+    const realJSON: ref JSONSerializer = {JSONSerializer.new()}
+    const real: real scale 2 ter = 0.22
+    forwardReal(real, into: realJSON)
+    print(realJSON.result())
+    const wide: real sig 80 bin = 9007199254740993.0
+    print(serializeJSON(transport(wide)))
+    const nativeJSON: ref JSONSerializer = {JSONSerializer.new()}
+    const native: binary32 = 1.25
+    forwardReal(native, into: nativeJSON)
+    print(nativeJSON.result())
+}

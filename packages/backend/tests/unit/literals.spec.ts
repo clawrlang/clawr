@@ -11,7 +11,9 @@ describe('Lowering Literals', () => {
             type: { universe: 'string', value: 'Hello, World!' },
         }
         const result = lowerExpr(expr)
-        expect(result).toBe('String¸fromCString("Hello, World!")')
+        expect(result).toBe(
+            'String¸fromBytes("Hello, World!", sizeof("Hello, World!") - 1)',
+        )
     })
 
     it('lowers integer literals correctly', () => {
@@ -32,9 +34,7 @@ describe('Lowering Literals', () => {
                 precision: { kind: 'sig', digits: 3, base: 'dec' },
             },
         }
-        expect(lowerExpr(expr)).toBe(
-            'Real¸fromString("1.25", 3, false)',
-        )
+        expect(lowerExpr(expr)).toBe('Real¸fromString("1.25", 3, false)')
     })
 
     it('lowers IEEE binary32 real literals to native float parsing', () => {

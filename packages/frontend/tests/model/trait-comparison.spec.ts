@@ -169,7 +169,11 @@ describe('trait comparisons', () => {
                 return a == b
             }
         `)
-        expect(cir.declarations).toMatchObject([
+        expect(
+            cir.declarations?.filter(
+                (decl) => decl.kind === 'FUNCTION_DECL' && !decl.namespace,
+            ),
+        ).toMatchObject([
             { body: [{ kind: 'RETURN', value: { kind: 'LESS_THAN' } }] },
             { body: [{ kind: 'RETURN', value: { kind: 'EQUAL' } }] },
         ])

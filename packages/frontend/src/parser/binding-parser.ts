@@ -22,7 +22,7 @@ export class BindingParser {
         return new BindingParser(context)
     }
 
-    parse(stream: TokenStream): Binding {
+    parse(stream: TokenStream, { parameter = false } = {}): Binding {
         const mutabilityToken = stream.isNext('KEYWORD', ...MUTABILITY_KEYWORDS)
             ? stream.expect('KEYWORD', ...MUTABILITY_KEYWORDS)
             : undefined
@@ -34,7 +34,7 @@ export class BindingParser {
         }
         const name = nameToken.identifier
 
-        const typeConstraint = this.parseTypeConstraint(stream)
+        const typeConstraint = this.parseTypeConstraint(stream, parameter)
         const type = typeConstraint?.[0]
         const isolation = typeConstraint?.[1]
         if (isolation === 'ref' && type instanceof StringSet)
@@ -69,6 +69,7 @@ export class BindingParser {
 
     private parseTypeConstraint(
         stream: TokenStream,
+        parameter: boolean,
     ): [TypeConstraintDeclaration, IsolationKeyword | undefined] | undefined {
         if (!stream.isNext('PUNCTUATION', ':')) return undefined
         stream.expect('PUNCTUATION', ':')
@@ -78,7 +79,9 @@ export class BindingParser {
             : undefined
 
         return [
-            TypeConstraintParser.create(this.context).parse(stream),
+            TypeConstraintParser.create(this.context).parse(stream, {
+                allowMissingRealPrecision: parameter,
+            }),
             isolationToken?.keyword,
         ]
     }

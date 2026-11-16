@@ -94,9 +94,7 @@ export class ObjectDeclarationParser {
             kind: startToken.keyword as 'object' | 'service',
             name: TypeName.create({
                 name: nameToken.identifier,
-                namespace: opaqueToken
-                    ? this.context.scope?.namespace
-                    : undefined,
+                namespace: this.context.scope?.namespace,
             }),
             opaque: !!opaqueToken,
             nameSpan: { start: nameToken.start, end: nameToken.end },

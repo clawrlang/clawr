@@ -15,6 +15,7 @@ import { Context } from '@/parser'
 import { FunctionArgumentsParser } from '@/parser/function-arguments-parser'
 import { DataLiteralParser } from '@/parser/literals'
 import { SourceError } from '@/tools'
+import { StringLiteral } from '@/model/literals/string-literal'
 
 export class ExpressionParser {
     private readonly dataLiteralParser: DataLiteralParser
@@ -219,6 +220,22 @@ export class ExpressionParser {
     private parsePrimaryExpression(stream: TokenStream): Expression {
         const nextToken = stream.peek()
         switch (nextToken?.kind) {
+            case 'STRING_LITERAL': {
+                const token = stream.expectToken()
+                if (token.kind !== 'STRING_LITERAL')
+                    throw new Error('Expected string')
+                let value: string
+                try {
+                    value = JSON.parse(`"${token.value}"`)
+                } catch (error) {
+                    if (!(error instanceof SyntaxError)) throw error
+                    throw SourceError.create({
+                        message: 'Invalid string literal escape',
+                        span: token,
+                    })
+                }
+                return StringLiteral.create(value, token)
+            }
             case 'TRUTHVALUE_LITERAL':
                 return this.parseTruthValueLiteral(stream)
             case 'INTEGER_LITERAL':

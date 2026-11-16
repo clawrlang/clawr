@@ -1,0 +1,16 @@
+{"leaf":{"large":9007199254740993123456789,"text":"quote: \" slash: \\ line:\n nul:\u0000 å"},"empty":{},"small":7,"binary":1.25,"decimal":12345678901234567890.123456789,"ternary":0.3,"flag":null}
+true
+false
+null
+"hello"
+"??/"
+42
+1.25
+"custom"
+9
+null
+{"left":2,"right":3}
+5
+0.2
+9007199254740993.0
+1.25

@@ -4,6 +4,7 @@
 #include "interfaces.h"
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -33,7 +34,7 @@ __attribute__((visibility("default"))) const __type_info Stringˇtype = {
             .release_nested_properties = releaseNestedProperties,
             .conformances = (const __interface_conformance_entry *[]){
                 &stringConformance, &Stringˇhash_conformance,
-                &Stringˇequal_conformance, NULL,
+                &Stringˇequal_conformance, &Stringˇserializable_conformance, NULL,
             },
         },
 };
@@ -43,13 +44,23 @@ String *String¸fromCString(const char *value) {
   if (!value)
     panic("String¸fromCString does not accept NULL");
 
-  size_t len = strlen(value);
-  char *data = malloc(len + 1);
-  if (!data)
-    panic("Out of memory in String¸fromCString");
-  memcpy(data, value, len + 1);
+  return String¸fromBytes(value, strlen(value));
+}
 
-  return allocInitRC(String, 0, __rc_ISOLATED, .length = len, .data = data);
+__attribute__((visibility("default")))
+String *String¸fromBytes(const char *value, size_t length) {
+  if (!value)
+    panic("String¸fromBytes does not accept NULL");
+  if (length == SIZE_MAX)
+    panic("String is too large");
+
+  char *data = malloc(length + 1);
+  if (!data)
+    panic("Out of memory in String¸fromBytes");
+  memcpy(data, value, length);
+  data[length] = '\0';
+
+  return allocInitRC(String, 0, __rc_ISOLATED, .length = length, .data = data);
 }
 
 __attribute__((visibility("default")))

@@ -49,7 +49,12 @@ export class Module {
         if (this.main?.length) context.scope.releaseVariables()
         return {
             $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
-            declarations: context.scope.rootScope.emitted,
+            declarations: [
+                ...(context.scope.parentScope?.namespace === 'clawr'
+                    ? context.scope.parentScope.rootScope.emitted
+                    : []),
+                ...context.scope.rootScope.emitted,
+            ],
             startBlock: context.scope.emitted,
         }
     }

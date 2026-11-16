@@ -1,201 +1,145 @@
 # yaml-language-server: $schema=../../../../../schema/cir.schema.json
 $schema: http://clawr.lang/schema/cir/DRAFT-0
 declarations:
+  - kind: INTERFACE_DECL
+    name: Writable
+    methods:
+      - baseName: serialize
+        labels: [into]
+        parameters:
+          - name: buffer
+            type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+        returnType: {universe: void}
   - kind: RC_TYPE_DECL
-    name: Leaf
+    name: Point
     properties:
-      - name: value
-        type:
-          universe: integer
+      - name: number
+        type: {universe: integer}
+  - kind: EXTENSION_DECL
+    target: {name: Point}
     conformances:
-      - interface:
-          name: JSONSerializable
-          namespace: clawr
+      - interface: {name: Writable}
         fulfillments:
-          - requirement:
-              baseName: toJSON
-              labels: []
-            implementation:
-              baseName: toJSON
-              labels: []
-  - kind: RC_TYPE_DECL
-    name: Record
-    properties:
-      - name: leaf
-        type:
-          universe: rc-type
-          name: Leaf
-      - name: small
-        type:
-          universe: integer
-          min: '0'
-          max: '10'
-      - name: text
-        type:
-          universe: string
-      - name: binary
-        type:
-          universe: real
-          min: '-340282346638528859811704183484516925440.0'
-          max: '340282346638528859811704183484516925440.0'
-          precision: { kind: sig, digits: 24, base: bin }
-      - name: trit
-        type:
-          universe: real
-          precision: { kind: scale, digits: 1, base: ter }
-      - name: state
-        type:
-          universe: truthvalue
-    conformances:
-      - interface:
-          name: JSONSerializable
-          namespace: clawr
-        fulfillments:
-          - requirement:
-              baseName: toJSON
-              labels: []
-            implementation:
-              baseName: toJSON
-              labels: []
-  - kind: RC_TYPE_DECL
-    name: Manual
-    properties: []
+          - requirement: {baseName: serialize, labels: [into]}
+            implementation: {baseName: serialize, labels: [into]}
     methods:
       - kind: FUNCTION_DECL
-        baseName: toJSON
-        labels: []
-        parameters: []
-        returnType:
-          universe: string
+        baseName: serialize
+        labels: [into]
+        parameters:
+          - name: buffer
+            type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+        returnType: {universe: void}
         body:
-          - kind: RETURN
-            value:
-              kind: STRING_LITERAL
-              type:
-                universe: string
-                value: '42'
-    initializers: []
-    conformances:
-      - interface:
-          name: JSONSerializable
-          namespace: clawr
-        fulfillments:
-          - requirement:
-              baseName: toJSON
-              labels: []
-            implementation:
-              baseName: toJSON
-              labels: []
+          - kind: CALL
+            name: {baseName: jsonBeginStructure, labels: [fieldCount], namespace: clawr}
+            arguments:
+              - kind: VARIABLE_REF
+                name: buffer
+                type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+              - kind: INTEGER_LITERAL
+                type: {universe: integer, value: '1'}
+          - kind: CALL
+            name: {baseName: jsonBeginField, labels: [name], namespace: clawr}
+            arguments:
+              - kind: VARIABLE_REF
+                name: buffer
+                type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+              - kind: STRING_LITERAL
+                type: {universe: string, value: number}
+          - kind: CALL
+            name: {baseName: jsonWriteInteger, labels: [value], namespace: clawr}
+            arguments:
+              - kind: VARIABLE_REF
+                name: buffer
+                type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+              - kind: PROPERTY_REF
+                object:
+                  kind: VARIABLE_REF
+                  name: self
+                  type: {universe: rc-type, name: Point}
+                property: number
+                type: {universe: integer}
+          - kind: CALL
+            name: {baseName: jsonEndField, labels: [], namespace: clawr}
+            arguments:
+              - kind: VARIABLE_REF
+                name: buffer
+                type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+          - kind: CALL
+            name: {baseName: jsonEndStructure, labels: [], namespace: clawr}
+            arguments:
+              - kind: VARIABLE_REF
+                name: buffer
+                type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+  - kind: FUNCTION_DECL
+    baseName: encode
+    labels: []
+    parameters:
+      - name: value
+        type: {universe: interface, name: Writable}
+    returnType: {universe: string}
+    body:
+      - kind: VARIABLE_DECL
+        name: buffer
+        type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+        initialValue:
+          kind: CALL
+          name: {baseName: newJSONBuffer, labels: [], namespace: clawr}
+          arguments: []
+          type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+      - kind: CALL
+        name: {baseName: serialize, labels: [into]}
+        receiver:
+          dispatch: conformance
+          object:
+            kind: VARIABLE_REF
+            name: value
+            type: {universe: interface, name: Writable}
+        arguments:
+          - kind: VARIABLE_REF
+            name: buffer
+            type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+      - kind: VARIABLE_DECL
+        name: text
+        type: {universe: string}
+        initialValue:
+          kind: CALL
+          name: {baseName: jsonResult, labels: [], namespace: clawr}
+          arguments:
+            - kind: VARIABLE_REF
+              name: buffer
+              type: {universe: rc-type, name: JSONBuffer, namespace: clawr}
+          type: {universe: string}
+      - kind: RELEASE
+        object: {kind: VARIABLE_REF, name: buffer}
+      - kind: RETURN
+        value:
+          kind: VARIABLE_REF
+          name: text
+          type: {universe: string}
+startBlock:
   - kind: VARIABLE_DECL
-    name: value
-    type:
-      universe: rc-type
-      name: Record
+    name: point
+    type: {universe: rc-type, name: Point}
     initialValue:
       kind: ALLOCATION
-      type:
-        universe: rc-type
-        name: Record
+      type: {universe: rc-type, name: Point}
       isolationLevel: ISOLATED
       properties:
-        - name: leaf
-          value:
-            kind: ALLOCATION
-            type:
-              universe: rc-type
-              name: Leaf
-            isolationLevel: ISOLATED
-            properties:
-              - name: value
-                value:
-                  kind: INTEGER_LITERAL
-                  type:
-                    universe: integer
-                    value: '9007199254740993'
-        - name: small
+        - name: number
           value:
             kind: INTEGER_LITERAL
-            type:
-              universe: integer
-              value: '7'
-        - name: text
-          value:
-            kind: STRING_LITERAL
-            type:
-              universe: string
-              value: 'hello'
-        - name: binary
-          value:
-            kind: REAL_LITERAL
-            type:
-              universe: real
-              value: '1.25'
-              precision: { kind: sig, digits: 24, base: bin }
-        - name: trit
-          value:
-            kind: REAL_LITERAL
-            type:
-              universe: real
-              value: '0.333'
-              precision: { kind: scale, digits: 1, base: ter }
-        - name: state
-          value:
-            kind: TRUTHVALUE_LITERAL
-            type:
-              universe: truthvalue
-              value: ambiguous
-  - kind: VARIABLE_DECL
-    name: manual
-    type:
-      universe: rc-type
-      name: Manual
-    initialValue:
-      kind: ALLOCATION
-      type:
-        universe: rc-type
-        name: Manual
-      isolationLevel: ISOLATED
-      properties: []
-startBlock:
+            type: {universe: integer, value: '9007199254740993'}
   - kind: CALL
-    name:
-      baseName: print
-      labels: []
+    name: {baseName: print, labels: []}
     arguments:
       - kind: CALL
-        name:
-          baseName: serializeJSON
-          labels: []
+        name: {baseName: encode, labels: []}
         arguments:
           - kind: VARIABLE_REF
-            name: value
-            type:
-              universe: rc-type
-              name: Record
-        type:
-          universe: string
+            name: point
+            type: {universe: rc-type, name: Point}
+        type: {universe: string}
   - kind: RELEASE
-    object:
-      kind: VARIABLE_REF
-      name: value
-  - kind: CALL
-    name:
-      baseName: print
-      labels: []
-    arguments:
-      - kind: CALL
-        name:
-          baseName: serializeJSON
-          labels: []
-        arguments:
-          - kind: VARIABLE_REF
-            name: manual
-            type:
-              universe: rc-type
-              name: Manual
-        type:
-          universe: string
-  - kind: RELEASE
-    object:
-      kind: VARIABLE_REF
-      name: manual
+    object: {kind: VARIABLE_REF, name: point}

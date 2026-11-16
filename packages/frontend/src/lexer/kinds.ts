@@ -96,7 +96,6 @@ const ALL_KW = [
     // Object sections
     'init',
     `mutating`,
-    'serialize',
     `state`,
 
     // Function modifiers

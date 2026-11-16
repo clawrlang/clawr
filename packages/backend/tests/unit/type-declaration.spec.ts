@@ -93,7 +93,7 @@ describe('Type declaration', () => {
         expect(result).toContain(
             'void my_namespace¸MyType·myMethod(void* cˇself) {',
         )
-        expect(result).toContain('MyType* self = cˇself;')
+        expect(result).toContain('my_namespace¸MyType* self = cˇself;')
     })
 
     it('includes namespace in mangled free-function names', () => {

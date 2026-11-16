@@ -11,7 +11,8 @@ __attribute__((visibility("default"))) const __type_info TruthvalueBoxˇtype = {
         .size = sizeof(TruthvalueBox),
         .conformances = (const __interface_conformance_entry *[]){
             &stringConformance, &TruthvalueBoxˇhash_conformance,
-            &TruthvalueBoxˇequal_conformance, NULL,
+            &TruthvalueBoxˇequal_conformance,
+            &TruthvalueBoxˇserializable_conformance, NULL,
         },
     },
 };

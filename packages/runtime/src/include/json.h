@@ -29,14 +29,19 @@ void JSONWriter¸appendReal(JSONWriter *writer, Real *value);
 void JSONWriter¸appendDouble(JSONWriter *writer, double value);
 String *JSONWriter¸finish(JSONWriter *writer);
 
-static String *serializeJSON(void *value) {
-  if (!value)
-    panic("serializeJSON does not accept NULL");
-  const clawr¸JSONSerializableˇwitness *witness =
-      CONFORMANCE_ENTRY(value, clawr¸JSONSerializable);
-  if (!witness || !witness->toJSON)
-    panic("Value does not conform to JSONSerializable");
-  return witness->toJSON(value);
-}
+typedef struct clawr¸JSONBuffer clawr¸JSONBuffer;
+extern const __type_info clawr¸JSONBufferˇtype;
+
+clawr¸JSONBuffer *clawr¸newJSONBuffer(void);
+void clawr¸jsonWriteString˛value(clawr¸JSONBuffer *buffer, String *value);
+void clawr¸jsonWriteInteger˛value(clawr¸JSONBuffer *buffer, Integer *value);
+void clawr¸jsonWriteReal˛value(clawr¸JSONBuffer *buffer, Real *value);
+void clawr¸jsonWriteTruthvalue˛value(clawr¸JSONBuffer *buffer, truthvalue_t value);
+void clawr¸jsonBeginStructure˛fieldCount(clawr¸JSONBuffer *buffer,
+                                        Integer *fieldCount);
+void clawr¸jsonBeginField˛name(clawr¸JSONBuffer *buffer, String *name);
+void clawr¸jsonEndField(clawr¸JSONBuffer *buffer);
+void clawr¸jsonEndStructure(clawr¸JSONBuffer *buffer);
+String *clawr¸jsonResult(clawr¸JSONBuffer *buffer);
 
 #endif // CLAWR_JSON_H

@@ -267,6 +267,16 @@ export class ObjectDeclaration implements Declaration {
         context.scope.rootScope.addObjectDeclaration(this)
         if (this.opaque) {
             if (
+                this.kind === 'service' &&
+                this.name.canonical() === 'clawr¸JSONBuffer' &&
+                !this.inherits.length &&
+                !this.properties.length &&
+                !this.initializers.length &&
+                !this.mutating.length &&
+                !this.readonly.length
+            )
+                return Result.ok
+            if (
                 this.kind !== 'service' ||
                 this.name.canonical() !== 'clawr¸HashBuilder' ||
                 this.inherits.length ||

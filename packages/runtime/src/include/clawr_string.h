@@ -17,6 +17,8 @@ typedef struct Stringˇproperties {
 extern const __type_info Stringˇtype;
 
 String *String¸fromCString(const char *value);
+// Copies exactly length bytes, including embedded NUL, into an owned string.
+String *String¸fromBytes(const char *value, size_t length);
 String *String¸concat(String *left, String *right);
 truthvalue_t String¸eq(String *left, String *right);
 String *String¸readTextFile(String *path);

@@ -181,19 +181,24 @@ export class Scope {
             if (declaration)
                 return { universe: 'interface', ...declaration.name.toCIR() }
             const object = this.objectDeclaration(value.type)
-            if (object?.opaque)
-                return { universe: 'rc-type', ...object.name.toCIR() }
+            if (object) return { universe: 'rc-type', ...object.name.toCIR() }
+            const data = this.dataDeclaration(value.type)
+            if (data) return { universe: 'rc-type', ...data.name.toCIR() }
         }
         return value.toCIR()
     }
 
-    canonicalOpaqueType(value: ValueSet): ValueSet {
+    canonicalType(value: ValueSet): ValueSet {
         const declaration =
             value instanceof RCTypeSet
-                ? this.objectDeclaration(value.type)
+                ? (this.objectDeclaration(value.type) ??
+                  this.dataDeclaration(value.type))
                 : undefined
-        return declaration?.opaque
-            ? RCTypeSet.create({ type: declaration.name })
+        return declaration && value instanceof RCTypeSet
+            ? RCTypeSet.create({
+                  type: declaration.name,
+                  properties: value.properties,
+              })
             : value
     }
 

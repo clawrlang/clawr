@@ -173,7 +173,7 @@ export class DataLiteral implements Expression {
             properties,
             type: {
                 universe: 'rc-type',
-                ...explicitType.type.toCIR(),
+                ...targetType.name.toCIR(),
             },
         } satisfies cir.Expression)
     }

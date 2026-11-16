@@ -1,0 +1,7 @@
+func shiftBits(_ value: bitfield, _ count: integer) -> bitfield {
+    return value << count
+}
+
+@main {
+    const invalid = shiftBits(bitfield("1"), -1)
+}

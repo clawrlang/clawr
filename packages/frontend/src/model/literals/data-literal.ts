@@ -2,7 +2,13 @@ import { Context, ContextWithType, Expression } from '@/model'
 import { FunctionCall } from '@/model/function-call'
 import { UNIQUE } from '@/model/isolation-level'
 import { TypeName } from '@/model/type-name'
-import { RCTypeSet, ValueSet } from '@/model/value-set'
+import {
+    canAssignValue,
+    checkedValue,
+    FieldSet,
+    RCTypeSet,
+    ValueSet,
+} from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result, SuccessResult } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
@@ -67,10 +73,22 @@ export class DataLiteral implements Expression {
                         `DataLiteral.currentValue: property ${property.name} not found on type ${explicitType.type.name}`,
                         this.span,
                     )
-                return property.value.currentValue({
+                const value = property.value.currentValue({
                     ...context,
                     explicitType: propertyDeclaration.type,
                 })
+                if (value.isError) return value
+                if (propertyDeclaration.type instanceof FieldSet) {
+                    if (!canAssignValue(propertyDeclaration.type, value.value))
+                        return SemanticErrorResult.failure(
+                            `Incompatible field value for property ${property.name}`,
+                            property.value.span,
+                        )
+                    return Result.value(
+                        checkedValue(propertyDeclaration.type, value.value),
+                    )
+                }
+                return value
             }),
         )
         if (propertyValuesResult.isError) return propertyValuesResult

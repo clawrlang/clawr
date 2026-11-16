@@ -6,7 +6,7 @@ import { ISOLATED, SHARED, UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { ISOLATION_KEYWORDS, IsolationKeyword } from '@/model/keywords'
 import { Parameter } from '@/model/parameter'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
-import { RCTypeSet, StringSet } from '@/model/value-set'
+import { FieldSet, RCTypeSet, StringSet } from '@/model/value-set'
 import { Context, DeclarationParser } from '@/parser'
 import { BindingParser } from '@/parser/binding-parser'
 import { BlockParser } from '@/parser/block-parser'
@@ -121,15 +121,20 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             stream.expect('OPERATOR', '->')
             const isolationLevel = this.parseIsolationlevel(stream)
             const type = this.typeConstraintParser.parse(stream)
-            if (type instanceof StringSet && isolationLevel === SHARED)
+            if (
+                (type instanceof StringSet || type instanceof FieldSet) &&
+                isolationLevel === SHARED
+            )
                 throw SourceError.create({
-                    message: 'A string value cannot be shared with ref',
+                    message: `A ${type instanceof StringSet ? 'string' : 'field'} value cannot be shared with ref`,
                     span: type.span,
                 })
             return {
                 type,
                 isolationLevel:
-                    type instanceof StringSet ? ISOLATED : isolationLevel,
+                    type instanceof StringSet || type instanceof FieldSet
+                        ? ISOLATED
+                        : isolationLevel,
             }
         }
     }

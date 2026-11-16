@@ -14,7 +14,7 @@ import { ReturnStatement } from '@/model/return-statement'
 import { Scope } from '@/model/scope'
 import { SelfAssignment } from '@/model/self-assignment'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
-import { RCTypeSet, StringSet, ValueSet } from '@/model/value-set'
+import { FieldSet, RCTypeSet, StringSet, ValueSet } from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { mapFilter } from '@/tools/map-filter'
 import { Result } from '@/tools/result'
@@ -92,10 +92,13 @@ export class FunctionDeclaration implements Declaration {
         context: Context,
     ): SemanticResult<IsolationLevel | UNIQUE> {
         if (!this.result) throw new Error('Function has no declared result')
-        if (this.result.type instanceof StringSet) {
+        if (
+            this.result.type instanceof StringSet ||
+            this.result.type instanceof FieldSet
+        ) {
             if (this.result.isolationLevel === SHARED)
                 return this.externNotAllowed(
-                    'A string value cannot be shared with ref',
+                    `A ${this.result.type instanceof StringSet ? 'string' : 'field'} value cannot be shared with ref`,
                 )
             return Result.value(ISOLATED)
         }

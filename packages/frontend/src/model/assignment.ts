@@ -3,7 +3,7 @@ import { UNIQUE, UNKNOWN } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import { PropertyReference } from '@/model/property-reference'
 import { Retain } from '@/model/retain'
-import { RCTypeSet } from '@/model/value-set'
+import { canAssignValue, checkedValue, RCTypeSet } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
@@ -61,7 +61,10 @@ export class Assignment implements Statement {
                 .withTarget(this.target)
                 .emitStatement(context)
 
-        return this.target.setCurrentValue(context, value.value)
+        return this.target.setCurrentValue(
+            context,
+            checkedValue(targetType, value.value),
+        )
     }
 
     private emitCIRStatements(context: Context): SemanticResult {
@@ -176,7 +179,7 @@ export class Assignment implements Statement {
         const assignedValueResult = this.value.currentValue(explicitTypeContext)
         if (assignedValueResult.isError) return assignedValueResult
         const assignedValue = assignedValueResult.value
-        if (!targetType.isSupersetTo(assignedValue))
+        if (!canAssignValue(targetType, assignedValue))
             return SemanticErrorResult.failure(
                 `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetType.toString()}`,
                 this.span,

@@ -6,7 +6,7 @@ import {
     MUTABILITY_KEYWORDS,
 } from '@/model/keywords'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
-import { StringSet } from '@/model/value-set'
+import { FieldSet, StringSet } from '@/model/value-set'
 import { SourceCodeSpan, SourceError } from '@/tools'
 import { Context } from '.'
 import { TypeConstraintParser } from './type-constraint-parser'
@@ -37,9 +37,12 @@ export class BindingParser {
         const typeConstraint = this.parseTypeConstraint(stream, parameter)
         const type = typeConstraint?.[0]
         const isolation = typeConstraint?.[1]
-        if (isolation === 'ref' && type instanceof StringSet)
+        if (
+            isolation === 'ref' &&
+            (type instanceof StringSet || type instanceof FieldSet)
+        )
             throw SourceError.create({
-                message: 'A string value cannot be shared with ref',
+                message: `A ${type instanceof StringSet ? 'string' : 'field'} value cannot be shared with ref`,
                 span: type.span,
             })
 

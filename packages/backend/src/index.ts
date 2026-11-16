@@ -826,6 +826,9 @@ function lowerType(valueSet: cir.ValueSet | { universe: 'void' }): string {
             return valueSet.boxed ? 'TruthvalueBox*' : 'truthvalue_t'
         case 'string':
             return 'String*'
+        case 'bitfield':
+        case 'tritfield':
+            return 'Field*'
         case 'rc-type':
             if (
                 valueSet.namespace === 'clawr' &&
@@ -955,7 +958,9 @@ function isManagedOwnedType(valueSet: cir.ValueSet): boolean {
     return (
         isImplicitBig(valueSet) ||
         isManagedReal(valueSet) ||
-        valueSet.universe === 'string'
+        valueSet.universe === 'string' ||
+        valueSet.universe === 'bitfield' ||
+        valueSet.universe === 'tritfield'
     )
 }
 
@@ -1246,6 +1251,15 @@ function lowerLiteralToBinary(
 
 /** Lowers `expr` for storing in a location of type `target`. */
 function lowerConverted(expr: cir.Expression, target: cir.ValueSet): string {
+    if (target.universe === 'bitfield' || target.universe === 'tritfield') {
+        if (expr.type.universe !== target.universe)
+            throw new Error('Incompatible field kind')
+        const value =
+            expr.kind === 'VARIABLE_REF' || expr.kind === 'PROPERTY_REF'
+                ? `retainRC(${lowerExpr(expr)})`
+                : lowerExpr(expr)
+        return lowerFieldLengthChecked(value, target)
+    }
     if (
         target.universe === 'string' &&
         (expr.kind === 'VARIABLE_REF' || expr.kind === 'PROPERTY_REF')
@@ -1268,8 +1282,32 @@ function lowerConverted(expr: cir.Expression, target: cir.ValueSet): string {
     return to === undefined ? lowerExpr(expr) : lowerOwned(expr, to)
 }
 
+function lowerFieldLengthChecked(value: string, type: cir.FieldSet): string {
+    return type.length === undefined
+        ? value
+        : `Field¸ensureLength(${value}, ${type.length})`
+}
+
 /** Lowers a call argument for a parameter of type `parameter`. */
 function lowerArgument(expr: cir.Expression, parameter?: cir.ValueSet) {
+    if (
+        expr.type.universe === 'bitfield' ||
+        expr.type.universe === 'tritfield'
+    ) {
+        const value =
+            expr.kind === 'VARIABLE_REF' || expr.kind === 'PROPERTY_REF'
+                ? lowerExpr(expr)
+                : hoist(lowerExpr(expr), 'Field*')
+        if (
+            parameter?.universe === 'bitfield' ||
+            parameter?.universe === 'tritfield'
+        ) {
+            if (parameter.universe !== expr.type.universe)
+                throw new Error('Incompatible field argument')
+            return lowerFieldLengthChecked(value, parameter)
+        }
+        return value
+    }
     if (expr.kind === 'BOX') return hoist(lowerExpr(expr), lowerType(expr.type))
     if (
         isRuntimeOpaqueType(expr.type) &&
@@ -1492,6 +1530,74 @@ export function lowerExpr(expr: cir.Expression): string {
             return lowerRealLiteral(expr)
         case 'TRUTHVALUE_LITERAL':
             return lowerTruthvalueLiteral(expr)
+        case 'FIELD_FROM_STRING': {
+            if (expr.value.type.universe !== 'string')
+                throw new Error('Field constructor requires a string')
+            const value = `Field¸fromString(${expr.type.universe === 'bitfield' ? 'FIELD_BINARY' : 'FIELD_TERNARY'}, ${lowerArgument(expr.value)})`
+            return lowerFieldLengthChecked(value, expr.type)
+        }
+        case 'FIELD_NOT':
+            if (expr.type.universe !== expr.operand.type.universe)
+                throw new Error('Field NOT result kind must match its operand')
+            return lowerFieldLengthChecked(
+                `Field¸not(${lowerArgument(expr.operand)})`,
+                expr.type,
+            )
+        case 'FIELD_LENGTH': {
+            const field = lowerArgument(expr.operand)
+            return integerRepresentation(expr.type) === 'native'
+                ? `((int64_t)(${field})->length)`
+                : `Field¸length(${field})`
+        }
+        case 'FIELD_AND':
+        case 'FIELD_OR':
+        case 'FIELD_XOR':
+        case 'FIELD_ADJUST':
+        case 'FIELD_ROTATE_STATES':
+        case 'FIELD_MODULATE': {
+            if (
+                expr.left.type.universe !== expr.type.universe ||
+                expr.right.type.universe !== expr.type.universe
+            )
+                throw new Error('Field operation kinds must match')
+            if (expr.kind === 'FIELD_XOR' && expr.type.universe !== 'bitfield')
+                throw new Error('Field XOR requires binary fields')
+            if (
+                [
+                    'FIELD_ADJUST',
+                    'FIELD_ROTATE_STATES',
+                    'FIELD_MODULATE',
+                ].includes(expr.kind) &&
+                expr.type.universe !== 'tritfield'
+            )
+                throw new Error('Ternary operation requires ternary fields')
+            const operation = {
+                FIELD_AND: 'and',
+                FIELD_OR: 'or',
+                FIELD_XOR: 'xor',
+                FIELD_ADJUST: 'adjust',
+                FIELD_ROTATE_STATES: 'rotateStates',
+                FIELD_MODULATE: 'modulate',
+            }[expr.kind]
+            return lowerFieldLengthChecked(
+                `Field¸${operation}(${lowerArgument(expr.left)}, ${lowerArgument(expr.right)})`,
+                expr.type,
+            )
+        }
+        case 'FIELD_SHIFT_LEFT':
+        case 'FIELD_SHIFT_RIGHT': {
+            if (expr.type.universe !== expr.left.type.universe)
+                throw new Error(
+                    'Field shift result kind must match its operand',
+                )
+            const field = lowerArgument(expr.left)
+            const representation = operandRepresentation(expr.right)
+            const count = lowerBorrowed(expr.right, representation)
+            return lowerFieldLengthChecked(
+                `Field¸shift${representation === 'big' ? 'Integer' : 'Int64'}(${field}, ${count}, ${expr.kind === 'FIELD_SHIFT_LEFT' ? 'true' : 'false'})`,
+                expr.type,
+            )
+        }
         case 'NOT':
             return `(-(${lowerContainedExpression(expr.operand)}))`
         case 'CALL':
@@ -1534,12 +1640,22 @@ export function lowerExpr(expr: cir.Expression): string {
         case 'AND':
             return `truthvalue¸and(${lowerExpr(expr.left)}, ${lowerExpr(expr.right)})`
         case 'EQUAL':
+            if (
+                expr.left.type.universe === 'bitfield' ||
+                expr.left.type.universe === 'tritfield'
+            )
+                return `Field¸equal(${lowerArgument(expr.left)}, ${lowerArgument(expr.right)})`
             return (
                 lowerRealComparison(expr, '==') ??
                 lowerIntegerComparison(expr, 'eq', '==') ??
                 `((${lowerExpr(expr.left)}) == (${lowerExpr(expr.right)}) ? c_true : c_false)`
             )
         case 'NOT_EQUAL':
+            if (
+                expr.left.type.universe === 'bitfield' ||
+                expr.left.type.universe === 'tritfield'
+            )
+                return `-Field¸equal(${lowerArgument(expr.left)}, ${lowerArgument(expr.right)})`
             return (
                 lowerRealComparison(expr, '!=') ??
                 lowerIntegerComparison(expr, 'ne', '!=') ??

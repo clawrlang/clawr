@@ -1,11 +1,14 @@
 import { Context, Expression, Statement, isStorage } from '@/model'
 import { FunctionDeclaration } from '@/model/function-declaration'
+import { FieldCall, isFieldCallName } from '@/model/field-call'
 import { DataDeclaration } from '@/model/data-declaration'
 import { FunctionName } from '@/model/function-name'
 import { AnyIsolationLevel, ISOLATED, UNIQUE } from '@/model/isolation-level'
 import { TypeName } from '@/model/type-name'
 import {
     IntegerSet,
+    FieldSet,
+    canAssignValue,
     RCTypeSet,
     RealSet,
     TruthvalueSet,
@@ -68,11 +71,21 @@ export class FunctionCall implements Expression, Statement {
         )
     }
 
+    private fieldCall(context: Context): FieldCall | undefined {
+        if (this.recipient || context.scope.functionDeclaration(this.name))
+            return undefined
+        const { baseName, labels } = this.name.toCIR()
+        if (labels?.length || !isFieldCallName(baseName)) return undefined
+        return new FieldCall(baseName, this.arguments, this.span)
+    }
+
     isEffectivelyConst(): SuccessResult<true> {
         return Result.true
     }
 
     isolationLevel(context: Context): SemanticResult<AnyIsolationLevel> {
+        const fieldCall = this.fieldCall(context)
+        if (fieldCall) return fieldCall.isolationLevel()
         if (this.name.toString() === 'copy(of:)') return Result.value(UNIQUE)
 
         if (this.recipient) {
@@ -110,6 +123,8 @@ export class FunctionCall implements Expression, Statement {
     }
 
     currentValue(context: Context): SemanticResult<ValueSet> {
+        const fieldCall = this.fieldCall(context)
+        if (fieldCall) return fieldCall.currentValue(context)
         if (this.recipient) {
             const recipientTypeResult = this.recipient.type(context)
             if (recipientTypeResult.isError) return recipientTypeResult
@@ -212,6 +227,8 @@ export class FunctionCall implements Expression, Statement {
     }
 
     toCIRExpression(context: Context): SemanticResult<cir.Expression> {
+        const fieldCall = this.fieldCall(context)
+        if (fieldCall) return fieldCall.toCIRExpression(context)
         if (this.recipient) {
             const mutatingPrelude = this.mutatingReceiverPrelude(context)
             if (mutatingPrelude.isError) return mutatingPrelude
@@ -409,6 +426,15 @@ export class FunctionCall implements Expression, Statement {
             const converted = argument.toCIRExpression(context)
             if (converted.isError) return converted
             const parameter = declaration?.parameters[index]?.type
+            if (parameter instanceof FieldSet) {
+                const actual = argument.currentValue(context)
+                if (actual.isError) return actual
+                if (!canAssignValue(parameter, actual.value))
+                    return SemanticErrorResult.failure(
+                        `Argument must be ${parameter.toString()}`,
+                        argument.span,
+                    )
+            }
             if (
                 parameter instanceof IntegerSet ||
                 parameter instanceof RealSet ||

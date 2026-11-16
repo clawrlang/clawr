@@ -1,0 +1,7 @@
+func combine(_ a: bitfield, _ b: bitfield) -> bitfield {
+    return a & b
+}
+
+@main {
+    const invalid = combine(bitfield("1"), bitfield("10"))
+}

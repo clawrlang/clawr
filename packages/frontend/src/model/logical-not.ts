@@ -1,6 +1,11 @@
 import { Context, ContextWithType, Expression } from '@/model'
 import { ISOLATED } from '@/model/isolation-level'
-import { truthvalue, TruthvalueSet, ValueSet } from '@/model/value-set'
+import {
+    FieldSet,
+    truthvalue,
+    TruthvalueSet,
+    ValueSet,
+} from '@/model/value-set'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
@@ -41,10 +46,27 @@ export class LogicalNot implements Expression {
     toCIRExpression(context: ContextWithType): SemanticResult<cir.Expression> {
         const type = this.type(context)
         if (type.isError) return type
-        if (!(type.value instanceof TruthvalueSet))
+        if (
+            !(type.value instanceof TruthvalueSet) &&
+            !(type.value instanceof FieldSet)
+        )
             return SemanticErrorResult.failure('Expected truthvalue', this.span)
         const operand = this.operand.toCIRExpression(context)
         if (operand.isError) return operand
+        if (type.value instanceof FieldSet) {
+            if (
+                operand.value.type.universe !== 'bitfield' &&
+                operand.value.type.universe !== 'tritfield'
+            )
+                return SemanticErrorResult.failure('Expected field', this.span)
+            return Result.value({
+                kind: 'FIELD_NOT',
+                operand: operand.value as cir.Expression & {
+                    type: cir.FieldSet
+                },
+                type: type.value.toCIR(),
+            })
+        }
         return Result.value({
             kind: 'NOT',
             operand: operand.value,
@@ -54,6 +76,7 @@ export class LogicalNot implements Expression {
 
     private negate(result: SemanticResult<ValueSet>): SemanticResult<ValueSet> {
         if (result.isError) return result
+        if (result.value instanceof FieldSet) return result
         if (!(result.value instanceof TruthvalueSet))
             return SemanticErrorResult.failure(
                 'Logical negation requires a truthvalue',

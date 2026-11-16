@@ -1,0 +1,60 @@
+data BitsBox {
+    lanes: bitfield(4)
+}
+
+func makeBits(_ text: string) -> bitfield {
+    return bitfield(text)
+}
+
+func keepBits(_ value: bitfield(4)) -> bitfield(4) {
+    return value
+}
+
+func shiftBits(_ value: bitfield, _ count: integer) -> bitfield {
+    return value << count
+}
+
+func countBits(_ value: bitfield) -> integer {
+    return fieldLength(value)
+}
+
+func throughBox(_ value: bitfield) -> bitfield {
+    const box: BitsBox = { lanes: value }
+    return box.lanes
+}
+
+@main {
+    const a: bitfield(4) = bitfield("1001")
+    const b = bitfield("1010")
+    print((a & b) == bitfield("1000"))
+    print((a | b) == bitfield("1011"))
+    print((a ^ b) == bitfield("0011"))
+    print(!a == bitfield("0110"))
+    print((a << 1) == bitfield("0010"))
+    print((a >> 1) == bitfield("0100"))
+    print(fieldLength(a))
+    print(countBits(makeBits("101")))
+    print(keepBits(makeBits("1001")) == a)
+    print(throughBox(makeBits("1001")) == a)
+    mut changing: bitfield(4) = b
+    const saved = changing
+    changing = a
+    print(saved == b && changing == a)
+    print(shiftBits(a, 1000000000000000000000000000000000000000) == bitfield("0000"))
+    print(bitfield("") == bitfield(""))
+    print(bitfield("10") != bitfield("1"))
+    print(bitfield("10000000000000000000000000000000000000000000000000000000000000001") << 64 == bitfield("10000000000000000000000000000000000000000000000000000000000000000"))
+    print(a & b ^ b == a & bitfield("0000"))
+    const ta = tritfield("TTT000111")
+    const tb = tritfield("T01T01T01")
+    print(tritwiseAdjust(ta, tb) == tritfield("TT0T01011"))
+    print(tritwiseRotate(ta, tb) == tritfield("1T0T0101T"))
+    print(tritwiseModulate(ta, tb) == tritfield("10T000T01"))
+    print((tritfield("01") >> 1) == tritfield("T0"))
+    const nine: tritfield(9) = tritfield("T0T0T0T01")
+    const twentySeven: tritfield(27) = tritfield("TTTTTTTTTTTTTTTTTTTTTTTTTT1")
+    print(nine << 8 == tritfield("1TTTTTTTT"))
+    print(twentySeven << 26 == tritfield("1TTTTTTTTTTTTTTTTTTTTTTTTTT"))
+    print(2 ^ 3 ^ 2)
+}
+

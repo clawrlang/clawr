@@ -9,6 +9,63 @@ export interface ValueSet {
     toString(): string
 }
 
+export class FieldSet implements ValueSet {
+    private constructor(
+        public readonly universe: 'bitfield' | 'tritfield',
+        public readonly length?: number,
+    ) {}
+
+    static create(universe: 'bitfield' | 'tritfield', length?: number) {
+        return new FieldSet(universe, length)
+    }
+
+    unconstrained(): FieldSet {
+        return FieldSet.create(this.universe)
+    }
+
+    isSupersetTo(other: ValueSet): boolean {
+        return (
+            other instanceof FieldSet &&
+            this.universe === other.universe &&
+            (this.length === undefined || this.length === other.length)
+        )
+    }
+
+    toCIR(): cir.FieldSet {
+        return this.length === undefined
+            ? { universe: this.universe }
+            : { universe: this.universe, length: this.length }
+    }
+
+    toString(): string {
+        return this.length === undefined
+            ? this.universe
+            : `${this.universe}(${this.length})`
+    }
+}
+
+export function canAssignValue(target: ValueSet, value: ValueSet): boolean {
+    if (
+        target instanceof FieldSet &&
+        value instanceof FieldSet &&
+        target.universe === value.universe &&
+        value.length === undefined
+    )
+        return true
+    return target.isSupersetTo(value)
+}
+
+export function checkedValue(target: ValueSet, value: ValueSet): ValueSet {
+    if (
+        target instanceof FieldSet &&
+        value instanceof FieldSet &&
+        target.length !== undefined &&
+        value.length === undefined
+    )
+        return target
+    return value
+}
+
 export class IntegerSet<
     Min extends bigint | undefined = bigint | undefined,
     Max extends bigint | undefined = bigint | undefined,

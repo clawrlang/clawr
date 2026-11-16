@@ -9,7 +9,13 @@ import { DataLiteral } from '@/model/literals'
 import { Retain } from '@/model/retain'
 import { Scope } from '@/model/scope'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
-import { RCTypeSet, StringSet, ValueSet } from '@/model/value-set'
+import {
+    canAssignValue,
+    FieldSet,
+    RCTypeSet,
+    StringSet,
+    ValueSet,
+} from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
@@ -80,10 +86,12 @@ export class VariableDeclaration implements Statement, Declaration {
         if (
             this.isolationLevel === SHARED &&
             (initialValue instanceof StringSet ||
-                this.type instanceof StringSet)
+                this.type instanceof StringSet ||
+                initialValue instanceof FieldSet ||
+                this.type instanceof FieldSet)
         )
             return SemanticErrorResult.failure(
-                'A string value cannot be shared with ref',
+                `A ${initialValue instanceof StringSet || this.type instanceof StringSet ? 'string' : 'field'} value cannot be shared with ref`,
                 this.span,
             )
         if (valueIsolationLevel === 'UNKNOWN')
@@ -213,7 +221,7 @@ export class VariableDeclaration implements Statement, Declaration {
         }
         return (
             !this.type ||
-            context.scope.canonicalType(this.type).isSupersetTo(currentValue)
+            canAssignValue(context.scope.canonicalType(this.type), currentValue)
         )
     }
 

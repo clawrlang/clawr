@@ -6,6 +6,7 @@
 #include "TruthValueBox.h"
 #include "array.h"
 #include "clawr_string.h"
+#include "fields.h"
 #include "integer.h"
 #include "interfaces.h"
 #include "json.h"

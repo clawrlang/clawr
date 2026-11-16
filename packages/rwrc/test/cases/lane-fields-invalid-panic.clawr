@@ -1,0 +1,7 @@
+func makeBits(_ text: string) -> bitfield {
+    return bitfield(text)
+}
+
+@main {
+    const invalid = makeBits("T")
+}

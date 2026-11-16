@@ -12,6 +12,8 @@ import {
 import { TypeName } from '@/model/type-name'
 import {
     RCTypeSet,
+    FieldSet,
+    IntegerSet,
     TruthvalueSet,
     ValueSet,
     truthvalue,
@@ -28,7 +30,7 @@ import { LogicalOR } from './operators/logical-or'
 
 export class BinaryOperation implements Expression {
     private constructor(
-        private readonly operator: keyof typeof OPERATORS,
+        private readonly operator: OperatorName,
         private readonly left: Expression,
         private readonly right: Expression,
         public readonly span: SourceCodeSpan,
@@ -40,7 +42,7 @@ export class BinaryOperation implements Expression {
         right,
         span,
     }: {
-        operator: keyof typeof OPERATORS
+        operator: OperatorName
         left: Expression
         right: Expression
         span: SourceCodeSpan
@@ -97,6 +99,64 @@ export class BinaryOperation implements Expression {
         ])
         if (operands.isError) return operands
         const [leftCIR, rightCIR] = operands.value
+        if (left instanceof FieldSet) {
+            if (
+                leftCIR.type.universe !== 'bitfield' &&
+                leftCIR.type.universe !== 'tritfield'
+            )
+                return SemanticErrorResult.failure(
+                    'Expected field operand',
+                    this.span,
+                )
+            const field = leftCIR as cir.Expression & { type: cir.FieldSet }
+            if (this.operator === '<<' || this.operator === '>>') {
+                if (
+                    !(type instanceof FieldSet) ||
+                    rightCIR.type.universe !== 'integer'
+                )
+                    return SemanticErrorResult.failure(
+                        'Invalid field shift',
+                        this.span,
+                    )
+                return Result.value({
+                    kind:
+                        this.operator === '<<'
+                            ? 'FIELD_SHIFT_LEFT'
+                            : 'FIELD_SHIFT_RIGHT',
+                    left: field,
+                    right: rightCIR as cir.Expression & {
+                        type: { universe: 'integer' }
+                    },
+                    type: type.toCIR(),
+                })
+            }
+            if (
+                this.operator === '&' ||
+                this.operator === '|' ||
+                this.operator === '^'
+            ) {
+                if (
+                    !(type instanceof FieldSet) ||
+                    (rightCIR.type.universe !== 'bitfield' &&
+                        rightCIR.type.universe !== 'tritfield')
+                )
+                    return SemanticErrorResult.failure(
+                        'Invalid field operation',
+                        this.span,
+                    )
+                return Result.value({
+                    kind:
+                        this.operator === '&'
+                            ? 'FIELD_AND'
+                            : this.operator === '|'
+                              ? 'FIELD_OR'
+                              : 'FIELD_XOR',
+                    left: field,
+                    right: rightCIR as cir.Expression & { type: cir.FieldSet },
+                    type: type.toCIR(),
+                })
+            }
+        }
         if (
             (this.operator === '&&' || this.operator === '||') &&
             type instanceof TruthvalueSet &&
@@ -113,6 +173,11 @@ export class BinaryOperation implements Expression {
                 ),
             )
         // The operator strategies already verified the operand types.
+        if (!isExistingOperator(this.operator))
+            return SemanticErrorResult.failure(
+                'Invalid field operation',
+                this.span,
+            )
         return Result.value({
             kind: CIR_KINDS[this.operator],
             left: leftCIR,
@@ -289,6 +354,69 @@ export class BinaryOperation implements Expression {
         context: Context,
     ): SemanticResult<ValueSet> {
         if (
+            left instanceof FieldSet ||
+            right instanceof FieldSet ||
+            this.operator === '&' ||
+            this.operator === '|' ||
+            this.operator === '<<' ||
+            this.operator === '>>'
+        ) {
+            if (!(left instanceof FieldSet))
+                return SemanticErrorResult.failure(
+                    'Expected field as left operand',
+                    this.span,
+                )
+            if (this.operator === '<<' || this.operator === '>>') {
+                if (!(right instanceof IntegerSet))
+                    return SemanticErrorResult.failure(
+                        'Field shift count must be an integer',
+                        this.span,
+                    )
+                if (right.max !== undefined && right.max < 0n)
+                    return SemanticErrorResult.failure(
+                        'Field shift count cannot be negative',
+                        this.span,
+                    )
+                return Result.value(left)
+            }
+            if (
+                !(right instanceof FieldSet) ||
+                left.universe !== right.universe
+            )
+                return SemanticErrorResult.failure(
+                    'Field operands must have the same kind',
+                    this.span,
+                )
+            if (this.operator === '==' || this.operator === '!=')
+                return Result.value(TruthvalueSet.create(['false', 'true']))
+            if (
+                this.operator !== '&' &&
+                this.operator !== '|' &&
+                this.operator !== '^'
+            )
+                return SemanticErrorResult.failure(
+                    'Unsupported field operation',
+                    this.span,
+                )
+            if (this.operator === '^' && left.universe !== 'bitfield')
+                return SemanticErrorResult.failure(
+                    'XOR requires binary fields',
+                    this.span,
+                )
+            if (
+                left.length !== undefined &&
+                right.length !== undefined &&
+                left.length !== right.length
+            )
+                return SemanticErrorResult.failure(
+                    'Field operands must have equal lengths',
+                    this.span,
+                )
+            return Result.value(
+                FieldSet.create(left.universe, left.length ?? right.length),
+            )
+        }
+        if (
             isTraitOperator(this.operator) &&
             (left instanceof RCTypeSet || right instanceof RCTypeSet)
         ) {
@@ -345,6 +473,11 @@ export class BinaryOperation implements Expression {
                     : TruthvalueSet.create(['false', 'true']),
             )
         }
+        if (!isExistingOperator(this.operator))
+            return SemanticErrorResult.failure(
+                'Invalid field operation',
+                this.span,
+            )
         const strategy = OPERATORS[this.operator]
         const result = strategy.compute(left, right)
         return result.isError
@@ -361,8 +494,16 @@ function isTruthvalueExpression(
     return expression.type.universe === 'truthvalue'
 }
 
+type OperatorName = keyof typeof OPERATORS | '&' | '|' | '<<' | '>>'
+
+function isExistingOperator(
+    operator: OperatorName,
+): operator is keyof typeof OPERATORS {
+    return operator in OPERATORS
+}
+
 function isTraitOperator(
-    operator: keyof typeof OPERATORS,
+    operator: OperatorName,
 ): operator is '==' | '!=' | '<' | '>' | '<=' | '>=' {
     return ['==', '!=', '<', '>', '<=', '>='].includes(operator)
 }

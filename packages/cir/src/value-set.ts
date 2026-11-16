@@ -1,5 +1,16 @@
 export type ValueSet =
-    IntegerSet | RealSet | TruthvalueSet | StringSet | RCTypeSet | InterfaceSet
+    | IntegerSet
+    | RealSet
+    | TruthvalueSet
+    | StringSet
+    | FieldSet
+    | RCTypeSet
+    | InterfaceSet
+
+export type FieldSet = {
+    universe: 'bitfield' | 'tritfield'
+    length?: number
+}
 
 export type BoxedValueSet = ValueSet & { boxed: true }
 

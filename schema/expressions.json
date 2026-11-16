@@ -4,6 +4,7 @@
   "oneOf": [
     { "$ref": "#/$defs/BinaryOperation" },
     { "$ref": "#/$defs/LogicalNot" },
+    { "$ref": "#/$defs/FieldOperation" },
     { "$ref": "#/$defs/FunctionCallExpression" },
     { "$ref": "#/$defs/Literal" },
     { "$ref": "#/$defs/MemoryExpression" },
@@ -12,6 +13,80 @@
     { "$ref": "#/$defs/ScopedExpression" }
   ],
   "$defs": {
+    "FieldExpression": {
+      "type": "object",
+      "allOf": [{ "$ref": "#" }],
+      "properties": { "type": { "$ref": "./valuesets.json#/$defs/FieldSet" } },
+      "required": ["type"]
+    },
+    "StringExpression": {
+      "type": "object",
+      "allOf": [{ "$ref": "#" }],
+      "properties": { "type": { "$ref": "./valuesets.json#/$defs/StringSet" } },
+      "required": ["type"]
+    },
+    "IntegerExpression": {
+      "type": "object",
+      "allOf": [{ "$ref": "#" }],
+      "properties": { "type": { "$ref": "./valuesets.json#/$defs/IntegerSet" } },
+      "required": ["type"]
+    },
+    "FieldOperation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "FIELD_FROM_STRING" },
+            "value": { "$ref": "#/$defs/StringExpression" },
+            "type": { "$ref": "./valuesets.json#/$defs/FieldSet" }
+          },
+          "required": ["kind", "value", "type"],
+          "unevaluatedProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "FIELD_NOT" },
+            "operand": { "$ref": "#/$defs/FieldExpression" },
+            "type": { "$ref": "./valuesets.json#/$defs/FieldSet" }
+          },
+          "required": ["kind", "operand", "type"],
+          "unevaluatedProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "const": "FIELD_LENGTH" },
+            "operand": { "$ref": "#/$defs/FieldExpression" },
+            "type": { "$ref": "./valuesets.json#/$defs/IntegerSet" }
+          },
+          "required": ["kind", "operand", "type"],
+          "unevaluatedProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "enum": ["FIELD_AND", "FIELD_OR", "FIELD_XOR", "FIELD_ADJUST", "FIELD_ROTATE_STATES", "FIELD_MODULATE"] },
+            "left": { "$ref": "#/$defs/FieldExpression" },
+            "right": { "$ref": "#/$defs/FieldExpression" },
+            "type": { "$ref": "./valuesets.json#/$defs/FieldSet" }
+          },
+          "required": ["kind", "left", "right", "type"],
+          "unevaluatedProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": { "enum": ["FIELD_SHIFT_LEFT", "FIELD_SHIFT_RIGHT"] },
+            "left": { "$ref": "#/$defs/FieldExpression" },
+            "right": { "$ref": "#/$defs/IntegerExpression" },
+            "type": { "$ref": "./valuesets.json#/$defs/FieldSet" }
+          },
+          "required": ["kind", "left", "right", "type"],
+          "unevaluatedProperties": false
+        }
+      ]
+    },
     "UnboxedTruthvalueSet": {
       "type": "object",
       "allOf": [{ "$ref": "./valuesets.json#/$defs/TruthvalueSet" }],

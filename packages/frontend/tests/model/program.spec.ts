@@ -9,6 +9,93 @@ function compile(sources: { name: string; source: string }[]) {
     return parseProgram(sources, scope).toCIR({ scope })
 }
 
+describe('field value semantics', () => {
+    const compileMain = (body: string) =>
+        compile([{ name: 'fields.clawr', source: `@main { ${body} }` }])
+
+    it('rejects invalid literals, incompatible widths and ternary XOR', () => {
+        expect(() => compileMain('const a = bitfield("T")')).toThrow(
+            'Invalid bitfield lane',
+        )
+        expect(() =>
+            compileMain('const a: bitfield(4) = bitfield("1")'),
+        ).toThrow('Incompatible initial value')
+        expect(() =>
+            compileMain('const a = bitfield("1") & bitfield("10")'),
+        ).toThrow('equal lengths')
+        expect(() =>
+            compileMain('const a = tritfield("1") ^ tritfield("1")'),
+        ).toThrow('XOR requires binary')
+        expect(() => compileMain('const a = bitfield("1") << -1')).toThrow(
+            'cannot be negative',
+        )
+        expect(() =>
+            compileMain('const a = bitfield("1") == tritfield("1")'),
+        ).toThrow('same kind')
+    })
+
+    it('keeps exponentiation and recognizes field shift and pointwise precedence', () => {
+        const module = compileMain(`
+            const a = bitfield("1001")
+            const b = bitfield("1010")
+            const result = a & b ^ b
+            const shifted = a << 1 + 1
+            const power = 2 ^ 3 ^ 2
+        `)
+        expect(module.startBlock).toMatchObject([
+            {
+                kind: 'VARIABLE_DECL',
+                type: { universe: 'bitfield', length: 4 },
+                initialValue: { kind: 'FIELD_FROM_STRING' },
+            },
+            {
+                kind: 'VARIABLE_DECL',
+                type: { universe: 'bitfield', length: 4 },
+            },
+            {
+                kind: 'VARIABLE_DECL',
+                initialValue: {
+                    kind: 'FIELD_AND',
+                    right: { kind: 'FIELD_XOR' },
+                },
+            },
+            {
+                kind: 'VARIABLE_DECL',
+                initialValue: {
+                    kind: 'FIELD_SHIFT_LEFT',
+                    right: { kind: 'ADDITION' },
+                },
+            },
+            {
+                kind: 'VARIABLE_DECL',
+                initialValue: { kind: 'POWER', right: { kind: 'POWER' } },
+            },
+        ])
+    })
+
+    it('does not shadow existing functions with field builtin names', () => {
+        expect(() =>
+            compile([
+                {
+                    name: 'shadow.clawr',
+                    source: 'func fieldLength(_ x: integer) -> integer => x @main { print(fieldLength(1)) }',
+                },
+            ]),
+        ).not.toThrow()
+    })
+
+    it('rejects a statically incompatible field in a data property', () => {
+        expect(() =>
+            compile([
+                {
+                    name: 'property.clawr',
+                    source: 'data D { lanes: bitfield(4) } @main { const x: D = { lanes: bitfield("1") } }',
+                },
+            ]),
+        ).toThrow('Incompatible field value')
+    })
+})
+
 describe('multi-file programs', () => {
     it('resolves functions declared in another file in either order', () => {
         const first = {

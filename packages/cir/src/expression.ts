@@ -2,7 +2,7 @@ import { BinaryOpExpression } from './binary-op-expression.js'
 import { FunctionName } from './identfier.js'
 import { Literal } from './literal.js'
 import { MemoryExpression } from './memory-expression.js'
-import { InterfaceSet, RCTypeSet, ValueSet } from './value-set.js'
+import { FieldSet, InterfaceSet, RCTypeSet, ValueSet } from './value-set.js'
 import { Statement } from './statement.js'
 
 export type Expression =
@@ -14,6 +14,42 @@ export type Expression =
     | BinaryOpExpression
     | ScopedExpression
     | LogicalNot
+    | FieldExpression
+
+export type FieldExpression =
+    | {
+          kind: 'FIELD_FROM_STRING'
+          value: Expression & { type: { universe: 'string' } }
+          type: FieldSet
+      }
+    | {
+          kind: 'FIELD_NOT'
+          operand: Expression & { type: FieldSet }
+          type: FieldSet
+      }
+    | {
+          kind: 'FIELD_LENGTH'
+          operand: Expression & { type: FieldSet }
+          type: ValueSet & { universe: 'integer' }
+      }
+    | {
+          kind:
+              | 'FIELD_AND'
+              | 'FIELD_OR'
+              | 'FIELD_XOR'
+              | 'FIELD_ADJUST'
+              | 'FIELD_ROTATE_STATES'
+              | 'FIELD_MODULATE'
+          left: Expression & { type: FieldSet }
+          right: Expression & { type: FieldSet }
+          type: FieldSet
+      }
+    | {
+          kind: 'FIELD_SHIFT_LEFT' | 'FIELD_SHIFT_RIGHT'
+          left: Expression & { type: FieldSet }
+          right: Expression & { type: { universe: 'integer' } }
+          type: FieldSet
+      }
 
 type LogicalNot = {
     kind: 'NOT'

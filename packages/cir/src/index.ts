@@ -13,6 +13,7 @@ export { CanonicalName } from './identfier.js'
 export { Statement } from './statement.js'
 export {
     BoxedValueSet,
+    FieldSet,
     RealPrecision,
     RealSet,
     truthvalue,

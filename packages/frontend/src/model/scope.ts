@@ -7,7 +7,12 @@ import { IsolationLevel, SHARED, UNKNOWN } from '@/model/isolation-level'
 import { ObjectDeclaration } from '@/model/object-declaration'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { TypeName } from '@/model/type-name'
-import { RCTypeSet, ValueSet } from '@/model/value-set'
+import {
+    canAssignValue,
+    checkedValue,
+    RCTypeSet,
+    ValueSet,
+} from '@/model/value-set'
 import { ErrorResult, Result } from '@/tools/result'
 import * as cir from '@clawr/cir'
 
@@ -358,9 +363,9 @@ export class Scope {
     setCurrentValue(name: string, valueSet: ValueSet): Result {
         const variable = this.variableDeclaration(name)
         if (!variable) return ErrorResult.failure(`Unknown variable: ${name}`)
-        if (!variable?.type.isSupersetTo(valueSet))
+        if (!canAssignValue(variable.type, valueSet))
             return ErrorResult.failure(`Incompatible value for ${name}`)
-        this.currentValues.set(name, valueSet)
+        this.currentValues.set(name, checkedValue(variable.type, valueSet))
         if (!this.variables.has(name)) this.outerAssignments.add(name)
         return Result.ok
     }

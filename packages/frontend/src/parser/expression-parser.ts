@@ -69,16 +69,61 @@ export class ExpressionParser {
     }
 
     parseComparisonOperation(stream: TokenStream): Expression {
-        const left = this.parseAdditiveOperation(stream)
+        const left = this.parseFieldOR(stream)
         if (!stream.isNext('OPERATOR', ...Comparison.operators)) return left
         const operatorToken = stream.expect('OPERATOR', ...Comparison.operators)
-        const right = this.parseAdditiveOperation(stream)
+        const right = this.parseFieldOR(stream)
         return BinaryOperation.create({
             operator: operatorToken.operator,
             left,
             right,
             span: { start: left.span.start, end: right.span.end },
         })
+    }
+
+    parseFieldOR(stream: TokenStream): Expression {
+        let expr = this.parseFieldAND(stream)
+        while (stream.isNext('OPERATOR', '|')) {
+            stream.expect('OPERATOR', '|')
+            const right = this.parseFieldAND(stream)
+            expr = BinaryOperation.create({
+                operator: '|',
+                left: expr,
+                right,
+                span: { start: expr.span.start, end: right.span.end },
+            })
+        }
+        return expr
+    }
+
+    parseFieldAND(stream: TokenStream): Expression {
+        let expr = this.parseShift(stream)
+        while (stream.isNext('OPERATOR', '&')) {
+            stream.expect('OPERATOR', '&')
+            const right = this.parseShift(stream)
+            expr = BinaryOperation.create({
+                operator: '&',
+                left: expr,
+                right,
+                span: { start: expr.span.start, end: right.span.end },
+            })
+        }
+        return expr
+    }
+
+    parseShift(stream: TokenStream): Expression {
+        let expr = this.parseAdditiveOperation(stream)
+        while (stream.isNext('OPERATOR', '<<', '>>')) {
+            const operator = stream.expect('OPERATOR', '<<', '>>').operator
+            const right = this.parseAdditiveOperation(stream)
+            expr = BinaryOperation.create({
+                operator,
+                left: expr,
+                right,
+                span: { start: expr.span.start, end: right.span.end },
+            })
+        }
+        return expr
     }
 
     parseAdditiveOperation(stream: TokenStream): Expression {
@@ -245,6 +290,12 @@ export class ExpressionParser {
             case 'IDENTIFIER':
                 return this.parseVariableReference(stream)
             case 'PUNCTUATION':
+                if (stream.isNext('PUNCTUATION', '(')) {
+                    stream.expect('PUNCTUATION', '(')
+                    const expression = this.parse(stream)
+                    stream.expect('PUNCTUATION', ')')
+                    return expression
+                }
                 return this.parseDataLiteral(stream)
         }
         const token = stream.expectToken()

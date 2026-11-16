@@ -1,5 +1,11 @@
 import { Expression } from './expression.js'
-import { BooleanSet, IntegerSet, RealRange, ValueSet } from './value-set.js'
+import {
+    BooleanSet,
+    FieldSet,
+    IntegerSet,
+    RealRange,
+    ValueSet,
+} from './value-set.js'
 
 export type BinaryOpExpression =
     | ArithmeticOperation
@@ -44,6 +50,10 @@ type EqualityComparison = {
     | {
           left: Expression & { type: { universe: 'truthvalue' } }
           right: Expression & { type: { universe: 'truthvalue' } }
+      }
+    | {
+          left: Expression & { type: FieldSet }
+          right: Expression & { type: FieldSet }
       }
 )
 

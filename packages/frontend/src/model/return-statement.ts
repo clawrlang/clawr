@@ -4,7 +4,14 @@ import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 import { ISOLATED } from './isolation-level'
-import { IntegerSet, RealSet, StringSet, TruthvalueSet } from './value-set'
+import {
+    canAssignValue,
+    FieldSet,
+    IntegerSet,
+    RealSet,
+    StringSet,
+    TruthvalueSet,
+} from './value-set'
 
 export class ReturnStatement implements Statement {
     private constructor(
@@ -46,7 +53,7 @@ export class ReturnStatement implements Statement {
         if (cirResult.isError) return cirResult
         const retainedValueCIR = cirResult.value
 
-        if (type instanceof StringSet) {
+        if (type instanceof StringSet || type instanceof FieldSet) {
             const releaseStart = context.scope.emitted.length
             context.scope.releaseThrough(context.returnScope ?? context.scope)
             let returnValue = retainedValueCIR
@@ -144,7 +151,7 @@ export class ReturnStatement implements Statement {
         if (collected.isError) return collected
 
         const [currentValue, isolationLevel] = collected.value
-        if (!calleeResult.type.isSupersetTo(currentValue))
+        if (!canAssignValue(calleeResult.type, currentValue))
             return SemanticErrorResult.failure(
                 'Return value type mismatch',
                 this.value!.span,
@@ -156,6 +163,7 @@ export class ReturnStatement implements Statement {
             currentValue instanceof IntegerSet ||
             currentValue instanceof RealSet ||
             currentValue instanceof StringSet ||
+            currentValue instanceof FieldSet ||
             currentValue instanceof TruthvalueSet
         )
             return Result.ok

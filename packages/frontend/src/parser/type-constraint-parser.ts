@@ -8,6 +8,7 @@ import {
 import { TypeName } from '@/model/type-name'
 import {
     IntegerSet,
+    FieldSet,
     RCTypeSet,
     RealSet,
     StringSet,
@@ -62,6 +63,31 @@ export class TypeConstraintParser {
                 return decorateTypeConstraint(StringSet.create(), {
                     span: { start: typeToken.start, end: typeToken.end },
                 })
+            case 'bitfield':
+            case 'tritfield': {
+                if (!stream.isNext('PUNCTUATION', '('))
+                    return decorateTypeConstraint(FieldSet.create(type), {
+                        span: { start: typeToken.start, end: typeToken.end },
+                    })
+                stream.expect('PUNCTUATION', '(')
+                const length = stream.expect('INTEGER_LITERAL')
+                if (
+                    length.value < 0n ||
+                    length.value > BigInt(Number.MAX_SAFE_INTEGER)
+                )
+                    throw SourceError.create({
+                        message:
+                            'Field length must be a non-negative safe integer',
+                        span: { start: length.start, end: length.end },
+                    })
+                const end = stream.expect('PUNCTUATION', ')').end
+                return decorateTypeConstraint(
+                    FieldSet.create(type, Number(length.value)),
+                    {
+                        span: { start: typeToken.start, end },
+                    },
+                )
+            }
             default:
                 return decorateTypeConstraint(
                     RCTypeSet.create({

@@ -2,7 +2,7 @@ import { Context, Statement } from '@/model'
 import { SHARED } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import { SourceCodeSpan } from '@/tools/diagnostics'
-import { RCTypeSet } from '@/model/value-set'
+import { canAssignValue, RCTypeSet } from '@/model/value-set'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
 
@@ -92,7 +92,7 @@ export class SelfAssignment implements Statement {
         const assignedValueResult = this.value.currentValue(explicitTypeContext)
         if (assignedValueResult.isError) return assignedValueResult
         const assignedValue = assignedValueResult.value
-        if (!targetType.isSupersetTo(assignedValue))
+        if (!canAssignValue(targetType, assignedValue))
             return SemanticErrorResult.failure(
                 `Cannot assign value of type ${assignedValue.toString()} to target of type ${targetType.toString()}`,
                 this.span,

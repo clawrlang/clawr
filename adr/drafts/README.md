@@ -13,7 +13,6 @@ They are essentally an ice-box for architectural decisions and future TODOs.
 - 🗳️ [Threads and Processes](./threads.md)
 - 🗳️ [Purity](./purity.md)
 - 🗳️ [Unions and Enumerated Types](./union-enum.md)
-- 🗳️ [Ternary Fields on Binary Hardware](./fields.md)
 - 🗳️ [List Comprehensions and Generators](./list-comprehension.md)
 - 🗳️ [Debug Information in the CIR](./debug.md)
 - 🗳️ [Disposing `service`](./deinit.md)

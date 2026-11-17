@@ -29,7 +29,7 @@ func throughBox(_ value: bitfield) -> bitfield {
     print((a & b) == bitfield("1000"))
     print((a | b) == bitfield("1011"))
     print((a ^ b) == bitfield("0011"))
-    print(!a == bitfield("0110"))
+    print(~a == bitfield("0110"))
     print((a << 1) == bitfield("0010"))
     print((a >> 1) == bitfield("0100"))
     print(fieldLength(a))

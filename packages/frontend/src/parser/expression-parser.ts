@@ -179,10 +179,11 @@ export class ExpressionParser {
     }
 
     parsePrefixExpression(stream: TokenStream): Expression {
-        if (stream.isNext('OPERATOR', '!')) {
-            const token = stream.expect('OPERATOR', '!')
+        if (stream.isNext('OPERATOR', '!', '~')) {
+            const token = stream.expect('OPERATOR', '!', '~')
             const operand = this.parsePrefixExpression(stream)
             return LogicalNot.create({
+                operator: token.operator,
                 operand,
                 span: { start: token.start, end: operand.span.end },
             })

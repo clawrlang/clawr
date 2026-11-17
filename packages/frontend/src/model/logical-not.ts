@@ -13,18 +13,21 @@ import * as cir from '@clawr/cir'
 
 export class LogicalNot implements Expression {
     private constructor(
+        private readonly operator: '!' | '~',
         private readonly operand: Expression,
         public readonly span: SourceCodeSpan,
     ) {}
 
     static create({
+        operator,
         operand,
         span,
     }: {
+        operator: '!' | '~'
         operand: Expression
         span: SourceCodeSpan
     }) {
-        return new LogicalNot(operand, span)
+        return new LogicalNot(operator, operand, span)
     }
 
     isEffectivelyConst(context: Context): SemanticResult<boolean> {
@@ -76,7 +79,13 @@ export class LogicalNot implements Expression {
 
     private negate(result: SemanticResult<ValueSet>): SemanticResult<ValueSet> {
         if (result.isError) return result
-        if (result.value instanceof FieldSet) return result
+        if (this.operator === '~')
+            return result.value instanceof FieldSet
+                ? result
+                : SemanticErrorResult.failure(
+                      'Pointwise negation requires a field',
+                      this.operand.span,
+                  )
         if (!(result.value instanceof TruthvalueSet))
             return SemanticErrorResult.failure(
                 'Logical negation requires a truthvalue',

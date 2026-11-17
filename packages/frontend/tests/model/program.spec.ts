@@ -105,6 +105,69 @@ describe('field value semantics', () => {
         ).toThrow('same kind')
     })
 
+    it('lowers pointwise NOT separately from scalar logical NOT', () => {
+        const module = compileMain(`
+            const bits = ~0b0001
+            const trits = ~0tT01
+            const twice = ~~0x0F
+            const combined = ~0x0F & 0xFF
+            const shifted = ~0x0F << 1
+            const xor = ~0x0F ^ 0xFF
+            const logical = !ambiguous
+        `)
+        expect(module.startBlock).toMatchObject([
+            {
+                type: { universe: 'bitfield', length: 4 },
+                initialValue: { kind: 'FIELD_NOT' },
+            },
+            {
+                type: { universe: 'tritfield', length: 3 },
+                initialValue: { kind: 'FIELD_NOT' },
+            },
+            {
+                initialValue: {
+                    kind: 'FIELD_NOT',
+                    operand: { kind: 'FIELD_NOT' },
+                },
+            },
+            {
+                initialValue: {
+                    kind: 'FIELD_AND',
+                    left: { kind: 'FIELD_NOT' },
+                },
+            },
+            {
+                initialValue: {
+                    kind: 'FIELD_SHIFT_LEFT',
+                    left: { kind: 'FIELD_NOT' },
+                },
+            },
+            {
+                initialValue: {
+                    kind: 'FIELD_XOR',
+                    left: { kind: 'FIELD_NOT' },
+                },
+            },
+            {
+                type: { universe: 'truthvalue', value: 'ambiguous' },
+                initialValue: { kind: 'NOT' },
+            },
+        ])
+    })
+
+    it.each([
+        ['!0b1', 'Logical negation requires a truthvalue'],
+        ['!0tT01', 'Logical negation requires a truthvalue'],
+        ['~true', 'Pointwise negation requires a field'],
+        ['~ambiguous', 'Pointwise negation requires a field'],
+        ['~1', 'Pointwise negation requires a field'],
+        ['~"text"', 'Pointwise negation requires a field'],
+    ])('rejects invalid NOT operands: %s', (expression, message) => {
+        expect(() => compileMain(`const result = ${expression}`)).toThrow(
+            message,
+        )
+    })
+
     it('keeps exponentiation and recognizes field shift and pointwise precedence', () => {
         const module = compileMain(`
             const a = bitfield("1001")

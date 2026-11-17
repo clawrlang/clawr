@@ -107,6 +107,84 @@ describe('octet stream I/O', () => {
     })
 })
 
+describe('JSON octet interoperability', () => {
+    test.each(['external JSON', 'Clawr serialization'])(
+        'round-trips %s through UTF-8 files with 1-, 8- and 9-octet reads',
+        async (source) => {
+            const directory = fs.mkdtempSync(
+                path.join(os.tmpdir(), 'clawr-json-io-'),
+            )
+            const expected = {
+                text: {
+                    escaped: 'quote: " slash: \\ line:\n tab:\t nul:\u0000',
+                    unicode: 'å € 😀 e\u0301',
+                },
+                count: -42,
+                ratio: 12.5,
+                enabled: true,
+                disabled: false,
+                unknown: null,
+                empty: {},
+            }
+            const external = {
+                ...expected,
+                items: [null, true, false, 'external array', -7, 0.125],
+            }
+            // Text encoding and JSON decoding remain host adapters, not Clawr APIs.
+            let bytes = Buffer.from(
+                `${JSON.stringify(external, null, 2)}\n`,
+                'utf8',
+            )
+            const outputs = ['single.json', 'word.json', 'cross-word.json']
+            try {
+                fs.writeFileSync(path.join(directory, 'input.json'), bytes)
+                for (const name of outputs)
+                    fs.writeFileSync(
+                        path.join(directory, name),
+                        Buffer.alloc(4096, 0xff),
+                    )
+                expect(
+                    await exec(
+                        RWRC_PATH,
+                        [
+                            'build',
+                            path.join(__dirname, 'io/json-octets.clawr'),
+                            '-o',
+                            directory,
+                        ],
+                        directory,
+                    ),
+                ).toMatchObject({ code: 0, stdout: '', stderr: '' })
+                const executable = path.join(directory, 'json-octets')
+                const serialized = await exec(executable, [], directory)
+                expect(serialized).toMatchObject({ code: 0, stderr: '' })
+                expect(JSON.parse(serialized.stdout)).toEqual(expected)
+
+                if (source === 'Clawr serialization') {
+                    bytes = Buffer.from(serialized.stdout, 'utf8')
+                    fs.writeFileSync(path.join(directory, 'input.json'), bytes)
+                    expect(await exec(executable, [], directory)).toEqual(
+                        serialized,
+                    )
+                }
+
+                expect(
+                    fs.readFileSync(path.join(directory, 'input.json')),
+                ).toEqual(bytes)
+                for (const name of outputs) {
+                    const actual = fs.readFileSync(path.join(directory, name))
+                    expect(actual).toEqual(bytes)
+                    expect(JSON.parse(actual.toString('utf8'))).toEqual(
+                        source === 'external JSON' ? external : expected,
+                    )
+                }
+            } finally {
+                fs.rmSync(directory, { recursive: true, force: true })
+            }
+        },
+    )
+})
+
 describe('multi-file builds', () => {
     const directory = path.join(__dirname, 'multifile')
 

@@ -1,0 +1,47 @@
+data JSONText {
+    escaped: string
+    unicode: string
+}
+
+data JSONEmpty {}
+
+data JSONDocument {
+    text: JSONText
+    count: integer
+    ratio: real sig 16
+    enabled: truthvalue
+    disabled: truthvalue
+    unknown: truthvalue
+    empty: JSONEmpty
+}
+
+func copyJSONOctets(_ destination: string, _ count: integer) {
+    const input = openOctetInput("input.json")
+    const output = openOctetOutput(destination)
+    mut chunk: bitfield = readOctets(input, count: count)
+    while fieldLength(chunk) > 0 {
+        writeOctets(output, value: chunk)
+        chunk = readOctets(input, count: count)
+    }
+    closeOctetInput(input)
+    closeOctetOutput(output)
+}
+
+@main {
+    const document: JSONDocument = {
+        text: {
+            escaped: "quote: \" slash: \\ line:\n tab:\t nul:\u0000"
+            unicode: "å € 😀 e\u0301"
+        }
+        count: -42
+        ratio: 12.5
+        enabled: true
+        disabled: false
+        unknown: ambiguous
+        empty: {}
+    }
+    print(serializeJSON(document))
+    copyJSONOctets("single.json", 1)
+    copyJSONOctets("word.json", 8)
+    copyJSONOctets("cross-word.json", 9)
+}

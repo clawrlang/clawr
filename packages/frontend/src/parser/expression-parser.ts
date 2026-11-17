@@ -2,6 +2,7 @@ import { TokenStream } from '@/lexer'
 import { Expression } from '@/model'
 import { BinaryOperation } from '@/model/binary-operation'
 import { FunctionCall } from '@/model/function-call'
+import { FieldCall } from '@/model/field-call'
 import { LogicalNot } from '@/model/logical-not'
 import {
     IntegerLiteral,
@@ -265,6 +266,14 @@ export class ExpressionParser {
     private parsePrimaryExpression(stream: TokenStream): Expression {
         const nextToken = stream.peek()
         switch (nextToken?.kind) {
+            case 'FIELD_LITERAL': {
+                const token = stream.expect('FIELD_LITERAL')
+                return new FieldCall(
+                    token.fieldKind,
+                    [StringLiteral.create(token.value, token)],
+                    token,
+                )
+            }
             case 'STRING_LITERAL': {
                 const token = stream.expectToken()
                 if (token.kind !== 'STRING_LITERAL')

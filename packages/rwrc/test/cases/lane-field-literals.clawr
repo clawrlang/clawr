@@ -1,0 +1,27 @@
+func keepLiteral(_ value: bitfield(8)) -> bitfield(8) => value
+
+@main {
+    const bits: bitfield(4) = 0b000_1
+    const trits: tritfield(9) = 0tT01_T01_T01
+    const hex: bitfield(8) = 0x0F
+    print(bits == bitfield("0001"))
+    print(trits == tritfield("T01T01T01"))
+    print(hex == bitfield("00001111"))
+    print(fieldLength(0b0) == 1 && fieldLength(0t0) == 1 && fieldLength(0x0) == 4)
+    print(0b0 != 0b00 && 0x0 != 0x00 && 0t0 != 0t00)
+    print(0b0011 | 0x8 == 0xB)
+    print(0x0F ^ 0b11110000 == 0xFF)
+    print(!0x0F == 0xf0)
+    print(0x01 << 7 == 0x80)
+    print(0x80 >> 7 == 0x01)
+    print(fieldLane(0x80, 0) == true && fieldLane(0x01, 0) == false)
+    print(fieldLane(0tT01, 0) == false && fieldLane(0tT01, 1) == ambiguous)
+    print(tritwiseRotate(0tT01, 0t111) == tritfield("01T"))
+    print(fieldConcat(0b00, fieldSlice(0xF0, 0, 4)) == 0b001111)
+    print(keepLiteral(0x0F) == hex)
+    const wide: bitfield(72) = 0x00_0123456789aBcDeF
+    print(wide == bitfield("000000000000000100100011010001010110011110001001101010111100110111101111"))
+    print(wide >> 64 == 0x00_0000000000000000)
+    const twentySeven: tritfield(27) = 0tT01_T01_T01_T01_T01_T01_T01_T01_T01
+    print(fieldLength(twentySeven) == 27)
+}

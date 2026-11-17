@@ -15,6 +15,7 @@ export type Token =
     | IdentifierToken
     | RealLiteralToken
     | IntegerLiteralToken
+    | FieldLiteralToken
     | TruthvalueLiteralToken
     | StringLiteralToken
     | RegexLiteralToken
@@ -48,6 +49,11 @@ export type TruthvalueLiteralToken = {
 export type IntegerLiteralToken = {
     kind: 'INTEGER_LITERAL'
     value: bigint
+} & SourceCodeSpan
+export type FieldLiteralToken = {
+    kind: 'FIELD_LITERAL'
+    fieldKind: 'bitfield' | 'tritfield'
+    value: string
 } & SourceCodeSpan
 export type StringLiteralToken = {
     kind: 'STRING_LITERAL'

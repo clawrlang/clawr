@@ -3,6 +3,80 @@ import { describe, expect, it, test } from 'bun:test'
 import { decimal } from 'decimalish'
 
 describe('TokenStream', () => {
+    describe('FIELD_LITERAL', () => {
+        it.each([
+            ['0b0001', 'bitfield', '0001'],
+            ['0b0_01', 'bitfield', '001'],
+            ['0tT01_T01_T01', 'tritfield', 'T01T01T01'],
+            ['0x0F', 'bitfield', '00001111'],
+            ['0x0a_Bc', 'bitfield', '0000101010111100'],
+        ])('reads %s with its full source span', (source, fieldKind, value) => {
+            expect([...tokenize(source)]).toEqual([
+                expect.objectContaining({
+                    kind: 'FIELD_LITERAL',
+                    fieldKind,
+                    value,
+                    start: expect.objectContaining({ line: 1, column: 1 }),
+                    end: expect.objectContaining({
+                        line: 1,
+                        column: source.length + 1,
+                    }),
+                }),
+            ])
+        })
+
+        it.each([
+            '0b',
+            '0t',
+            '0x',
+            '0b102',
+            '0t012',
+            '0tt01',
+            '0xFG',
+            '0b_01',
+            '0tT_',
+            '0xA__F',
+            '0b10name',
+            '0tT01变量',
+        ])('rejects malformed literal %s as a whole', (source) => {
+            expect(() => [...tokenize(source)]).toThrow(
+                `Invalid ${source.slice(0, 2)} field literal`,
+            )
+        })
+
+        it('preserves token boundaries beside operators and comments', () => {
+            expect(
+                [...tokenize('(0b01^0x3)// comment\n0tT01>>1')].map(
+                    (token) => token.kind,
+                ),
+            ).toEqual([
+                'PUNCTUATION',
+                'FIELD_LITERAL',
+                'OPERATOR',
+                'FIELD_LITERAL',
+                'PUNCTUATION',
+                'NEWLINE',
+                'FIELD_LITERAL',
+                'OPERATOR',
+                'INTEGER_LITERAL',
+            ])
+        })
+
+        it('retains the source name on malformed literals', () => {
+            try {
+                TokenStream.read('0xG', 'literal.clawr').next()
+                throw new Error('Expected a source error')
+            } catch (error) {
+                expect(error).toMatchObject({
+                    span: {
+                        start: { source: 'literal.clawr', column: 1 },
+                        end: { source: 'literal.clawr', column: 4 },
+                    },
+                })
+            }
+        })
+    })
+
     describe('INTEGER_LITERAL', () => {
         const examples = {
             '1': { int: 1n, s: '1' },

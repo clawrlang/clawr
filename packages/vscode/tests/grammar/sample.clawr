@@ -20,6 +20,9 @@ state:
 
 @main {
     const label: string = "hello"
+    const bits = 0b000_1
+    const trits = 0tT01_T01_T01
+    const hex = 0x0a_BC
     mut total: integer = 0
     total += 1
     if true {} else if false {} else {}

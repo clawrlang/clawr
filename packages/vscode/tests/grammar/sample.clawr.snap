@@ -112,6 +112,33 @@
 #                          ^ source.clawr string.quoted.double.clawr
 #                           ^^^^^ source.clawr string.quoted.double.clawr
 #                                ^ source.clawr string.quoted.double.clawr
+>    const bits = 0b000_1
+#^^^^ source.clawr
+#    ^^^^^ source.clawr storage.modifier.clawr
+#         ^ source.clawr
+#          ^^^^ source.clawr variable.other.clawr
+#              ^ source.clawr
+#               ^ source.clawr keyword.operator.assignment.clawr
+#                ^ source.clawr
+#                 ^^^^^^^ source.clawr constant.other.field.clawr
+>    const trits = 0tT01_T01_T01
+#^^^^ source.clawr
+#    ^^^^^ source.clawr storage.modifier.clawr
+#         ^ source.clawr
+#          ^^^^^ source.clawr variable.other.clawr
+#               ^ source.clawr
+#                ^ source.clawr keyword.operator.assignment.clawr
+#                 ^ source.clawr
+#                  ^^^^^^^^^^^^^ source.clawr constant.other.field.clawr
+>    const hex = 0x0a_BC
+#^^^^ source.clawr
+#    ^^^^^ source.clawr storage.modifier.clawr
+#         ^ source.clawr
+#          ^^^ source.clawr variable.other.clawr
+#             ^ source.clawr
+#              ^ source.clawr keyword.operator.assignment.clawr
+#               ^ source.clawr
+#                ^^^^^^^ source.clawr constant.other.field.clawr
 >    mut total: integer = 0
 #^^^^ source.clawr
 #    ^^^ source.clawr storage.modifier.clawr

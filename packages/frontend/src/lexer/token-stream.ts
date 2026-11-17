@@ -14,6 +14,7 @@ import {
 } from '@/lexer/kinds'
 import type {
     AnnotationToken,
+    FieldLiteralToken,
     IdentifierToken,
     IntegerLiteralToken,
     KeywordToken,
@@ -108,6 +109,7 @@ export class TokenStream {
 
     expect(kind: 'TRUTHVALUE_LITERAL'): TruthvalueLiteralToken
     expect(kind: 'INTEGER_LITERAL'): IntegerLiteralToken
+    expect(kind: 'FIELD_LITERAL'): FieldLiteralToken
     expect(kind: 'REAL_LITERAL'): RealLiteralToken
     expect(kind: 'NEWLINE'): NewlineToken
     expect(kind: 'IDENTIFIER'): IdentifierToken
@@ -262,6 +264,9 @@ export class TokenStream {
 
         if (current === '\n') return this.collapsedNewlineToken()
 
+        if (['0b', '0t', '0x'].includes(this.source.peek(2)))
+            return this.consumeFieldLiteral()
+
         const number = this.peekNumericLiteral()
         if (number) {
             const loc = { ...this.source.location }
@@ -394,6 +399,54 @@ export class TokenStream {
             this.source.skip(2)
             this.source.skipThrough('*/')
             this.skipIgnoredCharacters({ includingNewline })
+        }
+    }
+
+    private consumeFieldLiteral(): FieldLiteralToken {
+        const start = { ...this.source.location }
+        const source = this.source.source
+        let end = start.index + 2
+        while (end < source.length) {
+            const codePoint = source.codePointAt(end)
+            if (codePoint === undefined) break
+            const char = String.fromCodePoint(codePoint)
+            if (!isIdentifierContinue(char)) break
+            end += char.length
+        }
+        const literal = source.slice(start.index, end)
+        const prefix = literal.slice(0, 2)
+        const digits = literal.slice(2)
+        const valid =
+            prefix === '0b'
+                ? /^[01](?:_?[01])*$/
+                : prefix === '0t'
+                  ? /^[T01](?:_?[T01])*$/
+                  : /^[0-9a-fA-F](?:_?[0-9a-fA-F])*$/
+        this.source.skip(literal.length)
+        const span = {
+            start,
+            end: { ...this.source.location },
+        }
+        if (!valid.test(digits))
+            throw SourceError.create({
+                message: `Invalid ${prefix} field literal`,
+                span,
+            })
+        const lanes = digits.replaceAll('_', '')
+        return {
+            kind: 'FIELD_LITERAL',
+            fieldKind: prefix === '0t' ? 'tritfield' : 'bitfield',
+            value:
+                prefix === '0x'
+                    ? [...lanes]
+                          .map((digit) =>
+                              Number.parseInt(digit, 16)
+                                  .toString(2)
+                                  .padStart(4, '0'),
+                          )
+                          .join('')
+                    : lanes,
+            ...span,
         }
     }
 
@@ -667,7 +720,7 @@ function asToken(next: string, loc: SourceLocation): Token | undefined {
         }
     }
 
-    try {
+    if (/^\d[\d_]*$/.test(next)) {
         return {
             kind: 'INTEGER_LITERAL',
             value: BigInt(next.replaceAll('_', '')),
@@ -677,7 +730,7 @@ function asToken(next: string, loc: SourceLocation): Token | undefined {
                 column: start.column + next.length,
             },
         }
-    } catch {}
+    }
     try {
         const real = decimal(next.replaceAll('_', ''))
         return {

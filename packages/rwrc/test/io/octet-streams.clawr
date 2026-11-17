@@ -4,7 +4,7 @@ func readSome(_ input: ref OctetInput, _ count: integer) -> bitfield {
 
 @main {
     const output = openOctetOutput("data.bin")
-    writeOctets(output, value: bitfield("00000000100000001111111100000001"))
+    writeOctets(output, value: 0x00_80_FF_01)
     writeOctets(output, value: bitfield("101010100101010101111111111111101000000101000000000000101100001100001001"))
     writeOctets(output, value: bitfield(""))
     closeOctetOutput(output)

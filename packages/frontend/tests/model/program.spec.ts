@@ -13,6 +13,77 @@ describe('field value semantics', () => {
     const compileMain = (body: string) =>
         compile([{ name: 'fields.clawr', source: `@main { ${body} }` }])
 
+    it('infers exact field literal widths and lowers canonical lane strings', () => {
+        const module = compileMain(`
+            const bits = 0b000_1
+            const trits = 0tT01_T01_T01
+            const hex = 0x0F
+            const alphabet = 0x0123456789aBcDeF
+        `)
+        expect(module.startBlock).toMatchObject(
+            [
+                ['bitfield', 4, '0001'],
+                ['tritfield', 9, 'T01T01T01'],
+                ['bitfield', 8, '00001111'],
+                [
+                    'bitfield',
+                    64,
+                    '0000000100100011010001010110011110001001101010111100110111101111',
+                ],
+            ].map(([universe, length, value]) => ({
+                kind: 'VARIABLE_DECL',
+                type: { universe, length },
+                initialValue: {
+                    kind: 'FIELD_FROM_STRING',
+                    type: { universe, length },
+                    value: { kind: 'STRING_LITERAL', type: { value } },
+                },
+            })),
+        )
+    })
+
+    it.each([
+        'const a: bitfield(3) = 0b0001',
+        'const a: tritfield(2) = 0tT01',
+        'const a: bitfield(2) = 0x0F',
+        'const a: integer = 0b1',
+        'const a: integer = 0xF',
+        'const a: tritfield(1) = 0b1',
+    ])('rejects incompatible literal types: %s', (body) => {
+        expect(() => compileMain(body)).toThrow('Incompatible initial value')
+    })
+
+    it.each(['0B10', '0XFF', '0o77'])(
+        'does not treat %s as a non-decimal integer literal',
+        (literal) => {
+            expect(() => compileMain(`const a: integer = ${literal}`)).toThrow()
+        },
+    )
+
+    it('does not resolve field literals through user-defined constructors', () => {
+        const module = compile([
+            {
+                name: 'shadow.clawr',
+                source: `
+                    func bitfield(_ x: string) -> integer => 7
+                    func tritfield(_ x: string) -> integer => 8
+                    @main {
+                        const b: bitfield(1) = 0b1
+                        const h: bitfield(4) = 0xF
+                        const t: tritfield(1) = 0tT
+                        const ordinary: integer = bitfield("1")
+                    }
+                `,
+            },
+        ])
+        expect(module.startBlock).toMatchObject([
+            { type: { universe: 'bitfield', length: 1 } },
+            { type: { universe: 'bitfield', length: 4 } },
+            { type: { universe: 'tritfield', length: 1 } },
+            { type: { universe: 'integer' } },
+        ])
+    })
+
     it('rejects invalid literals, incompatible widths and ternary XOR', () => {
         expect(() => compileMain('const a = bitfield("T")')).toThrow(
             'Invalid bitfield lane',

@@ -48,6 +48,17 @@ Field *Field¸fromString(FieldKind kind, const String *value);
 /// Panics on NULL or an invalid lane; this is not a wire-format encoding.
 String *Field¸toString(const Field *field);
 
+/// @brief Decodes length octets MSB-first into an owned binary field.
+/// The first octet supplies the first eight displayed lanes. Empty input is
+/// valid. Borrows non-NULL data; panics on excessive size or allocation failure.
+Field *Field¸fromOctets(const uint8_t *data, size_t length);
+
+/// @brief Encodes a binary field MSB-first into a caller-owned malloc buffer.
+/// Its octet count is field->length / 8. Empty fields return a freeable buffer.
+/// Panics on NULL, non-binary fields, non-multiples of eight lanes, or allocation
+/// failure. Never exposes storage words or adds padding.
+uint8_t *Field¸toOctets(const Field *field);
+
 /// @brief Returns c_true iff kind, length, and ordered lanes match; else
 /// c_false. Different kinds or lengths are unequal. Panics on NULL.
 truthvalue_t Field¸equal(const Field *left, const Field *right);

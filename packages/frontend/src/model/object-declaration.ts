@@ -268,7 +268,11 @@ export class ObjectDeclaration implements Declaration {
         if (this.opaque) {
             if (
                 this.kind === 'service' &&
-                this.name.canonical() === 'clawr¸JSONBuffer' &&
+                [
+                    'clawr¸JSONBuffer',
+                    'clawr¸OctetInput',
+                    'clawr¸OctetOutput',
+                ].includes(this.name.canonical()) &&
                 !this.inherits.length &&
                 !this.properties.length &&
                 !this.initializers.length &&

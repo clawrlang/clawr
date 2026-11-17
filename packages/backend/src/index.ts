@@ -214,6 +214,37 @@ export function lower(json: string): string {
         parameters: [jsonBuffer],
         returnType: { universe: 'string' },
     })
+    const octetInput: cir.ValueSet = {
+        universe: 'rc-type',
+        namespace: 'clawr',
+        name: 'OctetInput',
+    }
+    const octetOutput: cir.ValueSet = {
+        universe: 'rc-type',
+        namespace: 'clawr',
+        name: 'OctetOutput',
+    }
+    for (const [suffix, type] of [
+        ['Input', octetInput],
+        ['Output', octetOutput],
+    ] as const) {
+        registerSignature(`clawr¸openOctet${suffix}`, {
+            parameters: [{ universe: 'string' }],
+            returnType: type,
+        })
+        registerSignature(`clawr¸closeOctet${suffix}`, {
+            parameters: [type],
+            returnType: { universe: 'void' },
+        })
+    }
+    registerSignature('clawr¸readOctets˛count', {
+        parameters: [octetInput, { universe: 'integer' }],
+        returnType: { universe: 'bitfield' },
+    })
+    registerSignature('clawr¸writeOctets˛value', {
+        parameters: [octetOutput, { universe: 'bitfield' }],
+        returnType: { universe: 'void' },
+    })
     registerSignature('clawr¸newHashBuilder', {
         parameters: [],
         returnType: {
@@ -1957,7 +1988,9 @@ function isRuntimeOpaqueType(type: cir.ValueSet): boolean {
     return (
         type.universe === 'rc-type' &&
         type.namespace === 'clawr' &&
-        ['HashBuilder', 'JSONBuffer'].includes(type.name)
+        ['HashBuilder', 'JSONBuffer', 'OctetInput', 'OctetOutput'].includes(
+            type.name,
+        )
     )
 }
 

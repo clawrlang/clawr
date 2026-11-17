@@ -303,6 +303,58 @@ describe('standard library declarations', () => {
         ).toBe(false)
     })
 
+    it('resolves typed octet streams without exposing their runtime representation', () => {
+        const module = compile(
+            `
+            @main {
+                const input = openOctetInput("data.bin")
+                const value: bitfield = readOctets(input, count: 4)
+                closeOctetInput(input)
+                const output = openOctetOutput("copy.bin")
+                writeOctets(output, value: value)
+                closeOctetOutput(output)
+            }
+        `,
+            true,
+        )
+        expect(module.startBlock).toContainEqual(
+            expect.objectContaining({
+                kind: 'VARIABLE_DECL',
+                initialValue: expect.objectContaining({
+                    kind: 'CALL',
+                    name: expect.objectContaining({ baseName: 'readOctets' }),
+                    type: { universe: 'bitfield' },
+                }),
+            }),
+        )
+        expect(
+            module.declarations?.some(
+                (decl) =>
+                    decl.kind === 'RC_TYPE_DECL' &&
+                    ['OctetInput', 'OctetOutput'].includes(decl.name),
+            ),
+        ).toBe(false)
+        expect(() =>
+            compile('@main { const input: ref OctetInput = {} }'),
+        ).toThrow()
+        expect(() =>
+            compile(
+                '@main { const input = openOctetInput("x") const clone = copy(of: input) }',
+            ),
+        ).toThrow('Opaque services cannot be copied')
+        expect(() =>
+            compile(
+                '@main { writeOctets(openOctetOutput("x"), value: tritfield("T01")) }',
+            ),
+        ).toThrow()
+        expect(() =>
+            compile('@main { readOctets(openOctetOutput("x"), count: 1) }'),
+        ).toThrow()
+        expect(() =>
+            compile('@main { readOctets(openOctetInput("x"), count: "1") }'),
+        ).toThrow()
+    })
+
     it('uses explicit conformance instead of synthesizing a second serializer', () => {
         const result = compile(`
             data Pure { number: integer }

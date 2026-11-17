@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import fs from 'fs'
 import child_process from 'node:child_process'
+import os from 'node:os'
 import path from 'path'
 
 const CASES_DIR = path.join(__dirname, 'cases')
@@ -61,6 +62,49 @@ describe('End-to-end Tests', () => {
             }
         })
     }
+})
+
+describe('octet stream I/O', () => {
+    test('encodes exact wire bytes and reads independent chunks through shared handles', async () => {
+        const directory = fs.mkdtempSync(
+            path.join(os.tmpdir(), 'clawr-octet-io-'),
+        )
+        try {
+            fs.writeFileSync(
+                path.join(directory, 'data.bin'),
+                Buffer.alloc(100, 0x42),
+            )
+            const result = await exec(
+                RWRC_PATH,
+                [
+                    'build',
+                    path.join(__dirname, 'io/octet-streams.clawr'),
+                    '-o',
+                    directory,
+                ],
+                directory,
+            )
+            expect(result).toMatchObject({ code: 0, stdout: '', stderr: '' })
+            expect(
+                await exec(
+                    path.join(directory, 'octet-streams'),
+                    [],
+                    directory,
+                ),
+            ).toMatchObject({ code: 0, stdout: 'true\n'.repeat(9), stderr: '' })
+            expect(fs.readFileSync(path.join(directory, 'data.bin'))).toEqual(
+                Buffer.from([
+                    0x00, 0x80, 0xff, 0x01, 0xaa, 0x55, 0x7f, 0xfe, 0x81, 0x40,
+                    0x02, 0xc3, 0x09,
+                ]),
+            )
+            expect(fs.readFileSync(path.join(directory, 'copy.bin'))).toEqual(
+                fs.readFileSync(path.join(directory, 'data.bin')),
+            )
+        } finally {
+            fs.rmSync(directory, { recursive: true, force: true })
+        }
+    })
 })
 
 describe('multi-file builds', () => {

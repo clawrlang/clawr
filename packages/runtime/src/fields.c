@@ -99,6 +99,39 @@ String *Field¸toString(const Field *field) {
 }
 
 __attribute__((visibility("default")))
+Field *Field¸fromOctets(const uint8_t *data, size_t length) {
+  if (!data)
+    panic("Octet decoding requires a buffer");
+  if (length > SIZE_MAX / 8)
+    panic("Field is too large");
+  Field *field = newField(FIELD_BINARY, length * 8);
+  for (size_t i = 0; i < length; i++) {
+    size_t position = (length - 1 - i) * 8;
+    field->words[position / LANES_PER_WORD] |=
+        (BinaryWord)data[i] << (position % LANES_PER_WORD);
+  }
+  return field;
+}
+
+__attribute__((visibility("default")))
+uint8_t *Field¸toOctets(const Field *field) {
+  if (!field || field->kind != FIELD_BINARY)
+    panic("Octet encoding requires a binary field");
+  if (field->length % 8)
+    panic("Octet encoding requires a multiple of 8 lanes");
+  size_t length = field->length / 8;
+  uint8_t *data = malloc(length ? length : 1);
+  if (!data)
+    panic("Out of memory encoding octets");
+  for (size_t i = 0; i < length; i++) {
+    size_t position = (length - 1 - i) * 8;
+    data[i] = (uint8_t)(field->words[position / LANES_PER_WORD] >>
+                        (position % LANES_PER_WORD));
+  }
+  return data;
+}
+
+__attribute__((visibility("default")))
 truthvalue_t Field¸equal(const Field *left, const Field *right) {
   if (!left || !right)
     panic("Field equality requires fields");

@@ -52,6 +52,27 @@ String *Field¸toString(const Field *field);
 /// c_false. Different kinds or lengths are unequal. Panics on NULL.
 truthvalue_t Field¸equal(const Field *left, const Field *right);
 
+/// @brief Returns the lane at a zero-based displayed-sequence index.
+/// Panics on NULL or index >= length.
+truthvalue_t Field¸lane(const Field *field, size_t index);
+
+/// @brief Returns an owned slice of length lanes starting at displayed index
+/// start. An empty slice at the end is valid. Panics on NULL or out-of-bounds
+/// start/length; never clamps or pads.
+Field *Field¸slice(const Field *field, size_t start, size_t length);
+
+/// @brief Returns an owned field with left's lanes followed by right's.
+/// Panics on NULL, unequal kinds, excessive length, or allocation failure.
+Field *Field¸concat(const Field *left, const Field *right);
+
+/// @brief Converts a lane index or count to a storage size.
+/// Panics on negative or unrepresentable values; never truncates or saturates.
+size_t Field¸sizeInt64(int64_t value);
+
+/// @brief Like Field¸sizeInt64 for a borrowed arbitrary-precision integer.
+/// Also panics on NULL.
+size_t Field¸sizeInteger(Integer *value);
+
 /// @brief Returns an owned lane-wise negation, preserving kind and length.
 /// False and true exchange; ambiguous is unchanged. Panics on NULL.
 Field *Field¸not(const Field *field);

@@ -1,0 +1,7 @@
+func lane(_ value: bitfield, _ index: integer) -> truthvalue {
+    return fieldLane(value, index)
+}
+
+@main {
+    print(lane(bitfield("10"), 1000000000000000000000000000000000000000))
+}

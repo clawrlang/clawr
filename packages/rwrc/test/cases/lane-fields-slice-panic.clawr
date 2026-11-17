@@ -1,0 +1,7 @@
+func slice(_ value: tritfield, _ start: integer, _ length: integer) -> tritfield {
+    return fieldSlice(value, start, length)
+}
+
+@main {
+    print(slice(tritfield("T01"), 1, 3) == tritfield(""))
+}

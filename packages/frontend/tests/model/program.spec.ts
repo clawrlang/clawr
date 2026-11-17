@@ -84,6 +84,90 @@ describe('field value semantics', () => {
         ).not.toThrow()
     })
 
+    it('lowers lane access, slices and unequal-width concatenation with precise types', () => {
+        const module = compileMain(`
+            const bits = bitfield("1001")
+            const lane = fieldLane(bits, 0)
+            const slice: bitfield(2) = fieldSlice(bits, 1, 2)
+            const joined: bitfield(3) = fieldConcat(slice, bitfield("1"))
+            const empty: bitfield(0) = fieldSlice(bits, 4, 0)
+            const trit = fieldLane(tritfield("T01"), 1)
+        `)
+        expect(module.startBlock).toMatchObject([
+            { kind: 'VARIABLE_DECL' },
+            {
+                kind: 'VARIABLE_DECL',
+                initialValue: {
+                    kind: 'FIELD_LANE',
+                    type: { universe: 'truthvalue', values: ['false', 'true'] },
+                },
+            },
+            {
+                kind: 'VARIABLE_DECL',
+                initialValue: {
+                    kind: 'FIELD_SLICE',
+                    type: { universe: 'bitfield', length: 2 },
+                },
+            },
+            {
+                kind: 'VARIABLE_DECL',
+                initialValue: {
+                    kind: 'FIELD_CONCAT',
+                    type: { universe: 'bitfield', length: 3 },
+                },
+            },
+            {
+                kind: 'VARIABLE_DECL',
+                type: { universe: 'bitfield', length: 0 },
+            },
+            {
+                kind: 'VARIABLE_DECL',
+                initialValue: {
+                    kind: 'FIELD_LANE',
+                    type: { universe: 'truthvalue' },
+                },
+            },
+        ])
+    })
+
+    it.each([
+        ['fieldLane(bitfield("1"), -1)', 'cannot be negative'],
+        ['fieldLane(bitfield("1"), 1)', 'out of bounds'],
+        ['fieldLane(bitfield(""), 0)', 'out of bounds'],
+        ['fieldSlice(bitfield("10"), 3, 0)', 'out of bounds'],
+        ['fieldSlice(bitfield("10"), 1, 2)', 'out of bounds'],
+        ['fieldSlice(bitfield("10"), 0, -1)', 'cannot be negative'],
+        ['fieldSlice(bitfield("10"), -1, 0)', 'cannot be negative'],
+        [
+            'fieldSlice(bitfield("10"), 0, 10000000000000000000000)',
+            'out of bounds',
+        ],
+        ['fieldLane(bitfield("1"), "0")', 'requires integer'],
+        ['fieldSlice(bitfield("1"), 0, "1")', 'requires integer'],
+        ['fieldConcat(bitfield("1"), tritfield("1"))', 'same kind'],
+        ['fieldSlice(bitfield("1"), 0)', 'expects 3'],
+    ])('rejects invalid field manipulation: %s', (expression, message) => {
+        expect(() => compileMain(`const result = ${expression}`)).toThrow(
+            message,
+        )
+    })
+
+    it('allows ordinary functions to shadow the new field helpers', () => {
+        expect(() =>
+            compile([
+                {
+                    name: 'shadow.clawr',
+                    source: `
+                func fieldLane(_ a: integer, _ b: integer) => a + b
+                func fieldSlice(_ a: integer, _ b: integer, _ c: integer) => a + b + c
+                func fieldConcat(_ a: integer, _ b: integer) => a + b
+                @main { print(fieldLane(1, 2)) print(fieldSlice(1, 2, 3)) print(fieldConcat(1, 2)) }
+            `,
+                },
+            ]),
+        ).not.toThrow()
+    })
+
     it('rejects a statically incompatible field in a data property', () => {
         expect(() =>
             compile([

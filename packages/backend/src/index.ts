@@ -1288,6 +1288,11 @@ function lowerFieldLengthChecked(value: string, type: cir.FieldSet): string {
         : `Field¸ensureLength(${value}, ${type.length})`
 }
 
+function lowerFieldSize(expr: cir.Expression): string {
+    const representation = operandRepresentation(expr)
+    return `Field¸size${representation === 'big' ? 'Integer' : 'Int64'}(${lowerBorrowed(expr, representation)})`
+}
+
 /** Lowers a call argument for a parameter of type `parameter`. */
 function lowerArgument(expr: cir.Expression, parameter?: cir.ValueSet) {
     if (
@@ -1549,6 +1554,27 @@ export function lowerExpr(expr: cir.Expression): string {
                 ? `((int64_t)(${field})->length)`
                 : `Field¸length(${field})`
         }
+        case 'FIELD_LANE':
+            return `Field¸lane(${lowerArgument(expr.operand)}, ${lowerFieldSize(expr.index)})`
+        case 'FIELD_SLICE':
+            if (expr.type.universe !== expr.operand.type.universe)
+                throw new Error(
+                    'Field slice result kind must match its operand',
+                )
+            return lowerFieldLengthChecked(
+                `Field¸slice(${lowerArgument(expr.operand)}, ${lowerFieldSize(expr.start)}, ${lowerFieldSize(expr.length)})`,
+                expr.type,
+            )
+        case 'FIELD_CONCAT':
+            if (
+                expr.left.type.universe !== expr.type.universe ||
+                expr.right.type.universe !== expr.type.universe
+            )
+                throw new Error('Field concatenation kinds must match')
+            return lowerFieldLengthChecked(
+                `Field¸concat(${lowerArgument(expr.left)}, ${lowerArgument(expr.right)})`,
+                expr.type,
+            )
         case 'FIELD_AND':
         case 'FIELD_OR':
         case 'FIELD_XOR':

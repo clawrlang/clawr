@@ -1,0 +1,7 @@
+func slice(_ value: bitfield, _ start: integer, _ length: integer) -> bitfield {
+    return fieldSlice(value, start, length)
+}
+
+@main {
+    print(slice(bitfield("10"), 0, -1) == bitfield(""))
+}

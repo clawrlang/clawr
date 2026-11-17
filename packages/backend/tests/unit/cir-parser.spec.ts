@@ -42,6 +42,59 @@ describe('CIR parser schema validation', () => {
         ).toThrow('Invalid CIR:')
     })
 
+    it('validates field manipulation and requires integer positions', () => {
+        const operand = {
+            kind: 'FIELD_FROM_STRING',
+            value: {
+                kind: 'STRING_LITERAL',
+                type: { universe: 'string', value: '01' },
+            },
+            type: { universe: 'bitfield', length: 2 },
+        }
+        const count = {
+            kind: 'INTEGER_LITERAL',
+            type: { universe: 'integer', value: '1' },
+        }
+        const lane = {
+            kind: 'FIELD_LANE',
+            operand,
+            index: count,
+            type: { universe: 'truthvalue', values: ['false', 'true'] },
+        }
+        const slice = {
+            kind: 'FIELD_SLICE',
+            operand,
+            start: count,
+            length: count,
+            type: { universe: 'bitfield', length: 1 },
+        }
+        const concat = {
+            kind: 'FIELD_CONCAT',
+            left: operand,
+            right: slice,
+            type: { universe: 'bitfield', length: 3 },
+        }
+        const module = (value: object) =>
+            JSON.stringify({
+                $schema: 'http://clawr.lang/schema/cir/DRAFT-0',
+                startBlock: [
+                    {
+                        kind: 'CALL',
+                        name: { baseName: 'print', labels: [] },
+                        arguments: [value],
+                    },
+                ],
+            })
+        for (const expression of [lane, slice, concat])
+            expect(() => CIRParser.parse(module(expression))).not.toThrow()
+        expect(() =>
+            CIRParser.parse(module({ ...lane, index: operand })),
+        ).toThrow('Invalid CIR:')
+        expect(() =>
+            CIRParser.parse(module({ ...slice, length: operand })),
+        ).toThrow('Invalid CIR:')
+    })
+
     it('validates scoped expressions and their statements', () => {
         const scope = {
             kind: 'SCOPE',

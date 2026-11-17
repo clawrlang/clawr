@@ -110,6 +110,69 @@ truthvalue_t Field¸equal(const Field *left, const Field *right) {
              : c_false;
 }
 
+// Offsets here count from the rightmost lane. Target ranges must be zeroed.
+static void copyLanes(Field *target, size_t targetOffset, const Field *source,
+                      size_t sourceOffset, size_t length) {
+  size_t sourceWords = wordCount(source->length);
+  size_t targetWords = wordCount(target->length);
+  for (size_t plane = 0; plane < planeCount(source->kind); plane++) {
+    size_t copied = 0;
+    while (copied < length) {
+      size_t from = sourceOffset + copied, to = targetOffset + copied;
+      unsigned shift = from % LANES_PER_WORD;
+      unsigned targetShift = to % LANES_PER_WORD;
+      size_t width = LANES_PER_WORD - targetShift;
+      if (width > length - copied)
+        width = length - copied;
+      size_t word = from / LANES_PER_WORD;
+      const BinaryWord *data = source->words + plane * sourceWords;
+      BinaryWord value = data[word] >> shift;
+      if (shift && word + 1 < sourceWords)
+        value |= data[word + 1] << (LANES_PER_WORD - shift);
+      target->words[plane * targetWords + to / LANES_PER_WORD] |=
+          (value & bitwiseNot(0, (uint32_t)width)) << targetShift;
+      copied += width;
+    }
+  }
+}
+
+__attribute__((visibility("default")))
+truthvalue_t Field¸lane(const Field *field, size_t index) {
+  if (!field || index >= field->length)
+    panic("Field lane index is out of bounds");
+  size_t position = field->length - 1 - index;
+  size_t word = position / LANES_PER_WORD;
+  BinaryWord bit = 1ULL << (position % LANES_PER_WORD);
+  if (field->kind == FIELD_BINARY)
+    return field->words[word] & bit ? c_true : c_false;
+  bool x0 = (field->words[word] & bit) != 0;
+  bool x1 = (field->words[wordCount(field->length) + word] & bit) != 0;
+  if (x1 && !x0)
+    panic("Invalid field lane");
+  return x1 ? c_true : x0 ? c_ambiguous : c_false;
+}
+
+__attribute__((visibility("default")))
+Field *Field¸slice(const Field *field, size_t start, size_t length) {
+  if (!field || start > field->length || length > field->length - start)
+    panic("Field slice is out of bounds");
+  Field *result = newField(field->kind, length);
+  copyLanes(result, 0, field, field->length - start - length, length);
+  return result;
+}
+
+__attribute__((visibility("default")))
+Field *Field¸concat(const Field *left, const Field *right) {
+  if (!left || !right || left->kind != right->kind)
+    panic("Field concatenation requires fields of the same kind");
+  if (right->length > SIZE_MAX - left->length)
+    panic("Field is too large");
+  Field *result = newField(left->kind, left->length + right->length);
+  copyLanes(result, right->length, left, 0, left->length);
+  copyLanes(result, 0, right, 0, right->length);
+  return result;
+}
+
 typedef enum {
   OP_AND,
   OP_OR,
@@ -265,26 +328,48 @@ Field *Field¸shiftInt64(const Field *field, int64_t count, bool left) {
   return Field¸shift(field, (size_t)count, left);
 }
 
+static size_t integerSize(Integer *count, const char *negativeError,
+                          bool saturate) {
+  __int128 value = 0;
+  for (size_t i = count->digits->count; i > 0; i--) {
+    value = value * (__int128)BASE +
+            ARRAY_ELEMENT_AT(i - 1, count->digits, digit_t);
+    if (value < 0)
+      panic(negativeError);
+    // Bound prefixes so the next radix multiplication fits in int128.
+    __int128 limit = i == 1 ? (__int128)SIZE_MAX : INT64_MAX;
+    if (value > limit) {
+      if (!saturate)
+        panic("Field index or count is too large");
+      return SIZE_MAX;
+    }
+  }
+  return (size_t)value;
+}
+
 __attribute__((visibility("default")))
 Field *Field¸shiftInteger(const Field *field, Integer *count, bool left) {
   if (!field || !count)
     panic("Field shift requires a field and a count");
-  String *text = Integer·toStringRC(count);
-  if (text->length && text->data[0] == '-')
-    panic("Field shift count cannot be negative");
-  size_t value = 0;
-  for (size_t i = 0; i < text->length; i++) {
-    unsigned digit = (unsigned)(text->data[i] - '0');
-    if (digit > 9)
-      panic("Invalid integer shift count");
-    if (value > (SIZE_MAX - digit) / 10) {
-      value = SIZE_MAX;
-      break;
-    }
-    value = value * 10 + digit;
-  }
-  releaseRC(text);
-  return Field¸shift(field, value, left);
+  return Field¸shift(
+      field, integerSize(count, "Field shift count cannot be negative", true),
+      left);
+}
+
+__attribute__((visibility("default")))
+size_t Field¸sizeInt64(int64_t value) {
+  if (value < 0)
+    panic("Field index or count cannot be negative");
+  if ((uintmax_t)value > SIZE_MAX)
+    panic("Field index or count is too large");
+  return (size_t)value;
+}
+
+__attribute__((visibility("default")))
+size_t Field¸sizeInteger(Integer *value) {
+  if (!value)
+    panic("Field index or count requires an integer");
+  return integerSize(value, "Field index or count cannot be negative", false);
 }
 
 __attribute__((visibility("default")))

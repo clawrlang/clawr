@@ -1,0 +1,42 @@
+func lane(_ value: bitfield, _ index: integer) -> truthvalue {
+    return fieldLane(value, index)
+}
+
+func slice(_ value: bitfield, _ start: integer, _ length: integer) -> bitfield {
+    return fieldSlice(value, start, length)
+}
+
+func nativeSlice(_ value: bitfield, _ start: integer(0...100), _ length: integer(0...100)) -> bitfield {
+    return fieldSlice(value, start, length)
+}
+
+func join(_ left: tritfield, _ right: tritfield) -> tritfield {
+    return fieldConcat(left, right)
+}
+
+@main {
+    const bits = bitfield("1001")
+    print(lane(bits, 0) == true)
+    print(lane(bits, 1) == false)
+    print(fieldLane(bits, 3) == true)
+    print(fieldLane(tritfield("T01"), 0) == false)
+    print(fieldLane(tritfield("T01"), 1) == ambiguous)
+    print(fieldLane(tritfield("T01"), 2) == true)
+    const middle: bitfield(2) = fieldSlice(bits, 1, 2)
+    print(middle == bitfield("00"))
+    print(slice(bits, 2, 2) == bitfield("01"))
+    print(nativeSlice(bits, 1, 2) == middle)
+    print(fieldSlice(bits, 4, 0) == bitfield(""))
+    print(fieldSlice(tritfield("T01"), 1, 2) == tritfield("01"))
+    const joined: bitfield(5) = fieldConcat(bits, bitfield("0"))
+    print(joined == bitfield("10010"))
+    print(fieldConcat(bitfield(""), bits) == bits)
+    print(fieldConcat(bits, bitfield("")) == bits)
+    print(join(tritfield("T0"), tritfield("1")) == tritfield("T01"))
+    const extended = fieldConcat(bits, bitfield("10000000000000000000000000000000000000000000000000000000000000001"))
+    print(fieldLength(extended) == 69)
+    print(lane(extended, 4) == true)
+    print(slice(extended, 4, 65) == bitfield("10000000000000000000000000000000000000000000000000000000000000001"))
+    print(slice(extended, 63, 6) == bitfield("000001"))
+    print(fieldConcat(fieldSlice(extended, 0, 27), fieldSlice(extended, 27, 42)) == extended)
+}

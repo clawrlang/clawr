@@ -33,6 +33,25 @@ export type FieldExpression =
           type: ValueSet & { universe: 'integer' }
       }
     | {
+          kind: 'FIELD_LANE'
+          operand: Expression & { type: FieldSet }
+          index: Expression & { type: { universe: 'integer' } }
+          type: ValueSet & { universe: 'truthvalue' }
+      }
+    | {
+          kind: 'FIELD_SLICE'
+          operand: Expression & { type: FieldSet }
+          start: Expression & { type: { universe: 'integer' } }
+          length: Expression & { type: { universe: 'integer' } }
+          type: FieldSet
+      }
+    | {
+          kind: 'FIELD_CONCAT'
+          left: Expression & { type: FieldSet }
+          right: Expression & { type: FieldSet }
+          type: FieldSet
+      }
+    | {
           kind:
               | 'FIELD_AND'
               | 'FIELD_OR'

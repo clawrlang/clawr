@@ -70,6 +70,34 @@ static void checkPackedOperations(size_t length, FieldKind kind) {
   Field *b = field(kind, bText);
   check(a, aText);
   check(b, bText);
+  for (size_t i = 0; i < length; i++)
+    assert(Field¸lane(a, i) == laneValue(kind, aText[i]));
+  for (size_t start = 0; start <= length; start++) {
+    Field *prefix = Field¸slice(a, 0, start);
+    Field *suffix = Field¸slice(a, start, length - start);
+    memcpy(expected, aText, start);
+    expected[start] = '\0';
+    check(prefix, expected);
+    check(suffix, aText + start);
+    Field *joined = Field¸concat(prefix, suffix);
+    check(joined, aText);
+    releaseRC(joined);
+    joined = Field¸concat(suffix, prefix);
+    memcpy(expected, aText + start, length - start);
+    memcpy(expected + length - start, aText, start);
+    expected[length] = '\0';
+    check(joined, expected);
+    releaseRC(joined);
+    size_t take = (length - start) / 2;
+    Field *middle = Field¸slice(a, start, take);
+    memcpy(expected, aText + start, take);
+    expected[take] = '\0';
+    check(middle, expected);
+    releaseRC(middle);
+    releaseRC(prefix);
+    releaseRC(suffix);
+  }
+  expected[length] = '\0';
 
   Field *(*operations[])(const Field *, const Field *) = {
       Field¸and, Field¸or, Field¸xor,
@@ -181,10 +209,36 @@ static void expectPanic(int scenario) {
       const char bytes[] = {'1', '\0', '1'};
       String *text = String¸fromBytes(bytes, sizeof(bytes));
       Field¸fromString(scenario == 4 ? FIELD_BINARY : FIELD_TERNARY, text);
-    } else {
+    } else if (scenario == 6) {
       Field *a = field(FIELD_TERNARY, "T");
       a->words[1] = 1;
       Field¸toString(a);
+    } else if (scenario == 7) {
+      Field¸lane(field(FIELD_BINARY, ""), 0);
+    } else if (scenario == 8) {
+      Field¸lane(field(FIELD_TERNARY, "T01"), 3);
+    } else if (scenario == 9) {
+      Field¸slice(field(FIELD_BINARY, "01"), 3, 0);
+    } else if (scenario == 10) {
+      Field¸slice(field(FIELD_TERNARY, "T01"), 1, SIZE_MAX);
+    } else if (scenario == 11) {
+      Field¸concat(field(FIELD_BINARY, ""), field(FIELD_TERNARY, ""));
+    } else if (scenario == 12) {
+      Field¸sizeInt64(-1);
+    } else if (scenario == 13) {
+      Field¸sizeInteger(Integer¸fromCString("-1"));
+    } else if (scenario == 14) {
+      Field¸sizeInteger(Integer¸fromCString("100000000000000000000000000000000000000"));
+    } else if (scenario == 15) {
+      Field *a = field(FIELD_BINARY, "");
+      a->length = SIZE_MAX;
+      Field¸concat(a, field(FIELD_BINARY, "1"));
+    } else {
+      char text[3 * sizeof(size_t) + 1];
+      snprintf(text, sizeof(text), "%zu", SIZE_MAX);
+      Integer *maximum = Integer¸fromCString(text);
+      Integer *one = Integer¸fromInt64(1);
+      Field¸sizeInteger(Integer¸add(maximum, one));
     }
     _exit(0);
   }
@@ -270,7 +324,16 @@ int main(void) {
     checkPackedOperations(widths[i], FIELD_BINARY);
     checkPackedOperations(widths[i], FIELD_TERNARY);
   }
-  for (int i = 0; i < 7; i++)
+  assert(Field¸sizeInt64(0) == 0);
+  Integer *size = Integer¸fromCString("129");
+  assert(Field¸sizeInteger(size) == 129);
+  releaseRC(size);
+  char maxSize[3 * sizeof(size_t) + 1];
+  snprintf(maxSize, sizeof(maxSize), "%zu", SIZE_MAX);
+  size = Integer¸fromCString(maxSize);
+  assert(Field¸sizeInteger(size) == SIZE_MAX);
+  releaseRC(size);
+  for (int i = 0; i < 17; i++)
     expectPanic(i);
   return 0;
 }

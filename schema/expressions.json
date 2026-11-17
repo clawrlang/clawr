@@ -51,7 +51,10 @@
           "type": "array",
           "items": { "$ref": "./statements.json#" }
         },
-        "value": { "$comment": "The result evaluated before cleanup.", "$ref": "#" },
+        "value": {
+          "$comment": "The result evaluated before cleanup.",
+          "$ref": "#"
+        },
         "cleanup": {
           "type": "array",
           "$comment": "Releases evaluated after the value and before the scope exits.",
@@ -79,6 +82,9 @@
         { "$ref": "#/$defs/FieldFromString" },
         { "$ref": "#/$defs/FieldNot" },
         { "$ref": "#/$defs/FieldLength" },
+        { "$ref": "#/$defs/FieldLane" },
+        { "$ref": "#/$defs/FieldSlice" },
+        { "$ref": "#/$defs/FieldConcat" },
         { "$ref": "#/$defs/FieldBinaryOperation" },
         { "$ref": "#/$defs/FieldShift" }
       ]
@@ -177,6 +183,79 @@
         }
       },
       "required": ["kind", "operand", "type"],
+      "unevaluatedProperties": false
+    },
+    "FieldLane": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Expression discriminator.",
+          "const": "FIELD_LANE"
+        },
+        "operand": {
+          "$comment": "The field to inspect.",
+          "$ref": "#/$defs/FieldValueExpression"
+        },
+        "index": {
+          "$comment": "Zero-based index, with 0 at the left.",
+          "$ref": "#/$defs/IntegerValueExpression"
+        },
+        "type": {
+          "$comment": "Result truthvalue value-set.",
+          "$ref": "./valuesets.json#/$defs/TruthvalueSet"
+        }
+      },
+      "required": ["kind", "operand", "index", "type"],
+      "unevaluatedProperties": false
+    },
+    "FieldSlice": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Expression discriminator.",
+          "const": "FIELD_SLICE"
+        },
+        "operand": {
+          "$comment": "The source field.",
+          "$ref": "#/$defs/FieldValueExpression"
+        },
+        "start": {
+          "$comment": "Zero-based displayed start index.",
+          "$ref": "#/$defs/IntegerValueExpression"
+        },
+        "length": {
+          "$comment": "Number of lanes to select.",
+          "$ref": "#/$defs/IntegerValueExpression"
+        },
+        "type": {
+          "$comment": "Same field kind and selected lane count.",
+          "$ref": "./valuesets.json#/$defs/FieldSet"
+        }
+      },
+      "required": ["kind", "operand", "start", "length", "type"],
+      "unevaluatedProperties": false
+    },
+    "FieldConcat": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$comment": "Expression discriminator.",
+          "const": "FIELD_CONCAT"
+        },
+        "left": {
+          "$comment": "The first lanes.",
+          "$ref": "#/$defs/FieldValueExpression"
+        },
+        "right": {
+          "$comment": "The following lanes.",
+          "$ref": "#/$defs/FieldValueExpression"
+        },
+        "type": {
+          "$comment": "Same field kind and combined lane count.",
+          "$ref": "./valuesets.json#/$defs/FieldSet"
+        }
+      },
+      "required": ["kind", "left", "right", "type"],
       "unevaluatedProperties": false
     },
     "FieldBinaryOperation": {

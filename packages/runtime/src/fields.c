@@ -10,33 +10,61 @@ __attribute__((visibility("default"))) const __type_info Fieldˇtype = {
     .data_type = {.size = sizeof(Field)},
 };
 
+enum { LANES_PER_WORD = 64 };
+
+static size_t wordCount(size_t length) {
+  return length / LANES_PER_WORD + (length % LANES_PER_WORD != 0);
+}
+
+static size_t planeCount(FieldKind kind) {
+  return kind == FIELD_TERNARY ? 2 : 1;
+}
+
+static void maskPadding(Field *field) {
+  size_t remainder = field->length % LANES_PER_WORD;
+  if (!remainder)
+    return;
+  size_t count = wordCount(field->length);
+  BinaryWord mask = bitwiseNot(0, (uint32_t)remainder);
+  for (size_t plane = 0; plane < planeCount(field->kind); plane++)
+    field->words[plane * count + count - 1] &= mask;
+}
+
 static Field *newField(FieldKind kind, size_t length) {
-  if (length > SIZE_MAX - sizeof(Field))
+  size_t count = wordCount(length);
+  size_t bytesPerWord = planeCount(kind) * sizeof(BinaryWord);
+  if (count > (SIZE_MAX - sizeof(Field)) / bytesPerWord)
     panic("Field is too large");
-  return allocInitRC(Field, length, __rc_ISOLATED, .kind = kind,
-                     .length = length);
+  size_t bytes = count * bytesPerWord;
+  Field *field =
+      allocInitRC(Field, bytes, __rc_ISOLATED, .kind = kind, .length = length);
+  memset(field->words, 0, bytes);
+  return field;
 }
 
 __attribute__((visibility("default")))
 Field *Field¸fromString(FieldKind kind, const String *value) {
   if (!value || (kind != FIELD_BINARY && kind != FIELD_TERNARY))
     panic("Invalid field constructor arguments");
-  Field *field = newField(kind, value->length);
+  // Preserve field diagnostics in sequence order before parsing word chunks.
   for (size_t i = 0; i < value->length; i++) {
-    switch (value->data[i]) {
-    case '0':
-      field->lanes[i] = kind == FIELD_BINARY ? c_false : c_ambiguous;
-      break;
-    case '1':
-      field->lanes[i] = c_true;
-      break;
-    case 'T':
-      if (kind == FIELD_BINARY)
-        panic("Invalid binary field lane");
-      field->lanes[i] = c_false;
-      break;
-    default:
+    if (value->data[i] == 'T' && kind == FIELD_BINARY)
+      panic("Invalid binary field lane");
+    if (value->data[i] != '0' && value->data[i] != '1' && value->data[i] != 'T')
       panic("Invalid field lane");
+  }
+  Field *field = newField(kind, value->length);
+  size_t count = wordCount(field->length);
+  size_t end = value->length;
+  for (size_t i = 0; i < count; i++) {
+    uint32_t width = end < LANES_PER_WORD ? (uint32_t)end : LANES_PER_WORD;
+    end -= width;
+    if (kind == FIELD_BINARY) {
+      field->words[i] = BinaryWord¸fromCString(value->data + end, width);
+    } else {
+      TernaryWord word = TernaryWord¸fromCString(value->data + end, width);
+      field->words[i] = word.x0;
+      field->words[count + i] = word.x1;
     }
   }
   return field;
@@ -46,18 +74,24 @@ __attribute__((visibility("default")))
 String *Field¸toString(const Field *field) {
   if (!field)
     panic("Field.toString requires a field");
+  if (field->length == SIZE_MAX)
+    panic("Field is too large to format");
   char *data = malloc(field->length + 1);
   if (!data)
     panic("Out of memory in Field.toString");
-  for (size_t i = 0; i < field->length; i++) {
-    if (field->lanes[i] == c_true)
-      data[i] = '1';
-    else if (field->lanes[i] == c_false)
-      data[i] = field->kind == FIELD_BINARY ? '0' : 'T';
-    else if (field->lanes[i] == c_ambiguous && field->kind == FIELD_TERNARY)
-      data[i] = '0';
-    else
-      panic("Invalid field lane");
+  size_t count = wordCount(field->length);
+  size_t end = field->length;
+  for (size_t i = 0; i < count; i++) {
+    uint32_t width = end < LANES_PER_WORD ? (uint32_t)end : LANES_PER_WORD;
+    end -= width;
+    char *chunk = field->kind == FIELD_BINARY
+                      ? BinaryWord·toCString(field->words[i], width)
+                      : TernaryWord·toCString(
+                            (TernaryWord){.x0 = field->words[i],
+                                          .x1 = field->words[count + i]},
+                            width);
+    memcpy(data + end, chunk, width);
+    free(chunk);
   }
   String *result = String¸fromBytes(data, field->length);
   free(data);
@@ -69,7 +103,9 @@ truthvalue_t Field¸equal(const Field *left, const Field *right) {
   if (!left || !right)
     panic("Field equality requires fields");
   return left->kind == right->kind && left->length == right->length &&
-                 memcmp(left->lanes, right->lanes, left->length) == 0
+                 memcmp(left->words, right->words,
+                        wordCount(left->length) * planeCount(left->kind) *
+                            sizeof(BinaryWord)) == 0
              ? c_true
              : c_false;
 }
@@ -93,29 +129,51 @@ static Field *binaryOperation(const Field *left, const Field *right,
   if (op >= OP_ADJUST && left->kind != FIELD_TERNARY)
     panic("Ternary operation requires ternary fields");
   Field *result = newField(left->kind, left->length);
-  for (size_t i = 0; i < left->length; i++) {
-    truthvalue_t a = left->lanes[i], b = right->lanes[i];
+  size_t count = wordCount(left->length);
+  for (size_t i = 0; i < count; i++) {
+    if (left->kind == FIELD_BINARY) {
+      BinaryWord a = left->words[i], b = right->words[i];
+      switch (op) {
+      case OP_AND:
+        result->words[i] = bitwiseAnd(a, b);
+        break;
+      case OP_OR:
+        result->words[i] = bitwiseOr(a, b);
+        break;
+      case OP_XOR:
+        result->words[i] = bitwiseXor(a, b);
+        break;
+      default:
+        panic("Ternary operation requires ternary fields");
+      }
+      continue;
+    }
+    TernaryWord a = {.x0 = left->words[i], .x1 = left->words[count + i]};
+    TernaryWord b = {.x0 = right->words[i], .x1 = right->words[count + i]};
+    TernaryWord value;
     switch (op) {
     case OP_AND:
-      result->lanes[i] = truthvalue¸and(a, b);
+      value = tritwiseAnd(a, b);
       break;
     case OP_OR:
-      result->lanes[i] = truthvalue¸or(a, b);
-      break;
-    case OP_XOR:
-      result->lanes[i] = a != b ? c_true : c_false;
+      value = tritwiseOr(a, b);
       break;
     case OP_ADJUST:
-      result->lanes[i] = adjust__towards(a, b);
+      value = tritwiseAdjust__towards(a, b);
       break;
     case OP_ROTATE:
-      result->lanes[i] = rotate__by(a, b);
+      value = tritwiseRotate__by(a, b);
       break;
     case OP_MODULATE:
-      result->lanes[i] = modulate__by(a, b);
+      value = tritwiseModulate__by(a, b);
       break;
+    default:
+      panic("XOR requires binary fields");
     }
+    result->words[i] = value.x0;
+    result->words[count + i] = value.x1;
   }
+  maskPadding(result);
   return result;
 }
 
@@ -124,8 +182,18 @@ Field *Field¸not(const Field *field) {
   if (!field)
     panic("Field NOT requires a field");
   Field *result = newField(field->kind, field->length);
-  for (size_t i = 0; i < field->length; i++)
-    result->lanes[i] = -field->lanes[i];
+  size_t count = wordCount(field->length);
+  for (size_t i = 0; i < count; i++) {
+    if (field->kind == FIELD_BINARY) {
+      result->words[i] = bitwiseNot(field->words[i], LANES_PER_WORD);
+    } else {
+      TernaryWord word = {.x0 = field->words[i], .x1 = field->words[count + i]};
+      TernaryWord value = tritwiseNot(word, LANES_PER_WORD);
+      result->words[i] = value.x0;
+      result->words[count + i] = value.x1;
+    }
+  }
+  maskPadding(result);
   return result;
 }
 
@@ -164,15 +232,27 @@ Field *Field¸shift(const Field *field, size_t count, bool left) {
   if (!field)
     panic("Field shift requires a field");
   Field *result = newField(field->kind, field->length);
-  for (size_t i = 0; i < field->length; i++) {
-    if (count >= field->length)
-      result->lanes[i] = c_false;
-    else if (left)
-      result->lanes[i] =
-          i < field->length - count ? field->lanes[i + count] : c_false;
-    else
-      result->lanes[i] = i >= count ? field->lanes[i - count] : c_false;
+  if (count >= field->length)
+    return result;
+  size_t words = wordCount(field->length);
+  size_t offset = count / LANES_PER_WORD;
+  unsigned shift = count % LANES_PER_WORD;
+  for (size_t plane = 0; plane < planeCount(field->kind); plane++) {
+    const BinaryWord *source = field->words + plane * words;
+    BinaryWord *target = result->words + plane * words;
+    for (size_t i = 0; i < words - offset; i++) {
+      if (left) {
+        target[i + offset] = source[i] << shift;
+        if (shift && i > 0)
+          target[i + offset] |= source[i - 1] >> (LANES_PER_WORD - shift);
+      } else {
+        target[i] = source[i + offset] >> shift;
+        if (shift && i + offset + 1 < words)
+          target[i] |= source[i + offset + 1] << (LANES_PER_WORD - shift);
+      }
+    }
   }
+  maskPadding(result);
   return result;
 }
 

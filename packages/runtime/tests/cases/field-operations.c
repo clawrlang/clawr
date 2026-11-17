@@ -13,11 +13,132 @@ static Field *field(FieldKind kind, const char *lanes) {
   return result;
 }
 
+static void checkPacked(const Field *value) {
+  size_t words = value->length / 64 + (value->length % 64 != 0);
+  size_t planes = value->kind == FIELD_TERNARY ? 2 : 1;
+  assert(value->header.allocation_size ==
+         sizeof(Field) + words * planes * sizeof(BinaryWord));
+  if (value->length % 64) {
+    BinaryWord padding = ~((1ULL << (value->length % 64)) - 1);
+    for (size_t plane = 0; plane < planes; plane++)
+      assert((value->words[plane * words + words - 1] & padding) == 0);
+  }
+  if (value->kind == FIELD_TERNARY)
+    for (size_t i = 0; i < words; i++)
+      assert((value->words[words + i] & ~value->words[i]) == 0);
+}
+
 static void check(const Field *value, const char *expected) {
+  checkPacked(value);
   String *text = Field¸toString(value);
   assert(text->length == strlen(expected));
   assert(strcmp(text->data, expected) == 0);
+  Field *parsed = field(value->kind, expected);
+  assert(Field¸equal(value, parsed) == c_true);
+  releaseRC(parsed);
   releaseRC(text);
+}
+
+static char laneSymbol(FieldKind kind, int value) {
+  return value == 1 ? '1' : value == -1 && kind == FIELD_TERNARY ? 'T' : '0';
+}
+
+static int laneValue(FieldKind kind, char symbol) {
+  return symbol == '1' ? 1 : symbol == 'T' || kind == FIELD_BINARY ? -1 : 0;
+}
+
+static void checkPackedOperations(size_t length, FieldKind kind) {
+  char *aText = malloc(length + 1);
+  char *bText = malloc(length + 1);
+  char *expected = malloc(length + 1);
+  assert(aText && bText && expected);
+  int states = kind == FIELD_BINARY ? 2 : 3;
+  uint32_t random = 17;
+  for (size_t i = 0; i < length; i++) {
+    int x = (int)(i % states), y = (int)(i / states % states);
+    if (i >= 9) {
+      random = random * 1664525u + 1013904223u;
+      x = (int)((random >> 16) % states);
+      random = random * 1664525u + 1013904223u;
+      y = (int)((random >> 16) % states);
+    }
+    aText[i] = laneSymbol(kind, kind == FIELD_BINARY ? (x ? 1 : -1) : x - 1);
+    bText[i] = laneSymbol(kind, kind == FIELD_BINARY ? (y ? 1 : -1) : y - 1);
+  }
+  aText[length] = bText[length] = expected[length] = '\0';
+  Field *a = field(kind, aText);
+  Field *b = field(kind, bText);
+  check(a, aText);
+  check(b, bText);
+
+  Field *(*operations[])(const Field *, const Field *) = {
+      Field¸and, Field¸or, Field¸xor,
+      Field¸adjust, Field¸rotateStates, Field¸modulate,
+  };
+  const int adjust[3][3] = {{-1, -1, 0}, {-1, 0, 1}, {0, 1, 1}};
+  const int rotate[3][3] = {{1, -1, 0}, {-1, 0, 1}, {0, 1, -1}};
+  const int modulate[3][3] = {{1, 0, -1}, {0, 0, 0}, {-1, 0, 1}};
+  for (size_t op = 0; op < sizeof(operations) / sizeof(operations[0]); op++) {
+    if ((kind == FIELD_TERNARY && op == 2) ||
+        (kind == FIELD_BINARY && op >= 3))
+      continue;
+    for (size_t i = 0; i < length; i++) {
+      int av = laneValue(kind, aText[i]), bv = laneValue(kind, bText[i]);
+      int x = av + 1, y = bv + 1;
+      int value;
+      switch (op) {
+      case 0: value = av < bv ? av : bv; break;
+      case 1: value = av > bv ? av : bv; break;
+      case 2: value = av != bv ? 1 : -1; break;
+      case 3: value = adjust[x][y]; break;
+      case 4: value = rotate[x][y]; break;
+      default: value = modulate[x][y]; break;
+      }
+      expected[i] = laneSymbol(kind, value);
+    }
+    Field *result = operations[op](a, b);
+    check(result, expected);
+    releaseRC(result);
+  }
+
+  for (size_t i = 0; i < length; i++)
+    expected[i] = laneSymbol(kind, -laneValue(kind, aText[i]));
+  Field *negated = Field¸not(a);
+  check(negated, expected);
+  Field *restored = Field¸not(negated);
+  check(restored, aText);
+  releaseRC(restored);
+  releaseRC(negated);
+
+  for (size_t count = 0; count <= length + 1; count++) {
+    for (int left = 0; left <= 1; left++) {
+      memset(expected, kind == FIELD_BINARY ? '0' : 'T', length);
+      if (count < length) {
+        if (left)
+          memcpy(expected, aText + count, length - count);
+        else
+          memcpy(expected + count, aText, length - count);
+      }
+      Field *shifted = Field¸shift(a, count, left);
+      check(shifted, expected);
+      releaseRC(shifted);
+    }
+  }
+  memset(expected, kind == FIELD_BINARY ? '0' : 'T', length);
+  Field *shifted = Field¸shift(a, SIZE_MAX, true);
+  check(shifted, expected);
+  releaseRC(shifted);
+  check(a, aText);
+  check(b, bText);
+  Field *copy = copyRC(a, __rc_ISOLATED);
+  assert(copy != a);
+  releaseRC(a);
+  check(copy, aText);
+  releaseRC(copy);
+  releaseRC(b);
+  free(aText);
+  free(bText);
+  free(expected);
 }
 
 static void checkWidth(size_t length, FieldKind kind) {
@@ -54,8 +175,16 @@ static void expectPanic(int scenario) {
     } else if (scenario == 2) {
       Field *a = field(FIELD_TERNARY, "T");
       Field¸xor(a, a);
-    } else {
+    } else if (scenario == 3) {
       field(FIELD_TERNARY, "x");
+    } else if (scenario == 4 || scenario == 5) {
+      const char bytes[] = {'1', '\0', '1'};
+      String *text = String¸fromBytes(bytes, sizeof(bytes));
+      Field¸fromString(scenario == 4 ? FIELD_BINARY : FIELD_TERNARY, text);
+    } else {
+      Field *a = field(FIELD_TERNARY, "T");
+      a->words[1] = 1;
+      Field¸toString(a);
     }
     _exit(0);
   }
@@ -133,12 +262,15 @@ int main(void) {
   check(result, "");
   releaseRC(result);
   releaseRC(a);
-  const size_t widths[] = {0, 9, 27, 32, 64, 65};
+  const size_t widths[] = {0, 1, 2, 9, 27, 32, 63, 64, 65, 66,
+                           127, 128, 129, 191, 192, 193, 257};
   for (size_t i = 0; i < sizeof(widths) / sizeof(widths[0]); i++) {
     checkWidth(widths[i], FIELD_BINARY);
     checkWidth(widths[i], FIELD_TERNARY);
+    checkPackedOperations(widths[i], FIELD_BINARY);
+    checkPackedOperations(widths[i], FIELD_TERNARY);
   }
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < 7; i++)
     expectPanic(i);
   return 0;
 }

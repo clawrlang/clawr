@@ -3,6 +3,7 @@
 
 #include "clawr_string.h"
 #include "integer.h"
+#include "lanes.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -14,16 +15,20 @@ typedef enum {
 
 /// @brief Reference-counted field with lanes in displayed sequence order.
 /// Binary lanes contain c_false or c_true; ternary lanes also allow
-/// c_ambiguous. Runtime storage currently uses one byte per lane, not the
-/// packed words in lanes.h. APIs below borrow non-NULL inputs and never mutate
-/// them. Constructors and transformations return owned results to release with
-/// releaseRC. Allocation failures panic; callers must preserve valid kind and
-/// lane values.
+/// c_ambiguous. Storage uses packed 64-lane words from lanes.h, with one bit
+/// plane for binary fields and two for ternary fields. APIs borrow non-NULL
+/// inputs and never mutate them. Constructors and transformations return owned
+/// results to release with releaseRC. Allocation failures panic; callers must
+/// preserve valid kind and lane values.
 typedef struct Field {
   __rc_header header;
   FieldKind kind;
   size_t length;
-  int8_t lanes[];
+  /// @brief Low words first; bit 0 of word 0 is the rightmost displayed lane.
+  /// Each plane has ceil(length / 64) words. Ternary x0 words precede x1
+  /// words; unused high bits are always zero.
+  /// This internal layout does not define language indexing or a wire format.
+  BinaryWord words[];
 } Field;
 
 typedef struct Fieldˇproperties {

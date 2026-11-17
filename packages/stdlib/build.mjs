@@ -1,11 +1,11 @@
-import { readFileSync, mkdirSync, realpathSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const directory = path.dirname(fileURLToPath(import.meta.url))
 const sourceDirectory = path.resolve(
     directory,
-    '../../vendor/clawr-doc/spec/stdlib',
+    '../../vendor/clawr-doc/spec/stdlib/src',
 )
 const manifestPath = path.join(sourceDirectory, 'manifest.json')
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))

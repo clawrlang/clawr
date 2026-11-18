@@ -386,23 +386,26 @@ describe('standard library declarations', () => {
                         decl.name.startsWith(`Memory${kind}`),
                 ),
             ).toBe(false)
-            expect(result.declarations).toContainEqual(
-                expect.objectContaining({
-                    kind: 'EXTENSION_DECL',
-                    target: {
-                        namespace: 'clawr',
-                        name: `Memory${kind}Input`,
-                    },
-                    conformances: [
-                        expect.objectContaining({
-                            interface: {
-                                namespace: 'clawr',
-                                name: `${kind}Input`,
+            for (const direction of ['Input', 'Output']) {
+                const extensions = result.declarations?.filter(
+                    (decl) =>
+                        decl.kind === 'EXTENSION_DECL' &&
+                        decl.target.namespace === 'clawr' &&
+                        decl.target.name === `Memory${kind}${direction}`,
+                )
+                expect(extensions).toMatchObject([
+                    {
+                        conformances: [
+                            {
+                                interface: {
+                                    namespace: 'clawr',
+                                    name: `${kind}${direction}`,
+                                },
                             },
-                        }),
-                    ],
-                }),
-            )
+                        ],
+                    },
+                ])
+            }
             expect(() =>
                 compile(`@main { const input: ref Memory${kind}Input = {} }`),
             ).toThrow('Opaque services cannot be constructed')

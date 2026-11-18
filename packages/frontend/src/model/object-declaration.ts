@@ -191,7 +191,7 @@ export class ObjectDeclaration implements Declaration {
         name: FunctionName,
         context: Context,
     ): FunctionDeclaration | undefined {
-        return context.scope.rootScope
+        return context.scope
             .extensionDeclarations(this.name)
             .flatMap((extension: ExtensionDeclaration) => [
                 ...extension.methods,
@@ -205,7 +205,7 @@ export class ObjectDeclaration implements Declaration {
             this.mutating.some(
                 (method) => method.name().toString() === name.toString(),
             ) ||
-            context.scope.rootScope
+            context.scope
                 .extensionDeclarations(this.name)
                 .some((extension) =>
                     extension.mutating.some(
@@ -219,7 +219,7 @@ export class ObjectDeclaration implements Declaration {
 
     isExtensionMutatingMethod(name: FunctionName, context: Context): boolean {
         return (
-            context.scope.rootScope
+            context.scope
                 .extensionDeclarations(this.name)
                 .some((extension) =>
                     extension.mutating.some(
@@ -265,66 +265,42 @@ export class ObjectDeclaration implements Declaration {
 
     emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addObjectDeclaration(this)
-        const memoryStream =
-            this.opaque &&
-            this.name.namespace === 'clawr' &&
-            [
-                'MemoryBitfieldInput',
-                'MemoryBitfieldOutput',
-                'MemoryTritfieldInput',
-                'MemoryTritfieldOutput',
-            ].includes(this.name.name)
-        if (
-            memoryStream &&
-            (this.kind !== 'service' ||
-                this.superType ||
-                this.properties.length ||
-                this.initializers.length ||
-                this.mutating.length)
-        )
-            return SemanticErrorResult.failure(
-                'Unsupported opaque service declaration',
-                this.span,
-            )
-        if (this.opaque && !memoryStream) {
-            if (
-                this.kind === 'service' &&
+        if (this.opaque) {
+            const emptyRuntimeService =
                 [
                     'clawr¸JSONBuffer',
                     'clawr¸OctetInput',
                     'clawr¸OctetOutput',
-                ].includes(this.name.canonical()) &&
-                !this.inherits.length &&
-                !this.properties.length &&
-                !this.initializers.length &&
-                !this.mutating.length &&
-                !this.readonly.length
-            )
-                return Result.ok
+                    'clawr¸MemoryBitfieldInput',
+                    'clawr¸MemoryBitfieldOutput',
+                    'clawr¸MemoryTritfieldInput',
+                    'clawr¸MemoryTritfieldOutput',
+                ].includes(this.name.canonical()) && !this.readonly.length
+            const runtimeHashBuilder =
+                this.name.canonical() === 'clawr¸HashBuilder' &&
+                this.readonly.length === 1 &&
+                this.readonly.every(
+                    (m) =>
+                        m.implementation.kind === 'extern' &&
+                        m.name().toString() === 'add(_:)' &&
+                        !m.result &&
+                        m.parameters[0]?.type instanceof RCTypeSet &&
+                        context.scope
+                            .interfaceDeclaration(m.parameters[0].type.type)
+                            ?.name.canonical() === 'clawr¸HashEquatable',
+                )
             if (
                 this.kind !== 'service' ||
-                this.name.canonical() !== 'clawr¸HashBuilder' ||
                 this.inherits.length ||
                 this.properties.length ||
                 this.initializers.length ||
                 this.mutating.length ||
-                this.readonly.length !== 1 ||
-                this.readonly.some(
-                    (m) =>
-                        m.implementation.kind !== 'extern' ||
-                        m.name().toString() !== 'add(_:)' ||
-                        m.result ||
-                        !(m.parameters[0]?.type instanceof RCTypeSet) ||
-                        context.scope
-                            .interfaceDeclaration(m.parameters[0].type.type)
-                            ?.name.canonical() !== 'clawr¸HashEquatable',
-                )
+                (!emptyRuntimeService && !runtimeHashBuilder)
             )
                 return SemanticErrorResult.failure(
                     'Unsupported opaque service declaration',
                     this.span,
                 )
-            return Result.ok
         }
         if (this.superDeclaration(context)?.opaque)
             return SemanticErrorResult.failure(
@@ -340,7 +316,7 @@ export class ObjectDeclaration implements Declaration {
         objectContext.scope.addSelfVariable(this.name)
 
         const declaredMethodsResult = SemanticResult.collect(
-            [...this.readonly, ...this.mutating].map((m) =>
+            (this.opaque ? [] : [...this.readonly, ...this.mutating]).map((m) =>
                 m.emitMethod(objectContext),
             ),
         )
@@ -374,30 +350,21 @@ export class ObjectDeclaration implements Declaration {
 
         const conformancesResult = this.checkConformances(context)
         if (conformancesResult.isError) return conformancesResult
-        const extensionConformanceNames =
-            this.extensionConformanceNames(context)
-        const conformances = conformancesResult.value.filter(
-            (conformance) =>
-                !extensionConformanceNames.has(
-                    canonicalName(conformance.interface),
-                ),
-        )
-
-        const tableResult = this.makeDispatchTable(
-            context,
-            declaredMethodsResult.value,
-        )
-        if (tableResult.isError) return tableResult
-        this.dispatchTable = tableResult.value
-
-        if (memoryStream) {
-            context.scope.rootScope.emitted.push({
-                kind: 'EXTENSION_DECL',
-                target: this.name.toCIR(),
-                methods: declaredMethodsResult.value,
-                ...(conformances.length && { conformances }),
-            })
-        } else {
+        if (!this.opaque) {
+            const extensionConformanceNames =
+                this.extensionConformanceNames(context)
+            const conformances = conformancesResult.value.filter(
+                (conformance) =>
+                    !extensionConformanceNames.has(
+                        canonicalName(conformance.interface),
+                    ),
+            )
+            const tableResult = this.makeDispatchTable(
+                context,
+                declaredMethodsResult.value,
+            )
+            if (tableResult.isError) return tableResult
+            this.dispatchTable = tableResult.value
             context.scope.rootScope.emitted.push({
                 kind: 'RC_TYPE_DECL',
                 name: this.name.name,
@@ -551,7 +518,7 @@ export class ObjectDeclaration implements Declaration {
     private allConformances(context: Context): string[] {
         const inherited =
             this.superDeclaration(context)?.allConformances(context) ?? []
-        const extensions = context.scope.rootScope
+        const extensions = context.scope
             .extensionDeclarations(this.name)
             .flatMap((extension) =>
                 extension.conformance ? [extension.conformance.name] : [],
@@ -565,7 +532,7 @@ export class ObjectDeclaration implements Declaration {
 
     private conformanceSelf(name: string, context: Context): TypeName {
         return this.conformances.includes(name) ||
-            context.scope.rootScope
+            context.scope
                 .extensionDeclarations(this.name)
                 .some((extension) => extension.conformance?.name === name)
             ? this.name

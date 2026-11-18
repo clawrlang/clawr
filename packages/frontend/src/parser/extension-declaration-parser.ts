@@ -43,7 +43,10 @@ export class ExtensionDeclarationParser implements DeclarationParser<ExtensionDe
         }
         const end = stream.expect('PUNCTUATION', '}')
         return ExtensionDeclaration.create({
-            target: TypeName.create({ name: target.identifier }),
+            target: TypeName.create({
+                name: target.identifier,
+                namespace: this.context.scope?.namespace,
+            }),
             conformance,
             methods,
             mutating,

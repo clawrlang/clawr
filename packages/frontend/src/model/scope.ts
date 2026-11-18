@@ -237,6 +237,12 @@ export class Scope {
         )
     }
 
+    extensionDeclarations(name: TypeName): ExtensionDeclaration[] {
+        const inherited = this.parentScope?.extensionDeclarations(name) ?? []
+        if (this.parentScope?.rootScope === this.rootScope) return inherited
+        return [...this.rootScope.extensionDeclarations(name), ...inherited]
+    }
+
     typeAlias(name: string): TypeConstraintDeclaration | undefined {
         return (
             this.rootScope.typeAlias(name) ?? this.parentScope?.typeAlias(name)

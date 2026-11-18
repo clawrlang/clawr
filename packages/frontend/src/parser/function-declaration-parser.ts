@@ -189,6 +189,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
                         start: binding.span.start,
                         end: defaultValue?.span.end ?? binding.span.end,
                     },
+                    nameSpan: binding.nameSpan,
                 }),
             )
 

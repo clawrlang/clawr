@@ -403,10 +403,14 @@ export class FunctionDeclaration implements Declaration {
                 isolationLevel: opaque ? SHARED : param.isolationLevel,
                 type: context.scope.canonicalType(typeResult.value),
             })
-            context.highlightRecorder?.record('parameter', param.span, [
-                'declaration',
-                ...(param.isImmutable ? (['readonly'] as const) : []),
-            ])
+            context.highlightRecorder?.record(
+                'parameter',
+                param.nameSpan ?? param.span,
+                [
+                    'declaration',
+                    ...(param.isImmutable ? (['readonly'] as const) : []),
+                ],
+            )
         }
         return Result.value(parameterScope)
     }

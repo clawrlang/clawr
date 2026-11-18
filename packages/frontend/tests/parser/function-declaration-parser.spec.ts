@@ -73,6 +73,10 @@ describe('Function Declaration Parser', () => {
                         start: { line: 1, column: 17 },
                         end: { line: 1, column: 29 },
                     },
+                    nameSpan: {
+                        start: { line: 1, column: 19 },
+                        end: { line: 1, column: 20 },
+                    },
                 },
                 {
                     varName: 'y',

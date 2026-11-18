@@ -12,6 +12,7 @@ export class Parameter {
         public readonly isolationLevel: IsolationLevel | UNKNOWN,
         public readonly type: TypeConstraintDeclaration | undefined,
         public readonly defaultValue?: Expression,
+        public readonly nameSpan?: SourceCodeSpan,
     ) {}
 
     static create({
@@ -22,6 +23,7 @@ export class Parameter {
         type,
         defaultValue,
         span,
+        nameSpan,
     }: {
         label: string | undefined
         varName: string
@@ -30,6 +32,7 @@ export class Parameter {
         isImmutable: boolean
         defaultValue?: Expression
         span: SourceCodeSpan
+        nameSpan?: SourceCodeSpan
     }): Parameter {
         return new Parameter(
             isImmutable,
@@ -39,6 +42,7 @@ export class Parameter {
             isolationLevel,
             type,
             defaultValue,
+            nameSpan,
         )
     }
 }

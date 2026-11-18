@@ -11,10 +11,14 @@ import * as util from '@@/util'
 import { describe, expect, it } from 'bun:test'
 
 class RecordingHighlightRecorder implements HighlightRecorder {
-    recorded: { kind: SemanticTokenKind; modifiers?: string[] }[] = []
+    recorded: {
+        kind: SemanticTokenKind
+        span: unknown
+        modifiers?: string[]
+    }[] = []
 
-    record(kind: SemanticTokenKind, _span: unknown, modifiers?: string[]) {
-        this.recorded.push({ kind, modifiers })
+    record(kind: SemanticTokenKind, span: unknown, modifiers?: string[]) {
+        this.recorded.push({ kind, span, modifiers })
     }
 }
 
@@ -36,10 +40,12 @@ describe('HighlightRecorder', () => {
 
         decl.emitStatement(context)
 
-        expect(highlightRecorder.recorded).toContainEqual({
-            kind: 'variable',
-            modifiers: ['declaration', 'readonly'],
-        })
+        expect(highlightRecorder.recorded).toContainEqual(
+            expect.objectContaining({
+                kind: 'variable',
+                modifiers: ['declaration', 'readonly'],
+            }),
+        )
     })
 
     it('records a reference to a variable', () => {
@@ -54,10 +60,12 @@ describe('HighlightRecorder', () => {
 
         util.variableRef('foo').toCIRExpression(context)
 
-        expect(highlightRecorder.recorded).toContainEqual({
-            kind: 'variable',
-            modifiers: [],
-        })
+        expect(highlightRecorder.recorded).toContainEqual(
+            expect.objectContaining({
+                kind: 'variable',
+                modifiers: [],
+            }),
+        )
     })
 
     it('records a property access', () => {
@@ -98,15 +106,21 @@ describe('HighlightRecorder', () => {
             'property',
         ).toCIRExpression(context)
 
-        expect(highlightRecorder.recorded).toContainEqual({
-            kind: 'property',
-            modifiers: [],
-        })
+        expect(highlightRecorder.recorded).toContainEqual(
+            expect.objectContaining({
+                kind: 'property',
+                modifiers: [],
+            }),
+        )
     })
 
     it('records parameter declarations', () => {
         const highlightRecorder = new RecordingHighlightRecorder()
         const context = { ...util.newSemanticContext(), highlightRecorder }
+        const nameSpan = {
+            start: { line: 1, column: 8 },
+            end: { line: 1, column: 9 },
+        }
         const decl = FunctionDeclaration.create({
             baseName: 'f',
             parameters: [
@@ -119,6 +133,7 @@ describe('HighlightRecorder', () => {
                         IntegerSet.unconstrained(),
                     ),
                     span: util.someCodeSpan,
+                    nameSpan,
                 }),
             ],
             result: undefined,
@@ -135,6 +150,7 @@ describe('HighlightRecorder', () => {
 
         expect(highlightRecorder.recorded).toContainEqual({
             kind: 'parameter',
+            span: nameSpan,
             modifiers: ['declaration', 'readonly'],
         })
     })

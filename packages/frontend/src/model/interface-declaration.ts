@@ -1,6 +1,9 @@
 import { Context, Declaration } from '@/model'
 import { FunctionName } from '@/model/function-name'
-import { Parameter } from '@/model/parameter'
+import {
+    Parameter,
+    recordParameterDeclarationHighlight,
+} from '@/model/parameter'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { TypeName } from '@/model/type-name'
 import { RCTypeSet } from '@/model/value-set'
@@ -202,6 +205,12 @@ export class InterfaceDeclaration implements Declaration {
     }
 
     emitDeclaration(context: Context): SemanticResult {
+        for (const method of this.methods)
+            for (const param of method.parameters)
+                recordParameterDeclarationHighlight(
+                    context.highlightRecorder,
+                    param,
+                )
         const methodsResult = SemanticResult.collect(
             this.resolvedMethods(context).map((m) => m.toCIR(context)),
         )

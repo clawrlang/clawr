@@ -9,7 +9,10 @@ import {
     ISOLATED,
 } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
-import { Parameter } from '@/model/parameter'
+import {
+    Parameter,
+    recordParameterDeclarationHighlight,
+} from '@/model/parameter'
 import { ReturnStatement } from '@/model/return-statement'
 import { Scope } from '@/model/scope'
 import { SelfAssignment } from '@/model/self-assignment'
@@ -138,7 +141,14 @@ export class FunctionDeclaration implements Declaration {
             const isolation = this.resultIsolationLevel(context)
             if (isolation.isError) return isolation
         }
-        if (this.implementation.kind === 'extern') return Result.ok
+        if (this.implementation.kind === 'extern') {
+            for (const param of this.parameters)
+                recordParameterDeclarationHighlight(
+                    context.highlightRecorder,
+                    param,
+                )
+            return Result.ok
+        }
 
         const bodyContextResult = this.makeBodyContext(context)
         if (bodyContextResult.isError) return bodyContextResult
@@ -403,13 +413,9 @@ export class FunctionDeclaration implements Declaration {
                 isolationLevel: opaque ? SHARED : param.isolationLevel,
                 type: context.scope.canonicalType(typeResult.value),
             })
-            context.highlightRecorder?.record(
-                'parameter',
-                param.nameSpan ?? param.span,
-                [
-                    'declaration',
-                    ...(param.isImmutable ? (['readonly'] as const) : []),
-                ],
+            recordParameterDeclarationHighlight(
+                context.highlightRecorder,
+                param,
             )
         }
         return Result.value(parameterScope)

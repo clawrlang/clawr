@@ -2,6 +2,7 @@ import { Expression } from '@/model'
 import { IsolationLevel, UNKNOWN } from '@/model/isolation-level'
 import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
 import { SourceCodeSpan } from '@/tools/diagnostics'
+import { HighlightRecorder } from '@/tools/highlights'
 
 export class Parameter {
     private constructor(
@@ -45,4 +46,15 @@ export class Parameter {
             nameSpan,
         )
     }
+}
+
+/** Records the semantic token for a parameter declaration's name. */
+export function recordParameterDeclarationHighlight(
+    recorder: HighlightRecorder | undefined,
+    parameter: Pick<Parameter, 'isImmutable' | 'span' | 'nameSpan'>,
+): void {
+    recorder?.record('parameter', parameter.nameSpan ?? parameter.span, [
+        'declaration',
+        ...(parameter.isImmutable ? (['readonly'] as const) : []),
+    ])
 }

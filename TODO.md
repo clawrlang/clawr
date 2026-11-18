@@ -2,7 +2,6 @@
 
 ## VS Code Integration
 
-- `extern func` looks “better” than regular `func`. Parameters of the former are colored as `variable.other`, `storage.modifier` and `entity.name.type`. The latter adds `variable`, which overrides the other scopes.
 - `MemoryBitfieldInput`, `MemoryBitfieldOutput` and the tritfield counterparts are defined as `opaque`, though they also have body definitions.
 - The extension complains about `opaque` types like `opaque service OctetOutput {}`. “Error: Unsupported opaque service declaration”
 

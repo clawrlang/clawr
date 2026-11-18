@@ -1,5 +1,9 @@
 import { DataDeclaration } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
+import {
+    InterfaceDeclaration,
+    MethodSignature,
+} from '@/model/interface-declaration'
 import { ISOLATED } from '@/model/isolation-level'
 import { IntegerLiteral } from '@/model/literals'
 import { Parameter } from '@/model/parameter'
@@ -144,6 +148,82 @@ describe('HighlightRecorder', () => {
                     span: util.someCodeSpan,
                 }),
             },
+        })
+
+        decl.emitDeclaration(context)
+
+        expect(highlightRecorder.recorded).toContainEqual({
+            kind: 'parameter',
+            span: nameSpan,
+            modifiers: ['declaration', 'readonly'],
+        })
+    })
+
+    it('records parameter declarations for extern functions', () => {
+        const highlightRecorder = new RecordingHighlightRecorder()
+        const context = { ...util.newSemanticContext(), highlightRecorder }
+        const nameSpan = {
+            start: { line: 1, column: 15 },
+            end: { line: 1, column: 16 },
+        }
+        const decl = FunctionDeclaration.create({
+            baseName: 'f',
+            parameters: [
+                Parameter.create({
+                    label: undefined,
+                    varName: 'x',
+                    isolationLevel: ISOLATED,
+                    isImmutable: true,
+                    type: util.spannedTypeConstraint(
+                        IntegerSet.unconstrained(),
+                    ),
+                    span: util.someCodeSpan,
+                    nameSpan,
+                }),
+            ],
+            result: undefined,
+            implementation: { kind: 'extern' },
+        })
+
+        decl.emitDeclaration(context)
+
+        expect(highlightRecorder.recorded).toContainEqual({
+            kind: 'parameter',
+            span: nameSpan,
+            modifiers: ['declaration', 'readonly'],
+        })
+    })
+
+    it('records parameter declarations for trait method signatures', () => {
+        const highlightRecorder = new RecordingHighlightRecorder()
+        const context = { ...util.newSemanticContext(), highlightRecorder }
+        const nameSpan = {
+            start: { line: 2, column: 16 },
+            end: { line: 2, column: 17 },
+        }
+        const decl = InterfaceDeclaration.create({
+            kind: 'trait',
+            name: TypeName.create({ name: 'Fooable' }),
+            methods: [
+                MethodSignature.create({
+                    baseName: 'foo',
+                    parameters: [
+                        Parameter.create({
+                            label: undefined,
+                            varName: 'x',
+                            isolationLevel: ISOLATED,
+                            isImmutable: true,
+                            type: util.spannedTypeConstraint(
+                                IntegerSet.unconstrained(),
+                            ),
+                            span: util.someCodeSpan,
+                            nameSpan,
+                        }),
+                    ],
+                    span: util.someCodeSpan,
+                }),
+            ],
+            span: util.someCodeSpan,
         })
 
         decl.emitDeclaration(context)

@@ -1,0 +1,109 @@
+service ShortBitReads: BitfieldInput {
+    func readSome(maxLanes: integer) -> bitfield {
+        mut count: integer = maxLanes
+        if count > 2 { count = 2 }
+        return self->source.readSome(maxLanes: count)
+    }
+    func close() { self->source.close() }
+state:
+    source: ref BitfieldInput
+init:
+    func new(_ source: ref BitfieldInput) => {source: source}
+}
+
+service ShortTritReads: TritfieldInput {
+    func readSome(maxLanes: integer) -> tritfield {
+        mut count: integer = maxLanes
+        if count > 2 { count = 2 }
+        return self->source.readSome(maxLanes: count)
+    }
+    func close() { self->source.close() }
+state:
+    source: ref TritfieldInput
+init:
+    func new(_ source: ref TritfieldInput) => {source: source}
+}
+
+func copyBits(_ input: ref BitfieldInput, into output: ref BitfieldOutput, count: integer) {
+    mut chunk: bitfield = input.readSome(maxLanes: count)
+    while fieldLength(chunk) > 0 {
+        output.write(chunk)
+        chunk = input.readSome(maxLanes: count)
+    }
+}
+
+func copyTrits(_ input: ref TritfieldInput, into output: ref TritfieldOutput, count: integer) {
+    mut chunk: tritfield = input.readSome(maxLanes: count)
+    while fieldLength(chunk) > 0 {
+        output.write(chunk)
+        chunk = input.readSome(maxLanes: count)
+    }
+}
+
+func checkBits(_ value: bitfield, count: integer) -> truthvalue {
+    const input = newMemoryBitfieldInput(value)
+    const output = newMemoryBitfieldOutput()
+    copyBits(input, into: output, count: count)
+    input.close()
+    output.close()
+    return output.result() == value
+}
+
+func checkTrits(_ value: tritfield, count: integer) -> truthvalue {
+    const input = newMemoryTritfieldInput(value)
+    const output = newMemoryTritfieldOutput()
+    copyTrits(input, into: output, count: count)
+    input.close()
+    output.close()
+    return output.result() == value
+}
+
+@main {
+    const bits = fieldConcat(fieldConcat(0x0123456789ABCDEF, ~0x0123456789ABCDEF), 0b1)
+    const trits = 0tT01_T01_T01_T01_T01_T01_T01_T01_T01_T01_T01_T01
+    print(checkBits(bits, count: 1) && checkBits(bits, count: 9) && checkBits(bits, count: 65))
+    print(checkTrits(trits, count: 1) && checkTrits(trits, count: 9) && checkTrits(trits, count: 27))
+    print(checkBits(bitfield(""), count: 3) && checkTrits(tritfield(""), count: 3))
+
+    const shortBits: ref ShortBitReads = {ShortBitReads.new(newMemoryBitfieldInput(bits))}
+    print(readBitfieldExactly(shortBits, count: 9) == fieldSlice(bits, 0, 9))
+    print(readBitfieldExactly(shortBits, count: 27) == fieldSlice(bits, 9, 27))
+    shortBits.close()
+    const shortTrits: ref ShortTritReads = {ShortTritReads.new(newMemoryTritfieldInput(trits))}
+    const nine: tritfield(9) = readTritfieldExactly(shortTrits, count: 9)
+    const twentySeven: tritfield(27) = readTritfieldExactly(shortTrits, count: 27)
+    print(fieldConcat(nine, twentySeven) == trits)
+    print(shortTrits.readSome(maxLanes: 1) == tritfield(""))
+    print(shortTrits.readSome(maxLanes: 1) == tritfield(""))
+    shortTrits.close()
+
+    mut original: bitfield = 0b101
+    const input = newMemoryBitfieldInput(original)
+    const alias = input
+    original = 0b000
+    print(alias.readSome(maxLanes: 1) == 0b1)
+    print(input.readSome(maxLanes: 2) == 0b01)
+    alias.close()
+
+    const output = newMemoryBitfieldOutput()
+    const destination = output
+    const empty = output.result()
+    destination.write(0b101)
+    const snapshot = output.result()
+    destination.write(0b01)
+    destination.write(empty)
+    destination.close()
+    print(empty == bitfield("") && snapshot == 0b101 && output.result() == 0b10101)
+
+    const ternaryOutput = newMemoryTritfieldOutput()
+    ternaryOutput.write(0tT0)
+    const ternarySnapshot = ternaryOutput.result()
+    ternaryOutput.write(0t1)
+    ternaryOutput.close()
+    print(ternarySnapshot == 0tT0 && ternaryOutput.result() == 0tT01)
+
+    print(readBitfieldExactly(newMemoryBitfieldInput(0b1), count: 1) == 0b1)
+    print(readTritfieldExactly(newMemoryTritfieldInput(0t0), count: 1) == 0t0)
+    newMemoryBitfieldOutput().write(0b1)
+    newMemoryTritfieldOutput().result()
+}

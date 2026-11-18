@@ -245,6 +245,58 @@ export function lower(json: string): string {
         parameters: [octetOutput, { universe: 'bitfield' }],
         returnType: { universe: 'void' },
     })
+    for (const [kind, universe, lanes] of [
+        ['Bitfield', 'bitfield', 'Bits'],
+        ['Tritfield', 'tritfield', 'Trits'],
+    ] as const) {
+        const field: cir.ValueSet = { universe }
+        const input: cir.ValueSet = {
+            universe: 'rc-type',
+            namespace: 'clawr',
+            name: `Memory${kind}Input`,
+        }
+        const output: cir.ValueSet = {
+            universe: 'rc-type',
+            namespace: 'clawr',
+            name: `Memory${kind}Output`,
+        }
+        registerSignature(`clawr¸newMemory${kind}Input`, {
+            parameters: [field],
+            returnType: input,
+        })
+        registerSignature(`clawr¸newMemory${kind}Output`, {
+            parameters: [],
+            returnType: output,
+        })
+        registerSignature(`clawr¸readMemory${lanes}˛maxLanes`, {
+            parameters: [input, { universe: 'integer' }],
+            returnType: field,
+        })
+        registerSignature(`clawr¸writeMemory${lanes}˛value`, {
+            parameters: [output, field],
+            returnType: { universe: 'void' },
+        })
+        registerSignature(`clawr¸memory${kind}Result`, {
+            parameters: [output],
+            returnType: field,
+        })
+        for (const [suffix, type] of [
+            ['Input', input],
+            ['Output', output],
+        ] as const)
+            registerSignature(`clawr¸closeMemory${kind}${suffix}`, {
+                parameters: [type],
+                returnType: { universe: 'void' },
+            })
+    }
+    registerSignature('laneStreamCheckCount', {
+        parameters: [{ universe: 'integer' }],
+        returnType: { universe: 'void' },
+    })
+    registerSignature('laneStreamCheckRead˛maxLanes', {
+        parameters: [{ universe: 'integer' }, { universe: 'integer' }],
+        returnType: { universe: 'void' },
+    })
     registerSignature('clawr¸newHashBuilder', {
         parameters: [],
         returnType: {
@@ -1988,9 +2040,16 @@ function isRuntimeOpaqueType(type: cir.ValueSet): boolean {
     return (
         type.universe === 'rc-type' &&
         type.namespace === 'clawr' &&
-        ['HashBuilder', 'JSONBuffer', 'OctetInput', 'OctetOutput'].includes(
-            type.name,
-        )
+        [
+            'HashBuilder',
+            'JSONBuffer',
+            'OctetInput',
+            'OctetOutput',
+            'MemoryBitfieldInput',
+            'MemoryBitfieldOutput',
+            'MemoryTritfieldInput',
+            'MemoryTritfieldOutput',
+        ].includes(type.name)
     )
 }
 

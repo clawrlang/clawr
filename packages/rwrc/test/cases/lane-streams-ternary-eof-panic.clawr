@@ -1,0 +1,4 @@
+@main {
+    const input = newMemoryTritfieldInput(0tT01_T01_T01)
+    readTritfieldExactly(input, count: 27)
+}

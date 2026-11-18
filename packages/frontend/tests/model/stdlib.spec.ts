@@ -17,7 +17,11 @@ function compile(source: string, includeStdlib = false) {
             ? result.declarations
             : result.declarations?.filter(
                   (decl) =>
-                      !('namespace' in decl && decl.namespace === 'clawr'),
+                      !('namespace' in decl && decl.namespace === 'clawr') &&
+                      !(
+                          decl.kind === 'EXTENSION_DECL' &&
+                          decl.target.namespace === 'clawr'
+                      ),
               ),
     }
 }
@@ -354,6 +358,80 @@ describe('standard library declarations', () => {
             compile('@main { readOctets(openOctetInput("x"), count: "1") }'),
         ).toThrow()
     })
+
+    it.each([
+        ['Bitfield', 'bitfield', '0b101', '0tT01'],
+        ['Tritfield', 'tritfield', '0tT01', '0b101'],
+    ])(
+        'exposes opaque memory %s endpoints through typed stream roles',
+        (kind, field, literal, wrongKind) => {
+            const result = compile(
+                `@main {
+                    const input = newMemory${kind}Input(${literal})
+                    const source = input
+                    const value: ${field} = read${kind}Exactly(source, count: 3)
+                    const output = newMemory${kind}Output()
+                    const destination = output
+                    destination.write(value)
+                    source.close()
+                    destination.close()
+                    const snapshot: ${field} = output.result()
+                }`,
+                true,
+            )
+            expect(
+                result.declarations?.some(
+                    (decl) =>
+                        decl.kind === 'RC_TYPE_DECL' &&
+                        decl.name.startsWith(`Memory${kind}`),
+                ),
+            ).toBe(false)
+            expect(result.declarations).toContainEqual(
+                expect.objectContaining({
+                    kind: 'EXTENSION_DECL',
+                    target: {
+                        namespace: 'clawr',
+                        name: `Memory${kind}Input`,
+                    },
+                    conformances: [
+                        expect.objectContaining({
+                            interface: {
+                                namespace: 'clawr',
+                                name: `${kind}Input`,
+                            },
+                        }),
+                    ],
+                }),
+            )
+            expect(() =>
+                compile(`@main { const input: ref Memory${kind}Input = {} }`),
+            ).toThrow('Opaque services cannot be constructed')
+            expect(() =>
+                compile(`service Fake: Memory${kind}Input {}`),
+            ).toThrow('Opaque services cannot be subclassed')
+            expect(() =>
+                compile(`@main {
+                    const input = newMemory${kind}Input(${literal})
+                    const duplicate = copy(of: input)
+                }`),
+            ).toThrow('Opaque services cannot be copied')
+            expect(() =>
+                compile(`@main {
+                    const output = newMemory${kind}Output()
+                    const duplicate = copy(of: output)
+                }`),
+            ).toThrow('Opaque services cannot be copied')
+            expect(() =>
+                compile(`@main { newMemory${kind}Input(${wrongKind}) }`),
+            ).toThrow()
+            expect(() =>
+                compile(`@main {
+                    const output = newMemory${kind}Output()
+                    output.write(${wrongKind})
+                }`),
+            ).toThrow()
+        },
+    )
 
     it('uses explicit conformance instead of synthesizing a second serializer', () => {
         const result = compile(`

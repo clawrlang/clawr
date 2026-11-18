@@ -1,0 +1,4 @@
+@main {
+    const input = newMemoryBitfieldInput(0b1)
+    readBitfieldExactly(input, count: 2)
+}

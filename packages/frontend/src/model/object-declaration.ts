@@ -265,7 +265,28 @@ export class ObjectDeclaration implements Declaration {
 
     emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addObjectDeclaration(this)
-        if (this.opaque) {
+        const memoryStream =
+            this.opaque &&
+            this.name.namespace === 'clawr' &&
+            [
+                'MemoryBitfieldInput',
+                'MemoryBitfieldOutput',
+                'MemoryTritfieldInput',
+                'MemoryTritfieldOutput',
+            ].includes(this.name.name)
+        if (
+            memoryStream &&
+            (this.kind !== 'service' ||
+                this.superType ||
+                this.properties.length ||
+                this.initializers.length ||
+                this.mutating.length)
+        )
+            return SemanticErrorResult.failure(
+                'Unsupported opaque service declaration',
+                this.span,
+            )
+        if (this.opaque && !memoryStream) {
             if (
                 this.kind === 'service' &&
                 [
@@ -369,22 +390,33 @@ export class ObjectDeclaration implements Declaration {
         if (tableResult.isError) return tableResult
         this.dispatchTable = tableResult.value
 
-        context.scope.rootScope.emitted.push({
-            kind: 'RC_TYPE_DECL',
-            name: this.name.name,
-            namespace: this.name.namespace,
-            ...(this.superType && { base: this.superTypeName()!.toCIR() }),
-            ...(conformances.length && {
-                conformances,
-            }),
-            ...(this.dispatchTable && { dispatchTable: this.dispatchTable }),
-            methods: declaredMethodsResult.value,
-            initializers,
-            properties: this.properties.map((property) => ({
-                name: property.name,
-                type: context.scope.toCIRType(property.type),
-            })),
-        })
+        if (memoryStream) {
+            context.scope.rootScope.emitted.push({
+                kind: 'EXTENSION_DECL',
+                target: this.name.toCIR(),
+                methods: declaredMethodsResult.value,
+                ...(conformances.length && { conformances }),
+            })
+        } else {
+            context.scope.rootScope.emitted.push({
+                kind: 'RC_TYPE_DECL',
+                name: this.name.name,
+                namespace: this.name.namespace,
+                ...(this.superType && { base: this.superTypeName()!.toCIR() }),
+                ...(conformances.length && {
+                    conformances,
+                }),
+                ...(this.dispatchTable && {
+                    dispatchTable: this.dispatchTable,
+                }),
+                methods: declaredMethodsResult.value,
+                initializers,
+                properties: this.properties.map((property) => ({
+                    name: property.name,
+                    type: context.scope.toCIRType(property.type),
+                })),
+            })
+        }
         for (const extension of extensions) {
             const interfaceDeclaration = extension.conformance
                 ? context.scope.interfaceDeclaration(extension.conformance)

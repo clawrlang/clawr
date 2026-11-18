@@ -1,6 +1,7 @@
 import { Context, ContextWithType, Expression } from '@/model'
 import { FunctionCall } from '@/model/function-call'
 import { UNIQUE } from '@/model/isolation-level'
+import { Retain } from '@/model/retain'
 import { TypeName } from '@/model/type-name'
 import {
     canAssignValue,
@@ -173,8 +174,13 @@ export class DataLiteral implements Expression {
                     explicitType: propertyDeclaration.type,
                     isolationLevel: propertyDeclaration.isolationLevel,
                 }
+                const retainedValue = Retain.ifStorage(
+                    property.value,
+                    nestedContext,
+                )
+                if (retainedValue.isError) return retainedValue
                 const valueResult =
-                    property.value.toCIRExpression(nestedContext)
+                    retainedValue.value.toCIRExpression(nestedContext)
                 if (valueResult.isError) return valueResult
                 return Result.value({
                     name: property.name,

@@ -12,6 +12,7 @@
 #include "json.h"
 #include "hash.h"
 #include "lanes.h"
+#include "lane_stream.h"
 #include "octet_stream.h"
 #include "real.h"
 #include "panic.h"

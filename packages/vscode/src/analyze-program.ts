@@ -22,6 +22,7 @@ export type AnalyzedDocument = ParsedDocument & {
 
 export function analyzeProgram(
     sources: ProgramSource[],
+    options?: { standardLibrary?: boolean },
 ): Map<string, AnalyzedDocument> {
     const results = new Map<string, AnalyzedDocument>(
         sources.map(({ name }) => [
@@ -62,7 +63,12 @@ export function analyzeProgram(
     }
     let remaining = [...sources]
     while (remaining.length) {
-        const scope = Scope.createRoot(createStandardLibraryScope())
+        // The standard library's own sources must be analyzed as the
+        // stdlib itself: in the `clawr` namespace, without the compiled
+        // stdlib declarations preloaded.
+        const scope = options?.standardLibrary
+            ? Scope.createRoot(undefined, 'clawr')
+            : Scope.createRoot(createStandardLibraryScope())
         typeReferences.length = 0
         types.clear()
         for (const result of results.values()) {

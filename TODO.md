@@ -3,7 +3,6 @@
 ## VS Code Integration
 
 - `MemoryBitfieldInput`, `MemoryBitfieldOutput` and the tritfield counterparts are defined as `opaque`, though they also have body definitions.
-- The extension complains about `opaque` types like `opaque service OctetOutput {}`. “Error: Unsupported opaque service declaration”
 
 ## Serialization
 

@@ -1,0 +1,3 @@
+opaque service OctetInput {}
+
+extern func openOctetInput(_ path: string) -> ref OctetInput

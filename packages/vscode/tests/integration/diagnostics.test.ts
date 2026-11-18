@@ -29,4 +29,23 @@ suite('Diagnostics', () => {
         const diagnostics = vscode.languages.getDiagnostics(document.uri)
         assert.strictEqual(diagnostics.length, 0)
     })
+
+    test('analyzes manifest-listed sources as the standard library', async () => {
+        const document = await openFixture('stdlib-src/io.clawr')
+
+        // The opaque service is only accepted in the stdlib's own
+        // namespace; give the diagnostics provider a chance to run.
+        await new Promise((resolve) => setTimeout(resolve, 200))
+
+        const diagnostics = vscode.languages.getDiagnostics(document.uri)
+        assert.strictEqual(diagnostics.length, 0)
+
+        const tokens = await waitFor(async () => {
+            const result = await vscode.commands.executeCommand<
+                vscode.SemanticTokens | undefined
+            >('vscode.provideDocumentSemanticTokens', document.uri)
+            return result && result.data.length > 0 ? result : undefined
+        })
+        assert.ok(tokens.data.length > 0)
+    })
 })

@@ -16,24 +16,31 @@ export function activate(context: vscode.ExtensionContext): void {
     const watcher = vscode.workspace.createFileSystemWatcher('**/*.clawr')
     const projectWatcher =
         vscode.workspace.createFileSystemWatcher('**/.clawr-project')
+    const manifestWatcher =
+        vscode.workspace.createFileSystemWatcher('**/manifest.json')
 
     context.subscriptions.push(
         analysis,
         watcher,
         projectWatcher,
+        manifestWatcher,
         watcher.onDidCreate(() => analysis.invalidate()),
         watcher.onDidChange(() => analysis.invalidate()),
         watcher.onDidDelete(() => analysis.invalidate()),
         projectWatcher.onDidCreate(() => analysis.invalidate()),
         projectWatcher.onDidChange(() => analysis.invalidate()),
         projectWatcher.onDidDelete(() => analysis.invalidate()),
+        manifestWatcher.onDidCreate(() => analysis.invalidate()),
+        manifestWatcher.onDidChange(() => analysis.invalidate()),
+        manifestWatcher.onDidDelete(() => analysis.invalidate()),
         vscode.workspace.onDidRenameFiles((event) => {
             if (
                 event.files.some(({ oldUri, newUri }) =>
                     [oldUri, newUri].some(
                         (uri) =>
                             uri.path.endsWith('.clawr') ||
-                            uri.path.endsWith('/.clawr-project'),
+                            uri.path.endsWith('/.clawr-project') ||
+                            uri.path.endsWith('/manifest.json'),
                     ),
                 )
             )

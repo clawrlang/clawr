@@ -79,4 +79,21 @@ describe('workspace program analysis', () => {
         expect(targets).toContain('file:///first.clawr')
         expect(targets).toContain('file:///second.clawr')
     })
+
+    it('analyzes standard library sources in the clawr namespace', () => {
+        const name = 'file:///io.clawr'
+        const source =
+            'opaque service OctetInput {}\n' +
+            'extern func openOctetInput(_ path: string) -> ref OctetInput'
+
+        const normal = analyzeProgram([{ name, source }])
+        expect(normal.get(name)!.diagnostics.map((d) => d.message)).toContain(
+            'Unsupported opaque service declaration',
+        )
+
+        const stdlib = analyzeProgram([{ name, source }], {
+            standardLibrary: true,
+        })
+        expect(stdlib.get(name)!.diagnostics).toHaveLength(0)
+    })
 })

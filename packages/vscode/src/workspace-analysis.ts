@@ -3,6 +3,39 @@ import { posix } from 'node:path'
 import { analyzeProgram, AnalyzedDocument } from './analyze-program'
 import { toRange } from './spans'
 
+/**
+ * Reads a `manifest.json` identifying the standard library's own sources.
+ * Returns the listed source names in manifest order, or undefined when the
+ * file is missing or is not a standard library manifest.
+ */
+async function readStandardLibraryManifest(
+    uri: vscode.Uri,
+): Promise<string[] | undefined> {
+    try {
+        const manifest: unknown = JSON.parse(
+            Buffer.from(await vscode.workspace.fs.readFile(uri)).toString(
+                'utf8',
+            ),
+        )
+        const sources =
+            manifest && typeof manifest === 'object' && 'sources' in manifest
+                ? manifest.sources
+                : undefined
+        if (!Array.isArray(sources) || sources.length === 0) return undefined
+        const names = sources.filter(
+            (name): name is string =>
+                typeof name === 'string' &&
+                name.endsWith('.clawr') &&
+                !name
+                    .split('/')
+                    .some((part) => !part || part === '.' || part === '..'),
+        )
+        return names.length === sources.length ? names : undefined
+    } catch {
+        return undefined
+    }
+}
+
 export class WorkspaceAnalysis implements vscode.Disposable {
     readonly collection = vscode.languages.createDiagnosticCollection('clawr')
     private readonly changed = new vscode.EventEmitter<void>()
@@ -34,9 +67,55 @@ export class WorkspaceAnalysis implements vscode.Disposable {
             const found = result.get(document.uri.toString())
             if (found) return found
         }
+        const stdlib = await this.standardLibraryGroup(document)
+        const found = stdlib?.get(document.uri.toString())
+        if (found) return found
         return analyzeProgram([
             { name: document.uri.toString(), source: document.getText() },
         ]).get(document.uri.toString())!
+    }
+
+    /**
+     * The standard library's own sources are identified by a sibling
+     * `manifest.json` listing them. They are analyzed together as the
+     * stdlib itself rather than against the compiled stdlib.
+     *
+     * TODO: Revisit when package support defines a general mechanism.
+     */
+    private async standardLibraryGroup(
+        document: vscode.TextDocument,
+    ): Promise<Map<string, AnalyzedDocument> | undefined> {
+        const directory = document.uri.with({
+            path: posix.dirname(document.uri.path),
+        })
+        const names = await readStandardLibraryManifest(
+            vscode.Uri.joinPath(directory, 'manifest.json'),
+        )
+        if (!names) return undefined
+        const uris = names.map((name) => vscode.Uri.joinPath(directory, name))
+        if (!uris.some((uri) => uri.toString() === document.uri.toString()))
+            return undefined
+        const open = new Map(
+            vscode.workspace.textDocuments.map((item) => [
+                item.uri.toString(),
+                item,
+            ]),
+        )
+        try {
+            const sources = await Promise.all(
+                uris.map(async (uri) => ({
+                    name: uri.toString(),
+                    source:
+                        open.get(uri.toString())?.getText() ??
+                        Buffer.from(
+                            await vscode.workspace.fs.readFile(uri),
+                        ).toString('utf8'),
+                })),
+            )
+            return analyzeProgram(sources, { standardLibrary: true })
+        } catch {
+            return undefined
+        }
     }
 
     private async folder(
@@ -54,12 +133,15 @@ export class WorkspaceAnalysis implements vscode.Disposable {
     private async load(
         folder: vscode.WorkspaceFolder,
     ): Promise<Map<string, AnalyzedDocument>> {
-        const [sources, markers] = await Promise.all([
+        const [sources, markers, manifests] = await Promise.all([
             vscode.workspace.findFiles(
                 new vscode.RelativePattern(folder, '**/*.clawr'),
             ),
             vscode.workspace.findFiles(
                 new vscode.RelativePattern(folder, '**/.clawr-project'),
+            ),
+            vscode.workspace.findFiles(
+                new vscode.RelativePattern(folder, '**/manifest.json'),
             ),
         ])
         const included = (uri: vscode.Uri): boolean =>
@@ -75,6 +157,25 @@ export class WorkspaceAnalysis implements vscode.Disposable {
                 )
         const projectDirectories = new Set(
             markers.filter(included).map((uri) => posix.dirname(uri.path)),
+        )
+        const stdlibMembers = new Map<
+            string,
+            { group: string; index: number }
+        >()
+        await Promise.all(
+            manifests.filter(included).map(async (uri) => {
+                const names = await readStandardLibraryManifest(uri)
+                if (!names) return
+                const directory = uri.with({
+                    path: posix.dirname(uri.path),
+                })
+                names.forEach((name, index) => {
+                    stdlibMembers.set(
+                        vscode.Uri.joinPath(directory, name).toString(),
+                        { group: directory.toString(), index },
+                    )
+                })
+            }),
         )
         const folderPath = folder.uri.path.replace(/\/+$/, '') || '/'
         const uris = sources.filter(included).sort((a, b) =>
@@ -99,6 +200,14 @@ export class WorkspaceAnalysis implements vscode.Disposable {
         )
         const groups = new Map<string, typeof loaded>()
         for (const source of loaded) {
+            const stdlib = stdlibMembers.get(source.name)
+            if (stdlib) {
+                const key = `stdlib:${stdlib.group}`
+                const group = groups.get(key) ?? []
+                group.push(source)
+                groups.set(key, group)
+                continue
+            }
             let directory = posix.dirname(source.uri.path)
             let project: string | undefined
             if (!source.uri.path.endsWith('.script.clawr')) {
@@ -121,9 +230,20 @@ export class WorkspaceAnalysis implements vscode.Disposable {
             groups.set(key, group)
         }
         const results = new Map<string, AnalyzedDocument>()
-        for (const group of groups.values())
-            for (const [name, result] of analyzeProgram(group))
+        for (const [key, group] of groups) {
+            const standardLibrary = key.startsWith('stdlib:')
+            if (standardLibrary)
+                // The stdlib compiles in manifest order.
+                group.sort(
+                    (a, b) =>
+                        stdlibMembers.get(a.name)!.index -
+                        stdlibMembers.get(b.name)!.index,
+                )
+            for (const [name, result] of analyzeProgram(group, {
+                standardLibrary,
+            }))
                 results.set(name, result)
+        }
         return results
     }
 

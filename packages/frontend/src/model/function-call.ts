@@ -1,19 +1,18 @@
 import { Context, Expression, Statement, isStorage } from '@/model'
-import { FunctionDeclaration } from '@/model/function-declaration'
 import { FieldCall, isFieldCallName } from '@/model/field-call'
-import { DataDeclaration } from '@/model/data-declaration'
+import { FunctionDeclaration } from '@/model/function-declaration'
 import { FunctionName } from '@/model/function-name'
 import { AnyIsolationLevel, ISOLATED, UNIQUE } from '@/model/isolation-level'
 import { TypeName } from '@/model/type-name'
 import {
-    IntegerSet,
     FieldSet,
-    canAssignValue,
+    IntegerSet,
     RCTypeSet,
     RealSet,
-    TruthvalueSet,
     StringSet,
+    TruthvalueSet,
     ValueSet,
+    canAssignValue,
 } from '@/model/value-set'
 import { VariableReference } from '@/model/variable-reference'
 import { SourceCodeSpan } from '@/tools/diagnostics'
@@ -119,7 +118,107 @@ export class FunctionCall implements Expression, Statement {
     }
 
     type(context: Context): SemanticResult<ValueSet> {
-        return this.currentValue(context)
+        const fieldCall = this.fieldCall(context)
+        if (fieldCall) return fieldCall.type(context)
+        if (this.recipient) {
+            const recipientTypeResult = this.recipient.type(context)
+            if (recipientTypeResult.isError) return recipientTypeResult
+            const recipientType = recipientTypeResult.value
+            if (!(recipientType instanceof RCTypeSet))
+                return SemanticErrorResult.failure(
+                    'Recipient must be rc-type',
+                    this.recipient.span,
+                )
+
+            const interfaceDecl = context.scope.interfaceDeclaration(
+                recipientType.type,
+            )
+            if (interfaceDecl) {
+                const required = interfaceDecl.method(this.name, context)
+                if (!required)
+                    return SemanticErrorResult.failure(
+                        `Method declaration not found: ${this.name.toString()}`,
+                        this.span,
+                    )
+                if (required.usesSelf())
+                    return SemanticErrorResult.failure(
+                        'Methods involving Self cannot be called on a trait-typed value',
+                        this.span,
+                    )
+                return required.result
+                    ? Result.value(required.result)
+                    : SemanticErrorResult.failure(
+                          `Method has no result set: ${this.name.toString()}`,
+                          this.span,
+                      )
+            }
+
+            const typeDecl = context.scope.objectDeclaration(recipientType.type)
+            const dataDecl = context.scope.dataDeclaration(recipientType.type)
+            if (!typeDecl && !dataDecl)
+                return SemanticErrorResult.failure(
+                    'Unknown type',
+                    this.recipient.span,
+                )
+
+            const found = typeDecl?.lookupMethod(this.name, context)
+            const dataMethod = dataDecl?.lookupMethod(this.name, context)
+            if (!found)
+                if (!dataMethod)
+                    return SemanticErrorResult.failure(
+                        `Method declaration not found: ${this.name.toString()}`,
+                        this.span,
+                    )
+
+            const method = found?.declaration ?? dataMethod!
+            const methodContext = found
+                ? found.owner.injectSelf(context)
+                : dataDecl!.injectSelf(context)
+            const typeResult = method.type(methodContext)
+            if (typeResult.isError) return typeResult
+            if (!typeResult.value)
+                return SemanticErrorResult.failure(
+                    `Method has no result set: ${this.name.toString()}`,
+                    this.span,
+                )
+            return Result.value(typeResult.value)
+        } else {
+            if (this.name.toString() === 'copy(of:)') {
+                const valueResult = this.arguments[0].currentValue(context)
+                if (valueResult.isError) return valueResult
+                const value = valueResult.value
+                if (
+                    value instanceof RCTypeSet &&
+                    context.scope.objectDeclaration(value.type)?.opaque
+                )
+                    return SemanticErrorResult.failure(
+                        'Opaque services cannot be copied',
+                        this.span,
+                    )
+                return value instanceof RCTypeSet
+                    ? Result.value(value)
+                    : SemanticErrorResult.failure(
+                          'not a reference-counted type',
+                          this.span,
+                      )
+            }
+
+            const decl = context.scope.functionDeclaration(this.name)
+            if (!decl)
+                return SemanticErrorResult.failure(
+                    `Function declaration not found: ${this.name.toString()}`,
+                    this.span,
+                )
+
+            const typeResult = decl.type(context)
+            if (typeResult.isError) return typeResult
+            if (!typeResult.value)
+                return SemanticErrorResult.failure(
+                    `Function declaration has no result set: ${this.name.toString()}`,
+                    this.span,
+                )
+            return Result.value(typeResult.value)
+        }
     }
 
     currentValue(context: Context): SemanticResult<ValueSet> {

@@ -77,6 +77,12 @@ export class VariableDeclaration implements Statement, Declaration {
         scope: Scope | Scope['rootScope'],
         context: Context,
     ): SemanticResult {
+        if (['super', 'self'].includes(this.name))
+            return SemanticErrorResult.failure(
+                `'${this.name}' is a reserved identifier`,
+                this.nameSpan,
+            )
+
         const initialValueResult = SemanticResult.collect([
             this.initialValue.isolationLevel(context),
             this.currentValueFromInitial(context),

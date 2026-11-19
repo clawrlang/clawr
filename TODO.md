@@ -11,8 +11,6 @@
 
 ## `object`/`service`
 
-- Make `self` a reserved identifier (and `super` too?)
-
 ### Frontend Semantic/Static Analysis
 
 - Subtype initializers must call a supertype initializer (today it is optional)

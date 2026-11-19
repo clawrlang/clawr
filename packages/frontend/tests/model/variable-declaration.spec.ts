@@ -856,4 +856,21 @@ describe('VariableDeclaration', () => {
             })
         })
     })
+
+    describe('reserved identifiers', () => {
+        for (const id of ['self', 'super']) {
+            test(`rejects '${id}'`, () => {
+                const decl = VariableDeclaration.create({
+                    name: id,
+                    isImmutable: true,
+                    initialValue: util.integerLiteral(1n),
+                    span: util.someCodeSpan,
+                    nameSpan: util.someCodeSpan,
+                })
+
+                const result = decl.emitDeclaration(util.newSemanticContext())
+                expect(result.isError || result.value).toBeTrue()
+            })
+        }
+    })
 })

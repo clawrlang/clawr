@@ -1,7 +1,7 @@
 import { Context, Declaration } from '@/model'
 import { Property } from '@/model/data-declaration'
-import { FunctionDeclaration } from '@/model/function-declaration'
 import type { ExtensionDeclaration } from '@/model/extension-declaration'
+import { FunctionDeclaration } from '@/model/function-declaration'
 import { FunctionName } from '@/model/function-name'
 import {
     InterfaceDeclaration,
@@ -265,43 +265,12 @@ export class ObjectDeclaration implements Declaration {
 
     emitDeclaration(context: Context): SemanticResult {
         context.scope.rootScope.addObjectDeclaration(this)
-        if (this.opaque) {
-            const emptyRuntimeService =
-                [
-                    'clawr¸JSONBuffer',
-                    'clawr¸OctetInput',
-                    'clawr¸OctetOutput',
-                    'clawr¸MemoryBitfieldInput',
-                    'clawr¸MemoryBitfieldOutput',
-                    'clawr¸MemoryTritfieldInput',
-                    'clawr¸MemoryTritfieldOutput',
-                ].includes(this.name.canonical()) && !this.readonly.length
-            const runtimeHashBuilder =
-                this.name.canonical() === 'clawr¸HashBuilder' &&
-                this.readonly.length === 1 &&
-                this.readonly.every(
-                    (m) =>
-                        m.implementation.kind === 'extern' &&
-                        m.name().toString() === 'add(_:)' &&
-                        !m.result &&
-                        m.parameters[0]?.type instanceof RCTypeSet &&
-                        context.scope
-                            .interfaceDeclaration(m.parameters[0].type.type)
-                            ?.name.canonical() === 'clawr¸HashEquatable',
-                )
-            if (
-                this.kind !== 'service' ||
-                this.inherits.length ||
-                this.properties.length ||
-                this.initializers.length ||
-                this.mutating.length ||
-                (!emptyRuntimeService && !runtimeHashBuilder)
+        if (this.opaque && context.scope.namespace !== 'clawr')
+            return SemanticErrorResult.failure(
+                'Unsupported opaque service declaration',
+                this.span,
             )
-                return SemanticErrorResult.failure(
-                    'Unsupported opaque service declaration',
-                    this.span,
-                )
-        }
+
         if (this.superDeclaration(context)?.opaque)
             return SemanticErrorResult.failure(
                 'Opaque services cannot be subclassed',

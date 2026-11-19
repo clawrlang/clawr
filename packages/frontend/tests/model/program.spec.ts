@@ -329,10 +329,7 @@ describe('multi-file programs', () => {
         expect(userFunctions([second, first])).toHaveLength(2)
     })
 
-    it('requires exactly one main, including empty blocks', () => {
-        expect(() => compile([{ name: 'a', source: 'func f() => 1' }])).toThrow(
-            'No @main',
-        )
+    it('allows only one main, including empty blocks', () => {
         expect(() =>
             compile([
                 { name: 'a', source: '@main {}' },

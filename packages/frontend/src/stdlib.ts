@@ -4,6 +4,6 @@ import { sources } from '@clawr/stdlib'
 
 export function createStandardLibraryScope(): Scope {
     const scope = Scope.createRoot(undefined, 'clawr')
-    parseProgram(sources, scope, false).toCIR({ scope })
+    parseProgram(sources, scope).toCIR({ scope })
     return scope
 }

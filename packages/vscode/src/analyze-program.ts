@@ -5,8 +5,8 @@ import { Scope } from '@clawr/frontend/model/scope'
 import { TypeAliasDeclaration } from '@clawr/frontend/model/type-alias-declaration'
 import { parseProgram, ProgramSource } from '@clawr/frontend/program'
 import { createStandardLibraryScope } from '@clawr/frontend/stdlib'
-import { SourceError, SourceErrorCollection } from '@clawr/frontend/tools'
 import type { SourceCodeSpan } from '@clawr/frontend/tools'
+import { SourceError, SourceErrorCollection } from '@clawr/frontend/tools'
 import type { DefinitionRecorder } from '@clawr/frontend/tools/definitions'
 import type { HighlightRecorder } from '@clawr/frontend/tools/highlights'
 import { ParsedDocument } from './parse-document'
@@ -77,7 +77,7 @@ export function analyzeProgram(
         }
         let module
         try {
-            module = parseProgram(remaining, scope, false, {
+            module = parseProgram(remaining, scope, {
                 highlightRecorder,
                 definitionRecorder,
             })

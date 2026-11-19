@@ -97,6 +97,7 @@ async function parseToCIR({
         })),
     )
     const cir = parseProgram(sources, context.scope).toCIR(context)
+    if (!cir.startBlock) throw new Error('No @main block found')
 
     await ensureDirectoryExists(path.dirname(outputFilePath))
     await fs.writeFile(outputFilePath, JSON.stringify(cir))

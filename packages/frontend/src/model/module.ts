@@ -1,7 +1,7 @@
 import { Context, Declaration, Statement } from '@/model'
-import { SemanticResult } from '@/tools/source-result'
-import { SourceCodeSpan } from '@/tools/diagnostics'
 import { VariableDeclaration } from '@/model/variable-declaration'
+import { SourceCodeSpan } from '@/tools/diagnostics'
+import { SemanticResult } from '@/tools/source-result'
 import * as cir from '@clawr/cir'
 
 export class Module {
@@ -55,7 +55,7 @@ export class Module {
                     : []),
                 ...context.scope.rootScope.emitted,
             ],
-            startBlock: context.scope.emitted,
+            startBlock: this.main ? context.scope.emitted : undefined,
         }
     }
 }

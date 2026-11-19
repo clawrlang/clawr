@@ -1,16 +1,16 @@
 import { TokenStream } from '@/lexer'
-import { Module } from '@/model/module'
 import { DataDeclaration } from '@/model/data-declaration'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { InterfaceDeclaration } from '@/model/interface-declaration'
+import { Module } from '@/model/module'
 import { ObjectDeclaration } from '@/model/object-declaration'
+import { Scope } from '@/model/scope'
 import { TypeAliasDeclaration } from '@/model/type-alias-declaration'
 import { VariableDeclaration } from '@/model/variable-declaration'
-import { Scope } from '@/model/scope'
 import { ModuleParser } from '@/parser/module-parser'
 import { SourceError } from '@/tools'
-import { HighlightRecorder } from '@/tools/highlights'
 import { DefinitionRecorder } from '@/tools/definitions'
+import { HighlightRecorder } from '@/tools/highlights'
 
 export type ProgramSource = {
     name: string
@@ -20,7 +20,6 @@ export type ProgramSource = {
 export function parseProgram(
     sources: readonly ProgramSource[],
     scope: Scope,
-    requireMain = true,
     recorders?: {
         highlightRecorder?: HighlightRecorder
         definitionRecorder?: DefinitionRecorder
@@ -83,8 +82,6 @@ export function parseProgram(
         }
         modules.push(module)
     }
-
-    if (requireMain && !main) throw new Error('No @main block found')
 
     return Module.create({
         declarations: modules.flatMap((module) => module.declarations),

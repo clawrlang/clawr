@@ -251,7 +251,7 @@ describe('TokenStream', () => {
     })
 
     describe('KEYWORD', () => {
-        const keywords = ['const', 'mut', 'ref', 'helper', 'companion']
+        const keywords = ['const', 'mut', 'ref']
         for (const keyword of keywords) {
             test(keyword, () => {
                 const tokens = [...tokenize(keyword)]

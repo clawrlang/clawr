@@ -73,35 +73,26 @@ const ALL_KW = [
     // Functions / methods / operators
     `func`,
     'extern',
-    'pure',
     `operator`,
 
     // Types
-    `enum`,
-    'union',
+    // `enum`,
+    // 'union',
     'data',
     'subset',
     'type',
     'object',
     'service',
     'opaque',
-    'companion',
+    // 'companion',
     'role',
     'trait',
     'extension',
-
-    // Object-scoped variables
-    `super`,
 
     // Object sections
     'init',
     `mutating`,
     `state`,
-
-    // Function modifiers
-    'helper',
-    'atomic',
-    'concurrent',
 
     // Control flow
     `return`,

@@ -73,3 +73,4 @@ The following ADRs have been documented so far:
 - ✅ [ADR-039](./adr-039.md): Control-Flow
 - ✅ [ADR-040](./adr-040.md): Extensions
 - 📝 [ADR-041](./adr-041.md): Binary and Ternary Fields
+- 📝 [ADR-042](./adr-042.md): Annotation Modifiers

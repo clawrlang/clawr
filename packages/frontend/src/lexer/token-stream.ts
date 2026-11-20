@@ -6,6 +6,7 @@ import type {
     TruthvalueLiteral,
 } from '@/lexer/kinds'
 import {
+    isAnnotation,
     keywords,
     operators,
     punctuationChars,
@@ -232,7 +233,10 @@ export class TokenStream {
                     message: `Expected annotation name after '@'`,
                     span: { start: loc, end: loc },
                 })
-            } else if (identifier !== 'main') {
+            }
+
+            const annotation = `@${identifier}`
+            if (!isAnnotation(annotation)) {
                 throw SourceError.create({
                     message: `Unknown annotation '@${identifier}'`,
                     span: {
@@ -248,12 +252,9 @@ export class TokenStream {
             this.source.skip(identifier.length)
             return {
                 kind: 'ANNOTATION',
-                annotation: '@main',
+                annotation,
                 start: loc,
-                end: {
-                    line: this.source.location.line,
-                    column: this.source.location.column,
-                },
+                end: { ...this.source.location },
             }
         }
 

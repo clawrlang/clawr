@@ -133,3 +133,7 @@ export const punctuationChars = new Set<string>(
     [...PUNCTUATION, ...OPERATORS].flat(),
 )
 export const truthValues = new Set<string>(ALL_TRUTHVALUE_LITERALS)
+
+export function isAnnotation(value: string): value is Annotation {
+    return value === '@main'
+}

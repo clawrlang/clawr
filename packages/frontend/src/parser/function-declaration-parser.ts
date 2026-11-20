@@ -35,6 +35,8 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         stream: TokenStream,
         { allowExtern = true }: { allowExtern?: boolean } = {},
     ): FunctionDeclaration {
+        const annotations = this.parseAnnotations(stream)
+
         const isExtern = stream.isNext('KEYWORD', 'extern')
         const firstToken = isExtern
             ? stream.expect('KEYWORD', 'extern')
@@ -54,6 +56,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
 
         if (isExtern)
             return FunctionDeclaration.create({
+                annotations,
                 baseName,
                 parameters,
                 result,
@@ -75,6 +78,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             ).parse(stream)
 
             return FunctionDeclaration.create({
+                annotations,
                 baseName,
                 parameters,
                 result,
@@ -90,6 +94,7 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
         const statements = BlockParser.create(this.context).parse(stream)
 
         return FunctionDeclaration.create({
+            annotations,
             baseName,
             parameters,
             result,
@@ -97,6 +102,13 @@ export class FunctionDeclarationParser implements DeclarationParser<FunctionDecl
             span: { start, end: nameToken.end },
             nameSpan: { start: nameToken.start, end: nameToken.end },
         })
+    }
+
+    parseAnnotations(stream: TokenStream): string[] {
+        const annotations: string[] = []
+        while (stream.isNext('ANNOTATION'))
+            annotations.push(stream.expect('ANNOTATION').annotation)
+        return annotations
     }
 
     parseSignature(stream: TokenStream): MethodSignature {

@@ -1,16 +1,17 @@
 import { Context, Declaration, Expression } from '@/model'
+import type { ExtensionDeclaration } from '@/model/extension-declaration'
+import { FunctionCall } from '@/model/function-call'
 import { FunctionDeclaration } from '@/model/function-declaration'
 import { FunctionName } from '@/model/function-name'
-import type { ExtensionDeclaration } from '@/model/extension-declaration'
 import { IsolationLevel } from '@/model/isolation-level'
-import { TypeConstraintDeclaration } from '@/model/type-constraint-declaration'
-import { decorateTypeConstraint } from '@/model/type-constraint-declaration'
-import { FunctionCall } from '@/model/function-call'
-import { Parameter } from '@/model/parameter'
-import { PropertyReference } from '@/model/property-reference'
-import { VariableReference } from '@/model/variable-reference'
 import { IntegerLiteral } from '@/model/literals'
 import { StringLiteral } from '@/model/literals/string-literal'
+import { Parameter } from '@/model/parameter'
+import { PropertyReference } from '@/model/property-reference'
+import {
+    decorateTypeConstraint,
+    TypeConstraintDeclaration,
+} from '@/model/type-constraint-declaration'
 import { TypeName } from '@/model/type-name'
 import {
     IntegerSet,
@@ -19,9 +20,10 @@ import {
     StringSet,
     TruthvalueSet,
 } from '@/model/value-set'
+import { VariableReference } from '@/model/variable-reference'
+import { SourceCodeSpan } from '@/tools/diagnostics'
 import { Result } from '@/tools/result'
 import { SemanticErrorResult, SemanticResult } from '@/tools/source-result'
-import { SourceCodeSpan } from '@/tools/diagnostics'
 import * as cir from '@clawr/cir'
 
 export type Property = {
@@ -426,6 +428,7 @@ export class DataDeclaration implements Declaration {
                 span,
             })
         return FunctionDeclaration.create({
+            annotations: [],
             baseName: 'serialize',
             parameters: [
                 Parameter.create({

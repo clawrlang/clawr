@@ -71,6 +71,7 @@ describe('FunctionDeclaration (method)', () => {
 
     it('converts to CIR with explicit result value-set', () => {
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [],
             result: {
@@ -122,6 +123,7 @@ describe('FunctionDeclaration (method)', () => {
         })
 
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [],
             result: {
@@ -158,6 +160,7 @@ describe('FunctionDeclaration (method)', () => {
         })
 
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [],
             result: {
@@ -194,6 +197,7 @@ describe('FunctionDeclaration (method)', () => {
         })
 
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [],
             result: {
@@ -320,6 +324,7 @@ describe('FunctionDeclaration (method)', () => {
 
     it('registers parameters in the function body scope', () => {
         const decl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [
                 Parameter.create({
@@ -416,6 +421,7 @@ describe('FunctionDeclaration (method)', () => {
             )
 
             const funcDecl = FunctionDeclaration.create({
+                annotations: [],
                 baseName: 'myFunction',
                 parameters: [],
                 result: {

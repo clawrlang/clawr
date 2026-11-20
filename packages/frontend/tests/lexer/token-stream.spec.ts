@@ -414,10 +414,15 @@ describe('TokenStream', () => {
             })
         })
 
-        it('rejects unknown annotations', () => {
-            expect(() => [...tokenize('@unknown')]).toThrow(
-                /Unknown annotation/,
-            )
+        it('reads @open annotation', () => {
+            const tokens = [...tokenize('@open')]
+            expect(tokens).toHaveLength(1)
+            expect(tokens[0]).toMatchObject({
+                kind: 'ANNOTATION',
+                annotation: '@open',
+                start: { line: 1, column: 1 },
+                end: { line: 1, column: 6 },
+            })
         })
     })
 

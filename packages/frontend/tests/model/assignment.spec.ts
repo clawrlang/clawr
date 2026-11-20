@@ -248,6 +248,7 @@ describe('Assignment', () => {
                     name: util.simpleTypeName('MyType'),
                     initializers: [
                         FunctionDeclaration.create({
+                            annotations: [],
                             baseName: 'new',
                             parameters: [],
                             implementation: { kind: 'body', statements: [] },
@@ -334,6 +335,7 @@ describe('Assignment', () => {
                     name: util.simpleTypeName('MyType'),
                     initializers: [
                         FunctionDeclaration.create({
+                            annotations: [],
                             baseName: 'new',
                             parameters: [],
                             implementation: { kind: 'body', statements: [] },
@@ -435,6 +437,7 @@ describe('Assignment', () => {
         )
         context.scope.rootScope.addFunctionDeclaration(
             FunctionDeclaration.create({
+                annotations: [],
                 baseName: 'myFunction',
                 result: {
                     type: util.spannedTypeConstraint(

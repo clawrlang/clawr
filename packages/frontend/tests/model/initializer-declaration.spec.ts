@@ -87,6 +87,7 @@ describe('FunctionDeclaration (initializer)', () => {
 
     it('converts to CIR with explicit result value-set', () => {
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'makeNew',
             parameters: [],
             result: {
@@ -138,6 +139,7 @@ describe('FunctionDeclaration (initializer)', () => {
         })
 
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'makeNew',
             parameters: [],
             result: {
@@ -173,6 +175,7 @@ describe('FunctionDeclaration (initializer)', () => {
         })
 
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'makeNew',
             parameters: [],
             result: {
@@ -209,6 +212,7 @@ describe('FunctionDeclaration (initializer)', () => {
         })
 
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'makeNew',
             parameters: [],
             result: {
@@ -281,6 +285,7 @@ describe('FunctionDeclaration (initializer)', () => {
         context.scope.addSelfVariable(util.simpleTypeName('Object'))
 
         const decl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'makeNew',
             parameters: [
                 Parameter.create({
@@ -336,6 +341,7 @@ describe('FunctionDeclaration (initializer)', () => {
             )
 
             const funcDecl = FunctionDeclaration.create({
+                annotations: [],
                 baseName: 'makeNew',
                 parameters: [],
                 result: undefined,
@@ -389,6 +395,7 @@ describe('FunctionDeclaration (initializer)', () => {
             )
 
             const funcDecl = FunctionDeclaration.create({
+                annotations: [],
                 baseName: 'makeNew',
                 parameters: [],
                 result: {

@@ -1,5 +1,4 @@
 import type {
-    Annotation,
     Keyword,
     Operator,
     PunctuationSymbol,
@@ -31,7 +30,7 @@ export type KeywordToken = {
 } & SourceCodeSpan
 export type AnnotationToken = {
     kind: 'ANNOTATION'
-    annotation: Annotation
+    annotation: string
 } & SourceCodeSpan
 export type IdentifierToken = {
     kind: 'IDENTIFIER'

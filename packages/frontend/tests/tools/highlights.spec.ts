@@ -126,6 +126,7 @@ describe('HighlightRecorder', () => {
             end: { line: 1, column: 9 },
         }
         const decl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'f',
             parameters: [
                 Parameter.create({
@@ -167,6 +168,7 @@ describe('HighlightRecorder', () => {
             end: { line: 1, column: 16 },
         }
         const decl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'f',
             parameters: [
                 Parameter.create({

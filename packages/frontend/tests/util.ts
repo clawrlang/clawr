@@ -46,6 +46,7 @@ export const someObjectDeclConfig = {
 }
 
 export const someFunctionDeclConfig = {
+    annotations: [],
     parameters: [],
     result: undefined,
     implementation: { kind: 'body' as const, statements: [] },

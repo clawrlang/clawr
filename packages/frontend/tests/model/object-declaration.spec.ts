@@ -49,6 +49,7 @@ describe('ObjectDeclaration', () => {
             name: util.simpleTypeName('Object'),
             readonly: [
                 FunctionDeclaration.create({
+                    annotations: [],
                     baseName: 'read',
                     parameters: [
                         {
@@ -147,6 +148,7 @@ describe('ObjectDeclaration', () => {
                     },
                 }),
                 FunctionDeclaration.create({
+                    annotations: [],
                     baseName: 'selfAssign',
                     parameters: [
                         {

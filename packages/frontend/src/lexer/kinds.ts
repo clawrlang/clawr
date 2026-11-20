@@ -124,7 +124,6 @@ export type PunctuationSymbol = (typeof PUNCTUATION)[number]
 export type Operator = (typeof OPERATORS)[number]
 export type Keyword = (typeof ALL_KW)[number]
 export type TruthvalueLiteral = (typeof ALL_TRUTHVALUE_LITERALS)[number]
-export type Annotation = '@main'
 
 export const punctuationSymbols = new Set(PUNCTUATION)
 export const operators = new Set<string>(OPERATORS)
@@ -133,7 +132,3 @@ export const punctuationChars = new Set<string>(
     [...PUNCTUATION, ...OPERATORS].flat(),
 )
 export const truthValues = new Set<string>(ALL_TRUTHVALUE_LITERALS)
-
-export function isAnnotation(value: string): value is Annotation {
-    return value === '@main'
-}

@@ -13,6 +13,7 @@ import { describe, expect, it, test } from 'bun:test'
 describe('FunctionDeclaration', () => {
     it('registers an extern function without emitting a declaration', () => {
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [],
             result: undefined,
@@ -28,6 +29,7 @@ describe('FunctionDeclaration', () => {
 
     it('reports an error for extern methods and initializers', () => {
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'f',
             parameters: [],
             result: undefined,
@@ -40,6 +42,7 @@ describe('FunctionDeclaration', () => {
 
     it('converts to CIR with function body', () => {
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [
                 Parameter.create({
@@ -98,6 +101,7 @@ describe('FunctionDeclaration', () => {
 
     it('converts to CIR with explicit result value-set', () => {
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [],
             result: {
@@ -148,6 +152,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [],
             result: {
@@ -184,6 +189,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [],
             result: {
@@ -220,6 +226,7 @@ describe('FunctionDeclaration', () => {
         })
 
         const funcDecl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [],
             result: {
@@ -361,6 +368,7 @@ describe('FunctionDeclaration', () => {
 
     it('registers parameters in the function body scope', () => {
         const decl = FunctionDeclaration.create({
+            annotations: [],
             baseName: 'myFunction',
             parameters: [
                 Parameter.create({
@@ -457,6 +465,7 @@ describe('FunctionDeclaration', () => {
             )
 
             const funcDecl = FunctionDeclaration.create({
+                annotations: [],
                 baseName: 'myFunction',
                 parameters: [],
                 result: {

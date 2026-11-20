@@ -12,6 +12,7 @@ function method(
     resultType: IntegerSet<any, any> = IntegerSet.unconstrained(),
 ) {
     return FunctionDeclaration.create({
+        annotations: [],
         baseName: name,
         parameters: [],
         implementation: {

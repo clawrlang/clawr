@@ -1,12 +1,10 @@
 import type {
-    Annotation,
     Keyword,
     Operator,
     PunctuationSymbol,
     TruthvalueLiteral,
 } from '@/lexer/kinds'
 import {
-    isAnnotation,
     keywords,
     operators,
     punctuationChars,
@@ -69,7 +67,7 @@ export class TokenStream {
 
     isNext(kind: 'NEWLINE'): boolean
     isNext(kind: 'IDENTIFIER'): boolean
-    isNext(kind: 'ANNOTATION', ...annotations: Annotation[]): boolean
+    isNext(kind: 'ANNOTATION', ...annotations: string[]): boolean
     isNext(kind: 'OPERATOR', ...operators: Operator[]): boolean
     isNext(kind: 'KEYWORD', ...keywords: Keyword[]): boolean
     isNext(kind: 'PUNCTUATION', ...symbols: PunctuationSymbol[]): boolean
@@ -114,7 +112,7 @@ export class TokenStream {
     expect(kind: 'REAL_LITERAL'): RealLiteralToken
     expect(kind: 'NEWLINE'): NewlineToken
     expect(kind: 'IDENTIFIER'): IdentifierToken
-    expect<A extends Annotation[]>(
+    expect<A extends string[]>(
         kind: 'ANNOTATION',
         ...annotations: A
     ): AnnotationToken & { annotation: A[number] }
@@ -235,24 +233,10 @@ export class TokenStream {
                 })
             }
 
-            const annotation = `@${identifier}`
-            if (!isAnnotation(annotation)) {
-                throw SourceError.create({
-                    message: `Unknown annotation '@${identifier}'`,
-                    span: {
-                        start: loc,
-                        end: {
-                            line: loc.line,
-                            column: loc.column + identifier.length,
-                        },
-                    },
-                })
-            }
-
             this.source.skip(identifier.length)
             return {
                 kind: 'ANNOTATION',
-                annotation,
+                annotation: `@${identifier}`,
                 start: loc,
                 end: { ...this.source.location },
             }

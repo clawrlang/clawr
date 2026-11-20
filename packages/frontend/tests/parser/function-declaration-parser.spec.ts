@@ -224,6 +224,15 @@ describe('Function Declaration Parser', () => {
             parseFunction('func myFunction() -> const MyData { return {} }'),
         ).toThrow("Expected IDENTIFIER, but got KEYWORD 'const'")
     })
+
+    it('parses a function with annotations', () => {
+        const code = '@annotation1 @annotation2 func f() {}'
+
+        const result = parseFunction(code)
+        expect(result).toMatchObject({
+            annotations: ['@annotation1', '@annotation2'],
+        })
+    })
 })
 
 function parseFunction(code: string) {

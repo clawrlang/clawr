@@ -112,6 +112,7 @@ describe('FunctionCall', () => {
         const context = util.newSemanticContext()
         context.scope.rootScope.addFunctionDeclaration(
             FunctionDeclaration.create({
+                annotations: [],
                 baseName: 'foo',
                 parameters: [
                     Parameter.create({

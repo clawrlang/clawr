@@ -2,11 +2,11 @@ import { Context, Declaration, Expression, Statement } from '@/model'
 import { FunctionName } from '@/model/function-name'
 import {
     AnyIsolationLevel,
+    ISOLATED,
     IsolationLevel,
+    SHARED,
     UNIQUE,
     UNKNOWN,
-    SHARED,
-    ISOLATED,
 } from '@/model/isolation-level'
 import { DataLiteral } from '@/model/literals'
 import {
@@ -26,6 +26,7 @@ import * as cir from '@clawr/cir'
 
 export class FunctionDeclaration implements Declaration {
     private constructor(
+        public readonly annotations: string[],
         public readonly baseName: string,
         public readonly parameters: Parameter[],
         public readonly result:
@@ -40,6 +41,7 @@ export class FunctionDeclaration implements Declaration {
     ) {}
 
     static create({
+        annotations,
         baseName,
         parameters,
         result,
@@ -47,6 +49,7 @@ export class FunctionDeclaration implements Declaration {
         span,
         nameSpan,
     }: {
+        annotations: string[]
         baseName: string
         parameters: Parameter[]
         result:
@@ -60,6 +63,7 @@ export class FunctionDeclaration implements Declaration {
         nameSpan?: SourceCodeSpan
     }): FunctionDeclaration {
         return new FunctionDeclaration(
+            annotations,
             baseName,
             parameters,
             result,

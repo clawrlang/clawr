@@ -506,6 +506,7 @@ describe('VariableDeclaration', () => {
                 name: TypeName.create({ name: 'Object' }),
                 initializers: [
                     FunctionDeclaration.create({
+                        annotations: [],
                         baseName: 'new',
                         parameters: [],
                         implementation: { kind: 'body', statements: [] },

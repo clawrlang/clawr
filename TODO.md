@@ -1,9 +1,5 @@
 # TODO
 
-## VS Code Integration
-
-- `MemoryBitfieldInput`, `MemoryBitfieldOutput` and the tritfield counterparts are defined as `opaque`, though they also have body definitions.
-
 ## Serialization
 
 - Maybe add YAML, S-expressions and/or Protobuf support as alternative serialization formats.

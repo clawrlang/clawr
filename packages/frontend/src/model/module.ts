@@ -35,11 +35,7 @@ export class Module {
         this.registerDeclarations(context)
         const result = SemanticResult.collect([
             ...[...this.declarations]
-                .sort(
-                    (a, b) =>
-                        Number(b instanceof VariableDeclaration) -
-                        Number(a instanceof VariableDeclaration),
-                )
+                .sort(variablesLast)
                 .map((decl) => decl.emitDeclaration(context)),
             ...(this.main ?? []).map((stmt) =>
                 stmt.emitStatement({ ...context, returnScope: context.scope }),
@@ -56,6 +52,13 @@ export class Module {
                 ...context.scope.rootScope.emitted,
             ],
             startBlock: this.main ? context.scope.emitted : undefined,
+        }
+
+        function variablesLast(a: Declaration, b: Declaration): number {
+            return (
+                Number(b instanceof VariableDeclaration) -
+                Number(a instanceof VariableDeclaration)
+            )
         }
     }
 }
